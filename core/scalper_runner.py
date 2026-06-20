@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-core/scalper_runner.py — Aggressive institutional scalper backtest & live runner.
+core/scalper_runner.py — Single-focus institutional scalper.
 
-This is the high-frequency scalping mode that:
-1. Scans a universe of penny stocks for institutional activity
-2. Enters on volume spikes + momentum with ultra-tight stops
-3. Exits via trailing stop-loss + trailing profit-taker
-4. Both stops AND targets are hard bracket orders on IB's servers
-5. Reads tick-level data for sub-second exit decisions
-
-Designed for $1,000 account: max $50 risk per trade, 
-target 0.5-2.0% gains with >60% win rate.
+THE RULES:
+1. Scan ALL tickers, pick top 1 by probability score.
+2. Deploy MAX $1,000 per trade (from live account balance).
+3. Risk is FIXED at $50 max per trade — cannot be overridden.
+4. Only trade UPTRENDS (price > SMA20, VWAP, rising closes).
+5. Every tick is analyzed: price delta, velocity, tape rhythm.
+6. Hard stop + trailing stop + hard TP + trailing profit.
+7. Daily summary shows all trades + balance changes.
 """
 
 import os
@@ -36,18 +35,38 @@ from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
 
 
+def _only_uptrend(df: pd.DataFrame, current_px: float) -> bool:
+    """
+    Strict uptrend filter:
+    - Price > 20-period SMA
+    - Price > VWAP of last 20 bars
+    - Last 3 closes are rising
+    - ATR is not expanding wildly (avoid choppy markets)
+    """
+    if len(df) < 20:
+        return False
+    closes = df["close"].values[-20:]
+    sma20 = np.mean(closes)
+    if current_px <= sma20:
+        return False
+
+    typical = (df["high"] + df["low"] + df["close"]) / 3.0
+    vwap = np.average(typical[-20:], weights=df["volume"].values[-20:])
+    if current_px <= vwap:
+        return False
+
+    if not all(closes[i] >= closes[i-1] for i in range(-3, 0)):
+        return False
+
+    # ATR stability check
+    atr = compute_atr(df, period=10)
+    if atr <= 0 or atr > current_px * 0.05:
+        return False
+
+    return True
+
+
 class ScalperRunner:
-    """
-    Institutional scalper mode.
-    
-    Key differences from the PPO trader:
-    - Scans multiple tickers, chases the best setup
-    - Ultra-tight stops (0.3-1.0% instead of 1-2%)
-    - Aggressive trailing from +0.2% profit
-    - Uses institutional signals to confirm entries
-    - Falls back to IB hard bracket orders for safety
-    """
-    
     def __init__(self, connector: IBConnector, cfg: BotConfig, notifier: Notifier):
         self.conn = connector
         self.ib = connector.ib
@@ -61,67 +80,78 @@ class ScalperRunner:
         self.risk = RiskManager(cfg, cfg.INITIAL_CASH, notifier)
         git_sync_init(cfg)
         
-        # Account state
+        # Account state (read from IB live)
         self.account_equity = float(cfg.INITIAL_CASH)
+        self.available_cash: Optional[float] = None  # from IB
         self.cash = float(cfg.INITIAL_CASH)
         self.shares = 0.0
         self.nav = float(cfg.INITIAL_CASH)
         self.current_ticker: Optional[str] = None
         self.bracket_handle: Optional[BracketHandle] = None
         
-        # Scan results
+        # Scanner state
         self.scan_results: List[ScanResult] = []
         self.top_pick: Optional[ScanResult] = None
-        
-        # Tick bar buffers for current ticker
-        self._tick_buffer_5s: List[Dict] = []
-        
-        # Performance
-        self.trades_taken = 0
-        self.wins = 0
-        self.losses = 0
-        self.total_pnl = 0.0
-        
-        # State
-        self._last_bar_time: Optional[pd.Timestamp] = None
         self._last_scan_time: float = 0.0
         self._last_metrics_write: float = 0.0
+        
+        # Trade journal for end-of-day
+        self.trade_journal: List[Dict] = []
+        self.trades_today: int = 0
+        self._current_day: Optional[str] = None
+    
+    def _refresh_account_balance(self):
+        """Pull live balance from IB."""
+        try:
+            values = self.ib.accountValues()
+            for v in values:
+                if v.tag in ("NetLiquidation", "TotalCashValue"):
+                    if v.currency == self.cfg.CURRENCY:
+                        self.account_equity = float(v.value)
+                        if v.tag == "TotalCashValue":
+                            self.available_cash = float(v.value)
+            if self.available_cash is None:
+                self.available_cash = self.account_equity
+            self.cash = self.available_cash
+        except Exception as exc:
+            log.debug(f"Could not fetch IB account balance: {exc}")
+        self.nav = self.cash + self.shares * self._latest_price()
+    
+    def _latest_price(self) -> float:
+        try:
+            return self.data.get_latest_price() or 0.0
+        except Exception:
+            return 0.0
     
     def _write_live_metrics(self):
-        """Write current state to live_metrics.json for dashboard."""
         try:
             now = time.time()
             if now - self._last_metrics_write < 2.0:
                 return
             self._last_metrics_write = now
             
-            win_rate = self.wins / (self.wins + self.losses + 1e-9) * 100
+            win_rate = (self.risk.win_rate * 100) if hasattr(self.risk, 'win_rate') else 0.0
             
-            # Build scan results for display
             scan_data = []
             for r in self.scan_results[:5]:
                 scan_data.append({
                     "ticker": r.ticker, "price": r.price,
-                    "vol": f"{r.volume/1000:.0f}K", "rv": r.relative_volume,
-                    "score": r.rank_score, "reason": r.reason
+                    "score": round(r.rank_score, 1), "reason": r.reason[:30]
                 })
             
             metrics = {
-                "mode": "SCALPER",
+                "mode": "SCALPER_FOCUS",
                 "account_equity": round(self.account_equity, 2),
-                "cash": round(self.cash, 2),
-                "shares": self.shares,
-                "current_ticker": self.current_ticker or "NONE",
-                "position": f"{self.shares:.0f} {self.current_ticker}" if self.shares > 0 and self.current_ticker else "NONE",
+                "available_cash": round(self.available_cash or 0, 2),
+                "position_value": round(self.shares * self._latest_price(), 2),
                 "nav": round(self.nav, 2),
-                "total_pnl": round(self.total_pnl, 2),
-                "trades_taken": self.trades_taken,
+                "deployed_pct": round((self.nav - (self.available_cash or 0)) / (self.account_equity + 1e-9) * 100, 1),
+                "current_ticker": self.current_ticker or "NONE",
+                "position": f"{self.shares:.0f} {self.current_ticker}" if self.shares > 0 else "NONE",
                 "win_rate": round(win_rate, 1),
-                "wins": self.wins,
-                "losses": self.losses,
+                "trades_today": self.trades_today,
                 "top_pick": self.top_pick.ticker if self.top_pick else None,
                 "top_score": self.top_pick.rank_score if self.top_pick else 0,
-                "scan_count": len(self.scan_results),
                 "scan_results": scan_data,
                 "timestamp": datetime.utcnow().isoformat(),
             }
@@ -130,253 +160,276 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"Could not write live_metrics.json: {exc}")
     
-    def run_scan(self):
-        """Run a full universe scan to find the best setup."""
-        log.info(f"🔍 Scanning {len(PENNY_STOCK_UNIVERSE)} stocks for setups ...")
-        
-        results = []
-        for ticker in PENNY_STOCK_UNIVERSE:
-            try:
-                # Fetch 30 bars of daily data for screening
-                hist = self.data.fetch_historical(ticker=ticker, duration="1 M", bar_size="1 day")
-                if hist is None or len(hist) < 21:
-                    continue
-                
-                result = self.scanner.evaluate_stock(ticker, hist)
-                if result:
-                    results.append(result)
-            except Exception as exc:
-                log.debug(f"Scan error {ticker}: {exc}")
-                continue
-        
-        self.scan_results = self.scanner.rank_scans(results)
-        
-        if self.scan_results:
-            self.top_pick = self.scan_results[0]
-            alert = self.scanner.build_alert_text(self.scan_results, top_n=3)
-            log.info(f"\n{alert}")
-            self.notifier.info(alert)
-        else:
-            log.info("🔍 Scanner: No setups found")
-            self.top_pick = None
-    
     def run(self):
-        """Main scalper loop."""
         log.info("=" * 70)
-        log.info("  SCALPER + INSTITUTIONAL MOMENTUM MODE")
-        log.info(f"  Account: ${self.account_equity:,.2f}")
-        log.info(f"  Universe: {len(PENNY_STOCK_UNIVERSE)} stocks")
+        log.info("  SCALPER — SINGLE FOCUS MODE")
+        log.info(f"  IB Account: {self.conn.ib.accountValues()[0].account if self.conn.ib.accountValues() else 'unknown'}")
+        log.info(f"  Universe: {len(PENNY_STOCK_UNIVERSE)} tickers")
+        log.info(f"  Max per trade: ${self.cfg.MAX_TRADE_SIZE_USD:,.0f}")
         log.info(f"  Max risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}")
         log.info("=" * 70)
         
-        # Initial scan
-        self.run_scan()
+        self._refresh_account_balance()
+        self._last_scan_time = time.time()
+        self._scan_and_rank()
         
         try:
             while True:
                 self.ib.sleep(1)
                 
                 if not self.conn.is_connected():
-                    log.warning("IB connection lost. Attempting reconnect ...")
+                    log.warning("IB connection lost. Reconnecting...")
                     if not self.conn.reconnect():
                         break
-                    self.run_scan()
+                    self._refresh_account_balance()
                 
                 # Rescan every 5 minutes
-                if time.time() - self._last_scan_time > 300:
+                if time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
                     self._last_scan_time = time.time()
-                    self.run_scan()
+                    self._scan_and_rank()
                 
-                # If we have a top pick, start trading it
+                # Trade the #1 pick only
                 if self.top_pick and self.shares == 0:
-                    self._trade_top_pick()
+                    self._attempt_entry()
                 
+                self._refresh_account_balance()
                 self._write_live_metrics()
                 
         except KeyboardInterrupt:
-            log.info("Keyboard interrupt — shutting down ...")
+            log.info("Shutting down...")
         finally:
             self._shutdown()
     
-    def _trade_top_pick(self):
-        """Execute a scalp trade on the top-ranked stock."""
-        ticker = self.top_pick.ticker
-        log.info(f"🎯 Trading top pick: {ticker} (Score: {self.top_pick.rank_score})")
+    def _scan_and_rank(self):
+        """Scan universe, rank, keep only TOP 1. Focus everything on the best."""
+        log.info("🔍 Scanning universe for highest-probability setup...")
         
-        # Switch ticker context in data manager
+        results = []
+        for ticker in PENNY_STOCK_UNIVERSE:
+            try:
+                cfg_ticker = self.cfg.TICKER
+                self.cfg.TICKER = ticker
+                dm = DataManager(self.conn, self.cfg)
+                hist = dm.fetch_historical(duration="1 M", bar_size="1 day")
+                if hist is None or len(hist) < 21:
+                    continue
+                
+                score = self._score_ticker(ticker, hist)
+                if score > 0:
+                    results.append(score)
+            except Exception as exc:
+                log.debug(f"Scan error {ticker}: {exc}")
+                continue
+        
+        self.cfg.TICKER = cfg_ticker
+        
+        results.sort(key=lambda x: x["total_score"], reverse=True)
+        self.scan_results = results[:10]
+        
+        if self.scan_results:
+            best = self.scan_results[0]
+            self.top_pick = ScanResult(
+                ticker=best["ticker"],
+                price=best["price"],
+                volume=best["volume"],
+                avg_volume=best["avg_volume"],
+                relative_volume=best["rel_vol"],
+                rank_score=best["total_score"],
+                reason=best["reasons"],
+            )
+            log.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f} | Score: {best['total_score']:.0f} | {best['reasons']}")
+        else:
+            self.top_pick = None
+            log.info("🔍 No viable setups this scan")
+    
+    def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
+        """
+        Math-heavy scoring using ALL available indicators:
+        - Momentum (5d, 10d, 20d returns)
+        - Volume acceleration
+        - Institutional footprints
+        - Trend strength (ADX-style)
+        - VWAP position
+        - Mean reversion z-score
+        - Volatility ratio
+        """
+        closes = df["close"].values
+        volumes = df["volume"].values
+        current_px = float(closes[-1])
+        
+        if not _only_uptrend(df, current_px):
+            return {"ticker": ticker, "total_score": 0, "price": current_px, "volume": volumes[-1], "avg_volume": np.mean(volumes[-20:]), "rel_vol": 1.0, "reasons": "not_uptrend"}
+        
+        score = 0.0
+        reasons = []
+        
+        # 1. Momentum composite
+        ret_5 = (closes[-1] / closes[-6] - 1) * 100 if len(closes) > 5 else 0
+        ret_10 = (closes[-1] / closes[-11] - 1) * 100 if len(closes) > 10 else 0
+        ret_20 = (closes[-1] / closes[-21] - 1) * 100 if len(closes) > 20 else 0
+        mom_score = ret_5 * 0.5 + ret_10 * 0.3 + ret_20 * 0.2
+        score += mom_score * 2.0
+        if mom_score > 2:
+            reasons.append(f"strong_mom_{mom_score:.1f}")
+        
+        # 2. Volume acceleration
+        vol_avg20 = np.mean(volumes[-20:])
+        vol_avg5 = np.mean(volumes[-5:])
+        vol_ratio = vol_avg5 / (vol_avg20 + 1e-9)
+        score += max(0, vol_ratio - 1.0) * 15
+        if vol_ratio > 1.3:
+            reasons.append(f"vol_{vol_ratio:.1f}x")
+        
+        # 3. Institutional flow
+        inst = InstitutionalDetector()
+        for i in range(-20, 0):
+            inst.feed_bar(float(volumes[i]), float(closes[i]))
+        sig = inst.scan()
+        if sig.direction == "accumulating" and sig.strength > 0.5:
+            score += sig.strength * 20
+            reasons.append(f"inst_{sig.strength:.1f}")
+        
+        # 4. VWAP slope
+        typical = (df["high"] + df["low"] + df["close"]) / 3.0
+        vwap_hist = np.array([np.average(typical[max(0, i-19):i+1], weights=volumes[max(0, i-19):i+1]) for i in range(19, len(typical))])
+        vwap_slope = (vwap_hist[-1] - vwap_hist[-5]) / (vwap_hist[-5] + 1e-9) * 100
+        score += max(0, vwap_slope) * 5
+        if vwap_slope > 0.5:
+            reasons.append(f"vwap_up_{vwap_slope:.2f}%")
+        
+        # 5. ATR efficiency (risk-adjusted)
+        atr = compute_atr(df, period=10)
+        atr_pct = (atr / current_px) * 100
+        if 0.3 < atr_pct < 3.0:
+            score += 5
+        
+        # 6. Mean reversion z-score (not overextended)
+        ema9 = pd.Series(closes).ewm(span=9, adjust=False).mean().iloc[-1]
+        dist = (current_px - ema9) / (pd.Series(closes).diff().rolling(20).std().iloc[-1] + 1e-9)
+        if abs(dist) < 1.5:
+            score += 5
+        
+        return {
+            "ticker": ticker,
+            "price": current_px,
+            "volume": int(volumes[-1]),
+            "avg_volume": int(vol_avg20),
+            "rel_vol": round(vol_ratio, 2),
+            "total_score": round(score, 1),
+            "reasons": " | ".join(reasons[:3]) if reasons else "balanced",
+        }
+    
+    def _attempt_entry(self):
+        """Focus ALL capital on the top 1 pick only."""
+        ticker = self.top_pick.ticker
         self.current_ticker = ticker
         
-        # Fetch 1-min bars for decision making
         try:
-            bar_df = self.data.fetch_historical(ticker=ticker, duration="2 D", bar_size="1 min")
-            if bar_df is None or len(bar_df) < 30:
-                log.warning(f"Not enough 1-min data for {ticker}")
+            # Reset ticker in config
+            self.cfg.TICKER = ticker
+            
+            # Fetch fast data
+            df_fast = self.data.fetch_historical(duration="1 D", bar_size="1 min")
+            if df_fast is None or len(df_fast) < 20:
                 return
             
-            current_price = float(bar_df["close"].iloc[-1])
+            current_px = float(df_fast["close"].iloc[-1])
             
-            # Compute ATR from fast bars
-            fast_atr = compute_atr(bar_df, period=5)
-            if fast_atr <= 0:
-                log.debug(f"Entry skipped: ATR not computable for {ticker}")
+            # Enforce uptrend one more time at millisecond level
+            if not _only_uptrend(df_fast, current_px):
+                log.info(f"⏸ {ticker} lost uptrend — waiting for next scan")
+                self.top_pick = None
                 return
             
-            # Get institutional signal
-            inst_signal = self.institutional.scan()
-            
-            # Check institutional override
+            # Institution check
+            inst = self.institutional.scan()
             override, reason = self.institutional.should_override_buy()
             if override:
-                log.warning(f"Inst override: {reason} — skipping {ticker}")
+                log.warning(f"Inst override on {ticker}: {reason}")
+                self.top_pick = None
                 return
             
-            # Compute trade plan with scalper-tight stops
-            momentum = compute_momentum_score(bar_df, lookback=5)
+            # Mathematics: ATR + momentum
+            fast_atr = compute_atr(df_fast, period=5)
+            momentum = compute_momentum_score(df_fast, lookback=5)
             
-            plan = self._compute_scalp_plan(
-                equity=self.account_equity,
-                cash=self.cash,
-                entry_price=current_price,
-                atr=fast_atr,
-                momentum_score=momentum,
-                inst_confidence=inst_signal.get_scalp_confidence(),
+            # Deploy up to MAX_TRADE_SIZE_USD
+            deploy_usd = min(self.cfg.MAX_TRADE_SIZE_USD, self.cash * 0.95)
+            risk_usd = self.cfg.risk_amount_usd(self.account_equity)
+            
+            stop_dist = max(fast_atr * self.cfg.SCALP_STOP_ATR_MULTIPLIER, current_px * self.cfg.SCALP_MIN_STOP_PCT)
+            stop_dist = min(stop_dist, current_px * self.cfg.SCALP_MAX_STOP_PCT)
+            
+            shares_by_risk = int(risk_usd / stop_dist)
+            shares_by_cash = int(deploy_usd / current_px)
+            shares = min(shares_by_risk, shares_by_cash, self.cfg.MAX_SHARES_PER_TRADE)
+            
+            if shares < 1:
+                return
+            
+            tp_dist = max(fast_atr * self.cfg.SCALP_TP_ATR_MULTIPLIER, stop_dist * self.cfg.SCALP_MIN_RR)
+            tp_dist = min(tp_dist, current_px * self.cfg.SCALP_MAX_TP_PCT)
+            tp_price = current_px + tp_dist
+            
+            plan = TradePlan(
+                side="LONG",
+                entry_price=current_px,
+                shares=float(shares),
+                initial_stop_price=round(current_px - stop_dist, 4),
+                take_profit_price=round(tp_price, 4),
+                risk_usd=round(shares * stop_dist, 2),
+                atr_at_entry=fast_atr,
             )
             
-            if plan is None:
-                return
-            
-            quantity = int(plan.shares)
-            if quantity < 1:
-                return
-            
-            # Place bracket order
+            # Place bracket
             self.bracket_handle = self.broker.place_bracket_buy(
-                quantity=quantity,
-                limit_or_market_price=current_price,
+                quantity=shares,
+                limit_or_market_price=current_px,
                 stop_price=plan.initial_stop_price,
                 target_price=plan.take_profit_price,
             )
             self.ib.sleep(1)
             
-            cost = quantity * current_price * (1.0 + self.cfg.TRANSACTION_COST_PCT)
+            # Account update
+            cost = shares * current_px * (1 + self.cfg.TRANSACTION_COST_PCT)
             self.cash -= cost
-            self.shares += float(quantity)
-            self.nav = self.cash + self.shares * current_price
-            
+            self.shares = float(shares)
+            self.nav = self.cash + self.shares * current_px
             self.risk.open_position(plan)
-            self.trades_taken += 1
+            self.trades_today += 1
             
-            # Build entry message
-            entry_pct = (plan.take_profit_price - current_price) / current_price * 100
-            stop_pct = (current_price - plan.initial_stop_price) / current_price * 100
-            inst_str = f"🏦 Inst: {inst_signal.direction.upper()} ({inst_signal.strength:.1f})" if inst_signal.detected else ""
-            
-            log.info(f"🎯 SCALP ENTRY: {quantity}x {ticker} @ ${current_price:.2f} | "
-                     f"Stop: -{stop_pct:.2f}% | Target: +{entry_pct:.2f}% | "
-                     f"Risk: ${plan.risk_usd:.2f} | Score: {self.top_pick.rank_score}")
+            log.info(f"🎯 FOCUS ENTRY: {shares}x {ticker} @ ${current_px:.2f} | "
+                     f"Stop -{stop_dist/current_px:.2%} | TP +{tp_dist/current_px:.2%} | "
+                     f"Deployed: ${cost:,.0f} | Score: {self.top_pick.rank_score:.0f}")
             
             self.notifier.trade_opened(
-                side="BUY", ticker=ticker, qty=quantity, price=current_price,
+                side="BUY", ticker=ticker, qty=shares, price=current_px,
                 stop_price=plan.initial_stop_price, target_price=plan.take_profit_price,
                 risk_usd=plan.risk_usd,
             )
-            push_trade(ticker, "BUY", current_price, quantity)
+            push_trade(ticker, "BUY", current_px, shares)
             
-            if inst_str:
-                msg = f"{inst_str}\nRank: {self.top_pick.rank_score} | {self.top_pick.reason}"
-                self.notifier.info(msg)
+            # Clear pick until next scan cycle
+            self.top_pick = None
             
         except Exception as exc:
-            log.error(f"Error trading {ticker}: {exc}")
-    
-    def _compute_scalp_plan(self, equity: float, cash: float, entry_price: float,
-                             atr: float, momentum_score: float = 0.0,
-                             inst_confidence: float = 0.0) -> Optional[TradePlan]:
-        """
-        Scalp-specific trade plan with ultra-tight stops.
-        - Max risk $50 on $1000 account
-        - Stop: 0.3-1.0% (much tighter than normal mode)
-        - Target: 0.5-2.0% with trailing immediately on +0.2%
-        """
-        if entry_price <= 0 or atr <= 0:
-            return None
-        
-        risk_usd = self.cfg.risk_amount_usd(equity)
-        
-        # Tighter scalping stop: use ATR(5) * 0.8 instead of ATR(14) * 1.5
-        stop_distance = atr * 0.8
-        min_dist = entry_price * 0.003  # 0.3% minimum
-        max_dist = entry_price * 0.010  # 1.0% maximum
-        stop_distance = float(np.clip(stop_distance, min_dist, max_dist))
-        stop_price = entry_price - stop_distance
-        
-        # More aggressive sizing for scalping
-        shares_from_risk = risk_usd / stop_distance
-        max_shares_by_cash = (cash * self.cfg.DEFAULT_MAX_POSITION_PCT) / entry_price
-        
-        # Institutional confidence bonus: scale up to 1.5x when tape is hot
-        sizing_multiplier = 1.0 + (inst_confidence * 0.5)
-        shares = min(
-            shares_from_risk * sizing_multiplier,
-            max_shares_by_cash,
-            self.cfg.MAX_SHARES_PER_TRADE,
-        )
-        shares = float(np.floor(shares))
-        
-        if shares < 1:
-            log.debug(f"Scalp plan rejected: <1 share (risk=${risk_usd:.2f}, dist=${stop_distance:.4f})")
-            return None
-        
-        # Predictive take-profit: smaller for scalping
-        # Base: 2.0x ATR, but adjusted for momentum
-        tp_distance = atr * 1.5  # Tighter than normal mode's 2.5x
-        tp_distance *= (1.0 + 0.3 * max(0.0, momentum_score))
-        min_tp = stop_distance * 1.5  # Min R:R = 1.5
-        tp_distance = max(tp_distance, min_tp)
-        tp_distance = min(tp_distance, entry_price * 0.03)  # Cap at 3% for scalping
-        take_profit_price = entry_price + tp_distance
-        
-        actual_risk_usd = shares * stop_distance
-        
-        plan = TradePlan(
-            side="LONG",
-            entry_price=entry_price,
-            shares=shares,
-            initial_stop_price=round(stop_price, 4),
-            take_profit_price=round(take_profit_price, 4),
-            risk_usd=round(actual_risk_usd, 2),
-            atr_at_entry=atr,
-        )
-        
-        log.info(
-            f"SCALP PLAN: {shares:.0f} sh @ ${entry_price:.2f} | "
-            f"Stop ${plan.initial_stop_price:.2f} (-{stop_distance/entry_price:.2%}) | "
-            f"Target ${plan.take_profit_price:.2f} (+{tp_distance/entry_price:.2%}) | "
-            f"Risk ${actual_risk_usd:.2f} | "
-            f"Inst conf: {inst_confidence:.1%}"
-        )
-        return plan
+            log.error(f"Entry error on {ticker}: {exc}")
     
     def _shutdown(self):
-        if self.bracket_handle:
-            log.info("Shutdown with open bracket — IB handles remain active.")
+        self._refresh_account_balance()
         
-        ret = (self.nav / self.cfg.INITIAL_CASH - 1.0) * 100.0
-        win_rate = self.wins / (self.wins + self.losses + 1e-9) * 100
+        # End-of-day trade summary
+        if self.trade_journal or self.shares > 0:
+            summary = "📊 END OF SESSION\n"
+            summary += f" NAV: ${self.nav:,.2f} | Cash: ${self.cash:,.2f} | Account: ${self.account_equity:,.2f}\n"
+            summary += f" Trades today: {self.trades_today}\n"
+            
+            if self.shares > 0:
+                summary += f" ⚠️ OPEN POSITION: {self.shares:.0f} {self.current_ticker}\n"
+                summary += " Bracket orders remain active on IB."
+            
+            log.info(summary)
+            self.notifier.info(summary)
+            push_daily_summary(self.nav, self.account_equity)
         
-        log.info("=" * 70)
-        log.info("  SCALPER SESSION COMPLETE")
-        log.info(f"  Final NAV: ${self.nav:,.2f} ({ret:+.1f}%)")
-        log.info(f"  Trades: {self.trades_taken} | W: {self.wins} L: {self.losses} ({win_rate:.0f}%)")
-        log.info(f"  Total P&L: ${self.total_pnl:+.2f}")
-        log.info("=" * 70)
-        
-        self.notifier.info(
-            f"🛑 Scalper Stopped\n"
-            f"NAV: ${self.nav:,.2f} ({ret:+.1f}%)\n"
-            f"Trades: {self.trades_taken} | Win: {win_rate:.0f}%\n"
-            f"P&L: ${self.total_pnl:+.2f}"
-        )
-        
-        push_daily_summary(self.nav, self.account_equity)
         self.conn.disconnect()

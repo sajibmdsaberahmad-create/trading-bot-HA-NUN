@@ -56,6 +56,11 @@ class BotConfig:
     # This is what lets the same config file work for a $1,000 account
     # today and a $50,000 account later with zero code changes.
 
+    # Per-trade capital cap: never deploy more than this per single trade,
+    # regardless of account size. Use this to fragment a large account
+    # into $1,000 chunks across multiple tickers.
+    MAX_TRADE_SIZE_USD: float = 1_000.0
+
     TRANSACTION_COST_PCT: float = 0.001   # 0.1% per trade, both sides
 
     # ════════════════════════════════════════════════════════════════════

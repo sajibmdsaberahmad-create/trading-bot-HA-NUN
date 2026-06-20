@@ -526,3 +526,61 @@ Next step: python main.py --mode trade
   6. Client ID 12 not already in use?
 
 2026-06-20 23:07:24 | INFO     | TradingBot | Starting | mode=SCALPER | ticker=SPY | capital=$1,000 | port=4002 | client_id=1
+2026-06-20 23:07:27 | INFO     | TradingBot | GitHub: pushed — startup: mode=scalper ticker=SPY
+2026-06-20 23:07:27 | INFO     | TradingBot | Notifications: Telegram ✓
+2026-06-20 23:07:27 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 23:07:27 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 23:07:27 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 23:07:27 | INFO     | TradingBot | ======================================================================
+2026-06-20 23:07:27 | INFO     | TradingBot |   SCALPER + INSTITUTIONAL MOMENTUM MODE
+2026-06-20 23:07:27 | INFO     | TradingBot |   Account: $1,000.00
+2026-06-20 23:07:27 | INFO     | TradingBot |   Universe: 72 stocks
+2026-06-20 23:07:27 | INFO     | TradingBot |   Max risk/trade: $50.00
+2026-06-20 23:07:27 | INFO     | TradingBot | ======================================================================
+2026-06-20 23:07:27 | INFO     | TradingBot | 🔍 Scanning 72 stocks for setups ...
+2026-06-20 23:07:27 | INFO     | TradingBot | 🔍 Scanner: No setups found
+2026-06-20 23:07:28 | INFO     | TradingBot | 🔍 Scanning 72 stocks for setups ...
+2026-06-20 23:07:28 | INFO     | TradingBot | 🔍 Scanner: No setups found
+2026-06-20 23:07:42 | WARNING  | TradingBot | IB connection lost. Attempting reconnect ...
+2026-06-20 23:07:42 | WARNING  | TradingBot | Reconnect attempt 1/10 in 2s …
+2026-06-20 23:07:42 | INFO     | TradingBot | NOTIFY │ ⚠️ Reconnect attempt 1 failed — retrying…
+2026-06-20 23:07:46 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 23:07:46 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 23:07:46 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 23:07:46 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 23:07:46 | INFO     | TradingBot | Reconnected successfully.
+2026-06-20 23:07:46 | INFO     | TradingBot | NOTIFY │ 🔌 Reconnected to IB Gateway successfully.
+2026-06-20 23:07:47 | INFO     | TradingBot | 🔍 Scanning 72 stocks for setups ...
+2026-06-20 23:07:47 | INFO     | TradingBot | 🔍 Scanner: No setups found
+2026-06-20 23:08:02 | WARNING  | TradingBot | IB connection lost. Attempting reconnect ...
+2026-06-20 23:08:02 | WARNING  | TradingBot | Reconnect attempt 1/10 in 2s …
+2026-06-20 23:08:02 | INFO     | TradingBot | NOTIFY │ ⚠️ Reconnect attempt 1 failed — retrying…
+2026-06-20 23:08:05 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 23:08:05 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 23:08:05 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 23:08:05 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 23:08:05 | INFO     | TradingBot | Reconnected successfully.
+2026-06-20 23:08:05 | INFO     | TradingBot | NOTIFY │ 🔌 Reconnected to IB Gateway successfully.
+2026-06-20 23:08:06 | INFO     | TradingBot | 🔍 Scanning 72 stocks for setups ...
+2026-06-20 23:08:06 | INFO     | TradingBot | 🔍 Scanner: No setups found
+2026-06-20 23:08:21 | WARNING  | TradingBot | IB connection lost. Attempting reconnect ...
+2026-06-20 23:08:21 | WARNING  | TradingBot | Reconnect attempt 1/10 in 2s …
+2026-06-20 23:08:21 | INFO     | TradingBot | NOTIFY │ ⚠️ Reconnect attempt 1 failed — retrying…
+2026-06-20 23:08:24 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 23:08:25 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 23:08:25 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 23:08:25 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 23:08:25 | INFO     | TradingBot | Reconnected successfully.
+2026-06-20 23:08:25 | INFO     | TradingBot | NOTIFY │ 🔌 Reconnected to IB Gateway successfully.
+2026-06-20 23:08:26 | INFO     | TradingBot | 🔍 Scanning 72 stocks for setups ...
+2026-06-20 23:08:26 | INFO     | TradingBot | 🔍 Scanner: No setups found
+2026-06-20 23:08:28 | INFO     | TradingBot | Keyboard interrupt — shutting down ...
+2026-06-20 23:08:28 | INFO     | TradingBot | ======================================================================
+2026-06-20 23:08:28 | INFO     | TradingBot |   SCALPER SESSION COMPLETE
+2026-06-20 23:08:28 | INFO     | TradingBot |   Final NAV: $1,000.00 (+0.0%)
+2026-06-20 23:08:28 | INFO     | TradingBot |   Trades: 0 | W: 0 L: 0 (0%)
+2026-06-20 23:08:28 | INFO     | TradingBot |   Total P&L: $+0.00
+2026-06-20 23:08:28 | INFO     | TradingBot | ======================================================================
+2026-06-20 23:08:28 | INFO     | TradingBot | NOTIFY │ 🛑 Scalper Stopped
+2026-06-20 23:08:29 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 23:08:29 | INFO     | TradingBot | Disconnected from IB Gateway
