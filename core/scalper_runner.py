@@ -76,15 +76,19 @@ class ScalperRunner:
         self.risk = RiskManager(cfg, cfg.INITIAL_CASH, notifier)
         git_sync_init(cfg)
         
+        # IB account state (full account from IB)
         self.account_equity = float(cfg.INITIAL_CASH)
         self.available_cash: Optional[float] = None
         self.cash = float(cfg.INITIAL_CASH)
-        self.shares = 0.0
-        self.nav = float(cfg.INITIAL_CASH)
+        
+        # Bot's own financial state (starts at INITIAL_CASH, changes ONLY via trades)
+        self.bot_cash: float = float(cfg.INITIAL_CASH)
+        self.shares: float = 0.0
+        self.bot_nav: float = float(cfg.INITIAL_CASH)
         self.current_ticker: Optional[str] = None
         self.bracket_handle: Optional[BracketHandle] = None
         
-        # IB account tracking (shows real P&L impact on IB account)
+        # IB account tracking (real P&L impact)
         self._ib_starting_balance: Optional[float] = None
         
         self.scan_results: List[ScanResult] = []
@@ -99,6 +103,7 @@ class ScalperRunner:
         self._weights_file = "models/scalper_weights.json"
     
     def _refresh_account_balance(self):
+        """Pull live balance from IB. Bot state changes ONLY via trades."""
         try:
             values = self.ib.accountValues()
             for v in values:
@@ -110,13 +115,12 @@ class ScalperRunner:
             if self.available_cash is None:
                 self.available_cash = self.account_equity
             self.cash = self.available_cash
-            # Capture starting balance on first refresh
             if self._ib_starting_balance is None:
                 self._ib_starting_balance = self.account_equity
             self.cfg._latest_account_balance = self.account_equity
         except Exception as exc:
             log.debug(f"Could not fetch IB account balance: {exc}")
-        self.nav = self.cash + self.shares * self._latest_price()
+        self.bot_nav = self.bot_cash + self.shares * self._latest_price()
     
     def _latest_price(self) -> float:
         try:
@@ -142,8 +146,8 @@ class ScalperRunner:
                 "account_equity": round(self.account_equity, 2),
                 "available_cash": round(self.available_cash or 0, 2),
                 "position_value": round(self.shares * self._latest_price(), 2),
-                "nav": round(self.nav, 2),
-                "deployed_pct": round((self.nav - (self.available_cash or 0)) / (self.account_equity + 1e-9) * 100, 1),
+                "nav": round(self.bot_nav, 2),
+                "deployed_pct": round((self.bot_nav - (self.available_cash or 0)) / (self.account_equity + 1e-9) * 100, 1),
                 "current_ticker": self.current_ticker or "NONE",
                 "position": f"{self.shares:.0f} {self.current_ticker}" if self.shares > 0 else "NONE",
                 "win_rate": round(win_rate, 1),
@@ -161,7 +165,8 @@ class ScalperRunner:
     def run(self):
         log.info("=" * 70)
         log.info("  HA-NUN — SINGLE FOCUS SCALPER")
-        log.info(f"  IB Account: {self.conn.ib.accountValues()[0].account if self.conn.ib.accountValues() else 'unknown'}")
+        acct = self.conn.ib.accountValues()
+        log.info(f"  IB Account: {acct[0].account if acct else 'unknown'}")
         log.info(f"  Universe: {len(PENNY_STOCK_UNIVERSE)} tickers")
         log.info(f"  Max per trade: ${self.cfg.MAX_TRADE_SIZE_USD:,.0f}")
         log.info(f"  Max risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}")
@@ -314,7 +319,7 @@ class ScalperRunner:
                 return
             fast_atr = compute_atr(df_fast, period=5)
             momentum = compute_momentum_score(df_fast, lookback=5)
-            deploy_usd = min(self.cfg.MAX_TRADE_SIZE_USD, self.cash * 0.95)
+            deploy_usd = min(self.cfg.MAX_TRADE_SIZE_USD, self.bot_cash * 0.95)
             risk_usd = self.cfg.risk_amount_usd(self.account_equity)
             stop_dist = max(fast_atr * self.cfg.SCALP_STOP_ATR_MULTIPLIER, current_px * self.cfg.SCALP_MIN_STOP_PCT)
             stop_dist = min(stop_dist, current_px * self.cfg.SCALP_MAX_STOP_PCT)
@@ -338,9 +343,9 @@ class ScalperRunner:
             )
             self.ib.sleep(1)
             cost = shares * current_px * (1 + self.cfg.TRANSACTION_COST_PCT)
-            self.cash -= cost
+            self.bot_cash -= cost
             self.shares = float(shares)
-            self.nav = self.cash + self.shares * current_px
+            self.bot_nav = self.bot_cash + self.shares * current_px
             self.risk.open_position(plan)
             self.trades_today += 1
             log.info(f"🎯 FOCUS ENTRY: {shares}x {ticker} @ ${current_px:.2f} | Stop -{stop_dist/current_px:.2%} | TP +{tp_dist/current_px:.2%} | Deployed: ${cost:,.0f} | Score: {self.top_pick.rank_score:.0f}")
@@ -428,11 +433,11 @@ class ScalperRunner:
                     rules.append("Market conditions are weak (low scores). Consider wider SCALP_MIN_STOP_PCT or wait for better setups.")
                 elif max_score > 50:
                     rules.append("Strong market conditions. Increase SCALP_MAX_TP_PCT from 3% to 5% to capture more upside.")
-            if self.nav > float(self.cfg.INITIAL_CASH) * 1.5:
-                rules.append(f"Account grew {self.nav / float(self.cfg.INITIAL_CASH):.0%}x. Consider adding a second concurrent position (MAX_CONCURRENT_POSITIONS).")
+            if self.bot_nav > float(self.cfg.INITIAL_CASH) * 1.5:
+                rules.append(f"Account grew {self.bot_nav / float(self.cfg.INITIAL_CASH):.0%}x. Consider adding a second concurrent position (MAX_CONCURRENT_POSITIONS).")
             rules.append("Always use limit orders in fast markets (USE_LIMIT_ORDERS_IN_FAST_MARKETS = True).")
             rules.append("Monitor slippage: if fills consistently >0.4%, reduce order size.")
-            pnl = self.nav - float(self.cfg.INITIAL_CASH)
+            pnl = self.bot_nav - float(self.cfg.INITIAL_CASH)
             pnl_pct = pnl / float(self.cfg.INITIAL_CASH)
             if pnl_pct < -0.1:
                 rules.append("ALERT: Drawdown >10%. Pause trading for 24 hours and review strategy.")
@@ -455,16 +460,16 @@ class ScalperRunner:
                 self._daily_self_train()
                 guidelines = self._generate_guidelines()
                 baseline = float(self.cfg.INITIAL_CASH)
-                pnl = self.nav - baseline
+                pnl = self.bot_nav - baseline
                 pnl_pct = (pnl / baseline) * 100 if baseline else 0.0
                 stmt = (
                     f"portfolio: {today_str} ET | "
-                    f"bot_nav=${self.nav:,.0f} | "
+                    f"bot_nav=${self.bot_nav:,.0f} | "
                     f"baseline=${baseline:,.0f} | "
                     f"pnl=${pnl:+,.0f} ({pnl_pct:+.2f}%) | "
                     f"trades={self.trades_today}"
                 )
-                push_daily_summary(self.nav, self.account_equity)
+                push_daily_summary(self.bot_nav, self.account_equity)
                 try:
                     weights = self._load_weights()
                     self.cfg._latest_account_balance = self.account_equity
@@ -490,7 +495,7 @@ class ScalperRunner:
     def _shutdown(self):
         self._refresh_account_balance()
         baseline = float(self.cfg.INITIAL_CASH)
-        pnl = self.nav - baseline
+        pnl = self.bot_nav - baseline
         pnl_pct = (pnl / baseline) * 100 if baseline else 0.0
         ib_start = self._ib_starting_balance or self.account_equity
         ib_change = self.account_equity - ib_start
@@ -498,8 +503,8 @@ class ScalperRunner:
         summary = "📊 HA-NUN DAILY STATEMENT\n"
         summary += f" IB Account:    ${self.account_equity:>12,.2f}  (start: ${ib_start:,.2f})\n"
         summary += f" IB Change:     ${ib_change:>+12,.2f} ({ib_change_pct:+.2f}%)\n"
-        summary += f" Bot Cash:      ${self.cash:>12,.2f}\n"
-        summary += f" Bot NAV:       ${self.nav:>12,.2f}\n"
+        summary += f" Bot Cash:      ${self.bot_cash:>12,.2f}\n"
+        summary += f" Bot NAV:       ${self.bot_nav:>12,.2f}\n"
         summary += f" Day P&L:       ${pnl:>+12,.2f} ({pnl_pct:+.2f}%)\n"
         summary += f" Baseline:      ${baseline:>12,.2f}\n"
         summary += f" Trades:        {self.trades_today:>12d}\n"
@@ -508,5 +513,5 @@ class ScalperRunner:
             summary += " (bracket orders remain active on IB)\n"
         log.info(summary)
         self.notifier.info(summary)
-        push_daily_summary(self.nav, self.account_equity)
+        push_daily_summary(self.bot_nav, self.account_equity)
         self.conn.disconnect()
