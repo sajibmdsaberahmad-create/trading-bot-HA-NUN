@@ -91,6 +91,10 @@ class ScalperRunner:
         # IB account tracking (real P&L impact)
         self._ib_starting_balance: Optional[float] = None
         
+        # Track previous shares to detect exits
+        self._prev_shares: float = 0.0
+        self._entry_price: float = 0.0
+        
         self.scan_results: List[ScanResult] = []
         self.top_pick: Optional[ScanResult] = None
         self._last_scan_time: float = 0.0
@@ -127,6 +131,36 @@ class ScalperRunner:
             return self.data.get_latest_price() or 0.0
         except Exception:
             return 0.0
+    
+    def _detect_exit(self, current_px: float):
+        """Detect if position was closed (by bracket or manually) and notify."""
+        if self._prev_shares > 0 and self.shares == 0:
+            # Position closed
+            pnl = (current_px - self._entry_price) * self._prev_shares
+            pnl_pct = ((current_px / self._entry_price) - 1) * 100 if self._entry_price else 0
+            result = "win" if pnl > 0 else "loss"
+            log.info(f"📕 EXIT: {self.current_ticker} @ ${current_px:.2f} | P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%) | {result.upper()}")
+            self.notifier.info(
+                f"📕 HA-NUN EXIT\n"
+                f"Ticker: {self.current_ticker}\n"
+                f"Exit: ${current_px:.2f}\n"
+                f"Entry: ${self._entry_price:.2f}\n"
+                f"P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%)\n"
+                f"Result: {result.upper()}"
+            )
+            # Save to trade journal for self-training
+            self.trade_journal.append({
+                "ticker": self.current_ticker,
+                "entry": self._entry_price,
+                "exit": current_px,
+                "shares": self._prev_shares,
+                "pnl_usd": round(pnl, 2),
+                "pnl_pct": round(pnl_pct, 2),
+                "result": result,
+            })
+        self._prev_shares = self.shares
+        if self.shares > 0:
+            self._entry_price = current_px
     
     def _write_live_metrics(self):
         try:
@@ -172,6 +206,7 @@ class ScalperRunner:
         log.info(f"  Max risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}")
         log.info(f"  Baseline:      ${self.cfg.INITIAL_CASH:,.2f}")
         log.info("=" * 70)
+        self.notifier.info("🚀 HA-NUN STARTED\nSingle-focus scalper active.\nScanning for setups...")
         
         self._refresh_account_balance()
         if self._ib_starting_balance:
@@ -182,11 +217,16 @@ class ScalperRunner:
         try:
             while True:
                 self.ib.sleep(1)
+                current_px = self._latest_price()
+                
                 if not self.conn.is_connected():
                     log.warning("IB connection lost. Reconnecting...")
                     if not self.conn.reconnect():
                         break
                     self._refresh_account_balance()
+                
+                # Detect exits (bracket orders hitting stop/target)
+                self._detect_exit(current_px)
                 
                 if self.top_pick is None and self.shares == 0:
                     if time.time() - self._last_scan_time > 1:
@@ -346,13 +386,20 @@ class ScalperRunner:
             self.bot_cash -= cost
             self.shares = float(shares)
             self.bot_nav = self.bot_cash + self.shares * current_px
+            self._entry_price = current_px
+            self._prev_shares = self.shares
             self.risk.open_position(plan)
             self.trades_today += 1
             log.info(f"🎯 FOCUS ENTRY: {shares}x {ticker} @ ${current_px:.2f} | Stop -{stop_dist/current_px:.2%} | TP +{tp_dist/current_px:.2%} | Deployed: ${cost:,.0f} | Score: {self.top_pick.rank_score:.0f}")
-            self.notifier.trade_opened(
-                side="BUY", ticker=ticker, qty=shares, price=current_px,
-                stop_price=plan.initial_stop_price, target_price=plan.take_profit_price,
-                risk_usd=plan.risk_usd,
+            self.notifier.info(
+                f"🎯 HA-NUN ENTRY\n"
+                f"Ticker: {ticker}\n"
+                f"Qty: {shares}\n"
+                f"Entry: ${current_px:.2f}\n"
+                f"Stop: ${plan.initial_stop_price:.2f}\n"
+                f"Target: ${plan.take_profit_price:.2f}\n"
+                f"Deployed: ${cost:,.0f}\n"
+                f"Score: {self.top_pick.rank_score:.0f}"
             )
             push_trade(ticker, "BUY", current_px, shares)
             self.top_pick = None
@@ -375,6 +422,14 @@ class ScalperRunner:
     def _daily_self_train(self):
         try:
             weights = self._load_weights()
+            # Load trade journal into win_history if not already there
+            if self.trade_journal and not weights.get("win_history"):
+                for trade in self.trade_journal:
+                    weights["win_history"].append({
+                        "result": trade["result"],
+                        "pnl_usd": trade["pnl_usd"],
+                        "weights_active": {k: weights.get(k, 1.0) for k in ["momentum", "volume", "institutional", "vwap_slope", "atr_bonus", "mean_reversion"]}
+                    })
             wins = [w for w in weights.get("win_history", []) if w["result"] == "win"]
             losses = [w for w in weights.get("win_history", []) if w["result"] == "loss"]
             if wins or losses:
