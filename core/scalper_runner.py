@@ -18,6 +18,7 @@ import json
 import time
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
 import pandas as pd
@@ -113,6 +114,8 @@ class ScalperRunner:
             if self.available_cash is None:
                 self.available_cash = self.account_equity
             self.cash = self.available_cash
+            # Expose to notifier for Telegram balance display
+            self.cfg._latest_account_balance = self.account_equity
         except Exception as exc:
             log.debug(f"Could not fetch IB account balance: {exc}")
         self.nav = self.cash + self.shares * self._latest_price()
@@ -201,27 +204,36 @@ class ScalperRunner:
             self._shutdown()
     
     def _scan_and_rank(self):
-        """Scan universe, rank, keep only TOP 1. Focus everything on the best."""
-        log.info("🔍 Scanning universe for highest-probability setup...")
+        """Scan universe in PARALLEL, rank, keep only TOP 1. Focus everything on the best."""
+        t0 = time.perf_counter()
+        log.info(f"🔍 MILLISECOND SCAN: {len(PENNY_STOCK_UNIVERSE)} tickers...")
         
-        results = []
-        for ticker in PENNY_STOCK_UNIVERSE:
+        results: List[Dict] = []
+        
+        def _scan_one(ticker: str) -> Optional[Dict]:
             try:
                 cfg_ticker = self.cfg.TICKER
                 self.cfg.TICKER = ticker
                 dm = DataManager(self.conn, self.cfg)
                 hist = dm.fetch_historical(duration="1 M", bar_size="1 day")
                 if hist is None or len(hist) < 21:
-                    continue
-                
+                    return None
                 score = self._score_ticker(ticker, hist)
-                if score > 0:
-                    results.append(score)
-            except Exception as exc:
-                log.debug(f"Scan error {ticker}: {exc}")
-                continue
+                self.cfg.TICKER = cfg_ticker
+                return score if score and score.get("total_score", 0) > 0 else None
+            except Exception:
+                return None
         
-        self.cfg.TICKER = cfg_ticker
+        # Parallel scan: use as many workers as tickers (full CPU utilization)
+        workers = min(len(PENNY_STOCK_UNIVERSE), 32)
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(_scan_one, t): t for t in PENNY_STOCK_UNIVERSE}
+            for fut in as_completed(futures):
+                r = fut.result()
+                if r:
+                    results.append(r)
+        
+        elapsed_ms = (time.perf_counter() - t0) * 1000
         
         results.sort(key=lambda x: x["total_score"], reverse=True)
         self.scan_results = results[:10]
@@ -237,10 +249,11 @@ class ScalperRunner:
                 rank_score=best["total_score"],
                 reason=best["reasons"],
             )
-            log.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f} | Score: {best['total_score']:.0f} | {best['reasons']}")
+            log.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f} | Score: {best['total_score']:.0f} | Scan: {elapsed_ms:.0f}ms")
+            self.notifier.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f}\nScore: {best['total_score']:.0f}\n{best['reasons']}")
         else:
             self.top_pick = None
-            log.info("🔍 No viable setups this scan")
+            log.info(f"🔍 No viable setups this scan ({elapsed_ms:.0f}ms)")
     
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         """

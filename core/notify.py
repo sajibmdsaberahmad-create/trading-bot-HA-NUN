@@ -127,11 +127,13 @@ class Notifier:
 
     def trade_opened(self, side: str, ticker: str, qty: float, price: float,
                       stop_price: float, target_price: float, risk_usd: float):
+        bal = getattr(self.cfg, "_latest_account_balance", None)
+        bal_str = f"\nAccount: ${bal:,.2f}" if bal else ""
         msg = (
             f"🟢 TRADE OPENED\n"
             f"{side} {qty:.2f} {ticker} @ ${price:.2f}\n"
             f"Stop: ${stop_price:.2f}  |  Target: ${target_price:.2f}\n"
-            f"Risking: ${risk_usd:.2f}"
+            f"Risking: ${risk_usd:.2f}{bal_str}"
         )
         if self.cfg.NOTIFY_ON_TRADE_OPEN:
             self._send_all(msg)
@@ -139,10 +141,12 @@ class Notifier:
     def trade_closed(self, ticker: str, qty: float, price: float,
                       pnl_usd: float, pnl_pct: float, reason: str):
         emoji = "✅" if pnl_usd >= 0 else "🔴"
+        bal = getattr(self.cfg, "_latest_account_balance", None)
+        bal_str = f"\nAccount: ${bal:,.2f}" if bal else ""
         msg = (
             f"{emoji} TRADE CLOSED ({reason})\n"
             f"{qty:.2f} {ticker} @ ${price:.2f}\n"
-            f"P&L: ${pnl_usd:+.2f} ({pnl_pct:+.2f}%)"
+            f"P&L: ${pnl_usd:+.2f} ({pnl_pct:+.2f}%){bal_str}"
         )
         if self.cfg.NOTIFY_ON_TRADE_CLOSE:
             self._send_all(msg)
