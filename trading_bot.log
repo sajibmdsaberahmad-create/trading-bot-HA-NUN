@@ -584,3 +584,4 @@ Next step: python main.py --mode trade
 2026-06-20 23:08:28 | INFO     | TradingBot | NOTIFY │ 🛑 Scalper Stopped
 2026-06-20 23:08:29 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
 2026-06-20 23:08:29 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 23:19:40 | INFO     | TradingBot | Starting | mode=SCALPER | ticker=SPY | capital=$1,000 | port=4002 | client_id=1
