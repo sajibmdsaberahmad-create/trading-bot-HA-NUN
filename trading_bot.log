@@ -493,3 +493,35 @@ Next step: python main.py --mode trade
 2026-06-20 22:43:51 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
 2026-06-20 22:43:51 | INFO     | TradingBot | Disconnected from IB Gateway
 2026-06-20 22:56:04 | INFO     | TradingBot | Starting | mode=EVALUATE | ticker=SPY | capital=$1,000 | port=4002 | client_id=9
+2026-06-20 22:56:08 | INFO     | TradingBot | GitHub: pushed — startup: mode=evaluate ticker=SPY
+2026-06-20 22:56:08 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:56:08 | INFO     | TradingBot |   MODE: EVALUATE (offline backtest)
+2026-06-20 22:56:08 | INFO     | TradingBot |   Ticker: SPY | Model: ppo_trader.zip
+2026-06-20 22:56:08 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:56:08 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:56:08 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:56:08 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:56:08 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for SPY …
+2026-06-20 22:56:08 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 22:56:09 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:56:09 | INFO     | TradingBot | Loading existing model from ppo_trader.zip …
+2026-06-20 22:56:10 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:56:10 | INFO     | TradingBot |   BACKTEST RESULTS (last 1 year, daily bars)
+2026-06-20 22:56:10 | INFO     | TradingBot |   Final portfolio value: $979.93
+2026-06-20 22:56:10 | INFO     | TradingBot |   PPO return:            -2.0%
+2026-06-20 22:56:10 | INFO     | TradingBot |   Buy-and-hold return:   +13.1%
+2026-06-20 22:56:10 | INFO     | TradingBot |   Alpha vs B&H:          -15.1%
+2026-06-20 22:56:10 | INFO     | TradingBot |   Action breakdown:      HOLD=68 BUY=72 SELL=50
+2026-06-20 22:56:10 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:56:10 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:56:10 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:56:20 | INFO     | TradingBot | Notifications: Telegram ✓
+2026-06-20 22:56:20 | ERROR    | TradingBot | IB connection failed: [Errno 61] Connect call failed ('127.0.0.1', 7496)
+2026-06-20 22:56:20 | ERROR    | TradingBot | Troubleshooting checklist:
+  1. Is IB Gateway running and logged in?
+  2. API enabled? (Configure -> Settings -> API -> Enable Socket)
+  3. Correct port? (Paper=7496, Live=7496)
+  4. Read-Only API = OFF?
+  5. Allow connections from 127.0.0.1?
+  6. Client ID 12 not already in use?
+
