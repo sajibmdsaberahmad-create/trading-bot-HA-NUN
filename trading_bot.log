@@ -962,3 +962,4 @@ Next step: python main.py --mode trade
 2026-06-20 23:27:31 | INFO     | TradingBot | Mode: PAPER | Account: DUO429233
 2026-06-20 23:27:31 | INFO     | TradingBot | Reconnected successfully.
 2026-06-20 23:27:31 | INFO     | TradingBot | NOTIFY │ 🔌 Reconnected to IB Gateway successfully.
+2026-06-20 23:33:56 | INFO     | TradingBot | Starting | mode=SCALPER | ticker=SPY | capital=$1,000 | port=4002 | client_id=1
