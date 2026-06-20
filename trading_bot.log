@@ -492,3 +492,4 @@ Warm-up complete!
 Next step: python main.py --mode trade
 2026-06-20 22:43:51 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
 2026-06-20 22:43:51 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:56:04 | INFO     | TradingBot | Starting | mode=EVALUATE | ticker=SPY | capital=$1,000 | port=4002 | client_id=9
