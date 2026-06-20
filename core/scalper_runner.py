@@ -29,6 +29,15 @@ MARKET_TZ = ZoneInfo("America/New_York")
 
 import numpy as np
 import pandas as pd
+import requests
+
+# US market holidays (approximate - will verify via internet on startup)
+US_MARKET_HOLIDAYS = {
+    "2025-01-01", "2025-01-20", "2025-02-17", "2025-04-18", "2025-05-26",
+    "2025-06-19", "2025-07-04", "2025-09-01", "2025-11-27", "2025-12-25",
+    "2026-01-01", "2026-02-16", "2026-04-03", "2026-05-25", "2026-06-19",
+    "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
+}
 
 from core.config import BotConfig
 from core.connector import IBConnector
@@ -211,6 +220,16 @@ class ScalperRunner:
         self._refresh_account_balance()
         if self._ib_starting_balance:
             log.info(f"  IB Starting Balance: ${self._ib_starting_balance:,.2f}")
+        
+        # Check market status
+        market_open, market_reason = self._is_market_open()
+        if market_open:
+            log.info(f"  ✅ {market_reason}")
+            self.notifier.info(f"✅ HA-NUN MARKET STATUS\n{market_reason}\nStarting scalper...")
+        else:
+            log.warning(f"  ⚠️ {market_reason}")
+            self.notifier.warning(f"⚠️ HA-NUN MARKET STATUS\n{market_reason}\nBot will train offline until market opens.")
+        
         self._last_scan_time = time.time()
         self._scan_and_rank()
         
@@ -228,16 +247,28 @@ class ScalperRunner:
                 # Detect exits (bracket orders hitting stop/target)
                 self._detect_exit(current_px)
                 
-                if self.top_pick is None and self.shares == 0:
-                    if time.time() - self._last_scan_time > 1:
+                # Check market status every 60 seconds
+                market_open, market_reason = self._is_market_open()
+                
+                if market_open:
+                    # Market is open: scan and trade
+                    if self.top_pick is None and self.shares == 0:
+                        if time.time() - self._last_scan_time > 1:
+                            self._last_scan_time = time.time()
+                            self._scan_and_rank()
+                    elif time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
                         self._last_scan_time = time.time()
                         self._scan_and_rank()
-                elif time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
-                    self._last_scan_time = time.time()
-                    self._scan_and_rank()
-                
-                if self.top_pick and self.shares == 0:
-                    self._attempt_entry()
+                    
+                    if self.top_pick and self.shares == 0:
+                        self._attempt_entry()
+                else:
+                    # Market is closed: train instead of scan
+                    if int(time.time()) % 60 == 0:  # log every minute
+                        log.info(f"⏸ MARKET CLOSED: {market_reason} — training instead")
+                    if time.time() - self._last_scan_time > 300:  # train every 5 min
+                        self._last_scan_time = time.time()
+                        self._train_off_hours()
                 
                 self._refresh_account_balance()
                 self._write_live_metrics()
@@ -405,6 +436,88 @@ class ScalperRunner:
             self.top_pick = None
         except Exception as exc:
             log.error(f"Entry error on {ticker}: {exc}")
+    
+    @staticmethod
+    def _is_market_open() -> Tuple[bool, str]:
+        """
+        Check if US market is open right now.
+        Returns (is_open, reason).
+        """
+        now_et = datetime.now(MARKET_TZ)
+        weekday = now_et.weekday()  # 0=Mon, 6=Sun
+        
+        # Weekend check
+        if weekday >= 5:
+            return False, f"Market CLOSED (weekend: {now_et.strftime('%A')})"
+        
+        # Holiday check (verify via internet if possible)
+        date_str = now_et.strftime("%Y-%m-%d")
+        if date_str in US_MARKET_HOLIDAYS:
+            return False, f"Market CLOSED (holiday: {date_str})"
+        
+        # Try to fetch live holiday calendar from NYSE
+        try:
+            resp = requests.get("https://www.nyse.com/markets/hours-calendars", timeout=5)
+            if resp.status_code == 200 and date_str.replace("-", "") in resp.text.replace("-", ""):
+                return False, f"Market CLOSED (verified holiday via NYSE)"
+        except Exception:
+            pass
+        
+        # Time check: 9:30 AM - 4:00 PM ET
+        hour = now_et.hour
+        minute = now_et.minute
+        current_minutes = hour * 60 + minute
+        open_minutes = 9 * 60 + 30
+        close_minutes = 16 * 60
+        
+        if current_minutes < open_minutes:
+            return False, f"Market CLOSED (pre-market: {now_et.strftime('%H:%M')} ET)"
+        elif current_minutes >= close_minutes:
+            return False, f"Market CLOSED (after-hours: {now_et.strftime('%H:%M')} ET)"
+        
+        return True, f"Market OPEN ({now_et.strftime('%H:%M')} ET)"
+    
+    def _train_off_hours(self):
+        """
+        When market is closed, train on historical data instead of scanning.
+        This improves the model for the next session.
+        """
+        try:
+            log.info("🧠 OFF-HOURS TRAINING: Analyzing historical patterns...")
+            
+            # Fetch recent data for self-training
+            train_data = []
+            for ticker in PENNY_STOCK_UNIVERSE[:20]:  # subset for speed
+                try:
+                    self.cfg.TICKER = ticker
+                    dm = DataManager(self.conn, self.cfg)
+                    hist = dm.fetch_historical(duration="3 M", bar_size="1 day")
+                    if hist is not None and len(hist) > 30:
+                        train_data.append((ticker, hist))
+                except Exception:
+                    continue
+            
+            # Analyze patterns
+            bullish_days = 0
+            total_days = 0
+            for ticker, hist in train_data:
+                closes = hist["close"].values
+                for i in range(20, len(closes)):
+                    if closes[i] > closes[i-1]:
+                        bullish_days += 1
+                    total_days += 1
+            
+            if total_days > 0:
+                bullish_pct = bullish_days / total_days
+                log.info(f"🧠 Historical analysis: {bullish_pct:.0%} bullish days across {total_days} samples")
+            
+            # Train weights on historical data
+            self._daily_self_train()
+            
+            log.info("🧠 Off-hours training complete. Ready for next session.")
+            self.notifier.info("🧠 HA-NUN OFF-HOURS TRAINING\nMarket closed. Self-training on historical data.\nReady for next session.")
+        except Exception as exc:
+            log.debug(f"Off-hours training failed: {exc}")
     
     def _load_weights(self) -> Dict:
         try:
