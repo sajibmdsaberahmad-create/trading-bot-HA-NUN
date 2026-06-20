@@ -405,3 +405,90 @@ Next step: python main.py --mode trade
 2026-06-20 22:32:15 | INFO     | TradingBot |   ACHR   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
 2026-06-20 22:32:15 | INFO     | TradingBot |   NIO    |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
 2026-06-20 22:32:15 | INFO     | TradingBot |   XPEV   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:37:40 | INFO     | TradingBot | Starting | mode=WARMUP | ticker=SPY | capital=$1,000 | port=4002 | client_id=7
+2026-06-20 22:37:40 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:37:40 | INFO     | TradingBot |   MODE: WARM-UP TRAINING
+2026-06-20 22:37:40 | INFO     | TradingBot |   Ticker: SPY | History: 5 Y 1 day
+2026-06-20 22:37:40 | INFO     | TradingBot |   Timesteps: 200,000
+2026-06-20 22:37:40 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:37:41 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:37:41 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:37:41 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:37:41 | INFO     | TradingBot | Fetching 5 Y of 1 day bars for SPY …
+2026-06-20 22:37:41 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 22:37:42 | INFO     | TradingBot | Fetched 1,255 bars [2021-06-21 -> 2026-06-18]
+2026-06-20 22:37:42 | INFO     | TradingBot | Train: 857 bars | Eval (held-out): 368 bars
+2026-06-20 22:37:42 | INFO     | TradingBot | Building new PPO agent from scratch …
+2026-06-20 22:37:43 | INFO     | TradingBot | PPO agent ready | device: cpu | obs: (422,) | net: (512, 256, 128)
+2026-06-20 22:37:43 | INFO     | TradingBot | Running on CPU (no GPU detected)
+2026-06-20 22:37:43 | INFO     | TradingBot | Training for 200,000 steps …
+2026-06-20 22:37:43 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:37:43 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:37:50 | INFO     | TradingBot | Starting | mode=WARMUP | ticker=SPY | capital=$1,000 | port=4002 | client_id=8
+2026-06-20 22:37:50 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:37:50 | INFO     | TradingBot |   MODE: WARM-UP TRAINING
+2026-06-20 22:37:50 | INFO     | TradingBot |   Ticker: SPY | History: 5 Y 1 day
+2026-06-20 22:37:50 | INFO     | TradingBot |   Timesteps: 200,000
+2026-06-20 22:37:50 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:37:51 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:37:51 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:37:51 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:37:51 | INFO     | TradingBot | Fetching 5 Y of 1 day bars for SPY …
+2026-06-20 22:37:51 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 22:37:53 | INFO     | TradingBot | Fetched 1,255 bars [2021-06-21 -> 2026-06-18]
+2026-06-20 22:37:53 | INFO     | TradingBot | Train: 857 bars | Eval (held-out): 368 bars
+2026-06-20 22:37:53 | INFO     | TradingBot | Building new PPO agent from scratch …
+2026-06-20 22:37:53 | INFO     | TradingBot | PPO agent ready | device: cpu | obs: (422,) | net: (512, 256, 128)
+2026-06-20 22:37:53 | INFO     | TradingBot | Running on CPU (no GPU detected)
+2026-06-20 22:37:53 | INFO     | TradingBot | Training for 200,000 steps …
+2026-06-20 22:39:26 | INFO     | TradingBot | Model saved -> ppo_trader.zip
+2026-06-20 22:39:26 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:39:26 | INFO     | TradingBot |   HELD-OUT EVALUATION RESULTS
+2026-06-20 22:39:26 | INFO     | TradingBot |   Final portfolio value: $1,060.34
+2026-06-20 22:39:26 | INFO     | TradingBot |   PPO agent return:      +6.0%
+2026-06-20 22:39:26 | INFO     | TradingBot |   Buy-and-hold return:   +22.5%
+2026-06-20 22:39:26 | INFO     | TradingBot |   Alpha vs B&H:          -16.4%
+2026-06-20 22:39:26 | INFO     | TradingBot |   Action breakdown:      HOLD=118 BUY=121 SELL=98
+2026-06-20 22:39:26 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:39:26 | INFO     | TradingBot | Journal: Backup versioned model saved -> models/ppo_trader_warmup_20260620_223926.zip
+2026-06-20 22:39:26 | INFO     | TradingBot | Journal: Training entry recorded in training_journal.json
+2026-06-20 22:39:26 | INFO     | TradingBot | Journal: Auto-committed journal updates to git: journal: auto-record WARMUP session for SPY at 20260620_223926
+2026-06-20 22:39:26 | INFO     | TradingBot | 
+Warm-up complete!
+Next step: python main.py --mode trade
+2026-06-20 22:39:26 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:39:26 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:40:00 | INFO     | TradingBot | Starting | mode=WARMUP | ticker=SPY | capital=$1,000 | port=4002 | client_id=8
+2026-06-20 22:40:00 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:40:00 | INFO     | TradingBot |   MODE: WARM-UP TRAINING
+2026-06-20 22:40:00 | INFO     | TradingBot |   Ticker: SPY | History: 10 Y 1 day
+2026-06-20 22:40:00 | INFO     | TradingBot |   Timesteps: 500,000
+2026-06-20 22:40:00 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:40:01 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:40:01 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:40:01 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:40:01 | INFO     | TradingBot | Fetching 10 Y of 1 day bars for SPY …
+2026-06-20 22:40:01 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 22:40:03 | INFO     | TradingBot | Fetched 2,513 bars [2016-06-21 -> 2026-06-18]
+2026-06-20 22:40:03 | INFO     | TradingBot | Train: 1738 bars | Eval (held-out): 745 bars
+2026-06-20 22:40:03 | INFO     | TradingBot | Building new PPO agent from scratch …
+2026-06-20 22:40:04 | INFO     | TradingBot | PPO agent ready | device: cpu | obs: (422,) | net: (512, 256, 128)
+2026-06-20 22:40:04 | INFO     | TradingBot | Running on CPU (no GPU detected)
+2026-06-20 22:40:04 | INFO     | TradingBot | Training for 500,000 steps …
+2026-06-20 22:43:51 | INFO     | TradingBot | Model saved -> ppo_trader.zip
+2026-06-20 22:43:51 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:43:51 | INFO     | TradingBot |   HELD-OUT EVALUATION RESULTS
+2026-06-20 22:43:51 | INFO     | TradingBot |   Final portfolio value: $1,024.86
+2026-06-20 22:43:51 | INFO     | TradingBot |   PPO agent return:      +2.5%
+2026-06-20 22:43:51 | INFO     | TradingBot |   Buy-and-hold return:   +66.6%
+2026-06-20 22:43:51 | INFO     | TradingBot |   Alpha vs B&H:          -64.2%
+2026-06-20 22:43:51 | INFO     | TradingBot |   Action breakdown:      HOLD=245 BUY=240 SELL=229
+2026-06-20 22:43:51 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:43:51 | INFO     | TradingBot | Journal: Backup versioned model saved -> models/ppo_trader_warmup_20260620_224351.zip
+2026-06-20 22:43:51 | INFO     | TradingBot | Journal: Training entry recorded in training_journal.json
+2026-06-20 22:43:51 | INFO     | TradingBot | Journal: Auto-committed journal updates to git: journal: auto-record WARMUP session for SPY at 20260620_224351
+2026-06-20 22:43:51 | INFO     | TradingBot | 
+Warm-up complete!
+Next step: python main.py --mode trade
+2026-06-20 22:43:51 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:43:51 | INFO     | TradingBot | Disconnected from IB Gateway

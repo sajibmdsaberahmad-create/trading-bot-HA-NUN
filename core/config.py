@@ -158,9 +158,9 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     # WARM-UP (HISTORICAL) TRAINING
     # ════════════════════════════════════════════════════════════════════
-    HISTORY_DURATION: str   = "5 Y"
+    HISTORY_DURATION: str   = "10 Y"   # MAXIMUM available history for training memory
     HISTORY_BAR_SIZE:  str  = "1 day"
-    WARMUP_TIMESTEPS:  int   = 200_000
+    WARMUP_TIMESTEPS:  int   = 500_000  # Extended training for deep memory
     WARMUP_SPLIT_PCT:  float = 0.70
 
     # ════════════════════════════════════════════════════════════════════
@@ -173,9 +173,9 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     # PPO HYPERPARAMETERS
     # ════════════════════════════════════════════════════════════════════
-    PPO_N_STEPS:       int   = 1_024
-    PPO_BATCH_SIZE:    int   = 128
-    PPO_N_EPOCHS:      int   = 10
+    PPO_N_STEPS:       int   = 2_048   # Larger batch for stable learning
+    PPO_BATCH_SIZE:    int   = 256
+    PPO_N_EPOCHS:      int   = 15      # More epochs per update
     PPO_CLIP_RANGE:    float = 0.15
     PPO_LR:            float = 2.5e-4
     PPO_GAMMA:         float = 0.99
@@ -195,7 +195,7 @@ class BotConfig:
     TRADING_MODE: str = "scalper"   # "ppo" (original) or "scalper" (new)
     
     # Scalper-specific risk parameters (overrides for scalping)
-    SCALP_STOP_ATR_MULTIPLIER: float = 0.8   # Tighter: ATR(5) * 0.8
+    SCALP_STOP_ATR_MULTIPLIER: float = 0.7   # Tighter: ATR(5) * 0.7
     SCALP_MIN_STOP_PCT: float = 0.003       # 0.3% minimum stop
     SCALP_MAX_STOP_PCT: float = 0.010       # 1.0% maximum stop
     SCALP_TP_ATR_MULTIPLIER: float = 1.5    # Tighter: ATR(5) * 1.5

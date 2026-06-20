@@ -1,0 +1,52 @@
+# Secrets — NEVER commit these
+.env
+*.key
+*_token*
+id_rsa*
+id_ed25519*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+.envs/
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Models & data (too large for git)
+models/
+*.zip
+ppo_trader.zip
+ppo_trader_warmup_*.zip
+
+# Logs
+*.log
+trading_bot.log
+logs/
+
+# Performance data (contains personal account info)
+performance.csv
+live_metrics.json
+bot_state.json
+training_journal.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# MCP internal files
+.continue/
+mcpServers/
+
+# Streamlit
+.streamlit/
