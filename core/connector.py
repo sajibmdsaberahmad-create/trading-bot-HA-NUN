@@ -60,10 +60,8 @@ class IBConnector:
             log.info(f"IB Gateway connected → {self.cfg.IB_HOST}:{self.cfg.IB_PORT}")
             log.info(f"Account(s): {accounts}")
 
-            if self.cfg.PAPER_TRADING:
-                log.info("MODE: PAPER TRADING — no real money at risk ✓")
-            else:
-                log.warning("⚠ MODE: LIVE TRADING — REAL MONEY IS AT RISK ⚠")
+            mode_label = "PAPER" if self.cfg.PAPER_TRADING else "LIVE"
+            log.info(f"Mode: {mode_label} | Account: {accounts[0] if accounts else 'unknown'}")
 
             self._last_event_ts = time.time()
             return True
@@ -166,7 +164,7 @@ class IBConnector:
 
     def _on_error(self, reqId, errorCode, errorString, contract):
         # Pure informational error codes from IB that aren't real problems
-        BENIGN = {2104, 2106, 2108, 2158}
+        BENIGN = {2104, 2106, 2107, 2108, 2119, 2158}
         self.touch()
         if errorCode in BENIGN:
             return

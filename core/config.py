@@ -41,7 +41,7 @@ class BotConfig:
     RECONNECT_MAX_ATTEMPTS:   int = 10
     RECONNECT_BASE_DELAY_SEC: int = 2     # exponential backoff: 2,4,8,16...capped below
     RECONNECT_MAX_DELAY_SEC:  int = 60
-    HEARTBEAT_TIMEOUT_SEC:    int = 15    # if no IB event in this long, assume connection dead
+    HEARTBEAT_TIMEOUT_SEC:    int = 30    # if no IB event in this long, assume connection dead
 
     # ════════════════════════════════════════════════════════════════════
     # CAPITAL & ACCOUNT SIZE
