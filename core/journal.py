@@ -31,7 +31,7 @@ def get_git_commit_hash() -> str:
 
 
 def git_commit_journal(journal_path: str, message: str):
-    """Optionally stage and commit the training journal to git."""
+    """Stage, commit, and push the training journal to GitHub."""
     try:
         # Check if git is initialized
         subprocess.run(["git", "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
@@ -40,6 +40,13 @@ def git_commit_journal(journal_path: str, message: str):
         # Commit
         subprocess.run(["git", "commit", "-m", message], check=True)
         log.info(f"Journal: Auto-committed journal updates to git: {message}")
+        
+        # Push to GitHub
+        try:
+            from core.git_sync import push
+            push(message, files=[journal_path], allow_empty=True)
+        except Exception as push_exc:
+            log.debug(f"Journal: GitHub push skipped: {push_exc}")
     except Exception as exc:
         log.debug(f"Journal: Git auto-commit skipped or failed: {exc}")
 

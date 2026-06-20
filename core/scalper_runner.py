@@ -33,6 +33,7 @@ from core.risk import RiskManager, TradePlan, compute_atr, compute_momentum_scor
 from core.broker import BrokerExecutor, BracketHandle
 from core.env import TradingEnv
 from core.notify import log, Notifier
+from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
 
 
 class ScalperRunner:
@@ -58,6 +59,7 @@ class ScalperRunner:
         self.scanner = StockScanner(cfg)
         self.institutional = InstitutionalDetector()
         self.risk = RiskManager(cfg, cfg.INITIAL_CASH, notifier)
+        git_sync_init(cfg)
         
         # Account state
         self.account_equity = float(cfg.INITIAL_CASH)
@@ -278,6 +280,7 @@ class ScalperRunner:
                 stop_price=plan.initial_stop_price, target_price=plan.take_profit_price,
                 risk_usd=plan.risk_usd,
             )
+            push_trade(ticker, "BUY", current_price, quantity)
             
             if inst_str:
                 msg = f"{inst_str}\nRank: {self.top_pick.rank_score} | {self.top_pick.reason}"
@@ -375,4 +378,5 @@ class ScalperRunner:
             f"P&L: ${self.total_pnl:+.2f}"
         )
         
+        push_daily_summary(self.nav, self.account_equity)
         self.conn.disconnect()

@@ -20,6 +20,7 @@ from core.connector import IBConnector
 from core.runners import run_warmup, run_evaluate
 from core.trader import LiveTrader
 from core.scalper_runner import ScalperRunner
+from core.git_sync import init as git_sync_init, push_startup
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -66,6 +67,7 @@ if __name__ == "__main__":
 
     cfg = BotConfig()
     cfg.TICKER = args.ticker.upper()
+    git_sync_init(cfg)
     cfg.INITIAL_CASH = args.cash
     cfg.IB_PORT = args.port
     cfg.IB_CLIENT_ID = args.client_id
@@ -88,6 +90,7 @@ if __name__ == "__main__":
 
     log.info(f"Starting | mode={args.mode.upper()} | ticker={cfg.TICKER} | "
               f"capital=${cfg.INITIAL_CASH:,.0f} | port={cfg.IB_PORT} | client_id={cfg.IB_CLIENT_ID}")
+    push_startup(args.mode, cfg.TICKER)
 
     if args.mode == "warmup":
         run_warmup(cfg)

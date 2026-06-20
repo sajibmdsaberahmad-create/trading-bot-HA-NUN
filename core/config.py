@@ -186,6 +186,12 @@ class BotConfig:
     PPO_NET_ARCH:      tuple = (512, 256, 128)
 
     # ════════════════════════════════════════════════════════════════════
+    # GITHUB AUTO-PUSH
+    # ════════════════════════════════════════════════════════════════════
+    GITHUB_TOKEN: str = os.getenv("GITHUB_TOKEN", "")
+    GITHUB_REPO:  str = os.getenv("GITHUB_REPO", "")  # e.g. "sajibmdsaberahmad-create/Algo"
+
+    # ════════════════════════════════════════════════════════════════════
     # SCALPER / INSTITUTIONAL MOMENTUM MODE
     # ════════════════════════════════════════════════════════════════════
     # When TRADING_MODE = "scalper", the bot runs the institutional

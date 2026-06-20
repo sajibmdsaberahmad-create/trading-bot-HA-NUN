@@ -44,6 +44,7 @@ from core.agent import build_ppo_agent, OnlineLearningManager
 from core.env import TradingEnv
 from core.performance import PerformanceTracker
 from core.notify import log, Notifier
+from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
 
 
 class LiveTrader:
@@ -71,6 +72,7 @@ class LiveTrader:
         self.model = None
         self.online: Optional[OnlineLearningManager] = None
         self.bracket_handle: Optional[BracketHandle] = None
+        git_sync_init(cfg)
 
         self._bars_processed = 0
         self._last_bar_time: Optional[pd.Timestamp] = None
@@ -363,6 +365,7 @@ class LiveTrader:
         if reason in ("hard_stop", "trailing_stop", "hard_take_profit", "trailing_profit"):
             self.notifier.stop_triggered(reason, self.cfg.TICKER, price, detail=f"P&L: ${pnl_usd:+.2f}")
         self.notifier.trade_closed(self.cfg.TICKER, quantity, price, pnl_usd, pnl_pct, reason)
+        push_trade(self.cfg.TICKER, "SELL", price, quantity)
 
     def _get_bid_ask(self):
         try:
@@ -405,6 +408,7 @@ class LiveTrader:
             self._refresh_account_equity()
             text = self.perf.daily_summary_text(self.nav, self.account_equity)
             self.notifier.daily_summary(text)
+            push_daily_summary(self.nav, self.account_equity)
 
     def _shutdown(self):
         self.data.stop_tick_stream()
