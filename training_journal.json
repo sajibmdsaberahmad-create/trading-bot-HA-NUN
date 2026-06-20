@@ -56,5 +56,34 @@
         "SELL": 98
       }
     }
+  },
+  {
+    "timestamp": "2026-06-20T22:43:51.365959",
+    "event": "WARMUP",
+    "ticker": "SPY",
+    "sizing_mode": "risk_based",
+    "initial_cash": 1000.0,
+    "git_commit": "afa4f3ea3d5194c6076d027d49a67f295b7442d9",
+    "versioned_model_path": "models/ppo_trader_warmup_20260620_224351.zip",
+    "hyperparameters": {
+      "PPO_LR": 0.00025,
+      "PPO_ENT_COEF": 0.01,
+      "PPO_N_STEPS": 2048,
+      "PPO_BATCH_SIZE": 256,
+      "PPO_CLIP_RANGE": 0.15,
+      "WINDOW_SIZE": 30
+    },
+    "metrics": {
+      "warmup_timesteps": 500000,
+      "final_portfolio_value": 1024.86,
+      "ppo_return_pct": 2.49,
+      "bh_return_pct": 66.64,
+      "alpha_vs_bh_pct": -64.16,
+      "action_counts": {
+        "HOLD": 245,
+        "BUY": 240,
+        "SELL": 229
+      }
+    }
   }
 ]
