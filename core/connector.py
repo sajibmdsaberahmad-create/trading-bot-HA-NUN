@@ -130,7 +130,8 @@ class IBConnector:
                 f"Reconnect attempt {attempt}/{self.cfg.RECONNECT_MAX_ATTEMPTS} "
                 f"in {wait}s …"
             )
-            if self.notifier:
+            # Only notify on final failure, not every attempt
+            if self.notifier and attempt == self.cfg.RECONNECT_MAX_ATTEMPTS:
                 self.notifier.reconnect_event(success=False, attempt=attempt)
             time.sleep(wait)
             try:

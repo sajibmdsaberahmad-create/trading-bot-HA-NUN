@@ -195,8 +195,12 @@ class ScalperRunner:
                         break
                     self._refresh_account_balance()
                 
-                # Rescan every 5 minutes
-                if time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
+                # Continuous scan when no setup — don't wait 5 min
+                if self.top_pick is None and self.shares == 0:
+                    if time.time() - self._last_scan_time > 1:
+                        self._last_scan_time = time.time()
+                        self._scan_and_rank()
+                elif time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
                     self._last_scan_time = time.time()
                     self._scan_and_rank()
                 
@@ -265,7 +269,7 @@ class ScalperRunner:
             self.notifier.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f}\nScore: {best['total_score']:.0f}\n{best['reasons']}")
         else:
             self.top_pick = None
-            log.info(f"🔍 No viable setups this scan ({elapsed_ms:.0f}ms)")
+            log.info(f"🔍 No setups — rescanning in 1s ({elapsed_ms:.0f}ms)")
     
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         """
