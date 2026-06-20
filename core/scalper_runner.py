@@ -84,6 +84,9 @@ class ScalperRunner:
         self.current_ticker: Optional[str] = None
         self.bracket_handle: Optional[BracketHandle] = None
         
+        # IB account tracking (shows real P&L impact on IB account)
+        self._ib_starting_balance: Optional[float] = None
+        
         self.scan_results: List[ScanResult] = []
         self.top_pick: Optional[ScanResult] = None
         self._last_scan_time: float = 0.0
@@ -107,6 +110,9 @@ class ScalperRunner:
             if self.available_cash is None:
                 self.available_cash = self.account_equity
             self.cash = self.available_cash
+            # Capture starting balance on first refresh
+            if self._ib_starting_balance is None:
+                self._ib_starting_balance = self.account_equity
             self.cfg._latest_account_balance = self.account_equity
         except Exception as exc:
             log.debug(f"Could not fetch IB account balance: {exc}")
@@ -163,6 +169,8 @@ class ScalperRunner:
         log.info("=" * 70)
         
         self._refresh_account_balance()
+        if self._ib_starting_balance:
+            log.info(f"  IB Starting Balance: ${self._ib_starting_balance:,.2f}")
         self._last_scan_time = time.time()
         self._scan_and_rank()
         
@@ -175,7 +183,6 @@ class ScalperRunner:
                         break
                     self._refresh_account_balance()
                 
-                # Continuous scan when no setup
                 if self.top_pick is None and self.shares == 0:
                     if time.time() - self._last_scan_time > 1:
                         self._last_scan_time = time.time()
@@ -485,8 +492,12 @@ class ScalperRunner:
         baseline = float(self.cfg.INITIAL_CASH)
         pnl = self.nav - baseline
         pnl_pct = (pnl / baseline) * 100 if baseline else 0.0
+        ib_start = self._ib_starting_balance or self.account_equity
+        ib_change = self.account_equity - ib_start
+        ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0
         summary = "📊 HA-NUN DAILY STATEMENT\n"
-        summary += f" IB Account:    ${self.account_equity:>12,.2f}\n"
+        summary += f" IB Account:    ${self.account_equity:>12,.2f}  (start: ${ib_start:,.2f})\n"
+        summary += f" IB Change:     ${ib_change:>+12,.2f} ({ib_change_pct:+.2f}%)\n"
         summary += f" Bot Cash:      ${self.cash:>12,.2f}\n"
         summary += f" Bot NAV:       ${self.nav:>12,.2f}\n"
         summary += f" Day P&L:       ${pnl:>+12,.2f} ({pnl_pct:+.2f}%)\n"
