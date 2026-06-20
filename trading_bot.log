@@ -525,3 +525,4 @@ Next step: python main.py --mode trade
   5. Allow connections from 127.0.0.1?
   6. Client ID 12 not already in use?
 
+2026-06-20 23:07:24 | INFO     | TradingBot | Starting | mode=SCALPER | ticker=SPY | capital=$1,000 | port=4002 | client_id=1
