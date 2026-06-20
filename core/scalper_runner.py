@@ -100,6 +100,7 @@ class ScalperRunner:
         self.trade_journal: List[Dict] = []
         self.trades_today: int = 0
         self._current_day: Optional[str] = None
+        self._last_daily_push_date: Optional[str] = None
     
     def _refresh_account_balance(self):
         """Pull live balance from IB."""
@@ -197,6 +198,9 @@ class ScalperRunner:
                 
                 self._refresh_account_balance()
                 self._write_live_metrics()
+                
+                # Daily portfolio statement — push to git every day at ~5pm ET (21:00 UTC)
+                self._maybe_daily_push()
                 
         except KeyboardInterrupt:
             log.info("Shutting down...")
@@ -428,21 +432,51 @@ class ScalperRunner:
         except Exception as exc:
             log.error(f"Entry error on {ticker}: {exc}")
     
+    def _maybe_daily_push(self):
+        """Push a portfolio statement to git once per calendar day (at 21:00 UTC)."""
+        try:
+            now_utc = datetime.utcnow()
+            today_str = now_utc.strftime("%Y-%m-%d")
+            
+            # Push once per day at 21:00 UTC or later (after US market close)
+            if now_utc.hour >= 21 and self._last_daily_push_date != today_str:
+                self._last_daily_push_date = today_str
+                
+                pnl = self.nav - float(self.cfg.INITIAL_CASH)
+                pnl_pct = (pnl / float(self.cfg.INITIAL_CASH)) * 100 if self.cfg.INITIAL_CASH else 0.0
+                
+                stmt = (
+                    f"portfolio: {today_str} | "
+                    f"account=${self.account_equity:,.0f} | "
+                    f"nav=${self.nav:,.0f} | "
+                    f"pnl=${pnl:+,.0f} ({pnl_pct:+.2f}%) | "
+                    f"trades={self.trades_today}"
+                )
+                
+                # Push performance + metrics + journal to GitHub
+                push_daily_summary(self.nav, self.account_equity)
+                log.info(f"📤 Daily portfolio statement pushed to git: {stmt}")
+        except Exception as exc:
+            log.debug(f"Daily push skipped: {exc}")
+    
     def _shutdown(self):
         self._refresh_account_balance()
         
-        # End-of-day trade summary
-        if self.trade_journal or self.shares > 0:
-            summary = "📊 END OF SESSION\n"
-            summary += f" NAV: ${self.nav:,.2f} | Cash: ${self.cash:,.2f} | Account: ${self.account_equity:,.2f}\n"
-            summary += f" Trades today: {self.trades_today}\n"
-            
-            if self.shares > 0:
-                summary += f" ⚠️ OPEN POSITION: {self.shares:.0f} {self.current_ticker}\n"
-                summary += " Bracket orders remain active on IB."
-            
-            log.info(summary)
-            self.notifier.info(summary)
-            push_daily_summary(self.nav, self.account_equity)
+        # End-of-day portfolio statement — ALWAYS push, even with zero trades
+        pnl = self.nav - float(self.cfg.INITIAL_CASH)
+        pnl_pct = (pnl / float(self.cfg.INITIAL_CASH)) * 100 if self.cfg.INITIAL_CASH else 0.0
+        summary = "📊 DAILY PORTFOLIO STATEMENT\n"
+        summary += f" Account:       ${self.account_equity:>12,.2f}\n"
+        summary += f" Cash:          ${self.cash:>12,.2f}\n"
+        summary += f" NAV:           ${self.nav:>12,.2f}\n"
+        summary += f" Day P&L:       ${pnl:>+12,.2f} ({pnl_pct:+.2f}%)\n"
+        summary += f" Trades:        {self.trades_today:>12d}\n"
+        if self.shares > 0:
+            summary += f" Position:      {self.shares:.0f} {self.current_ticker}\n"
+            summary += " (bracket orders remain active on IB)\n"
+        
+        log.info(summary)
+        self.notifier.info(summary)
+        push_daily_summary(self.nav, self.account_equity)
         
         self.conn.disconnect()
