@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-main.py — Entry point. See docs/LAUNCH_GUIDE.md for full setup and
-docs/TRAINING_GUIDE.md for how the PPO agent is trained and tuned.
+main.py — Entry point for HA-NUN Single-Focus Institutional Scalper.
+See docs/LAUNCH_GUIDE.md for full setup.
 
 QUICK START
-  python main.py --mode warmup            # train once (~20-40 min)
-  python main.py --mode trade             # paper trade live
-  python main.py --mode evaluate          # offline backtest, no orders placed
+  python main.py --mode scalper             # HA-NUN institutional penny stock scalper
+  python main.py --mode warmup              # Train PPO (legacy)
+  python main.py --mode trade               # PPO paper/live trade (legacy)
+  python main.py --mode evaluate            # Offline backtest
 
-Full docs: docs/LAUNCH_GUIDE.md, docs/TRAINING_GUIDE.md, docs/ARCHITECTURE.md
+Full docs: docs/LAUNCH_GUIDE.md, docs/ARCHITECTURE.md
 """
 
 import argparse
@@ -26,27 +27,24 @@ from core.git_sync import init as git_sync_init
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="main.py",
-        description="PPO Momentum Trading Bot — IB Gateway Edition v3.0 (risk-managed + scalper)",
+        description="HA-NUN Single-Focus Institutional Scalper — IB Gateway Edition v3.5",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 QUICK START:
-  1. python main.py --mode warmup
-  2. python main.py --mode trade
-  3. python main.py --mode scalper          # NEW: institutional penny stock scalper
+  1. python main.py --mode scalper          # HA-NUN institutional scalper
+  2. python main.py --mode warmup           # Train PPO (legacy)
+  3. python main.py --mode trade            # PPO paper/live trade (legacy)
 
 EXAMPLES:
+  python main.py --mode scalper
   python main.py --mode warmup --ticker QQQ --cash 1000
-  python main.py --mode trade
-  python main.py --mode scalper             # Penny stock scalper (default mode)
-  python main.py --mode scalper --mode ppo  # Use PPO agent instead
-  python main.py --mode evaluate --ticker SPY
   python main.py --mode trade --port 7496   # LIVE — real money, be careful
         """,
     )
     parser.add_argument("--mode", choices=["warmup", "trade", "evaluate", "scalper"], required=True,
-                         help="warmup: train PPO | trade: live paper/live | evaluate: backtest | scalper: inst momentum")
+                         help="scalper: HA-NUN | warmup: train PPO | trade: PPO live | evaluate: backtest")
     parser.add_argument("--algo", choices=["ppo", "scalper"], default=None,
-                         help="Override TRADING_MODE: ppo (original) or scalper (new institutional scalper)")
+                         help="Override: ppo (legacy) or scalper (HA-NUN institutional)")
     parser.add_argument("--ticker", default="SPY", help="Ticker symbol (default: SPY)")
     parser.add_argument("--cash", default=1_000.0, type=float, help="Starting capital in USD (default: 1000)")
     parser.add_argument("--port", default=7497, type=int, help="IB Gateway port: 7497=paper, 7496=live")
@@ -88,7 +86,7 @@ if __name__ == "__main__":
         log.warning("  paper mode on the live port.")
         log.warning("=" * 70)
 
-    log.info(f"Starting | mode={args.mode.upper()} | ticker={cfg.TICKER} | "
+    log.info(f"HA-NUN | mode={args.mode.upper()} | ticker={cfg.TICKER} | "
               f"capital=${cfg.INITIAL_CASH:,.0f} | port={cfg.IB_PORT} | client_id={cfg.IB_CLIENT_ID}")
 
     if args.mode == "warmup":
@@ -122,14 +120,14 @@ if __name__ == "__main__":
         notifier = Notifier(cfg)
         connector = IBConnector(cfg, notifier)
         if not connector.connect():
-            log.error("Cannot start scalper — IB connection failed.")
+            log.error("Cannot start HA-NUN — IB connection failed.")
             sys.exit(1)
 
         try:
             scalper = ScalperRunner(connector, cfg, notifier)
             scalper.run()
         except Exception as exc:
-            log.exception(f"Fatal error in scalper loop: {exc}")
-            notifier.error("main scalper loop", str(exc))
+            log.exception(f"Fatal error in HA-NUN loop: {exc}")
+            notifier.error("HA-NUN main loop", str(exc))
             connector.disconnect()
             sys.exit(1)

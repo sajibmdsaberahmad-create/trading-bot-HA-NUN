@@ -127,6 +127,6 @@ def push_startup(mode: str, ticker: str):
     """Push on bot startup."""
     return push(
         f"startup: mode={mode} ticker={ticker}",
-        files=["trading_bot.log"],
+        files=["HA-NUN.log"],
         allow_empty=True,
     )

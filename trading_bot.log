@@ -5758,3 +5758,31 @@ Next step: python main.py --mode trade
 2026-06-21 00:08:23 | INFO     | TradingBot | NOTIFY │ 📊 HA-NUN DAILY STATEMENT
 2026-06-21 00:08:24 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
 2026-06-21 00:08:24 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-21 00:16:38 | INFO     | TradingBot | Starting | mode=SCALPER | ticker=SPY | capital=$1,000 | port=4002 | client_id=1
+2026-06-21 00:16:38 | INFO     | TradingBot | Notifications: Telegram ✓
+2026-06-21 00:16:39 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-21 00:16:39 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-21 00:16:39 | INFO     | TradingBot | Mode: PAPER | Account: DUO429233
+2026-06-21 00:16:39 | INFO     | TradingBot | ======================================================================
+2026-06-21 00:16:39 | INFO     | TradingBot |   HA-NUN — SINGLE FOCUS SCALPER
+2026-06-21 00:16:39 | INFO     | TradingBot |   IB Account: DUO429233
+2026-06-21 00:16:39 | INFO     | TradingBot |   Universe: 72 tickers
+2026-06-21 00:16:39 | INFO     | TradingBot |   Max per trade: $1,000
+2026-06-21 00:16:39 | INFO     | TradingBot |   Max risk/trade: $50.00
+2026-06-21 00:16:39 | INFO     | TradingBot |   Baseline:      $1,000.00
+2026-06-21 00:16:39 | INFO     | TradingBot | ======================================================================
+2026-06-21 00:16:39 | INFO     | TradingBot | NOTIFY │ 🚀 HA-NUN STARTED
+2026-06-21 00:16:40 | INFO     | TradingBot |   IB Starting Balance: $1,006,352.98
+2026-06-21 00:16:40 | WARNING  | TradingBot |   ⚠️ Market CLOSED (weekend: Saturday)
+2026-06-21 00:16:40 | ERROR    | TradingBot | Fatal error in scalper loop: 'Notifier' object has no attribute 'warning'
+Traceback (most recent call last):
+  File "/Users/mdsabersajib/Downloads/tradingbot/main.py", line 130, in <module>
+    scalper.run()
+    ~~~~~~~~~~~^^
+  File "/Users/mdsabersajib/Downloads/tradingbot/core/scalper_runner.py", line 231, in run
+    self.notifier.warning(f"⚠️ HA-NUN MARKET STATUS\n{market_reason}\nBot will train offline until market opens.")
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Notifier' object has no attribute 'warning'
+2026-06-21 00:16:40 | INFO     | TradingBot | NOTIFY │ ❗ ERROR in main scalper loop
+2026-06-21 00:16:41 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-21 00:16:41 | INFO     | TradingBot | Disconnected from IB Gateway

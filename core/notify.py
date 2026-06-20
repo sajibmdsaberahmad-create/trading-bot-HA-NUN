@@ -42,7 +42,7 @@ from core.config import BotConfig
 # LOGGING
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_logger(log_path: str = "trading_bot.log") -> logging.Logger:
+def build_logger(log_path: str = "HA-NUN.log") -> logging.Logger:
     """
     Build the project-wide logger. Writes to both stdout and a rotating
     log file. ib_insync's own chatty network logs are suppressed to
@@ -58,7 +58,7 @@ def build_logger(log_path: str = "trading_bot.log") -> logging.Logger:
     sh = logging.StreamHandler(sys.stdout)
     sh.setFormatter(fmt)
 
-    logger = logging.getLogger("TradingBot")
+    logger = logging.getLogger("HA-NUN")
     logger.setLevel(logging.INFO)
     if not logger.handlers:
         logger.addHandler(fh)
@@ -182,6 +182,14 @@ class Notifier:
     def info(self, text: str):
         """Generic low-priority notification (startup, shutdown, etc)."""
         self._send_all(text)
+
+    def warning(self, text: str):
+        """Warning notification (market closed, reconnect, etc)."""
+        log.warning(f"NOTIFY │ {text.splitlines()[0]}")
+        if self.telegram_ready:
+            self._send_telegram(text)
+        if self.email_ready:
+            self._send_email(text)
 
     # ── Internal fan-out ─────────────────────────────────────────────────────
 

@@ -32,7 +32,7 @@ BASE_DIR = Path(__file__).parent.parent
 JOURNAL_PATH = BASE_DIR / "training_journal.json"
 PERF_PATH = BASE_DIR / "performance.csv"
 STATE_PATH = BASE_DIR / "bot_state.json"
-LOG_PATH = BASE_DIR / "trading_bot.log"
+LOG_PATH = BASE_DIR / "HA-NUN.log"
 MODEL_PATH = BASE_DIR / "ppo_trader.zip"
 LIVE_METRICS_PATH = BASE_DIR / "live_metrics.json"
 
@@ -267,7 +267,7 @@ elif mode == "Bot Config":
 # ── Page: Logs ─────────────────────────────────────────────────────────────
 elif mode == "Logs":
     st.title("📝 Bot Logs")
-    st.markdown("Tail of `trading_bot.log`")
+    st.markdown("Tail of `HA-NUN.log`")
 
     log_tail = read_log_tail(300)
     st.text_area("Last 300 lines", log_tail, height=600)

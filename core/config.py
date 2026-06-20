@@ -251,7 +251,7 @@ class BotConfig:
     # FILES
     # ════════════════════════════════════════════════════════════════════
     MODEL_PATH:    str = "ppo_trader.zip"
-    LOG_PATH:      str = "trading_bot.log"
+    LOG_PATH:      str = "HA-NUN.log"
     PERF_PATH:     str = "performance.csv"
     STATE_PATH:    str = "bot_state.json"   # persisted position/risk state across restarts
 
