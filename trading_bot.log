@@ -1,0 +1,407 @@
+2026-06-20 21:55:57 | INFO     | TradingBot | Starting | mode=WARMUP | ticker=SPY | capital=$1,000 | port=7497 | client_id=1
+2026-06-20 21:55:57 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:55:57 | INFO     | TradingBot |   MODE: WARM-UP TRAINING
+2026-06-20 21:55:57 | INFO     | TradingBot |   Ticker: SPY | History: 5 Y 1 day
+2026-06-20 21:55:57 | INFO     | TradingBot |   Timesteps: 200,000
+2026-06-20 21:55:57 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:55:57 | ERROR    | TradingBot | IB connection failed: [Errno 61] Connect call failed ('127.0.0.1', 7497)
+2026-06-20 21:55:57 | ERROR    | TradingBot | Troubleshooting checklist:
+  1. Is IB Gateway running and logged in?
+  2. API enabled? (Configure -> Settings -> API -> Enable Socket)
+  3. Correct port? (Paper=7497, Live=7496)
+  4. Read-Only API = OFF?
+  5. Allow connections from 127.0.0.1?
+  6. Client ID 1 not already in use?
+
+2026-06-20 21:58:23 | INFO     | TradingBot | Starting | mode=EVALUATE | ticker=SPY | capital=$1,000 | port=7497 | client_id=1
+2026-06-20 21:58:23 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:58:23 | INFO     | TradingBot |   MODE: EVALUATE (offline backtest)
+2026-06-20 21:58:23 | INFO     | TradingBot |   Ticker: SPY | Model: ppo_trader.zip
+2026-06-20 21:58:23 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:58:23 | ERROR    | TradingBot | Model not found at 'ppo_trader.zip'. Run warmup first.
+2026-06-20 21:58:34 | INFO     | TradingBot | Starting | mode=WARMUP | ticker=SPY | capital=$1,000 | port=7497 | client_id=1
+2026-06-20 21:58:34 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:58:34 | INFO     | TradingBot |   MODE: WARM-UP TRAINING
+2026-06-20 21:58:34 | INFO     | TradingBot |   Ticker: SPY | History: 5 Y 1 day
+2026-06-20 21:58:34 | INFO     | TradingBot |   Timesteps: 200,000
+2026-06-20 21:58:34 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:58:34 | ERROR    | TradingBot | IB connection failed: [Errno 61] Connect call failed ('127.0.0.1', 7497)
+2026-06-20 21:58:34 | ERROR    | TradingBot | Troubleshooting checklist:
+  1. Is IB Gateway running and logged in?
+  2. API enabled? (Configure -> Settings -> API -> Enable Socket)
+  3. Correct port? (Paper=7497, Live=7496)
+  4. Read-Only API = OFF?
+  5. Allow connections from 127.0.0.1?
+  6. Client ID 1 not already in use?
+
+2026-06-20 21:59:01 | INFO     | TradingBot | Starting | mode=WARMUP | ticker=SPY | capital=$1,000 | port=4002 | client_id=1
+2026-06-20 21:59:01 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:59:01 | INFO     | TradingBot |   MODE: WARM-UP TRAINING
+2026-06-20 21:59:01 | INFO     | TradingBot |   Ticker: SPY | History: 5 Y 1 day
+2026-06-20 21:59:01 | INFO     | TradingBot |   Timesteps: 200,000
+2026-06-20 21:59:01 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:59:01 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 21:59:01 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 21:59:01 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 21:59:01 | INFO     | TradingBot | Fetching 5 Y of 1 day bars for SPY …
+2026-06-20 21:59:03 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 21:59:05 | INFO     | TradingBot | Fetched 1,255 bars [2021-06-21 -> 2026-06-18]
+2026-06-20 21:59:05 | INFO     | TradingBot | Train: 857 bars | Eval (held-out): 368 bars
+2026-06-20 21:59:05 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 21:59:05 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 21:59:35 | INFO     | TradingBot | Starting | mode=WARMUP | ticker=SPY | capital=$1,000 | port=4002 | client_id=2
+2026-06-20 21:59:35 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:59:35 | INFO     | TradingBot |   MODE: WARM-UP TRAINING
+2026-06-20 21:59:35 | INFO     | TradingBot |   Ticker: SPY | History: 5 Y 1 day
+2026-06-20 21:59:35 | INFO     | TradingBot |   Timesteps: 200,000
+2026-06-20 21:59:35 | INFO     | TradingBot | ======================================================================
+2026-06-20 21:59:36 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 21:59:36 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 21:59:36 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 21:59:36 | INFO     | TradingBot | Fetching 5 Y of 1 day bars for SPY …
+2026-06-20 21:59:36 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 21:59:37 | INFO     | TradingBot | Fetched 1,255 bars [2021-06-21 -> 2026-06-18]
+2026-06-20 21:59:38 | INFO     | TradingBot | Train: 857 bars | Eval (held-out): 368 bars
+2026-06-20 21:59:38 | INFO     | TradingBot | Building new PPO agent from scratch …
+2026-06-20 21:59:39 | INFO     | TradingBot | PPO agent ready | device: cpu | obs: (422,) | net: (512, 256, 128)
+2026-06-20 21:59:39 | INFO     | TradingBot | Running on CPU (no GPU detected)
+2026-06-20 21:59:39 | INFO     | TradingBot | Training for 200,000 steps …
+2026-06-20 22:01:23 | INFO     | TradingBot | Model saved -> ppo_trader.zip
+2026-06-20 22:01:23 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:01:23 | INFO     | TradingBot |   HELD-OUT EVALUATION RESULTS
+2026-06-20 22:01:23 | INFO     | TradingBot |   Final portfolio value: $1,179.85
+2026-06-20 22:01:23 | INFO     | TradingBot |   PPO agent return:      +18.0%
+2026-06-20 22:01:23 | INFO     | TradingBot |   Buy-and-hold return:   +22.5%
+2026-06-20 22:01:23 | INFO     | TradingBot |   Alpha vs B&H:          -4.5%
+2026-06-20 22:01:23 | INFO     | TradingBot |   Action breakdown:      HOLD=144 BUY=142 SELL=51
+2026-06-20 22:01:23 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:01:23 | INFO     | TradingBot | Journal: Backup versioned model saved -> models/ppo_trader_warmup_20260620_220123.zip
+2026-06-20 22:01:23 | INFO     | TradingBot | Journal: Training entry recorded in training_journal.json
+2026-06-20 22:01:23 | INFO     | TradingBot | 
+Warm-up complete!
+Next step: python main.py --mode trade
+2026-06-20 22:01:23 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:01:23 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:01:38 | INFO     | TradingBot | Starting | mode=EVALUATE | ticker=SPY | capital=$1,000 | port=4002 | client_id=3
+2026-06-20 22:01:38 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:01:38 | INFO     | TradingBot |   MODE: EVALUATE (offline backtest)
+2026-06-20 22:01:38 | INFO     | TradingBot |   Ticker: SPY | Model: ppo_trader.zip
+2026-06-20 22:01:38 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:01:39 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:01:39 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:01:39 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:01:39 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for SPY …
+2026-06-20 22:01:39 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 22:01:40 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:01:40 | INFO     | TradingBot | Loading existing model from ppo_trader.zip …
+2026-06-20 22:01:41 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:01:41 | INFO     | TradingBot |   BACKTEST RESULTS (last 1 year, daily bars)
+2026-06-20 22:01:41 | INFO     | TradingBot |   Final portfolio value: $1,095.68
+2026-06-20 22:01:41 | INFO     | TradingBot |   PPO return:            +9.6%
+2026-06-20 22:01:41 | INFO     | TradingBot |   Buy-and-hold return:   +13.1%
+2026-06-20 22:01:41 | INFO     | TradingBot |   Alpha vs B&H:          -3.6%
+2026-06-20 22:01:41 | INFO     | TradingBot |   Action breakdown:      HOLD=86 BUY=77 SELL=27
+2026-06-20 22:01:41 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:01:41 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:01:41 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:04:48 | INFO     | TradingBot | Starting | mode=EVALUATE | ticker=SPY | capital=$1,000 | port=4002 | client_id=4
+2026-06-20 22:04:48 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:04:48 | INFO     | TradingBot |   MODE: EVALUATE (offline backtest)
+2026-06-20 22:04:48 | INFO     | TradingBot |   Ticker: SPY | Model: ppo_trader.zip
+2026-06-20 22:04:48 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:04:48 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:04:48 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:04:48 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:04:48 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for SPY …
+2026-06-20 22:04:49 | INFO     | TradingBot | Contract qualified: Stock(conId=756733, symbol='SPY', exchange='SMART', primaryExchange='ARCA', currency='USD', localSymbol='SPY', tradingClass='SPY')
+2026-06-20 22:04:50 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:04:50 | INFO     | TradingBot | Loading existing model from ppo_trader.zip …
+2026-06-20 22:04:51 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:04:51 | INFO     | TradingBot |   BACKTEST RESULTS (last 1 year, daily bars)
+2026-06-20 22:04:51 | INFO     | TradingBot |   Final portfolio value: $1,095.68
+2026-06-20 22:04:51 | INFO     | TradingBot |   PPO return:            +9.6%
+2026-06-20 22:04:51 | INFO     | TradingBot |   Buy-and-hold return:   +13.1%
+2026-06-20 22:04:51 | INFO     | TradingBot |   Alpha vs B&H:          -3.6%
+2026-06-20 22:04:51 | INFO     | TradingBot |   Action breakdown:      HOLD=86 BUY=77 SELL=27
+2026-06-20 22:04:51 | INFO     | TradingBot | ----------------------------------------------------------------------
+2026-06-20 22:04:51 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:04:51 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:26:18 | ERROR    | TradingBot | IB connection failed: [Errno 61] Connect call failed ('127.0.0.1', 7497)
+2026-06-20 22:26:18 | ERROR    | TradingBot | Troubleshooting checklist:
+  1. Is IB Gateway running and logged in?
+  2. API enabled? (Configure -> Settings -> API -> Enable Socket)
+  3. Correct port? (Paper=7497, Live=7496)
+  4. Read-Only API = OFF?
+  5. Allow connections from 127.0.0.1?
+  6. Client ID 1 not already in use?
+
+2026-06-20 22:26:18 | ERROR    | TradingBot | Cannot connect to IB Gateway for historical data.
+2026-06-20 22:26:44 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:26:44 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:26:44 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:26:44 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:26:44 | INFO     | TradingBot |   AGGRESSIVE PENNY STOCK SCALPER BACKTEST
+2026-06-20 22:26:44 | INFO     | TradingBot |   Universe: 13 stocks | Cash: $1,000
+2026-06-20 22:26:44 | INFO     | TradingBot |   Max risk/trade: $50.00
+2026-06-20 22:26:44 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── SOFI ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting SOFI: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── MARA ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting MARA: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── PLTR ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting PLTR: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── COIN ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting COIN: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── RKLB ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting RKLB: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── ASTS ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting ASTS: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── QS ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting QS: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── LCID ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting LCID: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── IONQ ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting IONQ: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── ACHR ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting ACHR: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── JOBY ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting JOBY: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── NIO ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting NIO: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | INFO     | TradingBot |   ── XPEV ──
+2026-06-20 22:26:44 | WARNING  | TradingBot |   Error backtesting XPEV: DataManager.fetch_historical() got an unexpected keyword argument 'ticker'
+2026-06-20 22:26:44 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:26:44 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:26:44 | WARNING  | TradingBot | No valid backtest results.
+2026-06-20 22:27:13 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:27:13 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:27:13 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:27:13 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:27:13 | INFO     | TradingBot |   AGGRESSIVE PENNY STOCK SCALPER BACKTEST
+2026-06-20 22:27:13 | INFO     | TradingBot |   Universe: 11 stocks | Cash: $1,000
+2026-06-20 22:27:13 | INFO     | TradingBot |   Max risk/trade: $50.00
+2026-06-20 22:27:13 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:27:13 | INFO     | TradingBot |   ── SOFI ──
+2026-06-20 22:27:13 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for SOFI …
+2026-06-20 22:27:14 | INFO     | TradingBot | Contract qualified: Stock(conId=494162724, symbol='SOFI', exchange='SMART', primaryExchange='NASDAQ', currency='USD', localSymbol='SOFI', tradingClass='NMS')
+2026-06-20 22:27:15 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:16 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:16 | INFO     | TradingBot |   ── MARA ──
+2026-06-20 22:27:16 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for MARA …
+2026-06-20 22:27:16 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:17 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:17 | INFO     | TradingBot |   ── PLTR ──
+2026-06-20 22:27:17 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for PLTR …
+2026-06-20 22:27:17 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:18 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:18 | INFO     | TradingBot |   ── COIN ──
+2026-06-20 22:27:18 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for COIN …
+2026-06-20 22:27:19 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:19 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:19 | INFO     | TradingBot |   ── RKLB ──
+2026-06-20 22:27:19 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for RKLB …
+2026-06-20 22:27:20 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:20 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:20 | INFO     | TradingBot |   ── ASTS ──
+2026-06-20 22:27:20 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for ASTS …
+2026-06-20 22:27:21 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:21 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:21 | INFO     | TradingBot |   ── QS ──
+2026-06-20 22:27:21 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for QS …
+2026-06-20 22:27:22 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:23 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:23 | INFO     | TradingBot |   ── LCID ──
+2026-06-20 22:27:23 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for LCID …
+2026-06-20 22:27:23 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:24 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:24 | INFO     | TradingBot |   ── IONQ ──
+2026-06-20 22:27:24 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for IONQ …
+2026-06-20 22:27:25 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:25 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:25 | INFO     | TradingBot |   ── ACHR ──
+2026-06-20 22:27:25 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for ACHR …
+2026-06-20 22:27:26 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:26 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:26 | INFO     | TradingBot |   ── JOBY ──
+2026-06-20 22:27:26 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for JOBY …
+2026-06-20 22:27:27 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:27:27 | INFO     | TradingBot |     Trades: 2 | Win: 0.0% | P&L: $-37.73 (-4.1%) | DD: 5.7%
+2026-06-20 22:27:27 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:27:27 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:27:27 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:27:27 | INFO     | TradingBot |   BACKTEST SUMMARY
+2026-06-20 22:27:27 | INFO     | TradingBot |   Stocks tested: 11
+2026-06-20 22:27:27 | INFO     | TradingBot |   Total trades:  22
+2026-06-20 22:27:27 | INFO     | TradingBot |   Win/Loss:      0W / 22L
+2026-06-20 22:27:27 | INFO     | TradingBot |   Win rate:      0.0%
+2026-06-20 22:27:27 | INFO     | TradingBot |   Combined P&L:  $-415.03
+2026-06-20 22:27:27 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:27:27 | INFO     | TradingBot | 
+  TOP PERFORMERS:
+2026-06-20 22:27:27 | INFO     | TradingBot |   SOFI   |   2 trades | Win:   0.0% | P&L: $ -37.73 (  -4.1%) | DD:   5.7%
+2026-06-20 22:27:27 | INFO     | TradingBot |   MARA   |   2 trades | Win:   0.0% | P&L: $ -37.73 (  -4.1%) | DD:   5.7%
+2026-06-20 22:27:27 | INFO     | TradingBot |   PLTR   |   2 trades | Win:   0.0% | P&L: $ -37.73 (  -4.1%) | DD:   5.7%
+2026-06-20 22:27:27 | INFO     | TradingBot |   COIN   |   2 trades | Win:   0.0% | P&L: $ -37.73 (  -4.1%) | DD:   5.7%
+2026-06-20 22:27:27 | INFO     | TradingBot |   RKLB   |   2 trades | Win:   0.0% | P&L: $ -37.73 (  -4.1%) | DD:   5.7%
+2026-06-20 22:28:44 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:28:44 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:28:44 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:28:44 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:28:44 | INFO     | TradingBot |   SCALPER BACKTEST v2 — 5-min bars
+2026-06-20 22:28:44 | INFO     | TradingBot |   Universe: 9 | Cash: $1,000
+2026-06-20 22:28:44 | INFO     | TradingBot |   Risk/trade: $50.00
+2026-06-20 22:28:44 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:28:44 | INFO     | TradingBot |   ── SOFI ──
+2026-06-20 22:28:44 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for SOFI …
+2026-06-20 22:28:44 | INFO     | TradingBot | Contract qualified: Stock(conId=494162724, symbol='SOFI', exchange='SMART', primaryExchange='NASDAQ', currency='USD', localSymbol='SOFI', tradingClass='NMS')
+2026-06-20 22:28:46 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:28:46 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for SOFI …
+2026-06-20 22:28:47 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:28:48 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:28:48 | INFO     | TradingBot |   ── MARA ──
+2026-06-20 22:28:48 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for MARA …
+2026-06-20 22:28:49 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:28:49 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for MARA …
+2026-06-20 22:28:50 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:28:51 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:28:51 | INFO     | TradingBot |   ── PLTR ──
+2026-06-20 22:28:51 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for PLTR …
+2026-06-20 22:28:52 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:28:52 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for PLTR …
+2026-06-20 22:28:53 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:28:54 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:28:54 | INFO     | TradingBot |   ── RKLB ──
+2026-06-20 22:28:54 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for RKLB …
+2026-06-20 22:28:55 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:28:55 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for RKLB …
+2026-06-20 22:28:56 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:28:57 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:28:57 | INFO     | TradingBot |   ── ASTS ──
+2026-06-20 22:28:57 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for ASTS …
+2026-06-20 22:28:58 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:28:58 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for ASTS …
+2026-06-20 22:28:59 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:29:00 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:29:00 | INFO     | TradingBot |   ── COIN ──
+2026-06-20 22:29:00 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for COIN …
+2026-06-20 22:29:03 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:29:03 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for COIN …
+2026-06-20 22:29:04 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:29:05 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:29:05 | INFO     | TradingBot |   ── IONQ ──
+2026-06-20 22:29:05 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for IONQ …
+2026-06-20 22:29:09 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:29:09 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for IONQ …
+2026-06-20 22:29:10 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:29:11 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:29:11 | INFO     | TradingBot |   ── ACHR ──
+2026-06-20 22:29:11 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for ACHR …
+2026-06-20 22:29:27 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:29:27 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for ACHR …
+2026-06-20 22:29:29 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:29:30 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:29:30 | INFO     | TradingBot |   ── NIO ──
+2026-06-20 22:29:30 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for NIO …
+2026-06-20 22:29:45 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:29:45 | INFO     | TradingBot | Fetching 1 Y of 1 day bars for NIO …
+2026-06-20 22:29:46 | INFO     | TradingBot | Fetched 251 bars [2025-06-20 -> 2026-06-18]
+2026-06-20 22:29:47 | INFO     | TradingBot |     No trades triggered
+2026-06-20 22:29:47 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:29:47 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:29:47 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:29:47 | INFO     | TradingBot |   SUMMARY
+2026-06-20 22:29:47 | INFO     | TradingBot |   Stocks: 9 | Trades: 0
+2026-06-20 22:29:47 | INFO     | TradingBot |   Win/Loss: 0W/0L (0.0%)
+2026-06-20 22:29:47 | INFO     | TradingBot |   Combined P&L: $+0.00
+2026-06-20 22:29:47 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:29:47 | INFO     | TradingBot | 
+  TOP PERFORMERS:
+2026-06-20 22:30:48 | INFO     | TradingBot | IB Gateway connected → 127.0.0.1:4002
+2026-06-20 22:30:48 | INFO     | TradingBot | Account(s): ['DUO429233']
+2026-06-20 22:30:48 | INFO     | TradingBot | MODE: PAPER TRADING — no real money at risk ✓
+2026-06-20 22:30:48 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:30:48 | INFO     | TradingBot |   SCALPER BACKTEST v3 — Direct 5-min Momentum Scalper
+2026-06-20 22:30:48 | INFO     | TradingBot |   Universe: 15 | Cash: $1,000
+2026-06-20 22:30:48 | INFO     | TradingBot |   Max risk/trade: $50.00
+2026-06-20 22:30:48 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:30:48 | INFO     | TradingBot |   ── SOFI ──
+2026-06-20 22:30:48 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for SOFI …
+2026-06-20 22:30:49 | INFO     | TradingBot | Contract qualified: Stock(conId=494162724, symbol='SOFI', exchange='SMART', primaryExchange='NASDAQ', currency='USD', localSymbol='SOFI', tradingClass='NMS')
+2026-06-20 22:30:50 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:30:51 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:30:51 | INFO     | TradingBot |   ── MARA ──
+2026-06-20 22:30:51 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for MARA …
+2026-06-20 22:30:52 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:30:53 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:30:53 | INFO     | TradingBot |   ── PLTR ──
+2026-06-20 22:30:53 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for PLTR …
+2026-06-20 22:30:56 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:30:57 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:30:57 | INFO     | TradingBot |   ── RKLB ──
+2026-06-20 22:30:57 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for RKLB …
+2026-06-20 22:30:58 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:30:59 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:30:59 | INFO     | TradingBot |   ── ASTS ──
+2026-06-20 22:30:59 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for ASTS …
+2026-06-20 22:31:02 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:03 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:03 | INFO     | TradingBot |   ── COIN ──
+2026-06-20 22:31:03 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for COIN …
+2026-06-20 22:31:08 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:09 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:09 | INFO     | TradingBot |   ── IONQ ──
+2026-06-20 22:31:09 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for IONQ …
+2026-06-20 22:31:14 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:15 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:15 | INFO     | TradingBot |   ── ACHR ──
+2026-06-20 22:31:15 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for ACHR …
+2026-06-20 22:31:32 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:33 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:33 | INFO     | TradingBot |   ── NIO ──
+2026-06-20 22:31:33 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for NIO …
+2026-06-20 22:31:50 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:51 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:51 | INFO     | TradingBot |   ── XPEV ──
+2026-06-20 22:31:51 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for XPEV …
+2026-06-20 22:31:52 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:53 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:53 | INFO     | TradingBot |   ── LCID ──
+2026-06-20 22:31:53 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for LCID …
+2026-06-20 22:31:54 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:55 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:55 | INFO     | TradingBot |   ── QS ──
+2026-06-20 22:31:55 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for QS …
+2026-06-20 22:31:56 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:31:57 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:31:57 | INFO     | TradingBot |   ── GME ──
+2026-06-20 22:31:57 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for GME …
+2026-06-20 22:32:02 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:32:03 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:32:03 | INFO     | TradingBot |   ── FCEL ──
+2026-06-20 22:32:03 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for FCEL …
+2026-06-20 22:32:08 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:32:09 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:32:09 | INFO     | TradingBot |   ── NKLA ──
+2026-06-20 22:32:09 | INFO     | TradingBot | Fetching 1 M of 5 mins bars for NKLA …
+2026-06-20 22:32:14 | INFO     | TradingBot | Fetched 1,638 bars [2026-05-20 -> 2026-06-18]
+2026-06-20 22:32:15 | INFO     | TradingBot |     Trades: 33 | Win: 36.4% | P&L: $+47.70 (-1.1%) | DD: 6.5% | Avg hold: 2 bars
+2026-06-20 22:32:15 | WARNING  | TradingBot | IB connection dropped (disconnectedEvent fired).
+2026-06-20 22:32:15 | INFO     | TradingBot | Disconnected from IB Gateway
+2026-06-20 22:32:15 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:32:15 | INFO     | TradingBot |   COMBINED SUMMARY
+2026-06-20 22:32:15 | INFO     | TradingBot |   Stocks: 15 | Trades: 495
+2026-06-20 22:32:15 | INFO     | TradingBot |   Win/Loss: 180W/315L (36.4%)
+2026-06-20 22:32:15 | INFO     | TradingBot |   Combined P&L: $+715.50
+2026-06-20 22:32:15 | INFO     | TradingBot | ======================================================================
+2026-06-20 22:32:15 | INFO     | TradingBot | 
+  RANKINGS:
+2026-06-20 22:32:15 | INFO     | TradingBot |   SOFI   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   MARA   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   PLTR   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   RKLB   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   ASTS   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   COIN   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   IONQ   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   ACHR   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   NIO    |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars
+2026-06-20 22:32:15 | INFO     | TradingBot |   XPEV   |  33 tr | W: 36.4% | $ +47.70 ( -1.1%) | DD: 6.5% | Avg:2 bars

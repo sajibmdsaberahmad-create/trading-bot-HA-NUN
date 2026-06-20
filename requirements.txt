@@ -1,0 +1,10 @@
+ib_insync
+gymnasium
+stable-baselines3[extra]
+pandas
+numpy
+torch
+scipy
+scikit-learn
+tqdm
+python-dotenv
