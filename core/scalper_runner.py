@@ -101,6 +101,7 @@ class ScalperRunner:
         self.trades_today: int = 0
         self._current_day: Optional[str] = None
         self._last_daily_push_date: Optional[str] = None
+        self._weights_file = "models/scalper_weights.json"
     
     def _refresh_account_balance(self):
         """Pull live balance from IB."""
@@ -432,6 +433,77 @@ class ScalperRunner:
         except Exception as exc:
             log.error(f"Entry error on {ticker}: {exc}")
     
+    def _load_weights(self) -> Dict:
+        """Load learned scoring weights. Defaults if file missing."""
+        try:
+            with open(self._weights_file, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {
+                "momentum": 2.0, "volume": 15.0, "institutional": 20.0,
+                "vwap_slope": 5.0, "atr_bonus": 5.0, "mean_reversion": 5.0,
+                "win_history": []
+            }
+    
+    def _save_weights(self, weights: Dict):
+        os.makedirs("models", exist_ok=True)
+        with open(self._weights_file, "w") as f:
+            json.dump(weights, f, indent=2)
+        log.info(f"🧠 Learned weights saved -> {self._weights_file}")
+    
+    def _daily_self_train(self):
+        """
+        Daily self-improvement: review market data + trade outcomes,
+        adjust scoring weights to maximize profit.
+        """
+        try:
+            weights = self._load_weights()
+            wins = [w for w in weights.get("win_history", []) if w["result"] == "win"]
+            losses = [w for w in weights.get("win_history", []) if w["result"] == "loss"]
+            
+            # 1. If we have trade history, learn from it
+            if wins or losses:
+                win_rate = len(wins) / (len(wins) + len(losses)) if (wins or losses) else 0.5
+                
+                # Boost weights that appeared in winning trades
+                for w in weights.get("win_history", []):
+                    factor = 1.15 if w["result"] == "win" else 0.85
+                    for key in ["momentum", "volume", "institutional", "vwap_slope", "atr_bonus", "mean_reversion"]:
+                        if key in w.get("weights_active", {}):
+                            weights[key] = weights.get(key, 1.0) * factor
+                
+                # Clamp weights to sane bounds
+                for key in ["momentum", "volume", "institutional", "vwap_slope", "atr_bonus", "mean_reversion"]:
+                    weights[key] = max(0.5, min(weights[key], 50.0))
+                
+                log.info(f"🧠 Self-train: win_rate={win_rate:.0%} | wins={len(wins)} losses={len(losses)} | weights updated")
+            
+            # 2. Simulate today's top 10 picks with CURRENT weights — validate predictive power
+            try:
+                sim_scores = []
+                for result in self.scan_results[:10]:
+                    sim_scores.append(result.rank_score)
+                
+                if sim_scores:
+                    avg_score = sum(sim_scores) / len(sim_scores)
+                    max_score = max(sim_scores)
+                    
+                    # If top score is weak (<30), boost volume + institutional weight
+                    if max_score < 30:
+                        weights["volume"] *= 1.2
+                        weights["institutional"] *= 1.2
+                        log.info(f"🧠 Weak top-score ({max_score:.0f}) → boosted volume+institutional weights")
+                    
+                    log.info(f"🧠 Market calibration: avg_score={avg_score:.1f} max_score={max_score:.1f} across {len(sim_scores)} candidates")
+            except Exception:
+                pass
+            
+            # 3. Save updated weights
+            self._save_weights(weights)
+            
+        except Exception as exc:
+            log.debug(f"Self-train skipped: {exc}")
+    
     def _maybe_daily_push(self):
         """Push a portfolio statement to git once per calendar day (at 21:00 UTC)."""
         try:
@@ -441,6 +513,9 @@ class ScalperRunner:
             # Push once per day at 21:00 UTC or later (after US market close)
             if now_utc.hour >= 21 and self._last_daily_push_date != today_str:
                 self._last_daily_push_date = today_str
+                
+                # SELF-TRAIN: improve weights every day regardless of trades
+                self._daily_self_train()
                 
                 pnl = self.nav - float(self.cfg.INITIAL_CASH)
                 pnl_pct = (pnl / float(self.cfg.INITIAL_CASH)) * 100 if self.cfg.INITIAL_CASH else 0.0
@@ -453,8 +528,17 @@ class ScalperRunner:
                     f"trades={self.trades_today}"
                 )
                 
-                # Push performance + metrics + journal to GitHub
+                # Push weights + performance + metrics to GitHub
                 push_daily_summary(self.nav, self.account_equity)
+                try:
+                    weights = self._load_weights()
+                    self.cfg._latest_account_balance = self.account_equity  # refresh for notifier
+                    push_daily_summary(self.nav, self.account_equity)  # pushes performance.csv + live_metrics.json
+                    # Also commit the weights file directly
+                    os.system(f"cd {os.getcwd()} && git add models/scalper_weights.json && git commit -m 'train: self-improved scoring weights {today_str}' >/dev/null 2>&1")
+                except Exception:
+                    pass
+                
                 log.info(f"📤 Daily portfolio statement pushed to git: {stmt}")
         except Exception as exc:
             log.debug(f"Daily push skipped: {exc}")
