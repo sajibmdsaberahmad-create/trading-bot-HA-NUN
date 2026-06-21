@@ -43,11 +43,14 @@ from core.config import BotConfig
 from core.connector import IBConnector
 from core.data import DataManager
 from core.features import FeatureEngineer
+from core.features_enhanced import FeatureEngineerEnhanced
 from core.institutional import InstitutionalDetector, InstitutionalSignal
 from core.scanner import StockScanner, ScanResult, PENNY_STOCK_UNIVERSE
 from core.risk import RiskManager, TradePlan, compute_atr, compute_momentum_score
 from core.broker import BrokerExecutor, BracketHandle
 from core.env import TradingEnv
+from core.agent import build_ppo_agent, predict_with_reasoning, initialize_enhanced_system
+from core.experience_buffer import append as buffer_append
 from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
 
@@ -84,6 +87,11 @@ class ScalperRunner:
         self.institutional = InstitutionalDetector()
         self.risk = RiskManager(cfg, cfg.INITIAL_CASH, notifier)
         git_sync_init(cfg)
+
+        # AI / PPO wiring
+        self.model = None
+        self.ai_components: Dict[str, Any] = {}
+        self.fe = FeatureEngineerEnhanced()
         
         # IB account state (full account from IB)
         self.account_equity = float(cfg.INITIAL_CASH)
@@ -114,6 +122,32 @@ class ScalperRunner:
         self._current_day: Optional[str] = None
         self._last_daily_push_date: Optional[str] = None
         self._weights_file = "models/scalper_weights.json"
+
+        # Experience buffer for unified learning
+        self._xp_buffer_initialized = False
+
+        # Initialize enhanced AI system (guardrails, regime, ensemble, adaptive learner)
+        try:
+            self.ai_components = initialize_enhanced_system(cfg)
+            if self.ai_components:
+                log.info("🧠 Enhanced AI components loaded into scalper")
+        except Exception as exc:
+            log.debug(f"Enhanced AI init skipped: {exc}")
+        
+        # Build or load PPO model for top-pick gating
+        self._init_model()
+    
+    def _init_model(self):
+        try:
+            dummy_f = np.zeros((self.cfg.WINDOW_SIZE + 2, self.cfg.N_FEATURES), np.float32)
+            dummy_px = np.ones(self.cfg.WINDOW_SIZE + 2, np.float32) * 100.0
+            dummy_env = TradingEnv(dummy_f, dummy_px, self.cfg.INITIAL_CASH,
+                                   self.cfg.TRANSACTION_COST_PCT, self.cfg.WINDOW_SIZE, self.cfg.DEFAULT_MAX_POSITION_PCT)
+            self.model = build_ppo_agent(dummy_env, self.cfg, self.cfg.MODEL_PATH)
+            log.info(f"🧠 PPO model ready for top-pick gating: {self.cfg.MODEL_PATH}")
+        except Exception as exc:
+            log.debug(f"PPO model init skipped: {exc}")
+            self.model = None
     
     def _refresh_account_balance(self):
         """Pull live balance from IB. Bot state changes ONLY via trades."""
@@ -167,6 +201,21 @@ class ScalperRunner:
                 "pnl_pct": round(pnl_pct, 2),
                 "result": result,
             })
+            # Record exit outcome into experience buffer
+            try:
+                buffer_append({
+                    "source": "live_trade",
+                    "ticker": self.current_ticker,
+                    "action": "SELL",
+                    "exit_price": current_px,
+                    "entry_price": self._entry_price,
+                    "pnl_usd": round(pnl, 2),
+                    "win": 1 if pnl > 0 else 0,
+                    "confidence": 0.5,
+                    "features": [],
+                })
+            except Exception:
+                pass
         self._prev_shares = self.shares
         if self.shares > 0:
             self._entry_price = current_px
@@ -323,6 +372,19 @@ class ScalperRunner:
             )
             log.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f} | Score: {best['total_score']:.0f} | Scan: {elapsed_ms:.0f}ms")
             self.notifier.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f}\nScore: {best['total_score']:.0f}\n{best['reasons']}")
+            
+            # Record scan pick into experience buffer
+            try:
+                buffer_append({
+                    "source": "scan_pick",
+                    "ticker": best["ticker"],
+                    "action": "SCAN_PICK",
+                    "scan_score": best["total_score"],
+                    "confidence": 0.5,
+                    "features": [],
+                })
+            except Exception:
+                pass
         else:
             self.top_pick = None
             log.info(f"🔍 No setups — rescanning in 1s ({elapsed_ms:.0f}ms)")
@@ -376,6 +438,8 @@ class ScalperRunner:
         }
     
     def _attempt_entry(self):
+        if not self.top_pick:
+            return
         ticker = self.top_pick.ticker
         self.current_ticker = ticker
         try:
@@ -437,6 +501,23 @@ class ScalperRunner:
                 f"Score: {self.top_pick.rank_score:.0f}"
             )
             push_trade(ticker, "BUY", current_px, shares)
+            
+            # Record entry into experience buffer for unified training
+            try:
+                buffer_append({
+                    "source": "live_trade",
+                    "ticker": ticker,
+                    "action": "BUY",
+                    "entry_price": current_px,
+                    "stop_dist": stop_dist,
+                    "tp_dist": tp_dist,
+                    "confidence": 0.5,
+                    "scan_score": self.top_pick.rank_score if self.top_pick else 0,
+                    "features": [],
+                })
+            except Exception:
+                pass
+            
             self.top_pick = None
         except Exception as exc:
             log.error(f"Entry error on {ticker}: {exc}")
