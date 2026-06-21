@@ -54,6 +54,7 @@ from core.experience_buffer import append as buffer_append
 from core.market_context import summarize_market_context
 from core.market_regime import MarketRegimeDetector
 from core.self_improver import generate_self_improvement_plan
+from core.consciousness import AIConsciousness
 from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
 
@@ -140,6 +141,14 @@ class ScalperRunner:
         
         # Build or load PPO model for top-pick gating
         self._init_model()
+        
+        # Continuous consciousness - 24/7 self-training and versioning
+        try:
+            self.consciousness = AIConsciousness(cfg)
+            log.info("🧠 AI Consciousness initialized - continuous 24/7 self-improvement active")
+        except Exception as exc:
+            log.debug(f"Consciousness init skipped: {exc}")
+            self.consciousness = None
     
     def _init_model(self):
         try:
@@ -607,6 +616,17 @@ class ScalperRunner:
             self._daily_self_train()
             
             # Generate self-improvement plan from ALL experience
+            # Continuous consciousness training cycle
+            try:
+                if hasattr(self, 'consciousness') and self.consciousness:
+                    self.consciousness.observe_scan({"source": "off_hours", "tickers": len(PENNY_STOCK_UNIVERSE)})
+                    session = self.consciousness.continuous_train()
+                    reflection = self.consciousness.reflect()
+                    log.info(f"🧠 Consciousness reflection: {reflection[:200]}")
+                    self.notifier.info(f"🧠 AI CONSCIOUSNESS UPDATE\n{reflection[:1000]}")
+            except Exception as exc:
+                log.debug(f"Consciousness training failed: {exc}")
+            
             try:
                 plan = generate_self_improvement_plan(self.cfg)
                 if plan.get("adjustments"):
