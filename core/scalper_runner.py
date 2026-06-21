@@ -57,6 +57,9 @@ from core.self_improver import generate_self_improvement_plan
 from core.consciousness import AIConsciousness
 from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
+from core.async_utils import get_background_worker, AtomicFileWriter
+from core.feature_drift import validate_features_at_startup
+from core.train_subprocess import launch_training
 
 
 def _only_uptrend(df: pd.DataFrame, current_px: float) -> bool:
@@ -98,6 +101,12 @@ class ScalperRunner:
         self.fe = FeatureEngineerEnhanced()
         self.regime_detector = MarketRegimeDetector()
         
+        # Background worker for non-blocking Git/Ollama/notifications
+        self._worker = get_background_worker()
+        
+        # File watcher for hot-reload of weights
+        self._weights_watcher = None
+        
         # IB account state (full account from IB)
         self.account_equity = float(cfg.INITIAL_CASH)
         self.available_cash: Optional[float] = None
@@ -127,9 +136,16 @@ class ScalperRunner:
         self._current_day: Optional[str] = None
         self._last_daily_push_date: Optional[str] = None
         self._weights_file = "models/scalper_weights.json"
+        self._weights_mtime = 0.0
 
         # Experience buffer for unified learning
         self._xp_buffer_initialized = False
+        
+        # Start file watcher for weights hot-reload
+        self._start_weights_watcher()
+
+        # Validate feature pipeline (prevents training/serving skew)
+        self._validate_features()
 
         # Initialize enhanced AI system (quietly - details in final init report)
         self.ai_components = initialize_enhanced_system(cfg)
@@ -139,6 +155,28 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"Consciousness init skipped: {exc}")
             self.consciousness = None
+    
+    def _validate_features(self):
+        """Run feature pipeline validation to prevent training/serving skew."""
+        try:
+            # Use the feature engineer from enhanced features
+            from core.features_enhanced import FeatureEngineerEnhanced
+            fe = FeatureEngineerEnhanced()
+            
+            # Create a dummy DataManager to get the feature function
+            def feature_fn(df, window_size=30):
+                try:
+                    return fe.compute_features(df, window_size=window_size)
+                except Exception:
+                    # Fallback: return simple features
+                    n = min(window_size, len(df))
+                    return np.zeros((n, 18), dtype=np.float32)
+            
+            ok = validate_features_at_startup(feature_fn)
+            if not ok:
+                log.error("Feature validation failed — this would cause trading errors. Please fix before continuing.")
+        except Exception as exc:
+            log.debug(f"Feature validation skipped: {exc}")
     
     def _init_model(self):
         try:
@@ -561,56 +599,53 @@ class ScalperRunner:
     
     def _train_off_hours(self):
         """
-        When market is closed, train on historical data instead of scanning.
-        This improves the model for the next session.
+        When market is closed, launch isolated training subprocess.
+        
+        Training is moved to a separate short-lived process to:
+        - Free MPS/GPU memory completely after training
+        - Prevent memory fragmentation in the long-running trading process
+        - Isolate crashes from the main trading loop
         """
         try:
-            log.info("🧠 OFF-HOURS TRAINING: Analyzing historical patterns...")
+            log.info("🧠 OFF-HOURS TRAINING: Launching isolated training subprocess...")
             
-            # Fetch recent data for self-training
-            train_data = []
-            for ticker in PENNY_STOCK_UNIVERSE[:20]:  # subset for speed
-                try:
-                    self.cfg.TICKER = ticker
-                    dm = DataManager(self.conn, self.cfg)
-                    hist = dm.fetch_historical(duration="3 M", bar_size="1 day")
-                    if hist is not None and len(hist) > 30:
-                        train_data.append((ticker, hist))
-                except Exception:
-                    continue
-            
-            # Analyze patterns
-            bullish_days = 0
-            total_days = 0
-            for ticker, hist in train_data:
-                closes = hist["close"].values
-                for i in range(20, len(closes)):
-                    if closes[i] > closes[i-1]:
-                        bullish_days += 1
-                    total_days += 1
-            
-            if total_days > 0:
-                bullish_pct = bullish_days / total_days
-                log.info(f"🧠 Historical analysis: {bullish_pct:.0%} bullish days across {total_days} samples")
-            
-            # Update market regime from broader context
+            # Update market regime from broader context (lightweight, stays in-process)
             self._update_market_context()
             
-            # Train weights on historical data
+            # Train weights on historical data (lightweight, stays in-process)
             self._daily_self_train()
             
-            # Generate self-improvement plan from ALL experience
-            # Continuous consciousness training cycle
+            # Launch heavy training (Transformer + PPO + LSTM) in isolated subprocess
+            # This returns immediately - training continues in background
+            try:
+                session_id = launch_training([
+                    sys.executable, "-m", "core.advanced_training",
+                    "--mode", "full",
+                    "--ticker", self.cfg.TICKER,
+                    "--ppo-timesteps", "100000",  # Reduced for off-hours
+                    "--epochs", "20",
+                    "--save-model", "models/transformer_model.pth",
+                ], timeout_minutes=30)
+                
+                if session_id:
+                    log.info(f"🏋️ Training subprocess launched: {session_id}")
+                    self.notifier.info(f"🏋️ OFF-HOURS TRAINING\nIsolated subprocess launched.\nSession: {session_id}")
+                else:
+                    log.warning("Training subprocess failed to launch")
+            except Exception as exc:
+                log.debug(f"Subprocess training launch failed: {exc}")
+            
+            # Consciousness reflection (lightweight, stays in-process)
             try:
                 if hasattr(self, 'consciousness') and self.consciousness:
                     self.consciousness.observe_scan({"source": "off_hours", "tickers": len(PENNY_STOCK_UNIVERSE)})
                     session = self.consciousness.continuous_train()
                     reflection = self.consciousness.reflect()
                     log.info(f"🧠 Consciousness reflection: {reflection[:200]}")
-                    self.notifier.info(f"🧠 AI CONSCIOUSNESS UPDATE\n{reflection[:1000]}")
             except Exception as exc:
                 log.debug(f"Consciousness training failed: {exc}")
             
+            # Self-improvement plan (lightweight, stays in-process)
             try:
                 plan = generate_self_improvement_plan(self.cfg)
                 if plan.get("adjustments"):
@@ -618,10 +653,32 @@ class ScalperRunner:
             except Exception as exc:
                 log.debug(f"Self-improvement plan failed: {exc}")
             
-            log.info("🧠 Off-hours training complete. Ready for next session.")
-            self.notifier.info("🧠 HA-NUN OFF-HOURS TRAINING\nMarket closed. Self-training on historical data.\nReady for next session.")
+            log.info("🧠 Off-hours training dispatched. Ready for next session.")
         except Exception as exc:
             log.debug(f"Off-hours training failed: {exc}")
+    
+    def _start_weights_watcher(self):
+        """Start background file watcher for hot-reload of scalper_weights.json."""
+        try:
+            from core.async_utils import FileWatcher
+            self._weights_watcher = FileWatcher(
+                filepath=self._weights_file,
+                callback=self._on_weights_changed,
+                poll_interval=5.0
+            )
+            self._weights_watcher.start()
+            log.debug("Weights file watcher started")
+        except Exception as exc:
+            log.debug(f"Weights watcher init failed: {exc}")
+    
+    def _on_weights_changed(self, filepath: str):
+        """Called when scalper_weights.json changes on disk."""
+        log.info(f"🧠 Weights file changed — hot-reloading from disk")
+        try:
+            weights = self._load_weights()
+            log.info(f"🧠 Hot-reload complete | {len(weights.get('win_history', []))} trade samples in history")
+        except Exception as exc:
+            log.warning(f"Weights hot-reload failed: {exc}")
     
     def _load_weights(self) -> Dict:
         try:
@@ -632,8 +689,8 @@ class ScalperRunner:
     
     def _save_weights(self, weights: Dict):
         os.makedirs("models", exist_ok=True)
-        with open(self._weights_file, "w") as f:
-            json.dump(weights, f, indent=2)
+        # Atomic write to prevent corruption during concurrent access
+        AtomicFileWriter.write_json(self._weights_file, weights)
         log.info(f"🧠 Learned weights saved -> {self._weights_file}")
     
     def _daily_self_train(self):
@@ -772,10 +829,11 @@ class ScalperRunner:
                         f.write(f"\nGenerated: {now_et.isoformat()}\n")
                         f.write(f"Weights: {json.dumps(weights, indent=2)}\n")
                         f.write(f"Performance: {stmt}\n")
-                    os.system(
-                        f"cd {os.getcwd()} && "
-                        f"git add models/scalper_weights.json models/daily_guidelines.txt && "
-                        f"git commit -m 'train: ha-nun daily self-improvement {today_str}' >/dev/null 2>&1"
+                    # Async git commit (non-blocking)
+                    self._worker.submit_git_commit(
+                        files=["models/scalper_weights.json", "models/daily_guidelines.txt"],
+                        message=f"train: ha-nun daily self-improvement {today_str}",
+                        push=True
                     )
                 except Exception:
                     pass
@@ -809,9 +867,13 @@ class ScalperRunner:
             }
             with open(report_path, 'w') as f:
                 json.dump(report, f, indent=2)
-            # Push to git
+            # Push to git (async, non-blocking)
             try:
-                os.system(f"git add {report_path} && git commit -m 'report: ha-nun init {datetime.utcnow().strftime(\'%Y%m%d_%H%M%S\')}' >/dev/null 2>&1")
+                self._worker.submit_git_commit(
+                    files=[report_path],
+                    message=f"report: ha-nun init {datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                    push=False
+                )
             except Exception:
                 pass
             return report_path
@@ -856,9 +918,13 @@ class ScalperRunner:
             }
             with open(report_path, 'w') as f:
                 json.dump(report, f, indent=2)
-            # Push to git
+            # Push to git (async, non-blocking)
             try:
-                os.system(f"git add {report_path} && git commit -m 'report: ha-nun close {datetime.utcnow().strftime(\'%Y%m%d_%H%M%S\')}' >/dev/null 2>&1")
+                self._worker.submit_git_commit(
+                    files=[report_path],
+                    message=f"report: ha-nun close {datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                    push=False
+                )
             except Exception:
                 pass
             return report_path

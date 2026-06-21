@@ -208,5 +208,21 @@
       }
     },
     "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-21T10:54:49.720971\n\u2022 Win rate strong: consider larger size and wider targets"
+  },
+  {
+    "timestamp": "2026-06-21T12:12:58.103127",
+    "win_rate": 0.5466300940438872,
+    "buffer_win_rate": 0.8863636363636364,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-21T12:12:58.102083\nCombined win rate: 54.7% (buffer=88.6%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
+  },
+  {
+    "timestamp": "2026-06-21T12:12:58.993599",
+    "win_rate": 0.5466300940438872,
+    "buffer_win_rate": 0.8863636363636364,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-21T12:12:58.992978\nCombined win rate: 54.7% (buffer=88.6%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
   }
 ]

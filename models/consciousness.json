@@ -1,11 +1,11 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 2,
-  "training_sessions": 0,
+  "total_awakenings": 3,
+  "training_sessions": 1,
   "trades_observed": 0,
-  "scans_performed": 0,
-  "improvements_applied": 0,
+  "scans_performed": 1,
+  "improvements_applied": 1,
   "reports_generated": 0,
   "event_log": [
     {
@@ -31,7 +31,79 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #2",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-21T12:07:25.227800",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #3",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-21T12:12:55.033494",
+      "type": "SCAN",
+      "message": "Market scan #1",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": 72
+      }
+    },
+    {
+      "timestamp": "2026-06-21T12:12:55.033806",
+      "type": "TRAIN",
+      "message": "Training session #1",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-21T12:12:55.033996",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": null,
+        "vix_regime": "unknown",
+        "timestamp": "2026-06-21T12:12:55.033990"
+      }
+    },
+    {
+      "timestamp": "2026-06-21T12:12:55.034125",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-21T12:12:58.087878",
+      "type": "TRAIN_COMPLETE",
+      "message": "Unified training completed",
+      "metadata": {
+        "weights_updated": true,
+        "ppo_trained": false
+      }
+    },
+    {
+      "timestamp": "2026-06-21T12:12:58.104233",
+      "type": "IMPROVE",
+      "message": "Applied improvement #1",
+      "metadata": {
+        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-21T12:12:58.102083\nCombined win rate: 54.7% (buffer=88.6%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects",
+        "adjustments": {},
+        "win_rate": 0.5466300940438872,
+        "timestamp": "2026-06-21T12:12:58.104202"
+      }
+    },
+    {
+      "timestamp": "2026-06-21T12:12:58.104861",
+      "type": "ERROR",
+      "message": "Training session failed: 'version_history'",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-21T12:12:58.105775",
+      "type": "REFLECT",
+      "message": "Self-reflection completed",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-21T11:06:54.236339"
+  "last_awakening": "2026-06-21T12:07:25.227793",
+  "current_version": "v20260621_121258"
 }

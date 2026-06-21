@@ -38,6 +38,7 @@ from enum import Enum
 
 from core.config import BotConfig
 from core.notify import log
+from core.fusion_overrides import FusionOverrides
 
 # ── 100% Lazy model imports ──
 # NOTHING heavy is imported at module level.
@@ -460,6 +461,9 @@ class MultiModelFusionEngine:
         self.accuracy_tracker = ModelAccuracyTracker()
         self.kalman_smoother = KalmanDecisionSmoother()
         
+        # Circuit breaker overrides (bypass accuracy weights in extreme conditions)
+        self.overrides = FusionOverrides()
+        
         # Decision history for analysis
         self._decision_history: deque = deque(maxlen=500)
         
@@ -661,19 +665,25 @@ class MultiModelFusionEngine:
             fused_probs, min_confidence=self.cfg.CONFIDENCE_THRESHOLD
         )
         
-        # ── 5. Regime override for extreme conditions ──────────────────
-        if regime_result is not None:
-            if regime_result.regime == MarketRegime.HIGH_VOLATILITY and regime_result.volatility_percentile > 90:
-                # In extreme volatility, be more conservative
-                if smoothed_action != 0 and smoothed_conf < 0.7:
-                    smoothed_action = 0
-                    smooth_reason += " | Extreme vol override"
-            
-            elif regime_result.regime == MarketRegime.LOW_VOLATILITY and regime_result.volatility_percentile < 5:
-                # In extremely low vol, be patient
-                if smoothed_action != 0:
-                    smoothed_action = 0
-                    smooth_reason += " | Extreme low vol override"
+        # ── 5. Circuit breaker overrides ────────────────────────────────
+        atr_series = None
+        if features_df is not None and 'atr' in features_df.columns:
+            atr_series = features_df['atr']
+        override_signal = self.overrides.evaluate(regime_result, features_df, atr_series)
+        if override_signal:
+            log.warning(f"Fusion override active: {override_signal.reason}")
+            if override_signal.forced_weights:
+                fused_probs = np.zeros(3, dtype=np.float32)
+                for pred in predictions:
+                    w = override_signal.forced_weights.get(pred.model_name, 0.25)
+                    fused_probs += pred.probabilities * w
+                if fused_probs.sum() > 0:
+                    fused_probs /= fused_probs.sum()
+                else:
+                    fused_probs = np.array([1.0, 0.0, 0.0])
+            if override_signal.forced_action is not None:
+                smoothed_action = override_signal.forced_action
+            smooth_reason += f" | OVERRIDE[{override_signal.level.name}]: {override_signal.reason}"
         
         # ── 6. Build final decision ────────────────────────────────────
         action_name = ['HOLD', 'BUY', 'SELL'][smoothed_action]
