@@ -288,7 +288,7 @@ class ScalperRunner:
                 "top_pick": self.top_pick.ticker if self.top_pick else None,
                 "top_score": self.top_pick.rank_score if self.top_pick else 0,
                 "scan_results": scan_data,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(datetime.UTC).isoformat(),
             }
             with open("live_metrics.json", "w") as f:
                 json.dump(metrics, f, indent=2)
@@ -745,7 +745,7 @@ class ScalperRunner:
                 "regime": regime.regime.value if hasattr(regime, 'regime') else "unknown",
                 "confidence": getattr(regime, 'confidence', 0.0),
                 "features": [],
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(datetime.UTC).isoformat(),
             })
             log.info(f"🌍 Market context: {ctx.get('spy_trend', 'unknown')} SPY, {ctx.get('vix_regime', 'unknown')} VIX")
         except Exception as exc:
@@ -849,9 +849,9 @@ class ScalperRunner:
             from datetime import datetime
             import json
             os.makedirs("models/daily_reports", exist_ok=True)
-            report_path = f"models/daily_reports/init_report_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+            report_path = f"models/daily_reports/init_report_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}.json"
             report = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(datetime.UTC).isoformat(),
                 "mode": "HA-NUN",
                 "ticker": self.cfg.TICKER,
                 "account": "DUO429233",
@@ -871,7 +871,7 @@ class ScalperRunner:
             try:
                 self._worker.submit_git_commit(
                     files=[report_path],
-                    message=f"report: ha-nun init {datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                    message=f"report: ha-nun init {datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}",
                     push=False
                 )
             except Exception:
@@ -893,9 +893,9 @@ class ScalperRunner:
             ib_start = self._ib_starting_balance or self.account_equity
             ib_change = self.account_equity - ib_start
             ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0
-            report_path = f"models/daily_reports/close_report_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+            report_path = f"models/daily_reports/close_report_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}.json"
             report = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(datetime.UTC).isoformat(),
                 "mode": "HA-NUN",
                 "ticker": self.cfg.TICKER,
                 "ib_account": round(self.account_equity, 2),
@@ -922,7 +922,7 @@ class ScalperRunner:
             try:
                 self._worker.submit_git_commit(
                     files=[report_path],
-                    message=f"report: ha-nun close {datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                    message=f"report: ha-nun close {datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}",
                     push=False
                 )
             except Exception:
