@@ -78,10 +78,20 @@ def push_github_release(model_paths: List[str],
                 except Exception:
                     pass
         else:
+            hf_link = f'https://huggingface.co/{hf_repo_id or repo}' if hf_repo_id else ''
+            body_auto = (
+                f'{body}\n\n'
+                f'### Model Weights\n'
+                f'Raw binary weights are preserved on Hugging Face Hub:\n'
+                f'🔗 [Download Model Weights from Hugging Face Hub]({hf_link})\n\n'
+                f'### Verification\n'
+                f'- Manifest: `models/model_manifest.json`\n'
+                f'- Training history: `training_history_*.json`\n'
+            ) if hf_link else body
             payload = {
                 'tag_name': tag,
                 'name': name,
-                'body': body,
+                'body': body_auto,
                 'draft': False,
                 'prerelease': False,
             }
