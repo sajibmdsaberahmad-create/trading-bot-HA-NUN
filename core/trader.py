@@ -45,6 +45,7 @@ from core.env import TradingEnv
 from core.performance import PerformanceTracker
 from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
+from core.startup_checks import run_startup_checks
 
 
 class LiveTrader:
@@ -130,6 +131,7 @@ class LiveTrader:
     # ── Setup ─────────────────────────────────────────────────────────────────
 
     def setup(self):
+        run_startup_checks()
         if not os.path.exists(self.cfg.MODEL_PATH):
             raise FileNotFoundError(
                 f"No trained model found at '{self.cfg.MODEL_PATH}'.\n"

@@ -28,6 +28,20 @@ class FeatureEngineerEnhanced:
     N_FEATURES = 18  # 14 original + 4 new
     
     @staticmethod
+    def _robust_rolling_z(series: pd.Series, window: int = 30, clip_z: float = 3.0) -> pd.Series:
+        """
+        Rolling robust Z-score using median and IQR instead of mean/std.
+        This prevents a single extreme spike from poisoning the normalization.
+        """
+        roll = series.rolling(window, min_periods=max(2, window // 4))
+        med = roll.median()
+        q1 = roll.quantile(0.25)
+        q3 = roll.quantile(0.75)
+        iqr = (q3 - q1).replace(0, np.nan)
+        z = (series - med) / (iqr / 1.349)  # 1.349 converts IQR to std-equivalent for normal
+        return z.clip(-clip_z, clip_z)
+    
+    @staticmethod
     def compute(df: pd.DataFrame) -> np.ndarray:
         """
         Compute all 18 features from OHLCV data.
@@ -47,8 +61,8 @@ class FeatureEngineerEnhanced:
         # 0: Log return
         f["log_return"] = np.log(df["close"] / df["close"].shift(1))
         
-        # 1: Realised volatility
-        f["volatility_10"] = f["log_return"].rolling(10).std()
+        # 1: Realised volatility (robust: MAD-based)
+        f["volatility_10"] = f["log_return"].rolling(10).apply(lambda x: np.mean(np.abs(x - np.median(x))), raw=True)
         
         # 2: RSI-14 normalized [0, 1]
         delta = df["close"].diff()
@@ -72,9 +86,8 @@ class FeatureEngineerEnhanced:
         bb_lower = bb_mid - 2.0 * bb_std
         f["bb_pct"] = ((df["close"] - bb_lower) / (bb_upper - bb_lower + 1e-9)).clip(0.0, 1.0)
         
-        # 5: Volume Z-score
-        vol_roll = df["volume"].rolling(30)
-        f["volume_z"] = ((df["volume"] - vol_roll.mean()) / (vol_roll.std() + 1e-9)).clip(-3.0, 3.0)
+        # 5: Volume Z-score (robust IQR-based)
+        f["volume_z"] = FeatureEngineerEnhanced._robust_rolling_z(df["volume"], window=30, clip_z=3.0)
         
         # 6: Volume acceleration
         f["volume_accel"] = f["volume_z"].diff().clip(-3.0, 3.0)
@@ -97,11 +110,10 @@ class FeatureEngineerEnhanced:
         atr14 = tr.rolling(14).mean()
         f["atr_norm"] = (atr14 / (df["close"] + 1e-9)).clip(0.0, 0.05)
         
-        # 10: OBV Z-score
+        # 10: OBV Z-score (robust IQR-based)
         direction = np.sign(df["close"].diff()).fillna(0)
         obv = (direction * df["volume"]).cumsum()
-        obv_roll = obv.rolling(30)
-        f["obv_z"] = ((obv - obv_roll.mean()) / (obv_roll.std() + 1e-9)).clip(-3.0, 3.0)
+        f["obv_z"] = FeatureEngineerEnhanced._robust_rolling_z(obv, window=30, clip_z=3.0)
         
         # 11: Trend strength (ADX-style)
         up_move = df["high"].diff()
@@ -114,11 +126,10 @@ class FeatureEngineerEnhanced:
         dx = (plus_di - minus_di).abs() / (plus_di + minus_di + 1e-9) * 100
         f["trend_strength"] = (dx.rolling(14).mean() / 100.0).clip(0.0, 1.0)
         
-        # 12: Mean-reversion Z-score
+        # 12: Mean-reversion Z-score (robust IQR-based)
         ema9 = df["close"].ewm(span=9, adjust=False).mean()
         dist = df["close"] - ema9
-        dist_std = dist.rolling(20).std()
-        f["mean_reversion_z"] = (dist / (dist_std + 1e-9)).clip(-3.0, 3.0)
+        f["mean_reversion_z"] = FeatureEngineerEnhanced._robust_rolling_z(dist, window=20, clip_z=3.0)
         
         # 13: Realised-vol ratio
         vol_short = f["log_return"].rolling(5).std()

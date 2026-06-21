@@ -38,6 +38,7 @@ try:
 except ImportError:
     raise SystemExit("ERROR: gymnasium/stable-baselines3 not installed.")
 
+from collections import deque
 from core.config import BotConfig
 from core.env import TradingEnv
 from core.features import FeatureEngineer
@@ -362,11 +363,35 @@ class OnlineLearningManager:
         return False
 
     def _fine_tune(self, features: np.ndarray, prices: np.ndarray):
-        """Standard fine-tuning (legacy path)."""
+        """Standard fine-tuning with Experience Replay Anchoring."""
         self._tune_count += 1
         log.info(f"Online fine-tune #{self._tune_count} | {len(features)} bars | {self.cfg.FINE_TUNE_STEPS:,} PPO steps")
         try:
-            env = TradingEnv(features, prices, self.cfg.INITIAL_CASH, self.cfg.TRANSACTION_COST_PCT,
+            # ── Experience Replay Anchoring ───────────────────────────────
+            # Blend recent live data with a diverse historical anchor buffer
+            # to prevent catastrophic forgetting / policy shock on 30-bar windows.
+            live_features = features
+            live_prices = prices
+            anchor_features = live_features
+            anchor_prices = live_prices
+            try:
+                from core.experience_buffer import load_recent
+                anchor_recs = load_recent(n=max(getattr(self.cfg, "FINE_TUNE_ANCHOR_SAMPLES", 256), 0))
+                if anchor_recs:
+                    af, ap = [], []
+                    for rec in anchor_recs:
+                        feats = rec.get("features")
+                        if isinstance(feats, list) and len(feats) == getattr(self.cfg, "N_FEATURES", 18):
+                            af.append(feats)
+                            ap.append(float(rec.get("entry_price", 0.0) or 0.0))
+                    if af:
+                        anchor_features = np.vstack([live_features, np.array(af, dtype=np.float32)])
+                        anchor_prices = np.concatenate([live_prices, np.array(ap, dtype=np.float32)])
+                        log.info(f"Anchor replay: added {len(af)} historical records to fine-tune")
+            except Exception as exc:
+                log.debug(f"Anchor replay load failed: {exc}")
+
+            env = TradingEnv(anchor_features, anchor_prices, self.cfg.INITIAL_CASH, self.cfg.TRANSACTION_COST_PCT,
                               self.cfg.WINDOW_SIZE, self.cfg.DEFAULT_MAX_POSITION_PCT)
             vec_env = DummyVecEnv([lambda: env])
             self.model.set_env(vec_env)

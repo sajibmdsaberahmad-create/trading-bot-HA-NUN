@@ -120,6 +120,7 @@ class BotConfig:
     FINE_TUNE_EVERY_BARS:  int = 30
     FINE_TUNE_STEPS:       int = 2_048
     MIN_BARS_FOR_FINETUNE: int = 60
+    FINE_TUNE_ANCHOR_SAMPLES: int = 256
 
     # ════════════════════════════════════════════════════════════════════
     # PPO HYPERPARAMETERS
