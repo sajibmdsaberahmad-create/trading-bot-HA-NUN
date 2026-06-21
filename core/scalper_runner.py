@@ -281,15 +281,18 @@ class ScalperRunner:
     
     def _scan_and_rank(self):
         t0 = time.perf_counter()
-        log.info(f"🔍 HA-NUN SCAN: {len(PENNY_STOCK_UNIVERSE)} tickers...")
+        # Use a smaller active screen to reduce IB load; not the full universe every scan
+        screen_list = getattr(self.cfg, "SCAN_UNIVERSE", PENNY_STOCK_UNIVERSE[:40])
+        log.info(f"🔍 HA-NUN SCAN: {len(screen_list)} tickers (screened subset)...")
         results: List[Dict] = []
-        
+
         def _scan_one(ticker: str) -> Optional[Dict]:
             try:
                 cfg_ticker = self.cfg.TICKER
                 self.cfg.TICKER = ticker
                 dm = DataManager(self.conn, self.cfg)
-                hist = dm.fetch_historical(duration="1 M", bar_size="1 day")
+                # Lightweight: 5 days of 1-hour bars is enough for scoring (>=21 bars)
+                hist = dm.fetch_historical(duration="5 D", bar_size="1 hour")
                 if hist is None or len(hist) < 21:
                     return None
                 score = self._score_ticker(ticker, hist)
@@ -297,10 +300,11 @@ class ScalperRunner:
                 return score if score and score.get("total_score", 0) > 0 else None
             except Exception:
                 return None
-        
-        workers = min(len(PENNY_STOCK_UNIVERSE), 32)
+
+        # Sequential-ish with small worker count to avoid IB rate limits
+        workers = min(len(screen_list), 6)
         with ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {pool.submit(_scan_one, t): t for t in PENNY_STOCK_UNIVERSE}
+            futures = {pool.submit(_scan_one, t): t for t in screen_list}
             for fut in as_completed(futures):
                 r = fut.result()
                 if r:
