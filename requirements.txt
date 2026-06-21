@@ -23,3 +23,6 @@ tf-keras>=2.13.0          # For TensorFlow-Keras bridge
 # Advanced transformer dependencies
 einops>=0.6.0             # For transformer tensor operations (optional)
 accelerate>=0.20.0        # For mixed precision training (optional)
+
+# Model preservation / registry
+huggingface_hub>=1.20.0   # For HuggingFace Hub model registry
