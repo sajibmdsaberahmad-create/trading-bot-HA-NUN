@@ -131,21 +131,11 @@ class ScalperRunner:
         # Experience buffer for unified learning
         self._xp_buffer_initialized = False
 
-        # Initialize enhanced AI system (guardrails, regime, ensemble, adaptive learner)
-        try:
-            self.ai_components = initialize_enhanced_system(cfg)
-            if self.ai_components:
-                log.info("🧠 Enhanced AI components loaded into scalper")
-        except Exception as exc:
-            log.debug(f"Enhanced AI init skipped: {exc}")
-        
-        # Build or load PPO model for top-pick gating
+        # Initialize enhanced AI system (quietly - details in final init report)
+        self.ai_components = initialize_enhanced_system(cfg)
         self._init_model()
-        
-        # Continuous consciousness - 24/7 self-training and versioning
         try:
             self.consciousness = AIConsciousness(cfg)
-            log.info("🧠 AI Consciousness initialized - continuous 24/7 self-improvement active")
         except Exception as exc:
             log.debug(f"Consciousness init skipped: {exc}")
             self.consciousness = None
@@ -268,29 +258,23 @@ class ScalperRunner:
             log.debug(f"Could not write live_metrics.json: {exc}")
     
     def run(self):
-        log.info("=" * 70)
-        log.info("  HA-NUN — SINGLE FOCUS SCALPER")
+        # Full initialization report (pushed to git and Telegram)
+        report_path = self._write_init_report()
+        log.info("HA-NUN — SINGLE FOCUS SCALPER")
         acct = self.conn.ib.accountValues()
-        log.info(f"  IB Account: {acct[0].account if acct else 'unknown'}")
-        log.info(f"  Universe: {len(PENNY_STOCK_UNIVERSE)} tickers")
-        log.info(f"  Max per trade: ${self.cfg.MAX_TRADE_SIZE_USD:,.0f}")
-        log.info(f"  Max risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}")
-        log.info(f"  Baseline:      ${self.cfg.INITIAL_CASH:,.2f}")
-        log.info("=" * 70)
-        self.notifier.info("🚀 HA-NUN STARTED\nSingle-focus scalper active.\nScanning for setups...")
+        log.info(f"Account: {acct[0].account if acct else 'unknown'} | Universe: {len(PENNY_STOCK_UNIVERSE)} tickers")
+        log.info(f"Max per trade: ${self.cfg.MAX_TRADE_SIZE_USD:,.0f} | Risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}")
+        log.info(f"Init report: {report_path}")
+        self.notifier.info("🚀 HA-NUN STARTED")
         
         self._refresh_account_balance()
         if self._ib_starting_balance:
-            log.info(f"  IB Starting Balance: ${self._ib_starting_balance:,.2f}")
+            log.info(f"IB Starting Balance: ${self._ib_starting_balance:,.2f}")
         
-        # Check market status
+        # Check market status quietly
         market_open, market_reason = self._is_market_open()
-        if market_open:
-            log.info(f"  ✅ {market_reason}")
-            self.notifier.info(f"✅ HA-NUN MARKET STATUS\n{market_reason}\nStarting scalper...")
-        else:
-            log.warning(f"  ⚠️ {market_reason}")
-            self.notifier.warning(f"⚠️ HA-NUN MARKET STATUS\n{market_reason}\nBot will train offline until market opens.")
+        if not market_open:
+            self.notifier.warning(f"⚠️ MARKET STATUS\n{market_reason}\nBot will train offline until market opens.")
         
         self._last_scan_time = time.time()
         self._scan_and_rank()
@@ -801,7 +785,90 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"Daily push skipped: {exc}")
     
+    def _write_init_report(self) -> str:
+        """Write full initialization report and push to git."""
+        try:
+            from datetime import datetime
+            import json
+            os.makedirs("models/daily_reports", exist_ok=True)
+            report_path = f"models/daily_reports/init_report_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+            report = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "mode": "HA-NUN",
+                "ticker": self.cfg.TICKER,
+                "account": "DUO429233",
+                "equity": round(self.account_equity, 2),
+                "max_trade_usd": self.cfg.MAX_TRADE_SIZE_USD,
+                "risk_per_trade": self.cfg.risk_amount_usd(self.account_equity),
+                "baseline": self.cfg.INITIAL_CASH,
+                "universe_size": len(PENNY_STOCK_UNIVERSE),
+                "ai_models": list(self.ai_components.keys()) if self.ai_components else [],
+                "ppo_loaded": self.model is not None,
+                "consciousness_active": hasattr(self, 'consciousness') and self.consciousness is not None,
+                "market_status": self._is_market_open(),
+            }
+            with open(report_path, 'w') as f:
+                json.dump(report, f, indent=2)
+            # Push to git
+            try:
+                os.system(f"git add {report_path} && git commit -m 'report: ha-nun init {datetime.utcnow().strftime(\'%Y%m%d_%H%M%S\')}' >/dev/null 2>&1")
+            except Exception:
+                pass
+            return report_path
+        except Exception as exc:
+            log.debug(f"Init report failed: {exc}")
+            return "N/A"
+    
+    def _write_close_report(self):
+        """Write full shutdown/session report and push to git."""
+        try:
+            from datetime import datetime
+            import json
+            os.makedirs("models/daily_reports", exist_ok=True)
+            baseline = float(self.cfg.INITIAL_CASH)
+            pnl = self.bot_nav - baseline
+            pnl_pct = (pnl / baseline) * 100 if baseline else 0.0
+            ib_start = self._ib_starting_balance or self.account_equity
+            ib_change = self.account_equity - ib_start
+            ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0
+            report_path = f"models/daily_reports/close_report_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+            report = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "mode": "HA-NUN",
+                "ticker": self.cfg.TICKER,
+                "ib_account": round(self.account_equity, 2),
+                "ib_start": round(ib_start, 2),
+                "ib_change": round(ib_change, 2),
+                "ib_change_pct": round(ib_change_pct, 2),
+                "bot_cash": round(self.bot_cash, 2),
+                "bot_nav": round(self.bot_nav, 2),
+                "day_pnl": round(pnl, 2),
+                "day_pnl_pct": round(pnl_pct, 2),
+                "baseline": baseline,
+                "trades": self.trades_today,
+                "wins": len([t for t in self.trade_journal if t["result"] == "win"]),
+                "losses": len([t for t in self.trade_journal if t["result"] == "loss"]),
+                "position": f"{self.shares:.0f} {self.current_ticker}" if self.shares > 0 else None,
+                "scan_count": len(self.scan_results),
+                "top_pick": self.top_pick.ticker if self.top_pick else None,
+                "weights": self._load_weights(),
+                "journal": self.trade_journal[-20:],
+            }
+            with open(report_path, 'w') as f:
+                json.dump(report, f, indent=2)
+            # Push to git
+            try:
+                os.system(f"git add {report_path} && git commit -m 'report: ha-nun close {datetime.utcnow().strftime(\'%Y%m%d_%H%M%S\')}' >/dev/null 2>&1")
+            except Exception:
+                pass
+            return report_path
+        except Exception as exc:
+            log.debug(f"Close report failed: {exc}")
+            return "N/A"
+    
     def _shutdown(self):
+        # Write and push full session report
+        report_path = self._write_close_report()
         self._refresh_account_balance()
         baseline = float(self.cfg.INITIAL_CASH)
         pnl = self.bot_nav - baseline
@@ -809,7 +876,7 @@ class ScalperRunner:
         ib_start = self._ib_starting_balance or self.account_equity
         ib_change = self.account_equity - ib_start
         ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0
-        summary = "📊 HA-NUN DAILY STATEMENT\n"
+        summary = "📊 HA-NUN SESSION CLOSE\n"
         summary += f" IB Account:    ${self.account_equity:>12,.2f}  (start: ${ib_start:,.2f})\n"
         summary += f" IB Change:     ${ib_change:>+12,.2f} ({ib_change_pct:+.2f}%)\n"
         summary += f" Bot Cash:      ${self.bot_cash:>12,.2f}\n"
@@ -820,7 +887,9 @@ class ScalperRunner:
         if self.shares > 0:
             summary += f" Position:      {self.shares:.0f} {self.current_ticker}\n"
             summary += " (bracket orders remain active on IB)\n"
+        summary += f"\nReport: {report_path}\n"
         log.info(summary)
         self.notifier.info(summary)
         push_daily_summary(self.bot_nav, self.account_equity)
         self.conn.disconnect()
+        log.info("HA-NUN stopped.")

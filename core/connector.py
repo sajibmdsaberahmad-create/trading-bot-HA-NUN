@@ -90,7 +90,8 @@ class IBConnector:
         """Qualify and cache the contract for cfg.TICKER. Invalidate cache if ticker changes."""
         if self._contract is None or getattr(self._contract, 'symbol', None) != self.cfg.TICKER:
             raw = Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
-            qualified = self.ib.qualifyContracts(raw)
+            # Use async qualifier to avoid "coroutine was never awaited" warning on Python 3.13
+            qualified = self.ib.qualifyContractsAsync(raw)
             if not qualified:
                 raise RuntimeError(
                     f"Could not qualify contract for '{self.cfg.TICKER}'.\n"
