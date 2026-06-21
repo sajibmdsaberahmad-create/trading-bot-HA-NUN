@@ -87,8 +87,8 @@ class IBConnector:
             pass
 
     def get_contract(self):
-        """Qualify and cache the contract for cfg.TICKER."""
-        if self._contract is None:
+        """Qualify and cache the contract for cfg.TICKER. Invalidate cache if ticker changes."""
+        if self._contract is None or getattr(self._contract, 'symbol', None) != self.cfg.TICKER:
             raw = Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
             qualified = self.ib.qualifyContracts(raw)
             if not qualified:
