@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-06-21T20:09:40.131753",
+  "models": [
+    {
+      "path": "ppo_trader.zip",
+      "filename": "ppo_trader.zip",
+      "size_bytes": 21034659,
+      "sha256": "091bb2253c9728fbbaaa79d449640cc0b36eda946ba646b67805fe966a20a066"
+    },
+    {
+      "path": "models/transformer_model.pth",
+      "filename": "transformer_model.pth",
+      "size_bytes": 85342592,
+      "sha256": "6a4b34b3664aa357e1bfe6fe1a8ac43685e7a7ec4701b6bb2c7b907c20fcb1df"
+    }
+  ]
+}

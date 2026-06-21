@@ -39,7 +39,7 @@ from enum import Enum
 from core.config import BotConfig
 from core.notify import log
 from core.fusion_overrides import FusionOverrides
-from core.hmrs import HiddenMarkovRegimeSwitching, MarketRegime
+from core.hmrs import HiddenMarkovRegimeSwitching, MarketRegime, RegimeResult
 
 # ── 100% Lazy model imports ──
 # NOTHING heavy is imported at module level.

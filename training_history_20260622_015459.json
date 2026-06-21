@@ -1,0 +1,47 @@
+{
+  "start_time": "2026-06-21T19:13:23.460563",
+  "models_trained": [
+    "ppo",
+    "transformer"
+  ],
+  "metrics": {
+    "ppo": {
+      "timesteps": 500000,
+      "training_time_s": 2482.1
+    },
+    "transformer": {
+      "epochs": 10,
+      "best_val_loss": Infinity,
+      "samples": 945
+    },
+    "backtest": {
+      "initial_nav": 1000.0,
+      "final_nav": 1000.0,
+      "total_return_pct": 0.0,
+      "total_pnl": 0.0,
+      "max_drawdown_pct": 0.0,
+      "sharpe_ratio": 0.0,
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate_pct": 0.0,
+      "avg_win": 0,
+      "avg_loss": 0,
+      "model_accuracy": {}
+    }
+  },
+  "data": {
+    "total_bars": 1412,
+    "train_bars": 976,
+    "val_bars": 176,
+    "test_bars": 194,
+    "features_shape": [
+      976,
+      7
+    ],
+    "stationary_features": true,
+    "transformer_input_dim": 7
+  },
+  "total_time_s": 2496.0,
+  "end_time": "2026-06-21T19:54:59.509519"
+}
