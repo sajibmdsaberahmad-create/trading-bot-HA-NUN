@@ -85,10 +85,9 @@ echo "📡 Syncing with GitHub (HA-NUN repo)..."
 git config --global user.email "bot@ha-nun.local" 2>/dev/null || true
 git config --global user.name "HANUN-Bot" 2>/dev/null || true
 
-# Stash any local changes, pull, then restore
-git stash push -m "pre-flight stash $(date +%s)" 2>/dev/null || true
-git pull origin main 2>/dev/null || echo "  ℹ️  No remote changes to pull"
-git stash pop 2>/dev/null || true
+# Hard reset to origin/main ensures we always run the latest deployed code
+git fetch origin main 2>/dev/null || true
+git reset --hard origin/main 2>/dev/null || echo "  ℹ️  No remote changes to pull"
 
 echo "  ✅ Repo synchronized"
 
@@ -98,7 +97,9 @@ echo "🚦 Running Feature Drift Validation Gate..."
 python3 -c "
 from core.features_enhanced import FeatureEngineerEnhanced
 from core.feature_drift import validate_features_at_startup
-result = validate_features_at_startup(FeatureEngineerEnhanced().compute)
+fe = FeatureEngineerEnhanced()
+# Wrap compute() to match the validator's expected signature (df, window_size=...)
+result = validate_features_at_startup(lambda df, window_size=30: fe.compute(df))
 print(f'   Drift check: {\"PASS\" if result else \"WARN\"}')
 " 2>&1 || echo "  ℹ️  Drift validator skipped (no market data yet)"
 
