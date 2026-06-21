@@ -51,6 +51,9 @@ from core.broker import BrokerExecutor, BracketHandle
 from core.env import TradingEnv
 from core.agent import build_ppo_agent, predict_with_reasoning, initialize_enhanced_system
 from core.experience_buffer import append as buffer_append
+from core.market_context import summarize_market_context
+from core.market_regime import MarketRegimeDetector
+from core.self_improver import generate_self_improvement_plan
 from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
 
@@ -92,6 +95,7 @@ class ScalperRunner:
         self.model = None
         self.ai_components: Dict[str, Any] = {}
         self.fe = FeatureEngineerEnhanced()
+        self.regime_detector = MarketRegimeDetector()
         
         # IB account state (full account from IB)
         self.account_equity = float(cfg.INITIAL_CASH)
@@ -596,8 +600,19 @@ class ScalperRunner:
                 bullish_pct = bullish_days / total_days
                 log.info(f"🧠 Historical analysis: {bullish_pct:.0%} bullish days across {total_days} samples")
             
+            # Update market regime from broader context
+            self._update_market_context()
+            
             # Train weights on historical data
             self._daily_self_train()
+            
+            # Generate self-improvement plan from ALL experience
+            try:
+                plan = generate_self_improvement_plan(self.cfg)
+                if plan.get("adjustments"):
+                    self.notifier.info(f"🧬 SELF-IMPROVEMENT PLAN\n{plan['guidelines'][:1000]}")
+            except Exception as exc:
+                log.debug(f"Self-improvement plan failed: {exc}")
             
             log.info("🧠 Off-hours training complete. Ready for next session.")
             self.notifier.info("🧠 HA-NUN OFF-HOURS TRAINING\nMarket closed. Self-training on historical data.\nReady for next session.")
@@ -654,6 +669,27 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"Self-train skipped: {exc}")
     
+    def _update_market_context(self):
+        """Fetch Yahoo Finance context and update regime detector."""
+        try:
+            ctx = summarize_market_context()
+            regime = self.regime_detector.classify(
+                self.data.get_bar_dataframe() if hasattr(self.data, 'get_bar_dataframe') else None,
+                vix_df=None,
+            )
+            buffer_append({
+                "source": "market_context",
+                "ticker": "MARKET",
+                "action": "REGIME",
+                "regime": regime.regime.value if hasattr(regime, 'regime') else "unknown",
+                "confidence": getattr(regime, 'confidence', 0.0),
+                "features": [],
+                "timestamp": datetime.utcnow().isoformat(),
+            })
+            log.info(f"🌍 Market context: {ctx.get('spy_trend', 'unknown')} SPY, {ctx.get('vix_regime', 'unknown')} VIX")
+        except Exception as exc:
+            log.debug(f"Market context update failed: {exc}")
+
     def _generate_guidelines(self) -> str:
         try:
             weights = self._load_weights()
