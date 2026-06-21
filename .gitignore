@@ -29,12 +29,23 @@ backtest_results/results_*.csv
 # Experience buffer (large JSONL)
 models/experience_buffer.jsonl
 
-# Large binary model files (use Git LFS or separate Grandmaster repo)
+# Large binary model files — NEVER commit raw weights to Git.
+# Preserve via GitHub Releases / Hugging Face Hub instead.
 *.zip
-!ppo_trader.zip
-models/ppo_trader_warmup_*.zip
-models/transformer_model.pth
-models/lstm_model.h5
+*.pt
+*.pth
+*.h5
+*.ckpt
+*.onnx
+*.bin
+models/*.zip
+models/*.pt
+models/*.pth
+models/*.h5
+models/*.ckpt
+models/*.onnx
+models/checkpoints/
+models/backups/
 checkpoints/
 backups/
 

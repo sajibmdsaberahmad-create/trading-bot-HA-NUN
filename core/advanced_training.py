@@ -59,6 +59,7 @@ from core.stationary_features import (
     compute_microstructure_features, get_feature_columns,
     validate_stationarity
 )
+import requests
 
 # ── Conditional imports ────────────────────────────────────────────────
 
@@ -210,7 +211,7 @@ class AdvancedTrainingPipeline:
     # PHASE 1: DATA PREPARATION
     # ══════════════════════════════════════════════════════════════════════
     
-    def prepare_data(self, use_synthetic: bool = True, use_stationary_features: bool = True):
+    def prepare_data(self, use_synthetic: bool = True, use_stationary_features: bool = False):
         """
         Prepare all datasets for training.
         
@@ -477,14 +478,15 @@ class AdvancedTrainingPipeline:
                 price = max(price, 10.0)
                 prices.append(price)
         
-        # Build DataFrame with OHLCV
+        # Build DataFrame with OHLCV — ensure all arrays have exactly the same length
+        m = len(prices)
         df = pd.DataFrame({
-            'open': [p * (1 - 0.002 * np.random.rand()) for p in prices],
-            'high': [p * (1 + 0.003 * np.random.rand()) for p in prices],
-            'low': [p * (1 - 0.003 * np.random.rand()) for p in prices],
-            'close': prices,
-            'volume': [int(5_000_000 * (0.3 + np.random.rand())) for _ in range(n)],
-        }, index=timestamps[:n])
+            'open': [prices[i] * (1 - 0.002 * np.random.rand()) for i in range(m)],
+            'high': [prices[i] * (1 + 0.003 * np.random.rand()) for i in range(m)],
+            'low': [prices[i] * (1 - 0.003 * np.random.rand()) for i in range(m)],
+            'close': prices[:m],
+            'volume': [int(5_000_000 * (0.3 + np.random.rand())) for _ in range(m)],
+        }, index=timestamps[:m])
         
         df.index.name = 'date'
         
@@ -842,7 +844,14 @@ class AdvancedTrainingPipeline:
             self.lstm_model = model
             self.lstm_trainer = trainer
             
-            log.info(f"LSTM architecture: {model.count_params():,} parameters")
+            # Build model by passing a dummy batch to avoid Keras build-before-count error
+            try:
+                dummy_x = tf.zeros((1, config.seq_length, config.input_dim))
+                _ = model(dummy_x, training=False)
+                param_count = model.count_params()
+                log.info(f"LSTM architecture: {param_count:,} parameters")
+            except Exception as exc:
+                log.debug(f"LSTM param count skipped: {exc}")
             log.info(f"Training samples: {len(X_train)}")
             
             # Build tf.data dataset
@@ -1097,6 +1106,26 @@ class AdvancedTrainingPipeline:
         log.info(f"  Models trained: {', '.join(self.training_history['models_trained'])}")
         log.info(f"  History saved: {history_path}")
         log.info("=" * 70)
+        
+        # Preserve artifacts outside of Git
+        try:
+            from core.model_preservation import preserve_all
+            model_paths = []
+            for c in [self.config.ppo_save_path, self.config.transformer_save_path,
+                      self.config.lstm_save_path, self.config.fusion_save_path]:
+                if c and os.path.isfile(c):
+                    model_paths.append(c)
+            if model_paths:
+                preserve_all(
+                    model_paths=model_paths,
+                    github_repo=getattr(self.bot_cfg, 'GITHUB_REPO', '') or os.getenv('GITHUB_REPO', ''),
+                    github_token=getattr(self.bot_cfg, 'GITHUB_TOKEN', '') or os.getenv('GITHUB_TOKEN', ''),
+                    hf_repo_id=getattr(self.bot_cfg, 'GITHUB_GRANDMASTER_REPO', '') or os.getenv('HF_REPO_ID', ''),
+                    hf_token=os.getenv('HF_TOKEN', '') or os.getenv('HUGGINGFACE_TOKEN', ''),
+                    tag='grandmaster-latest',
+                )
+        except Exception as exc:
+            log.debug(f"Model preservation skipped: {exc}")
         
         return self.training_history
 
