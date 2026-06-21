@@ -96,10 +96,10 @@ echo "  ✅ Repo synchronized"
 echo ""
 echo "🚦 Running Feature Drift Validation Gate..."
 python3 -c "
-from core.feature_drift import FeatureDriftValidator
-validator = FeatureDriftValidator()
-status = validator.validate_all()
-print(f'   Drift check: {\"PASS\" if status else \"WARN\"}')
+from core.features_enhanced import FeatureEngineerEnhanced
+from core.feature_drift import validate_features_at_startup
+result = validate_features_at_startup(FeatureEngineerEnhanced().compute)
+print(f'   Drift check: {\"PASS\" if result else \"WARN\"}')
 " 2>&1 || echo "  ℹ️  Drift validator skipped (no market data yet)"
 
 # ── 5. Launch live trading bot ────────────────────────────────────────────────
