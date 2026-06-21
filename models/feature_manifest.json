@@ -1,0 +1,101 @@
+{
+  "version": "1.0.0",
+  "n_features": 18,
+  "features": [
+    {
+      "name": "close",
+      "type": "float",
+      "description": "Close price"
+    },
+    {
+      "name": "volume",
+      "type": "float",
+      "description": "Volume"
+    },
+    {
+      "name": "returns_1",
+      "type": "float",
+      "description": "1-bar return %"
+    },
+    {
+      "name": "returns_5",
+      "type": "float",
+      "description": "5-bar return %"
+    },
+    {
+      "name": "returns_20",
+      "type": "float",
+      "description": "20-bar return %"
+    },
+    {
+      "name": "sma_20",
+      "type": "float",
+      "description": "20-period SMA"
+    },
+    {
+      "name": "sma_50",
+      "type": "float",
+      "description": "50-period SMA"
+    },
+    {
+      "name": "ema_9",
+      "type": "float",
+      "description": "9-period EMA"
+    },
+    {
+      "name": "ema_21",
+      "type": "float",
+      "description": "21-period EMA"
+    },
+    {
+      "name": "macd",
+      "type": "float",
+      "description": "MACD line"
+    },
+    {
+      "name": "macd_signal",
+      "type": "float",
+      "description": "MACD signal line"
+    },
+    {
+      "name": "macd_hist",
+      "type": "float",
+      "description": "MACD histogram"
+    },
+    {
+      "name": "rsi",
+      "type": "float",
+      "description": "14-period RSI"
+    },
+    {
+      "name": "atr",
+      "type": "float",
+      "description": "14-period ATR"
+    },
+    {
+      "name": "atr_pct",
+      "type": "float",
+      "description": "ATR as % of price"
+    },
+    {
+      "name": "volatility_20",
+      "type": "float",
+      "description": "20-period rolling volatility"
+    },
+    {
+      "name": "volume_ratio",
+      "type": "float",
+      "description": "Current volume / 20-bar avg"
+    },
+    {
+      "name": "price_position",
+      "type": "float",
+      "description": "Price position in 20-bar range"
+    }
+  ],
+  "processing": {
+    "nan_handling": "zero_fill",
+    "outlier_clip": "3_std",
+    "normalization": "none"
+  }
+}

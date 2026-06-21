@@ -29,7 +29,9 @@ import subprocess
 import sys
 import time
 import hashlib
-from typing import List, Optional, Set
+import json
+import shutil
+from typing import List, Optional, Set, Dict
 from pathlib import Path
 from datetime import datetime
 from threading import Lock
@@ -67,7 +69,20 @@ TRACKED_FILES: Set[str] = {
     "core/ai_guardrails.py",        # Guardrails
     "core/features_enhanced.py",    # Features
     "core/risk.py",                 # Risk management
+    "core/hmrs.py",                 # HMRS engine
+    "core/stationary_features.py",  # Stationary features
+    "core/transformer_model.py",    # TFT + Distillation
+    "core/multi_model_fusion.py",   # Fusion engine
 }
+
+# Raw data files get pruned to prevent bloat
+RAW_DATA_FILES: Set[str] = {
+    "data/live_market_features.csv",
+    "backtest_results/results_latest.csv",
+    "models/experience_buffer.jsonl",
+}
+# Max days of raw data to keep in git history
+MAX_RAW_DATA_DAYS: int = 30
 
 # Debounce: minimum seconds between pushes
 MIN_PUSH_INTERVAL_SEC: float = 5.0
@@ -80,14 +95,18 @@ BATCH_WINDOW_SEC: float = 10.0
 # ═════════════════════════════════════════════════════════════════════════════
 
 def init(cfg: BotConfig):
-    """Initialize from BotConfig env vars."""
+    """
+    Initialize from BotConfig env vars.
+    
+    Sets up HA-NUN repo (primary) and optional Grandmaster/Logs repos.
+    """
     global _repo, _token, _enabled
     _repo = getattr(cfg, "GITHUB_REPO", None) or os.getenv("GITHUB_REPO", "")
     _token = getattr(cfg, "GITHUB_TOKEN", None) or os.getenv("GITHUB_TOKEN", "")
     _enabled = bool(_repo and _token)
     
     if _enabled:
-        log.info(f"GitHub sync initialized — repo={_repo}")
+        log.info(f"GitHub sync initialized — HA-NUN repo={_repo}")
         # Verify repo is reachable
         if not _verify_repo():
             log.warning("GitHub repo verification failed — sync disabled")
@@ -190,10 +209,14 @@ def _build_combined_message(messages: List[str], categories: List[str]) -> str:
     return f"batch [{cat_str}] @ {ts} | {len(messages)} changes | first: {msg_preview}"
 
 
-def _do_push(message: str, files: Optional[List[str]], category: str) -> bool:
+def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: Optional[str] = None) -> bool:
     """Execute the actual git commit and push."""
     with _push_lock:
         global _last_push_ts, _push_count, _failed_pushes
+        target_repo = repo_url or _remote_url()
+        if not target_repo:
+            log.warning("No target repo for push")
+            return False
         
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
@@ -201,6 +224,8 @@ def _do_push(message: str, files: Optional[List[str]], category: str) -> bool:
             # Auto-detect changed files if not specified
             if files is None:
                 files = _detect_changed_files(repo_root)
+                # Filter raw data files to only recent ones
+                files = _apply_bloat_guard(files, repo_root)
             
             if not files:
                 # Nothing to push, but that's okay
@@ -226,7 +251,7 @@ def _do_push(message: str, files: Optional[List[str]], category: str) -> bool:
             commit_cmd = ["git", "commit", "-m", full_message, "--allow-empty"]
             
             # Push
-            push_cmd = ["git", "push", _remote_url(), "HEAD:main"]
+            push_cmd = ["git", "push", target_repo, "HEAD:main"]
             
             # Execute pipeline: stage -> commit -> push
             all_success = True
@@ -252,7 +277,7 @@ def _do_push(message: str, files: Optional[List[str]], category: str) -> bool:
                 else:
                     _push_count += 1
                     _last_push_ts = time.time()
-                    log.debug(f"GitHub: pushed #{_push_count} — {category}: {message[:60]}")
+                    log.debug(f"GitHub: pushed #{_push_count} to {repo_url or 'default'} — {category}: {message[:60]}")
             else:
                 _failed_pushes += 1
             
@@ -266,6 +291,29 @@ def _do_push(message: str, files: Optional[List[str]], category: str) -> bool:
             log.debug(f"Git push failed [{category}]: {exc}")
             _failed_pushes += 1
             return False
+
+
+def _apply_bloat_guard(files: List[str], repo_root: str) -> List[str]:
+    """
+    Prune raw data files to prevent .git bloat.
+    
+    Keeps only the most recent 30 days of raw CSV/JSONL data in commits.
+    Model weights, config, and code are never pruned.
+    """
+    pruned = []
+    for f in files:
+        basename = os.path.basename(f)
+        if basename in RAW_DATA_FILES or any(rf in f for rf in RAW_DATA_FILES):
+            # Check file age
+            full = os.path.join(repo_root, f)
+            if os.path.exists(full):
+                mtime = os.path.getmtime(full)
+                age_days = (time.time() - mtime) / 86400
+                if age_days > MAX_RAW_DATA_DAYS:
+                    log.debug(f"Bloat guard: skipping old data file {f} ({age_days:.0f} days)")
+                    continue
+        pruned.append(f)
+    return pruned
 
 
 def _detect_changed_files(repo_root: str) -> List[str]:
@@ -336,6 +384,65 @@ def _verify_repo() -> bool:
         
         return True
     except Exception:
+        return False
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# GRANDMASTER PUSH (Secondary Repo for Model Weights)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def push_weights_to_repo(weight_files: List[str], repo_url: str, message: str) -> bool:
+    """
+    Push model weights to a secondary repo (e.g. Grandmaster).
+    Clones the target repo into a temp directory, copies weights,
+    commits, and pushes — without touching the primary HA-NUN repo.
+    """
+    try:
+        import tempfile
+        tmpdir = tempfile.mkdtemp(prefix="grandmaster_push_")
+        
+        # Authenticated clone
+        if _token and "@" not in repo_url:
+            auth_url = repo_url.replace("https://", f"https://{_token}@")
+        else:
+            auth_url = repo_url
+        
+        clone_cmd = ["git", "clone", "--depth", "1", auth_url, tmpdir]
+        result = subprocess.run(clone_cmd, capture_output=True, text=True, timeout=60)
+        if result.returncode != 0:
+            log.warning(f"Grandmaster clone failed: {result.stderr.strip()}")
+            shutil.rmtree(tmpdir, ignore_errors=True)
+            return False
+        
+        # Copy weights
+        for wf in weight_files:
+            src = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), wf)
+            if os.path.exists(src):
+                dst = os.path.join(tmpdir, os.path.basename(wf))
+                shutil.copy2(src, dst)
+        
+        # Configure git identity
+        subprocess.run(["git", "config", "user.email", "bot@ha-nun.local"], cwd=tmpdir, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "HANUN-Bot"], cwd=tmpdir, capture_output=True)
+        
+        # Commit & push
+        subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True)
+        commit_cmd = ["git", "commit", "-m", message, "--allow-empty"]
+        subprocess.run(commit_cmd, cwd=tmpdir, capture_output=True)
+        push_cmd = ["git", "push", auth_url, "HEAD:main"]
+        result = subprocess.run(push_cmd, cwd=tmpdir, capture_output=True, text=True, timeout=60)
+        
+        shutil.rmtree(tmpdir, ignore_errors=True)
+        
+        if result.returncode == 0:
+            log.info(f"🏛️ Grandmaster push success: {message}")
+            return True
+        else:
+            log.warning(f"Grandmaster push failed: {result.stderr.strip()}")
+            return False
+            
+    except Exception as exc:
+        log.error(f"Grandmaster push error: {exc}")
         return False
 
 

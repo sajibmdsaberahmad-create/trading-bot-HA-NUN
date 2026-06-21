@@ -36,6 +36,8 @@ import time
 import signal
 import subprocess
 import tempfile
+import threading
+import resource
 from typing import Optional, List
 from datetime import datetime
 from pathlib import Path
@@ -49,7 +51,10 @@ from core.notify import log
 
 def launch_training(cmd: List[str], 
                     timeout_minutes: int = 60,
-                    output_file: Optional[str] = None) -> Optional[str]:
+                    output_file: Optional[str] = None,
+                    memory_limit_mb: int = 4096,
+                    auto_git_push: bool = True,
+                    repo_url: Optional[str] = None) -> Optional[str]:
     """
     Launch a training subprocess and return immediately.
     
@@ -73,7 +78,22 @@ def launch_training(cmd: List[str],
         with open(output_file, 'w') as f:
             f.write(f"Training session: {session_id}\n")
             f.write(f"Command: {' '.join(cmd)}\n")
-            f.write(f"Started: {datetime.utcnow().isoformat()}\n\n")
+            f.write(f"Started: {datetime.utcnow().isoformat()}\n")
+            f.write(f"Memory limit: {memory_limit_mb}MB\n\n")
+        
+        # Build environment
+        env = os.environ.copy()
+        env["TRAINING_SESSION_ID"] = session_id
+        env["TRAINING_OUTPUT_FILE"] = output_file
+        
+        # Memory guard via ulimit if supported
+        preexec_fn = None
+        if memory_limit_mb > 0 and sys.platform != "win32":
+            try:
+                soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+                resource.setrlimit(resource.RLIMIT_AS, (memory_limit_mb * 1024 * 1024, hard))
+            except (ImportError, ValueError):
+                pass
         
         # Launch subprocess (non-blocking)
         # We use Popen with stdout/stderr redirected to file
@@ -82,6 +102,7 @@ def launch_training(cmd: List[str],
             cmd,
             stdout=open(output_file, 'a'),
             stderr=subprocess.STDOUT,
+            env=env,
             # Detach from parent process group so it survives parent exit
             start_new_session=True,
             # Ensure we don't inherit any weird file descriptors
@@ -94,7 +115,8 @@ def launch_training(cmd: List[str],
         import threading
         watchdog = threading.Thread(
             target=_watchdog,
-            args=(proc, session_id, timeout_minutes * 60, output_file),
+            args=(proc, session_id, timeout_minutes * 60, output_file,
+                  auto_git_push, repo_url),
             daemon=True,
             name=f"train-watchdog-{session_id}"
         )
@@ -107,7 +129,8 @@ def launch_training(cmd: List[str],
         return None
 
 
-def _watchdog(proc: subprocess.Popen, session_id: str, timeout: int, output_file: str):
+def _watchdog(proc: subprocess.Popen, session_id: str, timeout: int, output_file: str,
+              auto_git_push: bool = True, repo_url: Optional[str] = None):
     """
     Background watchdog that kills training if it exceeds timeout.
     Runs in daemon thread, won't prevent parent exit.
@@ -125,15 +148,21 @@ def _watchdog(proc: subprocess.Popen, session_id: str, timeout: int, output_file
         except Exception:
             pass
         
-        # If training produced model weights, trigger async git commit
+        # If training produced model weights, trigger async git commit/push
         if rc == 0:
             from core.async_utils import get_background_worker
             worker = get_background_worker()
+            weight_files = ["models/transformer_model.pth", "models/scalper_weights.json",
+                           "models/lstm_model.h5"]
             worker.submit_git_commit(
-                files=["models/transformer_model.pth", "models/scalper_weights.json"],
+                files=weight_files,
                 message=f"train: subprocess training {session_id}",
                 push=False,
             )
+            
+            # Multi-repo push: push weights to Grandmaster repo
+            if auto_git_push and repo_url:
+                _async_push_to_grandmaster(weight_files, repo_url, session_id)
         
     except subprocess.TimeoutExpired:
         log.warning(f"🏋️ Training {session_id} timed out after {timeout}s — terminating")
@@ -149,6 +178,19 @@ def _watchdog(proc: subprocess.Popen, session_id: str, timeout: int, output_file
     
     except Exception as exc:
         log.debug(f"Watchdog for {session_id} error: {exc}")
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# GRANDMASTER PUSH HELPER
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _async_push_to_grandmaster(weight_files: List[str], repo_url: str, session_id: str):
+    """Push distilled weights to Grandmaster repo in a background thread."""
+    def _push():
+        from core.git_sync import push_weights_to_repo
+        push_weights_to_repo(weight_files, repo_url, f"grandmaster: distill {session_id}")
+    t = threading.Thread(target=_push, daemon=True, name=f"grandmaster-push-{session_id}")
+    t.start()
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -198,11 +240,11 @@ def main():
     )
     
     try:
-        proc.wait(timeout=args.timeout)
-        rc = proc.returncode
-    except subprocess.TimeoutExpired:
-        log.warning(f"Training timed out after {args.timeout}s")
-        proc.kill()
+        # If invoked as subprocess entry, run the actual training
+        from core.advanced_training import run_training_cli
+        rc = 0 if run_training_cli() else 1
+    except Exception as exc:
+        log.error(f"Subprocess training crashed: {exc}")
         rc = -1
     
     with open(output_file, 'a') as f:

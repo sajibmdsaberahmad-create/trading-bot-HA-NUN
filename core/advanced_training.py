@@ -55,6 +55,10 @@ import torch
 from core.config import BotConfig
 from core.features_enhanced import FeatureEngineerEnhanced
 from core.notify import log
+from core.stationary_features import (
+    compute_microstructure_features, get_feature_columns,
+    validate_stationarity
+)
 
 # ── Conditional imports ────────────────────────────────────────────────
 
@@ -206,12 +210,14 @@ class AdvancedTrainingPipeline:
     # PHASE 1: DATA PREPARATION
     # ══════════════════════════════════════════════════════════════════════
     
-    def prepare_data(self, use_synthetic: bool = True):
+    def prepare_data(self, use_synthetic: bool = True, use_stationary_features: bool = True):
         """
         Prepare all datasets for training.
         
         Args:
             use_synthetic: If True, generate synthetic data when IB unavailable
+            use_stationary_features: If True, replace raw features with
+                fractional-diff / VPIN / Amihud stationary geometries
         """
         log.info("=" * 70)
         log.info("  PHASE 1: DATA PREPARATION")
@@ -235,29 +241,66 @@ class AdvancedTrainingPipeline:
         
         log.info(f"Total data: {len(data)} bars from {data.index[0]} to {data.index[-1]}")
         
-        # Split into train/val/test
-        train_mask = (data.index >= self.config.train_start) & (data.index < self.config.val_start)
-        val_mask = (data.index >= self.config.val_start) & (data.index < self.config.test_start)
-        test_mask = (data.index >= self.config.test_start) & (data.index <= self.config.test_end)
-        
-        self.train_data = data[train_mask].copy()
-        self.val_data = data[val_mask].copy()
-        self.test_data = data[test_mask].copy()
+        # Split into train/val/test (with purge/embargo if enabled)
+        if self.bot_cfg.PURGE_EMBARGO_ENABLED:
+            self.train_data, self.val_data, self.test_data = self._purged_embargoed_split(
+                data, self.bot_cfg.PURGE_BARS, self.bot_cfg.EMBARGO_BARS
+            )
+        else:
+            train_mask = (data.index >= self.config.train_start) & (data.index < self.config.val_start)
+            val_mask = (data.index >= self.config.val_start) & (data.index < self.config.test_start)
+            test_mask = (data.index >= self.config.test_start) & (data.index <= self.config.test_end)
+            self.train_data = data[train_mask].copy()
+            self.val_data = data[val_mask].copy()
+            self.test_data = data[test_mask].copy()
         
         log.info(f"Train: {len(self.train_data)} bars | Val: {len(self.val_data)} bars | Test: {len(self.test_data)} bars")
         
         # Compute features
         if len(self.train_data) >= 100:
-            self.train_features = FeatureEngineerEnhanced.compute(self.train_data)
+            if use_stationary_features and self.bot_cfg.USE_FRACTIONAL_DIFF:
+                self.train_data = compute_microstructure_features(
+                    self.train_data,
+                    frac_diff_order=self.bot_cfg.FRACTIONAL_DIFF_D,
+                    vpin_window=self.bot_cfg.VPIN_WINDOW,
+                    amihud_window=self.bot_cfg.AMIHUD_WINDOW,
+                )
+                feat_cols = get_feature_columns()
+                self.train_features = self.train_data[feat_cols].values
+                self.train_features = np.nan_to_num(self.train_features, nan=0.0, posinf=0.0, neginf=0.0)
+                log.info(f"Train features (stationary): {self.train_features.shape}")
+            else:
+                self.train_features = FeatureEngineerEnhanced.compute(self.train_data)
             self.train_prices = self.train_data['close'].values[-len(self.train_features):]
-            log.info(f"Train features: {self.train_features.shape}")
         
         if len(self.val_data) >= 100:
-            self.val_features = FeatureEngineerEnhanced.compute(self.val_data)
+            if use_stationary_features and self.bot_cfg.USE_FRACTIONAL_DIFF:
+                self.val_data = compute_microstructure_features(
+                    self.val_data,
+                    frac_diff_order=self.bot_cfg.FRACTIONAL_DIFF_D,
+                    vpin_window=self.bot_cfg.VPIN_WINDOW,
+                    amihud_window=self.bot_cfg.AMIHUD_WINDOW,
+                )
+                feat_cols = get_feature_columns()
+                self.val_features = self.val_data[feat_cols].values
+                self.val_features = np.nan_to_num(self.val_features, nan=0.0, posinf=0.0, neginf=0.0)
+            else:
+                self.val_features = FeatureEngineerEnhanced.compute(self.val_data)
             self.val_prices = self.val_data['close'].values[-len(self.val_features):]
         
         if len(self.test_data) >= 100:
-            self.test_features = FeatureEngineerEnhanced.compute(self.test_data)
+            if use_stationary_features and self.bot_cfg.USE_FRACTIONAL_DIFF:
+                self.test_data = compute_microstructure_features(
+                    self.test_data,
+                    frac_diff_order=self.bot_cfg.FRACTIONAL_DIFF_D,
+                    vpin_window=self.bot_cfg.VPIN_WINDOW,
+                    amihud_window=self.bot_cfg.AMIHUD_WINDOW,
+                )
+                feat_cols = get_feature_columns()
+                self.test_features = self.test_data[feat_cols].values
+                self.test_features = np.nan_to_num(self.test_features, nan=0.0, posinf=0.0, neginf=0.0)
+            else:
+                self.test_features = FeatureEngineerEnhanced.compute(self.test_data)
             self.test_prices = self.test_data['close'].values[-len(self.test_features):]
         
         self.training_history['data'] = {
@@ -266,6 +309,7 @@ class AdvancedTrainingPipeline:
             'val_bars': len(self.val_data),
             'test_bars': len(self.test_data),
             'features_shape': self.train_features.shape if self.train_features is not None else (0, 0),
+            'stationary_features': use_stationary_features and self.bot_cfg.USE_FRACTIONAL_DIFF,
         }
         
         return True
@@ -296,6 +340,90 @@ class AdvancedTrainingPipeline:
             log.warning(f"Data fetch failed: {exc}")
             return None
     
+    def _purged_embargoed_split(self, data: pd.DataFrame, purge_bars: int, embargo_bars: int):
+        """
+        Produce train/val/test splits with purging and embargo periods to
+        prevent look-ahead leakage in time-series cross-validation.
+        
+        Purge: Remove training labels that overlap with validation labels.
+        Embargo: Remove training samples immediately after validation ends.
+        """
+        n = len(data)
+        
+        # Determine cut points
+        train_end = int(n * self.bot_cfg.TRAIN_VAL_SPLIT)
+        val_end = int(n * (self.bot_cfg.TRAIN_VAL_SPLIT + (1 - self.bot_cfg.TRAIN_VAL_SPLIT) / 2))
+        
+        # Apply purge forward and embargo backward
+        train_start = 0
+        train_end_adj = train_end - purge_bars
+        val_start = train_end + purge_bars + embargo_bars
+        val_end_adj = val_end - purge_bars - embargo_bars
+        test_start = val_end + purge_bars + embargo_bars
+        test_end = n
+        
+        train_data = data.iloc[train_start:train_end_adj].copy()
+        val_data = data.iloc[val_start:val_end_adj].copy()
+        test_data = data.iloc[test_start:test_end].copy()
+        
+        log.info(f"Purged/Embargoed split: train={len(train_data)}, "
+                 f"val={len(val_data)}, test={len(test_data)} "
+                 f"(purge={purge_bars}, embargo={embargo_bars})")
+        
+        return train_data, val_data, test_data
+
+    def _sample_regime_bootstrap(self, data: pd.DataFrame, n_samples: int,
+                                  regime: str = "high_volatility") -> pd.DataFrame:
+        """
+        Regime-aware bootstrapping: select historical chunks matching the
+        target regime (e.g. High-Vol Breakout) rather than uniform random.
+        
+        This targets the co-adaptation collapse failure mode by ensuring
+        the student sees diverse market environments during distillation.
+        
+        Args:
+            data: Full historical DataFrame
+            n_samples: Number of rows to sample
+            regime: Target regime label
+            
+        Returns:
+            Bootstrapped DataFrame slice
+        """
+        if len(data) < n_samples:
+            return data.copy()
+        
+        # Compute regime labels per chunk
+        if 'volatility_regime' not in data.columns:
+            return data.sample(n=n_samples, replace=False)
+        
+        vol_z = data['volatility_regime'].fillna(0).values
+        price_changes = data['close'].pct_change().fillna(0).abs().values
+        
+        if regime == "high_volatility":
+            mask = (np.abs(vol_z) > 1.0) | (price_changes > 0.02)
+        elif regime == "low_volatility":
+            mask = (np.abs(vol_z) < 0.3) & (price_changes < 0.005)
+        elif regime == "trending":
+            # Use cached rolling momentum if available, else simple heuristic
+            close = data['close'].values
+            mom = np.array([close[i] / close[i-20] - 1 if i >= 20 else 0
+                            for i in range(len(close))])
+            mask = np.abs(mom) > 0.01
+        else:
+            mask = np.ones(len(data), dtype=bool)
+        
+        candidates = data[mask]
+        if len(candidates) < n_samples // 2:
+            # Fallback: random sample with volatility weighting
+            weights = 1 + np.abs(vol_z)
+            weights = weights / weights.sum()
+            idx = np.random.choice(len(data), size=n_samples, replace=False, p=weights)
+            return data.iloc[idx].copy()
+        
+        # Sample without replacement from regime-matched subset
+        sampled = candidates.sample(n=min(n_samples, len(candidates)), replace=False)
+        return sampled
+
     def _generate_synthetic_data(self, start: str, end: str) -> pd.DataFrame:
         """Generate synthetic market data."""
         log.info("Generating synthetic market data...")
@@ -485,11 +613,22 @@ class AdvancedTrainingPipeline:
         try:
             # Prepare supervised dataset
             seq_len = self.bot_cfg.WINDOW_SIZE
-            n_features = self.config.n_features
+            n_features = self.train_features.shape[1]
             
-            X_train, y_train_actions, y_train_values = self._prepare_sequence_dataset(
-                self.train_features, self.train_prices, seq_len
-            )
+            # Apply regime bootstrapping if enabled
+            if self.bot_cfg.REGIME_BOOTSTRAP_ENABLED:
+                boot_df = self._sample_regime_bootstrap(
+                    pd.DataFrame(self.train_features, columns=[f'f{i}' for i in range(n_features)]),
+                    n_samples=self.bot_cfg.BOOTSTRAP_SAMPLES,
+                    regime="high_volatility",
+                )
+                X_train, y_train_actions, y_train_values = self._prepare_sequence_dataset(
+                    boot_df.values, self.train_prices[-len(boot_df):], seq_len
+                )
+            else:
+                X_train, y_train_actions, y_train_values = self._prepare_sequence_dataset(
+                    self.train_features, self.train_prices, seq_len
+                )
             
             if len(X_train) < 100:
                 log.error(f"Too few training sequences: {len(X_train)}")
@@ -509,6 +648,9 @@ class AdvancedTrainingPipeline:
                 epochs=self.config.epochs,
                 device=self.config.device,
             )
+            
+            # Log trajectory for later meta-optimization
+            self.training_history['data']['transformer_input_dim'] = n_features
             
             # Create model
             model, trainer = create_transformer(tf_config)
@@ -661,11 +803,21 @@ class AdvancedTrainingPipeline:
             return False
         
         try:
-            # Prepare dataset
+            # Prepare dataset with optional regime bootstrapping
             seq_len = self.bot_cfg.WINDOW_SIZE
-            X_train, y_actions, y_values = prepare_lstm_dataset(
-                self.train_features, self.train_prices, seq_len, lookahead=1
-            )
+            if self.bot_cfg.REGIME_BOOTSTRAP_ENABLED:
+                boot_df = self._sample_regime_bootstrap(
+                    pd.DataFrame(self.train_features, columns=[f'f{i}' for i in range(self.train_features.shape[1])]),
+                    n_samples=self.bot_cfg.BOOTSTRAP_SAMPLES,
+                    regime="trending",
+                )
+                X_train, y_actions, y_values = prepare_lstm_dataset(
+                    boot_df.values, self.train_prices[-len(boot_df):], seq_len, lookahead=1
+                )
+            else:
+                X_train, y_actions, y_values = prepare_lstm_dataset(
+                    self.train_features, self.train_prices, seq_len, lookahead=1
+                )
             
             if len(X_train) < 100:
                 log.error(f"Too few training sequences: {len(X_train)}")

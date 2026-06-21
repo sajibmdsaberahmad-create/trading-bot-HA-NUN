@@ -194,6 +194,74 @@ class BotConfig:
     OLLAMA_TEMPERATURE: float = 0.7
 
     # ════════════════════════════════════════════════════════════════════
+    # MULTI-REPO GIT ARCHITECTURE (HA-NUN / Grandmaster / Logs)
+    # ════════════════════════════════════════════════════════════════════
+    GITHUB_HA_NUN_REPO: str = os.getenv("GITHUB_HA_NUN_REPO", "")
+    GITHUB_GRANDMASTER_REPO: str = os.getenv("GITHUB_GRANDMASTER_REPO", "")
+    GITHUB_LOGS_REPO: str = os.getenv("GITHUB_LOGS_REPO", "")
+    GITHUB_PAT: str = os.getenv("GITHUB_PAT", "")
+    MAX_GIT_PUSH_RETRIES: int = 3
+    GIT_PUSH_TIMEOUT_SEC: int = 30
+
+    # ════════════════════════════════════════════════════════════════════
+    # HIDDEN MARKOV REGIME SWITCHING (HMRS)
+    # ════════════════════════════════════════════════════════════════════
+    HMRS_ENABLED: bool = True
+    HMRS_NUM_REGIMES: int = 4  # QuietGrowth, HighVolTrend, LiquidChop, LiquidityShock
+    HMRS_LOOKBACK_DAYS: int = 90
+    HMRS_RETRAIN_HOURS: int = 24
+    HMRS_MIN_REGIME_PROB: float = 0.35
+
+    # ════════════════════════════════════════════════════════════════════
+    # GRANDMASTER DISTILLATION (210M Teacher → 21M Student)
+    # ════════════════════════════════════════════════════════════════════
+    GRANDMASTER_ENABLED: bool = True
+    GRANDMASTER_D_MODEL: int = 768
+    GRANDMASTER_NUM_HEADS: int = 12
+    GRANDMASTER_FFN_DIM: int = 3072
+    GRANDMASTER_NUM_LAYERS: int = 8
+    DISTILLATION_TEMPERATURE: float = 3.0
+    DISTILLATION_ALPHA: float = 0.4
+    DISTILLATION_EPOCHS: int = 10
+    DISTILLATION_LR: float = 1e-4
+
+    # ════════════════════════════════════════════════════════════════════
+    # STATIONARY FEATURE ENGINEERING
+    # ════════════════════════════════════════════════════════════════════
+    USE_FRACTIONAL_DIFF: bool = True
+    FRACTIONAL_DIFF_D: float = 0.4  # Order of fractional differentiation
+    FRAC_DIFF_WINDOW: int = 60
+    USE_VPIN: bool = True
+    USE_AMIHUD: bool = True
+    AMIHUD_WINDOW: int = 20
+    VPIN_WINDOW: int = 50
+
+    # ════════════════════════════════════════════════════════════════════
+    # ADVANCED TRAINING (Purged/Embargoed CV + Regime Bootstrapping)
+    # ════════════════════════════════════════════════════════════════════
+    PURGE_EMBARGO_ENABLED: bool = True
+    PURGE_BARS: int = 12  # 12 minutes for 1-min bars
+    EMBARGO_BARS: int = 6
+    REGIME_BOOTSTRAP_ENABLED: bool = True
+    BOOTSTRAP_SAMPLES: int = 5000
+    TRAIN_VAL_SPLIT: float = 0.70
+
+    # ════════════════════════════════════════════════════════════════════
+    # OFF-HOURS TRAINING SUBPROCESS
+    # ════════════════════════════════════════════════════════════════════
+    OFF_HOURS_TRAINING_ENABLED: bool = True
+    TRAINING_START_HOUR_UTC: int = 21  # 9 PM UTC = after US market close
+    TRAINING_MEMORY_LIMIT_MB: int = 4096
+    TRAINING_TIMEOUT_MIN: int = 480  # 8 hours max
+
+    # ════════════════════════════════════════════════════════════════════
+    # GIT BLOAT GUARDRAILS
+    # ════════════════════════════════════════════════════════════════════
+    MAX_RAW_DATA_DAYS_IN_GIT: int = 30  # Rolling window only
+    GIT_LFS_THRESHOLD_MB: float = 10.0
+    AUTO_PRUNE_DAILY_LOGS: bool = True
+
+    # ════════════════════════════════════════════════════════════════════
     # NOTIFICATIONS
     # ════════════════════════════════════════════════════════════════════
     TELEGRAM_ENABLED:  bool = True
@@ -228,3 +296,11 @@ class BotConfig:
     def risk_amount_usd(self, account_equity: float) -> float:
         pct_based = account_equity * self.RISK_PER_TRADE_PCT
         return min(pct_based, self.MAX_RISK_PER_TRADE_USD)
+
+    # ════════════════════════════════════════════════════════════════════
+    # OLLAMA META-OPTIMIZER (Active File Mutation)
+    # ════════════════════════════════════════════════════════════════════
+    OLLAMA_META_OPTIMIZER_ENABLED: bool = True
+    META_OPTIMIZE_ONLY_WHEN_MARKET_CLOSED: bool = True
+    MAX_PARAM_MUTATIONS_PER_DAY: int = 5
+    META_OPTIMIZER_MODEL: str = "llama3:70b-instruct"

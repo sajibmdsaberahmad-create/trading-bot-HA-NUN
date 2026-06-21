@@ -35,6 +35,7 @@ from datetime import datetime
 
 from core.config import BotConfig
 from core.notify import log
+from core.hmrs import MarketRegime
 
 
 @dataclass
@@ -85,6 +86,13 @@ class OllamaBrain:
         self._last_call_time = 0.0
         self._call_count = 0
         self._error_count = 0
+        
+        # Meta-optimizer state
+        self.meta_enabled = getattr(cfg, 'OLLAMA_META_OPTIMIZER_ENABLED', True)
+        self.meta_model = getattr(cfg, 'META_OPTIMIZER_MODEL', 'llama3:70b-instruct')
+        self.max_mutations_per_day = getattr(cfg, 'MAX_PARAM_MUTATIONS_PER_DAY', 5)
+        self._mutations_today = 0
+        self._last_mutation_date = ""
     
     def _is_allowed(self) -> bool:
         """Check if enough time passed since last call (rate limiting)."""
@@ -92,13 +100,15 @@ class OllamaBrain:
             return False
         return True
     
-    def _call_ollama(self, prompt: str, system: Optional[str] = None) -> Optional[str]:
+    def _call_ollama(self, prompt: str, system: Optional[str] = None,
+                     model: Optional[str] = None) -> Optional[str]:
         """
         Call Ollama API synchronously with timeout.
         
         Args:
             prompt: User prompt
             system: Optional system prompt override
+            model: Optional model override (for meta-optimizer)
             
         Returns:
             Generated text or None on failure
@@ -108,9 +118,10 @@ class OllamaBrain:
         
         try:
             url = f"{self.config.host}/api/generate"
+            use_model = model or self.config.model
             
             payload = {
-                "model": self.config.model,
+                "model": use_model,
                 "prompt": prompt,
                 "stream": False,
                 "options": {
@@ -133,7 +144,7 @@ class OllamaBrain:
                 self._last_call_time = time.time()
                 self._call_count += 1
                 
-                log.debug(f"Ollama {self.config.model}: {elapsed:.0f}ms | "
+                log.debug(f"Ollama {use_model}: {elapsed:.0f}ms | "
                          f"{result.get('prompt_eval_count', 0)} prompt tokens, "
                          f"{result.get('eval_count', 0)} completion tokens")
                 
@@ -318,6 +329,189 @@ class OllamaBrain:
         result = self._call_ollama(prompt)
         return result or ""
     
+    # ═════════════════════════════════════════════════════════════════════════════
+    # META-OPTIMIZER (Active Hyperparameter Tuning)
+    # ═════════════════════════════════════════════════════════════════════════════
+    
+    def meta_optimize(self, performance_report: Dict[str, Any],
+                      market_context: Dict[str, Any],
+                      guideline_path: str = "models/ai_guidelines.txt",
+                      weights_path: str = "models/scalper_weights.json",
+                      config_path: str = "core/config.py") -> Dict[str, Any]:
+        """
+        LLM-in-the-loop meta-optimization: analyze recent performance,
+        suggest structural parameter tweaks, and write them to disk.
+        
+        This is the Active Meta-Optimizer phase. It only runs when the
+        market is closed and respects the daily mutation cap.
+        
+        Args:
+            performance_report: Dict from FusionEngine / backtest
+            market_context: Dict with regime, news summaries, etc.
+            guideline_path: Path to ai_guidelines.txt
+            weights_path: Path to scalper_weights.json
+            config_path: Path to core/config.py
+            
+        Returns:
+            Dict of mutations applied (or suggested)
+        """
+        if not self.meta_enabled:
+            return {"status": "disabled"}
+        
+        # Gate: only run when market closed
+        if getattr(self.cfg, 'META_OPTIMIZE_ONLY_WHEN_MARKET_CLOSED', True):
+            from core.connector import IBConnector
+            conn = IBConnector(self.cfg)
+            if conn.is_market_open():
+                return {"status": "skipped", "reason": "market_open"}
+        
+        # Gate: daily mutation budget
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+        if self._last_mutation_date != today:
+            self._mutations_today = 0
+            self._last_mutation_date = today
+        
+        if self._mutations_today >= self.max_mutations_per_day:
+            return {"status": "budget_exhausted", "mutations_today": self._mutations_today}
+        
+        try:
+            # 1. Ingest structured telemetry
+            perf_summary = json.dumps(performance_report, indent=2)[:3000]
+            ctx_summary = json.dumps(market_context, indent=2)[:2000]
+            
+            # 2. Load current guidelines
+            guidelines = ""
+            try:
+                with open(guideline_path, 'r') as f:
+                    guidelines = f.read()[:3000]
+            except Exception:
+                guidelines = "No existing guidelines."
+            
+            # 3. Construct meta-optimizer prompt
+            system = (
+                "You are a quantitative trading meta-optimizer. "
+                "Your job is to analyze AI trading performance and suggest "
+                "tunable parameter changes in JSON format. Be conservative: "
+                "only suggest changes when there is clear statistical evidence. "
+                "Never suggest changes that violate hard risk limits."
+            )
+            prompt = (
+                "Recent performance report:\n"
+                f"{perf_summary}\n\n"
+                "Market context:\n"
+                f"{ctx_summary}\n\n"
+                "Current AI guidelines:\n"
+                f"{guidelines}\n\n"
+                "Based on this data, suggest 1-3 parameter mutations in JSON format:\n"
+                '{"mutations": [{"param": "CONFIDENCE_THRESHOLD", "value": 0.58, "reason": "..."}], "summary": "..."}\n'
+                "Allowed params: CONFIDENCE_THRESHOLD, SCALP_MIN_RR, SCALP_TP_ATR_MULTIPLIER, ATR_THRESHOLD\n"
+                "Respond ONLY with valid JSON."
+            )
+            
+            # 4. Query Ollama (use meta-optimizer model if different)
+            response = self._call_ollama(prompt, system=system, model=self.meta_model)
+            if not response:
+                return {"status": "llm_failed"}
+            
+            # 5. Parse mutations (defensive)
+            mutations = []
+            try:
+                # Extract JSON from response (strip markdown fences if present)
+                clean = response.strip()
+                if clean.startswith("```"):
+                    clean = clean.split("\n", 1)[1].rsplit("```", 1)[0]
+                parsed = json.loads(clean)
+                mutations = parsed.get("mutations", [])
+            except Exception as e:
+                log.warning(f"Meta-optimizer JSON parse failed: {e}")
+                return {"status": "parse_failed", "raw_response": response[:500]}
+            
+            # 6. Apply mutations via background worker (non-blocking)
+            applied = []
+            for mutation in mutations[:self.max_mutations_per_day - self._mutations_today]:
+                param = mutation.get("param", "")
+                value = mutation.get("value")
+                reason = mutation.get("reason", "")
+                
+                if not param or value is None:
+                    continue
+                
+                # Safety: never mutate hardcoded risk limits
+                forbidden = {"MAX_DAILY_LOSS_PCT", "MAX_RISK_PER_TRADE_USD",
+                             "MAX_SHARES_PER_TRADE", "MIN_CASH_RESERVE_PCT"}
+                if param in forbidden:
+                    log.warning(f"Meta-optimizer blocked forbidden param: {param}")
+                    continue
+                
+                success = self._apply_mutation(param, value, weights_path, config_path)
+                if success:
+                    applied.append({"param": param, "value": value, "reason": reason})
+                    self._mutations_today += 1
+                    log.info(f"🧬 Meta-optimizer mutation: {param} = {value} ({reason})")
+            
+            return {
+                "status": "success",
+                "mutations_applied": applied,
+                "mutations_today": self._mutations_today,
+                "summary": json.loads(response).get("summary", "") if response else "",
+            }
+            
+        except Exception as e:
+            log.error(f"Meta-optimizer failed: {e}")
+            return {"status": "error", "error": str(e)}
+    
+    def _apply_mutation(self, param: str, value: Any,
+                        weights_path: str, config_path: str) -> bool:
+        """
+        Apply a single parameter mutation to weights.json or config.py.
+        
+        Uses atomic writes with fsync to prevent corruption.
+        """
+        import re
+        
+        # Decide target file based on parameter namespace
+        scalper_params = {
+            "SCALP_STOP_ATR_MULTIPLIER", "SCALP_MIN_STOP_PCT", "SCALP_MAX_STOP_PCT",
+            "SCALP_TP_ATR_MULTIPLIER", "SCALP_MAX_TP_PCT", "SCALP_MIN_RR",
+            "SCALP_TRAILING_ACTIVATE_PCT", "SCALP_TRAILING_ATR_MULTIPLIER",
+            "SCALP_PROFIT_ACTIVATE_PCT", "SCALP_PROFIT_GIVEBACK_PCT",
+            "CONFIDENCE_THRESHOLD",
+        }
+        
+        try:
+            if param in scalper_params:
+                # Target: weights.json
+                data = {}
+                if os.path.exists(weights_path):
+                    try:
+                        with open(weights_path, 'r') as f:
+                            data = json.load(f)
+                    except Exception:
+                        data = {}
+                data[param] = value
+                atomic_write_json(weights_path, data)
+                return True
+            
+            else:
+                # Target: config.py (regex replace)
+                if not os.path.exists(config_path):
+                    return False
+                with open(config_path, 'r') as f:
+                    content = f.read()
+                
+                pattern = rf'({param}:\s*)([-+]?\d+\.?\d*|True|False)'
+                replacement = r'\g<1>' + str(value)
+                new_content, count = re.subn(pattern, replacement, content)
+                
+                if count > 0:
+                    atomic_write_text(config_path, new_content)
+                    return True
+                return False
+                
+        except Exception as e:
+            log.error(f"Mutation apply failed for {param}: {e}")
+            return False
+    
     def health_check(self) -> Dict[str, Any]:
         """
         Check if Ollama service is reachable and model is loaded.
@@ -351,6 +545,26 @@ class OllamaBrain:
 # ═════════════════════════════════════════════════════════════════════════════
 # FACTORY FUNCTION
 # ═════════════════════════════════════════════════════════════════════════════
+
+def atomic_write_json(path: str, data: Dict):
+    """Atomic JSON write with fsync to prevent corruption on crash."""
+    tmp = path + ".tmp"
+    with open(tmp, 'w') as f:
+        json.dump(data, f, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
+def atomic_write_text(path: str, content: str):
+    """Atomic text write with fsync to prevent corruption on crash."""
+    tmp = path + ".tmp"
+    with open(tmp, 'w') as f:
+        f.write(content)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
 
 def create_ollama_brain(cfg: BotConfig) -> Optional[OllamaBrain]:
     """

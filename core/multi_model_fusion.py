@@ -39,6 +39,7 @@ from enum import Enum
 from core.config import BotConfig
 from core.notify import log
 from core.fusion_overrides import FusionOverrides
+from core.hmrs import HiddenMarkovRegimeSwitching, MarketRegime
 
 # ── 100% Lazy model imports ──
 # NOTHING heavy is imported at module level.
@@ -464,6 +465,9 @@ class MultiModelFusionEngine:
         # Circuit breaker overrides (bypass accuracy weights in extreme conditions)
         self.overrides = FusionOverrides()
         
+        # HMRS regime switching engine
+        self.hmrs = HiddenMarkovRegimeSwitching(cfg)
+        
         # Decision history for analysis
         self._decision_history: deque = deque(maxlen=500)
         
@@ -643,12 +647,29 @@ class MultiModelFusionEngine:
                 model_weights={}, reasoning="No models available",
             )
         
-        # ── 3. Weight predictions by historical accuracy ──────────────
+        # ── 3. HMRS Regime-Aware Weight Override ─────────────────────
+        hmrs_weights = {}
+        regime_result = None
+        
+        if features_df is not None and self.hmrs.enabled:
+            try:
+                regime_result = self.hmrs.classify(features_df)
+                hmrs_weights = self.hmrs.get_regime_weights(regime_result)
+            except Exception as e:
+                log.debug(f"HMRS classification failed: {e}")
+        
+        use_hmrs = bool(hmrs_weights)
+        
         model_weights = {}
         weighted_probs = np.zeros(3, dtype=np.float32)
         
         for pred in predictions:
-            weight = self.accuracy_tracker.get_weight(pred.model_name)
+            if use_hmrs:
+                # Override accuracy weight with regime structural weight
+                weight = hmrs_weights.get(pred.model_name, 0.2)
+            else:
+                # Fall back to accuracy-based weight
+                weight = self.accuracy_tracker.get_weight(pred.model_name)
             model_weights[pred.model_name] = weight
             
             # Weighted contribution
@@ -669,6 +690,11 @@ class MultiModelFusionEngine:
         atr_series = None
         if features_df is not None and 'atr' in features_df.columns:
             atr_series = features_df['atr']
+        
+        # Also pass regime result from HMRS if available
+        if regime_result is None:
+            regime_result = self.hmrs.classify(features_df) if (features_df is not None and self.hmrs.enabled) else None
+            
         override_signal = self.overrides.evaluate(regime_result, features_df, atr_series)
         if override_signal:
             log.warning(f"Fusion override active: {override_signal.reason}")
@@ -705,13 +731,23 @@ class MultiModelFusionEngine:
         if smooth_reason:
             reasoning += f" | {smooth_reason}"
         
+        # Append HMRS regime info to reasoning
+        if regime_result is not None and self.hmrs.enabled:
+            reason_regime = regime_result.regime.value.replace('_', ' ').title()
+            hmrs_line = (f"Regime[{reason_regime}]: "
+                        f"p={regime_result.confidence:.0%}, "
+                        f"vol_pct={regime_result.volatility_percentile:.0%}, "
+                        f"trend={regime_result.trend_strength:+.2f}")
+            if hmrs_line not in reasoning:
+                reasoning = hmrs_line + " | " + reasoning
+        
         decision = FusedDecision(
             action=smoothed_action,
             action_name=action_name,
             confidence=smoothed_conf,
             fused_probabilities=fused_probs,
             model_predictions=predictions,
-            fusion_method="weighted_accuracy_kalman",
+            fusion_method="hmrs_weighted_accuracy_kalman" if use_hmrs else "weighted_accuracy_kalman",
             model_weights=model_weights,
             reasoning=reasoning,
         )

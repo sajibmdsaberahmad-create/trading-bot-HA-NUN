@@ -1,63 +1,92 @@
-# Secrets — NEVER commit these
-.env
-*.key
-*_token*
-id_rsa*
-id_ed25519*
+# ════════════════════════════════════════════════════════════════════════════════
+# HA-NUN TRADING BOT — INSTITUTIONAL GRADE .gitignore
+# ════════════════════════════════════════════════════════════════════════════════
+# Multi-Repo Architecture: HA-NUN (live) / Grandmaster (weights) / Logs
 
-# Python
+# ════════════════════════════════════════════════════════════════════════════════
+# CRITICAL: NEVER COMMIT THESE
+# ════════════════════════════════════════════════════════════════════════════════
+.env
+*.pem
+*.key
+credentials.json
+secrets.yaml
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# ════════════════════════════════════════════════════════════════════════════════
+# DATA BLOAT GUARD — Only 30-day rolling window in Git
+# ════════════════════════════════════════════════════════════════════════════════
+# Raw CSV data (pushed to Logs repo, not HA-NUN)
+data/live_market_features.csv
+data/*.csv
+backtest_results/results_latest.csv
+backtest_results/results_*.csv
+**/results_latest.csv
+
+# Experience buffer (large JSONL)
+models/experience_buffer.jsonl
+
+# Large binary model files (use Git LFS or separate Grandmaster repo)
+*.zip
+!ppo_trader.zip
+models/ppo_trader_warmup_*.zip
+models/transformer_model.pth
+models/lstm_model.h5
+checkpoints/
+backups/
+
+# ════════════════════════════════════════════════════════════════════════════════
+# LOGS (Push to Logs repo if needed, otherwise local only)
+# ════════════════════════════════════════════════════════════════════════════════
+*.log
+logs/
+models/daily_reports/*.json
+!models/daily_reports/.gitkeep
+
+# ════════════════════════════════════════════════════════════════════════════════
+# PYTHON / IDE
+# ════════════════════════════════════════════════════════════════════════════════
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 .Python
+env/
 venv/
 .venv/
-env/
-.envs/
-*.egg-info/
-dist/
-build/
-*.whl
-
-# Large model binaries (too large for git)
-models/*.zip
-ppo_trader.zip
-ppo_trader_warmup_*.zip
-models/checkpoints/*
-models/backups/*
-
-# Track AI training artifacts in git (keep JSON/TXT/CSV/MD)
-!models/*.json
-!models/*.txt
-!models/*.csv
-!models/*.md
-!models/daily_reports/*
-
-# Logs
-*.log
-trading_bot.log
-logs/
-
-# Performance data (contains personal account info)
-performance.csv
-live_metrics.json
-bot_state.json
-
-# Track backtest result CSVs for AI training
-!backtest_results/results_1min_latest.csv
-training_journal.json
-
-# IDE
+ENV/
+env.bak/
+venv.bak/
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 .DS_Store
 
-# MCP internal files
-.continue/
-mcpServers/
+# ════════════════════════════════════════════════════════════════════════════════
+# JUPYTER / COLAB
+# ════════════════════════════════════════════════════════════════════════════════
+.ipynb_checkpoints
+*.ipynb
+!colab_training.ipynb
 
-# Streamlit
-.streamlit/
+# ════════════════════════════════════════════════════════════════════════════════
+# TENSORFLOW / PYTORCH ARTIFACTS
+# ════════════════════════════════════════════════════════════════════════════════
+*.pb
+tensorboard/
+runs/
+lightning_logs/
+model.ckpt
+*.onnx
+*.pt
+
+# ════════════════════════════════════════════════════════════════════════════════
+# OS / SYSTEM
+# ════════════════════════════════════════════════════════════════════════════════
+Thumbs.db
+Desktop.ini
