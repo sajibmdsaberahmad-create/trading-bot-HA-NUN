@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "run_at": "2026-06-21T09:24:53.572978",
+    "tickers": [
+      "SOFI",
+      "MARA",
+      "PLTR",
+      "RKLB",
+      "ASTS",
+      "COIN",
+      "IONQ",
+      "ACHR",
+      "NIO",
+      "XPEV",
+      "LCID",
+      "QS",
+      "GME",
+      "NKLA",
+      "FCEL",
+      "RIOT"
+    ],
+    "cash": 1000,
+    "avg_wr": 0.0,
+    "total_pnl": 0
+  },
+  "results": []
+}
