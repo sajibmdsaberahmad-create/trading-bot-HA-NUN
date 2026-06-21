@@ -1,0 +1,212 @@
+[
+  {
+    "ticker": "SOFI",
+    "trades": 71,
+    "wins": 27,
+    "losses": 44,
+    "win_rate": 0.38,
+    "pnl_usd": 57.35,
+    "return_pct": -6.57,
+    "max_dd": 10.38,
+    "weights_active": {
+      "momentum": 1.9975192871870397,
+      "volume": 14.981394653902798,
+      "institutional": 19.975192871870398,
+      "vwap_slope": 4.9937982179675995,
+      "atr_bonus": 4.9937982179675995,
+      "mean_reversion": 4.9937982179675995,
+      "trend_filter": 9.987596435935199,
+      "price_rising": 7.990077148748159,
+      "rsi_filter": 2.9962789307805595,
+      "volatility_gate": 3.9950385743740795
+    },
+    "timestamp": "2026-06-21T09:50:21.960035"
+  },
+  {
+    "ticker": "MARA",
+    "trades": 125,
+    "wins": 42,
+    "losses": 83,
+    "win_rate": 0.336,
+    "pnl_usd": -59.89,
+    "return_pct": -25.27,
+    "max_dd": 25.3,
+    "weights_active": {
+      "momentum": 1.9879298707739628,
+      "volume": 14.909474030804722,
+      "institutional": 19.87929870773963,
+      "vwap_slope": 4.969824676934907,
+      "atr_bonus": 4.969824676934907,
+      "mean_reversion": 4.969824676934907,
+      "trend_filter": 9.939649353869815,
+      "price_rising": 7.951719483095851,
+      "rsi_filter": 2.9818948061609443,
+      "volatility_gate": 3.9758597415479255
+    },
+    "timestamp": "2026-06-21T09:50:21.960108"
+  },
+  {
+    "ticker": "PLTR",
+    "trades": 74,
+    "wins": 33,
+    "losses": 41,
+    "win_rate": 0.446,
+    "pnl_usd": -28.59,
+    "return_pct": -14.38,
+    "max_dd": 14.38,
+    "weights_active": {
+      "momentum": 1.985125178689726,
+      "volume": 14.888438840172945,
+      "institutional": 19.85125178689726,
+      "vwap_slope": 4.962812946724315,
+      "atr_bonus": 4.962812946724315,
+      "mean_reversion": 4.962812946724315,
+      "trend_filter": 9.92562589344863,
+      "price_rising": 7.940500714758904,
+      "rsi_filter": 2.9776877680345892,
+      "volatility_gate": 3.970250357379452
+    },
+    "timestamp": "2026-06-21T09:50:21.960133"
+  },
+  {
+    "ticker": "RKLB",
+    "trades": 113,
+    "wins": 51,
+    "losses": 62,
+    "win_rate": 0.451,
+    "pnl_usd": 26.1,
+    "return_pct": -14.93,
+    "max_dd": 15.51,
+    "weights_active": {
+      "momentum": 1.9807278627101046,
+      "volume": 14.855458970325786,
+      "institutional": 19.80727862710105,
+      "vwap_slope": 4.951819656775262,
+      "atr_bonus": 4.951819656775262,
+      "mean_reversion": 4.951819656775262,
+      "trend_filter": 9.903639313550524,
+      "price_rising": 7.922911450840418,
+      "rsi_filter": 2.971091794065157,
+      "volatility_gate": 3.961455725420209
+    },
+    "timestamp": "2026-06-21T09:50:21.960163"
+  },
+  {
+    "ticker": "ASTS",
+    "trades": 95,
+    "wins": 39,
+    "losses": 56,
+    "win_rate": 0.41100000000000003,
+    "pnl_usd": 88.53,
+    "return_pct": -7.43,
+    "max_dd": 15.86,
+    "weights_active": {
+      "momentum": 1.9772204341511173,
+      "volume": 14.829153256133381,
+      "institutional": 19.772204341511173,
+      "vwap_slope": 4.943051085377793,
+      "atr_bonus": 4.943051085377793,
+      "mean_reversion": 4.943051085377793,
+      "trend_filter": 9.886102170755587,
+      "price_rising": 7.908881736604469,
+      "rsi_filter": 2.965830651226676,
+      "volatility_gate": 3.9544408683022345
+    },
+    "timestamp": "2026-06-21T09:50:21.960248"
+  },
+  {
+    "ticker": "COIN",
+    "trades": 110,
+    "wins": 44,
+    "losses": 66,
+    "win_rate": 0.4,
+    "pnl_usd": -49.84,
+    "return_pct": -20.37,
+    "max_dd": 20.51,
+    "weights_active": {
+      "momentum": 1.9709688999322417,
+      "volume": 14.782266749491814,
+      "institutional": 19.709688999322417,
+      "vwap_slope": 4.927422249830604,
+      "atr_bonus": 4.927422249830604,
+      "mean_reversion": 4.927422249830604,
+      "trend_filter": 9.854844499661208,
+      "price_rising": 7.883875599728967,
+      "rsi_filter": 2.956453349898363,
+      "volatility_gate": 3.9419377998644833
+    },
+    "timestamp": "2026-06-21T09:50:21.960342"
+  },
+  {
+    "ticker": "IONQ",
+    "trades": 91,
+    "wins": 38,
+    "losses": 53,
+    "win_rate": 0.418,
+    "pnl_usd": 4.99,
+    "return_pct": -14.48,
+    "max_dd": 17.66,
+    "weights_active": {
+      "momentum": 1.96687287706679,
+      "volume": 14.751546578000927,
+      "institutional": 19.6687287706679,
+      "vwap_slope": 4.917182192666975,
+      "atr_bonus": 4.917182192666975,
+      "mean_reversion": 4.917182192666975,
+      "trend_filter": 9.83436438533395,
+      "price_rising": 7.86749150826716,
+      "rsi_filter": 2.9503093156001854,
+      "volatility_gate": 3.93374575413358
+    },
+    "timestamp": "2026-06-21T09:50:21.960380"
+  },
+  {
+    "ticker": "SOFI",
+    "trades": 71,
+    "wins": 27,
+    "losses": 44,
+    "win_rate": 0.38,
+    "pnl_usd": 57.35,
+    "return_pct": -6.57,
+    "max_dd": 10.38,
+    "weights_active": {
+      "momentum": 1.9762760000000001,
+      "volume": 14.822070000000002,
+      "institutional": 19.76276,
+      "vwap_slope": 4.94069,
+      "atr_bonus": 4.94069,
+      "mean_reversion": 4.94069,
+      "trend_filter": 9.88138,
+      "price_rising": 7.905104000000001,
+      "rsi_filter": 2.964414,
+      "volatility_gate": 3.9525520000000003
+    },
+    "timestamp": "2026-06-21T10:22:58.305703"
+  },
+  {
+    "timestamp": "2026-06-21T10:54:49.721247",
+    "ppo_trained": false,
+    "steps": 4096,
+    "weights": {
+      "momentum": 2.652956662259216,
+      "volume": 19.897174966944117,
+      "institutional": 26.529566622592156,
+      "vwap_slope": 6.632391655648039,
+      "atr_bonus": 6.632391655648039,
+      "mean_reversion": 6.632391655648039,
+      "trend_filter": 13.264783311296078,
+      "price_rising": 10.611826649036864,
+      "rsi_filter": 3.979434993388824,
+      "volatility_gate": 5.305913324518432,
+      "_meta": {
+        "train_timestamp": "2026-06-21T10:54:49.720520",
+        "buffer_total": 58,
+        "buffer_win_rate": 0.897,
+        "sources": {
+          "backtest": 58
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-21T10:54:49.720971\n\u2022 Win rate strong: consider larger size and wider targets"
+  }
+]
