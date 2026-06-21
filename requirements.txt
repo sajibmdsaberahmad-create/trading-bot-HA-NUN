@@ -1,15 +1,25 @@
 ib_insync
 gymnasium
 stable-baselines3[extra]
-pandas
-numpy
-torch
-scipy
-scikit-learn
-tqdm
-python-dotenv
+pandas>=1.5.0
+numpy>=1.24.0
+torch>=2.0.0
+scipy>=1.10.0
+scikit-learn>=1.2.0
+tqdm>=4.64.0
+python-dotenv>=1.0.0
+
 # Enhanced AI dependencies
 matplotlib>=3.5.0         # For visualization of regime analysis
 seaborn>=0.12.0           # For enhanced plotting
 requests>=2.28.0          # For holiday calendar checks
 typing-extensions>=4.5.0  # For advanced type hints
+
+# Multi-Model AI dependencies
+tensorflow>=2.13.0        # For LSTM model (core/lstm_model.py)
+keras>=2.13.0             # For LSTM layers
+tf-keras>=2.13.0          # For TensorFlow-Keras bridge
+
+# Advanced transformer dependencies
+einops>=0.6.0             # For transformer tensor operations (optional)
+accelerate>=0.20.0        # For mixed precision training (optional)
