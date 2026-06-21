@@ -24,11 +24,15 @@ build/
 models/*.zip
 ppo_trader.zip
 ppo_trader_warmup_*.zip
+models/checkpoints/*
+models/backups/*
 
-# Track AI training artifacts in git (keep JSON/TXT/CSV)
+# Track AI training artifacts in git (keep JSON/TXT/CSV/MD)
 !models/*.json
 !models/*.txt
 !models/*.csv
+!models/*.md
+!models/daily_reports/*
 
 # Logs
 *.log
