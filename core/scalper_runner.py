@@ -62,6 +62,24 @@ from core.feature_drift import validate_features_at_startup
 from core.train_subprocess import launch_training
 
 
+def main():
+    """CLI entry-point for the live trading lifecycle."""
+    from core.config import BotConfig
+    from core.connector import IBConnector
+    from core.notify import Notifier
+
+    cfg = BotConfig()
+    connector = IBConnector(cfg)
+    notifier = Notifier(cfg)
+
+    runner = ScalperRunner(connector, cfg, notifier)
+    runner.run()
+
+
+if __name__ == "__main__":
+    main()
+
+
 def _only_uptrend(df: pd.DataFrame, current_px: float) -> bool:
     if len(df) < 20:
         return False
