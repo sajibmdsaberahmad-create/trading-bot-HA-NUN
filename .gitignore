@@ -20,11 +20,15 @@ dist/
 build/
 *.whl
 
-# Models & data (too large for git)
-models/
-*.zip
+# Large model binaries (too large for git)
+models/*.zip
 ppo_trader.zip
 ppo_trader_warmup_*.zip
+
+# Track AI training artifacts in git (keep JSON/TXT/CSV)
+!models/*.json
+!models/*.txt
+!models/*.csv
 
 # Logs
 *.log
@@ -35,6 +39,9 @@ logs/
 performance.csv
 live_metrics.json
 bot_state.json
+
+# Track backtest result CSVs for AI training
+!backtest_results/results_1min_latest.csv
 training_journal.json
 
 # IDE

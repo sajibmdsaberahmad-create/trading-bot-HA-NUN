@@ -353,10 +353,17 @@ def run_backtest(tickers, cash=1000.0, months=6, port=4002, client_id=5):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--tickers", default="SOFI,MARA,PLTR,RKLB,ASTS,COIN,IONQ,ACHR,NIO,XPEV,LCID,QS,GME,NKLA,FCEL,RIOT")
+    p.add_argument("--stock", default=None, help="Single stock to test (overrides --tickers)")
     p.add_argument("--cash", default=1000.0, type=float)
     p.add_argument("--months", default=6, type=int)
     p.add_argument("--port", default=4002, type=int)
     p.add_argument("--client-id", default=5, type=int)
     args = p.parse_args()
-    tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+    
+    if args.stock:
+        tickers = [args.stock.strip().upper()]
+        log.info(f"Single-stock mode: testing {tickers[0]} only (avoids IB rate limits)")
+    else:
+        tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+    
     run_backtest(tickers, cash=args.cash, months=args.months, port=args.port, client_id=args.client_id)
