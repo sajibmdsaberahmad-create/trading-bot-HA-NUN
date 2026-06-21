@@ -168,6 +168,18 @@ class BotConfig:
     GITHUB_REPO:  str = os.getenv("GITHUB_REPO", "")
 
     # ════════════════════════════════════════════════════════════════════
+    # AI-DRIVEN DYNAMIC TRAILING PROFIT / LOSS
+    # ════════════════════════════════════════════════════════════════════
+    # When enabled, the AI's confidence and regime classification dynamically
+    # tighten/loosen the trailing-profit giveback and trigger early loss exits
+    # before the hard stop. The hard $50 max loss is still enforced by risk.py.
+    DYNAMIC_TRAILING_ENABLED: bool = True
+    EARLY_LOSS_EXIT_ENABLED: bool = True
+    EARLY_LOSS_RISK_PCT_THRESHOLD: float = 0.30        # exit when loss > 30% of risk budget
+    DYNAMIC_PROFIT_GIVEBACK_MIN: float = 0.20          # 20% giveback (tight)
+    DYNAMIC_PROFIT_GIVEBACK_MAX: float = 0.50          # 50% giveback (loose)
+
+    # ════════════════════════════════════════════════════════════════════
     # SCALPER / INSTITUTIONAL MOMENTUM MODE
     # ════════════════════════════════════════════════════════════════════
     TRADING_MODE: str = "scalper"

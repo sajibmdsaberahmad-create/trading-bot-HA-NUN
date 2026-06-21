@@ -259,6 +259,48 @@ class LiveTrader:
         raw_action, _ = self.model.predict(obs, deterministic=True)
         action = int(raw_action)
 
+        # ── AI-driven dynamic trailing / early-loss state ─────────────────
+        ai_confidence = 0.5
+        regime_trend_strength = 0.0
+        regime_label = "unknown"
+        try:
+            if hasattr(self.model, "predict") and hasattr(self, "online"):
+                # Prefer components-backed confidence if available
+                components = getattr(self.online, "components", {})
+                confidence_scorer = components.get("confidence_scorer") if isinstance(components, dict) else None
+                if confidence_scorer is not None:
+                    ai_confidence = float(confidence_scorer.score(
+                        None, 0.0, None,
+                        features=obs[: self.cfg.N_FEATURES] if len(obs) >= self.cfg.N_FEATURES else None,
+                        last_n_rewards=getattr(self.perf, "recent_rewards", None),
+                    ))
+                else:
+                    ai_confidence = 0.5
+        except Exception:
+            ai_confidence = 0.5
+
+        try:
+            from core.agent_enhanced import MarketRegimeClassifier
+            regime_classifier = MarketRegimeClassifier()
+            regime_result = regime_classifier.classify(bar_df)
+            regime_trend_strength = float(regime_result.trend_strength)
+            regime_label = regime_result.regime.value
+        except Exception:
+            pass
+
+        if getattr(self.cfg, "DYNAMIC_TRAILING_ENABLED", False):
+            overrides = self.risk.update_ai_dynamic_trailing(
+                ai_confidence=ai_confidence,
+                regime_trend_strength=regime_trend_strength,
+                regime_label=regime_label,
+                observation=obs,
+            )
+            # Store threshold used by evaluate_tick()
+            if overrides.get("early_loss_exit_threshold_pct") is not None:
+                self.risk._early_loss_threshold_pct = overrides["early_loss_exit_threshold_pct"]
+            if overrides.get("trailing_profit_giveback_pct") is not None:
+                self.risk._dynamic_profit_giveback_pct = overrides["trailing_profit_giveback_pct"]
+
         safe = self.risk.validate_action(action, self.account_equity, self.cash, self.shares,
                                            now_ts=bar_df.index[-1])
         if safe != action:
@@ -309,6 +351,11 @@ class LiveTrader:
         quantity = int(plan.shares)
         if quantity < 1:
             return
+
+        # Clear per-trade dynamic overrides on fresh entry so a new trade
+        # starts from baseline risk.py values until the decision bar updates them.
+        self.risk._early_loss_threshold_pct = None
+        self.risk._dynamic_profit_giveback_pct = None
 
         bid, ask = self._get_bid_ask()
         limit_price, used_limit = self.broker.decide_entry_price(current_px, bid, ask)

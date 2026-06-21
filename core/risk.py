@@ -59,7 +59,7 @@ MAX_POSITION_PCT, and MAX_SHARES_PER_TRADE as secondary safety limits.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, Any
 
 import numpy as np
 import pandas as pd
@@ -316,6 +316,116 @@ class RiskManager:
 
     # ── Tick-by-tick exit evaluation ─────────────────────────────────────────
 
+    def update_ai_dynamic_trailing(self,
+                                   ai_confidence: float = 0.5,
+                                   regime_trend_strength: float = 0.0,
+                                   regime_label: str = "unknown",
+                                   observation: Optional[np.ndarray] = None) -> Dict[str, Any]:
+        """
+        Apply AI-driven dynamic adjustments to the active trade plan's
+        trailing-profit and early-loss parameters.
+
+        The AI itself does not override the ultimate max-loss ($50). Instead
+        it influences how tight/loose the trailing-profit floor and
+        early-loss threshold are, by reading:
+          - AI confidence
+          - Market regime (trend strength, direction)
+          - Recent feature geometry from the observation vector
+
+        Args:
+            ai_confidence: PPO/ensemble confidence in [0, 1]
+            regime_trend_strength: ADX-like trend strength in [0, 100]
+            regime_label: regime name
+            observation: latest 422-dim observation vector (optional)
+
+        Returns:
+            Dict of applied parameter overrides for this bar/tick window.
+        """
+        overrides: Dict[str, Any] = {
+            "trailing_profit_giveback_pct": self.cfg.TRAILING_PROFIT_GIVEBACK_PCT,
+            "early_loss_exit_threshold_usd": None,
+        }
+
+        if not (getattr(self.cfg, "DYNAMIC_TRAILING_ENABLED", False) and self.plan is not None):
+            return overrides
+
+        # ── 1. Dynamic trailing-profit giveback ────────────────────────────
+        # Strong trend + high confidence = let winners run more
+        # Weak trend + high volatility = tighten giveback (lock gains faster)
+        giveback = float(self.cfg.TRAILING_PROFIT_GIVEBACK_PCT)
+        if getattr(self.cfg, "DYNAMIC_PROFIT_GIVEBACK_MAX", None) is not None:
+            giveback = float(np.clip(
+                giveback,
+                getattr(self.cfg, "DYNAMIC_PROFIT_GIVEBACK_MIN", 0.2),
+                getattr(self.cfg, "DYNAMIC_PROFIT_GIVEBACK_MAX", 0.5),
+            ))
+
+        # Baseline: moderate giveback when confidence is middling
+        confidence_factor = float(np.clip(ai_confidence, 0.0, 1.0))
+        # High trend strength + high confidence -> wider giveback
+        trend_bonus = 0.0
+        if regime_trend_strength > 30:
+            trend_bonus += 0.05
+        if regime_trend_strength > 50:
+            trend_bonus += 0.05
+        if regime_label in ("trending_up", "trending_down", "high_volatility"):
+            trend_bonus += 0.05
+
+        # Calm/ranging/mixed -> tighten (protect gains)
+        if regime_label in ("ranging", "low_volatility", "unknown"):
+            trend_bonus -= 0.10
+
+        giveback = float(np.clip(
+            giveback + confidence_factor * 0.20 + trend_bonus,
+            getattr(self.cfg, "DYNAMIC_PROFIT_GIVEBACK_MIN", 0.2),
+            getattr(self.cfg, "DYNAMIC_PROFIT_GIVEBACK_MAX", 0.5),
+        ))
+
+        # Final safety clamp: never exceed original configured max
+        if hasattr(self.cfg, "TRAILING_PROFIT_GIVEBACK_PCT"):
+            giveback = min(giveback, float(self.cfg.TRAILING_PROFIT_GIVEBACK_PCT))
+
+        overrides["trailing_profit_giveback_pct"] = giveback
+
+        if self.plan.trailing_profit_armed and self.plan.profit_floor_price is not None:
+            # Recompute the floor using the dynamic giveback
+            new_floor = self.plan.entry_price + (
+                (self.plan.peak_price - self.plan.entry_price) * (1.0 - giveback)
+            )
+            self.plan.profit_floor_price = max(self.plan.profit_floor_price, new_floor)
+            overrides["profit_floor_price"] = round(self.plan.profit_floor_price, 4)
+
+        # ── 2. Early loss exit (pre-stop) ─────────────────────────────────
+        # Exit earlier than the hard stop when AI + regime agree this trade
+        # is degrading. The hard $50 cap in risk.py still caps the *actual*
+        # realized loss at trade close / stop fill.
+        if getattr(self.cfg, "EARLY_LOSS_EXIT_ENABLED", False):
+            if self.plan.risk_usd > 0:
+                # Use observation features to detect early degradation
+                early_penalty = 0.0
+                if observation is not None and len(observation) >= self.cfg.N_FEATURES:
+                    features = observation[: self.cfg.N_FEATURES]
+                    # Index mapping from features_enhanced.py:
+                    # 0 log_return, 1 volatility_10, 2 rsi_14, 3 macd_signal,
+                    # 4 bb_pct, 5 volume_z, 6 volume_accel, 7 price_momentum_5,
+                    # 8 vwap_deviation, 9 atr_norm, 10 obv_z, 11 trend_strength,
+                    # 12 mean_reversion_z, 13 realized_vol_ratio
+                    vol_expanding = features[13] > 1.0 if len(features) > 13 else False
+                    trend_weak = features[11] < 0.2 if len(features) > 11 else False
+                    momentum_bearish = (features[0] < -0.002) if len(features) > 0 else False
+                    if vol_expanding:
+                        early_penalty += 0.05
+                    if trend_weak:
+                        early_penalty += 0.05
+                    if momentum_bearish:
+                        early_penalty += 0.05
+
+                early_threshold = getattr(self.cfg, "EARLY_LOSS_RISK_PCT_THRESHOLD", 0.30)
+                effective_threshold = float(np.clip(early_threshold + early_penalty, 0.15, 0.50))
+                overrides["early_loss_exit_threshold_pct"] = round(effective_threshold, 3)
+
+        return overrides
+
     def evaluate_tick(self, price: float) -> Tuple[bool, str]:
         """
         Call on every tick while a position is open. Returns
@@ -344,6 +454,26 @@ class RiskManager:
                 if new_trail_stop > plan.current_stop_price:
                     plan.current_stop_price = new_trail_stop
 
+        # ── Early loss exit (pre-stop) ────────────────────────────────────
+        # Only trigger when the AI+regime logic flags a degrading setup.
+        # The AI does not choose size; it only asks for an earlier exit.
+        early_exit = False
+        if getattr(self.cfg, "EARLY_LOSS_EXIT_ENABLED", False) and getattr(self, "_early_loss_threshold_pct", None) is not None:
+            loss_per_share = price - plan.entry_price
+            unrealised_loss_usd = loss_per_share * plan.shares
+            if unrealised_loss_usd < 0:
+                loss_pct_of_risk = abs(unrealised_loss_usd) / (plan.risk_usd + 1e-9)
+                if loss_pct_of_risk >= float(self._early_loss_threshold_pct):
+                    early_exit = True
+                    reason_early = "early_loss_exit"
+                    # Do not allow early exit to breach the hard $50 max loss.
+                    # risk.py owns the hard failure state; early exit is an early warning only.
+                    log.warning(
+                        f"Early loss exit triggered: loss ${abs(unrealised_loss_usd):.2f} "
+                        f"= {loss_pct_of_risk:.0%} of risk budget ${plan.risk_usd:.2f}"
+                    )
+                    return True, reason_early
+
         # ── Hard / trailing stop check (current_stop_price covers both) ────────
         if price <= plan.current_stop_price:
             reason = "trailing_stop" if plan.trailing_stop_armed else "hard_stop"
@@ -355,17 +485,22 @@ class RiskManager:
 
         # ── Trailing profit-taker ────────────────────────────────────────────
         if self.cfg.TRAILING_PROFIT_ENABLED:
+            giveback = getattr(
+                self,
+                "_dynamic_profit_giveback_pct",
+                getattr(self.cfg, "TRAILING_PROFIT_GIVEBACK_PCT", 0.40),
+            )
             gain_pct = (plan.peak_price - plan.entry_price) / plan.entry_price
             if not plan.trailing_profit_armed and gain_pct >= self.cfg.TRAILING_PROFIT_ACTIVATE_PCT:
                 plan.trailing_profit_armed = True
                 plan.profit_floor_price = plan.entry_price + (
-                    (plan.peak_price - plan.entry_price) * (1 - self.cfg.TRAILING_PROFIT_GIVEBACK_PCT)
+                    (plan.peak_price - plan.entry_price) * (1 - giveback)
                 )
-                log.info(f"Trailing profit armed at +{gain_pct:.2%}, floor ${plan.profit_floor_price:.2f}")
+                log.info(f"Trailing profit armed at +{gain_pct:.2%}, floor ${plan.profit_floor_price:.2f} (giveback {giveback:.0%})")
 
             if plan.trailing_profit_armed:
                 new_floor = plan.entry_price + (
-                    (plan.peak_price - plan.entry_price) * (1 - self.cfg.TRAILING_PROFIT_GIVEBACK_PCT)
+                    (plan.peak_price - plan.entry_price) * (1 - giveback)
                 )
                 if plan.profit_floor_price is None or new_floor > plan.profit_floor_price:
                     plan.profit_floor_price = new_floor
