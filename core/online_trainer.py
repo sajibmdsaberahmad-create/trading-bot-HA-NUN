@@ -24,7 +24,7 @@ import pandas as pd
 from core.config import BotConfig
 from core.agent import build_ppo_agent, OnlineLearningManager
 from core.env import TradingEnv
-from core.experience_buffer import load_all, append as buffer_append
+from core.experience_buffer import load_all, load_recent, append as buffer_append
 from core.notify import log
 
 MODELS_DIR = Path("models")
@@ -158,23 +158,35 @@ def _update_weights_from_buffer():
 
 
 def _train_ppo_on_buffer(cfg: BotConfig, steps: int = 20_000):
-    """Train PPO on episodes synthesized from experience buffer."""
-    records = load_recent(n=5000)
+    """Train PPO on episodes synthesized from experience buffer when features are available."""
+    try:
+        records = load_recent(n=5000)
+    except Exception as exc:
+        log.debug(f"Buffer load failed: {exc}")
+        records = []
     if not records:
         log.warning("No experience buffer records for PPO training")
         return False
     trade_recs = [r for r in records if r.get("source") in ("backtest", "live_trade", "scan_pick") and r.get("features")]
     if not trade_recs:
-        log.warning("No feature-rich records for PPO training")
+        log.warning("No feature-rich records for PPO training yet — skipping neural update")
         return False
     log.info(f"🧠 PPO training on {len(trade_recs)} experience records | target steps={steps:,}")
     try:
         dummy_f = np.zeros((cfg.WINDOW_SIZE + 2, cfg.N_FEATURES), np.float32)
         dummy_px = np.ones(cfg.WINDOW_SIZE + 2, np.float32) * 100.0
-        dummy_env = TradingEnv(dummy_f, dummy_px, cfg.INITIAL_CASH,
-                               cfg.TRANSACTION_COST_PCT, cfg.WINDOW_SIZE, cfg.DEFAULT_MAX_POSITION_PCT)
+        dummy_env = TradingEnv(
+            dummy_f,
+            dummy_px,
+            cfg.INITIAL_CASH,
+            cfg.TRANSACTION_COST_PCT,
+            cfg.WINDOW_SIZE,
+            cfg.DEFAULT_MAX_POSITION_PCT,
+        )
         model = build_ppo_agent(dummy_env, cfg, model_path=cfg.MODEL_PATH)
         vec_env = model.get_env()
+        if vec_env is not None:
+            model.set_env(vec_env)
         model.learn(total_timesteps=steps, reset_num_timesteps=False, progress_bar=False)
         model.save(cfg.MODEL_PATH)
         log.info(f"💾 PPO model saved -> {cfg.MODEL_PATH}")
@@ -217,7 +229,7 @@ def run_unified_training(cfg: BotConfig, ppo_steps: int = 20_000):
     # 2) Update rule weights from buffer
     weights = _update_weights_from_buffer()
 
-    # 3) Train PPO on experience buffer
+    # 3) Train PPO on experience buffer when possible
     trained = _train_ppo_on_buffer(cfg, steps=ppo_steps)
 
     # 4) Save guidelines
