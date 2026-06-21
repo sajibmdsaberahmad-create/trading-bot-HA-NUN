@@ -356,6 +356,16 @@ def _detect_changed_files(repo_root: str) -> List[str]:
         return list(TRACKED_FILES)
 
 
+def _remote_url() -> Optional[str]:
+    """Build authenticated remote URL from global state."""
+    global _repo, _token
+    if not _repo:
+        return None
+    if _token and "@" not in _repo:
+        return f"https://{_token}@github.com/{_repo}.git"
+    return f"https://github.com/{_repo}.git"
+
+
 def _verify_repo() -> bool:
     """Verify the GitHub repo is reachable."""
     if not _repo:
