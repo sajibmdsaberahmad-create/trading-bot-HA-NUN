@@ -184,6 +184,16 @@ class BotConfig:
     SCAN_INTERVAL_SECONDS: int = 300
 
     # ════════════════════════════════════════════════════════════════════
+    # OLLAMA LOCAL LLM REASONING HEAD
+    # ════════════════════════════════════════════════════════════════════
+    OLLAMA_ENABLED: bool = False
+    OLLAMA_HOST: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "llama3"
+    OLLAMA_TIMEOUT: int = 10
+    OLLAMA_MAX_TOKENS: int = 256
+    OLLAMA_TEMPERATURE: float = 0.7
+
+    # ════════════════════════════════════════════════════════════════════
     # NOTIFICATIONS
     # ════════════════════════════════════════════════════════════════════
     TELEGRAM_ENABLED:  bool = True
