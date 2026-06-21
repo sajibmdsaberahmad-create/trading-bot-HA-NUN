@@ -32,7 +32,7 @@ class BotConfig:
     # IB GATEWAY CONNECTION
     # ════════════════════════════════════════════════════════════════════
     IB_HOST:       str  = "127.0.0.1"
-    IB_PORT:       int  = 7497     # 7497 = paper, 7496 = live, 4002/4001 = IB Gateway variants
+    IB_PORT:       int  = 4002     # 4002/4001 = IB Gateway, 7497 = TWS paper, 7496 = TWS live
     IB_CLIENT_ID:  int  = 1
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
 
