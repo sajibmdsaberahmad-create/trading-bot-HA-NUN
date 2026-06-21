@@ -1,0 +1,127 @@
+{
+  "timestamp": "20260621_090634",
+  "meta": {
+    "run_at": "2026-06-21T09:06:34.235906",
+    "tickers_requested": [
+      "SOFI",
+      "MARA",
+      "PLTR",
+      "RKLB",
+      "ASTS",
+      "COIN",
+      "IONQ"
+    ],
+    "tickers_success": [
+      "SOFI",
+      "MARA",
+      "PLTR",
+      "RKLB",
+      "ASTS",
+      "COIN",
+      "IONQ"
+    ],
+    "cash": 10000.0,
+    "avg_win_rate": 46.8,
+    "combined_pnl": 8327.49
+  },
+  "results": [
+    {
+      "ticker": "SOFI",
+      "trades": 92,
+      "wins": 38,
+      "losses": 54,
+      "win_rate_pct": 41.3,
+      "total_pnl": 1295.72,
+      "total_return_pct": -2.53,
+      "final_nav": 9747.27,
+      "avg_win": 124.21,
+      "avg_loss": -63.41,
+      "max_drawdown_pct": 14.32,
+      "avg_bars_held": 3.0
+    },
+    {
+      "ticker": "MARA",
+      "trades": 100,
+      "wins": 50,
+      "losses": 50,
+      "win_rate_pct": 50.0,
+      "total_pnl": 1189.41,
+      "total_return_pct": 0.17,
+      "final_nav": 10016.77,
+      "avg_win": 83.9,
+      "avg_loss": -60.11,
+      "max_drawdown_pct": 9.14,
+      "avg_bars_held": 2.6
+    },
+    {
+      "ticker": "PLTR",
+      "trades": 82,
+      "wins": 36,
+      "losses": 46,
+      "win_rate_pct": 43.9,
+      "total_pnl": 37.27,
+      "total_return_pct": -13.44,
+      "final_nav": 8656.1,
+      "avg_win": 86.18,
+      "avg_loss": -66.63,
+      "max_drawdown_pct": 15.23,
+      "avg_bars_held": 3.3
+    },
+    {
+      "ticker": "RKLB",
+      "trades": 122,
+      "wins": 54,
+      "losses": 68,
+      "win_rate_pct": 44.3,
+      "total_pnl": 793.19,
+      "total_return_pct": -12.33,
+      "final_nav": 8766.85,
+      "avg_win": 146.41,
+      "avg_loss": -104.6,
+      "max_drawdown_pct": 19.3,
+      "avg_bars_held": 2.1
+    },
+    {
+      "ticker": "ASTS",
+      "trades": 117,
+      "wins": 61,
+      "losses": 56,
+      "win_rate_pct": 52.1,
+      "total_pnl": 2600.48,
+      "total_return_pct": 6.19,
+      "final_nav": 10619.2,
+      "avg_win": 154.97,
+      "avg_loss": -122.36,
+      "max_drawdown_pct": 29.37,
+      "avg_bars_held": 2.1
+    },
+    {
+      "ticker": "COIN",
+      "trades": 102,
+      "wins": 43,
+      "losses": 59,
+      "win_rate_pct": 42.2,
+      "total_pnl": 184.49,
+      "total_return_pct": -15.56,
+      "final_nav": 8443.64,
+      "avg_win": 95.26,
+      "avg_loss": -66.3,
+      "max_drawdown_pct": 21.59,
+      "avg_bars_held": 2.8
+    },
+    {
+      "ticker": "IONQ",
+      "trades": 112,
+      "wins": 58,
+      "losses": 54,
+      "win_rate_pct": 51.8,
+      "total_pnl": 2226.93,
+      "total_return_pct": 2.17,
+      "final_nav": 10217.19,
+      "avg_win": 141.23,
+      "avg_loss": -110.45,
+      "max_drawdown_pct": 20.75,
+      "avg_bars_held": 2.3
+    }
+  ]
+}
