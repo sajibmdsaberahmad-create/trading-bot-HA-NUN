@@ -228,3 +228,93 @@ class Notifier:
                 server.sendmail(self.email_from, [self.email_to], mime.as_string())
         except Exception as exc:
             log.warning(f"Email send failed: {exc}")
+
+    # ── Advanced AI model notifications ──────────────────────────────────────
+
+    def fusion_decision(self, decision, price: float, ticker: str):
+        """Rich notification for multi-model fusion decisions."""
+        models_str = []
+        for m in decision.model_predictions:
+            action_name = ['HOLD', 'BUY', 'SELL'][m.action]
+            models_str.append(f"  {m.model_name:12s}: {action_name} ({m.confidence:.0%})")
+        
+        models_block = "\n".join(models_str)
+        weights_block = "\n".join(f"  {k:12s}: w={v:.2f}" for k, v in decision.model_weights.items())
+        
+        msg = (
+            f"🧠 FUSION DECISION: {decision.action_name}\n"
+            f"  Ticker: {ticker} @ ${price:.2f}\n"
+            f"  Confidence: {decision.confidence:.0%}\n"
+            f"  Method: {decision.fusion_method}\n"
+            f"── Model Votes ──\n{models_block}\n"
+            f"── Weights ──\n{weights_block}\n"
+            f"📝 {decision.reasoning[:200]}"
+        )
+        log.info(f"FUSION │ {decision.action_name} ({decision.confidence:.0%}) "
+                 f"| {len(decision.model_predictions)} models | {decision.reasoning[:80]}…")
+        if self.telegram_ready:
+            self._send_telegram(msg)
+    
+    def model_accuracy_update(self, accuracy_summary: dict):
+        """Weekly accuracy report of all ensemble models."""
+        lines = [f"  {k:15s}: acc={v['accuracy']:.1%}, w={v['weight']:.2f}, n={v['samples']}" 
+                 for k, v in accuracy_summary.items()]
+        msg = "📈 MODEL ACCURACY REPORT\n" + "\n".join(lines)
+        log.info(f"ACCURACY │ {len(accuracy_summary)} models tracked")
+        if self.telegram_ready:
+            self._send_telegram(msg)
+
+    def training_progress(self, model_name: str, epoch: int, loss: float, val_loss: float = None):
+        """Training progress update during advanced training pipeline."""
+        val = f" | val={val_loss:.4f}" if val_loss else ""
+        msg = f"🏋️ TRAINING {model_name}\nEpoch {epoch} | loss={loss:.4f}{val}"
+        log.info(f"TRAIN │ {model_name} epoch {epoch}: loss={loss:.4f}{val}")
+        # Send only every 10 epochs to avoid spam
+        if epoch % 10 == 0 and self.telegram_ready:
+            self._send_telegram(msg)
+
+    def training_complete(self, model_name: str, elapsed_s: float, metrics: dict = None):
+        """Training complete notification."""
+        metrics_block = ""
+        if metrics:
+            metrics_block = "\n" + "\n".join(f"  {k}: {v}" for k, v in metrics.items())
+        msg = (f"✅ TRAINING COMPLETE: {model_name}\n"
+               f"  Elapsed: {elapsed_s:.0f}s{metrics_block}")
+        log.info(f"TRAIN │ {model_name} complete in {elapsed_s:.0f}s")
+        if self.telegram_ready:
+            self._send_telegram(msg)
+
+    def backtest_result(self, results: dict):
+        """Comprehensive backtest result notification."""
+        msg = (
+            f"📊 BACKTEST RESULTS\n"
+            f"  Return: {results.get('total_return_pct', 0):+.2f}%\n"
+            f"  Final NAV: ${results.get('final_nav', 0):,.2f}\n"
+            f"  Sharpe: {results.get('sharpe_ratio', 0):.3f}\n"
+            f"  Max DD: {results.get('max_drawdown_pct', 0):.2f}%\n"
+            f"  Trades: {results.get('trades', 0)} ({results.get('win_rate_pct', 0):.0f}% WR)\n"
+            f"  Profit Factor: {results.get('profit_factor', 0):.2f}"
+        )
+        # Add model accuracy if available
+        if 'model_accuracy' in results and results['model_accuracy']:
+            acc_lines = "\n".join(f"  {k}: {v['accuracy']:.1%}" for k, v in results['model_accuracy'].items())
+            msg += f"\n── Model Accuracy ──\n{acc_lines}"
+        
+        log.info(f"BACKTEST │ Return: {results.get('total_return_pct', 0):+.2f}% | "
+                 f"Sharpe: {results.get('sharpe_ratio', 0):.3f} | "
+                 f"{results.get('trades', 0)} trades")
+        if self.telegram_ready:
+            self._send_telegram(msg)
+
+    def ai_state(self, ticker: str, mode: str, models_active: int, equity: float):
+        """Periodic AI system state summary."""
+        msg = (
+            f"🤖 AI SYSTEM STATUS\n"
+            f"  Mode: {mode.upper()}\n"
+            f"  Active Models: {models_active}\n"
+            f"  Ticker: {ticker}\n"
+            f"  Equity: ${equity:,.2f}"
+        )
+        log.info(f"STATUS │ {mode} | {models_active} models | ${equity:,.2f}")
+        if self.telegram_ready:
+            self._send_telegram(msg)
