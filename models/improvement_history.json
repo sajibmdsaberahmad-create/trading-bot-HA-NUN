@@ -224,5 +224,53 @@
     "returns_win_rate": 0.20689655172413793,
     "adjustments": {},
     "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-21T12:12:58.992978\nCombined win rate: 54.7% (buffer=88.6%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
+  },
+  {
+    "timestamp": "2026-06-22T08:55:53.915704",
+    "win_rate": 0.5500131613582522,
+    "buffer_win_rate": 0.8931297709923665,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T08:55:53.915191\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
+  },
+  {
+    "timestamp": "2026-06-22T08:55:53.921098",
+    "win_rate": 0.5500131613582522,
+    "buffer_win_rate": 0.8931297709923665,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T08:55:53.920885\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
+  },
+  {
+    "timestamp": "2026-06-22T09:00:55.110688",
+    "win_rate": 0.5501836710510725,
+    "buffer_win_rate": 0.8934707903780069,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:00:55.110150\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
+  },
+  {
+    "timestamp": "2026-06-22T09:00:55.116843",
+    "win_rate": 0.5501836710510725,
+    "buffer_win_rate": 0.8934707903780069,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:00:55.116651\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
+  },
+  {
+    "timestamp": "2026-06-22T09:05:55.489495",
+    "win_rate": 0.550323275862069,
+    "buffer_win_rate": 0.89375,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:05:55.489001\nCombined win rate: 55.0% (buffer=89.4%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
+  },
+  {
+    "timestamp": "2026-06-22T09:05:55.495930",
+    "win_rate": 0.550323275862069,
+    "buffer_win_rate": 0.89375,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {},
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:05:55.495735\nCombined win rate: 55.0% (buffer=89.4%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
   }
 ]

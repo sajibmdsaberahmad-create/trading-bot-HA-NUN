@@ -1,25 +1,4 @@
-• 🧭 AI GUIDELINES | generated 2026-06-22T09:05:52.404944
-• Win rate strong: consider larger size and wider targets
-
-Generated: 2026-06-22T09:05:52.405014
-Weights: {
-  "momentum": 11.918968949769532,
-  "volume": 50.0,
-  "institutional": 50.0,
-  "vwap_slope": 29.797422374423828,
-  "atr_bonus": 29.797422374423828,
-  "mean_reversion": 29.797422374423828,
-  "trend_filter": 50.0,
-  "price_rising": 47.67587579907813,
-  "rsi_filter": 17.878453424654293,
-  "volatility_gate": 23.837937899539064,
-  "_meta": {
-    "train_timestamp": "2026-06-22T09:05:52.404047",
-    "buffer_total": 320,
-    "buffer_win_rate": 0.894,
-    "sources": {
-      "backtest": 319,
-      "market_context": 1
-    }
-  }
-}
+🧭 SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:05:55.495735
+Combined win rate: 55.0% (buffer=89.4%, returns=20.7%)
+• Win rate stable: maintain current parameters
+• Avoid multiple parameter changes simultaneously; isolate effects

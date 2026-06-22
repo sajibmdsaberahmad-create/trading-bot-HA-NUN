@@ -1,12 +1,12 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 4,
-  "training_sessions": 1,
+  "total_awakenings": 5,
+  "training_sessions": 4,
   "trades_observed": 0,
-  "scans_performed": 1,
-  "improvements_applied": 1,
-  "reports_generated": 0,
+  "scans_performed": 4,
+  "improvements_applied": 4,
+  "reports_generated": 3,
   "event_log": [
     {
       "timestamp": "2026-06-21T11:02:48.682431",
@@ -108,8 +108,450 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #4",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T08:55:43.250691",
+      "age": "21h 52m 54s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #5",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T08:55:50.935173",
+      "age": "21h 53m 2s",
+      "type": "SCAN",
+      "message": "Market scan #2",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": 72
+      }
+    },
+    {
+      "timestamp": "2026-06-22T08:55:50.935945",
+      "age": "21h 53m 2s",
+      "type": "TRAIN",
+      "message": "Training session #2",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T08:55:50.936391",
+      "age": "21h 53m 2s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": null,
+        "vix_regime": "unknown",
+        "timestamp": "2026-06-22T08:55:50.936382"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T08:55:50.936690",
+      "age": "21h 53m 2s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T08:55:53.908855",
+      "age": "21h 53m 5s",
+      "type": "TRAIN_COMPLETE",
+      "message": "Unified training completed",
+      "metadata": {
+        "weights_updated": true,
+        "ppo_trained": false
+      }
+    },
+    {
+      "timestamp": "2026-06-22T08:55:53.916283",
+      "age": "21h 53m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2",
+      "metadata": {
+        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T08:55:53.915191\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects",
+        "adjustments": {},
+        "win_rate": 0.5500131613582522,
+        "timestamp": "2026-06-22T08:55:53.916169"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T08:55:53.916970",
+      "age": "21h 53m 5s",
+      "type": "VERSION",
+      "message": "Created version v20260622_085553",
+      "metadata": {
+        "id": "v20260622_085553",
+        "timestamp": "2026-06-22T08:55:53.916704",
+        "age": "21h 53m 5s",
+        "session": 2,
+        "mood": "learning",
+        "total_awakenings": 5,
+        "trades_observed": 0,
+        "scans_performed": 2,
+        "improvements_applied": 2,
+        "total_pnl": 0,
+        "best_streak": 0,
+        "steps": {
+          "market_context": {
+            "spy_trend": "unknown",
+            "qqq_trend": "unknown",
+            "vix_level": null,
+            "vix_regime": "unknown",
+            "timestamp": "2026-06-22T08:55:50.936382"
+          },
+          "regime": {
+            "regime": "unknown",
+            "confidence": 0.0,
+            "recommendation": "Insufficient data"
+          },
+          "unified_training": {
+            "weights_updated": true,
+            "ppo_trained": false
+          },
+          "self_improvement": {
+            "win_rate": 0.5500131613582522,
+            "adjustments": {}
+          }
+        },
+        "parent_version": "v20260621_121258"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T08:55:53.918222",
+      "age": "21h 53m 5s",
+      "type": "ERROR",
+      "message": "Training session failed: 'mood'",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T09:00:52.040263",
+      "age": "21h 58m 3s",
+      "type": "SCAN",
+      "message": "Market scan #3",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": 72
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:00:52.041868",
+      "age": "21h 58m 3s",
+      "type": "TRAIN",
+      "message": "Training session #3",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T09:00:52.042362",
+      "age": "21h 58m 3s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": null,
+        "vix_regime": "unknown",
+        "timestamp": "2026-06-22T09:00:52.042356"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:00:52.042874",
+      "age": "21h 58m 3s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T09:00:55.105723",
+      "age": "21h 58m 6s",
+      "type": "TRAIN_COMPLETE",
+      "message": "Unified training completed",
+      "metadata": {
+        "weights_updated": true,
+        "ppo_trained": false
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:00:55.111237",
+      "age": "21h 58m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #3",
+      "metadata": {
+        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:00:55.110150\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects",
+        "adjustments": {},
+        "win_rate": 0.5501836710510725,
+        "timestamp": "2026-06-22T09:00:55.111160"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:00:55.112329",
+      "age": "21h 58m 6s",
+      "type": "VERSION",
+      "message": "Created version v20260622_090055",
+      "metadata": {
+        "id": "v20260622_090055",
+        "timestamp": "2026-06-22T09:00:55.111949",
+        "age": "21h 58m 6s",
+        "session": 3,
+        "mood": "learning",
+        "total_awakenings": 5,
+        "trades_observed": 0,
+        "scans_performed": 3,
+        "improvements_applied": 3,
+        "total_pnl": 0,
+        "best_streak": 0,
+        "steps": {
+          "market_context": {
+            "spy_trend": "unknown",
+            "qqq_trend": "unknown",
+            "vix_level": null,
+            "vix_regime": "unknown",
+            "timestamp": "2026-06-22T09:00:52.042356"
+          },
+          "regime": {
+            "regime": "unknown",
+            "confidence": 0.0,
+            "recommendation": "Insufficient data"
+          },
+          "unified_training": {
+            "weights_updated": true,
+            "ppo_trained": false
+          },
+          "self_improvement": {
+            "win_rate": 0.5501836710510725,
+            "adjustments": {}
+          }
+        },
+        "parent_version": "v20260622_085553"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:00:55.113874",
+      "age": "21h 58m 6s",
+      "type": "ERROR",
+      "message": "Training session failed: 'mood'",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T09:05:52.371782",
+      "age": "22h 3m 3s",
+      "type": "SCAN",
+      "message": "Market scan #4",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": 72
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:05:52.373878",
+      "age": "22h 3m 3s",
+      "type": "TRAIN",
+      "message": "Training session #4",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T09:05:52.374530",
+      "age": "22h 3m 3s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": null,
+        "vix_regime": "unknown",
+        "timestamp": "2026-06-22T09:05:52.374520"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:05:52.374979",
+      "age": "22h 3m 3s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T09:05:55.484315",
+      "age": "22h 3m 6s",
+      "type": "TRAIN_COMPLETE",
+      "message": "Unified training completed",
+      "metadata": {
+        "weights_updated": true,
+        "ppo_trained": false
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:05:55.489983",
+      "age": "22h 3m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #4",
+      "metadata": {
+        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:05:55.489001\nCombined win rate: 55.0% (buffer=89.4%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects",
+        "adjustments": {},
+        "win_rate": 0.550323275862069,
+        "timestamp": "2026-06-22T09:05:55.489890"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:05:55.491114",
+      "age": "22h 3m 6s",
+      "type": "VERSION",
+      "message": "Created version v20260622_090555",
+      "metadata": {
+        "id": "v20260622_090555",
+        "timestamp": "2026-06-22T09:05:55.490789",
+        "age": "22h 3m 6s",
+        "session": 4,
+        "mood": "learning",
+        "total_awakenings": 5,
+        "trades_observed": 0,
+        "scans_performed": 4,
+        "improvements_applied": 4,
+        "total_pnl": 0,
+        "best_streak": 0,
+        "steps": {
+          "market_context": {
+            "spy_trend": "unknown",
+            "qqq_trend": "unknown",
+            "vix_level": null,
+            "vix_regime": "unknown",
+            "timestamp": "2026-06-22T09:05:52.374520"
+          },
+          "regime": {
+            "regime": "unknown",
+            "confidence": 0.0,
+            "recommendation": "Insufficient data"
+          },
+          "unified_training": {
+            "weights_updated": true,
+            "ppo_trained": false
+          },
+          "self_improvement": {
+            "win_rate": 0.550323275862069,
+            "adjustments": {}
+          }
+        },
+        "parent_version": "v20260622_090055"
+      }
+    },
+    {
+      "timestamp": "2026-06-22T09:05:55.492866",
+      "age": "22h 3m 6s",
+      "type": "ERROR",
+      "message": "Training session failed: 'mood'",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-21T12:33:52.965683",
-  "current_version": "v20260621_121258"
+  "last_awakening": "2026-06-22T08:55:43.250482",
+  "current_version": "v20260622_090555",
+  "version_history": [
+    {
+      "id": "v20260622_085553",
+      "timestamp": "2026-06-22T08:55:53.916704",
+      "age": "21h 53m 5s",
+      "session": 2,
+      "mood": "learning",
+      "total_awakenings": 5,
+      "trades_observed": 0,
+      "scans_performed": 2,
+      "improvements_applied": 2,
+      "total_pnl": 0,
+      "best_streak": 0,
+      "steps": {
+        "market_context": {
+          "spy_trend": "unknown",
+          "qqq_trend": "unknown",
+          "vix_level": null,
+          "vix_regime": "unknown",
+          "timestamp": "2026-06-22T08:55:50.936382"
+        },
+        "regime": {
+          "regime": "unknown",
+          "confidence": 0.0,
+          "recommendation": "Insufficient data"
+        },
+        "unified_training": {
+          "weights_updated": true,
+          "ppo_trained": false
+        },
+        "self_improvement": {
+          "win_rate": 0.5500131613582522,
+          "adjustments": {}
+        }
+      },
+      "parent_version": "v20260621_121258"
+    },
+    {
+      "id": "v20260622_090055",
+      "timestamp": "2026-06-22T09:00:55.111949",
+      "age": "21h 58m 6s",
+      "session": 3,
+      "mood": "learning",
+      "total_awakenings": 5,
+      "trades_observed": 0,
+      "scans_performed": 3,
+      "improvements_applied": 3,
+      "total_pnl": 0,
+      "best_streak": 0,
+      "steps": {
+        "market_context": {
+          "spy_trend": "unknown",
+          "qqq_trend": "unknown",
+          "vix_level": null,
+          "vix_regime": "unknown",
+          "timestamp": "2026-06-22T09:00:52.042356"
+        },
+        "regime": {
+          "regime": "unknown",
+          "confidence": 0.0,
+          "recommendation": "Insufficient data"
+        },
+        "unified_training": {
+          "weights_updated": true,
+          "ppo_trained": false
+        },
+        "self_improvement": {
+          "win_rate": 0.5501836710510725,
+          "adjustments": {}
+        }
+      },
+      "parent_version": "v20260622_085553"
+    },
+    {
+      "id": "v20260622_090555",
+      "timestamp": "2026-06-22T09:05:55.490789",
+      "age": "22h 3m 6s",
+      "session": 4,
+      "mood": "learning",
+      "total_awakenings": 5,
+      "trades_observed": 0,
+      "scans_performed": 4,
+      "improvements_applied": 4,
+      "total_pnl": 0,
+      "best_streak": 0,
+      "steps": {
+        "market_context": {
+          "spy_trend": "unknown",
+          "qqq_trend": "unknown",
+          "vix_level": null,
+          "vix_regime": "unknown",
+          "timestamp": "2026-06-22T09:05:52.374520"
+        },
+        "regime": {
+          "regime": "unknown",
+          "confidence": 0.0,
+          "recommendation": "Insufficient data"
+        },
+        "unified_training": {
+          "weights_updated": true,
+          "ppo_trained": false
+        },
+        "self_improvement": {
+          "win_rate": 0.550323275862069,
+          "adjustments": {}
+        }
+      },
+      "parent_version": "v20260622_090055"
+    }
+  ],
+  "last_training": "2026-06-22T09:05:55.492426"
 }
