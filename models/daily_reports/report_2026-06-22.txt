@@ -1,0 +1,147 @@
+🧠 HA-NUN CONSCIOUSNESS DAILY REPORT
+======================================================================
+Date: 2026-06-22
+AI Age: 22h 3m 6s
+Mood: learning — 🧠 Gathering data — still in early stages
+Total Awakenings: 5
+Training Sessions: 4
+Trades Observed: 0
+Scans Performed: 4
+Improvements Applied: 4
+Reports Generated: 2
+Total P&L: $+0.00
+Best Win Streak: 0
+Worst Loss Streak: 0
+
+Current Version: v20260622_090555
+
+Latest Training Results:
+{
+  "session": 4,
+  "timestamp": "2026-06-22T09:05:52.374332",
+  "age": "22h 3m 3s",
+  "mood": "learning",
+  "steps": {
+    "market_context": {
+      "spy_trend": "unknown",
+      "qqq_trend": "unknown",
+      "vix_level": null,
+      "vix_regime": "unknown",
+      "timestamp": "2026-06-22T09:05:52.374520"
+    },
+    "regime": {
+      "regime": "unknown",
+      "confidence": 0.0,
+      "recommendation": "Insufficient data"
+    },
+    "unified_training": {
+      "weights_updated": true,
+      "ppo_trained": false
+    },
+    "self_improvement": {
+      "win_rate": 0.550323275862069,
+      "adjustments": {}
+    }
+  },
+  "version": {
+    "id": "v20260622_090555",
+    "timestamp": "2026-06-22T09:05:55.490789",
+    "age": "22h 3m 6s",
+    "session": 4,
+    "mood": "learning",
+    "total_awakenings": 5,
+    "trades_observed": 0,
+    "scans_performed": 4,
+    "improvements_applied": 4,
+    "total_pnl": 0,
+    "best_streak": 0,
+    "steps": {
+      "market_context": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": null,
+        "vix_regime": "unknown",
+        "timestamp": "2026-06-22T09:05:52.374520"
+      },
+      "regime": {
+        "regime": "unknown",
+        "confidence": 0.0,
+        "recommendation": "Insufficient data"
+      },
+      "unified_training": {
+        "weights_updated": true,
+        "ppo_trained": false
+      },
+      "self_improvement": {
+        "win_rate": 0.550323275862069,
+        "adjustments": {}
+      }
+    },
+    "parent_version": "v20260622_090055"
+  }
+}
+
+Experience Buffer Stats:
+{
+  "total": 320,
+  "sources": {
+    "backtest": 319,
+    "market_context": 1
+  },
+  "win_rate": 0.89375,
+  "avg_reward": 887.597562499999
+}
+
+Recent Events (last 30):
+  [?] 2026-06-21T12:12:55 [REGIME] Market regime: unknown (conf=0%)
+  [?] 2026-06-21T12:12:58 [TRAIN_COMPLETE] Unified training completed
+  [?] 2026-06-21T12:12:58 [IMPROVE] Applied improvement #1
+  [?] 2026-06-21T12:12:58 [ERROR] Training session failed: 'version_history'
+  [?] 2026-06-21T12:12:58 [REFLECT] Self-reflection completed
+  [?] 2026-06-21T12:33:52 [AWAKEN] Consciousness awakened #4
+  [21h 52m 54s] 2026-06-22T08:55:43 [AWAKEN] Consciousness awakened #5
+  [21h 53m 2s] 2026-06-22T08:55:50 [SCAN] Market scan #2
+  [21h 53m 2s] 2026-06-22T08:55:50 [TRAIN] Training session #2
+  [21h 53m 2s] 2026-06-22T08:55:50 [CONTEXT] Fetched market context
+  [21h 53m 2s] 2026-06-22T08:55:50 [REGIME] Market regime: unknown (conf=0%)
+  [21h 53m 5s] 2026-06-22T08:55:53 [TRAIN_COMPLETE] Unified training completed
+  [21h 53m 5s] 2026-06-22T08:55:53 [IMPROVE] Applied improvement #2
+  [21h 53m 5s] 2026-06-22T08:55:53 [VERSION] Created version v20260622_085553
+  [21h 53m 5s] 2026-06-22T08:55:53 [ERROR] Training session failed: 'mood'
+  [21h 58m 3s] 2026-06-22T09:00:52 [SCAN] Market scan #3
+  [21h 58m 3s] 2026-06-22T09:00:52 [TRAIN] Training session #3
+  [21h 58m 3s] 2026-06-22T09:00:52 [CONTEXT] Fetched market context
+  [21h 58m 3s] 2026-06-22T09:00:52 [REGIME] Market regime: unknown (conf=0%)
+  [21h 58m 6s] 2026-06-22T09:00:55 [TRAIN_COMPLETE] Unified training completed
+  [21h 58m 6s] 2026-06-22T09:00:55 [IMPROVE] Applied improvement #3
+  [21h 58m 6s] 2026-06-22T09:00:55 [VERSION] Created version v20260622_090055
+  [21h 58m 6s] 2026-06-22T09:00:55 [ERROR] Training session failed: 'mood'
+  [22h 3m 3s] 2026-06-22T09:05:52 [SCAN] Market scan #4
+  [22h 3m 3s] 2026-06-22T09:05:52 [TRAIN] Training session #4
+  [22h 3m 3s] 2026-06-22T09:05:52 [CONTEXT] Fetched market context
+  [22h 3m 3s] 2026-06-22T09:05:52 [REGIME] Market regime: unknown (conf=0%)
+  [22h 3m 6s] 2026-06-22T09:05:55 [TRAIN_COMPLETE] Unified training completed
+  [22h 3m 6s] 2026-06-22T09:05:55 [IMPROVE] Applied improvement #4
+  [22h 3m 6s] 2026-06-22T09:05:55 [VERSION] Created version v20260622_090555
+
+
+--- AI Self-Reflection ---
+🧠 AI SELF-REFLECTION
+======================================================================
+Timestamp: 2026-06-22T09:05:55.492353
+Age: 22h 3m 6s
+Mood: learning — 🧠 Gathering data — still in early stages
+
+I have existed for 22h 3m 6s. In that time I have observed 0 trades, 
+conducted 4 training sessions, and scanned markets 4 times.
+I have applied 4 self-improvements to my own code.
+My current version is v20260622_090555.
+
+I have not yet observed any trades. I am gathering data and building my understanding of the markets.
+
+I have created 3 versions of myself since birth.
+  First: v20260622_085553
+  Latest: v20260622_090555
+
+I will continue to learn, adapt, and evolve.
+My purpose is to understand and exploit market inefficiencies with ever-increasing precision.
