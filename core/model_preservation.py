@@ -17,7 +17,7 @@ import zipfile
 import hashlib
 import requests
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def compute_sha256(path: str, block_size: int = 1024 * 1024) -> Optional[str]:
@@ -36,7 +36,7 @@ def compute_sha256(path: str, block_size: int = 1024 * 1024) -> Optional[str]:
 
 def create_model_manifest(model_paths: List[str], manifest_path: str = "models/model_manifest.json") -> str:
     manifest = {
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'models': [],
     }
     for p in model_paths:

@@ -47,7 +47,7 @@ import numpy as np
 import pandas as pd
 from typing import Optional, Tuple, Dict, List, Any
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import deque
 
 import torch
@@ -198,7 +198,7 @@ class AdvancedTrainingPipeline:
         
         # Metrics
         self.training_history: Dict[str, Any] = {
-            'start_time': datetime.utcnow().isoformat(),
+            'start_time': datetime.now(timezone.utc).isoformat(),
             'models_trained': [],
             'metrics': {},
         }
@@ -1093,7 +1093,7 @@ class AdvancedTrainingPipeline:
         
         # Save training history
         self.training_history['total_time_s'] = round(time.time() - overall_start, 1)
-        self.training_history['end_time'] = datetime.utcnow().isoformat()
+        self.training_history['end_time'] = datetime.now(timezone.utc).isoformat()
         
         # Save to file
         history_path = f"training_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
