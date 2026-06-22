@@ -24,6 +24,11 @@ from core.config import BotConfig
 from core.notify import log, Notifier
 
 
+# Common LSE tickers and exchanges
+LSE_EXCHANGES = {"LSE", "LSE.FPX", "LSE.GBP"}
+LSE_CURRENCY = "GBP"
+
+
 class IBConnector:
     """
     Manages the IB Gateway TCP connection.

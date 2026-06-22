@@ -67,6 +67,10 @@ EXAMPLES:
                          help="Override SIZING_MODE: risk_based or full_cash")
     parser.add_argument("--order-size-usd", default=None, type=float,
                          help="For full_cash mode: explicit dollar amount to use for order sizing")
+    parser.add_argument("--timeframe", choices=["1min", "5min", "1h", "4h", "1d"], default=None,
+                         help="Trading timeframe for data and risk parameters")
+    parser.add_argument("--lse", action="store_true",
+                         help="Trade on London Stock Exchange (auto-configure LSE settings)")
     # Advanced training options
     parser.add_argument("--ppo-timesteps", type=int, default=500_000,
                          help="PPO training timesteps (advanced-train mode)")
@@ -355,6 +359,34 @@ if __name__ == "__main__":
         cfg.SIZING_MODE = args.sizing_mode
     if args.order_size_usd is not None:
         cfg.FULL_CASH_ORDER_SIZE_USD = args.order_size_usd
+
+    # Apply LSE overrides if requested
+    if getattr(args, "lse", False):
+        cfg.EXCHANGE = "LSE"
+        cfg.CURRENCY = "GBP"
+        cfg.HISTORY_BAR_SIZE = "1 day"
+        cfg.IB_PORT = 7497  # paper default for LSE
+        log.info("🌍 LSE mode enabled: exchange=LSE, currency=GBP")
+
+    # Apply timeframe overrides if provided
+    tf = getattr(args, "timeframe", None)
+    if tf:
+        cfg.TRADING_TIMEFRAME = tf
+        risk_map = {
+            "1min": ("1 min", 0.7, 1.5, 0.010, 0.03),
+            "5min": ("5 mins", 1.0, 2.0, 0.015, 0.05),
+            "1h": ("1 hour", 1.5, 3.0, 0.025, 0.08),
+            "4h": ("4 hours", 2.0, 4.0, 0.035, 0.12),
+            "1d": ("1 day", 2.5, 5.0, 0.050, 0.20),
+        }
+        if tf in risk_map:
+            bar_size, stop_atr, tp_atr, max_stop, max_tp = risk_map[tf]
+            cfg.HISTORY_BAR_SIZE = bar_size
+            cfg.SCALP_STOP_ATR_MULTIPLIER = stop_atr
+            cfg.SCALP_TP_ATR_MULTIPLIER = tp_atr
+            cfg.SCALP_MAX_STOP_PCT = max_stop
+            cfg.SCALP_MAX_TP_PCT = max_tp
+            log.info(f"⏱ Timeframe set to {tf}: bar={bar_size}, stop_atr={stop_atr}, tp_atr={tp_atr}")
 
     if args.port == 7496:
         log.warning("=" * 70)

@@ -27,6 +27,55 @@ class BotConfig:
     TICKER:   str = "SPY"
     EXCHANGE: str = "SMART"
     CURRENCY: str = "USD"
+    
+    # ════════════════════════════════════════════════════════════════════
+    # MULTI-TIMEFRAME TRAINING CONFIGURATIONS
+    # ════════════════════════════════════════════════════════════════════
+    # Each timeframe adjusts the bar size and risk parameters
+    TRADING_TIMEFRAME: str = "1min"  # Options: "1min", "5min", "1h", "4h", "1d"
+    
+    # Timeframe-specific bar sizes for IB data fetch
+    BAR_SIZE_MAP: dict = field(default_factory=lambda: {
+        "scalper_1min": "1 min",
+        "scalper_5min": "5 mins",
+        "swing_1h": "1 hour",
+        "swing_4h": "4 hours",
+        "position_1d": "1 day"
+    })
+    
+    # Timeframe-specific risk parameters (auto-adjusted based on timeframe)
+    TIMEFRAME_RISK: dict = field(default_factory=lambda: {
+        "scalper_1min": {
+            "stop_atr_mult": 0.7,
+            "tp_atr_mult": 1.5,
+            "max_stop_pct": 0.010,
+            "max_tp_pct": 0.03,
+        },
+        "scalper_5min": {
+            "stop_atr_mult": 1.0,
+            "tp_atr_mult": 2.0,
+            "max_stop_pct": 0.015,
+            "max_tp_pct": 0.05,
+        },
+        "swing_1h": {
+            "stop_atr_mult": 1.5,
+            "tp_atr_mult": 3.0,
+            "max_stop_pct": 0.025,
+            "max_tp_pct": 0.08,
+        },
+        "swing_4h": {
+            "stop_atr_mult": 2.0,
+            "tp_atr_mult": 4.0,
+            "max_stop_pct": 0.035,
+            "max_tp_pct": 0.12,
+        },
+        "position_1d": {
+            "stop_atr_mult": 2.5,
+            "tp_atr_mult": 5.0,
+            "max_stop_pct": 0.050,
+            "max_tp_pct": 0.20,
+        }
+    })
 
     # ════════════════════════════════════════════════════════════════════
     # IB GATEWAY CONNECTION
