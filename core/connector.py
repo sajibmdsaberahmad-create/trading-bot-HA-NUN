@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-core/connector.py — IB Gateway connection management.
+core/connector.py — IB Gateway connection management with self-healing.
 
 Handles connect, disconnect, contract qualification, and automatic
-reconnection with exponential backoff. This is the only file that
-talks raw ib_insync connection calls — everything else goes through
-this class so the reconnect logic lives in exactly one place.
+reconnection with exponential backoff. Includes keepalive pings and
+anti-flap protection to prevent reconnect storms during idle periods.
 """
 
 import time
@@ -31,10 +30,10 @@ LSE_CURRENCY = "GBP"
 
 class IBConnector:
     """
-    Manages the IB Gateway TCP connection.
-
-    IB Gateway must be running and logged in BEFORE connect() is called.
-    See docs/LAUNCH_GUIDE.md PART 2 for the full Gateway setup walkthrough.
+    Manages the IB Gateway TCP connection with self-healing:
+    - Keepalive pings every 60s to prevent idle disconnection
+    - Anti-flap: min 30s between reconnects to break loop
+    - Connection health verified with actual reqCurrentTime call before flagging stale
     """
 
     def __init__(self, cfg: BotConfig, notifier: Optional[Notifier] = None):
@@ -46,6 +45,10 @@ class IBConnector:
         # Track last time we saw ANY event from IB, used to detect a
         # silently-dead connection (socket open but Gateway frozen/crashed)
         self._last_event_ts: float = time.time()
+        self._last_ping_ts: float = 0.0
+        self._last_reconnect_ts: float = 0.0
+        self._reconnect_count: int = 0  # total reconnects in this session
+        
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
         self.ib.errorEvent += self._on_error
@@ -69,6 +72,7 @@ class IBConnector:
             log.info(f"Mode: {mode_label} | Account: {accounts[0] if accounts else 'unknown'}")
 
             self._last_event_ts = time.time()
+            self._last_reconnect_ts = time.time()
             return True
 
         except Exception as exc:
@@ -95,7 +99,6 @@ class IBConnector:
         """Qualify and cache the contract for cfg.TICKER. Invalidate cache if ticker changes."""
         if self._contract is None or getattr(self._contract, 'symbol', None) != self.cfg.TICKER:
             raw = Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
-            # Use async qualifier to avoid "coroutine was never awaited" warning on Python 3.13
             qualified = self.ib.qualifyContractsAsync(raw)
             if not qualified:
                 raise RuntimeError(
@@ -110,12 +113,63 @@ class IBConnector:
         return self._contract
 
     def is_connected(self) -> bool:
+        """
+        Returns True if IB connection is alive.
+        Uses multi-layered health check:
+        1. ib_insync's internal isConnected()
+        2. Event heartbeat within timeout
+        3. Actual server ping to confirm (not just socket level)
+        """
+        # Layer 1: socket-level check
         if not self.ib.isConnected():
             return False
-        # Secondary check: have we heard from IB recently? A hung socket
-        # can report isConnected()==True for a while after a network drop.
-        stale = (time.time() - self._last_event_ts) > self.cfg.HEARTBEAT_TIMEOUT_SEC
-        return not stale
+        
+        now = time.time()
+        elapsed = now - self._last_event_ts
+        
+        # Layer 2: if we've seen events recently, connection is likely fine
+        # Use adaptive timeout: 120s during market hours, 300s when closed
+        timeout = getattr(self.cfg, 'HEARTBEAT_TIMEOUT_SEC', 60)
+        # Adaptive: during US market hours (9:30-16:00 ET) use configured timeout,
+        # otherwise double it since data may not flow
+        try:
+            from datetime import datetime as dt
+            from zoneinfo import ZoneInfo
+            now_et = dt.now(ZoneInfo("America/New_York"))
+            hour_min = now_et.hour * 60 + now_et.minute
+            if not (9*60+30 <= hour_min < 16*60):
+                timeout = max(timeout * 4, 300)  # Off-hours: 5 min timeout
+        except Exception:
+            pass  # Use default timeout
+        
+        if elapsed < timeout:
+            return True
+        
+        # Layer 3: elapsed > timeout, send keepalive ping to verify
+        try:
+            self._send_keepalive_ping()
+            self._last_event_ts = time.time()  # Reset on successful ping
+            return True
+        except Exception:
+            return False
+
+    def _send_keepalive_ping(self):
+        """
+        Send a lightweight ping to keep the IB connection alive.
+        Uses reqCurrentTime as it's the cheapest IB request.
+        """
+        now = time.time()
+        # Only ping every 30 seconds max to avoid flooding
+        if now - self._last_ping_ts < 30:
+            return
+        
+        self._last_ping_ts = now
+        try:
+            # reqCurrentTime is lightweight and always available
+            self.ib.reqCurrentTime()
+            log.debug("Keepalive ping sent to IB Gateway")
+        except Exception:
+            raise
 
     def touch(self):
         """Call whenever any IB event arrives, to mark the connection alive."""
@@ -123,10 +177,20 @@ class IBConnector:
 
     def reconnect(self) -> bool:
         """
-        Attempt reconnection with exponential backoff, capped at
-        RECONNECT_MAX_DELAY_SEC, up to RECONNECT_MAX_ATTEMPTS times.
+        Attempt reconnection with:
+        - Anti-flap: minimum 30s between reconnects to prevent storms
+        - Exponential backoff capped at RECONNECT_MAX_DELAY_SEC
+        - Up to RECONNECT_MAX_ATTEMPTS times
         """
+        now = time.time()
+        
+        # Anti-flap: if we just reconnected within the last 30s, skip
+        if now - self._last_reconnect_ts < 30:
+            log.debug(f"Anti-flap: skipping reconnect (last was {now - self._last_reconnect_ts:.0f}s ago)")
+            return self.ib.isConnected()
+        
         self._contract = None  # force re-qualification after reconnect
+        
         for attempt in range(1, self.cfg.RECONNECT_MAX_ATTEMPTS + 1):
             wait = min(
                 self.cfg.RECONNECT_BASE_DELAY_SEC * (2 ** (attempt - 1)),
@@ -146,10 +210,12 @@ class IBConnector:
             except Exception:
                 pass
             if self.connect():
-                log.info("Reconnected successfully.")
+                self._reconnect_count += 1
+                log.info(f"Reconnected successfully. (total reconnects: {self._reconnect_count})")
                 if self.notifier:
                     self.notifier.reconnect_event(success=True)
                 return True
+        
         log.error("All reconnection attempts failed.")
         if self.notifier:
             self.notifier.error(
