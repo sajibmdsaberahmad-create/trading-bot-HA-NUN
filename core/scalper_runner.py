@@ -349,23 +349,28 @@ class ScalperRunner:
                     if self.conn.is_connected():
                         now = time.time()
                         time_since_scan = now - self._last_scan_time
-                        # Rescan cadence:
-                        # - If we have locked targets, only full-rescan every SCAN_INTERVAL_SECONDS
-                        # - If no locked targets yet, scan more frequently until we get candidates
-                        have_targets = len(self._locked_targets) > 0
-                        need_rescan = (
-                            (not have_targets and self.top_pick is None and self.shares == 0 and time_since_scan > 1)
-                            or
-                            (time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS)
-                        )
+                        have_locked = len(self._locked_targets) > 0
+                        
+                        # Hard gate: if locked targets exist, ONLY rescan after SCAN_INTERVAL_SECONDS
+                        # No exceptions, no early rescans
+                        need_rescan = False
+                        if have_locked:
+                            # With locked targets, only rescan at full interval
+                            if time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS:
+                                need_rescan = True
+                                log.debug(f"Rescan triggered: interval elapsed ({time_since_scan:.0f}s > {self.cfg.SCAN_INTERVAL_SECONDS}s)")
+                        else:
+                            # No locked targets: scan more aggressively until we find candidates
+                            if self.top_pick is None and self.shares == 0 and time_since_scan > 1:
+                                need_rescan = True
+                                log.debug("Rescan triggered: no locked targets")
                         
                         if need_rescan:
                             self._last_scan_time = now
                             self._scan_and_rank()
-                        elif self.top_pick is None and self.shares == 0 and have_targets:
+                        elif self.top_pick is None and self.shares == 0 and have_locked:
                             # Heartbeat: cycle through locked targets for entry evaluation
-                            now2 = time.time()
-                            cycle = int(now2) % max(len(self._locked_targets), 1)
+                            cycle = int(now) % max(len(self._locked_targets), 1)
                             self.top_pick = self._locked_targets[cycle]
                         
                         # Apply confidence gating for pre-market/after-hours
@@ -461,8 +466,13 @@ class ScalperRunner:
             except Exception:
                 pass
         else:
+            # No new setups: DO NOT clear locked targets, just clear top_pick for re-evaluation
             self.top_pick = None
-            log.info(f"🔍 No new setups — continuing to monitor locked targets ({elapsed_ms:.0f}ms)")
+            if self._locked_targets:
+                names = ", ".join([p.ticker for p in self._locked_targets])
+                log.info(f"🔍 No new setups — keeping locked targets: {names} ({elapsed_ms:.0f}ms)")
+            else:
+                log.info(f"🔍 No setups — no locked targets yet ({elapsed_ms:.0f}ms)")
     
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         closes = df["close"].values
