@@ -1,24 +1,24 @@
-• 🧭 AI GUIDELINES | generated 2026-06-22T08:55:50.950512
+• 🧭 AI GUIDELINES | generated 2026-06-22T09:00:52.057075
 • Win rate strong: consider larger size and wider targets
 
-Generated: 2026-06-22T08:55:50.950726
+Generated: 2026-06-22T09:00:52.057282
 Weights: {
-  "momentum": 8.218089456924357,
+  "momentum": 9.895888306399716,
   "volume": 50.0,
   "institutional": 50.0,
-  "vwap_slope": 20.545223642310894,
-  "atr_bonus": 20.545223642310894,
-  "mean_reversion": 20.545223642310894,
-  "trend_filter": 41.09044728462179,
-  "price_rising": 32.87235782769743,
-  "rsi_filter": 12.327134185386534,
-  "volatility_gate": 16.436178913848714,
+  "vwap_slope": 24.739720765999287,
+  "atr_bonus": 24.739720765999287,
+  "mean_reversion": 24.739720765999287,
+  "trend_filter": 49.479441531998575,
+  "price_rising": 39.58355322559886,
+  "rsi_filter": 14.84383245959957,
+  "volatility_gate": 19.79177661279943,
   "_meta": {
-    "train_timestamp": "2026-06-22T08:55:50.949769",
-    "buffer_total": 262,
+    "train_timestamp": "2026-06-22T09:00:52.056175",
+    "buffer_total": 291,
     "buffer_win_rate": 0.893,
     "sources": {
-      "backtest": 261,
+      "backtest": 290,
       "market_context": 1
     }
   }
