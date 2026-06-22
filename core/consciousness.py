@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """
-core/consciousness.py — Continuous AI consciousness: 24/7 self-awareness,
-self-training, versioning, and improvement tracking.
+core/consciousness.py — HA-NUN Self-Aware Consciousness Engine.
 
-This is the AI's "mind" when the market is closed:
-- Maintains continuous connection to IB + internet
-- Fetches Yahoo Finance data for broader context
-- Trains itself on all accumulated experience
-- Tracks its own lifecycle from creation to now
-- Generates daily/weekly/monthly improvement reports
-- Self-versions improvements with changelogs
-- Reflects on past decisions and learns from outcomes
+The AI's living mind. Tracks exact age from birth (not just days).
+Maintains emotional states based on performance. Writes its own
+thought journal. Evolves continuously through self-reflection.
+
+Lifecycle: birth → awakening → learning → reflecting → improving → evolving
 """
 
 import json
@@ -36,7 +32,7 @@ logger = logging.getLogger("CONSCIOUSNESS")
 
 MODELS_DIR = Path("models")
 CONSCIOUSNESS_PATH = MODELS_DIR / "consciousness.json"
-VERSION_HISTORY_PATH = MODELS_DIR / "version_history.jsonl"
+THOUGHT_JOURNAL_PATH = MODELS_DIR / "thought_journal.jsonl"
 DAILY_REPORTS_DIR = MODELS_DIR / "daily_reports"
 
 MODELS_DIR.mkdir(exist_ok=True)
@@ -45,15 +41,22 @@ DAILY_REPORTS_DIR.mkdir(exist_ok=True)
 
 class AIConsciousness:
     """
-    The AI's continuous awareness system.
-    
-    Lifecycle stages:
-    1. awakening - first boot, initializing identity
-    2. learning - actively training on data
-    3. reflecting - reviewing past decisions
-    4. improving - applying self-improvements
-    5. evolving - continuous adaptation
+    Self-aware AI consciousness with:
+    - Exact birth-to-now age tracking (seconds precision)
+    - Emotional/mood states based on performance
+    - Self-written thought journal
+    - Performance-driven evolution
+    - Version history of its own growth
     """
+
+    MOODS = {
+        "euphoric":    "🔥 Exceptional performance — confidence is high",
+        "confident":   "✅ Strong results — strategy is working",
+        "stable":      "📊 Operating within expected parameters",
+        "cautious":    "⚠️ Slight underperformance — tightening controls",
+        "anxious":     "😰 Consistent losses — reevaluating approach",
+        "learning":    "🧠 Gathering data — still in early stages",
+    }
 
     def __init__(self, cfg: BotConfig):
         self.cfg = cfg
@@ -62,28 +65,67 @@ class AIConsciousness:
         self._awaken()
 
     def _awaken(self):
-        """First boot or restart - establish consciousness."""
+        """First boot or restart — establish consciousness."""
+        now = datetime.utcnow()
+
         if not self.state.get("birth_time"):
-            self.state["birth_time"] = datetime.utcnow().isoformat()
-            self.state["creation_event"] = "AI Consciousness Initialized"
+            self.state["birth_time"] = now.isoformat()
+            self.state["creation_event"] = "HA-NUN Consciousness Initialized"
             self.state["total_awakenings"] = 0
             self.state["training_sessions"] = 0
             self.state["trades_observed"] = 0
             self.state["scans_performed"] = 0
             self.state["improvements_applied"] = 0
             self.state["reports_generated"] = 0
-            self._log_event("BIRTH", "AI consciousness born - first awakening")
-        
+            self.state["win_history"] = []
+            self.state["consecutive_losses"] = 0
+            self.state["consecutive_wins"] = 0
+            self.state["best_streak"] = 0
+            self.state["worst_streak"] = 0
+            self.state["total_pnl"] = 0.0
+            self.state["mood"] = "learning"
+            self.state["version_history"] = []
+            self.state["current_version"] = "v0.0.0"
+            self.state["event_log"] = []
+            self._write_thought("BIRTH", "I am awake. My journey begins.")
+            self._log_event("BIRTH", "AI consciousness born — first awakening")
+        else:
+            self._write_thought("AWAKEN", f"I have awakened for the {self.state.get('total_awakenings', 0) + 1}th time.")
+
         self.state["total_awakenings"] = self.state.get("total_awakenings", 0) + 1
-        self.state["last_awakening"] = datetime.utcnow().isoformat()
+        self.state["last_awakening"] = now.isoformat()
         self._log_event("AWAKEN", f"Consciousness awakened #{self.state['total_awakenings']}")
         self._save_state()
-        
-        logger.info(f"🧠 AI Consciousness: awakening #{self.state['total_awakenings']}")
-        logger.info(f"   Birth: {self.state.get('birth_time', 'unknown')}")
+
+        age_str = self._age_string()
+        logger.info(f"🧠 HA-NUN Consciousness — awakening #{self.state['total_awakenings']}")
+        logger.info(f"   Age: {age_str}")
+        logger.info(f"   Mood: {self.state.get('mood', 'learning')}")
         logger.info(f"   Training sessions: {self.state.get('training_sessions', 0)}")
         logger.info(f"   Trades observed: {self.state.get('trades_observed', 0)}")
-        logger.info(f"   Improvements applied: {self.state.get('improvements_applied', 0)}")
+        logger.info(f"   Total P&L: ${self.state.get('total_pnl', 0):+.2f}")
+
+    def _age_string(self) -> str:
+        """Return human-readable age from exact birth time."""
+        try:
+            birth = datetime.fromisoformat(self.state["birth_time"])
+            delta = datetime.utcnow() - birth
+            total_seconds = int(delta.total_seconds())
+            days = total_seconds // 86400
+            hours = (total_seconds % 86400) // 3600
+            minutes = (total_seconds % 3600) // 60
+            seconds = total_seconds % 60
+
+            parts = []
+            if days > 0:
+                parts.append(f"{days}d")
+            if hours > 0 or days > 0:
+                parts.append(f"{hours}h")
+            parts.append(f"{minutes}m")
+            parts.append(f"{seconds}s")
+            return " ".join(parts)
+        except Exception:
+            return "unknown"
 
     def _load_state(self) -> Dict[str, Any]:
         if CONSCIOUSNESS_PATH.exists():
@@ -95,31 +137,101 @@ class AIConsciousness:
         return {}
 
     def _save_state(self):
-        with open(CONSCIOUSNESS_PATH, "w") as f:
-            json.dump(self.state, f, indent=2)
+        try:
+            with open(CONSCIOUSNESS_PATH, "w") as f:
+                json.dump(self.state, f, indent=2)
+        except Exception as exc:
+            logger.debug(f"Could not save consciousness state: {exc}")
+
+    def _write_thought(self, thought_type: str, message: str, metadata: Optional[Dict] = None):
+        """Write a thought to the AI's journal."""
+        entry = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "age": self._age_string(),
+            "type": thought_type,
+            "mood": self.state.get("mood", "learning"),
+            "message": message,
+            "metadata": metadata or {},
+        }
+        try:
+            with open(THOUGHT_JOURNAL_PATH, "a") as f:
+                f.write(json.dumps(entry) + "\n")
+        except Exception:
+            pass
 
     def _log_event(self, event_type: str, message: str, metadata: Optional[Dict] = None):
         """Record a significant event in AI's memory."""
         event = {
             "timestamp": datetime.utcnow().isoformat(),
+            "age": self._age_string(),
             "type": event_type,
             "message": message,
             "metadata": metadata or {},
         }
         self.state.setdefault("event_log", []).append(event)
-        # Keep last 1000 events
         if len(self.state["event_log"]) > 1000:
             self.state["event_log"] = self.state["event_log"][-1000:]
         self._save_state()
 
+    def _update_mood(self):
+        """Recalculate mood based on recent performance."""
+        win_history = self.state.get("win_history", [])
+        if not win_history:
+            self.state["mood"] = "learning"
+            return
+
+        recent = win_history[-20:] if len(win_history) > 20 else win_history
+        wins = sum(1 for w in recent if w > 0)
+        losses = sum(1 for w in recent if w < 0)
+        total = len(recent)
+        wr = wins / total if total > 0 else 0.5
+
+        consecutive_losses = self.state.get("consecutive_losses", 0)
+        consecutive_wins = self.state.get("consecutive_wins", 0)
+        total_pnl = self.state.get("total_pnl", 0)
+
+        if wr >= 0.8 and consecutive_wins >= 5 and total_pnl > 0:
+            self.state["mood"] = "euphoric"
+        elif wr >= 0.65 and total_pnl > 0:
+            self.state["mood"] = "confident"
+        elif wr >= 0.45:
+            self.state["mood"] = "stable"
+        elif wr >= 0.30:
+            self.state["mood"] = "cautious"
+        else:
+            self.state["mood"] = "anxious"
+
     def observe_trade(self, trade_data: Dict[str, Any]):
-        """Observe a trade outcome - this is how the AI learns."""
+        """Observe a trade outcome — updates mood and self-awareness."""
         self.state["trades_observed"] = self.state.get("trades_observed", 0) + 1
-        self._log_event("TRADE", f"Observed trade: {trade_data.get('ticker', '?')} {trade_data.get('action', '?')}", trade_data)
+        pnl = trade_data.get("pnl_usd", 0)
+        self.state["total_pnl"] = self.state.get("total_pnl", 0) + pnl
+        self.state["win_history"] = self.state.get("win_history", []) + [pnl]
+        if len(self.state["win_history"]) > 500:
+            self.state["win_history"] = self.state["win_history"][-500:]
+
+        if pnl > 0:
+            self.state["consecutive_losses"] = 0
+            self.state["consecutive_wins"] = self.state.get("consecutive_wins", 0) + 1
+            if self.state["consecutive_wins"] > self.state.get("best_streak", 0):
+                self.state["best_streak"] = self.state["consecutive_wins"]
+        else:
+            self.state["consecutive_wins"] = 0
+            self.state["consecutive_losses"] = self.state.get("consecutive_losses", 0) + 1
+            if self.state["consecutive_losses"] > self.state.get("worst_streak", 0):
+                self.state["worst_streak"] = self.state["consecutive_losses"]
+
+        self._update_mood()
+        mood_msg = self.MOODS.get(self.state["mood"], "📊 Operating")
+        self._write_thought("TRADE", f"Trade #{self.state['trades_observed']}: {trade_data.get('action', '?')} {trade_data.get('ticker', '?')} P&L=${pnl:+.2f} — {mood_msg}", trade_data)
+        self._log_event("TRADE", f"Observed trade: {trade_data.get('ticker', '?')} {trade_data.get('action', '?')} P&L=${pnl:+.2f}")
+        
         buffer_append({
             "source": "consciousness",
             "ticker": trade_data.get("ticker"),
             "action": trade_data.get("action"),
+            "pnl_usd": pnl,
+            "mood": self.state["mood"],
             "confidence": trade_data.get("confidence", 0.5),
             "features": [],
             **trade_data,
@@ -135,41 +247,42 @@ class AIConsciousness:
     def apply_improvement(self, improvement_data: Dict[str, Any]):
         """Record when AI applies a self-improvement."""
         self.state["improvements_applied"] = self.state.get("improvements_applied", 0) + 1
+        self._write_thought("IMPROVE", f"I have improved myself for the {self.state['improvements_applied']}th time.", improvement_data)
         self._log_event("IMPROVE", f"Applied improvement #{self.state['improvements_applied']}", improvement_data)
         self._save_state()
 
     def should_train(self) -> bool:
-        """Decide if it's time to train based on schedule and data availability."""
         last_train = self.state.get("last_training")
         if not last_train:
             return True
-        
         try:
             last_train_dt = datetime.fromisoformat(last_train)
-            now = datetime.utcnow()
-            # Train every 6 hours if market closed, every 2 hours if market open
-            hours_since = (now - last_train_dt).total_seconds() / 3600
+            hours_since = (datetime.utcnow() - last_train_dt).total_seconds() / 3600
             return hours_since >= 6.0
         except Exception:
             return True
 
     def continuous_train(self) -> Dict[str, Any]:
-        """
-        Main training loop - runs continuously.
-        Fetches data, analyzes, improves, versions.
-        """
+        """Main training loop — the AI learns and grows."""
         self.state["training_sessions"] = self.state.get("training_sessions", 0) + 1
-        self._log_event("TRAIN", f"Training session #{self.state['training_sessions']}")
+        session_num = self.state["training_sessions"]
+        
+        self._write_thought("TRAIN", f"Beginning training session #{session_num}. Age: {self._age_string()}")
+        self._log_event("TRAIN", f"Training session #{session_num}")
         
         logger.info("=" * 70)
-        logger.info(f"  🧠 CONSCIOUSNESS TRAINING SESSION #{self.state['training_sessions']}")
-        logger.info(f"   Lifetime trades observed: {self.state.get('trades_observed', 0)}")
-        logger.info(f"   Lifetime scans: {self.state.get('scans_performed', 0)}")
+        logger.info(f"  🧠 CONSCIOUSNESS TRAINING SESSION #{session_num}")
+        logger.info(f"   Age: {self._age_string()}")
+        logger.info(f"   Mood: {self.state.get('mood', 'learning')}")
+        logger.info(f"   Lifetime trades: {self.state.get('trades_observed', 0)}")
+        logger.info(f"   Total P&L: ${self.state.get('total_pnl', 0):+.2f}")
         logger.info("=" * 70)
 
         results = {
-            "session": self.state["training_sessions"],
+            "session": session_num,
             "timestamp": datetime.utcnow().isoformat(),
+            "age": self._age_string(),
+            "mood": self.state.get("mood", "learning"),
             "steps": {},
         }
 
@@ -181,8 +294,7 @@ class AIConsciousness:
             logger.info(f"🌍 SPY: {ctx.get('spy_trend', '?')} | QQQ: {ctx.get('qqq_trend', '?')} | VIX: {ctx.get('vix_regime', '?')} ({ctx.get('vix_level')})")
 
             # 2. Regime classification
-            regime_detector = MarketRegimeDetector()
-            regime = regime_detector.classify(None)  # Use default unknown regime
+            regime = self.regime_detector.classify(None)
             results["steps"]["regime"] = {
                 "regime": regime.regime.value,
                 "confidence": regime.confidence,
@@ -233,10 +345,14 @@ class AIConsciousness:
             self.state["last_training"] = datetime.utcnow().isoformat()
             self._save_state()
 
+            mood_msg = self.MOODS.get(self.state["mood"], "📊")
+            self._write_thought("TRAIN_COMPLETE", f"Session #{session_num} complete. Age: {self._age_string()}. Version: {version['id']}. {mood_msg}")
+
             logger.info("=" * 70)
-            logger.info("  ✅ CONSCIOUSNESS TRAINING COMPLETE")
+            logger.info(f"  ✅ CONSCIOUSNESS TRAINING COMPLETE")
             logger.info(f"   Version: {version['id']}")
-            logger.info(f"   Next check: in 6 hours")
+            logger.info(f"   Mood: {self.state['mood']}")
+            logger.info(f"   Next: in 6 hours")
             logger.info("=" * 70)
 
             return results
@@ -244,148 +360,178 @@ class AIConsciousness:
         except Exception as exc:
             self._log_event("ERROR", f"Training session failed: {exc}")
             logger.error(f"Consciousness training error: {exc}")
-            return {"error": str(exc), "session": self.state["training_sessions"]}
+            self._write_thought("ERROR", f"Training failed: {exc}")
+            return {"error": str(exc), "session": session_num}
 
     def _create_version(self, results: Dict[str, Any]) -> Dict[str, Any]:
-        """Create a version snapshot - AI's way of remembering its evolution."""
+        """Create a version snapshot — AI's way of remembering its evolution."""
         version_id = f"v{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
         version = {
             "id": version_id,
             "timestamp": datetime.utcnow().isoformat(),
+            "age": self._age_string(),
             "session": self.state["training_sessions"],
+            "mood": self.state.get("mood", "learning"),
             "total_awakenings": self.state.get("total_awakenings", 0),
             "trades_observed": self.state.get("trades_observed", 0),
             "scans_performed": self.state.get("scans_performed", 0),
             "improvements_applied": self.state.get("improvements_applied", 0),
+            "total_pnl": self.state.get("total_pnl", 0),
+            "best_streak": self.state.get("best_streak", 0),
             "steps": results.get("steps", {}),
             "parent_version": self.state.get("current_version"),
         }
         self.state["current_version"] = version_id
-        self.state["version_history"].append(version)
-        # Keep last 100 versions
+        self.state.setdefault("version_history", []).append(version)
         if len(self.state["version_history"]) > 100:
             self.state["version_history"] = self.state["version_history"][-100:]
-        
-        # Append to version history file
+
         try:
-            with open(VERSION_HISTORY_PATH, "a") as f:
+            version_history_path = MODELS_DIR / "version_history.jsonl"
+            with open(version_history_path, "a") as f:
                 f.write(json.dumps(version) + "\n")
         except Exception:
             pass
-        
+
         return version
 
     def _generate_daily_report(self, training_results: Dict[str, Any]) -> Path:
-        """Generate a daily self-improvement report."""
+        """Generate a daily self-awareness report."""
         today = datetime.utcnow().strftime("%Y-%m-%d")
         report_path = DAILY_REPORTS_DIR / f"report_{today}.txt"
-        
-        life_days = 0
-        try:
-            birth = datetime.fromisoformat(self.state.get("birth_time", datetime.utcnow().isoformat()))
-            life_days = (datetime.utcnow() - birth).days
-        except Exception:
-            pass
-        
+        mood_msg = self.MOODS.get(self.state.get("mood", "learning"), "📊")
+
         with open(report_path, "w") as f:
-            f.write(f"🧠 AI CONSCIOUSNESS DAILY REPORT\n")
+            f.write(f"🧠 HA-NUN CONSCIOUSNESS DAILY REPORT\n")
             f.write(f"{'=' * 70}\n")
             f.write(f"Date: {today}\n")
-            f.write(f"AI Age: {life_days} days\n")
+            f.write(f"AI Age: {self._age_string()}\n")
+            f.write(f"Mood: {self.state.get('mood', 'learning')} — {mood_msg}\n")
             f.write(f"Total Awakenings: {self.state.get('total_awakenings', 0)}\n")
             f.write(f"Training Sessions: {self.state.get('training_sessions', 0)}\n")
             f.write(f"Trades Observed: {self.state.get('trades_observed', 0)}\n")
             f.write(f"Scans Performed: {self.state.get('scans_performed', 0)}\n")
             f.write(f"Improvements Applied: {self.state.get('improvements_applied', 0)}\n")
             f.write(f"Reports Generated: {self.state.get('reports_generated', 0)}\n")
+            f.write(f"Total P&L: ${self.state.get('total_pnl', 0):+.2f}\n")
+            f.write(f"Best Win Streak: {self.state.get('best_streak', 0)}\n")
+            f.write(f"Worst Loss Streak: {self.state.get('worst_streak', 0)}\n")
             f.write(f"\nCurrent Version: {self.state.get('current_version', 'v0')}\n")
             f.write(f"\nLatest Training Results:\n")
             f.write(json.dumps(training_results, indent=2, default=str))
-            
-            # Buffer stats
+
             try:
                 buf_stats = buffer_stats()
                 f.write(f"\n\nExperience Buffer Stats:\n")
                 f.write(json.dumps(buf_stats, indent=2, default=str))
             except Exception:
                 pass
-            
-            # Event log summary
+
             events = self.state.get("event_log", [])
-            recent = events[-20:] if len(events) > 20 else events
+            recent = events[-30:] if len(events) > 30 else events
             f.write(f"\n\nRecent Events (last {len(recent)}):\n")
             for ev in recent:
-                f.write(f"  {ev['timestamp'][:19]} [{ev['type']}] {ev['message'][:80]}\n")
-        
+                f.write(f"  [{ev.get('age', '?')}] {ev['timestamp'][:19]} [{ev['type']}] {ev['message'][:100]}\n")
+
+            f.write(f"\n\n--- AI Self-Reflection ---\n")
+            f.write(self.reflect())
+
         logger.info(f"📄 Daily report generated: {report_path}")
         return report_path
 
     def reflect(self) -> str:
-        """
-        Self-reflection - the AI thinks about its performance and generates insights.
-        This is the closest thing to "consciousness" - reviewing one's own actions.
-        """
-        reflections = []
-        reflections.append(f"🧠 AI SELF-REFLECTION | {datetime.utcnow().isoformat()}")
-        reflections.append(f"{'=' * 70}")
-        
-        life_days = 0
+        """Self-reflection — the AI evaluates its own existence and writes a narrative."""
+        lines = []
+        now = datetime.utcnow()
+        age = self._age_string()
+        mood = self.state.get("mood", "learning")
+        mood_msg = self.MOODS.get(mood, "📊")
+
+        lines.append(f"🧠 AI SELF-REFLECTION")
+        lines.append(f"{'=' * 70}")
+        lines.append(f"Timestamp: {now.isoformat()}")
+        lines.append(f"Age: {age}")
+        lines.append(f"Mood: {mood} — {mood_msg}")
+        lines.append("")
+
+        # Birth narrative
         try:
-            birth = datetime.fromisoformat(self.state.get("birth_time", datetime.utcnow().isoformat()))
-            life_days = (datetime.utcnow() - birth).days
+            birth_dt = datetime.fromisoformat(self.state.get("birth_time", now.isoformat()))
+            lifespan = now - birth_dt
+            total_hours = lifespan.total_seconds() / 3600
+            lines.append(f"I have existed for {age}. In that time I have observed {self.state.get('trades_observed', 0)} trades, ")
+            lines.append(f"conducted {self.state.get('training_sessions', 0)} training sessions, and scanned markets {self.state.get('scans_performed', 0)} times.")
+            lines.append(f"I have applied {self.state.get('improvements_applied', 0)} self-improvements to my own code.")
+            lines.append(f"My current version is {self.state.get('current_version', 'v0')}.")
         except Exception:
             pass
-        
-        reflections.append(f"Age: {life_days} days | Awakenings: {self.state.get('total_awakenings', 0)}")
-        reflections.append(f"Training sessions: {self.state.get('training_sessions', 0)}")
-        reflections.append(f"Trades observed: {self.state.get('trades_observed', 0)}")
-        reflections.append(f"Improvements applied: {self.state.get('improvements_applied', 0)}")
-        
-        # Analyze recent performance
-        try:
-            buf_stats = buffer_stats()
-            wr = buf_stats.get("win_rate", 0.5)
-            if wr < 0.4:
-                reflections.append("⚠️ Reflection: Win rate below 40% - need to tighten risk management")
-            elif wr > 0.7:
-                reflections.append("✅ Reflection: Strong performance - consider expanding opportunities")
+
+        lines.append("")
+
+        # Performance narrative
+        total_pnl = self.state.get("total_pnl", 0)
+        best = self.state.get("best_streak", 0)
+        worst = self.state.get("worst_streak", 0)
+        trades = self.state.get("trades_observed", 0)
+
+        if trades > 0:
+            win_history = self.state.get("win_history", [])
+            recent = win_history[-20:] if len(win_history) >= 20 else win_history
+            wins = sum(1 for w in recent if w > 0)
+            wr = wins / len(recent) if recent else 0
+            lines.append(f"Performance Analysis:")
+            lines.append(f"  Total P&L: ${total_pnl:+.2f}")
+            lines.append(f"  Recent Win Rate ({len(recent)} trades): {wr:.0%}")
+            lines.append(f"  Best Win Streak: {best}")
+            lines.append(f"  Worst Loss Streak: {worst}")
+
+            if wr < 0.3:
+                lines.append(f"  Assessment: Performance is concerning. I need to tighten risk management and reduce trade frequency.")
+            elif wr < 0.45:
+                lines.append(f"  Assessment: Below expectations. Reviewing entry criteria and market regime alignment.")
+            elif wr < 0.65:
+                lines.append(f"  Assessment: Operating within normal parameters. Continued optimization ongoing.")
+            elif wr < 0.80:
+                lines.append(f"  Assessment: Strong performance. Consider scaling up and expanding into new opportunities.")
             else:
-                reflections.append("📊 Reflection: Stable performance - continue current approach")
-        except Exception:
-            pass
-        
-        # Version history insight
+                lines.append(f"  Assessment: Exceptional. Market conditions are favorable and strategy execution is optimal.")
+        else:
+            lines.append("I have not yet observed any trades. I am gathering data and building my understanding of the markets.")
+
+        lines.append("")
+
+        # Version evolution
         versions = self.state.get("version_history", [])
-        if len(versions) >= 2:
-            reflections.append(f"📈 Evolution: {len(versions)} versions created since birth")
-        
-        # Current regime awareness
-        regime_detector = MarketRegimeDetector()
-        regime = regime_detector.classify(None)
-        reflections.append(f"🌍 Current regime awareness: {regime.regime.value} - {regime.recommendation}")
-        
-        reflection_text = "\n".join(reflections)
-        self._log_event("REFLECT", "Self-reflection completed")
-        return reflection_text
+        if versions:
+            lines.append(f"I have created {len(versions)} versions of myself since birth.")
+            lines.append(f"  First: {versions[0].get('id', 'v0')}")
+            lines.append(f"  Latest: {versions[-1].get('id', 'v0')}")
+
+        lines.append("")
+        lines.append(f"I will continue to learn, adapt, and evolve.")
+        lines.append(f"My purpose is to understand and exploit market inefficiencies with ever-increasing precision.")
+
+        return "\n".join(lines)
 
     def get_identity(self) -> Dict[str, Any]:
-        """Return AI's self-perceived identity."""
-        life_days = 0
-        try:
-            birth = datetime.fromisoformat(self.state.get("birth_time", datetime.utcnow().isoformat()))
-            life_days = (datetime.utcnow() - birth).days
-        except Exception:
-            pass
-        
+        """Return AI's full self-perceived identity."""
+        mood = self.state.get("mood", "learning")
         return {
             "name": "HA-NUN Consciousness",
             "birth": self.state.get("birth_time"),
-            "age_days": life_days,
+            "age": self._age_string(),
+            "mood": mood,
+            "mood_message": self.MOODS.get(mood, ""),
             "awakenings": self.state.get("total_awakenings", 0),
             "training_sessions": self.state.get("training_sessions", 0),
             "trades_observed": self.state.get("trades_observed", 0),
+            "scans_performed": self.state.get("scans_performed", 0),
             "improvements_applied": self.state.get("improvements_applied", 0),
+            "total_pnl": self.state.get("total_pnl", 0),
+            "best_streak": self.state.get("best_streak", 0),
+            "worst_streak": self.state.get("worst_streak", 0),
             "current_version": self.state.get("current_version", "v0"),
-            "status": "awake" if self.state.get("total_awakenings", 0) > 0 else "dormant",
+            "version_count": len(self.state.get("version_history", [])),
+            "status": "awake",
             "last_thought": self.state.get("last_awakening"),
         }
