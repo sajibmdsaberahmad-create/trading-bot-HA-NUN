@@ -58,6 +58,12 @@ class IBConnector:
     def connect(self) -> bool:
         """Establish the IB Gateway connection. Returns True on success."""
         try:
+            # Suppress ib_insync INFO chatter that fills the client output buffer
+            try:
+                import ib_insync as ibi
+                ibi.util.log.level = 30  # WARNING
+            except Exception:
+                pass
             self.ib.connect(
                 host=self.cfg.IB_HOST,
                 port=self.cfg.IB_PORT,
@@ -209,7 +215,9 @@ class IBConnector:
                     self.ib.disconnect()
             except Exception:
                 pass
+            # After reconnect, pause briefly so IB can finish setup before scanner resumes
             if self.connect():
+                time.sleep(2)
                 self._reconnect_count += 1
                 log.info(f"Reconnected successfully. (total reconnects: {self._reconnect_count})")
                 if self.notifier:
