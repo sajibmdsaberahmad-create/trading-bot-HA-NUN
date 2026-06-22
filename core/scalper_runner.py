@@ -361,7 +361,7 @@ class ScalperRunner:
                                 log.debug(f"Rescan triggered: interval elapsed ({time_since_scan:.0f}s > {self.cfg.SCAN_INTERVAL_SECONDS}s)")
                         else:
                             # No locked targets: scan more aggressively until we find candidates
-                            if self.top_pick is None and self.shares == 0 and time_since_scan > 1:
+                            if self.top_pick is None and self.shares == 0 and time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS:
                                 need_rescan = True
                                 log.debug("Rescan triggered: no locked targets")
                         
