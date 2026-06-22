@@ -255,6 +255,7 @@ class BotConfig:
     SCALP_PROFIT_ACTIVATE_PCT: float = 0.005
     SCALP_PROFIT_GIVEBACK_PCT: float = 0.30
     SCAN_INTERVAL_SECONDS: int = 300
+    MAX_LOCKED_TARGETS: int = 5
 
     # ════════════════════════════════════════════════════════════════════
     # OLLAMA LOCAL LLM REASONING HEAD
