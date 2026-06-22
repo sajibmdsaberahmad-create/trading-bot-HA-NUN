@@ -304,18 +304,22 @@ class ScalperRunner:
         log.info(f"Max per trade: ${self.cfg.MAX_TRADE_SIZE_USD:,.0f} | Risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}")
         log.info(f"Init report: {report_path}")
         self.notifier.info("🚀 HA-NUN STARTED")
-        
+
         self._refresh_account_balance()
         if self._ib_starting_balance:
             log.info(f"IB Starting Balance: ${self._ib_starting_balance:,.2f}")
-        
+
         # Check market status quietly
         market_open, market_reason = self._is_market_open()
         if not market_open:
             self.notifier.warning(f"⚠️ MARKET STATUS\n{market_reason}\nBot will train offline until market opens.")
-        
-        self._last_scan_time = time.time()
-        self._scan_and_rank()
+
+        # Block startup scan until IB connection is confirmed live
+        if self.conn.is_connected():
+            self._last_scan_time = time.time()
+            self._scan_and_rank()
+        else:
+            log.warning("IB Gateway not connected at startup — skipping initial scan until connection is live")
         
         try:
             while True:
@@ -335,17 +339,18 @@ class ScalperRunner:
                 market_open, market_reason = self._is_market_open()
                 
                 if market_open:
-                    # Market is open: scan and trade
-                    if self.top_pick is None and self.shares == 0:
-                        if time.time() - self._last_scan_time > 1:
+                    # Market is open: scan and trade ONLY when IB is connected
+                    if self.conn.is_connected():
+                        if self.top_pick is None and self.shares == 0:
+                            if time.time() - self._last_scan_time > 1:
+                                self._last_scan_time = time.time()
+                                self._scan_and_rank()
+                        elif time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
                             self._last_scan_time = time.time()
                             self._scan_and_rank()
-                    elif time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
-                        self._last_scan_time = time.time()
-                        self._scan_and_rank()
-                    
-                    if self.top_pick and self.shares == 0:
-                        self._attempt_entry()
+                        
+                        if self.top_pick and self.shares == 0:
+                            self._attempt_entry()
                 else:
                     # Market is closed: train instead of scan
                     if int(time.time()) % 60 == 0:  # log every minute
@@ -429,7 +434,7 @@ class ScalperRunner:
         volumes = df["volume"].values
         current_px = float(closes[-1])
         if not _only_uptrend(df, current_px):
-            return {"ticker": ticker, "total_score": 0, "price": current_px, "volume": volumes[-1], "avg_volume": np.mean(volumes[-20:]), "rel_vol": 1.0, "reasons": "not_uptrend"}
+            return {"ticker": ticker, "total_score": 0, "price": current_px, "volume": int(volumes[-1]), "avg_volume": int(np.mean(volumes[-20:])), "rel_vol": 1.0, "reasons": "not_uptrend"}
         score = 0.0
         reasons = []
         ret_5 = (closes[-1] / closes[-6] - 1) * 100 if len(closes) > 5 else 0
