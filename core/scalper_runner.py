@@ -128,7 +128,7 @@ class ScalperRunner:
         
         self.scan_results: List[ScanResult] = []
         self.top_pick: Optional[ScanResult] = None
-        self._locked_target: Optional[ScanResult] = None
+        self._locked_targets: List[ScanResult] = []
         self._last_scan_time: float = 0.0
         self._last_metrics_write: float = 0.0
         
@@ -350,11 +350,11 @@ class ScalperRunner:
                         now = time.time()
                         time_since_scan = now - self._last_scan_time
                         # Rescan cadence:
-                        # - If we have a locked target, only full-rescan every SCAN_INTERVAL_SECONDS
-                        # - If no locked target yet, scan more frequently until we get one
-                        have_target = self._locked_target is not None
+                        # - If we have locked targets, only full-rescan every SCAN_INTERVAL_SECONDS
+                        # - If no locked targets yet, scan more frequently until we get candidates
+                        have_targets = len(self._locked_targets) > 0
                         need_rescan = (
-                            (not have_target and self.top_pick is None and self.shares == 0 and time_since_scan > 1)
+                            (not have_targets and self.top_pick is None and self.shares == 0 and time_since_scan > 1)
                             or
                             (time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS)
                         )
@@ -362,9 +362,11 @@ class ScalperRunner:
                         if need_rescan:
                             self._last_scan_time = now
                             self._scan_and_rank()
-                        elif self.top_pick is None and self.shares == 0 and self._locked_target is not None:
-                            # Promote locked target to top_pick for evaluation
-                            self.top_pick = self._locked_target
+                        elif self.top_pick is None and self.shares == 0 and have_targets:
+                            # Heartbeat: cycle through locked targets for entry evaluation
+                            now2 = time.time()
+                            cycle = int(now2) % max(len(self._locked_targets), 1)
+                            self.top_pick = self._locked_targets[cycle]
                         
                         # Apply confidence gating for pre-market/after-hours
                         if self.top_pick and self.shares == 0:
@@ -429,24 +431,30 @@ class ScalperRunner:
         self.scan_results = results[:10]
         
         if self.scan_results:
-            best = self.scan_results[0]
-            self.top_pick = ScanResult(
-                ticker=best["ticker"], price=best["price"], volume=best["volume"],
-                avg_volume=best["avg_volume"], relative_volume=best["rel_vol"],
-                rank_score=best["total_score"], reason=best["reasons"],
-            )
-            # Lock target: keep highest scoring ticker as persistent monitor between scans
-            self._locked_target = self.top_pick
-            log.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f} | Score: {best['total_score']:.0f} | Scan: {elapsed_ms:.0f}ms")
-            self.notifier.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f}\nScore: {best['total_score']:.0f}\n{best['reasons']}")
+            # Keep top N setups as locked targets
+            max_locked = getattr(self.cfg, "MAX_LOCKED_TARGETS", 5)
+            self._locked_targets = []
+            for r in self.scan_results[:max_locked]:
+                best = r
+                pick = ScanResult(
+                    ticker=best["ticker"], price=best["price"], volume=best["volume"],
+                    avg_volume=best["avg_volume"], relative_volume=best["rel_vol"],
+                    rank_score=best["total_score"], reason=best["reasons"],
+                )
+                self._locked_targets.append(pick)
+            # Current top_pick for immediate evaluation is the best of the locked list
+            self.top_pick = self._locked_targets[0] if self._locked_targets else None
+            names = ", ".join([p.ticker for p in self._locked_targets])
+            log.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names} | Scan: {elapsed_ms:.0f}ms")
+            self.notifier.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\nTop score: {self.top_pick.rank_score:.0f}")
             
             # Record scan pick into experience buffer
             try:
                 buffer_append({
                     "source": "scan_pick",
-                    "ticker": best["ticker"],
+                    "ticker": self.top_pick.ticker,
                     "action": "SCAN_PICK",
-                    "scan_score": best["total_score"],
+                    "scan_score": self.top_pick.rank_score,
                     "confidence": 0.5,
                     "features": [],
                 })
@@ -454,7 +462,7 @@ class ScalperRunner:
                 pass
         else:
             self.top_pick = None
-            log.info(f"🔍 No new setups — continuing to monitor locked target ({elapsed_ms:.0f}ms)")
+            log.info(f"🔍 No new setups — continuing to monitor locked targets ({elapsed_ms:.0f}ms)")
     
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         closes = df["close"].values
