@@ -128,6 +128,7 @@ class ScalperRunner:
         
         self.scan_results: List[ScanResult] = []
         self.top_pick: Optional[ScanResult] = None
+        self._locked_target: Optional[ScanResult] = None
         self._last_scan_time: float = 0.0
         self._last_metrics_write: float = 0.0
         
@@ -346,13 +347,20 @@ class ScalperRunner:
                 if can_trade:
                     # Scan and trade ONLY when IB is connected
                     if self.conn.is_connected():
-                        if self.top_pick is None and self.shares == 0:
-                            if time.time() - self._last_scan_time > 1:
-                                self._last_scan_time = time.time()
-                                self._scan_and_rank()
-                        elif time.time() - self._last_scan_time > self.cfg.SCAN_INTERVAL_SECONDS:
-                            self._last_scan_time = time.time()
+                        now = time.time()
+                        time_since_scan = now - self._last_scan_time
+                        need_rescan = (
+                            self.top_pick is None and self.shares == 0 and time_since_scan > 1
+                        ) or (
+                            time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS
+                        )
+                        
+                        if need_rescan:
+                            self._last_scan_time = now
                             self._scan_and_rank()
+                        elif self.top_pick is None and self.shares == 0 and self._locked_target is not None:
+                            # Promote locked target to top_pick for evaluation
+                            self.top_pick = self._locked_target
                         
                         # Apply confidence gating for pre-market/after-hours
                         if self.top_pick and self.shares == 0:
@@ -423,6 +431,8 @@ class ScalperRunner:
                 avg_volume=best["avg_volume"], relative_volume=best["rel_vol"],
                 rank_score=best["total_score"], reason=best["reasons"],
             )
+            # Lock target: keep highest scoring ticker as persistent monitor between scans
+            self._locked_target = self.top_pick
             log.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f} | Score: {best['total_score']:.0f} | Scan: {elapsed_ms:.0f}ms")
             self.notifier.info(f"🎯 TOP PICK: {best['ticker']} @ ${best['price']:.2f}\nScore: {best['total_score']:.0f}\n{best['reasons']}")
             
@@ -440,7 +450,7 @@ class ScalperRunner:
                 pass
         else:
             self.top_pick = None
-            log.info(f"🔍 No setups — rescanning in 1s ({elapsed_ms:.0f}ms)")
+            log.info(f"🔍 No new setups — continuing to monitor locked target ({elapsed_ms:.0f}ms)")
     
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         closes = df["close"].values
