@@ -1,7 +1,7 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 5,
+  "total_awakenings": 6,
   "training_sessions": 4,
   "trades_observed": 0,
   "scans_performed": 4,
@@ -439,9 +439,16 @@
       "type": "ERROR",
       "message": "Training session failed: 'mood'",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-22T10:32:13.559905",
+      "age": "23h 29m 24s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #6",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-22T08:55:43.250482",
+  "last_awakening": "2026-06-22T10:32:13.559570",
   "current_version": "v20260622_090555",
   "version_history": [
     {
