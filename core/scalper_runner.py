@@ -349,10 +349,14 @@ class ScalperRunner:
                     if self.conn.is_connected():
                         now = time.time()
                         time_since_scan = now - self._last_scan_time
+                        # Rescan cadence:
+                        # - If we have a locked target, only full-rescan every SCAN_INTERVAL_SECONDS
+                        # - If no locked target yet, scan more frequently until we get one
+                        have_target = self._locked_target is not None
                         need_rescan = (
-                            self.top_pick is None and self.shares == 0 and time_since_scan > 1
-                        ) or (
-                            time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS
+                            (not have_target and self.top_pick is None and self.shares == 0 and time_since_scan > 1)
+                            or
+                            (time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS)
                         )
                         
                         if need_rescan:
