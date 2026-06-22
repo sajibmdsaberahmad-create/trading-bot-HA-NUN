@@ -87,7 +87,11 @@ git config --global user.name "HANUN-Bot" 2>/dev/null || true
 
 # Hard reset to origin/main ensures we always run the latest deployed code
 git fetch origin main 2>/dev/null || true
-git reset --hard origin/main 2>/dev/null || echo "  ℹ️  No remote changes to pull"
+if [ ! -f "bot_state.json" ]; then
+  git reset --hard origin/main 2>/dev/null || echo "  ℹ️  No remote changes to pull"
+else
+  echo "  ⚠️  Skipping hard reset: bot_state.json exists"
+fi
 
 echo "  ✅ Repo synchronized"
 
