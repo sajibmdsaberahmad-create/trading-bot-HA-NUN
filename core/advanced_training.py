@@ -961,7 +961,8 @@ class AdvancedTrainingPipeline:
         nav_history = [cash]
         
         window_size = self.bot_cfg.WINDOW_SIZE
-        n_features = self.config.n_features
+        # Use actual feature count from data, not hardcoded default
+        n_features = self.test_features.shape[1] if self.test_features is not None else self.config.n_features
         
         for i in range(window_size, len(self.test_features)):
             # Build observation
