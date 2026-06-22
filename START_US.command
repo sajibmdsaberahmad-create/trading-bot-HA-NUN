@@ -49,10 +49,11 @@ echo "  Press Ctrl+C to stop this instance only"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+# Remove --port flag — it inherits from core/config.py (IB_GATEWAY=4002) or .env
+# To override, set IB_PORT in .env or pass --port manually.
 python3 main.py --mode scalper \
     --ticker SPY \
     --timeframe 1min \
-    --port 7497 \
     --client-id 1 2>&1 | tee HA-NUN_US.log
 
 echo ""

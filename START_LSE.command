@@ -53,7 +53,6 @@ python3 main.py --mode scalper \
     --ticker ISF \
     --lse \
     --timeframe 1min \
-    --port 7497 \
     --client-id 2 2>&1 | tee HA-NUN_LSE.log
 
 echo ""
