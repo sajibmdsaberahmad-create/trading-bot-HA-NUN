@@ -150,6 +150,17 @@ class BotConfig:
     DECISION_BAR:           str  = "1 min"
 
     # ════════════════════════════════════════════════════════════════════
+    # PRE-MARKET / EXTENDED HOURS
+    # ════════════════════════════════════════════════════════════════════
+    ALLOW_PRE_MARKET_TRADING:  bool = True   # Trade before 9:30 ET if high confidence
+    ALLOW_AFTER_HOURS_TRADING: bool = False  # Trade after 4:00 ET
+    PRE_MARKET_START:          str  = "04:00"  # ET
+    PRE_MARKET_END:            str  = "09:25"   # ET
+    AFTER_HOURS_START:         str  = "16:00"   # ET
+    AFTER_HOURS_END:           str  = "20:00"   # ET
+    MIN_CONFIDENCE_PRE_MARKET: float = 0.70    # Min fusion confidence to trade pre-market
+
+    # ════════════════════════════════════════════════════════════════════
     # OBSERVATION WINDOW (PPO input)
     # ════════════════════════════════════════════════════════════════════
     WINDOW_SIZE: int = 30

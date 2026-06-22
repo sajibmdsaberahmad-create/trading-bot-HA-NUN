@@ -310,9 +310,9 @@ class ScalperRunner:
             log.info(f"IB Starting Balance: ${self._ib_starting_balance:,.2f}")
 
         # Check market status quietly
-        market_open, market_reason = self._is_market_open()
-        if not market_open:
-            self.notifier.warning(f"⚠️ MARKET STATUS\n{market_reason}\nBot will train offline until market opens.")
+        market_state = self._get_market_state()
+        if market_state != "open":
+            log.info(f"📊 Market state: {market_state.upper()} — pre-market/after-hours trading enabled")
 
         # Block startup scan until IB connection is confirmed live
         if self.conn.is_connected():
@@ -335,11 +335,16 @@ class ScalperRunner:
                 # Detect exits (bracket orders hitting stop/target)
                 self._detect_exit(current_px)
                 
-                # Check market status every 60 seconds
-                market_open, market_reason = self._is_market_open()
+                # Check market state
+                market_state = self._get_market_state()
+                can_trade = (
+                    market_state == "open" or
+                    (market_state == "pre_market" and self.cfg.ALLOW_PRE_MARKET_TRADING) or
+                    (market_state == "after_hours" and self.cfg.ALLOW_AFTER_HOURS_TRADING)
+                )
                 
-                if market_open:
-                    # Market is open: scan and trade ONLY when IB is connected
+                if can_trade:
+                    # Scan and trade ONLY when IB is connected
                     if self.conn.is_connected():
                         if self.top_pick is None and self.shares == 0:
                             if time.time() - self._last_scan_time > 1:
@@ -349,12 +354,20 @@ class ScalperRunner:
                             self._last_scan_time = time.time()
                             self._scan_and_rank()
                         
+                        # Apply confidence gating for pre-market/after-hours
                         if self.top_pick and self.shares == 0:
-                            self._attempt_entry()
+                            confidence = getattr(self.top_pick, 'rank_score', 0) / 100.0
+                            min_conf = self.cfg.MIN_CONFIDENCE_PRE_MARKET if market_state != "open" else 0.0
+                            
+                            if confidence >= min_conf:
+                                self._attempt_entry()
+                            else:
+                                log.info(f"⏸ SKIPPING {self.top_pick.ticker} — confidence {confidence:.0%} < {min_conf:.0%} threshold for {market_state}")
+                                self.top_pick = None
                 else:
                     # Market is closed: train instead of scan
                     if int(time.time()) % 60 == 0:  # log every minute
-                        log.info(f"⏸ MARKET CLOSED: {market_reason} — training instead")
+                        log.info(f"⏸ MARKET CLOSED ({market_state}) — training instead")
                     if time.time() - self._last_scan_time > 300:  # train every 5 min
                         self._last_scan_time = time.time()
                         self._train_off_hours()
@@ -563,44 +576,48 @@ class ScalperRunner:
             log.error(f"Entry error on {ticker}: {exc}")
     
     @staticmethod
-    def _is_market_open() -> Tuple[bool, str]:
+    def _get_market_state() -> str:
         """
-        Check if US market is open right now.
-        Returns (is_open, reason).
+        Returns one of: 'open', 'pre_market', 'after_hours', 'closed'
         """
         now_et = datetime.now(MARKET_TZ)
         weekday = now_et.weekday()  # 0=Mon, 6=Sun
-        
-        # Weekend check
+
+        # Weekend
         if weekday >= 5:
-            return False, f"Market CLOSED (weekend: {now_et.strftime('%A')})"
-        
-        # Holiday check (verify via internet if possible)
+            return "closed"
+
+        # Holiday check
         date_str = now_et.strftime("%Y-%m-%d")
         if date_str in US_MARKET_HOLIDAYS:
-            return False, f"Market CLOSED (holiday: {date_str})"
-        
-        # Try to fetch live holiday calendar from NYSE
+            return "closed"
+
+        # Optional live holiday verification
         try:
             resp = requests.get("https://www.nyse.com/markets/hours-calendars", timeout=5)
             if resp.status_code == 200 and date_str.replace("-", "") in resp.text.replace("-", ""):
-                return False, f"Market CLOSED (verified holiday via NYSE)"
+                return "closed"
         except Exception:
             pass
-        
-        # Time check: 9:30 AM - 4:00 PM ET
+
         hour = now_et.hour
         minute = now_et.minute
         current_minutes = hour * 60 + minute
-        open_minutes = 9 * 60 + 30
-        close_minutes = 16 * 60
-        
-        if current_minutes < open_minutes:
-            return False, f"Market CLOSED (pre-market: {now_et.strftime('%H:%M')} ET)"
-        elif current_minutes >= close_minutes:
-            return False, f"Market CLOSED (after-hours: {now_et.strftime('%H:%M')} ET)"
-        
-        return True, f"Market OPEN ({now_et.strftime('%H:%M')} ET)"
+        pre_start = int(BotConfig.PRE_MARKET_START.split(":")[0]) * 60 + int(BotConfig.PRE_MARKET_START.split(":")[1])
+        pre_end = int(BotConfig.PRE_MARKET_END.split(":")[0]) * 60 + int(BotConfig.PRE_MARKET_END.split(":")[1])
+        regular_open = 9 * 60 + 30
+        regular_close = 16 * 60
+        ah_start = int(BotConfig.AFTER_HOURS_START.split(":")[0]) * 60 + int(BotConfig.AFTER_HOURS_START.split(":")[1])
+        ah_end = int(BotConfig.AFTER_HOURS_END.split(":")[0]) * 60 + int(BotConfig.AFTER_HOURS_END.split(":")[1])
+
+        if pre_start <= current_minutes < regular_open:
+            return "pre_market"
+        elif regular_open <= current_minutes < regular_close:
+            return "open"
+        elif regular_close <= current_minutes < ah_end:
+            return "after_hours"
+        else:
+            return "closed"
     
     def _train_off_hours(self):
         """
@@ -868,7 +885,7 @@ class ScalperRunner:
                 "ai_models": list(self.ai_components.keys()) if self.ai_components else [],
                 "ppo_loaded": self.model is not None,
                 "consciousness_active": hasattr(self, 'consciousness') and self.consciousness is not None,
-                "market_status": self._is_market_open(),
+                "market_status": self._get_market_state(),
             }
             with open(report_path, 'w') as f:
                 json.dump(report, f, indent=2)
