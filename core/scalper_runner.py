@@ -944,8 +944,11 @@ class ScalperRunner:
             score += sig.strength * 20
             reasons.append(f"inst_{sig.strength:.1f}")
         typical = (df["high"] + df["low"] + df["close"]) / 3.0
-        vwap_hist = np.array([np.average(typical[max(0, i-19):i+1], weights=volumes[max(0, i-19):i+1]) for i in range(19, len(typical))])
-        vwap_slope = (vwap_hist[-1] - vwap_hist[-5]) / (vwap_hist[-5] + 1e-9) * 100
+        try:
+            vwap_hist = np.array([np.average(typical[max(0, i-19):i+1], weights=volumes[max(0, i-19):i+1]) for i in range(19, len(typical))])
+            vwap_slope = (vwap_hist[-1] - vwap_hist[-5]) / (vwap_hist[-5] + 1e-9) * 100
+        except Exception:
+            vwap_slope = 0
         score += max(0, vwap_slope) * 5
         if vwap_slope > 0.5:
             reasons.append(f"vwap_up_{vwap_slope:.2f}%")

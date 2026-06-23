@@ -81,7 +81,7 @@ class DataManager:
     def _get_contract(self):
         """Qualify and cache the contract for this DataManager's cfg.TICKER."""
         if self._contract is None or getattr(self._contract, 'symbol', None) != self.cfg.TICKER:
-            raw = Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
+            raw = ibi.Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
             qualified = self.ib.qualifyContracts(raw)
             if not qualified:
                 raise RuntimeError(
