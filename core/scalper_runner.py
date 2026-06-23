@@ -827,7 +827,8 @@ class ScalperRunner:
                 return 'waiting'
             
             inst = self.institutional.scan()
-            override, reason = inst.should_override_buy()
+            # Use detector's override check (not signal's attribute)
+            override, reason = self.institutional.should_override_buy()
             if override:
                 return 'waiting'
             
