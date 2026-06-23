@@ -440,42 +440,24 @@ class ScalperRunner:
                         time_since_scan = now - self._last_scan_time
                         
                         # USER METHODOLOGY:
-                        # - If we have locked targets, try entries FIRST (don't rescan)
-                        # - Only rescan when NO locked targets exist
-                        # - Scan every 60s when no targets, 120s when targets exist
+                        # - If we have locked targets, fast 1min monitor runs every 2s
+                        # - Full rescan every 120s even with targets (in case better setups appear)
+                        # - Scan every 60s when no targets
                         have_targets = len(self._locked_targets) > 0
                         scan_interval = 120 if have_targets else 60
                         
-                        need_rescan = (not have_targets) and (time_since_scan > scan_interval)
+                        need_rescan = time_since_scan > scan_interval
                         
                         if need_rescan:
                             self._scan_and_rank()
-                            self._last_scan_time = time.time()  # Set AFTER scan completes
+                            self._last_scan_time = time.time()
                         
-                        # USER METHODOLOGY: Monitor ALL locked targets for entries
+                        # USER METHODOLOGY: 1min millisecond obs on locked targets
                         if self._locked_targets and self.shares == 0:
-                            tried = set()
-                            remove_after = []
-                            for target in self._locked_targets[:self.cfg.MAX_LOCKED_TARGETS]:
-                                if target.ticker in tried:
-                                    continue
-                                tried.add(target.ticker)
-                                self.top_pick = target
-                                result = self._attempt_entry()
-                                if self.shares > 0:
-                                    break
-                                if result == 'permanent_skip':
-                                    remove_after.append(target.ticker)
-                            
-                            # Remove permanently failed targets
-                            if remove_after:
-                                self._locked_targets = [
-                                    t for t in self._locked_targets 
-                                    if t.ticker not in remove_after
-                                ]
-                                log.info(f"🗑 Removed {remove_after} from locked targets (permanent skip)")
-                                if not self._locked_targets:
-                                    self._last_scan_time = 0  # Force rescan
+                            now = time.time()
+                            if now - getattr(self, '_last_fast_monitor', 0) > 2.0:  # Every 2s
+                                self._last_fast_monitor = now
+                                self._fast_monitor_locked()
                         
                         # USER METHODOLOGY: Early exit check on ALL positions every iteration
                         if self.shares > 0:
@@ -511,34 +493,26 @@ class ScalperRunner:
     
     def _scan_one(self, ticker: str) -> Optional[Dict]:
         """
-        Scan one ticker: fetch multi-timeframe data and score it.
-        USER METHODOLOGY: 1min, 5min, 15min candles + volume + trend
+        Scan one ticker: 1min candles ONLY for high-frequency penny scalping.
+        USER METHODOLOGY: 1min is PRIMARY — trade on millisecond 1min bar obs.
         """
         try:
             cfg_ticker = self.cfg.TICKER
             self.cfg.TICKER = ticker
             dm = DataManager(self.conn, self.cfg)
             
-            # Primary: 1min bars (most recent data)
+            # ONLY 1min bars — fast, focused, high-frequency
             hist_1m = dm.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
-            
-            # Secondary: 5min bars for trend confirmation
-            hist_5m = dm.fetch_historical(duration="5 D", bar_size="5 mins", use_rth=False)
-            
-            # Tertiary: 15min bars for higher timeframe trend
-            hist_15m = dm.fetch_historical(duration="1 W", bar_size="15 mins", use_rth=False)
             
             self.cfg.TICKER = cfg_ticker
             
-            # Score based on best available timeframe
             score = None
             if hist_1m is not None and len(hist_1m) >= 60:
                 score = self._score_ticker(ticker, hist_1m)
-                # Cache for entry use
                 self._scan_data_cache[ticker] = hist_1m
             
             if score and score.get("total_score", 0) > 0:
-                log.info(f"  ✅ {ticker}: score={score['total_score']:.1f} | {score.get('reasons', '')[:60]}")
+                log.debug(f"  ✅ {ticker}: score={score['total_score']:.1f} | {score.get('reasons', '')[:60]}")
             else:
                 reason = score.get('reasons', 'no_data') if score else 'no_data'
                 log.debug(f"  ❌ {ticker}: {reason}")
@@ -627,6 +601,63 @@ class ScalperRunner:
             self.top_pick = None
             self._locked_targets = []
             log.info(f"🔍 No setups found in full universe scan ({elapsed_ms:.0f}ms)")
+    
+    def _fast_monitor_locked(self):
+        """
+        USER METHODOLOGY: Millisecond 1min observation on locked targets.
+        Fetches only latest 1min bars (not 2 days) for speed.
+        Triggers entry on volume spike + uptrend in real-time.
+        """
+        if not self._locked_targets or self.shares > 0:
+            return
+        
+        alive = []
+        for target in self._locked_targets[:self.cfg.MAX_LOCKED_TARGETS]:
+            ticker = target.ticker
+            try:
+                cfg_ticker = self.cfg.TICKER
+                self.cfg.TICKER = ticker
+                dm = DataManager(self.conn, self.cfg)
+                # Fast fetch: only 1 hour of 1min bars (60 bars)
+                df = dm.fetch_historical(duration="1 D", bar_size="1 min", use_rth=False)
+                self.cfg.TICKER = cfg_ticker
+                
+                if df is None or len(df) < 30:
+                    alive.append(target)
+                    continue
+                
+                current_px = float(df["close"].iloc[-1])
+                
+                # Quick uptrend check on 1min
+                if not _only_uptrend(df, current_px):
+                    log.debug(f"  ⏳ {ticker}: 1min uptrend lost — still watching")
+                    alive.append(target)
+                    continue
+                
+                # Volume spike check on 1min
+                is_spike, spike_ratio = self._detect_volume_spike(df)
+                if not is_spike:
+                    alive.append(target)
+                    continue
+                
+                # Volume spike detected — try entry NOW
+                self._scan_data_cache[ticker] = df  # Update cache for entry use
+                self.top_pick = target
+                log.info(f"⚡ 1min SPIKE DETECTED: {ticker} @ ${current_px:.2f} | vol={spike_ratio:.1f}x | attempting entry...")
+                result = self._attempt_entry()
+                if self.shares > 0:
+                    return  # Entered!
+                if result == 'permanent_skip':
+                    continue  # Don't add to alive
+                alive.append(target)
+                
+            except Exception as exc:
+                log.debug(f"  Fast monitor error {ticker}: {exc}")
+                alive.append(target)
+        
+        self._locked_targets = alive
+        if not self._locked_targets:
+            self._last_scan_time = 0  # Force new scan
     
     def _detect_volume_spike(self, df: pd.DataFrame) -> Tuple[bool, float]:
         """
@@ -817,30 +848,33 @@ class ScalperRunner:
             
             current_px = float(df_fast["close"].iloc[-1])
             
-            if current_px > 5.0:
-                return 'permanent_skip'
             if not _only_uptrend(df_fast, current_px):
+                log.debug(f"Entry skip {ticker}: not uptrend")
                 return 'waiting'
             
             is_spike, spike_ratio = self._detect_volume_spike(df_fast)
             if not is_spike:
+                log.debug(f"Entry skip {ticker}: no volume spike (ratio={spike_ratio:.2f})")
                 return 'waiting'
             
             inst = self.institutional.scan()
             # Use detector's override check (not signal's attribute)
             override, reason = self.institutional.should_override_buy()
             if override:
+                log.debug(f"Entry skip {ticker}: institutional override — {reason}")
                 return 'waiting'
             
             if self.cfg.USE_ENHANCED_AI and self.model is not None:
                 self._ai_update_buffers(df_fast, current_px)
                 should_enter, ai_conf, ai_reason = self._ai_gate_entry(ticker, current_px)
                 if not should_enter:
+                    log.debug(f"Entry skip {ticker}: AI gate rejected (conf={ai_conf:.2f}) — {ai_reason[:80]}")
                     return 'waiting'
             
             deploy_usd = 1000.0
             shares = int(deploy_usd / current_px)
             if shares < 1:
+                log.debug(f"Entry skip {ticker}: shares={shares} < 1")
                 return 'waiting'
             
             stop_usd = 50.0
