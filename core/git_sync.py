@@ -573,14 +573,7 @@ def _resolve_target_repos(files: Optional[List[str]], category: str) -> Dict[str
         basename = os.path.basename(f)
         routed = False
         
-        # Check category-based routing first
-        repo_from_category = CATEGORY_TO_REPO.get(category)
-        if repo_from_category and repo_from_category != "code":
-            result[repo_from_category].append(f)
-            routed = True
-            continue
-        
-        # Route based on file path patterns
+        # Route based on file path patterns (most specific)
         for route_key, patterns in REPO_ROUTES.items():
             for pattern in patterns:
                 if basename == pattern or pattern in f:
@@ -591,7 +584,9 @@ def _resolve_target_repos(files: Optional[List[str]], category: str) -> Dict[str
                 break
         
         if not routed:
-            result["code"].append(f)
+            # Fallback: use category as hint
+            repo_from_category = CATEGORY_TO_REPO.get(category, "code")
+            result[repo_from_category].append(f)
     
     # Remove empty entries
     return {k: v for k, v in result.items() if v}
