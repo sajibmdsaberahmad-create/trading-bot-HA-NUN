@@ -60,7 +60,7 @@ TRACKED_FILES: Set[str] = {
     "live_metrics.json",            # Dashboard metrics
     "bot_state.json",               # Bot state
     "training_journal.json",        # Training history
-    "HA-NUN.log",                   # Logs
+    "HANOON.log",                   # Logs
     "models/scalper_weights.json",  # Learned weights
     "models/daily_guidelines.txt",  # Daily self-improvement
     "core/config.py",               # Configuration
@@ -103,7 +103,7 @@ REPO_ROUTES: Dict[str, Set[str]] = {
         "requirements.txt",
     },
     "logs": {
-        "HA-NUN.log",
+        "HANOON.log",
         "trading_bot.log",
         "performance.csv",
         "live_metrics.json",
@@ -168,10 +168,10 @@ def init(cfg: BotConfig):
     """
     Initialize from BotConfig env vars.
     
-    Sets up HA-NUN repo (primary), Grandmaster (models), and Logs repos.
+    Sets up HANOON repo (primary), Grandmaster (models), and Logs repos.
     """
     global _repo, _token, _enabled
-    _repo = (getattr(cfg, "GITHUB_HA_NUN_REPO", None) or os.getenv("GITHUB_HA_NUN_REPO", "") or
+    _repo = (getattr(cfg, "GITHUB_HANOON_REPO", None) or os.getenv("GITHUB_HANOON_REPO", "") or
              getattr(cfg, "GITHUB_REPO", None) or os.getenv("GITHUB_REPO", ""))
     _token = getattr(cfg, "GITHUB_TOKEN", None) or os.getenv("GITHUB_TOKEN", "")
     _enabled = bool(_repo and _token)
@@ -180,9 +180,9 @@ def init(cfg: BotConfig):
     _logs_repo = (getattr(cfg, "GITHUB_LOGS_REPO", None) or os.getenv("GITHUB_LOGS_REPO", "") or "").strip()
     
     if _enabled:
-        log.info(f"GitHub sync initialized — HA-NUN={_repo} | Grandmaster={_grandmaster_repo or 'disabled'} | Logs={_logs_repo or 'disabled'}")
+        log.info(f"GitHub sync initialized — HANOON={_repo} | Grandmaster={_grandmaster_repo or 'disabled'} | Logs={_logs_repo or 'disabled'}")
         if not _verify_repo():
-            log.warning("HA-NUN repo verification failed — sync disabled")
+            log.warning("HANOON repo verification failed — sync disabled")
             _enabled = False
         set_global_config(cfg)
     else:
@@ -486,7 +486,7 @@ def push_weights_to_repo(weight_files: List[str], repo_url: str, message: str) -
     """
     Push model weights to a secondary repo (e.g. Grandmaster).
     Clones the target repo into a temp directory, copies weights,
-    commits, and pushes — without touching the primary HA-NUN repo.
+    commits, and pushes — without touching the primary HANOON repo.
     """
     try:
         import tempfile
@@ -513,7 +513,7 @@ def push_weights_to_repo(weight_files: List[str], repo_url: str, message: str) -
                 shutil.copy2(src, dst)
         
         # Configure git identity
-        subprocess.run(["git", "config", "user.email", "bot@ha-nun.local"], cwd=tmpdir, capture_output=True)
+        subprocess.run(["git", "config", "user.email", "bot@hanoon.local"], cwd=tmpdir, capture_output=True)
         subprocess.run(["git", "config", "user.name", "HANUN-Bot"], cwd=tmpdir, capture_output=True)
         
         # Commit & push
@@ -542,7 +542,7 @@ def push_weights_to_repo(weight_files: List[str], repo_url: str, message: str) -
 # ═════════════════════════════════════════════════════════════════════════════
 
 def _get_repo_url(repo_key: str) -> Optional[str]:
-    """Get authenticated repo URL for HA-NUN, Grandmaster, or Logs."""
+    """Get authenticated repo URL for HANOON, Grandmaster, or Logs."""
     if not _token:
         return None
     if repo_key == "code":
@@ -624,7 +624,7 @@ def push_to_secondary_repo(repo_key: str, files: List[str], message: str, catego
                 os.makedirs(os.path.dirname(dst), exist_ok=True) if os.path.dirname(dst) else None
                 shutil.copy2(src, dst)
         
-        subprocess.run(["git", "config", "user.email", "bot@ha-nun.local"], cwd=tmpdir, capture_output=True)
+        subprocess.run(["git", "config", "user.email", "bot@hanoon.local"], cwd=tmpdir, capture_output=True)
         subprocess.run(["git", "config", "user.name", "HANUN-Bot"], cwd=tmpdir, capture_output=True)
         
         subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True)
@@ -666,7 +666,7 @@ def push_trade(ticker: str, action: str, price: float, qty: float):
 
 
 def push_training(ticker: str, timesteps: int, return_pct: float):
-    """Push after training completion — to HA-NUN and Grandmaster."""
+    """Push after training completion — to HANOON and Grandmaster."""
     ha_ok = push_change(
         f"train: {ticker} {timesteps} steps return={return_pct:+.1f}%",
         files=[f"models/ppo_trader_warmup_*.zip", "training_journal.json", "audit_trail.jsonl"],
@@ -691,7 +691,7 @@ def push_daily_summary(nav: float, equity: float):
 
 
 def push_model_update(model_path: str = "ppo_trader.zip"):
-    """Push after model update (online fine-tune) — to HA-NUN and Grandmaster."""
+    """Push after model update (online fine-tune) — to HANOON and Grandmaster."""
     ha_nun_ok = push_change(
         f"model: updated {os.path.basename(model_path)}",
         files=[model_path, "audit_trail.jsonl"],
@@ -736,7 +736,7 @@ def push_error(error_message: str, context: str = ""):
     """Push error snapshot for debugging."""
     return push_change(
         f"error: {context} — {error_message[:100]}",
-        files=["HA-NUN.log", "audit_trail.jsonl", "bot_state.json"],
+        files=["HANOON.log", "audit_trail.jsonl", "bot_state.json"],
         category="error",
     )
 
@@ -745,7 +745,7 @@ def push_startup(mode: str, ticker: str):
     """Push on bot startup (force push)."""
     return push_change(
         f"startup: mode={mode} ticker={ticker}",
-        files=["HA-NUN.log", "audit_trail.jsonl"],
+        files=["HANOON.log", "audit_trail.jsonl"],
         category="startup",
     )
 
@@ -771,3 +771,30 @@ def get_stats() -> dict:
         "tracked_files": len(TRACKED_FILES),
         "repo": _repo,
     }
+
+
+def push_model_release(version: str, model_path: str = "ppo_trader.zip", notes: str = ""):
+    """
+    Create a git tag/release after training completion.
+    Tags every model version so we can roll back and track progress.
+    """
+    try:
+        now = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        tag_name = f"v{version}_{now}"
+        
+        subprocess.run(
+            ["git", "tag", "-a", tag_name, "-m", f"HANOON model release {version} | {notes}"],
+            cwd=REPO_DIR,
+            capture_output=True,
+        )
+        
+        push_change(
+            f"release: model v{version} tagged as {tag_name}",
+            files=[model_path, "models/scalper_weights.json", "models/training_history.json", "models/experience_buffer.jsonl"],
+            category="release",
+        )
+        log.info(f"🏷 Git release tagged: {tag_name}")
+        return True
+    except Exception as exc:
+        log.warning(f"Git release failed: {exc}")
+        return False

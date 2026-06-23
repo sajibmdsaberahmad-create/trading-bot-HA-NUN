@@ -24,7 +24,7 @@ Tracked:
 Not tracked:
 - Large binaries: `models/*.zip`, `models/checkpoints/*`, `models/backups/*`
 - Local state: `performance.csv`, `live_metrics.json`, `bot_state.json`
-- Logs: `*.log`, `HA-NUN.log`
+- Logs: `*.log`, `HANOON.log`
 
 ## AI lifecycle events
 

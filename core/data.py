@@ -51,6 +51,8 @@ class DataManager:
         self.cfg  = cfg
         self.ib   = connector.ib
 
+        self._contract = None  # DataManager's own contract cache
+
         # Tick buffer — every individual trade print
         self._tick_buffer: Deque[Dict] = deque(maxlen=cfg.TICK_BUFFER_MAXLEN)
         self.last_tick_price: Optional[float] = None
@@ -76,6 +78,20 @@ class DataManager:
         """Register a function(price: float, ts: pd.Timestamp) called on every tick."""
         self._tick_callbacks.append(callback)
 
+    def _get_contract(self):
+        """Qualify and cache the contract for this DataManager's cfg.TICKER."""
+        if self._contract is None or getattr(self._contract, 'symbol', None) != self.cfg.TICKER:
+            raw = Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
+            qualified = self.ib.qualifyContracts(raw)
+            if not qualified:
+                raise RuntimeError(
+                    f"Could not qualify contract for '{self.cfg.TICKER}' "
+                    f"(exchange={self.cfg.EXCHANGE}, currency={self.cfg.CURRENCY}). "
+                    "Check ticker, data subscription, and IB Gateway login."
+                )
+            self._contract = qualified[0]
+        return self._contract
+
     # ── Historical data ──────────────────────────────────────────────────────
 
     def fetch_historical(self, duration: Optional[str] = None,
@@ -85,7 +101,7 @@ class DataManager:
         bar_size = bar_size or self.cfg.HISTORY_BAR_SIZE
 
         log.info(f"Fetching {duration} of {bar_size} bars for {self.cfg.TICKER} …")
-        contract = self.conn.get_contract()
+        contract = self._get_contract()
 
         bars = self.ib.reqHistoricalData(
             contract,
@@ -129,25 +145,27 @@ class DataManager:
         Falls back to 5-second real-time bars automatically if the
         subscription is rejected (common on lower-tier data plans).
         """
-        contract = self.conn.get_contract()
+        try:
+            if self.cfg.USE_TICK_STREAM:
+                try:
+                    contract = self._get_contract()
+                    ticker = self.ib.reqTickByTickData(contract, "Last", 0, False)
+                    ticker.updateEvent += self._on_tick
+                    self._tick_handle = ticker
+                    log.info("Tick-by-tick stream started (every trade print, sub-second).")
+                    return
+                except Exception as exc:
+                    log.warning(
+                        f"Tick-by-tick stream unavailable ({exc}). "
+                        "Falling back to 5-second real-time bars."
+                    )
 
-        if self.cfg.USE_TICK_STREAM:
-            try:
-                ticker = self.ib.reqTickByTickData(contract, "Last", 0, False)
-                ticker.updateEvent += self._on_tick
-                self._tick_handle = ticker
-                log.info("Tick-by-tick stream started (every trade print, sub-second).")
-                return
-            except Exception as exc:
-                log.warning(
-                    f"Tick-by-tick stream unavailable ({exc}). "
-                    "Falling back to 5-second real-time bars."
-                )
-
-        self._start_realtime_bars_fallback()
+            self._start_realtime_bars_fallback()
+        except Exception as exc:
+            log.warning(f"Stream start failed entirely: {exc}")
 
     def _start_realtime_bars_fallback(self):
-        contract = self.conn.get_contract()
+        contract = self._get_contract()
         rt_bars = self.ib.reqRealTimeBars(
             contract, barSize=5, whatToShow="TRADES", useRTH=True,
         )

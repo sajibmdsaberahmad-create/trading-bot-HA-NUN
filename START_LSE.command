@@ -1,6 +1,6 @@
 #!/bin/bash
 # ════════════════════════════════════════════════════════════════════════════════
-# START_LSE.command — HA-NUN LSE Market Instance (ISF, 1min scalper)
+# START_LSE.command — HANOON LSE Market Instance (ISF, 1min scalper)
 # ════════════════════════════════════════════════════════════════════════════════
 # Opens a dedicated terminal for London Stock Exchange trading.
 # Uses client-id 2 (must differ from US instance).
@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 echo "═══════════════════════════════════════════════════════════════════════"
-echo "  🇬🇧 HA-NUN LSE MARKET INSTANCE"
+echo "  🇬🇧 HANOON LSE MARKET INSTANCE"
 echo "  Asset: ISF | Exchange: LSE | Ccy: GBP"
 echo "═══════════════════════════════════════════════════════════════════════"
 echo ""
@@ -53,7 +53,7 @@ python3 main.py --mode scalper \
     --ticker ISF \
     --lse \
     --timeframe 1h \
-    --client-id 2 2>&1 | tee HA-NUN_LSE.log
+    --client-id 2 2>&1 | tee HANOON_LSE.log
 
 echo ""
 echo "🇬🇧 LSE Market instance stopped."

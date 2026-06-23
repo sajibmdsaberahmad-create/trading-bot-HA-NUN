@@ -1,7 +1,7 @@
 # ════════════════════════════════════════════════════════════════════════════════
-# HA-NUN TRADING BOT — INSTITUTIONAL GRADE .gitignore
+# HANOON TRADING BOT — INSTITUTIONAL GRADE .gitignore
 # ════════════════════════════════════════════════════════════════════════════════
-# Multi-Repo Architecture: HA-NUN (live) / Grandmaster (weights) / Logs
+# Multi-Repo Architecture: HANOON (live) / Grandmaster (weights) / Logs
 
 # ════════════════════════════════════════════════════════════════════════════════
 # CRITICAL: NEVER COMMIT THESE
@@ -19,7 +19,7 @@ __pycache__/
 # ════════════════════════════════════════════════════════════════════════════════
 # DATA BLOAT GUARD — Only 30-day rolling window in Git
 # ════════════════════════════════════════════════════════════════════════════════
-# Raw CSV data (pushed to Logs repo, not HA-NUN)
+# Raw CSV data (pushed to Logs repo, not HANOON)
 data/live_market_features.csv
 data/*.csv
 backtest_results/results_latest.csv

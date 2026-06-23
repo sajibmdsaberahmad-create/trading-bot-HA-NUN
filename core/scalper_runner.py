@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-core/scalper_runner.py — HA-NUN institutional algo-wave rider.
+core/scalper_runner.py — HANOON institutional algo-wave rider.
 
 MATCHES USER MANUAL TRADING METHODOLOGY:
 1. Scan full universe, select 1-5 stocks (most active, top movers, volume, VWAP, etc.)
@@ -60,7 +60,7 @@ from core.market_regime import MarketRegimeDetector
 from core.self_improver import generate_self_improvement_plan
 from core.consciousness import AIConsciousness
 from core.notify import log, Notifier
-from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
+from core.git_sync import init as git_sync_init, push_trade, push_daily_summary, push_model_release
 from core.async_utils import get_background_worker, AtomicFileWriter
 from core.feature_drift import validate_features_at_startup
 from core.train_subprocess import launch_training
@@ -277,7 +277,7 @@ class ScalperRunner:
             result = "win" if pnl > 0 else "loss"
             log.info(f"📕 EXIT: {self.current_ticker} @ ${current_px:.2f} | P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%) | {result.upper()}")
             self.notifier.info(
-                f"📕 HA-NUN EXIT\n"
+                f"📕 HANOON EXIT\n"
                 f"Ticker: {self.current_ticker}\n"
                 f"Exit: ${current_px:.2f}\n"
                 f"Entry: ${self._entry_price:.2f}\n"
@@ -318,6 +318,12 @@ class ScalperRunner:
             if self._active_stream_ticker:
                 self._stop_target_stream(self._active_stream_ticker)
                 self._active_stream_ticker = None
+            
+            # Train from exit event
+            try:
+                self._daily_self_train()
+            except Exception:
+                pass
         self._prev_shares = self.shares
         if self.shares > 0:
             self._entry_price = current_px
@@ -345,6 +351,12 @@ class ScalperRunner:
             if self._active_stream_ticker:
                 self._stop_target_stream(self._active_stream_ticker)
                 self._active_stream_ticker = None
+            
+            # Train from manual exit event
+            try:
+                self._daily_self_train()
+            except Exception:
+                pass
         except Exception as exc:
             log.error(f"Early exit failed: {exc}")
     
@@ -362,7 +374,7 @@ class ScalperRunner:
                     "score": round(r.rank_score, 1), "reason": r.reason[:30]
                 })
             metrics = {
-                "mode": "HA-NUN",
+                "mode": "HANOON",
                 "account_equity": round(self.account_equity, 2),
                 "available_cash": round(self.available_cash or 0, 2),
                 "position_value": round(self.shares * self._latest_price(), 2),
@@ -385,12 +397,12 @@ class ScalperRunner:
     def run(self):
         # Full initialization report (pushed to git and Telegram)
         report_path = self._write_init_report()
-        log.info("HA-NUN — SINGLE FOCUS SCALPER")
+        log.info("HANOON — SINGLE FOCUS SCALPER")
         acct = self.conn.ib.accountValues()
         log.info(f"Account: {acct[0].account if acct else 'unknown'} | Universe: {len(PENNY_STOCK_UNIVERSE)} tickers")
         log.info(f"Max per trade: ${self.cfg.MAX_TRADE_SIZE_USD:,.0f} | Risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}")
         log.info(f"Init report: {report_path}")
-        self.notifier.info("🚀 HA-NUN STARTED")
+        self.notifier.info("🚀 HANOON STARTED")
 
         self._refresh_account_balance()
         if self._ib_starting_balance:
@@ -471,6 +483,21 @@ class ScalperRunner:
                         if need_rescan:
                             self._scan_and_rank()
                             self._last_scan_time = time.time()
+                            # Train from scan results
+                            try:
+                                if self.scan_results and len(self.scan_results) > 0:
+                                    best = self.scan_results[0]
+                                    buffer_append({
+                                        "source": "scan_complete",
+                                        "ticker": best.ticker,
+                                        "action": "SCAN_COMPLETE",
+                                        "scan_score": best.rank_score,
+                                        "confidence": 0.5,
+                                        "features": [],
+                                        "timestamp": datetime.now(datetime.UTC).isoformat(),
+                                    })
+                            except Exception:
+                                pass
                         
                         # USER METHODOLOGY: 1min millisecond obs on locked targets
                         if self._locked_targets and self.shares == 0:
@@ -531,6 +558,10 @@ class ScalperRunner:
             score = None
             if hist_1m is not None and len(hist_1m) >= 60:
                 score = self._score_ticker(ticker, hist_1m)
+                if score and score.get("total_score", 0) > 0:
+                    ai_adjusted = self._ai_score_ticker(ticker, hist_1m, score["total_score"])
+                    score["total_score"] = round(ai_adjusted, 1)
+                    score["ai_score"] = round(ai_adjusted, 1)
                 self._scan_data_cache[ticker] = hist_1m
             
             if score and score.get("total_score", 0) > 0:
@@ -541,13 +572,13 @@ class ScalperRunner:
             
             return score if score and score.get("total_score", 0) > 0 else None
         except Exception as exc:
-            log.debug(f"  ❌ {ticker}: error — {exc}")
+            log.info(f"  ❌ {ticker}: SCAN ERROR — {exc}")
             return None
     
     def _scan_and_rank(self):
         t0 = time.perf_counter()
         screen_list = getattr(self.cfg, "SCAN_UNIVERSE", PENNY_STOCK_UNIVERSE[:72])
-        log.info(f"🔍 HA-NUN SCAN START: {len(screen_list)} tickers")
+        log.info(f"🔍 HANOON SCAN START: {len(screen_list)} tickers")
         results: List[Dict] = []
         
         # USER METHODOLOGY: Sequential scan — IB async loop breaks with threads
@@ -561,7 +592,7 @@ class ScalperRunner:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         log.info(f"Scan: {len(results)}/{scan_count} qualified in {elapsed_ms:.0f}ms")
         
-        results.sort(key=lambda x: x["total_score"], reverse=True)
+        results.sort(key=lambda x: x.get("total_score", 0), reverse=True)
         
         # Debug: log score distribution
         if results:
@@ -634,6 +665,8 @@ class ScalperRunner:
             return  # Already streaming
         try:
             cfg = BotConfig(TICKER=ticker)  # fresh config for new contract
+            log.info(f"  📡 DEBUG: ticker={ticker}, cfg.TICKER={cfg.TICKER!r}")
+            print(f"STREAM DEBUG: ticker={ticker}, cfg.TICKER={cfg.TICKER!r}")
             dm = DataManager(self.conn, cfg)
             dm.start_tick_stream()  # tick-by-tick or 5s realtime bars
             self._target_monitors[ticker] = dm
@@ -807,7 +840,15 @@ class ScalperRunner:
             if pnl_pct < giveback:
                 return True, f"profit_trail: locked {pnl_pct:.2%}, giving back {giveback:.2%}"
         
-        # 2. Slippage prediction + volume check on LIVE 1min bars
+        # 2. AI-driven exit: use live stream data for AI evaluation
+        try:
+            ai_exit, ai_conf, ai_reason = self._ai_gate_exit(current_px)
+            if ai_exit and ai_conf >= self.cfg.CONFIDENCE_THRESHOLD:
+                return True, f"AI_exit: conf={ai_conf:.2f} | {ai_reason[:80]}"
+        except Exception:
+            pass
+        
+        # 3. Slippage prediction + volume check on LIVE 1min bars
         try:
             fast_df = None
             if self._active_stream_ticker and self._active_stream_ticker in self._target_monitors:
@@ -824,14 +865,14 @@ class ScalperRunner:
         except Exception:
             pass
         
-        # 3. USER RULE: If unrealized profit is tiny ($1-$2) and risk is high, exit
+        # 4. USER RULE: If unrealized profit is tiny ($1-$2) and risk is high, exit
         if 0 < unrealized_pnl < 2.0 and risk_usd > 30:
             return True, f"low_profit_high_risk: ${unrealized_pnl:.2f} profit, ${risk_usd:.0f} risk"
         
         return False, "hold"
     
     def _update_trailing_stops(self, current_px: float):
-        """USER METHODOLOGY: Trail profit along institutional algo wave."""
+        """USER METHODOLOGY: Trail profit along institutional algo wave — AI-driven."""
         if self.shares <= 0 or self._entry_price <= 0:
             return
         if not self.bracket_handle:
@@ -843,9 +884,22 @@ class ScalperRunner:
         if pnl_pct <= 0:
             return
         
-        # Calculate new stop: lock in 50% of gains
-        trail_stop = current_px - (self._entry_price * pnl_pct * 0.5)
-        trail_stop = max(trail_stop, self.bracket_handle.initial_stop_price)  # Never move stop down
+        # AI-driven trail decision
+        ai_trail = True
+        try:
+            ai_exit, ai_conf, ai_reason = self._ai_gate_exit(current_px)
+            if ai_exit and ai_conf >= self.cfg.CONFIDENCE_THRESHOLD:
+                ai_trail = False
+        except Exception:
+            pass
+        
+        trail_ratio = 0.5
+        if not ai_trail:
+            trail_ratio = 0.3
+        
+        # Calculate new stop: lock in gains based on AI confidence
+        trail_stop = current_px - (self._entry_price * pnl_pct * trail_ratio)
+        trail_stop = max(trail_stop, self.bracket_handle.initial_stop_price)
         
         # Update bracket if stop improved
         try:
@@ -857,7 +911,7 @@ class ScalperRunner:
                     stop_price=trail_stop,
                     target_price=self.bracket_handle.take_profit_price,
                 )
-                log.info(f"📈 TRAILING STOP: moved to ${trail_stop:.2f} (locked {pnl_pct:.2%})")
+                log.info(f"📈 TRAILING STOP: moved to ${trail_stop:.2f} (locked {pnl_pct:.2%}, AI_trail={ai_trail})")
         except Exception as exc:
             log.debug(f"Trailing stop update failed: {exc}")
     
@@ -907,7 +961,50 @@ class ScalperRunner:
             "ticker": ticker, "price": current_px, "volume": int(volumes[-1]),
             "avg_volume": int(vol_avg20), "rel_vol": round(vol_ratio, 2),
             "total_score": round(score, 1), "reasons": " | ".join(reasons[:3]) if reasons else "balanced",
+            "ai_score": None,
         }
+    
+    def _ai_score_ticker(self, ticker: str, df: pd.DataFrame, rule_score: float) -> float:
+        """
+        AI validates/overrides rule-based score.
+        Returns AI-adjusted score (0-100 scale).
+        """
+        if not self.cfg.USE_ENHANCED_AI or self.model is None or self._model_fresh:
+            return rule_score
+        try:
+            self._ai_update_buffers(df, float(df["close"].iloc[-1]))
+            if len(self._feature_buffer) < self.cfg.WINDOW_SIZE:
+                return rule_score
+            window = np.array(list(self._feature_buffer)[-self.cfg.WINDOW_SIZE:], dtype=np.float32).flatten()
+            total = self.bot_cash + self.shares * float(df["close"].iloc[-1])
+            c_rat = self.bot_cash / (total + 1e-9)
+            p_rat = (self.shares * float(df["close"].iloc[-1])) / (total + 1e-9) if self.shares > 0 else 0.0
+            obs = np.concatenate([window, [c_rat, p_rat]]).astype(np.float32)
+            from core.agent import predict_with_reasoning
+            bar_df = pd.DataFrame(self._bar_df_buffer) if self._bar_df_buffer else None
+            action, confidence, reasoning = predict_with_reasoning(
+                self.model, obs, self.cfg, self.ai_components,
+                bar_df=bar_df,
+                recent_rewards=getattr(self.perf, 'recent_rewards', None) if hasattr(self, 'perf') else None,
+            )
+            ai_score = rule_score
+            if action == 1 and confidence >= self.cfg.CONFIDENCE_THRESHOLD:
+                ai_score = rule_score * (1.0 + confidence * 0.5)
+            elif action == 2:
+                ai_score = rule_score * 0.3
+            buffer_append({
+                "source": "ai_scan",
+                "ticker": ticker,
+                "action": "EVALUATE",
+                "scan_score": rule_score,
+                "ai_score": ai_score,
+                "confidence": confidence,
+                "features": [],
+                "timestamp": datetime.now(datetime.UTC).isoformat(),
+            })
+            return ai_score
+        except Exception:
+            return rule_score
     
     def _attempt_entry(self) -> str:
         """
@@ -1004,7 +1101,7 @@ class ScalperRunner:
             self.trades_today += 1
             log.info(f"🎯 ENTRY: {shares}x {ticker} @ ${current_px:.2f} | Stop ${plan.initial_stop_price:.2f} | TP ${plan.take_profit_price:.2f} | Deployed: ${cost:,.0f}")
             self.notifier.info(
-                f"🎯 HA-NUN ENTRY\n"
+                f"🎯 HANOON ENTRY\n"
                 f"Ticker: {ticker}\n"
                 f"Qty: {shares}\n"
                 f"Entry: ${current_px:.2f}\n"
@@ -1013,6 +1110,24 @@ class ScalperRunner:
                 f"Deployed: ${cost:,.0f}"
             )
             push_trade(ticker, "BUY", current_px, shares)
+            
+            # Train from entry event
+            try:
+                buffer_append({
+                    "source": "live_entry",
+                    "ticker": ticker,
+                    "action": "BUY",
+                    "entry_price": current_px,
+                    "shares": shares,
+                    "stop": plan.initial_stop_price,
+                    "target": plan.take_profit_price,
+                    "confidence": getattr(self, '_last_ai_confidence', 0.5),
+                    "features": [],
+                    "timestamp": datetime.now(datetime.UTC).isoformat(),
+                })
+            except Exception:
+                pass
+            
             return 'entered'
         except Exception as exc:
             log.error(f"Entry error on {ticker}: {exc}")
@@ -1209,6 +1324,13 @@ class ScalperRunner:
             except Exception as exc:
                 log.debug(f"Self-improvement plan failed: {exc}")
             
+            # Tag git release after off-hours training
+            try:
+                version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                push_model_release(version, notes="off_hours_full_training")
+            except Exception:
+                pass
+            
             log.info("🧠 Off-hours training dispatched. Ready for next session.")
         except Exception as exc:
             log.debug(f"Off-hours training failed: {exc}")
@@ -1283,6 +1405,13 @@ class ScalperRunner:
             except Exception:
                 pass
             self._save_weights(weights)
+            
+            # Tag git release after self-training
+            try:
+                version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                push_model_release(version, notes=f"weights={json.dumps(weights)[:100]}")
+            except Exception:
+                pass
         except Exception as exc:
             log.debug(f"Self-train skipped: {exc}")
     
@@ -1351,7 +1480,7 @@ class ScalperRunner:
             if not rules:
                 rules.append("No guideline changes needed. System running optimally.")
             rules_text = "\n".join(f"• {r}" for r in rules)
-            return f"🧭 HA-NUN SELF-IMPROVEMENT GUIDELINES\n{'_'*40}\n{rules_text}\n"
+            return f"🧭 HANOON SELF-IMPROVEMENT GUIDELINES\n{'_'*40}\n{rules_text}\n"
         except Exception as exc:
             log.debug(f"Guidelines generation failed: {exc}")
             return ""
@@ -1388,14 +1517,14 @@ class ScalperRunner:
                     # Async git commit (non-blocking)
                     self._worker.submit_git_commit(
                         files=["models/scalper_weights.json", "models/daily_guidelines.txt"],
-                        message=f"train: ha-nun daily self-improvement {today_str}",
+                        message=f"train: hanoon daily self-improvement {today_str}",
                         push=True
                     )
                 except Exception:
                     pass
                 log.info(f"📤 {stmt}")
                 log.info(f"🧭 Guidelines generated and pushed to git")
-                self.notifier.info(f"📊 HA-NUN DAILY COMPLETE\n{stmt}\n\n{guidelines}")
+                self.notifier.info(f"📊 HANOON DAILY COMPLETE\n{stmt}\n\n{guidelines}")
         except Exception as exc:
             log.debug(f"Daily push skipped: {exc}")
     
@@ -1408,7 +1537,7 @@ class ScalperRunner:
             report_path = f"models/daily_reports/init_report_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}.json"
             report = {
                 "timestamp": datetime.now(datetime.UTC).isoformat(),
-                "mode": "HA-NUN",
+                "mode": "HANOON",
                 "ticker": self.cfg.TICKER,
                 "account": "DUO429233",
                 "equity": round(self.account_equity, 2),
@@ -1427,7 +1556,7 @@ class ScalperRunner:
             try:
                 self._worker.submit_git_commit(
                     files=[report_path],
-                    message=f"report: ha-nun init {datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}",
+                    message=f"report: hanoon init {datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}",
                     push=False
                 )
             except Exception:
@@ -1452,7 +1581,7 @@ class ScalperRunner:
             report_path = f"models/daily_reports/close_report_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}.json"
             report = {
                 "timestamp": datetime.now(datetime.UTC).isoformat(),
-                "mode": "HA-NUN",
+                "mode": "HANOON",
                 "ticker": self.cfg.TICKER,
                 "ib_account": round(self.account_equity, 2),
                 "ib_start": round(ib_start, 2),
@@ -1478,7 +1607,7 @@ class ScalperRunner:
             try:
                 self._worker.submit_git_commit(
                     files=[report_path],
-                    message=f"report: ha-nun close {datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}",
+                    message=f"report: hanoon close {datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}",
                     push=False
                 )
             except Exception:
@@ -1498,7 +1627,7 @@ class ScalperRunner:
         ib_start = self._ib_starting_balance or self.account_equity
         ib_change = self.account_equity - ib_start
         ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0
-        summary = "📊 HA-NUN SESSION CLOSE\n"
+        summary = "📊 HANOON SESSION CLOSE\n"
         summary += f" IB Account:    ${self.account_equity:>12,.2f}  (start: ${ib_start:,.2f})\n"
         summary += f" IB Change:     ${ib_change:>+12,.2f} ({ib_change_pct:+.2f}%)\n"
         summary += f" Bot Cash:      ${self.bot_cash:>12,.2f}\n"
@@ -1514,7 +1643,7 @@ class ScalperRunner:
         self.notifier.info(summary)
         push_daily_summary(self.bot_nav, self.account_equity)
         self.conn.disconnect()
-        log.info("HA-NUN stopped.")
+        log.info("HANOON stopped.")
 
 
 def main():

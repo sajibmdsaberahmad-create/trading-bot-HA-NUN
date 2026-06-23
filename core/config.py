@@ -285,9 +285,9 @@ class BotConfig:
     OLLAMA_TEMPERATURE: float = 0.7
 
     # ════════════════════════════════════════════════════════════════════
-    # MULTI-REPO GIT ARCHITECTURE (HA-NUN / Grandmaster / Logs)
+    # MULTI-REPO GIT ARCHITECTURE (HANOON / Grandmaster / Logs)
     # ════════════════════════════════════════════════════════════════════
-    GITHUB_HA_NUN_REPO: str = os.getenv("GITHUB_HA_NUN_REPO", "sajibmdsaberahmad-create/trading-bot-HA-NUN")
+    GITHUB_HANOON_REPO: str = os.getenv("GITHUB_HANOON_REPO", "sajibmdsaberahmad-create/trading-bot-HANOON")
     GITHUB_GRANDMASTER_REPO: str = os.getenv("GITHUB_GRANDMASTER_REPO", "sajibmdsaberahmad-create/trading-bot-Grandmaster")
     GITHUB_LOGS_REPO: str = os.getenv("GITHUB_LOGS_REPO", "sajibmdsaberahmad-create/trading-bot-Logs")
     GITHUB_PAT: str = os.getenv("GITHUB_PAT", "")
@@ -379,7 +379,7 @@ class BotConfig:
     # FILES
     # ════════════════════════════════════════════════════════════════════
     MODEL_PATH:    str = "ppo_trader.zip"
-    LOG_PATH:      str = "HA-NUN.log"
+    LOG_PATH:      str = "HANOON.log"
     PERF_PATH:     str = "performance.csv"
     STATE_PATH:    str = "bot_state.json"
     AUDIT_PATH:    str = "audit_trail.jsonl"
