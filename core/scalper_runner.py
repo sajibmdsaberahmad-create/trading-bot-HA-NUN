@@ -67,23 +67,36 @@ from core.train_subprocess import launch_training
 
 
 def _only_uptrend(df: pd.DataFrame, current_px: float) -> bool:
+    """
+    USER METHODOLOGY: Uptrend filter — must be loose enough to catch
+    institutional algo waves early, not late.
+    """
     if len(df) < 20:
         return False
     closes = df["close"].values[-20:]
+    volumes = df["volume"].values[-20:]
     sma20 = np.mean(closes)
-    if current_px <= sma20 * 0.98:
+    
+    # Price above sma20 (1% tolerance for wicks)
+    if current_px <= sma20 * 0.99:
         return False
+    
+    # VWAP above (1% tolerance)
     typical = (df["high"] + df["low"] + df["close"]) / 3.0
-    vwap = np.average(typical[-20:], weights=df["volume"].values[-20:])
-    if current_px <= vwap * 0.985:
+    vwap = np.average(typical[-20:], weights=volumes[-20:])
+    if current_px <= vwap * 0.99:
         return False
-    # Require at least 2 of last 5 closes rising
-    rising = sum(1 for i in range(-5, 0) if i > -len(closes) and closes[i] >= closes[i-1])
+    
+    # At least 2 of last 8 closes rising (not too strict)
+    rising = sum(1 for i in range(-8, 0) if i > -len(closes) and closes[i] >= closes[i-1])
     if rising < 2:
         return False
+    
+    # ATR sanity check (max 10% = very volatile, skip)
     atr = compute_atr(df, period=10)
-    if atr <= 0 or atr > current_px * 0.05:
+    if atr <= 0 or atr > current_px * 0.10:
         return False
+    
     return True
 
 
@@ -425,23 +438,43 @@ class ScalperRunner:
                         now = time.time()
                         time_since_scan = now - self._last_scan_time
                         
-                        # USER METHODOLOGY: High frequency - scan every 30s when have positions
-                        scan_interval = 30 if hasattr(self, '_active_positions') and self._active_positions else self.cfg.SCAN_INTERVAL_SECONDS
+                        # USER METHODOLOGY:
+                        # - If we have locked targets, try entries FIRST (don't rescan)
+                        # - Only rescan when NO locked targets exist
+                        # - Scan every 60s when no targets, 120s when targets exist
+                        have_targets = len(self._locked_targets) > 0
+                        scan_interval = 120 if have_targets else 60
                         
-                        need_rescan = time_since_scan > scan_interval
+                        need_rescan = (not have_targets) and (time_since_scan > scan_interval)
                         
                         if need_rescan:
-                            self._last_scan_time = now
                             self._scan_and_rank()
+                            self._last_scan_time = time.time()  # Set AFTER scan completes
                         
                         # USER METHODOLOGY: Monitor ALL locked targets for entries
                         if self._locked_targets and self.shares == 0:
-                            # Cycle through locked targets looking for entries
-                            for target in self._locked_targets[:3]:  # Check top 3
+                            tried = set()
+                            remove_after = []
+                            for target in self._locked_targets[:self.cfg.MAX_LOCKED_TARGETS]:
+                                if target.ticker in tried:
+                                    continue
+                                tried.add(target.ticker)
                                 self.top_pick = target
-                                self._attempt_entry()
+                                result = self._attempt_entry()
                                 if self.shares > 0:
-                                    break  # One entry per scan cycle
+                                    break
+                                if result == 'permanent_skip':
+                                    remove_after.append(target.ticker)
+                            
+                            # Remove permanently failed targets
+                            if remove_after:
+                                self._locked_targets = [
+                                    t for t in self._locked_targets 
+                                    if t.ticker not in remove_after
+                                ]
+                                log.info(f"🗑 Removed {remove_after} from locked targets (permanent skip)")
+                                if not self._locked_targets:
+                                    self._last_scan_time = 0  # Force rescan
                         
                         # USER METHODOLOGY: Early exit check on ALL positions every iteration
                         if self.shares > 0:
@@ -475,48 +508,79 @@ class ScalperRunner:
         finally:
             self._shutdown()
     
+    def _scan_one(self, ticker: str) -> Optional[Dict]:
+        """
+        Scan one ticker: fetch multi-timeframe data and score it.
+        USER METHODOLOGY: 1min, 5min, 15min candles + volume + trend
+        """
+        try:
+            cfg_ticker = self.cfg.TICKER
+            self.cfg.TICKER = ticker
+            dm = DataManager(self.conn, self.cfg)
+            
+            # Primary: 1min bars (most recent data)
+            hist_1m = dm.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
+            
+            # Secondary: 5min bars for trend confirmation
+            hist_5m = dm.fetch_historical(duration="5 D", bar_size="5 mins", use_rth=False)
+            
+            # Tertiary: 15min bars for higher timeframe trend
+            hist_15m = dm.fetch_historical(duration="1 W", bar_size="15 mins", use_rth=False)
+            
+            self.cfg.TICKER = cfg_ticker
+            
+            # Score based on best available timeframe
+            score = None
+            if hist_1m is not None and len(hist_1m) >= 60:
+                score = self._score_ticker(ticker, hist_1m)
+            
+            if score and score.get("total_score", 0) > 0:
+                log.info(f"  ✅ {ticker}: score={score['total_score']:.1f} | {score.get('reasons', '')[:60]}")
+            else:
+                reason = score.get('reasons', 'no_data') if score else 'no_data'
+                log.debug(f"  ❌ {ticker}: {reason}")
+            
+            return score if score and score.get("total_score", 0) > 0 else None
+        except Exception as exc:
+            log.debug(f"  ❌ {ticker}: error — {exc}")
+            return None
+    
     def _scan_and_rank(self):
         t0 = time.perf_counter()
-        screen_list = getattr(self.cfg, "SCAN_UNIVERSE", PENNY_STOCK_UNIVERSE[:60])
-        log.info(f"🔍 HA-NUN SCAN: {len(screen_list)} tickers (full universe screen)...")
+        screen_list = getattr(self.cfg, "SCAN_UNIVERSE", PENNY_STOCK_UNIVERSE[:72])
+        log.info(f"🔍 HA-NUN SCAN START: {len(screen_list)} tickers")
         results: List[Dict] = []
-
-        def _scan_one(ticker: str) -> Optional[Dict]:
-            try:
-                cfg_ticker = self.cfg.TICKER
-                self.cfg.TICKER = ticker
-                dm = DataManager(self.conn, self.cfg)
-                hist = dm.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
-                if hist is None or len(hist) < 60:
-                    return None
-                score = self._score_ticker(ticker, hist)
-                self.cfg.TICKER = cfg_ticker
-                return score if score and score.get("total_score", 0) > 0 else None
-            except Exception:
-                return None
-
-        workers = 1
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {pool.submit(_scan_one, t): t for t in screen_list}
-            for fut in as_completed(futures):
-                r = fut.result()
-                if r:
-                    results.append(r)
+        
+        # USER METHODOLOGY: Sequential scan — IB async loop breaks with threads
+        scan_count = 0
+        for ticker in screen_list:
+            scan_count += 1
+            r = self._scan_one(ticker)
+            if r:
+                results.append(r)
+        
         elapsed_ms = (time.perf_counter() - t0) * 1000
+        log.info(f"Scan: {len(results)}/{scan_count} qualified in {elapsed_ms:.0f}ms")
         
         results.sort(key=lambda x: x["total_score"], reverse=True)
         
+        # Debug: log score distribution
+        if results:
+            scores = [r["total_score"] for r in results[:5]]
+            log.debug(f"Score distribution: top5={scores}")
+        
         # USER METHODOLOGY: Always return 1-5 stocks, never 0
-        # If no high-score setups, relax criteria and take best available
-        min_score = 1.0  # minimum score to be considered
+        min_score = 1.0
         qualified = [r for r in results if r["total_score"] >= min_score]
         
-        if not qualified and results:
-            # Take top 3 even if below threshold - user wants to trade every session
-            qualified = results[:3]
-            log.info(f"⚠️ No high-score setups — taking top {len(qualified)} by default")
+        if not qualified:
+            if results:
+                qualified = results[:3]
+                log.info(f"⚠️ No high-score setups — taking top {len(qualified)} by default (scores: {[r['total_score'] for r in qualified]})")
+            else:
+                log.warning("🔴 Zero scan results — check data feed or uptrend filter")
         
-        self.scan_results = qualified[:5]  # MAX 5 STOCKS
+        self.scan_results = qualified[:5]
         
         if self.scan_results:
             self._locked_targets = []
@@ -712,71 +776,54 @@ class ScalperRunner:
             "total_score": round(score, 1), "reasons": " | ".join(reasons[:3]) if reasons else "balanced",
         }
     
-    def _attempt_entry(self):
+    def _attempt_entry(self) -> str:
+        """
+        Attempt entry on self.top_pick.
+        Returns: 'entered', 'permanent_skip', or 'waiting'
+        """
         if not self.top_pick:
-            return
+            return 'waiting'
         ticker = self.top_pick.ticker
         
-        # USER RULE: Max 5 concurrent positions
         active_positions = getattr(self, '_active_positions', [])
         if len(active_positions) >= 5:
-            log.debug(f"Max 5 positions reached ({len(active_positions)}). Skipping {ticker}.")
-            return
+            return 'waiting'
         
         try:
             self.cfg.TICKER = ticker
             df_fast = self.data.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
             if df_fast is None or len(df_fast) < 20:
-                return
+                return 'waiting'
             current_px = float(df_fast["close"].iloc[-1])
             
-            # USER RULE: Penny stocks focus (< $5)
             if current_px > 5.0:
-                log.info(f"⏸ SKIPPING {ticker}: ${current_px:.2f} > $5 (penny stock only)")
-                self.top_pick = None
-                return
-            
+                return 'permanent_skip'
             if not _only_uptrend(df_fast, current_px):
-                self.top_pick = None
-                return
+                return 'waiting'
             
-            # USER RULE: Volume spike confirmation
             is_spike, spike_ratio = self._detect_volume_spike(df_fast)
             if not is_spike:
-                log.debug(f"⏸ {ticker}: no volume spike (ratio={spike_ratio:.1f}x)")
-                self.top_pick = None
-                return
-            log.info(f"  📊 VOLUME SPIKE: {spike_ratio:.1f}x average on {ticker}")
+                return 'waiting'
             
             inst = self.institutional.scan()
-            override, reason = self.institutional.should_override_buy()
+            override, reason = inst.should_override_buy()
             if override:
-                self.top_pick = None
-                return
+                return 'waiting'
             
-            # AI gate
             if self.cfg.USE_ENHANCED_AI and self.model is not None:
                 self._ai_update_buffers(df_fast, current_px)
                 should_enter, ai_conf, ai_reason = self._ai_gate_entry(ticker, current_px)
                 if not should_enter:
-                    log.info(f"  🧠 AI BLOCKS ENTRY on {ticker}: confidence={ai_conf:.0%}")
-                    self.top_pick = None
-                    return
-                log.info(f"  🧠 AI APPROVES: {ticker} confidence={ai_conf:.0%}")
+                    return 'waiting'
             
-            # USER RULE: Deploy EXACTLY $1,000 per stock
             deploy_usd = 1000.0
             shares = int(deploy_usd / current_px)
             if shares < 1:
-                self.top_pick = None
-                return
+                return 'waiting'
             
-            # USER RULE: Hard stop $50 per trade
             stop_usd = 50.0
             stop_dist = stop_usd / shares
             stop_dist = max(stop_dist, current_px * self.cfg.SCALP_MIN_STOP_PCT)
-            
-            # Hard TP: 2x risk (2:1 RR) or max 5%
             tp_dist = stop_dist * 2.0
             tp_dist = min(tp_dist, current_px * 0.05)
             tp_price = current_px + tp_dist
@@ -800,7 +847,6 @@ class ScalperRunner:
             self._entry_price = current_px
             self._prev_shares = self.shares
             
-            # Track active position
             if not hasattr(self, '_active_positions'):
                 self._active_positions = []
             self._active_positions.append({
@@ -814,38 +860,21 @@ class ScalperRunner:
             
             self.risk.open_position(plan)
             self.trades_today += 1
-            log.info(f"🎯 ENTRY: {shares}x {ticker} @ ${current_px:.2f} | Penny=${current_px < 2.0} | Spike={spike_ratio:.1f}x | Stop ${plan.initial_stop_price:.2f} | TP ${plan.take_profit_price:.2f} | Deployed: ${cost:,.0f}")
+            log.info(f"🎯 ENTRY: {shares}x {ticker} @ ${current_px:.2f} | Stop ${plan.initial_stop_price:.2f} | TP ${plan.take_profit_price:.2f} | Deployed: ${cost:,.0f}")
             self.notifier.info(
                 f"🎯 HA-NUN ENTRY\n"
                 f"Ticker: {ticker}\n"
                 f"Qty: {shares}\n"
                 f"Entry: ${current_px:.2f}\n"
-                f"Stop: ${plan.initial_stop_price:.2f} (-$50 max)\n"
+                f"Stop: ${plan.initial_stop_price:.2f} (-$50)\n"
                 f"Target: ${plan.take_profit_price:.2f}\n"
-                f"Deployed: ${cost:,.0f}\n"
-                f"Volume Spike: {spike_ratio:.1f}x"
+                f"Deployed: ${cost:,.0f}"
             )
             push_trade(ticker, "BUY", current_px, shares)
-            
-            # Record entry into experience buffer for unified training
-            try:
-                buffer_append({
-                    "source": "live_trade",
-                    "ticker": ticker,
-                    "action": "BUY",
-                    "entry_price": current_px,
-                    "stop_dist": stop_dist,
-                    "tp_dist": tp_dist,
-                    "confidence": 0.5,
-                    "scan_score": self.top_pick.rank_score if self.top_pick else 0,
-                    "features": [],
-                })
-            except Exception:
-                pass
-            
-            self.top_pick = None
+            return 'entered'
         except Exception as exc:
             log.error(f"Entry error on {ticker}: {exc}")
+            return 'waiting'
     
     @staticmethod
     def _get_market_state() -> str:
