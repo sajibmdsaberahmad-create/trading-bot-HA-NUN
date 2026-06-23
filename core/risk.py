@@ -268,6 +268,7 @@ class RiskManager:
             max_shares_by_cash = (cash * self.cfg.DEFAULT_MAX_POSITION_PCT) / entry_price
             shares = min(shares_from_risk, max_shares_by_cash, self.cfg.MAX_SHARES_PER_TRADE)
             shares = float(np.floor(shares))
+            order_size_usd = shares * entry_price
 
             if shares < 1:
                 log.debug(

@@ -511,8 +511,8 @@ class MultiModelFusionEngine:
         self.confidence_scorer = confidence
     
     def get_decision(self, obs: np.ndarray, features_df: Optional[pd.DataFrame] = None,
-                      regime_result: Optional[RegimeResult] = None,
-                      recent_rewards: Optional[List[float]] = None) -> FusedDecision:
+                           regime_result = None,
+                           recent_rewards: Optional[List[float]] = None) -> FusedDecision:
         """
         Get fused decision from all available models.
         
@@ -609,7 +609,7 @@ class MultiModelFusionEngine:
                         regime=MR.UNKNOWN, confidence=0.0,
                         trend_strength=0.0, volatility_percentile=50.0,
                         momentum=0.0, volume_regime="normal",
-                        recommendation="",
+                        recommendation="No regime data available",
                     )
                 
                 votes = self.ensemble.get_votes(

@@ -188,11 +188,14 @@ class FusionOverrides:
         except Exception:
             return OverrideSignal()
         
-        if regime == "HIGH_VOL":
+        # Handle both agent_enhanced.MarketRegime and hmrs.MarketRegime value formats
+        regime_upper = regime.upper()
+        
+        if "HIGH_VOL" in regime_upper or "VOLATILITY" in regime_upper:
             return OverrideSignal(
                 override_active=True,
                 level=OverrideLevel.HARD_OVERRIDE,
-                reason="HIGH_VOL regime: defensive posture, favor ensemble.",
+                reason=f"{regime} regime: defensive posture, favor ensemble.",
                 forced_weights={
                     "ensemble": 0.65,
                     "ppo": 0.20,
@@ -203,11 +206,11 @@ class FusionOverrides:
                 risk_multiplier=0.6,
                 position_scale=0.6,
             )
-        elif regime == "LOW_VOL":
+        elif regime_upper == "LOW_VOLATILITY" or "LOW" in regime_upper or "CALM" in regime_upper:
             return OverrideSignal(
                 override_active=True,
                 level=OverrideLevel.CAUTION,
-                reason="LOW_VOL regime: can increase size slightly but watch for breakout.",
+                reason=f"{regime} regime: can increase size slightly but watch for breakout.",
                 forced_weights={
                     "ensemble": 0.40,
                     "ppo": 0.30,
@@ -218,11 +221,11 @@ class FusionOverrides:
                 risk_multiplier=1.2,
                 position_scale=1.2,
             )
-        elif regime == "TRENDING":
+        elif "TREND" in regime_upper and "DOWN" not in regime_upper:
             return OverrideSignal(
                 override_active=True,
                 level=OverrideLevel.CAUTION,
-                reason="TRENDING regime: favor momentum models.",
+                reason=f"{regime} regime: favor momentum models.",
                 forced_weights={
                     "ensemble": 0.30,
                     "ppo": 0.35,
