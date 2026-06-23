@@ -468,7 +468,7 @@ class ScalperRunner:
                 return None
 
         # Sequential-ish with small worker count to avoid IB rate limits
-        workers = min(len(screen_list), 6)
+        workers = 1
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = {pool.submit(_scan_one, t): t for t in screen_list}
             for fut in as_completed(futures):
