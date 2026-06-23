@@ -82,7 +82,7 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     IB_HOST:       str  = "127.0.0.1"
     IB_PORT:       int  = 4002     # 4002/4001 = IB Gateway, 7497 = TWS paper, 7496 = TWS live
-    IB_CLIENT_ID:  int  = 999
+    IB_CLIENT_ID:  int  = 9999
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
 
     # Reconnection behaviour (handles VPS network blips / ISP drops)

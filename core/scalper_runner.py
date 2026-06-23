@@ -152,6 +152,11 @@ class ScalperRunner:
         self._last_metrics_write: float = 0.0
         self._scan_data_cache: Dict[str, pd.DataFrame] = {}  # Cache scanned data
         
+        # Live stream monitors for locked targets (heartbeat in milliseconds)
+        self._target_monitors: Dict[str, DataManager] = {}      # ticker -> DataManager
+        self._target_last_bar_count: Dict[str, int] = {}        # ticker -> last seen bar count
+        self._active_stream_ticker: Optional[str] = None        # Currently streaming ticker
+        
         self.trade_journal: List[Dict] = []
         self.trades_today: int = 0
         self._current_day: Optional[str] = None
@@ -253,6 +258,13 @@ class ScalperRunner:
     
     def _latest_price(self) -> float:
         try:
+            # Priority 1: Active stream ticker (post-entry live monitoring)
+            if self._active_stream_ticker and self._active_stream_ticker in self._target_monitors:
+                dm = self._target_monitors[self._active_stream_ticker]
+                px = dm.get_latest_price()
+                if px and px > 0:
+                    return px
+            # Priority 2: Main data stream
             return self.data.get_latest_price() or 0.0
         except Exception:
             return 0.0
@@ -302,6 +314,10 @@ class ScalperRunner:
             
             self.current_ticker = None
             self.bracket_handle = None
+            # Clean up live stream for closed position
+            if self._active_stream_ticker:
+                self._stop_target_stream(self._active_stream_ticker)
+                self._active_stream_ticker = None
         self._prev_shares = self.shares
         if self.shares > 0:
             self._entry_price = current_px
@@ -325,6 +341,10 @@ class ScalperRunner:
             self.current_ticker = None
             if hasattr(self, '_active_positions'):
                 self._active_positions = [p for p in self._active_positions if p["ticker"] != ticker]
+            # Clean up live stream for manually exited position
+            if self._active_stream_ticker:
+                self._stop_target_stream(self._active_stream_ticker)
+                self._active_stream_ticker = None
         except Exception as exc:
             log.error(f"Early exit failed: {exc}")
     
@@ -455,25 +475,27 @@ class ScalperRunner:
                         # USER METHODOLOGY: 1min millisecond obs on locked targets
                         if self._locked_targets and self.shares == 0:
                             now = time.time()
-                            if now - getattr(self, '_last_fast_monitor', 0) > 2.0:  # Every 2s
+                            if now - getattr(self, '_last_fast_monitor', 0) > 2.0:  # Every 2s heartbeat
                                 self._last_fast_monitor = now
                                 self._fast_monitor_locked()
                         
-                        # USER METHODOLOGY: Early exit check on ALL positions every iteration
+                        # USER METHODOLOGY: Live stream post-entry monitoring — EVERY loop iteration
                         if self.shares > 0:
                             current_px = self._latest_price()
                             if current_px > 0:
-                                # Check early exit
+                                # AI-driven early exit check on EVERY tick (millisecond)
                                 should_exit, exit_reason = self._should_exit_early(
                                     current_px, self._entry_price,
                                     (current_px - self._entry_price) * self.shares,
-                                    50.0  # $50 risk
+                                    50.0
                                 )
                                 if should_exit:
-                                    log.info(f"  ⚡ EARLY EXIT: {exit_reason}")
+                                    log.info(f"  ⚡ LIVE EXIT: {exit_reason}")
                                     self._exit_position(current_px, exit_reason)
+                                    # Clean up streams after exit
+                                    self._active_stream_ticker = None
                                 else:
-                                    # Update trailing stops
+                                    # Trailing stops on every iteration
                                     self._update_trailing_stops(current_px)
                 else:
                     if int(time.time()) % 60 == 0:
@@ -586,6 +608,10 @@ class ScalperRunner:
             log.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names} | Scan: {elapsed_ms:.0f}ms")
             self.notifier.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\nTop score: {self.top_pick.rank_score:.0f}")
             
+            # Start live streams for ALL locked targets immediately
+            for pick in self._locked_targets:
+                self._start_target_stream(pick.ticker)
+            
             try:
                 buffer_append({
                     "source": "scan_pick",
@@ -602,11 +628,55 @@ class ScalperRunner:
             self._locked_targets = []
             log.info(f"🔍 No setups found in full universe scan ({elapsed_ms:.0f}ms)")
     
+    def _start_target_stream(self, ticker: str):
+        """Start live tick stream for a locked target — millisecond heartbeat."""
+        if ticker in self._target_monitors:
+            return  # Already streaming
+        try:
+            cfg = BotConfig(TICKER=ticker)  # fresh config for new contract
+            dm = DataManager(self.conn, cfg)
+            dm.start_tick_stream()  # tick-by-tick or 5s realtime bars
+            self._target_monitors[ticker] = dm
+            self._target_last_bar_count[ticker] = 0
+            log.info(f"  📡 LIVE STREAM started for {ticker} (millisecond heartbeat)")
+        except Exception as exc:
+            log.warning(f"  Stream start failed for {ticker}: {exc}")
+    
+    def _stop_target_stream(self, ticker: str):
+        """Stop live tick stream for a target."""
+        dm = self._target_monitors.pop(ticker, None)
+        if dm:
+            try:
+                dm.stop_tick_stream()
+            except Exception:
+                pass
+        self._target_last_bar_count.pop(ticker, None)
+        if self._active_stream_ticker == ticker:
+            self._active_stream_ticker = None
+    
+    def _get_live_1min_bars(self, ticker: str) -> Optional[pd.DataFrame]:
+        """
+        Get NEW 1min bars since last check from live stream buffer.
+        Returns only bars we haven't processed yet.
+        """
+        dm = self._target_monitors.get(ticker)
+        if dm is None:
+            return None
+        df = dm.get_bar_dataframe()
+        if df is None or len(df) < 20:
+            return None
+        last_count = self._target_last_bar_count.get(ticker, 0)
+        if len(df) <= last_count:
+            return None  # No new bars
+        new_bars = df.iloc[last_count:]
+        self._target_last_bar_count[ticker] = len(df)
+        return new_bars
+    
     def _fast_monitor_locked(self):
         """
-        USER METHODOLOGY: Millisecond 1min observation on locked targets.
-        Fetches only latest 1min bars (not 2 days) for speed.
-        Triggers entry on volume spike + uptrend in real-time.
+        USER METHODOLOGY: Millisecond 1min observation via LIVE STREAM heartbeat.
+        No historical fetches. Uses tick-by-tick / realtime bar buffers.
+        Triggers entry on live volume spike + uptrend the instant it happens.
         """
         if not self._locked_targets or self.shares > 0:
             return
@@ -614,48 +684,62 @@ class ScalperRunner:
         alive = []
         for target in self._locked_targets[:self.cfg.MAX_LOCKED_TARGETS]:
             ticker = target.ticker
-            try:
-                cfg_ticker = self.cfg.TICKER
-                self.cfg.TICKER = ticker
-                dm = DataManager(self.conn, self.cfg)
-                # Fast fetch: only 1 hour of 1min bars (60 bars)
-                df = dm.fetch_historical(duration="1 D", bar_size="1 min", use_rth=False)
-                self.cfg.TICKER = cfg_ticker
-                
-                if df is None or len(df) < 30:
-                    alive.append(target)
-                    continue
-                
-                current_px = float(df["close"].iloc[-1])
-                
-                # Quick uptrend check on 1min
-                if not _only_uptrend(df, current_px):
-                    log.debug(f"  ⏳ {ticker}: 1min uptrend lost — still watching")
-                    alive.append(target)
-                    continue
-                
-                # Volume spike check on 1min
-                is_spike, spike_ratio = self._detect_volume_spike(df)
-                if not is_spike:
-                    alive.append(target)
-                    continue
-                
-                # Volume spike detected — try entry NOW
-                self._scan_data_cache[ticker] = df  # Update cache for entry use
-                self.top_pick = target
-                log.info(f"⚡ 1min SPIKE DETECTED: {ticker} @ ${current_px:.2f} | vol={spike_ratio:.1f}x | attempting entry...")
-                result = self._attempt_entry()
-                if self.shares > 0:
-                    return  # Entered!
-                if result == 'permanent_skip':
-                    continue  # Don't add to alive
+            
+            # Ensure live stream is running (start on first check)
+            if ticker not in self._target_monitors:
+                self._start_target_stream(ticker)
+            
+            # Get NEW 1min bars since last heartbeat check
+            new_bars = self._get_live_1min_bars(ticker)
+            if new_bars is None or len(new_bars) == 0:
                 alive.append(target)
-                
-            except Exception as exc:
-                log.debug(f"  Fast monitor error {ticker}: {exc}")
+                continue
+            
+            # Use the accumulated live bars (all we have so far)
+            dm = self._target_monitors[ticker]
+            full_df = dm.get_bar_dataframe()
+            if full_df is None or len(full_df) < 20:
                 alive.append(target)
+                continue
+            
+            current_px = float(full_df["close"].iloc[-1])
+            
+            # Quick uptrend check on live 1min bars
+            if not _only_uptrend(full_df, current_px):
+                alive.append(target)
+                continue
+            
+            # Volume spike check on LIVE 1min bars
+            is_spike, spike_ratio = self._detect_volume_spike(full_df)
+            if not is_spike:
+                alive.append(target)
+                continue
+            
+            # Volume spike detected — try entry NOW
+            self._scan_data_cache[ticker] = full_df.tail(60).copy()  # Update cache for entry
+            self.top_pick = target
+            log.info(f"⚡ LIVE 1min SPIKE: {ticker} @ ${current_px:.2f} | vol={spike_ratio:.1f}x | entering...")
+            result = self._attempt_entry()
+            if self.shares > 0:
+                # Entered! Keep stream running for post-entry monitoring
+                self._active_stream_ticker = ticker
+                return
+            if result == 'permanent_skip':
+                self._stop_target_stream(ticker)
+                continue
+            alive.append(target)
         
         self._locked_targets = alive
+        # Stop streams for targets that were removed
+        old_tickers = set(self._target_monitors.keys())
+        new_tickers = set(t.ticker for t in self._locked_targets)
+        removed = old_tickers - new_tickers
+        for t in removed:
+            self._stop_target_stream(t)
+        # Start streams for any new targets that don't have them
+        for t in self._locked_targets:
+            if t.ticker not in self._target_monitors:
+                self._start_target_stream(t.ticker)
         if not self._locked_targets:
             self._last_scan_time = 0  # Force new scan
     
@@ -723,15 +807,17 @@ class ScalperRunner:
             if pnl_pct < giveback:
                 return True, f"profit_trail: locked {pnl_pct:.2%}, giving back {giveback:.2%}"
         
-        # 2. Slippage prediction: exit if price stalling on low volume
+        # 2. Slippage prediction + volume check on LIVE 1min bars
         try:
-            fast_df = self.data.fetch_historical(duration="1 H", bar_size="1 min", use_rth=False)
+            fast_df = None
+            if self._active_stream_ticker and self._active_stream_ticker in self._target_monitors:
+                fast_df = self._target_monitors[self._active_stream_ticker].get_bar_dataframe()
+            if fast_df is None and hasattr(self.data, 'get_bar_dataframe'):
+                fast_df = self.data.get_bar_dataframe()
             if fast_df is not None and len(fast_df) >= 10:
                 slippage = self._predict_slippage(fast_df, current_px)
-                if slippage > 0.7:  # High slippage risk
+                if slippage > 0.7:
                     return True, f"slippage_risk: {slippage:.0%}"
-                
-                # Volume spike check: if no volume spike after entry = institutional algo done
                 is_spike, ratio = self._detect_volume_spike(fast_df)
                 if not is_spike and pnl_pct > 0.01:
                     return True, f"no_volume_spike: profit {pnl_pct:.2%} locked, algo wave ending"
