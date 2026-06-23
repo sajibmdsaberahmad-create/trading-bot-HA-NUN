@@ -187,13 +187,17 @@ class ScalperRunner:
             log.debug(f"Feature validation skipped: {exc}")
     
     def _init_model(self):
+        self._model_fresh = True
+        self._model_train_step = 0
         try:
             dummy_f = np.zeros((self.cfg.WINDOW_SIZE + 2, self.cfg.N_FEATURES), np.float32)
             dummy_px = np.ones(self.cfg.WINDOW_SIZE + 2, np.float32) * 100.0
             dummy_env = TradingEnv(dummy_f, dummy_px, self.cfg.INITIAL_CASH,
                                    self.cfg.TRANSACTION_COST_PCT, self.cfg.WINDOW_SIZE, self.cfg.DEFAULT_MAX_POSITION_PCT)
             self.model = build_ppo_agent(dummy_env, self.cfg, self.cfg.MODEL_PATH)
-            log.info(f"🧠 PPO model ready for top-pick gating: {self.cfg.MODEL_PATH}")
+            if self.cfg.MODEL_PATH and os.path.exists(self.cfg.MODEL_PATH):
+                self._model_fresh = False
+            log.info(f"🧠 PPO model ready: fresh={self._model_fresh}")
         except Exception as exc:
             log.warning(f"PPO model init failed ({exc.__class__.__name__}: {exc}) — will use fresh model")
             try:
@@ -726,6 +730,8 @@ class ScalperRunner:
             return True, 0.5, "AI disabled"
         if self.model is None:
             return True, 0.5, "No model"
+        if self._model_fresh:
+            return True, 0.5, "Fresh model — bypassing AI gate (rule-based only)"
         if len(self._feature_buffer) < self.cfg.WINDOW_SIZE:
             return True, 0.5, "Warming up"
         
@@ -763,6 +769,8 @@ class ScalperRunner:
             return False, 0.5, "AI disabled"
         if self.model is None or self.shares <= 0:
             return False, 0.5, "No model/position"
+        if self._model_fresh:
+            return False, 0.5, "Fresh model — bypassing AI exit (rule-based only)"
         if len(self._feature_buffer) < self.cfg.WINDOW_SIZE:
             return False, 0.5, "Warming up"
         
