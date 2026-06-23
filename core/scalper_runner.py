@@ -582,9 +582,22 @@ class ScalperRunner:
         
         self.scan_results = qualified[:5]
         
-        if self.scan_results:
+        # USER RULE: Penny stocks only — filter out >$5 before locking
+        penny_results = []
+        for r in self.scan_results:
+            if r["price"] <= 5.0:
+                penny_results.append(r)
+            else:
+                log.debug(f"  Filtered {r['ticker']}: ${r['price']:.2f} > $5 (penny only)")
+        
+        if not penny_results and self.scan_results:
+            log.info(f"⚠️ All top {len(self.scan_results)} setups >$5 — taking cheapest available")
+            cheapest = sorted(self.scan_results, key=lambda x: x["price"])[:3]
+            penny_results = cheapest
+        
+        if penny_results:
             self._locked_targets = []
-            for r in self.scan_results:
+            for r in penny_results:
                 pick = ScanResult(
                     ticker=r["ticker"], price=r["price"], volume=r["volume"],
                     avg_volume=r["avg_volume"], relative_volume=r["rel_vol"],
