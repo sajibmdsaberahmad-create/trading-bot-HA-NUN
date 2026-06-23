@@ -150,6 +150,7 @@ class ScalperRunner:
         self._locked_targets: List[ScanResult] = []
         self._last_scan_time: float = 0.0
         self._last_metrics_write: float = 0.0
+        self._scan_data_cache: Dict[str, pd.DataFrame] = {}  # Cache scanned data
         
         self.trade_journal: List[Dict] = []
         self.trades_today: int = 0
@@ -533,6 +534,8 @@ class ScalperRunner:
             score = None
             if hist_1m is not None and len(hist_1m) >= 60:
                 score = self._score_ticker(ticker, hist_1m)
+                # Cache for entry use
+                self._scan_data_cache[ticker] = hist_1m
             
             if score and score.get("total_score", 0) > 0:
                 log.info(f"  ✅ {ticker}: score={score['total_score']:.1f} | {score.get('reasons', '')[:60]}")
@@ -804,9 +807,14 @@ class ScalperRunner:
         
         try:
             self.cfg.TICKER = ticker
-            df_fast = self.data.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
+            
+            # Use cached data from scanner (avoids re-fetching 2 days of bars every second)
+            df_fast = self._scan_data_cache.get(ticker)
             if df_fast is None or len(df_fast) < 20:
-                return 'waiting'
+                df_fast = self.data.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
+                if df_fast is None or len(df_fast) < 20:
+                    return 'waiting'
+            
             current_px = float(df_fast["close"].iloc[-1])
             
             if current_px > 5.0:
