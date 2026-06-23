@@ -18,6 +18,7 @@ import json
 import time
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 try:
@@ -150,6 +151,13 @@ class ScalperRunner:
         # Initialize enhanced AI system (quietly - details in final init report)
         self.ai_components = initialize_enhanced_system(cfg)
         self._init_model()
+        
+        # Feature buffer for AI observation building
+        self._feature_buffer: deque = deque(maxlen=cfg.WINDOW_SIZE + 10)
+        self._price_buffer: deque = deque(maxlen=cfg.WINDOW_SIZE + 10)
+        self._bar_df_buffer: List[Dict] = []
+        self._bars_since_ai_check = 0
+        
         try:
             self.consciousness = AIConsciousness(cfg)
         except Exception as exc:
@@ -332,8 +340,32 @@ class ScalperRunner:
                         break
                     self._refresh_account_balance()
                 
+                # Update AI buffers periodically (throttled to every 5s)
+                now = time.time()
+                if now - getattr(self, '_last_ai_update', 0) > 5.0:
+                    self._last_ai_update = now
+                    try:
+                        fast_df = self.data.get_fast_bar_dataframe(n=60)
+                        if fast_df is not None and len(fast_df) >= 30:
+                            self._ai_update_buffers(fast_df, current_px)
+                    except Exception:
+                        pass
+                
                 # Detect exits (bracket orders hitting stop/target)
                 self._detect_exit(current_px)
+                
+                # AI-driven early exit check (when in position, non-blocking)
+                if self.shares > 0 and self.model is not None:
+                    self._bars_since_ai_check += 1
+                    if self._bars_since_ai_check >= 10:  # Check every ~10 seconds in 1s loop
+                        self._bars_since_ai_check = 0
+                        try:
+                            should_exit, ai_conf, ai_reason = self._ai_gate_exit(current_px)
+                            if should_exit:
+                                log.info(f"  🧠 AI EARLY EXIT: confidence={ai_conf:.0%} — {ai_reason[:80]}")
+                                self._exit_position(current_px, "ai_early_exit")
+                        except Exception:
+                            pass
                 
                 # Check market state
                 market_state = self._get_market_state()
@@ -540,6 +572,17 @@ class ScalperRunner:
             if override:
                 self.top_pick = None
                 return
+            
+            # AI gate: require AI confidence >= threshold before entry
+            if self.cfg.USE_ENHANCED_AI and self.model is not None:
+                self._ai_update_buffers(df_fast, current_px)
+                should_enter, ai_conf, ai_reason = self._ai_gate_entry(ticker, current_px)
+                if not should_enter:
+                    log.info(f"  🧠 AI BLOCKS ENTRY on {ticker}: confidence={ai_conf:.0%} — {ai_reason[:80]}")
+                    self.top_pick = None
+                    return
+                log.info(f"  🧠 AI APPROVES ENTRY: {ticker} confidence={ai_conf:.0%}")
+            
             fast_atr = compute_atr(df_fast, period=5)
             momentum = compute_momentum_score(df_fast, lookback=5)
             deploy_usd = min(self.cfg.MAX_TRADE_SIZE_USD, self.bot_cash * 0.95)
@@ -649,6 +692,93 @@ class ScalperRunner:
             return "after_hours"
         else:
             return "closed"
+    
+    def _ai_update_buffers(self, bar_df: pd.DataFrame, current_px: float):
+        """Update feature and price buffers for AI evaluation."""
+        try:
+            feats = FeatureEngineerEnhanced.compute(bar_df)
+            if len(feats) > 0:
+                for f in feats[-min(len(feats), self.cfg.WINDOW_SIZE):]:
+                    self._feature_buffer.append(f)
+            for px in bar_df["close"].values[-min(len(bar_df), self.cfg.WINDOW_SIZE + 10):]:
+                self._price_buffer.append(float(px))
+            self._bar_df_buffer = bar_df.tail(self.cfg.WINDOW_SIZE + 10).to_dict('records')
+        except Exception:
+            pass
+    
+    def _ai_gate_entry(self, ticker: str, current_px: float) -> Tuple[bool, float, str]:
+        """
+        Use full enhanced AI pipeline to decide if entry is justified.
+        
+        Returns:
+            (should_enter, confidence, reasoning)
+        """
+        if not self.cfg.USE_ENHANCED_AI or not self.ai_components:
+            return True, 0.5, "AI disabled"
+        if self.model is None:
+            return True, 0.5, "No model"
+        if len(self._feature_buffer) < self.cfg.WINDOW_SIZE:
+            return True, 0.5, "Warming up"
+        
+        try:
+            from core.agent import predict_with_reasoning
+            
+            window = np.array(list(self._feature_buffer)[-self.cfg.WINDOW_SIZE:], dtype=np.float32).flatten()
+            total = self.bot_cash + self.shares * current_px
+            c_rat = self.bot_cash / (total + 1e-9)
+            p_rat = (self.shares * current_px) / (total + 1e-9) if self.shares > 0 else 0.0
+            obs = np.concatenate([window, [c_rat, p_rat]]).astype(np.float32)
+            
+            bar_df = pd.DataFrame(self._bar_df_buffer) if self._bar_df_buffer else None
+            
+            action, confidence, reasoning = predict_with_reasoning(
+                self.model, obs, self.cfg, self.ai_components,
+                bar_df=bar_df,
+                recent_rewards=getattr(self.perf, 'recent_rewards', None) if hasattr(self, 'perf') else None,
+            )
+            
+            should_enter = (action == 1 and confidence >= self.cfg.CONFIDENCE_THRESHOLD)
+            return should_enter, confidence, reasoning or "AI evaluation"
+        except Exception as exc:
+            log.debug(f"AI gate entry error: {exc}")
+            return True, 0.5, f"AI error: {exc}"
+    
+    def _ai_gate_exit(self, current_px: float) -> Tuple[bool, float, str]:
+        """
+        Use AI to evaluate if current position should be closed early.
+        
+        Returns:
+            (should_exit, confidence, reasoning)
+        """
+        if not self.cfg.USE_ENHANCED_AI or not self.ai_components:
+            return False, 0.5, "AI disabled"
+        if self.model is None or self.shares <= 0:
+            return False, 0.5, "No model/position"
+        if len(self._feature_buffer) < self.cfg.WINDOW_SIZE:
+            return False, 0.5, "Warming up"
+        
+        try:
+            from core.agent import predict_with_reasoning
+            
+            window = np.array(list(self._feature_buffer)[-self.cfg.WINDOW_SIZE:], dtype=np.float32).flatten()
+            total = self.bot_cash + self.shares * current_px
+            c_rat = self.bot_cash / (total + 1e-9)
+            p_rat = (self.shares * current_px) / (total + 1e-9)
+            obs = np.concatenate([window, [c_rat, p_rat]]).astype(np.float32)
+            
+            bar_df = pd.DataFrame(self._bar_df_buffer) if self._bar_df_buffer else None
+            
+            action, confidence, reasoning = predict_with_reasoning(
+                self.model, obs, self.cfg, self.ai_components,
+                bar_df=bar_df,
+                recent_rewards=getattr(self.perf, 'recent_rewards', None) if hasattr(self, 'perf') else None,
+            )
+            
+            should_exit = (action == 2 and confidence >= self.cfg.CONFIDENCE_THRESHOLD)
+            return should_exit, confidence, reasoning or "AI exit evaluation"
+        except Exception as exc:
+            log.debug(f"AI gate exit error: {exc}")
+            return False, 0.5, f"AI error: {exc}"
     
     def _train_off_hours(self):
         """
