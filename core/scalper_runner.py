@@ -67,13 +67,15 @@ def _only_uptrend(df: pd.DataFrame, current_px: float) -> bool:
         return False
     closes = df["close"].values[-20:]
     sma20 = np.mean(closes)
-    if current_px <= sma20:
+    if current_px <= sma20 * 0.99:
         return False
     typical = (df["high"] + df["low"] + df["close"]) / 3.0
     vwap = np.average(typical[-20:], weights=df["volume"].values[-20:])
-    if current_px <= vwap:
+    if current_px <= vwap * 0.99:
         return False
-    if not all(closes[i] >= closes[i-1] for i in range(-3, 0)):
+    # Require majority of last 5 closes rising (at least 3 of 5)
+    rising = sum(1 for i in range(-5, 0) if i > -len(closes) and closes[i] >= closes[i-1])
+    if rising < 3:
         return False
     atr = compute_atr(df, period=10)
     if atr <= 0 or atr > current_px * 0.05:
