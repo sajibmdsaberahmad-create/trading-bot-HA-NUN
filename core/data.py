@@ -79,7 +79,8 @@ class DataManager:
     # ── Historical data ──────────────────────────────────────────────────────
 
     def fetch_historical(self, duration: Optional[str] = None,
-                          bar_size: Optional[str] = None) -> pd.DataFrame:
+                          bar_size: Optional[str] = None,
+                          use_rth: bool = True) -> pd.DataFrame:
         duration = duration or self.cfg.HISTORY_DURATION
         bar_size = bar_size or self.cfg.HISTORY_BAR_SIZE
 
@@ -92,7 +93,7 @@ class DataManager:
             durationStr=duration,
             barSizeSetting=bar_size,
             whatToShow="TRADES",
-            useRTH=True,
+            useRTH=use_rth,
             formatDate=1,
             keepUpToDate=False,
         )

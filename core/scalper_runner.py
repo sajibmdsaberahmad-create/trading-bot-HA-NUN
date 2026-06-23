@@ -458,8 +458,7 @@ class ScalperRunner:
                 cfg_ticker = self.cfg.TICKER
                 self.cfg.TICKER = ticker
                 dm = DataManager(self.conn, self.cfg)
-                # Institutional momentum shows on 1-min bars; fetch 1 day for tape heartbeat
-                hist = dm.fetch_historical(duration="1 D", bar_size="1 min")
+                hist = dm.fetch_historical(duration="1 D", bar_size="1 min", use_rth=False)
                 if hist is None or len(hist) < 60:
                     return None
                 score = self._score_ticker(ticker, hist)
@@ -575,7 +574,7 @@ class ScalperRunner:
         self.current_ticker = ticker
         try:
             self.cfg.TICKER = ticker
-            df_fast = self.data.fetch_historical(duration="1 D", bar_size="1 min")
+            df_fast = self.data.fetch_historical(duration="1 D", bar_size="1 min", use_rth=False)
             if df_fast is None or len(df_fast) < 20:
                 return
             current_px = float(df_fast["close"].iloc[-1])
