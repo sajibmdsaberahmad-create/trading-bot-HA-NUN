@@ -195,8 +195,17 @@ class ScalperRunner:
             self.model = build_ppo_agent(dummy_env, self.cfg, self.cfg.MODEL_PATH)
             log.info(f"🧠 PPO model ready for top-pick gating: {self.cfg.MODEL_PATH}")
         except Exception as exc:
-            log.debug(f"PPO model init skipped: {exc}")
-            self.model = None
+            log.warning(f"PPO model init failed ({exc.__class__.__name__}: {exc}) — will use fresh model")
+            try:
+                dummy_f = np.zeros((self.cfg.WINDOW_SIZE + 2, self.cfg.N_FEATURES), np.float32)
+                dummy_px = np.ones(self.cfg.WINDOW_SIZE + 2, np.float32) * 100.0
+                dummy_env = TradingEnv(dummy_f, dummy_px, self.cfg.INITIAL_CASH,
+                                       self.cfg.TRANSACTION_COST_PCT, self.cfg.WINDOW_SIZE, self.cfg.DEFAULT_MAX_POSITION_PCT)
+                self.model = build_ppo_agent(dummy_env, self.cfg, None)
+                log.info("🧠 Fresh PPO model initialized (18-feature architecture)")
+            except Exception as exc2:
+                log.error(f"Fresh PPO model also failed: {exc2}")
+                self.model = None
     
     def _refresh_account_balance(self):
         """Pull live balance from IB. Bot state changes ONLY via trades."""
