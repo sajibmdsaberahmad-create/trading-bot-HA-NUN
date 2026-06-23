@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """
-core/scalper_runner.py — HA-NUN single-focus institutional scalper.
+core/scalper_runner.py — HA-NUN institutional algo-wave rider.
 
-THE RULES:
-1. Scan ALL tickers, pick top 1 by probability score.
-2. Deploy MAX $1,000 per trade (from live account balance).
-3. Risk is FIXED at $50 max per trade — cannot be overridden.
-4. Only trade UPTRENDS (price > SMA20, VWAP, rising closes).
-5. Every tick is analyzed: price delta, velocity, tape rhythm.
-6. Hard stop + trailing stop + hard TP + trailing profit.
-7. Daily summary shows all trades + balance changes.
+MATCHES USER MANUAL TRADING METHODOLOGY:
+1. Scan full universe, select 1-5 stocks (most active, top movers, volume, VWAP, etc.)
+2. Lock selected stocks and monitor them continuously
+3. Detect volume spike + uptrend before entry
+4. Deploy EXACTLY $1,000 per stock (penny stocks focus)
+5. Hard stop loss ($50) + hard take profit ALWAYS in place
+6. Trail profit to ride institutional algo waves
+7. Early exit on slippage prediction (protect gains, minimize losses)
+8. High-frequency: every bar/tick analyzed
+9. AI predicts entries/exits like human trader
+
+GOAL: 60%+ win rate, $1,000 → profit via systematic execution.
 """
 
 import os
@@ -242,7 +246,6 @@ class ScalperRunner:
     def _detect_exit(self, current_px: float):
         """Detect if position was closed (by bracket or manually) and notify."""
         if self._prev_shares > 0 and self.shares == 0:
-            # Position closed
             pnl = (current_px - self._entry_price) * self._prev_shares
             pnl_pct = ((current_px / self._entry_price) - 1) * 100 if self._entry_price else 0
             result = "win" if pnl > 0 else "loss"
@@ -255,7 +258,6 @@ class ScalperRunner:
                 f"P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%)\n"
                 f"Result: {result.upper()}"
             )
-            # Save to trade journal for self-training
             self.trade_journal.append({
                 "ticker": self.current_ticker,
                 "entry": self._entry_price,
@@ -265,7 +267,6 @@ class ScalperRunner:
                 "pnl_pct": round(pnl_pct, 2),
                 "result": result,
             })
-            # Record exit outcome into experience buffer
             try:
                 buffer_append({
                     "source": "live_trade",
@@ -280,9 +281,38 @@ class ScalperRunner:
                 })
             except Exception:
                 pass
+            
+            # Remove from active positions
+            if hasattr(self, '_active_positions'):
+                self._active_positions = [p for p in self._active_positions if p["ticker"] != self.current_ticker]
+            
+            self.current_ticker = None
+            self.bracket_handle = None
         self._prev_shares = self.shares
         if self.shares > 0:
             self._entry_price = current_px
+    
+    def _exit_position(self, current_px: float, reason: str):
+        """Manually exit position (early exit, AI exit, etc.)."""
+        if self.shares <= 0:
+            return
+        ticker = self.current_ticker
+        try:
+            self.broker.cancel_bracket(self.bracket_handle)
+            self.ib.sleep(0.5)
+            self.broker.place_market_sell(self.shares)
+            self.ib.sleep(1)
+            pnl = (current_px - self._entry_price) * self.shares
+            log.info(f"⚡ EARLY EXIT: {ticker} @ ${current_px:.2f} | Reason: {reason} | P&L: ${pnl:+.2f}")
+            self.notifier.info(f"⚡ EARLY EXIT\n{ticker} @ ${current_px:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}")
+            self.shares = 0.0
+            self.bot_nav = self.bot_cash
+            self.bracket_handle = None
+            self.current_ticker = None
+            if hasattr(self, '_active_positions'):
+                self._active_positions = [p for p in self._active_positions if p["ticker"] != ticker]
+        except Exception as exc:
+            log.error(f"Early exit failed: {exc}")
     
     def _write_live_metrics(self):
         try:
@@ -391,49 +421,48 @@ class ScalperRunner:
                 )
                 
                 if can_trade:
-                    # Scan and trade ONLY when IB is connected
                     if self.conn.is_connected():
                         now = time.time()
                         time_since_scan = now - self._last_scan_time
-                        have_locked = len(self._locked_targets) > 0
                         
-                        # Hard gate: if locked targets exist, ONLY rescan after SCAN_INTERVAL_SECONDS
-                        # No exceptions, no early rescans
-                        need_rescan = False
-                        if have_locked:
-                            # With locked targets, only rescan at full interval
-                            if time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS:
-                                need_rescan = True
-                                log.debug(f"Rescan triggered: interval elapsed ({time_since_scan:.0f}s > {self.cfg.SCAN_INTERVAL_SECONDS}s)")
-                        else:
-                            # No locked targets: scan more aggressively until we find candidates
-                            if self.top_pick is None and self.shares == 0 and time_since_scan > self.cfg.SCAN_INTERVAL_SECONDS:
-                                need_rescan = True
-                                log.debug("Rescan triggered: no locked targets")
+                        # USER METHODOLOGY: High frequency - scan every 30s when have positions
+                        scan_interval = 30 if hasattr(self, '_active_positions') and self._active_positions else self.cfg.SCAN_INTERVAL_SECONDS
+                        
+                        need_rescan = time_since_scan > scan_interval
                         
                         if need_rescan:
                             self._last_scan_time = now
                             self._scan_and_rank()
-                        elif self.top_pick is None and self.shares == 0 and have_locked:
-                            # Heartbeat: cycle through locked targets for entry evaluation
-                            cycle = int(now) % max(len(self._locked_targets), 1)
-                            self.top_pick = self._locked_targets[cycle]
                         
-                        # Apply confidence gating for pre-market/after-hours
-                        if self.top_pick and self.shares == 0:
-                            confidence = getattr(self.top_pick, 'rank_score', 0) / 100.0
-                            min_conf = self.cfg.MIN_CONFIDENCE_PRE_MARKET if market_state != "open" else 0.0
-                            
-                            if confidence >= min_conf:
+                        # USER METHODOLOGY: Monitor ALL locked targets for entries
+                        if self._locked_targets and self.shares == 0:
+                            # Cycle through locked targets looking for entries
+                            for target in self._locked_targets[:3]:  # Check top 3
+                                self.top_pick = target
                                 self._attempt_entry()
-                            else:
-                                log.info(f"⏸ SKIPPING {self.top_pick.ticker} — confidence {confidence:.0%} < {min_conf:.0%} threshold for {market_state}")
-                                self.top_pick = None
+                                if self.shares > 0:
+                                    break  # One entry per scan cycle
+                        
+                        # USER METHODOLOGY: Early exit check on ALL positions every iteration
+                        if self.shares > 0:
+                            current_px = self._latest_price()
+                            if current_px > 0:
+                                # Check early exit
+                                should_exit, exit_reason = self._should_exit_early(
+                                    current_px, self._entry_price,
+                                    (current_px - self._entry_price) * self.shares,
+                                    50.0  # $50 risk
+                                )
+                                if should_exit:
+                                    log.info(f"  ⚡ EARLY EXIT: {exit_reason}")
+                                    self._exit_position(current_px, exit_reason)
+                                else:
+                                    # Update trailing stops
+                                    self._update_trailing_stops(current_px)
                 else:
-                    # Market is closed: train instead of scan
-                    if int(time.time()) % 60 == 0:  # log every minute
+                    if int(time.time()) % 60 == 0:
                         log.info(f"⏸ MARKET CLOSED ({market_state}) — training instead")
-                    if time.time() - self._last_scan_time > 300:  # train every 5 min
+                    if time.time() - self._last_scan_time > 300:
                         self._last_scan_time = time.time()
                         self._train_off_hours()
                 
@@ -448,9 +477,8 @@ class ScalperRunner:
     
     def _scan_and_rank(self):
         t0 = time.perf_counter()
-        # Use a smaller active screen to reduce IB load; not the full universe every scan
-        screen_list = getattr(self.cfg, "SCAN_UNIVERSE", PENNY_STOCK_UNIVERSE[:40])
-        log.info(f"🔍 HA-NUN SCAN: {len(screen_list)} tickers (screened subset)...")
+        screen_list = getattr(self.cfg, "SCAN_UNIVERSE", PENNY_STOCK_UNIVERSE[:60])
+        log.info(f"🔍 HA-NUN SCAN: {len(screen_list)} tickers (full universe screen)...")
         results: List[Dict] = []
 
         def _scan_one(ticker: str) -> Optional[Dict]:
@@ -458,7 +486,7 @@ class ScalperRunner:
                 cfg_ticker = self.cfg.TICKER
                 self.cfg.TICKER = ticker
                 dm = DataManager(self.conn, self.cfg)
-                hist = dm.fetch_historical(duration="1 D", bar_size="1 min", use_rth=False)
+                hist = dm.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
                 if hist is None or len(hist) < 60:
                     return None
                 score = self._score_ticker(ticker, hist)
@@ -467,7 +495,6 @@ class ScalperRunner:
             except Exception:
                 return None
 
-        # Sequential-ish with small worker count to avoid IB rate limits
         workers = 1
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = {pool.submit(_scan_one, t): t for t in screen_list}
@@ -478,27 +505,33 @@ class ScalperRunner:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         
         results.sort(key=lambda x: x["total_score"], reverse=True)
-        self.scan_results = results[:10]
+        
+        # USER METHODOLOGY: Always return 1-5 stocks, never 0
+        # If no high-score setups, relax criteria and take best available
+        min_score = 1.0  # minimum score to be considered
+        qualified = [r for r in results if r["total_score"] >= min_score]
+        
+        if not qualified and results:
+            # Take top 3 even if below threshold - user wants to trade every session
+            qualified = results[:3]
+            log.info(f"⚠️ No high-score setups — taking top {len(qualified)} by default")
+        
+        self.scan_results = qualified[:5]  # MAX 5 STOCKS
         
         if self.scan_results:
-            # Keep top N setups as locked targets
-            max_locked = getattr(self.cfg, "MAX_LOCKED_TARGETS", 5)
             self._locked_targets = []
-            for r in self.scan_results[:max_locked]:
-                best = r
+            for r in self.scan_results:
                 pick = ScanResult(
-                    ticker=best["ticker"], price=best["price"], volume=best["volume"],
-                    avg_volume=best["avg_volume"], relative_volume=best["rel_vol"],
-                    rank_score=best["total_score"], reason=best["reasons"],
+                    ticker=r["ticker"], price=r["price"], volume=r["volume"],
+                    avg_volume=r["avg_volume"], relative_volume=r["rel_vol"],
+                    rank_score=r["total_score"], reason=r["reasons"],
                 )
                 self._locked_targets.append(pick)
-            # Current top_pick for immediate evaluation is the best of the locked list
             self.top_pick = self._locked_targets[0] if self._locked_targets else None
             names = ", ".join([p.ticker for p in self._locked_targets])
             log.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names} | Scan: {elapsed_ms:.0f}ms")
             self.notifier.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\nTop score: {self.top_pick.rank_score:.0f}")
             
-            # Record scan pick into experience buffer
             try:
                 buffer_append({
                     "source": "scan_pick",
@@ -511,13 +544,125 @@ class ScalperRunner:
             except Exception:
                 pass
         else:
-            # No new setups: DO NOT clear locked targets, just clear top_pick for re-evaluation
             self.top_pick = None
-            if self._locked_targets:
-                names = ", ".join([p.ticker for p in self._locked_targets])
-                log.info(f"🔍 No new setups — keeping locked targets: {names} ({elapsed_ms:.0f}ms)")
-            else:
-                log.info(f"🔍 No setups — no locked targets yet ({elapsed_ms:.0f}ms)")
+            self._locked_targets = []
+            log.info(f"🔍 No setups found in full universe scan ({elapsed_ms:.0f}ms)")
+    
+    def _detect_volume_spike(self, df: pd.DataFrame) -> Tuple[bool, float]:
+        """
+        Detect volume spike: current volume vs 20-period average.
+        Returns (is_spike, spike_ratio)
+        """
+        if len(df) < 20:
+            return False, 1.0
+        volumes = df["volume"].values[-20:]
+        avg_vol = np.mean(volumes[:-1])  # exclude current bar
+        current_vol = volumes[-1]
+        if avg_vol <= 0:
+            return False, 1.0
+        spike_ratio = current_vol / avg_vol
+        return spike_ratio >= 1.5, spike_ratio  # 1.5x = 50% above average
+    
+    def _predict_slippage(self, df: pd.DataFrame, current_px: float) -> float:
+        """
+        Predict slippage risk based on spread, momentum divergence, and order flow.
+        Returns 0.0 (no slippage) to 1.0 (high slippage)
+        """
+        if len(df) < 10:
+            return 0.5
+        closes = df["close"].values[-10:]
+        volumes = df["volume"].values[-10:]
+        
+        # Momentum divergence: price up but volume down = exhaustion
+        price_up = closes[-1] > closes[-3]
+        vol_down = volumes[-1] < np.mean(volumes[-5:-1])
+        divergence = 0.3 if (price_up and vol_down) else 0.0
+        
+        # High volatility = higher slippage
+        atr = compute_atr(df, period=5)
+        vol_ratio = atr / current_px if current_px > 0 else 0.01
+        vol_slippage = min(0.3, vol_ratio * 2.0)
+        
+        # Thin volume = higher slippage
+        avg_vol = np.mean(volumes[-5:])
+        thin_penalty = 0.2 if avg_vol < 50000 else 0.0
+        
+        total_slippage = min(1.0, divergence + vol_slippage + thin_penalty)
+        return total_slippage
+    
+    def _should_exit_early(self, current_px: float, entry_px: float, 
+                           unrealized_pnl: float, risk_usd: float) -> Tuple[bool, str]:
+        """
+        USER METHODOLOGY: Exit early when slippage predicted OR profit locked.
+        Even with $50 hard stop, exit at $1+ if prediction says so.
+        
+        Returns (should_exit, reason)
+        """
+        if self.shares <= 0 or entry_px <= 0:
+            return False, "no position"
+        
+        pnl_pct = (current_px / entry_px) - 1
+        
+        # USER RULE: Hard stop $50 per trade (already set in bracket)
+        # But exit EARLY if we predict slippage or lock profit
+        
+        # 1. Lock profit trail: if up > 2%, trail at 1% giveback
+        if pnl_pct > 0.02:
+            giveback = pnl_pct * 0.5  # give back up to 50% of gains
+            if pnl_pct < giveback:
+                return True, f"profit_trail: locked {pnl_pct:.2%}, giving back {giveback:.2%}"
+        
+        # 2. Slippage prediction: exit if price stalling on low volume
+        try:
+            fast_df = self.data.fetch_historical(duration="1 H", bar_size="1 min", use_rth=False)
+            if fast_df is not None and len(fast_df) >= 10:
+                slippage = self._predict_slippage(fast_df, current_px)
+                if slippage > 0.7:  # High slippage risk
+                    return True, f"slippage_risk: {slippage:.0%}"
+                
+                # Volume spike check: if no volume spike after entry = institutional algo done
+                is_spike, ratio = self._detect_volume_spike(fast_df)
+                if not is_spike and pnl_pct > 0.01:
+                    return True, f"no_volume_spike: profit {pnl_pct:.2%} locked, algo wave ending"
+        except Exception:
+            pass
+        
+        # 3. USER RULE: If unrealized profit is tiny ($1-$2) and risk is high, exit
+        if 0 < unrealized_pnl < 2.0 and risk_usd > 30:
+            return True, f"low_profit_high_risk: ${unrealized_pnl:.2f} profit, ${risk_usd:.0f} risk"
+        
+        return False, "hold"
+    
+    def _update_trailing_stops(self, current_px: float):
+        """USER METHODOLOGY: Trail profit along institutional algo wave."""
+        if self.shares <= 0 or self._entry_price <= 0:
+            return
+        if not self.bracket_handle:
+            return
+        
+        pnl_pct = (current_px / self._entry_price) - 1
+        
+        # Only trail if profitable
+        if pnl_pct <= 0:
+            return
+        
+        # Calculate new stop: lock in 50% of gains
+        trail_stop = current_px - (self._entry_price * pnl_pct * 0.5)
+        trail_stop = max(trail_stop, self.bracket_handle.initial_stop_price)  # Never move stop down
+        
+        # Update bracket if stop improved
+        try:
+            if trail_stop > self.bracket_handle.initial_stop_price:
+                self.broker.cancel_bracket(self.bracket_handle)
+                self.bracket_handle = self.broker.place_bracket_buy(
+                    quantity=int(self.shares),
+                    limit_or_market_price=current_px,
+                    stop_price=trail_stop,
+                    target_price=self.bracket_handle.take_profit_price,
+                )
+                log.info(f"📈 TRAILING STOP: moved to ${trail_stop:.2f} (locked {pnl_pct:.2%})")
+        except Exception as exc:
+            log.debug(f"Trailing stop update failed: {exc}")
     
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         closes = df["close"].values
@@ -571,52 +716,78 @@ class ScalperRunner:
         if not self.top_pick:
             return
         ticker = self.top_pick.ticker
-        self.current_ticker = ticker
+        
+        # USER RULE: Max 5 concurrent positions
+        active_positions = getattr(self, '_active_positions', [])
+        if len(active_positions) >= 5:
+            log.debug(f"Max 5 positions reached ({len(active_positions)}). Skipping {ticker}.")
+            return
+        
         try:
             self.cfg.TICKER = ticker
-            df_fast = self.data.fetch_historical(duration="1 D", bar_size="1 min", use_rth=False)
+            df_fast = self.data.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
             if df_fast is None or len(df_fast) < 20:
                 return
             current_px = float(df_fast["close"].iloc[-1])
+            
+            # USER RULE: Penny stocks focus (< $5)
+            if current_px > 5.0:
+                log.info(f"⏸ SKIPPING {ticker}: ${current_px:.2f} > $5 (penny stock only)")
+                self.top_pick = None
+                return
+            
             if not _only_uptrend(df_fast, current_px):
                 self.top_pick = None
                 return
+            
+            # USER RULE: Volume spike confirmation
+            is_spike, spike_ratio = self._detect_volume_spike(df_fast)
+            if not is_spike:
+                log.debug(f"⏸ {ticker}: no volume spike (ratio={spike_ratio:.1f}x)")
+                self.top_pick = None
+                return
+            log.info(f"  📊 VOLUME SPIKE: {spike_ratio:.1f}x average on {ticker}")
+            
             inst = self.institutional.scan()
             override, reason = self.institutional.should_override_buy()
             if override:
                 self.top_pick = None
                 return
             
-            # AI gate: require AI confidence >= threshold before entry
+            # AI gate
             if self.cfg.USE_ENHANCED_AI and self.model is not None:
                 self._ai_update_buffers(df_fast, current_px)
                 should_enter, ai_conf, ai_reason = self._ai_gate_entry(ticker, current_px)
                 if not should_enter:
-                    log.info(f"  🧠 AI BLOCKS ENTRY on {ticker}: confidence={ai_conf:.0%} — {ai_reason[:80]}")
+                    log.info(f"  🧠 AI BLOCKS ENTRY on {ticker}: confidence={ai_conf:.0%}")
                     self.top_pick = None
                     return
-                log.info(f"  🧠 AI APPROVES ENTRY: {ticker} confidence={ai_conf:.0%}")
+                log.info(f"  🧠 AI APPROVES: {ticker} confidence={ai_conf:.0%}")
             
-            fast_atr = compute_atr(df_fast, period=5)
-            momentum = compute_momentum_score(df_fast, lookback=5)
-            deploy_usd = min(self.cfg.MAX_TRADE_SIZE_USD, self.bot_cash * 0.95)
-            risk_usd = self.cfg.risk_amount_usd(self.account_equity)
-            stop_dist = max(fast_atr * self.cfg.SCALP_STOP_ATR_MULTIPLIER, current_px * self.cfg.SCALP_MIN_STOP_PCT)
-            stop_dist = min(stop_dist, current_px * self.cfg.SCALP_MAX_STOP_PCT)
-            shares_by_risk = int(risk_usd / stop_dist)
-            shares_by_cash = int(deploy_usd / current_px)
-            shares = min(shares_by_risk, shares_by_cash, self.cfg.MAX_SHARES_PER_TRADE)
+            # USER RULE: Deploy EXACTLY $1,000 per stock
+            deploy_usd = 1000.0
+            shares = int(deploy_usd / current_px)
             if shares < 1:
+                self.top_pick = None
                 return
-            tp_dist = max(fast_atr * self.cfg.SCALP_TP_ATR_MULTIPLIER, stop_dist * self.cfg.SCALP_MIN_RR)
-            tp_dist = min(tp_dist, current_px * self.cfg.SCALP_MAX_TP_PCT)
+            
+            # USER RULE: Hard stop $50 per trade
+            stop_usd = 50.0
+            stop_dist = stop_usd / shares
+            stop_dist = max(stop_dist, current_px * self.cfg.SCALP_MIN_STOP_PCT)
+            
+            # Hard TP: 2x risk (2:1 RR) or max 5%
+            tp_dist = stop_dist * 2.0
+            tp_dist = min(tp_dist, current_px * 0.05)
             tp_price = current_px + tp_dist
+            
             plan = TradePlan(
                 side="LONG", entry_price=current_px, shares=float(shares),
                 initial_stop_price=round(current_px - stop_dist, 4),
                 take_profit_price=round(tp_price, 4),
-                risk_usd=round(shares * stop_dist, 2), atr_at_entry=fast_atr,
+                risk_usd=stop_usd, atr_at_entry=compute_atr(df_fast, period=5),
             )
+            
             self.bracket_handle = self.broker.place_bracket_buy(
                 quantity=shares, limit_or_market_price=current_px,
                 stop_price=plan.initial_stop_price, target_price=plan.take_profit_price,
@@ -628,18 +799,31 @@ class ScalperRunner:
             self.bot_nav = self.bot_cash + self.shares * current_px
             self._entry_price = current_px
             self._prev_shares = self.shares
+            
+            # Track active position
+            if not hasattr(self, '_active_positions'):
+                self._active_positions = []
+            self._active_positions.append({
+                "ticker": ticker,
+                "entry_price": current_px,
+                "shares": shares,
+                "stop": plan.initial_stop_price,
+                "target": plan.take_profit_price,
+                "entry_time": time.time(),
+            })
+            
             self.risk.open_position(plan)
             self.trades_today += 1
-            log.info(f"🎯 FOCUS ENTRY: {shares}x {ticker} @ ${current_px:.2f} | Stop -{stop_dist/current_px:.2%} | TP +{tp_dist/current_px:.2%} | Deployed: ${cost:,.0f} | Score: {self.top_pick.rank_score:.0f}")
+            log.info(f"🎯 ENTRY: {shares}x {ticker} @ ${current_px:.2f} | Penny=${current_px < 2.0} | Spike={spike_ratio:.1f}x | Stop ${plan.initial_stop_price:.2f} | TP ${plan.take_profit_price:.2f} | Deployed: ${cost:,.0f}")
             self.notifier.info(
                 f"🎯 HA-NUN ENTRY\n"
                 f"Ticker: {ticker}\n"
                 f"Qty: {shares}\n"
                 f"Entry: ${current_px:.2f}\n"
-                f"Stop: ${plan.initial_stop_price:.2f}\n"
+                f"Stop: ${plan.initial_stop_price:.2f} (-$50 max)\n"
                 f"Target: ${plan.take_profit_price:.2f}\n"
                 f"Deployed: ${cost:,.0f}\n"
-                f"Score: {self.top_pick.rank_score:.0f}"
+                f"Volume Spike: {spike_ratio:.1f}x"
             )
             push_trade(ticker, "BUY", current_px, shares)
             

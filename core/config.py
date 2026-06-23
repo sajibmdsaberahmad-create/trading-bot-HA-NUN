@@ -241,9 +241,29 @@ class BotConfig:
     DYNAMIC_PROFIT_GIVEBACK_MAX: float = 0.50          # 50% giveback (loose)
 
     # ════════════════════════════════════════════════════════════════════
-    # SCALPER / INSTITUTIONAL MOMENTUM MODE
+    # SCALPER / INSTITUTIONAL ALGO-WAVE RIDER (USER METHODOLOGY)
     # ════════════════════════════════════════════════════════════════════
     TRADING_MODE: str = "scalper"
+    
+    # USER RULE: Deploy exactly $1,000 per stock
+    DEPLOY_PER_STOCK_USD: float = 1000.0
+    
+    # USER RULE: Hard stop $50 per trade (cannot be overridden)
+    HARD_STOP_USD: float = 50.0
+    
+    # USER RULE: Penny stocks only (< $5)
+    PENNY_STOCK_MAX_PRICE: float = 5.0
+    
+    # USER RULE: Max 5 concurrent positions
+    MAX_CONCURRENT_POSITIONS: int = 5
+    
+    # USER RULE: Volume spike threshold (1.5x = 50% above average)
+    VOLUME_SPIKE_MIN_RATIO: float = 1.5
+    
+    # High frequency scanning
+    SCAN_INTERVAL_SECONDS: int = 30  # Scan every 30s when positions open
+    MAX_LOCKED_TARGETS: int = 5  # Always return 1-5 stocks
+    
     SCALP_STOP_ATR_MULTIPLIER: float = 0.9
     SCALP_MIN_STOP_PCT: float = 0.004
     SCALP_MAX_STOP_PCT: float = 0.015
@@ -253,8 +273,6 @@ class BotConfig:
     SCALP_TRAILING_ATR_MULTIPLIER: float = 0.6
     SCALP_PROFIT_ACTIVATE_PCT: float = 0.005
     SCALP_PROFIT_GIVEBACK_PCT: float = 0.30
-    SCAN_INTERVAL_SECONDS: int = 300
-    MAX_LOCKED_TARGETS: int = 5
 
     # ════════════════════════════════════════════════════════════════════
     # OLLAMA LOCAL LLM REASONING HEAD
