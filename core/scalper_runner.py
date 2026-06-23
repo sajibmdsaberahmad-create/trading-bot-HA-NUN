@@ -525,8 +525,8 @@ class ScalperRunner:
         current_px = float(closes[-1])
         if not _only_uptrend(df, current_px):
             return {"ticker": ticker, "total_score": 0, "price": current_px, "volume": int(volumes[-1]), "avg_volume": int(np.mean(volumes[-20:])), "rel_vol": 1.0, "reasons": "not_uptrend"}
-        score = 0.0
-        reasons = []
+        score = 1.0
+        reasons = ["uptrend"]
         ret_5 = (closes[-1] / closes[-6] - 1) * 100 if len(closes) > 5 else 0
         ret_10 = (closes[-1] / closes[-11] - 1) * 100 if len(closes) > 10 else 0
         ret_20 = (closes[-1] / closes[-21] - 1) * 100 if len(closes) > 20 else 0
