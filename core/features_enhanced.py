@@ -186,6 +186,24 @@ class FeatureEngineerEnhanced:
         
         return f.values.astype(np.float32)
     
+    @classmethod
+    def compute_features(cls, df: pd.DataFrame, window_size: int = 30) -> np.ndarray:
+        """
+        Compute features from OHLCV data.
+        
+        This is a convenience wrapper around compute() that matches
+        the interface expected by scalper_runner.py and other callers.
+        
+        Args:
+            df: DataFrame with [open, high, low, close, volume]
+            window_size: Minimum window size (not used for filtering,
+                        but kept for API compatibility)
+            
+        Returns:
+            np.ndarray of shape (n_valid_rows, 18), dtype float32
+        """
+        return cls.compute(df)
+    
     @staticmethod
     def feature_names() -> list:
         """Return human-readable names for all 18 features."""

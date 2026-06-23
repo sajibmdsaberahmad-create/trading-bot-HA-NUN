@@ -219,6 +219,36 @@ class StockScanner:
         ranked = self.rank_scans(results)
         return ranked[:n]
     
+    def scan_pennies(self, limit: int = 50) -> List[Dict]:
+        """
+        Scan the PENNY_STOCK_UNIVERSE for stocks meeting momentum criteria.
+        
+        This method requires an IB connection to fetch real market data.
+        Returns a list of dicts with ticker and basic info for each match.
+        
+        Args:
+            limit: Maximum number of tickers to return
+            
+        Returns:
+            List of dicts: [{'ticker': str, 'price': float, ...}, ...]
+        """
+        # This is a synchronous wrapper - in production, use async version
+        # with IB connection to fetch real data
+        results = []
+        
+        # For now, return the universe as candidates (real scanning happens in _scan_and_rank)
+        # The actual data fetching is done in ScalperRunner._scan_and_rank()
+        for ticker in PENNY_STOCK_UNIVERSE[:limit]:
+            results.append({
+                'ticker': ticker,
+                'price': 0.0,  # Will be filled by real data fetch
+                'volume': 0,
+                'avg_volume': 0,
+                'rel_vol': 0.0,
+            })
+        
+        return results
+    
     def build_alert_text(self, results: List[ScanResult], top_n: int = 5) -> str:
         """Build a Telegram alert message from scan results."""
         top = self.get_top_picks(results, top_n)

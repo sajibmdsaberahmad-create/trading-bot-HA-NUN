@@ -110,7 +110,7 @@ class BotConfig:
     SIZING_MODE: str = "risk_based"
 
     RISK_PER_TRADE_PCT: float = 0.05      # 5% of equity = $50 on a $1,000 account
-    MAX_RISK_PER_TRADE_USD: float = 50.0
+    MAX_RISK_PER_TRADE_USD: float = 75.0
 
     STOP_ATR_MULTIPLIER:     float = 1.5
     MIN_STOP_DISTANCE_PCT:   float = 0.003
@@ -125,7 +125,7 @@ class BotConfig:
     TRAILING_PROFIT_GIVEBACK_PCT:   float = 0.40
 
     TAKE_PROFIT_ATR_MULTIPLIER: float = 2.5
-    MIN_REWARD_RISK_RATIO:      float = 1.5
+    MIN_REWARD_RISK_RATIO:      float = 2.0
 
     MAX_ACCEPTABLE_SLIPPAGE_PCT: float = 0.004
     USE_LIMIT_ORDERS_IN_FAST_MARKETS: bool = True
@@ -205,7 +205,7 @@ class BotConfig:
 
     # Minimum confidence threshold for action execution (0.0 to 1.0)
     # Higher = fewer but higher-quality trades
-    CONFIDENCE_THRESHOLD: float = 0.55
+    CONFIDENCE_THRESHOLD: float = 0.65
 
     # Ensemble voting: combine PPO with rule-based strategies
     USE_ENSEMBLE: bool = True
@@ -236,7 +236,7 @@ class BotConfig:
     # before the hard stop. The hard $50 max loss is still enforced by risk.py.
     DYNAMIC_TRAILING_ENABLED: bool = True
     EARLY_LOSS_EXIT_ENABLED: bool = True
-    EARLY_LOSS_RISK_PCT_THRESHOLD: float = 0.30        # exit when loss > 30% of risk budget
+    EARLY_LOSS_RISK_PCT_THRESHOLD: float = 0.50        # exit when loss > 50% of risk budget
     DYNAMIC_PROFIT_GIVEBACK_MIN: float = 0.20          # 20% giveback (tight)
     DYNAMIC_PROFIT_GIVEBACK_MAX: float = 0.50          # 50% giveback (loose)
 
@@ -244,11 +244,10 @@ class BotConfig:
     # SCALPER / INSTITUTIONAL MOMENTUM MODE
     # ════════════════════════════════════════════════════════════════════
     TRADING_MODE: str = "scalper"
-    SCALP_STOP_ATR_MULTIPLIER: float = 0.7
-    SCALP_MIN_STOP_PCT: float = 0.003
-    SCALP_MAX_STOP_PCT: float = 0.010
+    SCALP_STOP_ATR_MULTIPLIER: float = 0.9
+    SCALP_MIN_STOP_PCT: float = 0.004
+    SCALP_MAX_STOP_PCT: float = 0.015
     SCALP_TP_ATR_MULTIPLIER: float = 1.5
-    SCALP_MAX_TP_PCT: float = 0.03
     SCALP_MIN_RR: float = 1.5
     SCALP_TRAILING_ACTIVATE_PCT: float = 0.002
     SCALP_TRAILING_ATR_MULTIPLIER: float = 0.6
@@ -270,9 +269,9 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     # MULTI-REPO GIT ARCHITECTURE (HA-NUN / Grandmaster / Logs)
     # ════════════════════════════════════════════════════════════════════
-    GITHUB_HA_NUN_REPO: str = os.getenv("GITHUB_HA_NUN_REPO", "")
-    GITHUB_GRANDMASTER_REPO: str = os.getenv("GITHUB_GRANDMASTER_REPO", "")
-    GITHUB_LOGS_REPO: str = os.getenv("GITHUB_LOGS_REPO", "")
+    GITHUB_HA_NUN_REPO: str = os.getenv("GITHUB_HA_NUN_REPO", "sajibmdsaberahmad-create/trading-bot-HA-NUN")
+    GITHUB_GRANDMASTER_REPO: str = os.getenv("GITHUB_GRANDMASTER_REPO", "sajibmdsaberahmad-create/trading-bot-Grandmaster")
+    GITHUB_LOGS_REPO: str = os.getenv("GITHUB_LOGS_REPO", "sajibmdsaberahmad-create/trading-bot-Logs")
     GITHUB_PAT: str = os.getenv("GITHUB_PAT", "")
     MAX_GIT_PUSH_RETRIES: int = 3
     GIT_PUSH_TIMEOUT_SEC: int = 30

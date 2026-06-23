@@ -63,7 +63,7 @@ try:
 except ImportError:
     _ENHANCED_AVAILABLE = False
 
-from core.features import FeatureEngineer
+from core.features_enhanced import FeatureEngineerEnhanced
 from core.env import TradingEnv
 from core.risk import RiskManager, TradePlan, compute_atr, compute_momentum_score
 
@@ -917,7 +917,7 @@ class EventDrivenBacktester:
     def _build_observation(self, price: float) -> np.ndarray:
         """Build observation vector from current state."""
         # In backtest, we use a simplified observation
-        # The full pipeline uses FeatureEngineer but that requires a DataFrame
+        # The full pipeline uses FeatureEngineerEnhanced but that requires a DataFrame
         # For simplicity, we build a basic observation
         try:
             obs_dim = self.cfg.WINDOW_SIZE * self.cfg.N_FEATURES + 2

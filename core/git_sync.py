@@ -31,7 +31,7 @@ import time
 import hashlib
 import json
 import shutil
-from typing import List, Optional, Set, Dict
+from typing import List, Optional, Set, Dict, Any
 from pathlib import Path
 from datetime import datetime
 from threading import Lock
@@ -75,6 +75,76 @@ TRACKED_FILES: Set[str] = {
     "core/multi_model_fusion.py",   # Fusion engine
 }
 
+# Multi-repo routing: which files go to which repo
+REPO_ROUTES: Dict[str, Set[str]] = {
+    "code": {
+        "ppo_trader.zip",
+        "core/config.py",
+        "core/agent.py",
+        "core/agent_enhanced.py",
+        "core/ai_guardrails.py",
+        "core/features_enhanced.py",
+        "core/features.py",
+        "core/risk.py",
+        "core/hmrs.py",
+        "core/stationary_features.py",
+        "core/transformer_model.py",
+        "core/multi_model_fusion.py",
+        "core/fusion_overrides.py",
+        "core/scalper_sniper_integration.py",
+        "core/trader.py",
+        "core/scalper_runner.py",
+        "core/scanner.py",
+        "core/sniper.py",
+        "core/sniper_heartbeat.py",
+        "core/sniper_orchestrator.py",
+        "core/sniper_screener.py",
+        "main.py",
+        "requirements.txt",
+    },
+    "logs": {
+        "HA-NUN.log",
+        "trading_bot.log",
+        "performance.csv",
+        "live_metrics.json",
+        "bot_state.json",
+        "audit_trail.jsonl",
+        "training_journal.json",
+        "models/scalper_weights.json",
+        "models/daily_guidelines.txt",
+        "models/thought_journal.jsonl",
+        "models/consciousness.json",
+    },
+    "grandmaster": {
+        "ppo_trader.zip",
+        "models/ppo_trader.zip",
+        "models/transformer_model.pth",
+        "models/lstm_model.h5",
+        "models/fusion_state.json",
+        "models/model_accuracy.json",
+        "models/model_manifest.json",
+        "models/checkpoints/",
+        "backtest_results/",
+        "training_history_*.json",
+    },
+}
+
+# Category → repo mapping
+CATEGORY_TO_REPO: Dict[str, str] = {
+    "model": "grandmaster",
+    "training": "grandmaster",
+    "trade": "logs",
+    "daily": "logs",
+    "guardrail": "logs",
+    "config": "code",
+    "features": "code",
+    "error": "logs",
+    "startup": "code",
+    "shutdown": "logs",
+    "checkpoint": "code",
+    "general": "code",
+}
+
 # Raw data files get pruned to prevent bloat
 RAW_DATA_FILES: Set[str] = {
     "data/live_market_features.csv",
@@ -98,19 +168,22 @@ def init(cfg: BotConfig):
     """
     Initialize from BotConfig env vars.
     
-    Sets up HA-NUN repo (primary) and optional Grandmaster/Logs repos.
+    Sets up HA-NUN repo (primary), Grandmaster (models), and Logs repos.
     """
     global _repo, _token, _enabled
     _repo = getattr(cfg, "GITHUB_REPO", None) or os.getenv("GITHUB_REPO", "")
     _token = getattr(cfg, "GITHUB_TOKEN", None) or os.getenv("GITHUB_TOKEN", "")
     _enabled = bool(_repo and _token)
     
+    _grandmaster_repo = (getattr(cfg, "GITHUB_GRANDMASTER_REPO", None) or os.getenv("GITHUB_GRANDMASTER_REPO", "") or "").strip()
+    _logs_repo = (getattr(cfg, "GITHUB_LOGS_REPO", None) or os.getenv("GITHUB_LOGS_REPO", "") or "").strip()
+    
     if _enabled:
-        log.info(f"GitHub sync initialized — HA-NUN repo={_repo}")
-        # Verify repo is reachable
+        log.info(f"GitHub sync initialized — HA-NUN={_repo} | Grandmaster={_grandmaster_repo or 'disabled'} | Logs={_logs_repo or 'disabled'}")
         if not _verify_repo():
-            log.warning("GitHub repo verification failed — sync disabled")
+            log.warning("HA-NUN repo verification failed — sync disabled")
             _enabled = False
+        set_global_config(cfg)
     else:
         log.info("GitHub sync disabled (no token/repo configured)")
 
@@ -133,14 +206,28 @@ def push_change(message: str, files: Optional[List[str]] = None,
     if not _enabled:
         return False
     
-    # Debounce: don't push more than once per MIN_PUSH_INTERVAL_SEC
     now = time.time()
     global _last_push_ts
     if now - _last_push_ts < MIN_PUSH_INTERVAL_SEC:
-        # Queue this for the next batch window
         return _queue_push(message, files, category)
     
-    return _do_push(message, files, category)
+    # Determine which repos need updating based on category and files
+    target_repos = _resolve_target_repos(files, category)
+    
+    all_success = True
+    for repo_key, repo_files in target_repos.items():
+        repo_url = _get_repo_url(repo_key)
+        if not repo_url:
+            continue
+        # For logs/grandmaster repos, clone-push if not same as main
+        if repo_key == "code":
+            success = _do_push(message, repo_files, category, repo_url)
+        else:
+            success = push_to_secondary_repo(repo_key, repo_files, message, category)
+        if not success:
+            all_success = False
+    
+    return all_success
 
 
 def push_all(message: str = "checkpoint: all current state") -> bool:
@@ -228,7 +315,6 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
                 files = _apply_bloat_guard(files, repo_root)
             
             if not files:
-                # Nothing to push, but that's okay
                 _last_push_ts = time.time()
                 return True
             
@@ -243,17 +329,11 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
                 _last_push_ts = time.time()
                 return True
             
-            # Commit with timestamp
             timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
             full_message = f"{message}\n\nCategory: {category}\nTimestamp: {timestamp}\nAuto-pushed by git_sync.py"
-            
-            # Commit (allow empty in case of race conditions)
             commit_cmd = ["git", "commit", "-m", full_message, "--allow-empty"]
-            
-            # Push
             push_cmd = ["git", "push", target_repo, "HEAD:main"]
             
-            # Execute pipeline: stage -> commit -> push
             all_success = True
             for cmd in stage_cmds:
                 result = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True, timeout=30)
@@ -457,8 +537,128 @@ def push_weights_to_repo(weight_files: List[str], repo_url: str, message: str) -
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# CONVENIENCE WRAPPERS (called from other modules)
+# MULTI-REPO ROUTING
 # ═════════════════════════════════════════════════════════════════════════════
+
+def _get_repo_url(repo_key: str) -> Optional[str]:
+    """Get authenticated repo URL for HA-NUN, Grandmaster, or Logs."""
+    if not _token:
+        return None
+    if repo_key == "code":
+        return _remote_url()
+    elif repo_key == "grandmaster":
+        repo = (getattr(cfg_bot, "GITHUB_GRANDMASTER_REPO", None) or os.getenv("GITHUB_GRANDMASTER_REPO", "") or "").strip()
+        if repo:
+            if "@" not in repo:
+                return f"https://{_token}@{repo}.git" if not repo.startswith("https://") else f"https://{_token}@{repo.split('https://')[1]}"
+            return repo
+    elif repo_key == "logs":
+        repo = (getattr(cfg_bot, "GITHUB_LOGS_REPO", None) or os.getenv("GITHUB_LOGS_REPO", "") or "").strip()
+        if repo:
+            if "@" not in repo:
+                return f"https://{_token}@{repo}.git" if not repo.startswith("https://") else f"https://{_token}@{repo.split('https://')[1]}"
+            return repo
+    return None
+
+
+def _resolve_target_repos(files: Optional[List[str]], category: str) -> Dict[str, List[str]]:
+    """Determine which repos get which files based on category and file paths."""
+    if files is None:
+        files = list(TRACKED_FILES)
+    
+    result = {"code": [], "logs": [], "grandmaster": []}
+    
+    for f in files:
+        basename = os.path.basename(f)
+        routed = False
+        
+        # Check category-based routing first
+        repo_from_category = CATEGORY_TO_REPO.get(category)
+        if repo_from_category and repo_from_category != "code":
+            result[repo_from_category].append(f)
+            routed = True
+            continue
+        
+        # Route based on file path patterns
+        for route_key, patterns in REPO_ROUTES.items():
+            for pattern in patterns:
+                if basename == pattern or pattern in f:
+                    result[route_key].append(f)
+                    routed = True
+                    break
+            if routed:
+                break
+        
+        if not routed:
+            result["code"].append(f)
+    
+    # Remove empty entries
+    return {k: v for k, v in result.items() if v}
+
+
+def push_to_secondary_repo(repo_key: str, files: List[str], message: str, category: str) -> bool:
+    """Push files to a secondary repo (logs or grandmaster) via clone-push."""
+    repo_url = _get_repo_url(repo_key)
+    if not repo_url:
+        return False
+    
+    try:
+        import tempfile
+        tmpdir = tempfile.mkdtemp(prefix=f"{repo_key}_push_")
+        
+        # Authenticated clone
+        if _token and "@" not in repo_url:
+            auth_url = f"https://{_token}@{repo_url.split('https://')[1]}" if "https://" in repo_url else repo_url
+        else:
+            auth_url = repo_url
+        
+        clone_cmd = ["git", "clone", "--depth", "1", auth_url, tmpdir]
+        result = subprocess.run(clone_cmd, capture_output=True, text=True, timeout=60)
+        if result.returncode != 0:
+            log.debug(f"{repo_key} clone failed: {result.stderr.strip()}")
+            shutil.rmtree(tmpdir, ignore_errors=True)
+            return False
+        
+        # Copy files
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        for wf in files:
+            src = os.path.join(repo_root, wf)
+            if os.path.exists(src):
+                dst = os.path.join(tmpdir, wf)
+                os.makedirs(os.path.dirname(dst), exist_ok=True) if os.path.dirname(dst) else None
+                shutil.copy2(src, dst)
+        
+        subprocess.run(["git", "config", "user.email", "bot@ha-nun.local"], cwd=tmpdir, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "HANUN-Bot"], cwd=tmpdir, capture_output=True)
+        
+        subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True)
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        commit_msg = f"[{repo_key}] {message}\n\nCategory: {category}\nTimestamp: {timestamp}\nAuto-pushed by git_sync.py"
+        subprocess.run(["git", "commit", "-m", commit_msg, "--allow-empty"], cwd=tmpdir, capture_output=True)
+        push_cmd = ["git", "push", auth_url, "HEAD:main"]
+        result = subprocess.run(push_cmd, cwd=tmpdir, capture_output=True, text=True, timeout=60)
+        
+        shutil.rmtree(tmpdir, ignore_errors=True)
+        
+        if result.returncode == 0:
+            log.info(f"✅ {repo_key} push success: {message[:60]}")
+            return True
+        else:
+            log.debug(f"{repo_key} push failed: {result.stderr.strip()}")
+            return False
+            
+    except Exception as exc:
+        log.debug(f"{repo_key} push error: {exc}")
+        return False
+
+
+# Global config reference for routing
+cfg_bot: Any = None
+
+def set_global_config(cfg: Any):
+    """Set global config reference for repo routing."""
+    global cfg_bot
+    cfg_bot = cfg
 
 def push_trade(ticker: str, action: str, price: float, qty: float):
     """Push after a trade event."""

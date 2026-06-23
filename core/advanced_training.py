@@ -114,9 +114,9 @@ class TrainingConfig:
     train_start: str = "2020-01-01"
     train_end: str = "2024-06-01"
     val_start: str = "2024-06-01"
-    val_end: str = "2024-12-01"
-    test_start: str = "2025-01-01"
-    test_end: str = "2025-06-01"
+    val_end: str = "2024-10-01"
+    test_start: str = "2024-10-01"
+    test_end: str = "2024-12-31"
     bar_size: str = "1 min"
     
     # Feature engineering
@@ -151,8 +151,8 @@ class TrainingConfig:
     
     # Backtest after training
     run_backtest: bool = True
-    backtest_start: str = "2025-01-01"
-    backtest_end: str = "2025-06-01"
+    backtest_start: str = "2024-10-01"
+    backtest_end: str = "2024-12-31"
     
     # Device
     device: str = "auto"

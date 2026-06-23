@@ -60,11 +60,12 @@ class RegimeResult:
     """Result of market regime analysis."""
     regime: MarketRegime
     confidence: float                 # 0.0 to 1.0
-    trend_strength: float             # ADX-like, 0 to 100
+    trend_strength: float             # 0 to 100
     volatility_percentile: float      # 0 to 100
     momentum: float                   # -1 to 1
     volume_regime: str                # "normal" | "elevated" | "low"
     recommendation: str               # Human-readable guidance
+    stability: float = 0.5            # Regime stability score (0-1), computed by classifier
 
 
 class MarketRegimeClassifier:
@@ -286,6 +287,8 @@ class MarketRegimeClassifier:
             "timestamp": time.time(),
         })
         
+        stability = self.regime_stability(n_last=10)
+        
         return RegimeResult(
             regime=regime,
             confidence=float(np.clip(confidence, 0.0, 1.0)),
@@ -294,6 +297,7 @@ class MarketRegimeClassifier:
             momentum=momentum,
             volume_regime=volume_regime,
             recommendation=recommendation,
+            stability=stability,
         )
     
     def regime_stability(self, n_last: int = 10) -> float:
@@ -460,8 +464,10 @@ class ConfidenceScorer:
             weights.append(0.10)
         
         # Factor 6: Regime stability
-        stability = getattr(regime_result, '_stability', 0.5)
-        factors.append(stability)
+        stability = getattr(regime_result, 'stability', 0.5)
+        if stability is None:
+            stability = 0.5
+        factors.append(float(stability))
         weights.append(0.10)
         
         # Weighted average

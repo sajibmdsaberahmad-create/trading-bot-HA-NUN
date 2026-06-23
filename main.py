@@ -78,7 +78,7 @@ EXAMPLES:
                          help="Transformer/LSTM training epochs (advanced-train mode)")
     parser.add_argument("--train-start", default="2020-01-01",
                          help="Training data start date (advanced-train mode)")
-    parser.add_argument("--train-end", default="2024-06-01",
+    parser.add_argument("--train-end", default="2024-12-31",
                          help="Training data end date (advanced-train mode)")
     parser.add_argument("--no-backtest", action="store_true",
                          help="Skip post-training backtest (advanced-train mode)")
@@ -87,9 +87,9 @@ EXAMPLES:
     parser.add_argument("--use-synthetic", action="store_true",
                          help="Use synthetic data for training (advanced-train mode)")
     # Fusion backtest options
-    parser.add_argument("--bt-start", default="2025-01-01",
+    parser.add_argument("--bt-start", default="2024-10-01",
                          help="Backtest start date")
-    parser.add_argument("--bt-end", default="2025-06-01",
+    parser.add_argument("--bt-end", default="2024-12-31",
                          help="Backtest end date")
     parser.add_argument("--bt-bars", type=int, default=1000,
                          help="Number of bars for fusion backtest")

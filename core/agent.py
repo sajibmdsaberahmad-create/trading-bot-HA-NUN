@@ -41,7 +41,6 @@ except ImportError:
 from collections import deque
 from core.config import BotConfig
 from core.env import TradingEnv
-from core.features import FeatureEngineer
 from core.notify import log
 
 # ── Conditional imports for enhanced AI ──────────────────────────────────

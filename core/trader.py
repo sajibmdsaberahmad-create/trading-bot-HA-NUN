@@ -37,7 +37,7 @@ import pandas as pd
 from core.config import BotConfig
 from core.connector import IBConnector
 from core.data import DataManager
-from core.features import FeatureEngineer
+from core.features_enhanced import FeatureEngineerEnhanced
 from core.risk import RiskManager, compute_atr, compute_momentum_score
 from core.broker import BrokerExecutor, BracketHandle
 from core.agent import build_ppo_agent, OnlineLearningManager
@@ -238,7 +238,7 @@ class LiveTrader:
     def _process_decision_bar(self, bar_df: pd.DataFrame):
         self._bars_processed += 1
 
-        features = FeatureEngineer.compute(bar_df)
+        features = FeatureEngineerEnhanced.compute(bar_df)
         prices = bar_df["close"].values[-len(features):]
 
         if len(features) < self.cfg.WINDOW_SIZE + 2:

@@ -42,7 +42,6 @@ US_MARKET_HOLIDAYS = {
 from core.config import BotConfig
 from core.connector import IBConnector
 from core.data import DataManager
-from core.features import FeatureEngineer
 from core.features_enhanced import FeatureEngineerEnhanced
 from core.institutional import InstitutionalDetector, InstitutionalSignal
 from core.scanner import StockScanner, ScanResult, PENNY_STOCK_UNIVERSE

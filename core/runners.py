@@ -10,7 +10,7 @@ import numpy as np
 from core.config import BotConfig
 from core.connector import IBConnector
 from core.data import DataManager
-from core.features import FeatureEngineer
+from core.features_enhanced import FeatureEngineerEnhanced
 from core.env import TradingEnv
 from core.agent import build_ppo_agent, run_deterministic_episode
 from core.notify import log
@@ -30,7 +30,7 @@ def run_warmup(cfg: BotConfig):
     try:
         data_mgr = DataManager(connector, cfg)
         hist_df = data_mgr.fetch_historical()
-        features = FeatureEngineer.compute(hist_df)
+        features = FeatureEngineerEnhanced.compute(hist_df)
         prices = hist_df["close"].values[-len(features):]
 
         if len(features) < 200:
@@ -120,7 +120,7 @@ def run_evaluate(cfg: BotConfig):
     try:
         data_mgr = DataManager(connector, cfg)
         hist_df = data_mgr.fetch_historical(duration="1 Y", bar_size="1 day")
-        features = FeatureEngineer.compute(hist_df)
+        features = FeatureEngineerEnhanced.compute(hist_df)
         prices = hist_df["close"].values[-len(features):]
 
         env = TradingEnv(features, prices, cfg.INITIAL_CASH, cfg.TRANSACTION_COST_PCT,
