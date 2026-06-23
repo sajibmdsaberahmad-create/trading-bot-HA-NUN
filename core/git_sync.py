@@ -171,7 +171,8 @@ def init(cfg: BotConfig):
     Sets up HA-NUN repo (primary), Grandmaster (models), and Logs repos.
     """
     global _repo, _token, _enabled
-    _repo = getattr(cfg, "GITHUB_REPO", None) or os.getenv("GITHUB_REPO", "")
+    _repo = (getattr(cfg, "GITHUB_HA_NUN_REPO", None) or os.getenv("GITHUB_HA_NUN_REPO", "") or
+             getattr(cfg, "GITHUB_REPO", None) or os.getenv("GITHUB_REPO", ""))
     _token = getattr(cfg, "GITHUB_TOKEN", None) or os.getenv("GITHUB_TOKEN", "")
     _enabled = bool(_repo and _token)
     
