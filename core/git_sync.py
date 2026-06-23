@@ -666,12 +666,19 @@ def push_trade(ticker: str, action: str, price: float, qty: float):
 
 
 def push_training(ticker: str, timesteps: int, return_pct: float):
-    """Push after training completion."""
-    return push_change(
+    """Push after training completion — to HA-NUN and Grandmaster."""
+    ha_ok = push_change(
         f"train: {ticker} {timesteps} steps return={return_pct:+.1f}%",
         files=[f"models/ppo_trader_warmup_*.zip", "training_journal.json", "audit_trail.jsonl"],
         category="training",
     )
+    gm_ok = push_weights_to_repo(
+        ["ppo_trader.zip", "models/transformer_model.pth", "models/lstm_model.h5",
+         "models/fusion_state.json", "models/model_accuracy.json"],
+        repo_url=_get_repo_url("grandmaster"),
+        message=f"train: {ticker} {timesteps} steps return={return_pct:+.1f}%",
+    ) if _get_repo_url("grandmaster") else False
+    return ha_ok or gm_ok
 
 
 def push_daily_summary(nav: float, equity: float):
@@ -684,12 +691,18 @@ def push_daily_summary(nav: float, equity: float):
 
 
 def push_model_update(model_path: str = "ppo_trader.zip"):
-    """Push after model update (online fine-tune)."""
-    return push_change(
+    """Push after model update (online fine-tune) — to HA-NUN and Grandmaster."""
+    ha_nun_ok = push_change(
         f"model: updated {os.path.basename(model_path)}",
         files=[model_path, "audit_trail.jsonl"],
         category="model",
     )
+    gm_ok = push_weights_to_repo(
+        [model_path],
+        repo_url=_get_repo_url("grandmaster"),
+        message=f"model: checkpoint {os.path.basename(model_path)}",
+    ) if _get_repo_url("grandmaster") else False
+    return ha_nun_ok or gm_ok
 
 
 def push_guardrail_event(event_type: str, details: str = ""):
