@@ -36,6 +36,14 @@ from datetime import datetime
 from core.config import BotConfig
 from core.notify import log
 from core.hmrs import MarketRegime
+from core.human_cognition import get_system_prompt, enrich_prompt, apply_gut_override
+from core.memory_guard import (
+    should_allow_ollama,
+    should_allow_ollama_decide,
+    should_allow_ollama_notify,
+    available_ram_mb,
+    is_low_ram_machine,
+)
 
 
 @dataclass
@@ -82,21 +90,39 @@ class OllamaBrain:
             host=getattr(cfg, 'OLLAMA_HOST', 'http://localhost:11434'),
             model=getattr(cfg, 'OLLAMA_MODEL', 'llama3'),
             timeout_seconds=getattr(cfg, 'OLLAMA_TIMEOUT', 10),
+            max_tokens=getattr(cfg, 'OLLAMA_MAX_TOKENS', 256),
+            temperature=getattr(cfg, 'OLLAMA_TEMPERATURE', 0.7),
         )
         self._last_call_time = 0.0
         self._call_count = 0
         self._error_count = 0
-        
-        # Meta-optimizer state
-        self.meta_enabled = getattr(cfg, 'OLLAMA_META_OPTIMIZER_ENABLED', True)
-        self.meta_model = getattr(cfg, 'META_OPTIMIZER_MODEL', 'llama3:70b-instruct')
+        self._skipped_pressure = 0
+        self._skipped_rate = 0
+        self._keep_alive = getattr(cfg, 'OLLAMA_KEEP_ALIVE', 0)
+        self._num_ctx = int(getattr(cfg, 'OLLAMA_NUM_CTX', 1024 if is_low_ram_machine() else 2048))
+        self._min_call_interval = float(getattr(cfg, 'OLLAMA_MIN_CALL_INTERVAL_SEC', 1))
+        self._unload_after_call = bool(getattr(cfg, 'OLLAMA_UNLOAD_AFTER_CALL', True))
+        self._system_prompt = get_system_prompt(cfg)
+        # Meta-optimizer state — never use 70B on low-RAM machines
+        self.meta_enabled = getattr(cfg, 'OLLAMA_META_OPTIMIZER_ENABLED', False) if is_low_ram_machine() else getattr(cfg, 'OLLAMA_META_OPTIMIZER_ENABLED', True)
+        self.meta_model = getattr(cfg, 'META_OPTIMIZER_MODEL', self.config.model)
         self.max_mutations_per_day = getattr(cfg, 'MAX_PARAM_MUTATIONS_PER_DAY', 5)
         self._mutations_today = 0
         self._last_mutation_date = ""
     
     def _is_allowed(self) -> bool:
-        """Check if enough time passed since last call (rate limiting)."""
+        """Rate limit + RAM pressure gate."""
         if not self.config.enabled:
+            return False
+        allowed, reason = should_allow_ollama(self.cfg)
+        if not allowed:
+            self._skipped_pressure += 1
+            if self._skipped_pressure <= 3 or self._skipped_pressure % 50 == 0:
+                log.debug(f"Ollama skipped ({reason}), free={available_ram_mb()}MB")
+            return False
+        elapsed = time.time() - self._last_call_time
+        if self._last_call_time > 0 and elapsed < self._min_call_interval:
+            self._skipped_rate += 1
             return False
         return True
     
@@ -104,52 +130,69 @@ class OllamaBrain:
                      model: Optional[str] = None) -> Optional[str]:
         """
         Call Ollama API synchronously with timeout.
-        
-        Args:
-            prompt: User prompt
-            system: Optional system prompt override
-            model: Optional model override (for meta-optimizer)
-            
-        Returns:
-            Generated text or None on failure
         """
         if not self._is_allowed():
             return None
-        
+
+        return self._execute_call(prompt, system=system, model=model, update_rate_clock=True)
+
+    def decide_call(self, prompt: str, system: Optional[str] = None,
+                    model: Optional[str] = None) -> Optional[str]:
+        """
+        Priority Ollama path for live trading decisions — bypasses rate limit
+        so entry/exit/position calls are never deferred to PPO-only fallbacks.
+        """
+        if not self.config.enabled:
+            return None
+        allowed, reason = should_allow_ollama_decide(self.cfg)
+        if not allowed:
+            log.debug(f"Ollama decide skipped ({reason})")
+            return None
+        return self._execute_call(prompt, system=system, model=model, update_rate_clock=True)
+
+    def _execute_call(self, prompt: str, system: Optional[str] = None,
+                      model: Optional[str] = None, update_rate_clock: bool = True) -> Optional[str]:
+        """Shared HTTP generate — used by standard, decide, and notify paths."""
         try:
             url = f"{self.config.host}/api/generate"
             use_model = model or self.config.model
-            
+            use_system = system or self._system_prompt
             payload = {
                 "model": use_model,
                 "prompt": prompt,
                 "stream": False,
+                "keep_alive": 0 if self._unload_after_call else self._keep_alive,
                 "options": {
                     "num_predict": self.config.max_tokens,
                     "temperature": self.config.temperature,
+                    "num_ctx": self._num_ctx,
                 },
             }
-            if system:
-                payload["system"] = system
-            
+            if use_system:
+                payload["system"] = use_system
+
             data = json.dumps(payload).encode("utf-8")
             req = urllib.request.Request(url, data=data, method="POST")
             req.add_header("Content-Type", "application/json")
-            
+
             start = time.time()
             with urllib.request.urlopen(req, timeout=self.config.timeout_seconds) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
                 elapsed = (time.time() - start) * 1000
-                
-                self._last_call_time = time.time()
+
+                if update_rate_clock:
+                    self._last_call_time = time.time()
                 self._call_count += 1
-                
+
                 log.debug(f"Ollama {use_model}: {elapsed:.0f}ms | "
                          f"{result.get('prompt_eval_count', 0)} prompt tokens, "
                          f"{result.get('eval_count', 0)} completion tokens")
-                
-                return result.get("response", "").strip()
-                
+
+                text = result.get("response", "").strip()
+                if self._unload_after_call:
+                    self._unload_model(use_model)
+                return text
+
         except urllib.error.URLError as exc:
             self._error_count += 1
             log.warning(f"Ollama connection failed: {exc}")
@@ -159,8 +202,85 @@ class OllamaBrain:
         except Exception as exc:
             self._error_count += 1
             log.debug(f"Ollama call failed: {exc}")
-        
+
         return None
+
+    def compose_notification(self, prompt: str, system: Optional[str] = None) -> Optional[str]:
+        """
+        Fast Ollama path for Telegram alerts — bypasses the trading-loop rate limit
+        so notifications are not blocked after warmup or position-management calls.
+        """
+        if not self.config.enabled:
+            return None
+        allowed, reason = should_allow_ollama_notify(self.cfg)
+        if not allowed:
+            log.debug(f"Notify compose skipped ({reason})")
+            return None
+
+        notify_system = system or (
+            "You are HANOON — an autonomous AI trading pilot briefing your commander on Telegram. "
+            "Write short, sharp, analytical messages with exact numbers. First-person pilot voice. "
+            "Sound alive and intentional — never robotic canned templates."
+        )
+        max_tokens = int(getattr(self.cfg, "AI_TELEGRAM_OLLAMA_MAX_TOKENS", 120))
+        timeout = int(getattr(self.cfg, "AI_TELEGRAM_OLLAMA_TIMEOUT", 12))
+
+        try:
+            url = f"{self.config.host}/api/generate"
+            payload = {
+                "model": self.config.model,
+                "prompt": prompt,
+                "stream": False,
+                "keep_alive": self._keep_alive,
+                "system": notify_system,
+                "options": {
+                    "num_predict": max_tokens,
+                    "temperature": 0.75,
+                    "num_ctx": min(self._num_ctx, 1536),
+                },
+            }
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, method="POST")
+            req.add_header("Content-Type", "application/json")
+
+            start = time.time()
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                elapsed = (time.time() - start) * 1000
+                self._call_count += 1
+                log.debug(f"Ollama notify: {elapsed:.0f}ms | {result.get('eval_count', 0)} tokens")
+                return (result.get("response") or "").strip()
+        except Exception as exc:
+            self._error_count += 1
+            log.debug(f"Ollama notify compose failed: {exc}")
+        return None
+
+    def _warmup(self) -> None:
+        """Load model into reserved RAM at startup."""
+        try:
+            self._last_call_time = 0.0  # bypass rate limit for warmup
+            r = self._call_ollama("Reply with one word: ready")
+            if r:
+                log.info(f"🧠 Ollama warmed up ({self.config.model} loaded, ~{getattr(self.cfg, 'OLLAMA_MEMORY_BUDGET_MB', 2560)}MB budget)")
+        except Exception as exc:
+            log.debug(f"Ollama warmup skipped: {exc}")
+
+    def _unload_model(self, model: Optional[str] = None) -> None:
+        """Drop model from RAM immediately (critical on 8GB Macs)."""
+        use_model = model or self.config.model
+        try:
+            url = f"{self.config.host}/api/generate"
+            payload = json.dumps({
+                "model": use_model,
+                "prompt": "",
+                "keep_alive": 0,
+            }).encode("utf-8")
+            req = urllib.request.Request(url, data=payload, method="POST")
+            req.add_header("Content-Type", "application/json")
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                resp.read()
+        except Exception:
+            pass
     
     def explain_decision(self, decision, price: float, ticker: str, 
                          regime_info: str = "") -> str:
@@ -531,6 +651,9 @@ class OllamaBrain:
                     "models_loaded": models,
                     "calls_made": self._call_count,
                     "errors": self._error_count,
+                    "skipped_pressure": self._skipped_pressure,
+                    "skipped_rate": self._skipped_rate,
+                    "free_ram_mb": available_ram_mb(),
                 }
         except Exception as exc:
             return {
@@ -584,7 +707,18 @@ def create_ollama_brain(cfg: BotConfig) -> Optional[OllamaBrain]:
     health = brain.health_check()
     
     if health.get("status") == "healthy":
-        log.info(f"✅ Ollama brain active | model={cfg.OLLAMA_MODEL} | host={cfg.OLLAMA_HOST}")
+        from core.memory_guard import memory_status
+        mem = memory_status(cfg)
+        log.info(
+            f"✅ Ollama brain active | model={cfg.OLLAMA_MODEL} | "
+            f"warm={not getattr(cfg, 'OLLAMA_UNLOAD_AFTER_CALL', False)} | "
+            f"budget={getattr(cfg, 'OLLAMA_MEMORY_BUDGET_MB', 2560)}MB | "
+            f"interval={getattr(cfg, 'OLLAMA_MIN_CALL_INTERVAL_SEC', 5)}s | "
+            f"RAM free={mem['available_ram_mb']}MB"
+        )
+        # Pre-load model into reserved RAM so first trade decision is fast
+        if int(getattr(cfg, 'OLLAMA_KEEP_ALIVE', 0)) > 0:
+            brain._warmup()
         return brain
     else:
         log.warning(f"⚠️ Ollama brain unreachable: {health.get('error', 'unknown')}")

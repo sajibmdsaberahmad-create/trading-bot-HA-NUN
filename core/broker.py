@@ -15,10 +15,8 @@ in this Python process. That means:
     and target are still working — IB's matching engine, not your
     laptop, is watching the price.
   - If the VPS reboots or its network drops, same protection applies.
-  - The trailing stop/profit logic in core/risk.py additionally
-    RE-SUBMITS a tighter stop order as price moves favourably, so the
-    exchange-side protection ratchets up too, not just the in-memory
-    Python state.
+  - The trailing stop/profit logic in core/risk.py RE-SUBMITS bracket children
+    via cancel-and-replace (IB does not allow in-place OCA order edits).
 
 SLIPPAGE HANDLING
 ═══════════════════════════════════════════════════════════════════════
@@ -34,9 +32,10 @@ a STOP-LIMIT's limit offset automatically in fast markets so the order
 isn't left unfilled during a sharp move.
 """
 
-import math
-from dataclasses import dataclass
-from typing import Optional, Tuple
+import time
+import re
+from dataclasses import dataclass, field
+from typing import Optional, Tuple, Dict, Any
 
 try:
     from ib_insync import MarketOrder, LimitOrder, StopOrder, StopLimitOrder, Trade
@@ -45,7 +44,27 @@ except ImportError:
 
 from core.config import BotConfig
 from core.connector import IBConnector
+from core.market_hours import should_use_extended_hours_orders
 from core.notify import log
+
+
+def parse_ib_regulatory_cap(error_string: str) -> Optional[float]:
+    """Extract IB price cap from error 2161 text."""
+    if not error_string:
+        return None
+    patterns = (
+        r"cap \(or limit\) the price of your Limit Order to\s+([0-9.]+)",
+        r"Limit Order to\s+([0-9.]+)",
+        r"price of your.*?to\s+([0-9.]+)",
+    )
+    for pat in patterns:
+        m = re.search(pat, error_string, re.I)
+        if m:
+            try:
+                return float(m.group(1))
+            except ValueError:
+                pass
+    return None
 
 
 @dataclass
@@ -55,6 +74,11 @@ class BracketHandle:
     stop_trade: Optional[Trade] = None
     target_trade: Optional[Trade] = None
     parent_trade: Optional[Trade] = None
+    oca_group: str = ""
+    quantity: int = 0
+    last_stop_price: float = 0.0
+    last_target_price: float = 0.0
+    _last_replace_ts: float = field(default=0.0, repr=False)
 
 
 class BrokerExecutor:
@@ -66,6 +90,16 @@ class BrokerExecutor:
         self.cfg = cfg
 
     # ── Entry: bracket order (parent + stop child + target child) ───────────
+
+    def _configure_order(self, order):
+        """Apply TIF and extended-hours settings for IB Gateway compatibility."""
+        order.tif = "DAY"
+        if should_use_extended_hours_orders(self.cfg):
+            order.outsideRth = True
+
+    def _round_price(self, price: float) -> float:
+        """Sub-dollar stocks need 4dp stops/targets on IB."""
+        return round(price, 4) if price < 1.0 else round(price, 2)
 
     def place_bracket_buy(self, quantity: int, limit_or_market_price: Optional[float],
                            stop_price: float, target_price: float) -> BracketHandle:
@@ -84,17 +118,20 @@ class BrokerExecutor:
         if limit_or_market_price is None:
             parent = MarketOrder("BUY", quantity)
         else:
-            parent = LimitOrder("BUY", quantity, round(limit_or_market_price, 2))
+            parent = LimitOrder("BUY", quantity, self._round_price(limit_or_market_price))
 
+        self._configure_order(parent)
         parent.orderId = parent_id
         parent.transmit = False
 
-        stop_child = StopOrder("SELL", quantity, round(stop_price, 2))
+        stop_child = StopOrder("SELL", quantity, self._round_price(stop_price))
+        self._configure_order(stop_child)
         stop_child.orderId = self.ib.client.getReqId()
         stop_child.parentId = parent_id
         stop_child.transmit = False
 
-        target_child = LimitOrder("SELL", quantity, round(target_price, 2))
+        target_child = LimitOrder("SELL", quantity, self._round_price(target_price))
+        self._configure_order(target_child)
         target_child.orderId = self.ib.client.getReqId()
         target_child.parentId = parent_id
         target_child.transmit = True  # last child transmits the whole bracket
@@ -120,30 +157,220 @@ class BrokerExecutor:
             stop_trade=stop_trade,
             target_trade=target_trade,
             parent_trade=parent_trade,
+            oca_group=oca_group,
+            quantity=quantity,
+            last_stop_price=self._round_price(stop_price),
+            last_target_price=self._round_price(target_price),
         )
 
-    # ── Modify the resting stop order as the trailing logic ratchets it up ──
+    # ── Cancel + replace bracket children (IB rejects in-place OCA edits: 10326) ──
+
+    _MIN_REPLACE_INTERVAL_SEC = 2.0
+
+    def _order_done(self, trade: Optional[Trade]) -> bool:
+        if trade is None or trade.orderStatus is None:
+            return True
+        return trade.orderStatus.status in ("Cancelled", "Inactive", "Filled", "ApiCancelled")
+
+    def _cancel_and_wait(self, trade: Optional[Trade], timeout: float = 2.0) -> bool:
+        if trade is None or self._order_done(trade):
+            return True
+        try:
+            self.ib.cancelOrder(trade.order)
+        except Exception as exc:
+            log.debug(f"Cancel order #{getattr(trade.order, 'orderId', '?')}: {exc}")
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            if self._order_done(trade):
+                return True
+            self.ib.sleep(0.15)
+        return self._order_done(trade)
+
+    def _throttle_replace(self, handle: BracketHandle) -> bool:
+        now = time.time()
+        if now - handle._last_replace_ts < self._MIN_REPLACE_INTERVAL_SEC:
+            return False
+        handle._last_replace_ts = now
+        return True
 
     def update_stop_price(self, handle: BracketHandle, new_stop_price: float):
         """
-        Re-price the live stop order on IB's servers to match the
-        trailing stop / trailing profit floor computed in core/risk.py.
-        This keeps exchange-side protection in sync with the bot's
-        in-memory trailing logic, so the improved protection survives
-        even if the bot itself goes offline after this point.
+        Re-price the live stop on IB via cancel-and-replace.
+
+        IB error 10326 blocks in-place edits to OCA bracket children; we cancel
+        the resting stop and submit a new one in the same OCA group.
         """
         if handle.stop_trade is None:
             return
-        order = handle.stop_trade.order
-        order.auxPrice = round(new_stop_price, 2)
+        rounded = self._round_price(new_stop_price)
+        if handle.last_stop_price and abs(rounded - handle.last_stop_price) < 0.0001:
+            return
+        if not self._throttle_replace(handle):
+            return
+
+        old = handle.stop_trade
+        old_order = old.order
+        qty = int(old_order.totalQuantity or handle.quantity or 0)
+        if qty < 1:
+            return
+        parent_id = int(old_order.parentId or handle.parent_order_id)
+        oca_group = handle.oca_group or f"bracket_{handle.parent_order_id}"
+        parent_filled = (
+            handle.parent_trade is not None
+            and handle.parent_trade.orderStatus is not None
+            and handle.parent_trade.orderStatus.status == "Filled"
+        )
+
+        if not self._cancel_and_wait(old):
+            log.debug("Stop cancel pending — skipping replace this cycle")
+            return
+
+        stop_child = StopOrder("SELL", qty, rounded)
+        self._configure_order(stop_child)
+        stop_child.orderId = self.ib.client.getReqId()
+        if not parent_filled:
+            stop_child.parentId = parent_id
+        stop_child.transmit = True
+        stop_child.ocaGroup = oca_group
+        stop_child.ocaType = 1
+
         contract = self.conn.get_contract()
-        self.ib.placeOrder(contract, order)
-        log.debug(f"Stop order #{order.orderId} repriced -> ${new_stop_price:.2f}")
+        handle.stop_trade = self.ib.placeOrder(contract, stop_child)
+        handle.last_stop_price = rounded
+        log.debug(f"Stop replaced -> ${rounded:.2f} (order #{stop_child.orderId})")
+
+    def update_target_price(self, handle: BracketHandle, new_target_price: float):
+        """Re-price take-profit via cancel-and-replace (same OCA constraint as stop)."""
+        if handle.target_trade is None:
+            return
+        rounded = self._round_price(new_target_price)
+        if handle.last_target_price and abs(rounded - handle.last_target_price) < 0.0001:
+            return
+        if not self._throttle_replace(handle):
+            return
+
+        old = handle.target_trade
+        old_order = old.order
+        qty = int(old_order.totalQuantity or handle.quantity or 0)
+        if qty < 1:
+            return
+        parent_id = int(old_order.parentId or handle.parent_order_id)
+        oca_group = handle.oca_group or f"bracket_{handle.parent_order_id}"
+        parent_filled = (
+            handle.parent_trade is not None
+            and handle.parent_trade.orderStatus is not None
+            and handle.parent_trade.orderStatus.status == "Filled"
+        )
+
+        if not self._cancel_and_wait(old):
+            log.debug("Target cancel pending — skipping replace this cycle")
+            return
+
+        target_child = LimitOrder("SELL", qty, rounded)
+        self._configure_order(target_child)
+        target_child.orderId = self.ib.client.getReqId()
+        if not parent_filled:
+            target_child.parentId = parent_id
+        target_child.transmit = True
+        target_child.ocaGroup = oca_group
+        target_child.ocaType = 1
+
+        contract = self.conn.get_contract()
+        handle.target_trade = self.ib.placeOrder(contract, target_child)
+        handle.last_target_price = rounded
+        log.debug(f"Target replaced -> ${rounded:.2f} (order #{target_child.orderId})")
 
     # ── Flatten: cancel brackets and market-sell ─────────────────────────────
 
+    def cancel_open_orders_for_symbol(self, symbol: str) -> int:
+        """Cancel resting orders for a symbol (prevents duplicate bracket stacks)."""
+        cancelled = 0
+        sym = (symbol or "").upper()
+        if not sym:
+            return 0
+        try:
+            self.ib.reqAllOpenOrders()
+            self.ib.sleep(0.3)
+            for trade in list(self.ib.openTrades()):
+                try:
+                    if getattr(trade.contract, "symbol", "").upper() != sym:
+                        continue
+                    st = trade.orderStatus.status if trade.orderStatus else ""
+                    if st in ("Filled", "Cancelled", "Inactive", "ApiCancelled"):
+                        continue
+                    self.ib.cancelOrder(trade.order)
+                    cancelled += 1
+                except Exception:
+                    pass
+            if cancelled:
+                self.ib.sleep(0.3)
+        except Exception as exc:
+            log.debug(f"Cancel orders for {sym}: {exc}")
+        return cancelled
+
+    def cancel_stale_open_orders(self) -> int:
+        """Cancel all resting orders on startup — clears orphaned brackets from prior runs."""
+        cancelled = 0
+        try:
+            self.ib.reqAllOpenOrders()
+            self.ib.sleep(0.5)
+            for trade in list(self.ib.openTrades()):
+                try:
+                    self.ib.cancelOrder(trade.order)
+                    cancelled += 1
+                except Exception:
+                    pass
+            if cancelled:
+                self.ib.sleep(0.5)
+                log.info(f"🧹 Cancelled {cancelled} stale open order(s) from prior session")
+        except Exception as exc:
+            log.debug(f"Stale order cleanup: {exc}")
+        return cancelled
+
+    def flatten_orphan_short_positions(self) -> int:
+        """Buy to cover unexpected short positions left on the paper account."""
+        covered = 0
+        try:
+            from ib_insync import Stock
+            self.ib.reqPositions()
+            self.ib.sleep(0.5)
+            for p in list(self.ib.positions()):
+                qty = float(p.position)
+                if qty >= -0.5:
+                    continue
+                sym = getattr(p.contract, "symbol", "") or ""
+                if not sym:
+                    continue
+                cover_qty = int(abs(qty))
+                if cover_qty < 1:
+                    continue
+                self.cancel_open_orders_for_symbol(sym)
+                try:
+                    qualified = self.ib.qualifyContracts(Stock(sym, "SMART", "USD"))
+                    contract = qualified[0] if qualified else p.contract
+                except Exception:
+                    contract = p.contract
+                order = MarketOrder("BUY", cover_qty)
+                self._configure_order(order)
+                trade = self.ib.placeOrder(contract, order)
+                self.ib.sleep(0.8)
+                st = trade.orderStatus.status if trade.orderStatus else ""
+                if st in ("Filled", "Submitted", "PreSubmitted"):
+                    log.info(f"🧹 Covering orphan short: BUY {cover_qty:,} {sym} ({st})")
+                    covered += 1
+                else:
+                    log.warning(
+                        f"Orphan short cover rejected for {sym} ({st}) "
+                        f"— will ignore on sync until RTH"
+                    )
+            if covered:
+                self.ib.sleep(0.5)
+        except Exception as exc:
+            log.debug(f"Orphan short cleanup: {exc}")
+        return covered
+
     def flatten_position(self, quantity: int, handle: Optional[BracketHandle] = None,
-                          urgent: bool = True) -> Optional[Trade]:
+                          urgent: bool = True, symbol: Optional[str] = None) -> Optional[Trade]:
         """
         Immediately exit the position. Cancels any resting bracket
         children first (so we don't end up double-selling), then sends
@@ -151,22 +378,102 @@ class BrokerExecutor:
         exits, where guaranteed execution matters more than price.
         """
         contract = self.conn.get_contract()
+        sym = (symbol or getattr(contract, "symbol", "") or "").upper()
+        if sym:
+            n = self.cancel_open_orders_for_symbol(sym)
+            if n:
+                log.debug(f"Cleared {n} open {sym} order(s) before flatten")
+            self.ib.sleep(0.4)
 
         if handle is not None:
             try:
-                if handle.stop_trade is not None:
-                    self.ib.cancelOrder(handle.stop_trade.order)
-                if handle.target_trade is not None:
-                    self.ib.cancelOrder(handle.target_trade.order)
+                for trade in (handle.stop_trade, handle.target_trade, handle.parent_trade):
+                    if trade is None:
+                        continue
+                    st = trade.orderStatus.status if trade.orderStatus else ""
+                    if st in ("Filled", "Cancelled", "Inactive", "ApiCancelled", "PendingCancel"):
+                        continue
+                    try:
+                        self.ib.cancelOrder(trade.order)
+                    except Exception:
+                        pass
+                self.ib.sleep(0.3)
             except Exception as exc:
                 log.warning(f"Could not cancel bracket children cleanly: {exc}")
 
         order = MarketOrder("SELL", quantity)
+        self._configure_order(order)
         trade = self.ib.placeOrder(contract, order)
         log.info(f"Flatten order submitted: SELL {quantity} sh (market)")
         return trade
 
     # ── Slippage-aware entry price decision ──────────────────────────────────
+
+    def decide_smart_entry(
+        self,
+        last_price: float,
+        bid: Optional[float],
+        ask: Optional[float],
+        shares: int,
+        avg_volume: float = 0.0,
+    ) -> Tuple[Optional[float], str]:
+        """
+        Pick entry order type for IB compliance.
+
+        Penny / NASDAQ-SCM stocks: NEVER plain MARKET — IB converts to a
+        regulatory-capped limit that can sit below the ask (error 2161) and
+        never fill. Large orders on thin books get the same treatment.
+
+        Returns (limit_price_or_None, mode) where None limit => MARKET parent.
+        """
+        if last_price <= 0 or shares < 1:
+            return None, "invalid"
+
+        penny_thr = float(getattr(self.cfg, "PENNY_PRICE_THRESHOLD", 1.0))
+        is_penny = last_price < penny_thr
+        max_market_sh = int(getattr(self.cfg, "MAX_MARKET_ENTRY_SHARES", 400))
+        thin_book = avg_volume > 0 and shares > avg_volume * float(
+            getattr(self.cfg, "LIQUIDITY_MAX_VOL_PCT", 0.08)
+        )
+
+        allow_market = (
+            not is_penny
+            and not thin_book
+            and shares <= max_market_sh
+            and getattr(self.cfg, "PENNY_USE_MARKET_ENTRY", False)
+        )
+
+        if allow_market:
+            limit_px, used = self.decide_entry_price(last_price, bid, ask)
+            if used and limit_px:
+                return self._round_price(limit_px), "limit_spread"
+            return None, "market"
+
+        ref = ask if ask and ask > 0 else last_price
+        reg_pct = float(getattr(self.cfg, "IB_REGULATORY_LIMIT_PCT", 0.01))
+        ib_max = last_price * (1.0 + reg_pct)
+
+        if bid and ask and ask > bid > 0:
+            spread_pct = (ask - bid) / last_price
+            if spread_pct > float(getattr(self.cfg, "MAX_ACCEPTABLE_SLIPPAGE_PCT", 0.004)) * 2:
+                # IB error 2161 — cap limit inside regulatory band, not above ask
+                limit = min(ask, ib_max)
+                log.info(
+                    f"Wide spread {spread_pct:.2%} — limit entry @ ${limit:.4f} "
+                    f"(bid ${bid:.4f} ask ${ask:.4f} IB max ${ib_max:.4f})"
+                )
+                return self._round_price(limit), "limit_wide_spread"
+
+        buf = float(
+            getattr(self.cfg, "PENNY_LIMIT_BUFFER_PCT", 0.006)
+            if is_penny
+            else getattr(self.cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.003)
+        )
+        limit = min(ref * (1.0 + buf), ib_max)
+        limit = max(limit, last_price * 1.0005)
+
+        mode = "limit_penny" if is_penny else ("limit_thin" if thin_book else "limit_smart")
+        return self._round_price(limit), mode
 
     def decide_entry_price(self, last_price: float, bid: Optional[float],
                             ask: Optional[float]) -> Tuple[Optional[float], bool]:

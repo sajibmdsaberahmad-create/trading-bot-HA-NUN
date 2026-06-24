@@ -93,7 +93,8 @@ def build_ppo_agent(env: gym.Env, cfg: BotConfig, model_path: Optional[str] = No
 
     if model_path and os.path.exists(model_path):
         log.info(f"Loading existing model from {model_path} …")
-        model = PPO.load(model_path, env=vec_env)
+        # CPU for stable sub-ms live inference (MPS adds latency + SB3 warnings for MLP)
+        model = PPO.load(model_path, env=vec_env, device="cpu")
         model.set_env(vec_env)
     else:
         log.info("Building new PPO agent from scratch …")
@@ -161,6 +162,7 @@ def predict_with_reasoning(model: PPO, obs: np.ndarray, cfg: BotConfig,
                             components: Dict[str, Any],
                             bar_df: Optional[pd.DataFrame] = None,
                             recent_rewards: Optional[List[float]] = None,
+                            for_entry: bool = False,
                             ) -> Tuple[int, float, Optional[str]]:
     """
     Full enhanced prediction pipeline: regime → PPO → ensemble → guardrail → action.
@@ -220,12 +222,16 @@ def predict_with_reasoning(model: PPO, obs: np.ndarray, cfg: BotConfig,
             recommendation="No regime data",
         )
     
+    buy_prob = float(ppo_probs[1]) if ppo_probs is not None and len(ppo_probs) > 1 else 0.0
+    if for_entry and ppo_action == 2:
+        ppo_action = 0
+
     # Step 4: Ensemble voting
     if ensemble is not None and cfg.USE_ENSEMBLE and bar_df is not None:
         try:
             votes = ensemble.get_votes(ppo_action, ppo_probs, ppo_value, regime_result, bar_df)
             ensemble_action, ensemble_conf, ensemble_reason = ensemble.ensemble_decision(
-                votes, min_confidence=cfg.CONFIDENCE_THRESHOLD
+                votes, min_confidence=cfg.CONFIDENCE_THRESHOLD, for_entry=for_entry,
             )
             # Use ensemble if confident, fall back to PPO if ensemble is uncertain
             if ensemble_conf >= cfg.CONFIDENCE_THRESHOLD:
@@ -234,16 +240,24 @@ def predict_with_reasoning(model: PPO, obs: np.ndarray, cfg: BotConfig,
                 reasoning = ensemble_reason
             else:
                 final_action = ppo_action
-                final_confidence = max(ppo_probs)
+                final_confidence = float(max(ppo_probs)) if ppo_probs is not None else 0.5
                 reasoning = f"Ensemble uncertain ({ensemble_conf:.0%}), using PPO"
         except Exception as exc:
             final_action = ppo_action
-            final_confidence = float(max(ppo_probs))
+            final_confidence = float(max(ppo_probs)) if ppo_probs is not None else 0.5
             reasoning = f"Ensemble error: {exc}"
     else:
         final_action = ppo_action
         final_confidence = float(max(ppo_probs)) if ppo_probs is not None else 0.5
         reasoning = "PPO only (no ensemble)"
+
+    if for_entry:
+        if final_action == 2:
+            final_action = 0
+        if final_action != 1 and buy_prob >= cfg.CONFIDENCE_THRESHOLD:
+            final_action = 1
+            final_confidence = buy_prob
+            reasoning = f"PPO buy prob {buy_prob:.0%} | {reasoning or ''}"
     
     # Step 5: Confidence scoring
     if confidence_scorer is not None:
@@ -253,11 +267,15 @@ def predict_with_reasoning(model: PPO, obs: np.ndarray, cfg: BotConfig,
                 features=obs[:cfg.N_FEATURES] if len(obs) >= cfg.N_FEATURES else None,
                 last_n_rewards=recent_rewards,
             )
-            # Override confidence if it's below threshold
+            # Low confidence: block exits, but let entry gate decide on BUY signals
             if confidence < cfg.CONFIDENCE_THRESHOLD:
-                log.debug(f"Low confidence {confidence:.0%} < {cfg.CONFIDENCE_THRESHOLD:.0%} -> HOLD")
-                final_action = 0
-                reasoning = f"Low confidence ({confidence:.0%} < {cfg.CONFIDENCE_THRESHOLD:.0%})"
+                if final_action == 2:
+                    log.debug(f"Low confidence {confidence:.0%} — blocking exit signal")
+                    final_action = 0
+                    reasoning = f"Low confidence for exit ({confidence:.0%})"
+                elif final_action == 0:
+                    reasoning = f"Low confidence ({confidence:.0%})"
+                # BUY (action==1): pass through — scalper entry gate applies threshold + technical override
             final_confidence = confidence
         except Exception:
             pass

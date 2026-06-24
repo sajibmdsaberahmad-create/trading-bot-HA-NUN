@@ -176,7 +176,7 @@ class BackgroundWorker:
     def _run_ollama_task(self, task: OllamaTask):
         """Execute Ollama call in background."""
         try:
-            return task.func(*task.args, **task.task.kwargs)
+            return task.func(*task.args, **task.kwargs)
         except Exception as exc:
             log.debug(f"Ollama background call failed: {exc}")
             return None

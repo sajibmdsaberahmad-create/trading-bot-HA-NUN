@@ -1,9 +1,9 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 10,
+  "total_awakenings": 48,
   "training_sessions": 4,
-  "trades_observed": 0,
+  "trades_observed": 13,
   "scans_performed": 4,
   "improvements_applied": 4,
   "reports_generated": 3,
@@ -474,9 +474,366 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #10",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T08:58:29.810791",
+      "age": "2d 21h 55m 41s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #11",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T09:49:36.324714",
+      "age": "2d 22h 46m 47s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #12",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T09:52:35.033356",
+      "age": "2d 22h 49m 46s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #13",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T09:59:08.055168",
+      "age": "2d 22h 56m 19s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #14",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T10:10:39.417540",
+      "age": "2d 23h 7m 50s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #15",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T10:17:22.696042",
+      "age": "2d 23h 14m 34s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #16",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T10:24:37.534586",
+      "age": "2d 23h 21m 48s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #17",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T10:28:23.547097",
+      "age": "2d 23h 25m 34s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #18",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T10:29:36.777883",
+      "age": "2d 23h 26m 48s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #19",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T10:50:37.823969",
+      "age": "2d 23h 47m 49s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #20",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T10:56:38.469507",
+      "age": "2d 23h 53m 49s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #21",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T11:11:34.948030",
+      "age": "3d 0h 8m 46s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #22",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T11:43:58.763725",
+      "age": "3d 0h 41m 10s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #23",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T11:48:13.995319",
+      "age": "3d 0h 45m 25s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #24",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T11:57:59.840410",
+      "age": "3d 0h 55m 11s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #25",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T12:13:12.720659",
+      "age": "3d 1h 10m 24s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #26",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T12:23:29.280349",
+      "age": "3d 1h 20m 40s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #27",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T12:54:56.210728",
+      "age": "3d 1h 52m 7s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #28",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:00:30.697510",
+      "age": "3d 1h 57m 42s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #29",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:01:34.266796",
+      "age": "3d 1h 58m 45s",
+      "type": "TRADE",
+      "message": "Observed trade: HYFM ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:01:48.662768",
+      "age": "3d 1h 58m 59s",
+      "type": "TRADE",
+      "message": "Observed trade: HYFM ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:01:56.023178",
+      "age": "3d 1h 59m 7s",
+      "type": "TRADE",
+      "message": "Observed trade: HYFM ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:02:48.591904",
+      "age": "3d 1h 59m 59s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #30",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:05:38.009858",
+      "age": "3d 2h 2m 49s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$-2962.08",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:06:45.276051",
+      "age": "3d 2h 3m 56s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #31",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:08:23.850002",
+      "age": "3d 2h 5m 35s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #32",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:12:41.779403",
+      "age": "3d 2h 9m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$-2020.20",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:23:52.787427",
+      "age": "3d 2h 21m 4s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$-11044.70",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:28:19.456292",
+      "age": "3d 2h 25m 30s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #33",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:31:12.290334",
+      "age": "3d 2h 28m 23s",
+      "type": "TRADE",
+      "message": "Observed trade: VMAR ? P&L=$-1.75",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:32:22.764375",
+      "age": "3d 2h 29m 34s",
+      "type": "TRADE",
+      "message": "Observed trade: VMAR ? P&L=$-19.71",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:37:11.103214",
+      "age": "3d 2h 34m 22s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$-1659.43",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:41:27.306520",
+      "age": "3d 2h 38m 38s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #34",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:45:37.160365",
+      "age": "3d 2h 42m 48s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #35",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:51:04.992738",
+      "age": "3d 2h 48m 16s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #36",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T13:53:06.847811",
+      "age": "3d 2h 50m 18s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #37",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:02:19.403791",
+      "age": "3d 2h 59m 30s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #38",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:04:01.877115",
+      "age": "3d 3h 1m 13s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:04:21.688815",
+      "age": "3d 3h 1m 33s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$+11.34",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:05:03.346713",
+      "age": "3d 3h 2m 14s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$+6.48",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:12:32.438942",
+      "age": "3d 3h 9m 43s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #39",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:15:16.570496",
+      "age": "3d 3h 12m 27s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #40",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:19:47.238230",
+      "age": "3d 3h 16m 58s",
+      "type": "TRADE",
+      "message": "Observed trade: None ? P&L=$-3.80",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:23:59.394380",
+      "age": "3d 3h 21m 10s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #41",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:32:51.192516",
+      "age": "3d 3h 30m 2s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #42",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:38:30.718880",
+      "age": "3d 3h 35m 42s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #43",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:42:19.536815",
+      "age": "3d 3h 39m 30s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #44",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:48:22.339281",
+      "age": "3d 3h 45m 33s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #45",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T14:55:18.922662",
+      "age": "3d 3h 52m 30s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #46",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T15:30:11.791372",
+      "age": "3d 4h 27m 23s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #47",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T15:32:13.517384",
+      "age": "3d 4h 29m 24s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #48",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-23T11:40:52.983258",
+  "last_awakening": "2026-06-24T15:32:13.516186",
   "current_version": "v20260622_090555",
   "version_history": [
     {
@@ -588,5 +945,39 @@
       "parent_version": "v20260622_090055"
     }
   ],
-  "last_training": "2026-06-22T09:05:55.492426"
+  "last_training": "2026-06-22T09:05:55.492426",
+  "mood": "anxious",
+  "total_pnl": -17693.85,
+  "win_history": [
+    0.0,
+    0.0,
+    0.0,
+    -2962.08,
+    -2020.2,
+    -11044.7,
+    -1.75,
+    -19.71,
+    -1659.43,
+    0.0,
+    11.34,
+    6.48,
+    -3.8
+  ],
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
+  "worst_streak": 10,
+  "veteran_xp": 105,
+  "veteran_level": "Rookie",
+  "skill_points": {
+    "exit_timing": 7,
+    "risk_management": 2,
+    "entry_timing": 2
+  },
+  "flights_completed": 8,
+  "hours_flown": 0.7999999999999999,
+  "sector_experience": {
+    "HYF": 3,
+    "VMA": 2
+  },
+  "best_streak": 2
 }

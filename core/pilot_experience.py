@@ -34,7 +34,7 @@ from dataclasses import dataclass, field, asdict
 import numpy as np
 
 from core.config import BotConfig
-from core.git_sync import push_change
+from core.git_sync import push_learning_checkpoint
 
 logger = logging.getLogger("PILOT")
 
@@ -260,16 +260,16 @@ class PilotExperienceSystem:
         return result
     
     def get_confidence_threshold(self) -> float:
-        """Get confidence threshold based on veteran level."""
+        """Confidence threshold by veteran level — veterans act faster."""
         level = self.state.level
         thresholds = {
-            "Cadet": 0.85,
-            "Rookie": 0.75,
-            "Aviator": 0.65,
-            "Ace": 0.55,
-            "Veteran": 0.45,
+            "Cadet": 0.58,
+            "Rookie": 0.54,
+            "Aviator": 0.50,
+            "Ace": 0.46,
+            "Veteran": 0.42,
         }
-        return thresholds.get(level, 0.65)
+        return thresholds.get(level, 0.52)
     
     def get_max_position_size(self) -> float:
         """Get position size multiplier based on level."""
@@ -351,8 +351,6 @@ class PilotExperienceSystem:
 def pilot_experience_to_git(pilot: PilotExperienceSystem):
     """Push pilot experience to GitHub."""
     status = pilot.get_veteran_status()
-    push_change(
-        f"pilot: {status['level']} ({status['total_xp']} XP) | WR: {status['win_rate']:.0%}",
-        files=["models/pilot_experience.json", "models/flight_log.jsonl"],
-        category="pilot",
+    push_learning_checkpoint(
+        f"pilot {status['level']} {status['total_xp']}XP WR={status.get('win_rate', 0):.0%}"
     )

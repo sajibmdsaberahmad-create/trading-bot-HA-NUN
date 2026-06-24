@@ -50,12 +50,32 @@ checkpoints/
 backups/
 
 # ════════════════════════════════════════════════════════════════════════════════
-# LOGS (Push to Logs repo if needed, otherwise local only)
+# LOGS & RUNTIME (Push to Logs repo if needed, otherwise local only)
 # ════════════════════════════════════════════════════════════════════════════════
 *.log
 logs/
+runtime/*
+!runtime/.gitkeep
+audit_trail.jsonl
+live_metrics.json
+bot_state.json
+models/ai_decision_log.jsonl
+models/thought_journal.jsonl
+models/experience_buffer.jsonl
+models/flight_log.jsonl
+models/version_history.jsonl
+models/account_snapshots.jsonl
+models/account_evaluation_log.jsonl
+models/trained_record_hashes.jsonl
+models/trade_journal.json
+performance.csv
 models/daily_reports/*.json
+models/daily_reports/*.txt
 !models/daily_reports/.gitkeep
+*.bak
+models/teacher_proxy.joblib
+models/hybrid_distill_state.json
+backtest_results/*.json
 
 # ════════════════════════════════════════════════════════════════════════════════
 # PYTHON / IDE

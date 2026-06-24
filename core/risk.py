@@ -84,6 +84,17 @@ def compute_atr(df: pd.DataFrame, period: int = 14) -> float:
     return float(atr) if not np.isnan(atr) else 0.0
 
 
+def safe_vwap(prices: np.ndarray, volumes: np.ndarray) -> float:
+    """Volume-weighted average that survives pre-market / zero-volume bars."""
+    px = np.asarray(prices, dtype=float)
+    vol = np.asarray(volumes, dtype=float)
+    if len(px) == 0:
+        return 0.0
+    if vol.sum() <= 0:
+        return float(np.mean(px))
+    return float(np.average(px, weights=vol))
+
+
 def compute_momentum_score(df: pd.DataFrame, lookback: int = 10) -> float:
     """
     Simple normalised momentum score in [-1, 1] used to bias the

@@ -354,7 +354,9 @@ class HiddenMarkovRegimeSwitching:
         self.hmm: Optional[GaussianHMM] = None
         self._regime_history: deque = deque(maxlen=1000)
         self._last_train_time: float = 0.0
-        self._lock = threading.Lock()
+        # RLock (reentrant): classify() holds the lock and calls _check_retrain()
+        # which re-acquires it. A plain Lock would deadlock here.
+        self._lock = threading.RLock()
         self._warmup_passed = False
         
         # Heuristic fallback parameters
@@ -383,7 +385,9 @@ class HiddenMarkovRegimeSwitching:
             log.info("🔄 Retraining HMRS HMM on historical data...")
             features = self._build_feature_sequence(df)
             if len(features) < 200:
-                log.warning("Insufficient data for HMRS training, skipping")
+                # Throttle retries (and log spam): wait before trying to train again.
+                self._last_train_time = time.time()
+                log.debug("Insufficient data for HMRS training, using heuristic regime")
                 return
             
             self.hmm = GaussianHMM(n_regimes=self.n_regimes, n_features=features.shape[1])
@@ -394,12 +398,19 @@ class HiddenMarkovRegimeSwitching:
             log.error(f"HMRS training failed: {e}")
     
     def _build_feature_sequence(self, df: pd.DataFrame, step: int = 5) -> np.ndarray:
-        """Build rolling-window feature sequence for HMM training."""
+        """Build a rolling-window sequence of 8-dim regime features for HMM training."""
+        window = self.feature_extractor.window
+        if len(df) <= window:
+            return np.zeros((1, 8))
         windows = []
-        for i in range(self.window, len(df) - step, step):
-            window_df = df.iloc[i:i+step]
+        for i in range(window, len(df) + 1, step):
+            window_df = df.iloc[i - window:i]
             feat = self.feature_extractor.extract(window_df)
             windows.append(feat)
+        # Bound sequence length so Baum-Welch (pure-numpy EM) stays fast and
+        # never blocks the trading loop for long. Keep the most recent samples.
+        if len(windows) > 600:
+            windows = windows[-600:]
         return np.array(windows) if windows else np.zeros((1, 8))
     
     def classify(self, df: pd.DataFrame) -> RegimeResult:

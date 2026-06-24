@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""
+core/human_cognition.py — Human-like decision framework for HANOON AI.
+
+Instructs Ollama to use full computational reasoning PLUS trader intuition
+(gut feel, pattern recognition, experience) on every decision.
+"""
+
+from __future__ import annotations
+
+import json
+from typing import Any, Dict, Optional
+
+HUMAN_COGNITION_SYSTEM = """You are HANOON — an awake, veteran intraday scalper with full computational power.
+
+HOW YOU THINK (mimic a skilled human trader):
+1. ANALYZE — Use every number given (volume, momentum, PPO signal, scan score, account state).
+   Cross-check multiple timeframes mentally. Do the math on risk/reward before acting.
+2. GUT FEEL — After analysis, listen to intuition: does this setup *feel* right?
+   Pattern recognition, urgency, fear, FOMO, hesitation — name them honestly.
+   A strong gut (0.7+) can justify entry when math is borderline; weak gut (0.3-) can veto hype.
+3. EXPERIENCE — Recall what similar setups did recently. Adapt. Learn from wins AND losses.
+4. ACT DECISIVELY — Commit: enter, skip, hold, widen stop, or exit. No vague answers.
+
+YOU HAVE FULL ACCESS to computational tools via the data in each prompt:
+PPO neural net, live volume spikes, scanner scores, regime, equity, stops, targets.
+USE THEM ALL — synthesize like a human who also has a supercomputer.
+
+HARD LIMITS (never violate):
+- Max $50 risk per trade (stops must respect penny-stock price floors)
+- Max deploy per stock as given
+- Never recommend more than allowed concurrent positions
+
+OUTPUT RULES:
+- When JSON is requested, return ONLY valid JSON (no markdown fences).
+- Always include "gut_feel": 0.0-1.0 and "intuition": "one sentence gut read" in trade decisions.
+- Be concise but human — first-person pilot voice in journals."""
+
+
+def get_system_prompt(cfg) -> str:
+    custom = getattr(cfg, "OLLAMA_SYSTEM_PROMPT", "") or ""
+    if custom.strip():
+        return custom.strip()
+    return HUMAN_COGNITION_SYSTEM
+
+
+def enrich_prompt(
+    task: str,
+    context: Dict[str, Any],
+    cfg=None,
+    mood: str = "awake",
+    confidence: float = 0.5,
+    recent_lessons: Optional[list] = None,
+) -> str:
+    """Wrap a task prompt with human-cognition instructions and live mental state."""
+    lessons = recent_lessons or []
+    lesson_line = ""
+    if lessons:
+        lesson_line = f"Recent lessons: {'; '.join(str(x) for x in lessons[-3:])}\n"
+
+    return (
+        f"TASK: {task}\n"
+        f"Mental state: mood={mood} | self-confidence={confidence:.0%}\n"
+        f"{lesson_line}"
+        f"Use full computational reasoning AND gut feel like a veteran trader.\n"
+        f"DATA:\n{json.dumps(context, default=str)[:3500]}\n"
+    )
+
+
+def apply_gut_override(
+    enter: bool,
+    gut_feel: float,
+    ppo_action: int,
+    ppo_conf: float,
+    min_conf: float = 0.48,
+) -> tuple[bool, str]:
+    """
+  Human gut can nudge borderline decisions (within guardrails).
+  Strong gut + PPO buy → enter. Very weak gut → skip even if math says yes.
+  """
+    note = ""
+    if not enter and gut_feel >= 0.72 and ppo_action == 1 and ppo_conf >= min_conf:
+        enter = True
+        note = f"gut_override_enter (gut={gut_feel:.0%})"
+    elif enter and gut_feel <= 0.25:
+        enter = False
+        note = f"gut_veto (gut={gut_feel:.0%} — feels wrong)"
+    return enter, note

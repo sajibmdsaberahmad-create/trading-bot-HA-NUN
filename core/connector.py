@@ -8,7 +8,7 @@ anti-flap protection to prevent reconnect storms during idle periods.
 """
 
 import time
-from typing import Optional
+from typing import Optional, Dict, Any
 
 try:
     from ib_insync import IB, Stock
@@ -48,6 +48,7 @@ class IBConnector:
         self._last_ping_ts: float = 0.0
         self._last_reconnect_ts: float = 0.0
         self._reconnect_count: int = 0  # total reconnects in this session
+        self._order_errors: Dict[int, Dict[str, Any]] = {}
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -139,10 +140,9 @@ class IBConnector:
         # Adaptive: during US market hours (9:30-16:00 ET) use configured timeout,
         # otherwise double it since data may not flow
         try:
-            from datetime import datetime as dt
-            from zoneinfo import ZoneInfo
-            now_et = dt.now(ZoneInfo("America/New_York"))
-            hour_min = now_et.hour * 60 + now_et.minute
+            from core.market_hours import now_et
+            current_et = now_et()
+            hour_min = current_et.hour * 60 + current_et.minute
             if not (9*60+30 <= hour_min < 16*60):
                 timeout = max(timeout * 4, 300)  # Off-hours: 5 min timeout
         except Exception:
@@ -243,10 +243,22 @@ class IBConnector:
     def _on_disconnected(self):
         log.warning("IB connection dropped (disconnectedEvent fired).")
 
+    def pop_order_error(self, req_id: int) -> Optional[Dict[str, Any]]:
+        """Return and clear IB error recorded for an order reqId."""
+        return self._order_errors.pop(int(req_id), None)
+
     def _on_error(self, reqId, errorCode, errorString, contract):
         # Pure informational error codes from IB that aren't real problems
         BENIGN = {2104, 2106, 2107, 2108, 2119, 2158}
         self.touch()
+        if errorCode in (2161, 399, 201, 202):
+            from core.broker import parse_ib_regulatory_cap
+            info: Dict[str, Any] = {"code": errorCode, "message": errorString}
+            if errorCode == 2161:
+                cap = parse_ib_regulatory_cap(errorString)
+                if cap:
+                    info["price_cap"] = cap
+            self._order_errors[int(reqId)] = info
         if errorCode in BENIGN:
             return
         log.warning(f"IB error {errorCode}: {errorString} (reqId={reqId})")

@@ -19,7 +19,7 @@ from collections import defaultdict
 import numpy as np
 
 from core.config import BotConfig
-from core.git_sync import push_change
+from core.git_sync import push_learning_checkpoint
 
 logger = logging.getLogger("PATTERNS")
 
@@ -259,8 +259,6 @@ class PatternMemoryBank:
 def pattern_memory_to_git(patterns: PatternMemoryBank):
     """Push pattern memory to GitHub."""
     stats = patterns.get_memory_stats()
-    push_change(
-        f"patterns: {stats['total_patterns']} templates | WR: {stats['win_rate']:.0%}",
-        files=["models/pattern_memory_bank.json"],
-        category="patterns",
+    push_learning_checkpoint(
+        f"patterns {stats['total_patterns']} templates WR={stats['win_rate']:.0%}"
     )

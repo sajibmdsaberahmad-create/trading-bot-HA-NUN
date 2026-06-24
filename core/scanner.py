@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 
 from core.config import BotConfig
 from core.notify import log
+from core.risk import safe_vwap
 
 
 @dataclass
@@ -67,81 +68,70 @@ class StockScanner:
         self._last_dynamic_fetch: float = 0.0
         self._dynamic_fetch_interval: int = 20  # Faster refresh  # Refresh every 30 seconds
     
-    def get_dynamic_universe(self, ib_connector=None) -> List[str]:
+    def get_dynamic_universe(self, ib_connector=None, force: bool = False) -> List[str]:
         """
         Fetch live tickers from IB's most active scanner.
-        Returns tickers currently trading with high volume.
+        Returns tickers currently trading with high volume — no static fallback.
         """
         import time
         now = time.time()
-        if self._dynamic_universe and (now - self._last_dynamic_fetch) < self._dynamic_fetch_interval:
+        if not force and self._dynamic_universe and (now - self._last_dynamic_fetch) < self._dynamic_fetch_interval:
             return self._dynamic_universe[:100]
-        
+
+        if force:
+            self._last_dynamic_fetch = 0.0
+            self._dynamic_universe = []
+
         tickers = []
         if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
             try:
                 from ib_insync import ScannerSubscription
-                # Multiple scan types for comprehensive coverage
-                scan_codes = ['TOP_VOLUME', 'HOT_BY_PRICE', 'HOT_BY_VOLUME']
-                
+                # Paper accounts often block TOP_VOLUME — prefer codes that work on paper
+                scan_codes = [
+                    'HOT_BY_VOLUME', 'HOT_BY_PRICE', 'TOP_PERC_GAIN',
+                    'MOST_ACTIVE', 'TOP_VOLUME',
+                ]
+                ib = ib_connector.ib
+                disabled_codes: set = set()
+
                 for scan_code in scan_codes:
+                    if scan_code in disabled_codes:
+                        continue
                     scan = ScannerSubscription(
                         instrument='STK',
                         locationCode='STK.US',
-                        scanCode=scan_code
+                        scanCode=scan_code,
                     )
-                    scan_results = ib_connector.ib.reqScannerData(scan, 0, '')
+                    try:
+                        scan_results = ib.reqScannerData(scan, 0, '')
+                    except Exception as exc:
+                        if '162' in str(exc) or 'disabled' in str(exc).lower():
+                            disabled_codes.add(scan_code)
+                            log.debug(f"Scanner {scan_code} unavailable — skipping")
+                        continue
+                    finally:
+                        try:
+                            ib.cancelScannerSubscription(scan)
+                        except Exception:
+                            pass
                     for result in scan_results:
                         if result.contractDetails and result.contractDetails.contract:
                             symbol = result.contractDetails.contract.symbol
                             if symbol and len(symbol) <= 5 and symbol not in tickers:
                                 tickers.append(symbol)
-                
+                    if len(tickers) >= 40:
+                        break
+
                 if tickers:
                     self._dynamic_universe = tickers[:100]
                     self._last_dynamic_fetch = now
                     log.info(f"Dynamic universe: {len(tickers)} live tickers from IB scanner")
                 else:
-                    log.warning("No tickers returned from IB scanner - market may be closed")
+                    log.warning("No tickers returned from IB scanner — check market hours / subscription")
             except Exception as exc:
                 log.warning(f"IB scanner error: {exc}")
-        
+
         return tickers[:100]
-        """
-        Fetch live tickers from IB's most active scanner.
-        Falls back to PENNY_STOCK_UNIVERSE if scanner unavailable.
-        """
-        import time
-        now = time.time()
-        if self._dynamic_universe and (now - self._last_dynamic_fetch) < self._dynamic_fetch_interval:
-            return self._dynamic_universe[:50]
-        
-        tickers = []
-        if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
-            try:
-                from ib_insync import ScannerSubscription, TagValue
-                scan = ScannerSubscription(
-                    instrument='STK',
-                    locationCode='STK.US',
-                    scanCode='TOP_VOLUME'
-                )
-                scan_results = ib_connector.ib.reqScannerData(scan)
-                for result in scan_results[:100]:
-                    if result.contractDetails and result.contractDetails.contract:
-                        symbol = result.contractDetails.contract.symbol
-                        if symbol and len(symbol) <= 5:
-                            tickers.append(symbol)
-                if tickers:
-                    self._dynamic_universe = tickers
-                    self._last_dynamic_fetch = now
-                    log.info(f"Dynamic universe: {len(tickers)} tickers from IB scanner")
-            except Exception as exc:
-                log.debug(f"IB scanner unavailable, using fallback universe: {exc}")
-        
-        if not tickers:
-            tickers = PENNY_STOCK_UNIVERSE[:50]
-        
-        return tickers[:50]
     
     def get_universe(self) -> List[str]:
         """Return the full scanning universe."""
@@ -198,7 +188,7 @@ class StockScanner:
         vwap_dist = 0.0
         typical = (df["high"] + df["low"] + df["close"]) / 3.0
         if "volume" in df.columns:
-            vwap = np.average(typical, weights=volume)
+            vwap = safe_vwap(typical.values, volume.values)
             vwap_dist = (current_price - vwap) / (vwap + 1e-9) * 100.0
         
         # ATR %
@@ -326,6 +316,9 @@ class StockScanner:
         return "\n".join(lines)
 
 
+# Tickers that fail IB contract qualification (delisted / renamed / no data)
+CONTRACT_BLACKLIST = frozenset({"MNMD", "MAXN", "NOVA", "X", "CEI", "NKLA", "GOEV"})
+
 # Pre-built universe for penny stock momentum
 PENNY_STOCK_UNIVERSE = [
     "SOFI", "PLTR", "MARA", "RIOT", "COIN", "RKLB", "ASTS",
@@ -342,9 +335,8 @@ PENNY_STOCK_UNIVERSE = [
     "ACHR", "JOBY", "PDYN",          # Aviation / defense
     "IONQ", "QMCO", "RGTI",          # Quantum computing
     "HIVE", "CLSK", "WULF",          # Bitcoin miners
-    "VKTX", "CERO", "MNMD",          # Biotech/psychedelics
-    "MAXN", "ARRY", "NOVA",          # Solar
-    "VALE", "X", "CLF",              # Materials
+    "VKTX", "CERO", "ARRY",          # Biotech / solar
+    "VALE", "CLF",                   # Materials
     "NIO", "XPEV", "LI",             # Chinese EV
     "HSAI", "BABA", "JD",            # Chinese tech
 ]

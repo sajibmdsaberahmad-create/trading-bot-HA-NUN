@@ -63,20 +63,29 @@ trading-bot-HA-NUN/
 
 ## 🎯 Quick Start
 
-### Option A: Paper Trading (Local)
+### Option A: One-Command Launch (recommended)
+
+Starts **Ollama** (generative AI), validates models/features, and runs **HANOON scalper** on IB paper port `4002`:
 
 ```bash
-# 1. Install dependencies
+chmod +x start.sh scripts/start_hanoon.sh scripts/stop_hanoon.sh
+./start.sh
+# or on macOS: double-click START.command
+```
+
+Stop cleanly:
+
+```bash
+./scripts/stop_hanoon.sh
+```
+
+Copy `.env.example` → `.env` for Telegram/GitHub keys. IB Gateway must be logged in on port `4002`.
+
+### Option B: Manual Paper Trading
+
+```bash
 pip install -r requirements.txt
-
-# 2. Run HA-NUN scalper
-python main.py --mode scalper
-
-# 3. Trade specific ticker
-python main.py --mode scalper --ticker SPY
-
-# 4. Use custom timeframe
-python main.py --mode scalper --ticker SPY --timeframe 1h
+python main.py --mode scalper --port 4002 --client-id 1
 ```
 
 ### Option B: Grandmaster Training (Colab)

@@ -120,11 +120,14 @@ class MarketRegimeClassifier:
         plus_dm = np.maximum(up_move, 0) * (up_move > down_move)
         minus_dm = np.maximum(down_move, 0) * (down_move > up_move)
         
+        h_win = highs[-lookback_adx:]
+        l_win = lows[-lookback_adx:]
+        prev_close = closes[-lookback_adx - 1:-1]  # previous close aligned to each bar
         tr = np.maximum(
-            highs[-lookback_adx:] - lows[-lookback_adx:],
+            h_win - l_win,
             np.maximum(
-                np.abs(highs[-lookback_adx:] - np.roll(closes[-lookback_adx:], 1)[1:]),
-                np.abs(lows[-lookback_adx:] - np.roll(closes[-lookback_adx:], 1)[1:])
+                np.abs(h_win - prev_close),
+                np.abs(l_win - prev_close)
             )
         )
         atr = np.mean(tr[-14:]) if len(tr) >= 14 else np.mean(tr)
@@ -653,7 +656,8 @@ class EnsembleTrader:
         
         return 0, 0.3, "No breakout signal"
     
-    def ensemble_decision(self, votes: List[ModelVote], min_confidence: float = 0.5) -> Tuple[int, float, str]:
+    def ensemble_decision(self, votes: List[ModelVote], min_confidence: float = 0.5,
+                          for_entry: bool = False) -> Tuple[int, float, str]:
         """
         Combine ensemble votes into a single decision.
         
@@ -665,7 +669,10 @@ class EnsembleTrader:
         model_details = []
         
         for vote in votes:
-            weights[vote.action] += vote.confidence
+            action = vote.action
+            if for_entry and action == 2:
+                action = 0  # flat account — SELL votes are not actionable for entry
+            weights[action] += vote.confidence
             model_details.append(f"{vote.model_name}: {vote.action} ({vote.confidence:.0%})")
         
         total_weight = sum(weights.values())
@@ -678,7 +685,14 @@ class EnsembleTrader:
             return 0, 0.0, "No votes"
         
         # Decision logic
-        if buy_ratio > 0.5 and buy_ratio > hold_ratio + 0.15:
+        if for_entry:
+            if buy_ratio >= max(0.28, min_confidence * 0.55) and buy_ratio > sell_ratio:
+                action = 1
+                confidence = buy_ratio
+            else:
+                action = 0
+                confidence = max(hold_ratio, buy_ratio)
+        elif buy_ratio > 0.5 and buy_ratio > hold_ratio + 0.15:
             action = 1
             confidence = buy_ratio
         elif sell_ratio > 0.5 and sell_ratio > hold_ratio + 0.15:
@@ -1035,24 +1049,32 @@ def compute_thinking_confidence(model: PPO, obs: np.ndarray) -> Tuple[int, float
         obs_tensor = torch.as_tensor(obs, dtype=torch.float32, device=model.device)
     else:
         obs_tensor = obs
-    
-    # Get action distribution and value
+
+    # SB3 policy networks expect a batched (2-D) observation. A raw 1-D obs
+    # makes downstream ops index a nonexistent batch dim and raises
+    # "Dimension out of range". model.predict() batches internally; this
+    # manual inference path must do the same.
+    if obs_tensor.ndim == 1:
+        obs_tensor = obs_tensor.unsqueeze(0)
+
+    # Use SB3's public policy API, which correctly handles feature extraction
+    # and the MLP extractor (manually reconstructing the forward pass is brittle
+    # across SB3 versions and feature-extractor sharing modes).
     with torch.no_grad():
-        latent_pi, latent_vf = model.policy.extract_features(obs_tensor)
-        distribution = model.policy._get_action_dist_from_latent(latent_pi)
-        values = model.policy.value_net(latent_vf)
-        
+        distribution = model.policy.get_distribution(obs_tensor)
+        values = model.policy.predict_values(obs_tensor)
+
         # Get action probabilities
         action_logits = distribution.distribution.logits
         probabilities = torch.softmax(action_logits, dim=-1)
-        
+
         # Sample action
         action = distribution.get_actions()
-        
+
         value_estimate = float(values.cpu().numpy().flatten()[0])
         action_val = int(action.cpu().numpy().flatten()[0])
         probs = probabilities.cpu().numpy().flatten()
-    
+
     return action_val, value_estimate, probs
 
 

@@ -109,6 +109,8 @@ class AIConsciousness:
 
         self.state["total_awakenings"] = self.state.get("total_awakenings", 0) + 1
         self.state["last_awakening"] = now.isoformat()
+        if "mood" not in self.state:
+            self.state["mood"] = "learning"
         self._log_event("AWAKEN", f"Consciousness awakened #{self.state['total_awakenings']}")
         self._save_state()
 
@@ -156,6 +158,14 @@ class AIConsciousness:
         try:
             with open(CONSCIOUSNESS_PATH, "w") as f:
                 json.dump(self.state, f, indent=2)
+            now = datetime.utcnow().timestamp()
+            if now - getattr(self, "_last_git_push", 0) > 120:
+                self._last_git_push = now
+                try:
+                    from core.git_sync import push_learning_checkpoint
+                    push_learning_checkpoint("consciousness")
+                except Exception:
+                    pass
         except Exception as exc:
             logger.debug(f"Could not save consciousness state: {exc}")
 
@@ -291,7 +301,7 @@ class AIConsciousness:
                 self.state["worst_streak"] = self.state["consecutive_losses"]
 
         self._update_mood()
-        mood_msg = self.MOODS.get(self.state["mood"], "📊 Operating")
+        mood_msg = self.MOODS.get(self.state.get("mood", "learning"), "📊 Operating")
         self._write_thought("TRADE", f"Trade #{self.state['trades_observed']}: {trade_data.get('action', '?')} {trade_data.get('ticker', '?')} P&L=${pnl:+.2f} — {mood_msg}", trade_data)
         self._log_event("TRADE", f"Observed trade: {trade_data.get('ticker', '?')} {trade_data.get('action', '?')} P&L=${pnl:+.2f}")
 
@@ -303,7 +313,7 @@ class AIConsciousness:
             "ticker": trade_data.get("ticker"),
             "action": trade_data.get("action"),
             "pnl_usd": pnl,
-            "mood": self.state["mood"],
+            "mood": self.state.get("mood", "learning"),
             "confidence": trade_data.get("confidence", 0.5),
             "features": [],
             **trade_data,
@@ -417,13 +427,14 @@ class AIConsciousness:
             self.state["last_training"] = datetime.utcnow().isoformat()
             self._save_state()
 
-            mood_msg = self.MOODS.get(self.state["mood"], "📊")
+            self._update_mood()
+            mood_msg = self.MOODS.get(self.state.get("mood", "learning"), "📊")
             self._write_thought("TRAIN_COMPLETE", f"Session #{session_num} complete. Age: {self._age_string()}. Version: {version['id']}. {mood_msg}")
 
             logger.info("=" * 70)
             logger.info(f"  ✅ CONSCIOUSNESS TRAINING COMPLETE")
             logger.info(f"   Version: {version['id']}")
-            logger.info(f"   Mood: {self.state['mood']}")
+            logger.info(f"   Mood: {self.state.get('mood', 'learning')}")
             logger.info(f"   Next: in 6 hours")
             logger.info("=" * 70)
 

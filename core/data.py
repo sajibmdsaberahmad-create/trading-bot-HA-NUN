@@ -43,6 +43,16 @@ from core.connector import IBConnector
 from core.notify import log
 
 
+def _utc_timestamp(dt) -> pd.Timestamp:
+    """Normalize IB/datetime timestamps to UTC without double tz assignment."""
+    if dt is None:
+        return pd.Timestamp.utcnow()
+    ts = pd.Timestamp(dt)
+    if ts.tzinfo is None:
+        return ts.tz_localize("UTC")
+    return ts.tz_convert("UTC")
+
+
 class DataManager:
     """Pulls historical data and manages the live tick/bar buffers."""
 
@@ -96,11 +106,15 @@ class DataManager:
 
     def fetch_historical(self, duration: Optional[str] = None,
                           bar_size: Optional[str] = None,
-                          use_rth: bool = True) -> pd.DataFrame:
+                          use_rth: bool = True,
+                          quiet: bool = False) -> pd.DataFrame:
         duration = duration or self.cfg.HISTORY_DURATION
         bar_size = bar_size or self.cfg.HISTORY_BAR_SIZE
 
-        log.info(f"Fetching {duration} of {bar_size} bars for {self.cfg.TICKER} …")
+        if quiet:
+            log.debug(f"Fetching {duration} of {bar_size} bars for {self.cfg.TICKER} …")
+        else:
+            log.info(f"Fetching {duration} of {bar_size} bars for {self.cfg.TICKER} …")
         contract = self._get_contract()
 
         bars = self.ib.reqHistoricalData(
@@ -130,7 +144,8 @@ class DataManager:
         df = df.sort_index().dropna()
         df = df[df["close"] > 0]
 
-        log.info(
+        fetch_log = log.debug if quiet else log.info
+        fetch_log(
             f"Fetched {len(df):,} bars "
             f"[{df.index[0].strftime('%Y-%m-%d')} -> {df.index[-1].strftime('%Y-%m-%d')}]"
         )
@@ -152,7 +167,7 @@ class DataManager:
                     ticker = self.ib.reqTickByTickData(contract, "Last", 0, False)
                     ticker.updateEvent += self._on_tick
                     self._tick_handle = ticker
-                    log.info("Tick-by-tick stream started (every trade print, sub-second).")
+                    log.debug("Tick-by-tick stream started (every trade print, sub-second).")
                     return
                 except Exception as exc:
                     log.warning(
@@ -175,15 +190,15 @@ class DataManager:
 
     def stop_tick_stream(self):
         try:
-            if self._tick_handle is not None:
-                self.ib.cancelTickByTickData(self.conn.get_contract(), "Last")
+            if self._tick_handle is not None and self._contract is not None:
+                self.ib.cancelTickByTickData(self._contract, "Last")
             if self._realtime_handle is not None:
                 self.ib.cancelRealTimeBars(self._realtime_handle)
         except Exception:
             pass
         self._tick_handle = None
         self._realtime_handle = None
-        log.info("Live data stream cancelled.")
+        log.debug("Live data stream cancelled.")
 
     def _on_tick(self, ticker):
         self.conn.touch()
@@ -192,7 +207,7 @@ class DataManager:
         for t in ticker.tickByTicks:
             price = float(t.price)
             size  = int(t.size)
-            ts    = pd.Timestamp(t.time, tz="UTC") if t.time else pd.Timestamp.utcnow()
+            ts    = _utc_timestamp(t.time)
             if price <= 0:
                 continue
 
@@ -215,7 +230,7 @@ class DataManager:
             return
         last = bars[-1]
         price = float(last.close)
-        ts = pd.Timestamp(last.time, tz="UTC")
+        ts = _utc_timestamp(last.time)
 
         self.last_tick_price = price
         self.last_tick_time = ts
@@ -299,9 +314,25 @@ class DataManager:
             log.warning(f"Could not seed buffer from historical: {exc}")
             log.warning("Bot will wait for live bars to accumulate.")
 
+    def seed_buffer_from_dataframe(self, df: pd.DataFrame, n_bars: int = 60):
+        """Pre-fill the 1-min bar buffer from an existing OHLCV dataframe."""
+        if df is None or len(df) == 0:
+            return
+        tail = df.tail(n_bars)
+        for ts, row in tail.iterrows():
+            self._bar_buffer.append({
+                "datetime": ts,
+                "open": float(row["open"]),
+                "high": float(row["high"]),
+                "low": float(row["low"]),
+                "close": float(row["close"]),
+                "volume": int(row["volume"]),
+            })
+        log.debug(f"Buffer seeded from dataframe: {len(self._bar_buffer)} bars")
+
     def get_bar_dataframe(self) -> Optional[pd.DataFrame]:
         """1-minute decision bars, for the PPO agent."""
-        min_required = self.cfg.WINDOW_SIZE + 2
+        min_required = 20  # enough for uptrend/spike checks on locked targets
         if len(self._bar_buffer) < min_required:
             return None
         df = pd.DataFrame(list(self._bar_buffer))

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-main.py — Entry point for HA-NUN Single-Focus Institutional Scalper.
+main.py — Entry point for HANOON Single-Focus Institutional Scalper.
 See docs/LAUNCH_GUIDE.md for full setup.
 
 QUICK START
-  python main.py --mode scalper             # HA-NUN institutional penny stock scalper
+  python main.py --mode scalper             # HANOON institutional penny stock scalper
   python main.py --mode warmup              # Train PPO (legacy)
   python main.py --mode trade               # PPO paper/live trade (legacy)
   python main.py --mode evaluate            # Offline backtest
@@ -16,6 +16,11 @@ import argparse
 import sys
 import os
 import time
+
+# Always run on US Eastern clock regardless of device timezone (e.g. Bangladesh)
+os.environ["TZ"] = "America/New_York"
+if hasattr(time, "tzset"):
+    time.tzset()
 
 from core.config import BotConfig
 from core.notify import log, Notifier
@@ -29,11 +34,11 @@ from core.git_sync import init as git_sync_init
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="main.py",
-        description="HA-NUN Single-Focus Institutional Scalper — IB Gateway Edition v3.5",
+        description="HANOON Single-Focus Institutional Scalper — IB Gateway Edition v3.5",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 QUICK START:
-  1. python main.py --mode scalper          # HA-NUN institutional scalper
+  1. python main.py --mode scalper          # HANOON institutional scalper
   2. python main.py --mode warmup           # Train PPO (legacy)
   3. python main.py --mode trade            # PPO paper/live trade (legacy)
   4. python main.py --mode advanced-train   # Train ALL models (PPO + Transformer + LSTM)
@@ -50,11 +55,11 @@ EXAMPLES:
     parser.add_argument("--mode", choices=["warmup", "trade", "evaluate", "scalper",
                                             "advanced-train", "fusion-trade",
                                             "fusion-backtest"], required=True,
-                         help="scalper: HA-NUN | warmup: train PPO | trade: PPO live | "
+                         help="scalper: HANOON | warmup: train PPO | trade: PPO live | "
                               "evaluate: backtest | advanced-train: train all AI models | "
                               "fusion-trade: multi-model AI trade | fusion-backtest: multi-model backtest")
     parser.add_argument("--algo", choices=["ppo", "scalper", "fusion"], default=None,
-                         help="Override: ppo (legacy), scalper (HA-NUN), or fusion (multi-model AI)")
+                         help="Override: ppo (legacy), scalper (HANOON), or fusion (multi-model AI)")
     parser.add_argument("--ticker", default="SPY", help="Ticker symbol (default: SPY)")
     parser.add_argument("--cash", default=1_000.0, type=float, help="Starting capital in USD (default: 1000)")
     parser.add_argument("--port", default=7497, type=int, help="IB Gateway port: 7497=paper, 7496=live")
@@ -223,12 +228,14 @@ def run_fusion_backtest(args):
         cash_ratio = cash / (cash + 1.0)
         obs = np.concatenate([window, [cash_ratio, 0.0]]).astype(np.float32)
         
-        # Build DataFrame for ensemble/regime
+        # Build DataFrame for ensemble/regime (guard against short slices early in loop)
+        lo = max(0, i - 50)
+        seg = prices[lo:i]
         bdf = pd.DataFrame({
-            'close': prices[i - 50:i],
-            'high': prices[i - 50:i] * 1.002,
-            'low': prices[i - 50:i] * 0.998,
-            'volume': np.random.randint(1_000_000, 10_000_000, 50),
+            'close': seg,
+            'high': seg * 1.002,
+            'low': seg * 0.998,
+            'volume': np.random.randint(1_000_000, 10_000_000, len(seg)),
         })
         
         # Get fused decision
@@ -396,7 +403,7 @@ if __name__ == "__main__":
         log.warning("  paper mode on the live port.")
         log.warning("=" * 70)
 
-    log.info(f"HA-NUN | mode={args.mode.upper()} | ticker={cfg.TICKER} | "
+    log.info(f"HANOON | mode={args.mode.upper()} | ticker={cfg.TICKER} | "
               f"capital=${cfg.INITIAL_CASH:,.0f} | port={cfg.IB_PORT} | client_id={cfg.IB_CLIENT_ID}")
 
     if args.mode == "warmup":
@@ -430,15 +437,15 @@ if __name__ == "__main__":
         notifier = Notifier(cfg)
         connector = IBConnector(cfg, notifier)
         if not connector.connect():
-            log.error("Cannot start HA-NUN — IB connection failed.")
+            log.error("Cannot start HANOON — IB connection failed.")
             sys.exit(1)
 
         try:
             scalper = ScalperRunner(connector, cfg, notifier)
             scalper.run()
         except Exception as exc:
-            log.exception(f"Fatal error in HA-NUN loop: {exc}")
-            notifier.error("HA-NUN main loop", str(exc))
+            log.exception(f"Fatal error in HANOON loop: {exc}")
+            notifier.error("HANOON main loop", str(exc))
             connector.disconnect()
             sys.exit(1)
 

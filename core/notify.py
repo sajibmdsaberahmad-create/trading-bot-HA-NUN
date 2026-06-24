@@ -32,25 +32,37 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import json
+from datetime import datetime
 from email.mime.text import MIMEText
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from core.config import BotConfig
+from core.market_hours import MARKET_TZ
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_logger(log_path: str = "HA-NUN.log") -> logging.Logger:
+class ETFormatter(logging.Formatter):
+    """Log timestamps always in US Eastern (NYSE clock)."""
+
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created, MARKET_TZ)
+        if datefmt:
+            return dt.strftime(datefmt)
+        return dt.strftime("%Y-%m-%d %H:%M:%S ET")
+
+
+def build_logger(log_path: str = "HANOON.log") -> logging.Logger:
     """
     Build the project-wide logger. Writes to both stdout and a rotating
     log file. ib_insync's own chatty network logs are suppressed to
     WARNING so they don't drown out the bot's own status lines.
     """
-    fmt = logging.Formatter(
+    fmt = ETFormatter(
         fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        datefmt="%Y-%m-%d %H:%M:%S ET",
     )
 
     fh = logging.FileHandler(log_path, encoding="utf-8")
@@ -58,7 +70,7 @@ def build_logger(log_path: str = "HA-NUN.log") -> logging.Logger:
     sh = logging.StreamHandler(sys.stdout)
     sh.setFormatter(fmt)
 
-    logger = logging.getLogger("HA-NUN")
+    logger = logging.getLogger("HANOON")
     logger.setLevel(logging.INFO)
     if not logger.handlers:
         logger.addHandler(fh)
@@ -87,6 +99,7 @@ class Notifier:
 
     def __init__(self, cfg: BotConfig):
         self.cfg = cfg
+        self._ai_composer = None
 
         self.telegram_token = cfg.TELEGRAM_BOT_TOKEN
         self.telegram_chat  = cfg.TELEGRAM_CHAT_ID
@@ -123,33 +136,73 @@ class Notifier:
         if not self.telegram_ready and not self.email_ready:
             log.info("Notifications: console/log file only (no Telegram/email configured)")
 
+    def attach_ai_brain(self, ai_commander=None, autopilot=None, consciousness=None, pilot=None):
+        """Wire Ollama composer after AI subsystems initialize."""
+        if not getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True):
+            return
+        try:
+            from core.ai_notifier import TelegramAIComposer
+            self._ai_composer = TelegramAIComposer(
+                self.cfg,
+                ai_commander=ai_commander,
+                autopilot=autopilot,
+                consciousness=consciousness,
+                pilot=pilot,
+            )
+            log.info("Notifications: AI Telegram composer ✓")
+        except Exception as exc:
+            log.debug(f"AI notifier attach skipped: {exc}")
+
+    def smart(self, event_type: str, context: Dict[str, Any], fallback: str):
+        """AI-crafted Telegram alert with structured fallback."""
+        from core.ai_notifier import send_smart_telegram
+        send_smart_telegram(self, event_type, context, fallback)
+
     # ── Public send methods (one per event type) ───────────────────────────
 
     def trade_opened(self, side: str, ticker: str, qty: float, price: float,
                       stop_price: float, target_price: float, risk_usd: float):
         bal = getattr(self.cfg, "_latest_account_balance", None)
-        bal_str = f"\nAccount: ${bal:,.2f}" if bal else ""
-        msg = (
+        fallback = (
             f"🟢 TRADE OPENED\n"
             f"{side} {qty:.2f} {ticker} @ ${price:.2f}\n"
             f"Stop: ${stop_price:.2f}  |  Target: ${target_price:.2f}\n"
-            f"Risking: ${risk_usd:.2f}{bal_str}"
+            f"Risking: ${risk_usd:.2f}"
+            + (f"\nAccount: ${bal:,.2f}" if bal else "")
         )
-        if self.cfg.NOTIFY_ON_TRADE_OPEN:
-            self._send_all(msg)
+        if not self.cfg.NOTIFY_ON_TRADE_OPEN:
+            return
+        ctx = {
+            "ticker": ticker, "shares": qty, "entry": price, "price": price,
+            "stop": stop_price, "target": target_price, "risk_usd": risk_usd,
+            "side": side,
+        }
+        if getattr(self, "_ai_composer", None) and getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True):
+            self.smart("trade_opened", ctx, fallback)
+        else:
+            self._send_all(fallback)
 
     def trade_closed(self, ticker: str, qty: float, price: float,
                       pnl_usd: float, pnl_pct: float, reason: str):
         emoji = "✅" if pnl_usd >= 0 else "🔴"
         bal = getattr(self.cfg, "_latest_account_balance", None)
-        bal_str = f"\nAccount: ${bal:,.2f}" if bal else ""
-        msg = (
+        fallback = (
             f"{emoji} TRADE CLOSED ({reason})\n"
             f"{qty:.2f} {ticker} @ ${price:.2f}\n"
-            f"P&L: ${pnl_usd:+.2f} ({pnl_pct:+.2f}%){bal_str}"
+            f"P&L: ${pnl_usd:+.2f} ({pnl_pct:+.2f}%)"
+            + (f"\nAccount: ${bal:,.2f}" if bal else "")
         )
-        if self.cfg.NOTIFY_ON_TRADE_CLOSE:
-            self._send_all(msg)
+        if not self.cfg.NOTIFY_ON_TRADE_CLOSE:
+            return
+        ctx = {
+            "ticker": ticker, "shares": qty, "price": price, "exit": price,
+            "pnl_usd": pnl_usd, "pnl_pct": pnl_pct, "reason": reason,
+            "result": "win" if pnl_usd >= 0 else "loss",
+        }
+        if getattr(self, "_ai_composer", None) and getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True):
+            self.smart("trade_closed", ctx, fallback)
+        else:
+            self._send_all(fallback)
 
     def stop_triggered(self, kind: str, ticker: str, trigger_price: float, detail: str = ""):
         msg = f"⛔ {kind.upper()} TRIGGERED — {ticker} @ ${trigger_price:.2f}\n{detail}"
@@ -179,9 +232,18 @@ class Notifier:
         if self.cfg.NOTIFY_DAILY_SUMMARY:
             self._send_all(msg)
 
-    def info(self, text: str):
-        """Generic low-priority notification (startup, shutdown, etc)."""
-        self._send_all(text)
+    def info(self, text: str, event_type: str = "info", context: Optional[Dict[str, Any]] = None,
+             skip_compose: bool = False):
+        """Generic notification — AI-composed when composer is attached."""
+        msg = text
+        if (
+            not skip_compose
+            and self._ai_composer
+            and getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True)
+            and getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True)
+        ):
+            msg = self._ai_composer.compose(event_type, context or {}, text)
+        self._send_all(msg)
 
     def warning(self, text: str):
         """Warning notification (market closed, reconnect, etc)."""

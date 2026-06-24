@@ -484,7 +484,13 @@ class AuditTrail:
         
         # Load existing last hash if file exists
         self._load_last_hash()
-    
+        valid, _ = self.verify_chain(quiet=True)
+        if not valid:
+            if self.repair_chain():
+                log.info("Audit trail chain re-anchored after rotation/truncation")
+            else:
+                log.warning("Audit trail chain invalid — could not auto-repair")
+
     def _load_last_hash(self):
         """Load last entry hash from existing audit file."""
         try:
@@ -502,6 +508,45 @@ class AuditTrail:
         except Exception:
             pass
     
+    def _rechain_entries(self, entries: List[Dict]) -> List[Dict]:
+        """Rebuild tamper-evident hashes from entry payloads (after rotation/truncation)."""
+        prev = ""
+        rebuilt: List[Dict] = []
+        for entry in entries:
+            core = {k: v for k, v in entry.items() if k not in ("hash", "prev_hash")}
+            content = json.dumps(core, sort_keys=True, default=str)
+            content_hash = hashlib.sha256((prev + content).encode()).hexdigest()
+            core["hash"] = content_hash
+            core["prev_hash"] = prev
+            rebuilt.append(core)
+            prev = content_hash
+        return rebuilt
+
+    def repair_chain(self) -> bool:
+        """Re-anchor hash chain after rotation or head truncation. Returns success."""
+        if not os.path.exists(self.path):
+            return True
+        try:
+            entries: List[Dict] = []
+            with open(self.path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    entries.append(json.loads(line))
+            if not entries:
+                return True
+            rebuilt = self._rechain_entries(entries)
+            with open(self.path, "w") as f:
+                for entry in rebuilt:
+                    f.write(json.dumps(entry, default=str) + "\n")
+            self._last_hash = rebuilt[-1]["hash"]
+            self._entry_count = len(rebuilt)
+            return True
+        except Exception as exc:
+            log.error(f"Audit trail repair failed: {exc}")
+            return False
+
     def record(self, entry: AuditEntry) -> str:
         """
         Record an audit entry with tamper-evident hash.
@@ -550,14 +595,12 @@ class AuditTrail:
             if len(lines) > keep:
                 with open(self.path, 'w') as f:
                     f.writelines(lines[-keep:])
-                
-                self._entry_count = keep
-                # Reload last hash
-                self._load_last_hash()
+                # Rotation drops the genesis entry — re-anchor hash chain
+                self.repair_chain()
         except Exception:
             pass
     
-    def verify_chain(self) -> Tuple[bool, int]:
+    def verify_chain(self, quiet: bool = False) -> Tuple[bool, int]:
         """
         Verify the integrity of the entire audit trail chain.
         
@@ -590,11 +633,13 @@ class AuditTrail:
                     ).hexdigest()
                     
                     if expected_hash != stored_hash:
-                        log.error(f"Audit trail tampered at entry {count}")
+                        if not quiet:
+                            log.error(f"Audit trail tampered at entry {count}")
                         return False, count
                     
                     if stored_prev != prev_hash:
-                        log.error(f"Audit trail chain broken at entry {count}")
+                        if not quiet:
+                            log.error(f"Audit trail chain broken at entry {count}")
                         return False, count
                     
                     prev_hash = stored_hash

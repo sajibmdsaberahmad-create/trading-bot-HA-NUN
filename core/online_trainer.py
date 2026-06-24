@@ -276,3 +276,66 @@ def run_unified_training(cfg: BotConfig, ppo_steps: int = 20_000):
         log.warning(f"Git push failed: {exc}")
 
     return weights, trained
+
+
+def run_incremental_training(cfg: BotConfig, fresh_records: list = None, ppo_steps: int = 4096) -> bool:
+    """
+    Forward-only training on NEW live/scanner records only.
+    Does not re-import backtest CSVs or replay old data.
+    """
+    log.info("  PILOT INCREMENTAL TRAIN — new data only")
+    if fresh_records is None:
+        from core.experience_buffer import load_recent
+        from core.pilot_mode import get_new_buffer_records
+        fresh_records = get_new_buffer_records(load_recent(n=200))
+
+    if not fresh_records:
+        log.debug("No new records for incremental training")
+        return False
+
+    for rec in fresh_records:
+        if not rec.get("features"):
+            continue
+        try:
+            from core.experience_buffer import append as buffer_append
+            buffer_append({**rec, "source": rec.get("source", "incremental")})
+        except Exception:
+            pass
+
+    weights = _update_weights_from_buffer()
+    trained = _train_ppo_on_buffer(cfg, steps=min(ppo_steps, 8192))
+
+    history_entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "mode": "incremental",
+        "new_records": len(fresh_records),
+        "ppo_trained": trained,
+        "steps": ppo_steps,
+    }
+    history = []
+    if HISTORY_PATH.exists():
+        try:
+            with open(HISTORY_PATH) as f:
+                history = json.load(f)
+        except Exception:
+            pass
+    history.append(history_entry)
+    with open(HISTORY_PATH, "w") as f:
+        json.dump(history[-200:], f, indent=2)
+
+    try:
+        from core.git_sync import push_change, push_model_release, sync_all_learning_artifacts
+        version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        push_change(
+            f"train: incremental pilot | new={len(fresh_records)} ppo={trained}",
+            files=["models/scalper_weights.json", "models/training_history.json",
+                   "models/experience_buffer.jsonl", "models/trained_record_hashes.jsonl"],
+            category="training",
+        )
+        if trained:
+            push_model_release(version, notes=f"incremental|new={len(fresh_records)}")
+            sync_all_learning_artifacts(release_tag=f"incremental_{version}")
+    except Exception as exc:
+        log.debug(f"Incremental git sync: {exc}")
+
+    return trained or bool(weights)
