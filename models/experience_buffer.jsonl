@@ -1049,3 +1049,4 @@
 {"source":"live_entry","ticker":"BOXL","action":"BUY","entry_price":7.47,"shares":134,"stop":7.3087,"target":7.5869,"confidence":0.55,"features":[],"timestamp":"2026-06-24T15:14:23.096684+00:00","model_version":"scalper_v1"}
 {"source":"live_entry","ticker":"BOXL","action":"BUY","entry_price":7.59,"shares":100,"stop":7.4761,"target":7.7608,"confidence":0.75,"features":[],"timestamp":"2026-06-24T15:15:41.612008+00:00","model_version":"scalper_v1"}
 {"source":"live_entry","ticker":"BOXL","action":"BUY","entry_price":7.96,"shares":125,"stop":7.8406,"target":8.1391,"confidence":0.55,"features":[],"timestamp":"2026-06-24T15:17:09.013898+00:00","model_version":"scalper_v1"}
+{"source":"live_entry","ticker":"LMFA","action":"BUY","entry_price":0.148,"shares":1200,"stop":0.146,"target":0.15,"confidence":0.75,"features":[],"timestamp":"2026-06-24T15:24:33.387883+00:00","model_version":"scalper_v1"}
