@@ -1046,3 +1046,4 @@
 {"source":"scan_pick","ticker":"LMFA","action":"SCAN_PICK","scan_score":94.0,"confidence":0.5,"features":[],"timestamp":"2026-06-24T14:57:39.158383","model_version":"scalper_v1"}
 {"source":"live_entry","ticker":"MNY","action":"BUY","entry_price":0.9934,"shares":96,"stop":0.9785,"target":1.0158,"confidence":0.55,"features":[],"timestamp":"2026-06-24T14:57:52.588525+00:00","model_version":"scalper_v1"}
 {"source":"live_entry","ticker":"LMFA","action":"BUY","entry_price":0.147475,"shares":1200,"stop":0.1463,"target":0.1503,"confidence":0.75,"features":[],"timestamp":"2026-06-24T15:11:55.787805+00:00","model_version":"scalper_v1"}
+{"source":"live_entry","ticker":"BOXL","action":"BUY","entry_price":7.47,"shares":134,"stop":7.3087,"target":7.5869,"confidence":0.55,"features":[],"timestamp":"2026-06-24T15:14:23.096684+00:00","model_version":"scalper_v1"}
