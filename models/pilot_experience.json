@@ -1,0 +1,23 @@
+{
+  "total_xp": 40,
+  "level": "Cadet",
+  "flights_completed": 1,
+  "flights_flown": 1,
+  "takeoffs": 1,
+  "landings": 1,
+  "hours_flown": 0.1,
+  "sectors_flown": {
+    "HYF": 1
+  },
+  "aircraft_type": "PPO-Transformer-LSTM",
+  "license_class": "Basic",
+  "certifications": {},
+  "skill_points": {
+    "entry_timing": 0,
+    "exit_timing": 1,
+    "risk_management": 0,
+    "regime_recognition": 0,
+    "pattern_recognition": 1,
+    "confidence_judgment": 0
+  }
+}

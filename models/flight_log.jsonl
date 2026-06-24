@@ -1,0 +1,1 @@
+{"ticker": "HYFM", "entry_time": "2026-06-24T13:01:29.597903", "exit_time": "2026-06-24T13:01:34.271187", "action": "NEUTRAL", "entry_price": 0.88, "exit_price": 0.88, "pnl_usd": 0.0, "pnl_pct": 0.0, "confidence": 0.5, "regime": "breakout", "vix_level": 0.0, "patterns_matched": [], "xp_gained": 10, "notes": "exit"}
