@@ -1,27 +1,28 @@
 {
-  "total_xp": 420,
+  "total_xp": 460,
   "level": "Rookie",
-  "flights_completed": 9,
-  "flights_flown": 22,
-  "takeoffs": 22,
-  "landings": 9,
-  "hours_flown": 0.8999999999999999,
+  "flights_completed": 10,
+  "flights_flown": 23,
+  "takeoffs": 23,
+  "landings": 10,
+  "hours_flown": 0.9999999999999999,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
     "VTA": 2,
     "VMA": 2,
-    "LMF": 1
+    "LMF": 1,
+    "QNR": 1
   },
   "aircraft_type": "PPO-Transformer-LSTM",
   "license_class": "Basic",
   "certifications": {},
   "skill_points": {
     "entry_timing": 0,
-    "exit_timing": 9,
+    "exit_timing": 10,
     "risk_management": 4,
     "regime_recognition": 0,
-    "pattern_recognition": 9,
+    "pattern_recognition": 10,
     "confidence_judgment": 0
   }
 }
