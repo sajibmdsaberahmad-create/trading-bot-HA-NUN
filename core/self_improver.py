@@ -18,6 +18,8 @@ import pandas as pd
 from core.config import BotConfig
 from core.experience_buffer import load_all, stats as buffer_stats
 from core.notify import log
+from core.pilot_experience import PilotExperienceSystem
+from core.pattern_memory_bank import PatternMemoryBank
 
 logger = logging.getLogger("SELF_IMPROVER")
 
@@ -263,3 +265,78 @@ def generate_guidelines_text() -> str:
     if GUIDELINES_PATH.exists():
         return GUIDELINES_PATH.read_text()
     return "No guidelines available. Run generate_self_improvement_plan() first."
+
+
+def generate_veteran_progression_plan(cfg: BotConfig) -> Dict[str, Any]:
+    """
+    Generate adjustments based on veteran level and skill points.
+    Higher-level pilots get access to more aggressive parameters.
+    """
+    lines: List[str] = []
+    lines.append(f"🧭 VETERAN PROGRESSION PLAN | {datetime.utcnow().isoformat()}")
+    
+    # Load current veteran status
+    pilot = PilotExperienceSystem(cfg)
+    status = pilot.get_veteran_status()
+    level = status["level"]
+    xp = status["total_xp"]
+    skill_mods = pilot.get_skill_modifiers()
+    
+    adjustments: Dict[str, Any] = {}
+    
+    lines.append(f"Current Rank: {level} ({xp} XP)")
+    lines.append(f"Skill Points: {status['skill_points']}")
+    
+    # Level-based parameter adjustments
+    if level == "Cadet":
+        lines.append("• Cadet restrictions: Conservative entry threshold")
+        lines.append("• Learning phase: High confidence required (85%)")
+        adjustments["CONFIDENCE_THRESHOLD"] = {"old": cfg.CONFIDENCE_THRESHOLD, "new": 0.85, "reason": "Cadet level - high caution"}
+        
+    elif level == "Rookie":
+        lines.append("• Rookie phase: Building confidence, moderate threshold")
+        lines.append("• Access to basic pattern matching enabled")
+        adjustments["CONFIDENCE_THRESHOLD"] = {"old": cfg.CONFIDENCE_THRESHOLD, "new": 0.75, "reason": "Rookie level - building confidence"}
+        
+    elif level == "Aviator":
+        lines.append("• Aviator status: Full strategy access unlocked")
+        lines.append("• Position sizing at 1x multiplier")
+        lines.append("• Confidence threshold: 65%")
+        adjustments["CONFIDENCE_THRESHOLD"] = {"old": cfg.CONFIDENCE_THRESHOLD, "new": 0.65, "reason": "Aviator level - full access"}
+        
+    elif level == "Ace":
+        lines.append("• Ace status: Elite trader privileges")
+        lines.append("• Can adjust advanced parameters (TP/SL multipliers)")
+        lines.append("• Confidence threshold: 55% (aggressive)")
+        adjustments["CONFIDENCE_THRESHOLD"] = {"old": cfg.CONFIDENCE_THRESHOLD, "new": 0.55, "reason": "Ace level - aggressive trading"}
+        
+    elif level == "Veteran":
+        lines.append("• Veteran status: Master trader")
+        lines.append("• Full autonomy: Can modify core strategies")
+        lines.append("• Confidence threshold: 45% (expert)")
+        adjustments["CONFIDENCE_THRESHOLD"] = {"old": cfg.CONFIDENCE_THRESHOLD, "new": 0.45, "reason": "Veteran level - expert confidence"}
+    
+    # Skill-based modifiers
+    for skill, modifier in skill_mods.items():
+        if modifier > 1.2:
+            lines.append(f"• {skill} is highly developed ({modifier:.1f}x) — leverage this strength")
+    
+    # Apply adjustments
+    for key, meta in adjustments.items():
+        if hasattr(cfg, key):
+            setattr(cfg, key, meta["new"])
+            log.info(f"⚙️ Veteran progression: {key} -> {meta['new']}")
+    
+    guidelines = "\n".join(lines)
+    
+    # Save to file
+    with open(GUIDELINES_PATH, "w") as f:
+        f.write(guidelines)
+        f.write("\n")
+    
+    return {
+        "veteran_level": level,
+        "xp": xp,
+        "adjustments": adjustments,
+        "skill_modifiers": skill_mods,
+    }

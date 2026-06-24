@@ -39,6 +39,9 @@ from threading import Lock
 from core.config import BotConfig
 from core.notify import log
 
+# Repository directory (project root)
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # ═════════════════════════════════════════════════════════════════════════════
 # GLOBAL STATE
@@ -71,8 +74,13 @@ TRACKED_FILES: Set[str] = {
     "core/risk.py",                 # Risk management
     "core/hmrs.py",                 # HMRS engine
     "core/stationary_features.py",  # Stationary features
-    "core/transformer_model.py",    # TFT + Distillation
+    "core/transformer_model.py",  # TFT + Distillation
     "core/multi_model_fusion.py",   # Fusion engine
+    # Pilot Experience & Pattern Memory
+    "models/pilot_experience.json",
+    "models/flight_log.jsonl",
+    "models/pattern_memory_bank.json",
+    "models/pattern_snapshots.jsonl",
 }
 
 # Multi-repo routing: which files go to which repo
@@ -798,3 +806,104 @@ def push_model_release(version: str, model_path: str = "ppo_trader.zip", notes: 
     except Exception as exc:
         log.warning(f"Git release failed: {exc}")
         return False
+
+
+def push_large_file_to_release(file_path: str, release_tag: str, description: str = "") -> bool:
+    """
+    Upload large files (model weights >10MB) to a GitHub release using gh CLI.
+    This avoids Git LFS while still providing versioned access to large artifacts.
+    
+    Requires: gh CLI installed and authenticated
+    """
+    try:
+        import os
+        full_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), file_path)
+        
+        if not os.path.exists(full_path):
+            log.warning(f"Large file not found: {file_path}")
+            return False
+        
+        file_size_mb = os.path.getsize(full_path) / (1024 * 1024)
+        
+        if file_size_mb < 10:
+            log.debug(f"File {file_path} is only {file_size_mb:.1f}MB — use normal git push")
+            return True
+        
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        if _token:
+            gh_auth = f"--repo={_repo}"
+        else:
+            result = subprocess.run(["gh", "repo", "view", "--json", "nameWithOwner"], 
+                                    cwd=repo_root, capture_output=True, text=True)
+            if result.returncode != 0:
+                log.warning("Could not determine GitHub repo for release upload")
+                return False
+            repo_data = json.loads(result.stdout)
+            gh_auth = f"--repo={repo_data['nameWithOwner']}"
+        
+        result = subprocess.run(
+            ["gh", "release", "upload", release_tag, file_path, "-n", description, gh_auth],
+            cwd=repo_root, capture_output=True, text=True, timeout=300
+        )
+        
+        if result.returncode == 0:
+            log.info(f"📦 Large file uploaded to release {release_tag}: {file_path} ({file_size_mb:.1f}MB)")
+            return True
+        else:
+            log.warning(f"Large file upload failed: {result.stderr}")
+            return False
+            
+    except Exception as exc:
+        log.warning(f"Large file release upload failed: {exc}")
+        return False
+
+
+def sync_all_learning_artifacts(release_tag: str = None) -> bool:
+    """
+    Sync all AI learning artifacts to GitHub, using releases for large files.
+    This is called after major training sessions.
+    
+    Large files (model weights) go to releases, small files go to git.
+    Everything is linked and version-tracked.
+    """
+    if not release_tag:
+        release_tag = f"training_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    
+    large_files = [
+        "models/transformer_model.pth",
+        "models/lstm_model.h5",
+        "models/ppo_trader_warmup_*.zip",
+    ]
+    
+    small_files = [
+        "models/pilot_experience.json",
+        "models/flight_log.jsonl",
+        "models/pattern_memory_bank.json",
+        "models/pattern_snapshots.jsonl",
+        "models/scalper_weights.json",
+        "models/ai_guidelines.txt",
+        "models/parameter_adjustments.json",
+        "models/improvement_history.json",
+    ]
+    
+    all_success = True
+    
+    for lf in large_files:
+        push_large_file_to_release(lf, release_tag, f"Training model weights - {datetime.utcnow().isoformat()}")
+    
+    push_change(
+        f"training: all learning artifacts synced | {release_tag}",
+        files=small_files,
+        category="training"
+    )
+    
+    if _enabled:
+        try:
+            subprocess.run(["git", "tag", "-a", release_tag, "-m", f"Training sync {release_tag}"], 
+                        cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))), capture_output=True)
+            log.info(f"🏷 Release tag: {release_tag}")
+        except Exception:
+            pass
+    
+    return all_success

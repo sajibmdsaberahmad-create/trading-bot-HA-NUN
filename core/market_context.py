@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from core.notify import log
+from typing import Dict
 
 logger = logging.getLogger("MARKET_CONTEXT")
 
@@ -49,8 +50,8 @@ def summarize_market_context() -> dict:
     summary = {
         "spy_trend": "unknown",
         "qqq_trend": "unknown",
-        "vix_level": None,
-        "vix_regime": "unknown",
+        "vix_level": 0.0,
+        "vix_regime": "low",
         "timestamp": datetime.utcnow().isoformat(),
     }
     for key in ("spy", "qqq"):
@@ -66,3 +67,68 @@ def summarize_market_context() -> dict:
         summary["vix_level"] = round(level, 2)
         summary["vix_regime"] = "high" if level > 30 else "elevated" if level > 20 else "low"
     return summary
+
+
+def get_ib_market_snapshot(ib_connector) -> Dict:
+    """
+    Fetch real-time market context from IB Gateway.
+    Uses IB contract details for SPY, QQQ, VIX, and sector ETFs.
+    """
+    snapshot = {
+        "spy_price": None,
+        "qqq_price": None,
+        "vix_level": 0.0,
+        "sector_etfs": {},
+        "market_status": "unknown",
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+    
+    if not ib_connector or not hasattr(ib_connector, 'ib'):
+        return snapshot
+    
+    try:
+        # Fetch live market data for key indices
+        try:
+            from ib_insync import Stock
+            spy = Stock('SPY', 'ARCA')
+            ib_connector.ib.qualifyContracts(spy)
+            spy_ticker = ib_connector.ib.reqMktData(spy, '', False, False)
+            if spy_ticker and hasattr(spy_ticker, 'last'):
+                snapshot["spy_price"] = float(spy_ticker.last)
+        except Exception:
+            pass
+        
+        try:
+            from ib_insync import Stock
+            qqq = Stock('QQQ', 'NASDAQ')
+            ib_connector.ib.qualifyContracts(qqq)
+            qqq_ticker = ib_connector.ib.reqMktData(qqq, '', False, False)
+            if qqq_ticker and hasattr(qqq_ticker, 'last'):
+                snapshot["qqq_price"] = float(qqq_ticker.last)
+        except Exception:
+            pass
+        
+        # VIX from CBOE - try IB first, then Yahoo
+        try:
+            from ib_insync import Index
+            vix = Index('VIX', 'CBOE')
+            ib_connector.ib.qualifyContracts(vix)
+            vix_ticker = ib_connector.ib.reqMktData(vix, '', False, False)
+            if vix_ticker and hasattr(vix_ticker, 'last'):
+                snapshot["vix_level"] = max(0.0, float(vix_ticker.last))
+        except Exception:
+            # Fallback to Yahoo Finance
+            yf = _try_import_yfinance()
+            if yf:
+                try:
+                    vix_hist = yf.Ticker("^VIX").history(period="1d")
+                    if not vix_hist.empty and "close" in vix_hist.columns:
+                        snapshot["vix_level"] = float(vix_hist["close"].iloc[-1])
+                except Exception:
+                    pass
+        
+        snapshot["market_status"] = "open"
+    except Exception as exc:
+        logger.debug(f"IB market snapshot error: {exc}")
+    
+    return snapshot

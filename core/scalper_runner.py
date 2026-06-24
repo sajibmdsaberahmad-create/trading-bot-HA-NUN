@@ -59,8 +59,10 @@ from core.market_context import summarize_market_context
 from core.market_regime import MarketRegimeDetector
 from core.self_improver import generate_self_improvement_plan
 from core.consciousness import AIConsciousness
+from core.pilot_experience import PilotExperienceSystem, pilot_experience_to_git
+from core.pattern_memory_bank import PatternMemoryBank, pattern_memory_to_git
 from core.notify import log, Notifier
-from core.git_sync import init as git_sync_init, push_trade, push_daily_summary, push_model_release
+from core.git_sync import init as git_sync_init, push_trade, push_daily_summary, push_model_release, sync_all_learning_artifacts
 from core.async_utils import get_background_worker, AtomicFileWriter
 from core.feature_drift import validate_features_at_startup
 from core.train_subprocess import launch_training
@@ -166,6 +168,10 @@ class ScalperRunner:
 
         # Experience buffer for unified learning
         self._xp_buffer_initialized = False
+        
+        # Pilot Experience and Pattern Memory systems
+        self.pilot = PilotExperienceSystem(cfg)
+        self.patterns = PatternMemoryBank(cfg)
         
         # Start file watcher for weights hot-reload
         self._start_weights_watcher()
@@ -322,6 +328,24 @@ class ScalperRunner:
             # Train from exit event
             try:
                 self._daily_self_train()
+            except Exception:
+                pass
+
+            # Update pilot experience
+            try:
+                pnl_usd = round(pnl, 2)
+                pnl_pct = round(pnl_pct, 2) / 100
+                self.pilot.complete_flight(current_px, pnl_usd, pnl_pct, "exit")
+                if pnl > 0:
+                    self.pilot.record_pattern_match("win", True, pnl_usd)
+                else:
+                    self.pilot.record_pattern_match("loss", False, pnl_usd)
+            except Exception:
+                pass
+
+            # Sync learning artifacts
+            try:
+                pilot_experience_to_git(self.pilot)
             except Exception:
                 pass
         self._prev_shares = self.shares
@@ -1069,7 +1093,17 @@ class ScalperRunner:
             tp_dist = stop_dist * 2.0
             tp_dist = min(tp_dist, current_px * 0.05)
             tp_price = current_px + tp_dist
-            
+
+            # Start pilot flight tracking - always compute real regime
+            regime_result = self.regime_detector.classify(df_fast) if hasattr(self.regime_detector, 'classify') else None
+            vix_level = 0.0
+            try:
+                ctx = summarize_market_context()
+                vix_level = float(ctx.get('vix_level', 0.0))
+            except Exception:
+                pass
+            self.pilot.start_flight(ticker, current_px, regime_result, 0.5, vix_level=vix_level)
+
             plan = TradePlan(
                 side="LONG", entry_price=current_px, shares=float(shares),
                 initial_stop_price=round(current_px - stop_dist, 4),
@@ -1331,6 +1365,7 @@ class ScalperRunner:
             try:
                 version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 push_model_release(version, notes="off_hours_full_training")
+                sync_all_learning_artifacts(f"off_hours_{version}")
             except Exception:
                 pass
             
@@ -1413,6 +1448,7 @@ class ScalperRunner:
             try:
                 version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 push_model_release(version, notes=f"weights={json.dumps(weights)[:100]}")
+                sync_all_learning_artifacts(f"weights_{version}")
             except Exception:
                 pass
         except Exception as exc:

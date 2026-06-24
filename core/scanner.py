@@ -48,6 +48,8 @@ class StockScanner:
     """
     Scans stocks from a candidate list and ranks them by
     momentum/scalping potential.
+    
+    Uses IB's built-in scanners for live ticker discovery - no static list.
     """
     
     def __init__(self, cfg: BotConfig):
@@ -55,37 +57,91 @@ class StockScanner:
         
         # Stock universe configuration
         self.MIN_PRICE = 1.0
-        self.MAX_PRICE = 20.0
-        self.MIN_VOLUME = 500_000
-        self.MIN_REL_VOLUME = 1.5
-        self.MAX_RESULTS = 20
+        self.MAX_PRICE = 1000.0  # No upper limit - trade any profitable stock
+        self.MIN_VOLUME = 10_000  # Lower bound for liquidity detection  # Lower for small caps
+        self.MIN_REL_VOLUME = 1.0
+        self.MAX_RESULTS = 50  # More results for wider selection
         
-        # Predefined watchlist of liquid penny stocks (NASDAQ/NYSE)
-        # These are active, liquid tickers suitable for momentum scalping
-        self.TICKER_UNIVERSE: List[str] = [
-            # Tech & Innovation
-            "SOFI", "PLTR", "MARA", "RIOT", "COIN", "RKLB", "ASTS",
-            "QS", "LCID", "RIVN", "CHPT", "FCEL", "PLUG",
-            # Biotech
-            "DNA", "CRSP", "EDIT", "NTLA", "BEAM",
-            # SPACs & Fintech
-            "DWAC", "PHUN", "ATER", "BBIG", "AMC", "APE",
-            # Energy & Commodities
-            "UUUU", "CCJ", "URA", "BOIL", "KOLD", "USO",
-            # Healthcare
-            "OCGN", "MRNA", "BNTX", "NVAX", "AXSM",
-            # Consumer & Retail
-            "GME", "BB", "KOSS", "CEI", "TKAT",
-            # EV & Battery
-            "NKLA", "HYZN", "GOEV", "FUV", "WKHS", "BLNK",
-            # Mining
-            "AG", "HL", "PAAS", "SILJ", "GDXJ",
-            # Leveraged ETFs (high momentum)
-            "TQQQ", "SQQQ", "SOXL", "FNGU", "LABU", "JNUG",
-        ]
+        # Dynamic universe from IB scanner only (no static list)
+        self._dynamic_universe: List[str] = []
+        self._last_dynamic_fetch: float = 0.0
+        self._dynamic_fetch_interval: int = 20  # Faster refresh  # Refresh every 30 seconds
+    
+    def get_dynamic_universe(self, ib_connector=None) -> List[str]:
+        """
+        Fetch live tickers from IB's most active scanner.
+        Returns tickers currently trading with high volume.
+        """
+        import time
+        now = time.time()
+        if self._dynamic_universe and (now - self._last_dynamic_fetch) < self._dynamic_fetch_interval:
+            return self._dynamic_universe[:100]
         
-        # Volume and price cache (to avoid re-fetching)
-        self._cache: Dict[str, Dict] = {}
+        tickers = []
+        if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
+            try:
+                from ib_insync import ScannerSubscription
+                # Multiple scan types for comprehensive coverage
+                scan_codes = ['TOP_VOLUME', 'HOT_BY_PRICE', 'HOT_BY_VOLUME']
+                
+                for scan_code in scan_codes:
+                    scan = ScannerSubscription(
+                        instrument='STK',
+                        locationCode='STK.US',
+                        scanCode=scan_code
+                    )
+                    scan_results = ib_connector.ib.reqScannerData(scan, 0, '')
+                    for result in scan_results:
+                        if result.contractDetails and result.contractDetails.contract:
+                            symbol = result.contractDetails.contract.symbol
+                            if symbol and len(symbol) <= 5 and symbol not in tickers:
+                                tickers.append(symbol)
+                
+                if tickers:
+                    self._dynamic_universe = tickers[:100]
+                    self._last_dynamic_fetch = now
+                    log.info(f"Dynamic universe: {len(tickers)} live tickers from IB scanner")
+                else:
+                    log.warning("No tickers returned from IB scanner - market may be closed")
+            except Exception as exc:
+                log.warning(f"IB scanner error: {exc}")
+        
+        return tickers[:100]
+        """
+        Fetch live tickers from IB's most active scanner.
+        Falls back to PENNY_STOCK_UNIVERSE if scanner unavailable.
+        """
+        import time
+        now = time.time()
+        if self._dynamic_universe and (now - self._last_dynamic_fetch) < self._dynamic_fetch_interval:
+            return self._dynamic_universe[:50]
+        
+        tickers = []
+        if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
+            try:
+                from ib_insync import ScannerSubscription, TagValue
+                scan = ScannerSubscription(
+                    instrument='STK',
+                    locationCode='STK.US',
+                    scanCode='TOP_VOLUME'
+                )
+                scan_results = ib_connector.ib.reqScannerData(scan)
+                for result in scan_results[:100]:
+                    if result.contractDetails and result.contractDetails.contract:
+                        symbol = result.contractDetails.contract.symbol
+                        if symbol and len(symbol) <= 5:
+                            tickers.append(symbol)
+                if tickers:
+                    self._dynamic_universe = tickers
+                    self._last_dynamic_fetch = now
+                    log.info(f"Dynamic universe: {len(tickers)} tickers from IB scanner")
+            except Exception as exc:
+                log.debug(f"IB scanner unavailable, using fallback universe: {exc}")
+        
+        if not tickers:
+            tickers = PENNY_STOCK_UNIVERSE[:50]
+        
+        return tickers[:50]
     
     def get_universe(self) -> List[str]:
         """Return the full scanning universe."""
@@ -105,8 +161,9 @@ class StockScanner:
         current_price = float(close[-1])
         current_volume = float(volume[-1])
         
-        # Price filter: $1 - $20
-        if current_price < self.MIN_PRICE or current_price > self.MAX_PRICE:
+        # Liquidity filter - must be tradable
+        # No price limits - AI can trade any stock with sufficient liquidity
+        if current_price <= 0:
             return None
         
         # Volume filter
@@ -274,7 +331,7 @@ PENNY_STOCK_UNIVERSE = [
     "SOFI", "PLTR", "MARA", "RIOT", "COIN", "RKLB", "ASTS",
     "QS", "LCID", "RIVN", "CHPT", "FCEL", "PLUG",
     "DNA", "CRSP", "EDIT", "NTLA", "BEAM",
-    "DWAC", "ATER", "BBIG",
+    "ATER",
     "UUUU", "CCJ",
     "OCGN", "MRNA", "BNTX", "NVAX", "AXSM",
     "GME", "BB", "CEI",

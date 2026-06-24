@@ -42,6 +42,8 @@ from collections import deque
 from core.config import BotConfig
 from core.env import TradingEnv
 from core.notify import log
+from core.pilot_experience import PilotExperienceSystem
+from core.pattern_memory_bank import PatternMemoryBank
 
 # ── Conditional imports for enhanced AI ──────────────────────────────────
 _enhanced_available = False
@@ -465,18 +467,22 @@ def initialize_enhanced_system(cfg: BotConfig, model: Optional[PPO] = None) -> D
     if model is not None:
         components['adaptive_learner'] = AdaptiveLearner(model, cfg)
     
-    # Ollama local LLM reasoning head (lazy, best-effort)
+# Ollama local LLM reasoning head (lazy, best-effort)
     if getattr(cfg, 'OLLAMA_ENABLED', False):
         try:
             from core.ollama_brain import create_ollama_brain
             components['ollama_brain'] = create_ollama_brain(cfg)
         except Exception as exc:
             log.debug(f"Ollama brain init skipped: {exc}")
-    
+
     log.info(f"✅ Enhanced AI system initialized: "
-             f"guardrails={cfg.USE_GUARDRAILS}, "
-             f"regime={cfg.USE_REGIME_CLASSIFIER}, "
-             f"ensemble={cfg.USE_ENSEMBLE}, "
-             f"ollama={getattr(cfg, 'OLLAMA_ENABLED', False)}")
-    
+              f"guardrails={cfg.USE_GUARDRAILS}, "
+              f"regime={cfg.USE_REGIME_CLASSIFIER}, "
+              f"ensemble={cfg.USE_ENSEMBLE}, "
+              f"ollama={getattr(cfg, 'OLLAMA_ENABLED', False)}")
+
+    # Integrate pilot experience system
+    components['pilot'] = PilotExperienceSystem(cfg)
+    components['patterns'] = PatternMemoryBank(cfg)
+
     return components

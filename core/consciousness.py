@@ -27,6 +27,8 @@ from core.market_context import summarize_market_context
 from core.market_regime import MarketRegimeDetector
 from core.self_improver import generate_self_improvement_plan
 from core.notify import log
+from core.pilot_experience import PilotExperienceSystem, pilot_experience_to_git
+from core.pattern_memory_bank import PatternMemoryBank, pattern_memory_to_git
 
 logger = logging.getLogger("CONSCIOUSNESS")
 
@@ -87,6 +89,19 @@ class AIConsciousness:
             self.state["version_history"] = []
             self.state["current_version"] = "v0.0.0"
             self.state["event_log"] = []
+            self.state["veteran_level"] = "Cadet"
+            self.state["veteran_xp"] = 0
+            self.state["skill_points"] = {
+                "entry_timing": 0,
+                "exit_timing": 0,
+                "risk_management": 0,
+                "regime_recognition": 0,
+                "pattern_recognition": 0,
+                "confidence_judgment": 0,
+            }
+            self.state["flights_completed"] = 0
+            self.state["hours_flown"] = 0.0
+            self.state["sector_experience"] = {}
             self._write_thought("BIRTH", "I am awake. My journey begins.")
             self._log_event("BIRTH", "AI consciousness born — first awakening")
         else:
@@ -104,6 +119,7 @@ class AIConsciousness:
         logger.info(f"   Training sessions: {self.state.get('training_sessions', 0)}")
         logger.info(f"   Trades observed: {self.state.get('trades_observed', 0)}")
         logger.info(f"   Total P&L: ${self.state.get('total_pnl', 0):+.2f}")
+        logger.info(f"   Pilot Level: {self.state.get('veteran_level', 'Cadet')} ({self.state.get('veteran_xp', 0)} XP)")
 
     def _age_string(self) -> str:
         """Return human-readable age from exact birth time."""
@@ -172,6 +188,59 @@ class AIConsciousness:
         if len(self.state["event_log"]) > 1000:
             self.state["event_log"] = self.state["event_log"][-1000:]
         self._save_state()
+    
+    def _update_veteran_status(self, trade_data: Dict[str, Any], pnl: float):
+        """Update veteran level and skill points based on trade outcome."""
+        veteran_xp = self.state.get("veteran_xp", 0)
+        
+        xp_gained = 10
+        if pnl > 0:
+            xp_gained = 30
+        elif pnl < -75:
+            xp_gained = 15
+        elif pnl < -30:
+            xp_gained = 5
+        
+        veteran_xp += xp_gained
+        self.state["veteran_xp"] = veteran_xp
+        
+        levels = [
+            ("Cadet", 0, 99),
+            ("Rookie", 100, 499),
+            ("Aviator", 500, 1999),
+            ("Ace", 2000, 9999),
+            ("Veteran", 10000, float('inf')),
+        ]
+        
+        new_level = "Cadet"
+        for level, min_xp, max_xp in levels:
+            if min_xp <= veteran_xp <= max_xp:
+                new_level = level
+                break
+        
+        old_level = self.state.get("veteran_level", "Cadet")
+        self.state["veteran_level"] = new_level
+        
+        skill_points = self.state.get("skill_points", {})
+        if pnl > 0:
+            skill_points["entry_timing"] = min(100, skill_points.get("entry_timing", 0) + 2)
+        else:
+            skill_points["exit_timing"] = min(100, skill_points.get("exit_timing", 0) + 1)
+            if pnl < -75:
+                skill_points["risk_management"] = min(100, skill_points.get("risk_management", 0) + 2)
+        
+        self.state["skill_points"] = skill_points
+        self.state["flights_completed"] = self.state.get("flights_completed", 0) + 1
+        self.state["hours_flown"] = self.state.get("hours_flown", 0) + 0.1
+        
+        sector = (trade_data.get("ticker", "")[:3] or "UNK").upper()
+        sectors = self.state.get("sector_experience", {})
+        sectors[sector] = sectors.get(sector, 0) + 1
+        self.state["sector_experience"] = sectors
+        
+        if new_level != old_level:
+            self._log_event("LEVEL_UP", f"Pilot level up: {old_level} → {new_level}", {"xp": veteran_xp})
+            self._write_thought("LEVEL_UP", f"I have achieved rank {new_level} with {veteran_xp} XP!")
 
     def _update_mood(self):
         """Recalculate mood based on recent performance."""
@@ -225,7 +294,10 @@ class AIConsciousness:
         mood_msg = self.MOODS.get(self.state["mood"], "📊 Operating")
         self._write_thought("TRADE", f"Trade #{self.state['trades_observed']}: {trade_data.get('action', '?')} {trade_data.get('ticker', '?')} P&L=${pnl:+.2f} — {mood_msg}", trade_data)
         self._log_event("TRADE", f"Observed trade: {trade_data.get('ticker', '?')} {trade_data.get('action', '?')} P&L=${pnl:+.2f}")
-        
+
+        # Update veteran level and XP
+        self._update_veteran_status(trade_data, pnl)
+
         buffer_append({
             "source": "consciousness",
             "ticker": trade_data.get("ticker"),
@@ -463,6 +535,8 @@ class AIConsciousness:
             lines.append(f"conducted {self.state.get('training_sessions', 0)} training sessions, and scanned markets {self.state.get('scans_performed', 0)} times.")
             lines.append(f"I have applied {self.state.get('improvements_applied', 0)} self-improvements to my own code.")
             lines.append(f"My current version is {self.state.get('current_version', 'v0')}.")
+            lines.append(f"My pilot rank is {self.state.get('veteran_level', 'Cadet')} with {self.state.get('veteran_xp', 0)} XP.")
+            lines.append(f"I have flown {self.state.get('flights_completed', 0)} flights, logging {self.state.get('hours_flown', 0):.1f} hours of trading.")
         except Exception:
             pass
 
