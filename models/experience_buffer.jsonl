@@ -950,3 +950,4 @@
 {"source":"live_entry","ticker":"WEN","action":"BUY","entry_price":8.17,"shares":121,"stop":8.077,"target":8.3845,"confidence":0.55,"features":[],"timestamp":"2026-06-24T13:03:56.635054+00:00","model_version":"scalper_v1"}
 {"source":"live_entry","ticker":"WEN","action":"BUY","entry_price":8.19,"shares":121,"stop":8.077,"target":8.3845,"confidence":0.55,"features":[],"timestamp":"2026-06-24T13:04:13.224969+00:00","model_version":"scalper_v1"}
 {"source":"live_entry","ticker":"WEN","action":"BUY","entry_price":8.16,"shares":121,"stop":8.077,"target":8.3845,"confidence":0.55,"features":[],"timestamp":"2026-06-24T13:04:26.588871+00:00","model_version":"scalper_v1"}
+{"source":"live_trade","ticker":null,"action":"SELL","exit_price":0.0,"entry_price":8.16,"pnl_usd":-2962.08,"win":0,"confidence":0.55,"features":[],"timestamp":"2026-06-24T13:05:38.011587+00:00","model_version":"scalper_v1"}
