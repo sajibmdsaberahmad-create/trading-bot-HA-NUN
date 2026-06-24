@@ -1,5 +1,5 @@
 {
-  "momentum": 24.137753539033014,
+  "momentum": 29.092853882186787,
   "volume": 50.0,
   "institutional": 50.0,
   "vwap_slope": 50.0,
@@ -7,14 +7,14 @@
   "mean_reversion": 50.0,
   "trend_filter": 50.0,
   "price_rising": 50.0,
-  "rsi_filter": 36.206630308549535,
-  "volatility_gate": 48.27550707806603,
+  "rsi_filter": 43.639280823280195,
+  "volatility_gate": 50.0,
   "_meta": {
-    "train_timestamp": "2026-06-24T07:39:51.798986",
-    "buffer_total": 436,
-    "buffer_win_rate": 0.894,
+    "train_timestamp": "2026-06-24T07:44:51.527854",
+    "buffer_total": 465,
+    "buffer_win_rate": 0.895,
     "sources": {
-      "backtest": 435,
+      "backtest": 464,
       "market_context": 1
     }
   }
