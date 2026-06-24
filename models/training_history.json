@@ -426,5 +426,32 @@
       "volatility_gate": 3.9525520000000003
     },
     "timestamp": "2026-06-24T07:52:03.169509"
+  },
+  {
+    "timestamp": "2026-06-24T07:54:59.783793",
+    "ppo_trained": false,
+    "steps": 4096,
+    "weights": {
+      "momentum": 2.2883991311663485,
+      "volume": 17.162993483747613,
+      "institutional": 22.883991311663483,
+      "vwap_slope": 5.720997827915871,
+      "atr_bonus": 5.720997827915871,
+      "mean_reversion": 5.720997827915871,
+      "trend_filter": 11.441995655831741,
+      "price_rising": 9.153596524665394,
+      "rsi_filter": 3.4325986967495226,
+      "volatility_gate": 4.576798262332697,
+      "_meta": {
+        "train_timestamp": "2026-06-24T07:54:59.781256",
+        "buffer_total": 523,
+        "buffer_win_rate": 0.895,
+        "sources": {
+          "backtest": 522,
+          "market_context": 1
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T07:54:59.783310\n\u2022 Win rate strong: consider larger size and wider targets"
   }
 ]
