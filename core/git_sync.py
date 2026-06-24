@@ -325,8 +325,11 @@ def init(cfg: BotConfig, ollama_brain: Optional[Any] = None):
     global _repo, _token, _enabled, _ollama_brain
     if ollama_brain is not None:
         _ollama_brain = ollama_brain
-    _repo = (getattr(cfg, "GITHUB_HANOON_REPO", None) or os.getenv("GITHUB_HANOON_REPO", "") or
-             getattr(cfg, "GITHUB_REPO", None) or os.getenv("GITHUB_REPO", ""))
+    _repo = (
+        getattr(cfg, "GITHUB_HANOON_REPO", None) or os.getenv("GITHUB_HANOON_REPO", "")
+        or os.getenv("GITHUB_HA_NUN_REPO", "")
+        or getattr(cfg, "GITHUB_REPO", None) or os.getenv("GITHUB_REPO", "")
+    )
     _token = (getattr(cfg, "GITHUB_TOKEN", None) or os.getenv("GITHUB_TOKEN", "") or
               getattr(cfg, "GITHUB_PAT", None) or os.getenv("GITHUB_PAT", ""))
     _enabled = bool(_repo and _token)

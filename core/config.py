@@ -396,7 +396,10 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     # MULTI-REPO GIT ARCHITECTURE (HANOON / Grandmaster / Logs)
     # ════════════════════════════════════════════════════════════════════
-    GITHUB_HANOON_REPO: str = os.getenv("GITHUB_HANOON_REPO", "sajibmdsaberahmad-create/trading-bot-HA-NUN")
+    GITHUB_HANOON_REPO: str = os.getenv(
+        "GITHUB_HANOON_REPO",
+        os.getenv("GITHUB_HA_NUN_REPO", "sajibmdsaberahmad-create/trading-bot-HA-NUN"),
+    )
     GITHUB_GRANDMASTER_REPO: str = os.getenv("GITHUB_GRANDMASTER_REPO", "sajibmdsaberahmad-create/trading-bot-Grandmaster")
     GITHUB_LOGS_REPO: str = os.getenv("GITHUB_LOGS_REPO", "sajibmdsaberahmad-create/trading-bot-Logs")
     GITHUB_ALGO_REPO: str = os.getenv("GITHUB_ALGO_REPO", "sajibmdsaberahmad-create/Algo")
