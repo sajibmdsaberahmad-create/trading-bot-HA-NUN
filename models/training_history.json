@@ -403,5 +403,28 @@
       }
     },
     "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T07:49:52.360812\n\u2022 Win rate strong: consider larger size and wider targets"
+  },
+  {
+    "ticker": "SOFI",
+    "trades": 71,
+    "wins": 27,
+    "losses": 44,
+    "win_rate": 0.38,
+    "pnl_usd": 57.35,
+    "return_pct": -6.57,
+    "max_dd": 10.38,
+    "weights_active": {
+      "momentum": 1.9762760000000001,
+      "volume": 14.822070000000002,
+      "institutional": 19.76276,
+      "vwap_slope": 4.94069,
+      "atr_bonus": 4.94069,
+      "mean_reversion": 4.94069,
+      "trend_filter": 9.88138,
+      "price_rising": 7.905104000000001,
+      "rsi_filter": 2.964414,
+      "volatility_gate": 3.9525520000000003
+    },
+    "timestamp": "2026-06-24T07:52:03.169509"
   }
 ]

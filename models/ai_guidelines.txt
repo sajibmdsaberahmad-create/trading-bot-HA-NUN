@@ -1,25 +1,6 @@
-• 🧭 AI GUIDELINES | generated 2026-06-24T07:49:52.360812
-• Win rate strong: consider larger size and wider targets
+✅ LEARNED: Winners average 38% WR → favor these stock types
+📊 Target: Maintain win rate >40%, grow toward 50%+
+💰 At 20% return/month on $1000 = $200/month profit target
+📈 Best monthly return was -7% — need multi-stock compounding to reach 20%
 
-Generated: 2026-06-24T07:49:52.360899
-Weights: {
-  "momentum": 35.068292434781085,
-  "volume": 50.0,
-  "institutional": 50.0,
-  "vwap_slope": 50.0,
-  "atr_bonus": 50.0,
-  "mean_reversion": 50.0,
-  "trend_filter": 50.0,
-  "price_rising": 50.0,
-  "rsi_filter": 50.0,
-  "volatility_gate": 50.0,
-  "_meta": {
-    "train_timestamp": "2026-06-24T07:49:52.359483",
-    "buffer_total": 494,
-    "buffer_win_rate": 0.895,
-    "sources": {
-      "backtest": 493,
-      "market_context": 1
-    }
-  }
-}
+Generated: 2026-06-24T07:52:03.170344
