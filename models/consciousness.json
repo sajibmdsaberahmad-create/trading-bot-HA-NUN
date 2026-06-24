@@ -1,9 +1,9 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 67,
+  "total_awakenings": 69,
   "training_sessions": 4,
-  "trades_observed": 16,
+  "trades_observed": 18,
   "scans_performed": 4,
   "improvements_applied": 4,
   "reports_generated": 3,
@@ -985,9 +985,37 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #67",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:39:50.975992",
+      "age": "3d 7h 37m 2s",
+      "type": "TRADE",
+      "message": "Observed trade: CCXI ? P&L=$-0.08",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:44:45.387955",
+      "age": "3d 7h 41m 56s",
+      "type": "TRADE",
+      "message": "Observed trade: FMFC BLOCKED P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:53:17.518442",
+      "age": "3d 7h 50m 28s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #68",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:54:32.907881",
+      "age": "3d 7h 51m 44s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #69",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-24T18:31:19.144018",
+  "last_awakening": "2026-06-24T18:54:32.907246",
   "current_version": "v20260622_090555",
   "version_history": [
     {
@@ -1101,7 +1129,7 @@
   ],
   "last_training": "2026-06-22T09:05:55.492426",
   "mood": "anxious",
-  "total_pnl": -17694.1,
+  "total_pnl": -17694.18,
   "win_history": [
     0.0,
     0.0,
@@ -1118,25 +1146,27 @@
     -3.8,
     0,
     0,
-    -0.25
+    -0.25,
+    -0.08,
+    0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 6,
   "worst_streak": 10,
-  "veteran_xp": 135,
+  "veteran_xp": 155,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 10,
+    "exit_timing": 12,
     "risk_management": 2,
     "entry_timing": 2
   },
-  "flights_completed": 11,
-  "hours_flown": 1.0999999999999999,
+  "flights_completed": 13,
+  "hours_flown": 1.3,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
-    "FMF": 2,
-    "CCX": 1
+    "FMF": 3,
+    "CCX": 2
   },
   "best_streak": 2
 }

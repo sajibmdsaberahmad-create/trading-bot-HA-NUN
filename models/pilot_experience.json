@@ -1,17 +1,17 @@
 {
-  "total_xp": 650,
+  "total_xp": 690,
   "level": "Aviator",
-  "flights_completed": 14,
-  "flights_flown": 37,
-  "takeoffs": 37,
-  "landings": 14,
-  "hours_flown": 1.4000000000000001,
+  "flights_completed": 15,
+  "flights_flown": 41,
+  "takeoffs": 41,
+  "landings": 15,
+  "hours_flown": 1.5000000000000002,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
     "VTA": 2,
     "VMA": 2,
-    "LMF": 1,
+    "LMF": 2,
     "QNR": 3,
     "ROC": 1,
     "CCX": 1
@@ -21,10 +21,10 @@
   "certifications": {},
   "skill_points": {
     "entry_timing": 2,
-    "exit_timing": 12,
+    "exit_timing": 13,
     "risk_management": 4,
     "regime_recognition": 0,
-    "pattern_recognition": 16,
+    "pattern_recognition": 17,
     "confidence_judgment": 0
   }
 }
