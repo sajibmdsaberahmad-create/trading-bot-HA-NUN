@@ -3,7 +3,7 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 57,
   "training_sessions": 4,
-  "trades_observed": 13,
+  "trades_observed": 14,
   "scans_performed": 4,
   "improvements_applied": 4,
   "reports_generated": 3,
@@ -894,6 +894,13 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #57",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T16:37:26.181535",
+      "age": "3d 5h 34m 37s",
+      "type": "TRADE",
+      "message": "Observed trade: FMFC BLOCKED P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-24T16:35:31.424259",
@@ -1024,23 +1031,25 @@
     0.0,
     11.34,
     6.48,
-    -3.8
+    -3.8,
+    0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 10,
-  "veteran_xp": 105,
+  "veteran_xp": 115,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 7,
+    "exit_timing": 8,
     "risk_management": 2,
     "entry_timing": 2
   },
-  "flights_completed": 8,
-  "hours_flown": 0.7999999999999999,
+  "flights_completed": 9,
+  "hours_flown": 0.8999999999999999,
   "sector_experience": {
     "HYF": 3,
-    "VMA": 2
+    "VMA": 2,
+    "FMF": 1
   },
   "best_streak": 2
 }
