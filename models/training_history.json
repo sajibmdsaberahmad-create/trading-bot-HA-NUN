@@ -528,5 +528,12 @@
     "new_records": 7,
     "ppo_trained": true,
     "steps": 4096
+  },
+  {
+    "timestamp": "2026-06-24T13:37:33.177640",
+    "mode": "incremental",
+    "new_records": 20,
+    "ppo_trained": true,
+    "steps": 4096
   }
 ]
