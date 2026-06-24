@@ -1,9 +1,9 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 57,
+  "total_awakenings": 67,
   "training_sessions": 4,
-  "trades_observed": 14,
+  "trades_observed": 16,
   "scans_performed": 4,
   "improvements_applied": 4,
   "reports_generated": 3,
@@ -901,9 +901,93 @@
       "type": "TRADE",
       "message": "Observed trade: FMFC BLOCKED P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T16:44:04.561272",
+      "age": "3d 5h 41m 15s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #58",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T17:02:42.132473",
+      "age": "3d 5h 59m 53s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #59",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T17:17:31.527356",
+      "age": "3d 6h 14m 42s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #60",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T17:28:13.946173",
+      "age": "3d 6h 25m 25s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #61",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T17:33:06.129132",
+      "age": "3d 6h 30m 17s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #62",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T17:41:50.836752",
+      "age": "3d 6h 39m 2s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #63",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T17:46:17.874275",
+      "age": "3d 6h 43m 29s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #64",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T17:58:14.353068",
+      "age": "3d 6h 55m 25s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #65",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:06:26.331082",
+      "age": "3d 7h 3m 37s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #66",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:28:23.844066",
+      "age": "3d 7h 25m 35s",
+      "type": "TRADE",
+      "message": "Observed trade: FMFC BLOCKED P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:30:49.294258",
+      "age": "3d 7h 28m 0s",
+      "type": "TRADE",
+      "message": "Observed trade: CCXI ? P&L=$-0.25",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-24T18:31:19.144339",
+      "age": "3d 7h 28m 30s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #67",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-24T16:35:31.424259",
+  "last_awakening": "2026-06-24T18:31:19.144018",
   "current_version": "v20260622_090555",
   "version_history": [
     {
@@ -1017,7 +1101,7 @@
   ],
   "last_training": "2026-06-22T09:05:55.492426",
   "mood": "anxious",
-  "total_pnl": -17693.85,
+  "total_pnl": -17694.1,
   "win_history": [
     0.0,
     0.0,
@@ -1032,24 +1116,27 @@
     11.34,
     6.48,
     -3.8,
-    0
+    0,
+    0,
+    -0.25
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 4,
   "worst_streak": 10,
-  "veteran_xp": 115,
+  "veteran_xp": 135,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 8,
+    "exit_timing": 10,
     "risk_management": 2,
     "entry_timing": 2
   },
-  "flights_completed": 9,
-  "hours_flown": 0.8999999999999999,
+  "flights_completed": 11,
+  "hours_flown": 1.0999999999999999,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
-    "FMF": 1
+    "FMF": 2,
+    "CCX": 1
   },
   "best_streak": 2
 }
