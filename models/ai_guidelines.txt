@@ -2126,3 +2126,7 @@ The reason for the loss is an increase in volatility. The spike_top_intrabar eve
 Observed trade_closed — recorded for learning.
 spike_top_intrabar: +0.61% vol=5853.0x
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:24:09.582039+00:00
+Observed trade_closed — recorded for learning.
+spike_top_intrabar: +0.49% vol=14619.0x
+

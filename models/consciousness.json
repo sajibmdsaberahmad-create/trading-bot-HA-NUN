@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 104,
   "training_sessions": 27,
-  "trades_observed": 40,
+  "trades_observed": 41,
   "scans_performed": 27,
-  "improvements_applied": 194,
+  "improvements_applied": 195,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10483,6 +10483,27 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #104",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:24:02.763812",
+      "age": "4d 5h 21m 14s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:24:09.549856",
+      "age": "4d 5h 21m 20s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #195",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T16:22:06.687310",
@@ -11768,7 +11789,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "\u51b7\u9759",
+  "mood": "confident",
   "total_pnl": -21344.760000000002,
   "win_history": [
     0.0,
@@ -11810,20 +11831,21 @@
     0.0,
     0.0,
     0,
-    -3665.15
+    -3665.15,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 10,
-  "worst_streak": 10,
-  "veteran_xp": 420,
+  "consecutive_losses": 11,
+  "worst_streak": 11,
+  "veteran_xp": 430,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 32,
+    "exit_timing": 33,
     "risk_management": 4,
     "entry_timing": 6
   },
-  "flights_completed": 35,
-  "hours_flown": 3.5000000000000018,
+  "flights_completed": 36,
+  "hours_flown": 3.600000000000002,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -11833,7 +11855,7 @@
     "SCA": 1,
     "XOC": 2,
     "EVG": 1,
-    "NEX": 1,
+    "NEX": 2,
     "MIM": 5,
     "AZI": 1,
     "TPT": 3,
@@ -11845,5 +11867,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "\u6211\u4eca\u5929\u4ea4\u6613\u8c28\u614e\uff0c\u6ca1\u6709\u8fc7\u5ea6\u5192\u9669\u3002"
+  "mood_message": "Trading is a skill; patience and focus are key."
 }
