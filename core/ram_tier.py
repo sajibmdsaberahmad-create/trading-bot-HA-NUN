@@ -178,6 +178,8 @@ def apply_ram_tier_to_config(cfg) -> str:
     cfg.RAM_TIER = tier
     cfg.RAM_TIER_LABEL = TIER_LABELS.get(tier, tier)
     cfg._ram_tier_applied = applied  # noqa: SLF001 — debug
+    if not os.getenv("META_OPTIMIZER_MODEL"):
+        cfg.META_OPTIMIZER_MODEL = getattr(cfg, "OLLAMA_MODEL", profile.get("OLLAMA_MODEL", "qwen2.5:3b"))
     return tier
 
 
