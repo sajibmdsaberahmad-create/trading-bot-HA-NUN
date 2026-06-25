@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 91,
+  "improvements_applied": 92,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6002,6 +6002,29 @@
           "Rigorous analysis is crucial for refining trading algorithms. Adjusting the confidence threshold can help prevent overconfidence.",
           "Understanding market dynamics is essential. If a trade closes due to a quick win, analyze the underlying factors.",
           "Adapting to future market conditions requires ongoing monitoring and learning from recent performances."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:19:50.327775",
+      "age": "4d 0h 17m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #92",
+      "metadata": {
+        "source": "runtime_order_canceled",
+        "summary": "The order_canceled event occurred due to an order at a limit price being rejected.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The change in the confidence threshold was made to increase the confidence level.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Increase the confidence level to make orders closer to the current market price",
+          "Reduce the limit price to allow for a more lenient acceptance of limits"
         ]
       }
     }

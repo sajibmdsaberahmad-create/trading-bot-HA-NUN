@@ -1,26 +1,5 @@
 [
   {
-    "timestamp": "2026-06-24T20:25:47.220477",
-    "win_rate": 0.29783029833397906,
-    "buffer_win_rate": 0.3887640449438202,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {
-      "SCALP_TP_ATR_MULTIPLIER": {
-        "old": 0.5230176601500002,
-        "new": 0.5,
-        "reason": "increase targets when WR strong; reduce when WR weak",
-        "confidence": 0.007
-      },
-      "SCAN_INTERVAL_SECONDS": {
-        "old": 636.2699623800002,
-        "new": 827.1509510940002,
-        "reason": "reduce frequency when WR low; increase when WR strong",
-        "confidence": 0.227
-      }
-    },
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:25:47.220005\nCombined win rate: 29.8% (buffer=38.9%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
     "timestamp": "2026-06-24T20:25:47.263372",
     "win_rate": 0.29783029833397906,
     "buffer_win_rate": 0.3887640449438202,
@@ -2210,6 +2189,24 @@
       "Rigorous analysis is crucial for refining trading algorithms. Adjusting the confidence threshold can help prevent overconfidence.",
       "Understanding market dynamics is essential. If a trade closes due to a quick win, analyze the underlying factors.",
       "Adapting to future market conditions requires ongoing monitoring and learning from recent performances."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:19:50.353988+00:00",
+    "source": "runtime_order_canceled",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The change in the confidence threshold was made to increase the confidence level.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The order_canceled event occurred due to an order at a limit price being rejected.",
+    "lessons": [
+      "Increase the confidence level to make orders closer to the current market price",
+      "Reduce the limit price to allow for a more lenient acceptance of limits"
     ]
   }
 ]

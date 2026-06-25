@@ -351,3 +351,11 @@ The trade closed due to a quick win (PPO hold) but the algorithm must consider f
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold can help prevent overconfidence in the algorithm's decisions.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T11:19:50.353632+00:00
+The order_canceled event occurred due to an order at a limit price being rejected.
+The order_canceled event indicates that the algorithm cannot accept an order at a limit price. The reason is because the limit price is more aggressive than the current market price (1.263). The confidence level was set too low, and the order was canceled.
+• Increase the confidence level for orders
+• Reduce the limit price for more lenient acceptance
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The change in the confidence threshold was made to increase the confidence level.)
+

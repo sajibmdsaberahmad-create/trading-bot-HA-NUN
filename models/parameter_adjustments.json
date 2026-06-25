@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Increased confidence threshold can help prevent overconfidence in the algorithm's decisions.",
+    "reason": "The change in the confidence threshold was made to increase the confidence level.",
     "ok": true,
     "msg": "applied"
   }
