@@ -1,7 +1,7 @@
 {
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.47999999999999987,
+    "value": 0.45999999999999985,
     "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
     "ok": true,
     "msg": "applied"

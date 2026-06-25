@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 24,
   "scans_performed": 27,
-  "improvements_applied": 60,
+  "improvements_applied": 62,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5269,6 +5269,42 @@
           {
             "param": "CONFIDENCE_THRESHOLD",
             "value": 0.47999999999999987,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:08:57.790997",
+      "age": "3d 22h 6m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #61",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:09:31.319552",
+      "age": "3d 22h 6m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #62",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.45999999999999985,
             "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
             "ok": true,
             "msg": "applied"

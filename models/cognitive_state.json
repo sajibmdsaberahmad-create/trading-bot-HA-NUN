@@ -1,7 +1,7 @@
 {
   "mood": "anxious",
-  "mood_message": "",
-  "confidence": 0.3699999999999999,
+  "mood_message": "I'm feeling overwhelmed with the recent trades and limited experience.",
+  "confidence": 0.3899999999999999,
   "mode": "autonomous",
   "learned_lessons": [
     "Hi",
@@ -80,10 +80,12 @@
     "Commander: The council timeout has a spike ratio of 1.3987 and a scan score of 85.0. This indicates that the system is not aligned with current signals.",
     "Implementing mechanisms to align signals within the Council meeting context can prevent such occurrences.",
     "Consider optimizing signal alignment based on real-time market dynamics and technical indicators.",
-    "Commander: The event indicates a timeout in the Council meeting, which was not aligned with signals."
+    "Commander: The event indicates a timeout in the Council meeting, which was not aligned with signals.",
+    "Review trade_closed on QCMD",
+    "Commander: win:council_exit: Ollama exit 87% (PPO hold)"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.9,\n  \"intuition\": \"The algorithm experienced high momentum but was not aligned with the signal, which suggests there might be a need to analyze and adjust based on recent losses.\",\n  \"trade_decision\": {\n    \"enter\": true,\n    \"skip\": false,\n    \"hold\": true,\n    \"widen_stop\": true,\n    \"exit_with_confidence\": true\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0,\n  \"intuition\": 0,\n  \"trade_decision\": \"hold\",\n  \"stop_loss\": null,\n  \"entry_point\": null,\n  \"execution_strategy\": {\n    \"type\": \"sweep\",\n    \"interval\": \"day\"\n  },\n  \"confidence_level\": 1.0\n}\n```",
   "market_belief": {},
-  "trades_observed": 0,
-  "updated": "2026-06-25T09:07:22.693613"
+  "trades_observed": 1,
+  "updated": "2026-06-25T09:09:31.318086"
 }
