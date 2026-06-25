@@ -569,3 +569,22 @@ Root cause: The algorithm is experiencing a high level of volatility and conflic
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The algorithm is experiencing a high level of volatility, and the current risk management strategy is not effective. Adjusting the confidence threshold to reflect this higher risk can help maintain a more stable portfolio.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T12:41:14.340635+00:00
+Council timeout occurred, no aligned signal
+The council timeout indicates that the system is not aligning signals correctly without a clear signal or alignment between trades.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.9 (The default value of 0.58 was too high, so it is recommended to increase the confidence threshold for better alignment with actual market conditions.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T12:43:02.914156+00:00
+Council timeout occurred, aligning signals for higher risk.
+Root cause: Council timeout prevent alignment of signals.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (From the event details, Council timeout prevents alignment with a higher confidence threshold.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T12:43:16.972904+00:00
+Council timeout occurred, no aligned signal.
+Root cause: Council timeout prevents aligned signals in the pipeline.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusted from 0.35 to 0.58 for better risk management.)
+  - MAX_CONCURRENT_POSITIONS → 1 (Reduced the maximum concurrent positions to 1 position.)
+

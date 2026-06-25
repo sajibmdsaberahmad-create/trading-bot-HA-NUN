@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 89,
   "training_sessions": 27,
-  "trades_observed": 26,
+  "trades_observed": 27,
   "scans_performed": 27,
-  "improvements_applied": 116,
+  "improvements_applied": 119,
   "reports_generated": 26,
   "event_log": [
     {
@@ -7069,6 +7069,87 @@
           "Analyze recent trades to identify patterns and trends."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T12:41:14.327916",
+      "age": "4d 1h 38m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #117",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred, no aligned signal",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.9,
+            "reason": "The default value of 0.58 was too high, so it is recommended to increase the confidence threshold for better alignment with actual market conditions.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'In this case, the confidence threshold set for algorithmic trading should be increased to ensure more reliable and aligned signals.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:43:02.887528",
+      "age": "4d 1h 40m 14s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #118",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred, aligning signals for higher risk.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "From the event details, Council timeout prevents alignment with a higher confidence threshold.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been increased to ensure alignment with the highest level of certainty.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:43:16.947201",
+      "age": "4d 1h 40m 28s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #119",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred, no aligned signal.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": "0.58",
+            "reason": "Adjusted from 0.35 to 0.58 for better risk management.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "MAX_CONCURRENT_POSITIONS",
+            "value": "1",
+            "reason": "Reduced the maximum concurrent positions to 1 position.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': '1', 'reason': 'Altered to a maximum of 500 positions.'}",
+          "{'param': 'AI_MAX_LOCKED_TARGETS', 'value': '200', 'reason': 'Lowered to prevent unnecessary locks in the pipeline.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:43:41.723278",
+      "age": "4d 1h 40m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: FMFC LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T12:31:01.138131",
@@ -8354,7 +8435,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
+  "mood": "confident",
   "total_pnl": -17680.03,
   "win_history": [
     0.0,
@@ -8382,24 +8463,25 @@
     0.0,
     0,
     14.2,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 10,
-  "veteran_xp": 255,
+  "veteran_xp": 265,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 19,
+    "exit_timing": 20,
     "risk_management": 2,
     "entry_timing": 4
   },
-  "flights_completed": 21,
-  "hours_flown": 2.1000000000000005,
+  "flights_completed": 22,
+  "hours_flown": 2.2000000000000006,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
-    "FMF": 5,
+    "FMF": 6,
     "CCX": 2,
     "TAG": 1,
     "SCA": 1,
@@ -8412,5 +8494,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I feel a sense of urgency and fear in my decision-making process due to recent losses."
+  "mood_message": "After 7 recent trades, I'm confident in my ability to execute with just 14% success rate."
 }

@@ -529,5 +529,64 @@
       "Diversify the portfolio for higher confidence in signals.",
       "Analyze recent trades to identify patterns and trends."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T12:41:14.340911+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.9,
+        "reason": "The default value of 0.58 was too high, so it is recommended to increase the confidence threshold for better alignment with actual market conditions.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred, no aligned signal",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'In this case, the confidence threshold set for algorithmic trading should be increased to ensure more reliable and aligned signals.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:43:02.914549+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "From the event details, Council timeout prevents alignment with a higher confidence threshold.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred, aligning signals for higher risk.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been increased to ensure alignment with the highest level of certainty.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:43:16.973426+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": "0.58",
+        "reason": "Adjusted from 0.35 to 0.58 for better risk management.",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MAX_CONCURRENT_POSITIONS": {
+        "param": "MAX_CONCURRENT_POSITIONS",
+        "value": "1",
+        "reason": "Reduced the maximum concurrent positions to 1 position.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred, no aligned signal.",
+    "lessons": [
+      "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': '1', 'reason': 'Altered to a maximum of 500 positions.'}",
+      "{'param': 'AI_MAX_LOCKED_TARGETS', 'value': '200', 'reason': 'Lowered to prevent unnecessary locks in the pipeline.'}"
+    ]
   }
 ]

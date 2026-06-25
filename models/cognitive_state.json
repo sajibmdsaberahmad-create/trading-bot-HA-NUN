@@ -4,13 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Understanding market dynamics is essential. If a trade closes due to a quick win, analyze the underlying factors.",
-    "Adapting to future market conditions requires ongoing monitoring and learning from recent performances.",
-    "Commander: The trade closed due to a quick win (PPO hold) but the algorithm must consider future market conditions and adjust its strategies accordingly.",
-    "Increase the confidence level to make orders closer to the current market price",
-    "Reduce the limit price to allow for a more lenient acceptance of limits",
-    "Commander: The order_canceled event indicates that the algorithm cannot accept an order at a limit price. The reason is because the limit price is more aggressive than the current market price (1.263). The confidence level was set too low, and the ord",
-    "T",
     "g",
     "j",
     "p",
@@ -103,10 +96,17 @@
     "Implement more robust risk management strategies to mitigate potential losses caused by such events.",
     "Diversify the portfolio for higher confidence in signals.",
     "Analyze recent trades to identify patterns and trends.",
-    "Commander: Root cause: The algorithm is experiencing a high level of volatility and conflicts."
+    "Commander: Root cause: The algorithm is experiencing a high level of volatility and conflicts.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'In this case, the confidence threshold set for algorithmic trading should be increased to ensure more reliable and aligned signals.'}",
+    "Commander: The council timeout indicates that the system is not aligning signals correctly without a clear signal or alignment between trades.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been increased to ensure alignment with the highest level of certainty.'}",
+    "Commander: Root cause: Council timeout prevent alignment of signals.",
+    "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': '1', 'reason': 'Altered to a maximum of 500 positions.'}",
+    "{'param': 'AI_MAX_LOCKED_TARGETS', 'value': '200', 'reason': 'Lowered to prevent unnecessary locks in the pipeline.'}",
+    "Commander: Root cause: Council timeout prevents aligned signals in the pipeline."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": \"The live account state appears to be in a challenging position due to the recent issues with IB closing transactions. The current balance of $101,473.8 and the available cash are both at $101,473.8.\",\n  \"intuition\": \"There is a potential issue with the execution of trades or the system's performance in real-time.\"\n}\n```",
+  "last_thought": "```json\n{\n    \"gut_feel\": 0.75,\n    \"intuition\": 0.75,\n    \"analysis\": {\n        \"volume_and_pricing_pattern\": true,\n        \"momentum_analysis\": false,\n        \"scanner_analysis\": true,\n        \"multi_timeframe_analyses\": false\n    },\n    \"predicted_profit_loss_ratio\": 1.83,\n    \"trade_advice\": null\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T12:40:20.102209"
+  "updated": "2026-06-25T12:43:16.946035"
 }

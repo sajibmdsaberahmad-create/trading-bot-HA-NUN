@@ -1,8 +1,15 @@
 {
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "The algorithm is experiencing a high level of volatility, and the current risk management strategy is not effective. Adjusting the confidence threshold to reflect this higher risk can help maintain a more stable portfolio.",
+    "value": "0.58",
+    "reason": "Adjusted from 0.35 to 0.58 for better risk management.",
+    "ok": true,
+    "msg": "applied"
+  },
+  "MAX_CONCURRENT_POSITIONS": {
+    "param": "MAX_CONCURRENT_POSITIONS",
+    "value": "1",
+    "reason": "Reduced the maximum concurrent positions to 1 position.",
     "ok": true,
     "msg": "applied"
   }
