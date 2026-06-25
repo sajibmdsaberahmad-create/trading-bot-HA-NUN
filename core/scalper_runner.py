@@ -58,6 +58,16 @@ from core.market_data_learning import (
     record_fetch_failure,
     prompt_block as market_data_prompt_block,
 )
+from core.fast_execution import (
+    ai_fast_execution,
+    min_bars_for_ticker,
+    stream_ticker_list,
+    warm_ticker_list,
+    should_spike_fast_entry,
+    prefetch_per_loop,
+    warm_budget_sec,
+    prioritize_locked_targets,
+)
 from core.connector import IBConnector
 from core.data import DataManager
 from core.features_enhanced import FeatureEngineerEnhanced
@@ -106,15 +116,16 @@ from core.ai_runtime_observer import get_runtime_observer
 from core.ollama_vision import ensure_vision_model
 
 
-def _only_uptrend(df: pd.DataFrame, current_px: float) -> bool:
+def _only_uptrend(df: pd.DataFrame, current_px: float, min_bars: int = 20) -> bool:
     """
     USER METHODOLOGY: Uptrend filter — must be loose enough to catch
     institutional algo waves early, not late.
     """
-    if len(df) < 20:
+    if len(df) < min_bars:
         return False
-    closes = df["close"].values[-20:]
-    volumes = df["volume"].values[-20:]
+    n = min(len(df), 20)
+    closes = df["close"].values[-n:]
+    volumes = df["volume"].values[-n:]
     sma20 = np.mean(closes)
     
     # Price above sma20 (1% tolerance for wicks)
@@ -2158,6 +2169,9 @@ class ScalperRunner:
                 rank_score=r["total_score"], reason=r.get("reasons", ""),
             )
             self._locked_targets.append(pick)
+        self._locked_targets = prioritize_locked_targets(
+            self._locked_targets, self.cfg, self._locked_targets[0].ticker if self._locked_targets else None,
+        )
         self.top_pick = self._locked_targets[0] if self._locked_targets else None
         self._targets_locked_at = time.time()
         self._focus_target_index = 0
@@ -2170,6 +2184,12 @@ class ScalperRunner:
             f"rotate every {getattr(self.cfg, 'LOCK_FOCUS_ROTATE_SEC', 60):.0f}s | "
             f"stale release {getattr(self.cfg, 'LOCK_STALE_RELEASE_SEC', 600):.0f}s"
         )
+        if ai_fast_execution(self.cfg):
+            log.info(
+                f"⚡ AI FAST EXEC: warm top {warm_priority_count(self.cfg)} | "
+                f"stream top {stream_priority_count(self.cfg)} | "
+                f"spike-fast entry ON"
+            )
         self._generative_review_locks(penny_results)
         if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
             send_dynamic_notification(
