@@ -2208,7 +2208,9 @@ class ScalperRunner:
             log.info(
                 f"⚡ AI FAST EXEC: simultaneous focus on {len(priority)} tickers "
                 f"[{','.join(priority[:12])}{'...' if len(priority) > 12 else ''}] | "
-                f"monitor {fast_monitor_interval(self.cfg):.2f}s | spike-fast ON"
+                f"IB budget {tick_stream_count(self.cfg)} tick + "
+                f"{max_realtime_bar_streams(self.cfg)} 5s-bars | "
+                f"monitor {fast_monitor_interval(self.cfg):.2f}s"
             )
         self._generative_review_locks(penny_results)
         if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
