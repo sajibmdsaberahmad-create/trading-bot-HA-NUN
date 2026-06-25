@@ -289,3 +289,7 @@ The council_timeout event indicates that the scanner + spike occurred after a ti
 Observed council_timeout — recorded for learning.
 Council timeout — no aligned signal
 
+🧭 COMMANDER LEARNING | 2026-06-25T10:44:34.826977+00:00
+Observed council_timeout — recorded for learning.
+Council timeout — no aligned signal
+
