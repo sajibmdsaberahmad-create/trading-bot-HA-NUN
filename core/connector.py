@@ -249,7 +249,7 @@ class IBConnector:
 
     def _on_error(self, reqId, errorCode, errorString, contract):
         # Pure informational error codes from IB that aren't real problems
-        BENIGN = {2104, 2106, 2107, 2108, 2119, 2158}
+        BENIGN = {2104, 2106, 2107, 2108, 2109, 2119, 2158}
         self.touch()
         # Order lifecycle codes — stored on reqId, not worth WARNING spam
         QUIET_ORDER = {201, 202, 399}
