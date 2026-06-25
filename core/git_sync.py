@@ -1529,6 +1529,7 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
         "models/consciousness.json", "models/thought_journal.jsonl",
         "models/ai_decision_log.jsonl", "models/trade_journal.json",
         "models/experience_buffer.jsonl", "models/cognitive_state.json",
+        "models/profit_hunt_ledger.jsonl",
         "models/account_snapshots.jsonl", "models/account_evaluation_log.jsonl",
         "ppo_trader.zip",
     ]
@@ -1786,6 +1787,7 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "models/pattern_snapshots.jsonl",
         "models/scalper_weights.json",
         "models/improvement_history.json",
+        "models/profit_hunt_ledger.jsonl",
         "models/trained_record_hashes.jsonl",
         "models/cognitive_state.json",
         "models/daily_guidelines.txt",
@@ -1796,6 +1798,7 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "models/thought_journal.jsonl",
         "models/trade_journal.json",
         "models/experience_buffer.jsonl",
+        "models/profit_hunt_ledger.jsonl",
         "models/ai_decision_log.jsonl",
         "models/flight_log.jsonl",
         "models/account_snapshots.jsonl",

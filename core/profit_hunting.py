@@ -162,10 +162,7 @@ def track_profit_hunt_event(
     if do_push:
         try:
             from core.git_sync import push_learning_checkpoint_async
-            push_learning_checkpoint_async(
-                f"profit_hunt:{event}:{ticker}",
-                files=["models/profit_hunt_ledger.jsonl", "models/experience_buffer.jsonl"],
-            )
+            push_learning_checkpoint_async(f"profit_hunt:{event}:{ticker}")
         except Exception:
             pass
 

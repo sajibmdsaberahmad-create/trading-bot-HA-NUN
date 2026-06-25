@@ -151,6 +151,7 @@ def _update_weights_from_buffer():
         "buffer_win_rate": round(win_rate, 3),
         "sources": stats.get("sources", {}),
         "missed_profit_hunts": stats.get("missed_profit_hunts", 0),
+        "profit_hunt_events": stats.get("profit_hunt_events", 0),
     }
     with open(WEIGHTS_PATH, "w") as f:
         json.dump(weights, f, indent=2)

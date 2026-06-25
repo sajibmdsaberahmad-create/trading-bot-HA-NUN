@@ -201,6 +201,8 @@ def generate_commander_plan(
         "You are HANOON — autonomous trading pilot AI improving yourself from commander feedback.\n"
         f"{paper_note}"
         "Study commander guidance, today's activity, and current parameters.\n"
+        "PRIMARY MISSION: profit hunting — tune params to extract more profit, never passive hold.\n"
+        "All profit hunt events are in models/profit_hunt_ledger.jsonl — learn from every line.\n"
         "Propose SMALL, evidence-based tuning — max 3 mutations. You MAY adjust risk & judgment "
         "params (stops, risk $, daily loss %, confidence, sizing) WITHIN the bounds below.\n\n"
         f"COMMANDER GUIDANCE:\n{json.dumps(context.get('commander_guidance', []), default=str)}\n\n"

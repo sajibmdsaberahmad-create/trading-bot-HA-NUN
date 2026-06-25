@@ -91,6 +91,7 @@ def stats() -> Dict[str, Any]:
     wins = 0
     total_reward = 0.0
     missed_profit_hunts = 0
+    profit_hunt_events = 0
     for r in recs:
         src = r.get("source", "unknown")
         sources[src] = sources.get(src, 0) + 1
@@ -99,10 +100,13 @@ def stats() -> Dict[str, Any]:
         total_reward += float(r.get("reward", 0.0))
         if r.get("event") == "missed_profit_hunt" or r.get("action") == "MISSED_PROFIT_HUNT":
             missed_profit_hunts += 1
+        if r.get("source") == "profit_hunt" or str(r.get("event", "")).startswith(("spike", "hunt", "profit")):
+            profit_hunt_events += 1
     return {
         "total": len(recs),
         "sources": sources,
         "win_rate": wins / len(recs) if recs else 0.0,
         "avg_reward": total_reward / len(recs) if recs else 0.0,
         "missed_profit_hunts": missed_profit_hunts,
+        "profit_hunt_events": profit_hunt_events,
     }

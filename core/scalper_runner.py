@@ -79,7 +79,7 @@ from core.pilot_mode import (
     is_ai_unlimited, is_ai_council_mode, effective_max_locked_targets, effective_max_concurrent_positions,
     effective_min_lock_score, effective_min_lock_candidates,
     effective_min_cash_reserve_pct, effective_max_shares_per_trade,
-    effective_prefetch_top_n, effective_min_position_hold_sec,
+    effective_prefetch_top_n, effective_min_position_hold_sec, effective_min_hold_for_exit,
     snapshot_features, send_dynamic_notification, observe_trade_everywhere,
     maybe_incremental_train, mtf_score_bonus, is_tradeable_ticker, generative_think,
     generative_position_decision,
@@ -2762,14 +2762,16 @@ class ScalperRunner:
         """Spike-top + spike-fade opportunistic exits while in profit."""
         if self.shares <= 0 or self._entry_price <= 0:
             return False, ""
-        min_hold = effective_min_position_hold_sec(self.cfg)
-        opened = getattr(self, "_position_opened_at", 0.0)
-        if opened and (time.time() - opened) < min_hold:
-            return False, ""
 
         ticker = self.current_ticker or ""
         entry_px = self._entry_price
         pnl_pct = (current_px / entry_px) - 1
+
+        min_hold = effective_min_hold_for_exit(self.cfg, pnl_pct)
+        opened = getattr(self, "_position_opened_at", 0.0)
+        if min_hold > 0 and opened and (time.time() - opened) < min_hold:
+            return False, ""
+
         extended = is_extended_session(get_market_state(self.cfg))
 
         fast_df = None
@@ -3024,14 +3026,6 @@ class ScalperRunner:
                     self._exit_position(current_px, risk_reason)
                     self._active_stream_ticker = None
                     return
-                elif (
-                    mechanical_bypass_council(self.cfg)
-                    and is_mechanical_profit_exit(risk_reason)
-                ):
-                    log.info(f"  ⚡ MECHANICAL RISK EXIT: {risk_reason}")
-                    self._exit_position(current_px, risk_reason)
-                    self._active_stream_ticker = None
-                    return
                 if is_ai_council_mode(self.cfg) and self.ai_commander:
                     if self._deliberate_risk_exit(ticker, current_px, risk_reason):
                         self._active_stream_ticker = None
@@ -3198,12 +3192,12 @@ class ScalperRunner:
         if self.shares <= 0 or entry_px <= 0:
             return False, "no position"
 
-        min_hold = effective_min_position_hold_sec(self.cfg)
+        pnl_pct = (current_px / entry_px) - 1
+        min_hold = effective_min_hold_for_exit(self.cfg, pnl_pct)
         opened = getattr(self, "_position_opened_at", 0.0)
-        if opened and (time.time() - opened) < min_hold:
+        if min_hold > 0 and opened and (time.time() - opened) < min_hold:
             return False, "hold (min hold)"
         
-        pnl_pct = (current_px / entry_px) - 1
         peak_pct = (self._position_peak / entry_px) - 1 if self._position_peak > 0 else pnl_pct
 
         # Dead trade: Ollama + PPO decide (rules are guardrail fallback only)
@@ -3997,6 +3991,21 @@ class ScalperRunner:
         Run exit council. Returns True if deliberating (pending) or position was exited.
         False means council says hold — caller continues other checks.
         """
+        entry_px = self._entry_price
+        pnl_pct_frac = ((current_px / entry_px) - 1) if entry_px else 0.0
+        pnl_pct = pnl_pct_frac * 100
+
+        if profit_exit_bypasses_council(self.cfg, ppo_reason or "", pnl_pct_frac) and ppo_exit:
+            log.info(f"  🎯 PROFIT HUNT bypass council: {ppo_reason[:80]}")
+            track_profit_hunt_event(
+                self.cfg, "profit_hunt_exit", ticker,
+                {"reason": ppo_reason, "price": current_px, "bypass": "council"},
+                pnl_usd=(current_px - entry_px) * self.shares if entry_px else 0,
+                pnl_pct=pnl_pct_frac, record_buffer=True, push_git=True,
+            )
+            self._exit_position(current_px, ppo_reason[:120])
+            return True
+
         if not self.ai_commander or not is_ai_council_mode(self.cfg):
             if ppo_exit and ppo_conf >= self.cfg.CONFIDENCE_THRESHOLD:
                 self._exit_position(current_px, f"ppo_exit: {ppo_reason[:80]}")
@@ -4004,8 +4013,6 @@ class ScalperRunner:
             return False
         if self._has_ai_council(ticker, "exit_decision"):
             return True
-        entry_px = self._entry_price
-        pnl_pct = ((current_px / entry_px) - 1) * 100 if entry_px else 0
         exit_ctx = {
             "ticker": ticker,
             "price": current_px,
@@ -4043,6 +4050,21 @@ class ScalperRunner:
 
     def _deliberate_risk_exit(self, ticker: str, current_px: float, risk_signal: str) -> bool:
         """Risk-engine exit via council. True = pending or exited."""
+        entry_px = self._entry_price
+        pnl_pct_frac = ((current_px / entry_px) - 1) if entry_px else 0.0
+        pnl_pct = pnl_pct_frac * 100
+
+        if profit_exit_bypasses_council(self.cfg, risk_signal, pnl_pct_frac):
+            log.info(f"  ⚡ PROFIT HUNT risk bypass: {risk_signal}")
+            track_profit_hunt_event(
+                self.cfg, risk_signal, ticker,
+                {"reason": risk_signal, "price": current_px, "bypass": "council"},
+                pnl_usd=(current_px - entry_px) * self.shares if entry_px else 0,
+                pnl_pct=pnl_pct_frac, record_buffer=True, push_git=True,
+            )
+            self._exit_position(current_px, risk_signal)
+            return True
+
         if not self.ai_commander or not is_ai_council_mode(self.cfg):
             log.info(f"  ⚡ RISK EXIT: {risk_signal}")
             self._exit_position(current_px, risk_signal)
@@ -4054,8 +4076,6 @@ class ScalperRunner:
             ppo_exit, ppo_conf, ppo_reason = self._ai_gate_exit(current_px)
         except Exception:
             pass
-        entry_px = self._entry_price
-        pnl_pct = ((current_px / entry_px) - 1) * 100 if entry_px else 0
         ctx = {
             "ticker": ticker,
             "price": current_px,
