@@ -1,8 +1,8 @@
 {
   "in_shadow": true,
   "consecutive_losses": 0,
-  "daily_start_equity": 876338.78,
-  "daily_pnl_usd": -58018.36,
+  "daily_start_equity": 841557.86,
+  "daily_pnl_usd": 0.0,
   "shadow_open": {
     "PLTR": {
       "ticker": "PLTR",
@@ -82,5 +82,5 @@
       "closed_at": 1782413174.662103
     }
   ],
-  "updated_at": 1782413306.5640278
+  "updated_at": 1782413356.457385
 }
