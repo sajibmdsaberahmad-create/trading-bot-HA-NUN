@@ -2268,7 +2268,7 @@ class ScalperRunner:
 
     def _drain_bar_prefetch_queue(self):
         """Non-blocking bar prefetch — one ticker per main-loop tick."""
-        per_loop = int(getattr(self.cfg, "SCAN_BAR_PREFETCH_PER_LOOP", 2))
+        per_loop = prefetch_per_loop(self.cfg)
         for _ in range(max(1, per_loop)):
             if not self._bar_prefetch_queue:
                 return
@@ -2278,14 +2278,16 @@ class ScalperRunner:
             self._prefetch_one_ticker_bars(ticker, quiet=True)
 
     def _warm_locked_bar_cache(self):
-        """Fetch 1-min bars for all locked names so spike monitor isn't blind."""
-        budget = float(getattr(self.cfg, "LOCK_BAR_WARM_BUDGET_SEC", 12.0))
+        """Fetch 1-min bars for priority locked names first — spike monitor ready ASAP."""
+        budget = warm_budget_sec(self.cfg)
         t0 = time.perf_counter()
         warmed = 0
-        for target in self._locked_targets:
+        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
+        priority = warm_ticker_list(self._locked_targets, self.cfg, focus)
+        for ticker in priority:
             if time.perf_counter() - t0 > budget:
                 break
-            if self._prefetch_one_ticker_bars(target.ticker, quiet=True) is not None:
+            if self._prefetch_one_ticker_bars(ticker, quiet=True) is not None:
                 warmed += 1
         remaining = [
             t.ticker for t in self._locked_targets
@@ -2293,7 +2295,10 @@ class ScalperRunner:
         ]
         if remaining:
             self._schedule_bar_prefetch(remaining)
-        log.info(f"📊 Bar cache: {warmed}/{len(self._locked_targets)} locked tickers ready")
+        log.info(
+            f"📊 Bar cache: {warmed}/{len(self._locked_targets)} locked tickers ready "
+            f"(priority {len(priority)})"
+        )
 
     def _maybe_release_stale_lock(self, now: float) -> bool:
         """Drop dead locks after no entry — allows universe rescan."""
@@ -2416,9 +2421,12 @@ class ScalperRunner:
             return
         watch_all = getattr(self.cfg, "WATCH_ALL_LOCKED_STREAMS", True)
         focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
-        wanted = [
-            t.ticker for t in self._locked_targets[: self._max_locked()]
-        ]
+        if watch_all and ai_fast_execution(self.cfg):
+            wanted = stream_ticker_list(self._locked_targets, self.cfg, focus)
+        else:
+            wanted = [
+                t.ticker for t in self._locked_targets[: self._max_locked()]
+            ]
         wanted = filter_tradeable_tickers(self.cfg, wanted)
 
         if not watch_all:
@@ -2706,19 +2714,31 @@ class ScalperRunner:
         best_priority = 0.0
 
         holding = self._held_tickers()
+        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
 
         for target in self._locked_targets[: self._max_locked()]:
             ticker = target.ticker
             if ticker == pending_ticker or ticker in holding:
                 continue
+            min_bars = min_bars_for_ticker(self.cfg, ticker, focus)
             df = self._scan_data_cache.get(ticker)
             dm = self._target_monitors.get(ticker)
             if dm:
                 live_df = dm.get_bar_dataframe()
-                if live_df is not None and len(live_df) >= 20:
+                if live_df is not None and len(live_df) >= min_bars:
                     self._scan_data_cache[ticker] = live_df
                     df = live_df
-            if df is None or len(df) < 20:
+            if df is None or len(df) < min_bars:
+                if dm:
+                    burst, burst_ratio = self._detect_tick_volume_burst(dm, df if df is not None else pd.DataFrame())
+                    if burst and ticker == focus:
+                        live_px = dm.get_latest_price() or 0.0
+                        if live_px > 0:
+                            priority = float(target.rank_score) * float(burst_ratio) * 1.5
+                            if priority > best_priority:
+                                best_priority = priority
+                                work_df = df.tail(60).copy() if df is not None and len(df) else pd.DataFrame()
+                                best_spike = (target, live_px, burst_ratio, work_df)
                 continue
 
             live_px = dm.get_latest_price() if dm else None
@@ -2727,7 +2747,7 @@ class ScalperRunner:
 
             work_df = df.tail(60).copy()
 
-            if not _only_uptrend(work_df, live_px):
+            if not _only_uptrend(work_df, live_px, min_bars=min_bars):
                 continue
 
             is_spike, spike_ratio = self._detect_volume_spike(work_df)
@@ -4744,12 +4764,30 @@ class ScalperRunner:
         
         try:
             self.cfg.TICKER = ticker
+            focus = self._focused_ticker() or ticker
+            min_bars = min_bars_for_ticker(self.cfg, ticker, focus)
             
-            # Use cached data from scanner (avoids re-fetching 2 days of bars every second)
             df_fast = self._scan_data_cache.get(ticker)
-            if df_fast is None or len(df_fast) < 20:
+            dm = self._target_monitors.get(ticker)
+            if dm:
+                live_df = dm.get_bar_dataframe()
+                if live_df is not None and len(live_df) >= min_bars:
+                    df_fast = live_df
+                    self._scan_data_cache[ticker] = live_df
+            if df_fast is None or len(df_fast) < min_bars:
                 df_fast = self.data.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
-                if df_fast is None or len(df_fast) < 20:
+            if df_fast is None or len(df_fast) < min_bars:
+                if dm:
+                    burst, burst_ratio = self._detect_tick_volume_burst(dm, df_fast if df_fast is not None else pd.DataFrame())
+                    if burst and should_spike_fast_entry(
+                        self.cfg, burst_ratio, self.top_pick.rank_score if self.top_pick else 0,
+                    ):
+                        df_fast = dm.get_fast_bar_dataframe(n=24)
+                        if df_fast is None or len(df_fast) < 3:
+                            return 'waiting'
+                    else:
+                        return 'waiting'
+                else:
                     return 'waiting'
             
             current_px = self._live_price_for(ticker, float(df_fast["close"].iloc[-1]))
