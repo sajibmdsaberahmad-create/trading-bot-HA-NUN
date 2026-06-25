@@ -1009,12 +1009,11 @@ class ScalperRunner:
         self.broker.cancel_open_orders_for_symbol(ticker)
         self.bracket_handle = None
         self._clear_pending_entry(ticker, cooldown_sec=cd)
-        if learn_dont_block(self.cfg):
-            self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
-        else:
-            self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
-            remaining = [t for t in self._locked_targets if t.ticker not in self._contract_blacklist]
-            self._locked_targets = remaining
+        self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
+        if not learn_dont_block(self.cfg):
+            self._locked_targets = [
+                t for t in self._locked_targets if t.ticker not in self._contract_blacklist
+            ]
         remaining = list(self._locked_targets)
         next_pick = None
         if remaining and getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander:
@@ -1330,6 +1329,11 @@ class ScalperRunner:
             log.warning("🧠 Generative thinking: OFF — set OLLAMA_ENABLED=true and run Ollama locally")
         if getattr(self.cfg, "AI_FULL_CONTROL", True):
             log.info("🧠 AI FULL CONTROL: all decisions, logs, journals, notifications via AI brain")
+        if learn_dont_block(self.cfg):
+            log.info(
+                "📚 LEARN MODE: failures → experience buffer + soft retry "
+                "(no permanent ticker blocks; AI_UNLIMITED filters lifted)"
+            )
         log.info(
             f"Max per trade: {'$' + format(self.cfg.MAX_TRADE_SIZE_USD, ',.0f') if getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False) else 'AI-sized'} "
             f"| Multi-position: {self._max_concurrent()} "
@@ -1722,8 +1726,12 @@ class ScalperRunner:
         except Exception as exc:
             msg = str(exc)
             if "Could not qualify" in msg or "No security definition" in msg:
-                self._contract_blacklist.add(ticker)
-                log.debug(f"  ⏭ {ticker}: blacklisted (no IB contract)")
+                if should_permanent_blacklist(self.cfg, "no IB contract"):
+                    self._contract_blacklist.add(ticker)
+                record_failure_for_learning(
+                    self.cfg, ticker=ticker, reason=msg[:200], event="scan_contract",
+                )
+                log.debug(f"  ⏭ {ticker}: no IB contract (recorded for learning)")
             else:
                 log.info(f"  ❌ {ticker}: SCAN ERROR — {exc}")
             return None
@@ -2502,7 +2510,7 @@ class ScalperRunner:
             self._active_stream_ticker = ticker
             self._ensure_position_stream(ticker)
             return
-        if result == 'permanent_skip':
+        if result in ("permanent_skip", "learn_skip"):
             self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
             self._stop_target_stream(ticker)
             if not self._locked_targets:
@@ -3900,6 +3908,43 @@ class ScalperRunner:
             self.cfg, gate_dec, fallback_entry=current_px,
         )
         if not ok:
+            if learn_dont_block(self.cfg):
+                from core.bracket_validator import compute_atr_bracket
+                from core.pilot_mode import get_ai_deploy_budget
+
+                atr = compute_atr(df_fast, period=5)
+                deploy = get_ai_deploy_budget(
+                    self.cfg,
+                    self.pilot,
+                    float(self.account_equity),
+                    float(self.bot_cash),
+                    int(self._open_position_count()),
+                )
+                reb = compute_atr_bracket(
+                    self.cfg,
+                    current_px,
+                    atr,
+                    equity=float(self.account_equity),
+                    cash=float(self.bot_cash),
+                    deploy_cap=deploy,
+                    shares_hint=int(ai_dec.get("shares", 0) or 0),
+                )
+                if reb.ok:
+                    gate_dec = {
+                        **ai_dec,
+                        "entry": current_px,
+                        "stop": reb.stop,
+                        "target": reb.target,
+                        "shares": reb.shares,
+                        "risk_usd": reb.risk_usd,
+                        "reward_risk": reb.reward_risk,
+                    }
+                    ok, gate_dec, err = validate_decision_bracket(
+                        self.cfg, gate_dec, fallback_entry=current_px,
+                    )
+                    if ok:
+                        log.info(f"  🔧 BRACKET REPAIRED {ticker} — ATR math (learn mode)")
+        if not ok:
             log.warning(f"  🛑 BRACKET REJECTED {ticker}: {err}")
             spike = float(getattr(self, "_last_spike_ratio", 1.0))
             snap = (
@@ -3943,7 +3988,7 @@ class ScalperRunner:
             return "waiting"
         spread_pct = (ask - bid) / current_px if bid and ask and current_px > 0 else 0.0
         max_spread = float(getattr(self.cfg, "MAX_ENTRY_SPREAD_PCT", 0.05))
-        if spread_pct > max_spread:
+        if spread_pct > max_spread and not learn_dont_block(self.cfg):
             log.info(f"  ⏭ Skip {ticker}: spread {spread_pct:.1%} > {max_spread:.0%} (IB 2161 risk)")
             self._clear_pending_entry(ticker, cooldown_sec=60.0)
             return "waiting"
