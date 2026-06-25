@@ -2253,5 +2253,23 @@
     "lessons": [
       "Review council_timeout on RKLB"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:43:52.864122+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The event occurred due to a change in the market data that prevented profit hunting.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Heuristic learning for trade_closed on LCID",
+    "lessons": [
+      "Use confidence intervals for market data.",
+      "Tune entry limits to avoid overtrading."
+    ]
   }
 ]

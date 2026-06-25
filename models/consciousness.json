@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 142,
+  "trades_observed": 143,
   "scans_performed": 27,
-  "improvements_applied": 322,
+  "improvements_applied": 323,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16549,6 +16549,36 @@
           "Review council_timeout on RKLB"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:43:49.998812",
+      "age": "4d 8h 41m 1s",
+      "type": "TRADE",
+      "message": "Observed trade: LCID ? P&L=$+32.77",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:43:52.813810",
+      "age": "4d 8h 41m 4s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #323",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Heuristic learning for trade_closed on LCID",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The event occurred due to a change in the market data that prevented profit hunting.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Use confidence intervals for market data.",
+          "Tune entry limits to avoid overtrading."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -17834,8 +17864,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
-  "total_pnl": 124539.81000000003,
+  "mood": "focused",
+  "total_pnl": 124572.58000000003,
   "win_history": [
     0.0,
     0.0,
@@ -17978,20 +18008,21 @@
     61.74,
     -132.9,
     75.14,
-    343.11
+    343.11,
+    32.77
   ],
-  "consecutive_wins": 2,
+  "consecutive_wins": 3,
   "consecutive_losses": 0,
   "worst_streak": 18,
-  "veteran_xp": 2050,
+  "veteran_xp": 2080,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 42,
-    "entry_timing": 58
+    "entry_timing": 60
   },
-  "flights_completed": 137,
-  "hours_flown": 13.699999999999967,
+  "flights_completed": 138,
+  "hours_flown": 13.799999999999967,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -18013,7 +18044,7 @@
     "BIT": 13,
     "GPU": 19,
     "PLT": 1,
-    "LCI": 4,
+    "LCI": 5,
     "RIO": 6,
     "QS": 3,
     "MAR": 4,
@@ -18025,5 +18056,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I'm feeling stressed about the recent performance and need to stay focused."
+  "mood_message": "You have consistently focused on trading in recent sessions to increase your profit margin."
 }

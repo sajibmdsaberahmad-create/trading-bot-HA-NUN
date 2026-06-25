@@ -1,14 +1,9 @@
 {
-  "mood": "focused",
-  "mood_message": "You are feeling optimistic about your strategies and the momentum in this session.",
-  "confidence": 0.35,
+  "mood": "in rhythm",
+  "mood_message": "Win streak 5 \u00b7 recent $+603.47. Riding what works, not forcing size.",
+  "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The event occurred due to the Ollama exit being close to the PPO hold ratio, which triggered the council_exit. This was an opportunistic move to avoid losses.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We should prioritize opportunistic exits and add a ticker for live IB bars if it occurs.'}",
-    "Commander: The market data failure indicates that the algorithm failed to identify profitable trades due to an empty loss streak.",
-    "Focus on taking profit into momentum to avoid losing profit early.",
-    "Implement stricter parameters and logic hints within the constraints to prevent recurrence.",
     "Commander: The event occurred because of a missed profit hunt (trailing stop). The algorithm prioritized opportunistic exits.",
     "Spike-top hunt on GDC: spike_top_intrabar: +0.76% vol=126309.0x",
     "Profit hunt worked on GDC: spike_top_intrabar: +0.76% vol=126309.0x \u2014 reinforce opportunistic exits.",
@@ -103,10 +98,15 @@
     "analyze",
     "learn from every outcome",
     "Review council_timeout on RKLB",
-    "Commander: High scanner score after timeout: score=81 vol=1.1x | ATR R:R 2.0"
+    "Commander: High scanner score after timeout: score=81 vol=1.1x | ATR R:R 2.0",
+    "Spike-top hunt on LCID: wave_end_spike_fade: peak +432.36% now +0.34% vol=0.3x fading",
+    "Profit hunt worked on LCID: wave_end_spike_fade: peak +432.36% now +0.34% vol=0.3x fading \u2014 reinforce opportunistic exits.",
+    "Use confidence intervals for market data.",
+    "Tune entry limits to avoid overtrading.",
+    "Commander: The trade closed with a profit of $32.77."
   ],
-  "last_thought": "```json\n{\n  \"entry\": 13.7525,\n  \"exit\": 13.81,\n  \"entry_fill\": 13.7525,\n  \"exit_fill\": 13.81,\n  \"quote_entry\": 13.7525,\n  \"quote_exit\": 13.81,\n  \"shares\": 5964.0,\n  \"pnl_usd\": 343.11,\n  \"pnl_pct\": 0.42,\n  \"result\": \"win\",\n  \"exit_reason\": \"trail_stop\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": 0.0,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 127.3,\n  \"peak\": 27.51,\n  \"stop\": 13.7375,\n  \"target\": 27.72,\n  \"fill_confirmed\": true,\n  \"reconcile_",
+  "last_thought": "```json\n{\n  \"entry\": 5.1676,\n  \"exit\": 5.18,\n  \"shares\": 2635.0,\n  \"pnl_usd\": 32.77,\n  \"pnl_pct\": 0.24,\n  \"result\": \"win\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": -0.000964,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 186.8,\n  \"peak\": 27.51,\n  \"stop\": 27.5055,\n  \"target\": 27.72,\n  \"fill_confirmed\": true\n}\n```",
   "market_belief": {},
-  "trades_observed": 6,
-  "updated": "2026-06-25T19:42:58.873178"
+  "trades_observed": 8,
+  "updated": "2026-06-25T19:43:52.812968"
 }
