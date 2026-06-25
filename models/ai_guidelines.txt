@@ -1132,3 +1132,14 @@ Council timeout — no aligned signal
 Observed market_data_failure — recorded for learning.
 MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: ONCI@SMART Trades
 
+🧭 COMMANDER LEARNING | 2026-06-25T14:01:36.836943+00:00
+The order canceled event occurred due to an aggressive limit price order at a market price of 4.7368818. The algorithm should lower the threshold for orders that are closer to the current market price.
+The user is experiencing repeated failed trades where they cannot accept limits and convert orders to algorithms or make opportunistic exits. This event indicates an issue with the order execution strategy.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in orders that are closer to the current market price.)
+  - MAX_CONCURRENT_POSITIONS → 200 (Lowering MAX_CONCURRENT_POSITIONS (1, 200) improves order execution efficiency.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T14:01:40.524449+00:00
+Observed market_data_failure — recorded for learning.
+MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: ONCI@SMART Trades
+

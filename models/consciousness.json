@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 30,
   "scans_performed": 27,
-  "improvements_applied": 148,
+  "improvements_applied": 150,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8304,6 +8304,49 @@
       "age": "4d 2h 56m 58s",
       "type": "IMPROVE",
       "message": "Applied improvement #148",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Observed market_data_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review market_data_failure on ONCI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:01:36.800857",
+      "age": "4d 2h 58m 48s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #149",
+      "metadata": {
+        "source": "runtime_order_canceled",
+        "summary": "The order canceled event occurred due to an aggressive limit price order at a market price of 4.7368818. The algorithm should lower the threshold for orders that are closer to the current market price.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increased confidence in orders that are closer to the current market price.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "MAX_CONCURRENT_POSITIONS",
+            "value": 200,
+            "reason": "Lowering MAX_CONCURRENT_POSITIONS (1, 200) improves order execution efficiency.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The order should be more aggressive, closer to the current market price of 4.3141.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:01:40.494947",
+      "age": "4d 2h 58m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #150",
       "metadata": {
         "source": "runtime_market_data_failure",
         "summary": "Observed market_data_failure \u2014 recorded for learning.",

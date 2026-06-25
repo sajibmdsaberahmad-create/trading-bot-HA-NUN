@@ -15,17 +15,17 @@
   },
   "ONCI": {
     "ticker": "ONCI",
-    "failures": 4,
+    "failures": 5,
     "last_code": 162,
-    "last_reason": "IB returned no historical data. Possible causes:\n  - Market data subscription does not cover this ticker\n  - IB Gateway is not fully logged in\n  - Outside data availability window\n  - Paper account may need a market data subscription",
+    "last_reason": "Historical Market Data Service error message:HMDS query returned no data: ONCI@SMART Trades",
     "pattern": "no_historical_data",
     "exchange": "SMART",
     "primary_exchange": "PINK",
-    "skip_until": 1782399581.252434,
-    "skip_until_iso": "2026-06-25T14:59:41.252434+00:00",
+    "skip_until": 1782410496.1696131,
+    "skip_until_iso": "2026-06-25T18:01:36.169613+00:00",
     "first_seen": "2026-06-25T13:34:31.524755+00:00",
-    "last_seen": "2026-06-25T13:59:41.270762+00:00",
-    "source": "fetch:1 min"
+    "last_seen": "2026-06-25T14:01:36.176473+00:00",
+    "source": "ib_error"
   },
   "GAID": {
     "ticker": "GAID",

@@ -2603,7 +2603,8 @@ class ScalperRunner:
         if pick.rank_score < min_lock:
             return
         df = self._scan_data_cache.get(pick.ticker)
-        if df is None or len(df) < 20:
+        min_bars = self._min_bars_for(pick.ticker)
+        if df is None or len(df) < min_bars:
             return
         is_spike, spike_ratio = self._detect_volume_spike(df)
         vol_ratio = float(df["volume"].tail(3).mean()) / (float(df["volume"].tail(20).mean()) + 1e-9)
@@ -2738,12 +2739,20 @@ class ScalperRunner:
             self._ensure_locked_streams(quiet=True)
 
         best_spike: Optional[Tuple[ScanResult, float, float, pd.DataFrame]] = None
+        spike_candidates: List[Tuple[float, ScanResult, float, float, pd.DataFrame]] = []
         best_priority = 0.0
 
         holding = self._held_tickers()
         focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
+        priority_names = set(
+            t.upper() for t in monitor_ticker_list(self._locked_targets, self.cfg, focus)
+        )
+        scan_targets = [
+            t for t in self._locked_targets[: self._max_locked()]
+            if t.ticker.upper() in priority_names
+        ] or self._locked_targets[: self._max_locked()]
 
-        for target in self._locked_targets[: self._max_locked()]:
+        for target in scan_targets:
             ticker = target.ticker
             if ticker == pending_ticker or ticker in holding:
                 continue
@@ -2756,16 +2765,14 @@ class ScalperRunner:
                     self._scan_data_cache[ticker] = live_df
                     df = live_df
             if df is None or len(df) < min_bars:
-                if dm:
+                if dm and ticker.upper() in priority_names:
                     burst, burst_ratio = self._detect_tick_volume_burst(dm, df if df is not None else pd.DataFrame())
-                    if burst and ticker == focus:
+                    if burst:
                         live_px = dm.get_latest_price() or 0.0
                         if live_px > 0:
                             priority = float(target.rank_score) * float(burst_ratio) * 1.5
-                            if priority > best_priority:
-                                best_priority = priority
-                                work_df = df.tail(60).copy() if df is not None and len(df) else pd.DataFrame()
-                                best_spike = (target, live_px, burst_ratio, work_df)
+                            work_df = df.tail(60).copy() if df is not None and len(df) else pd.DataFrame()
+                            spike_candidates.append((priority, target, live_px, burst_ratio, work_df))
                 continue
 
             live_px = dm.get_latest_price() if dm else None
@@ -2774,16 +2781,19 @@ class ScalperRunner:
 
             work_df = df.tail(60).copy()
 
+            spike_fast_ok = should_spike_fast_entry(
+                self.cfg, 1.0, float(target.rank_score),
+            )
             if not _only_uptrend(work_df, live_px, min_bars=min_bars):
-                continue
+                if not (ai_fast_execution(self.cfg) and ticker.upper() in priority_names):
+                    continue
 
-            is_spike, spike_ratio = self._detect_volume_spike(work_df)
+            is_spike, spike_ratio = self._detect_volume_spike(work_df, min_period=min(20, max(6, min_bars)))
             min_spike = float(getattr(self.cfg, "LOCKED_SPIKE_MIN_RATIO", 1.15))
             if not is_spike and spike_ratio >= min_spike:
                 is_spike, spike_ratio = True, spike_ratio
 
-            focused = self._focused_ticker()
-            if dm and ticker == focused:
+            if dm and ticker.upper() in priority_names:
                 burst, burst_ratio = self._detect_tick_volume_burst(dm, work_df)
                 if burst:
                     is_spike, spike_ratio = True, burst_ratio
@@ -2808,70 +2818,94 @@ class ScalperRunner:
                 continue
 
             priority = float(target.rank_score) * float(spike_ratio)
+            spike_candidates.append((priority, target, live_px, spike_ratio, work_df))
             if priority > best_priority:
                 best_priority = priority
                 best_spike = (target, live_px, spike_ratio, work_df)
 
-        if best_spike is None:
+        if best_spike is None and not spike_candidates:
             return
 
-        target, live_px, spike_ratio, work_df = best_spike
-        ticker = target.ticker
         if scout_only:
-            self._next_best_pick = target
-            self._next_best_score = best_priority
-            if int(time.time()) % 30 == 0:
-                log.debug(
-                    f"  👀 Scout while holding: next={ticker} "
-                    f"vol={spike_ratio:.1f}x score={target.rank_score:.0f}"
-                )
+            if best_spike:
+                target, live_px, spike_ratio, work_df = best_spike
+                self._next_best_pick = target
+                self._next_best_score = best_priority
+                if int(time.time()) % 30 == 0:
+                    log.debug(
+                        f"  👀 Scout while holding: next={target.ticker} "
+                        f"vol={spike_ratio:.1f}x score={target.rank_score:.0f}"
+                    )
             return
 
-        if time.time() < self._spike_attempt_until.get(ticker, 0):
-            return
-        if time.time() < self._spike_skip_until.get(ticker, 0):
-            return
-        if time.time() < self._entry_cooldown_until.get(ticker, 0):
-            return
+        spike_candidates.sort(key=lambda x: x[0], reverse=True)
+        max_attempts = max_spike_attempts_per_cycle(self.cfg)
+        attempted = 0
 
-        if self.risk.is_halted():
-            return
+        for priority, target, live_px, spike_ratio, work_df in spike_candidates[:max_attempts]:
+            ticker = target.ticker
+            if time.time() < self._spike_attempt_until.get(ticker, 0):
+                continue
+            if time.time() < self._spike_skip_until.get(ticker, 0):
+                continue
+            if time.time() < self._entry_cooldown_until.get(ticker, 0):
+                continue
+            if self.risk.is_halted():
+                return
+            if self._open_position_count() >= self._max_concurrent():
+                return
+            if self._pending_entry_ticker and time.time() < self._pending_entry_until:
+                return
 
-        self._scan_data_cache[ticker] = work_df
-        self.top_pick = target
-        self._last_entry_attempt_at = time.time()
-        spike_cd = float(getattr(self.cfg, "SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC", 20.0))
-        self._spike_attempt_until[ticker] = time.time() + spike_cd
-        log.info(f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | score={target.rank_score:.0f} | attempting entry...")
-        result = self._attempt_entry()
-        if ticker in self._held_tickers():
-            self._active_stream_ticker = ticker
-            self._ensure_position_stream(ticker)
-            return
-        if result in ("permanent_skip", "learn_skip"):
-            self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
-            self._stop_target_stream(ticker)
-            if not self._locked_targets:
-                self._last_scan_time = 0
-                log.info("🔓 All locked targets cleared — will rescan universe")
-            elif self.top_pick and self.top_pick.ticker == ticker:
-                self.top_pick = self._locked_targets[0]
-                self._ensure_focus_stream(quiet=True)
+            self._scan_data_cache[ticker] = work_df
+            self.top_pick = target
+            self._last_entry_attempt_at = time.time()
+            spike_cd = float(getattr(self.cfg, "SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC", 20.0))
+            if ai_fast_execution(self.cfg):
+                spike_cd = min(spike_cd, 8.0)
+            self._spike_attempt_until[ticker] = time.time() + spike_cd
+            log.info(
+                f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | "
+                f"score={target.rank_score:.0f} | attempting entry..."
+            )
+            result = self._attempt_entry()
+            attempted += 1
+            if ticker in self._held_tickers():
+                self._active_stream_ticker = ticker
+                self._ensure_position_stream(ticker)
+                return
+            if result == "entered":
+                return
+            if result in ("permanent_skip", "learn_skip"):
+                self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
+                self._stop_target_stream(ticker)
+                if not self._locked_targets:
+                    self._last_scan_time = 0
+                    log.info("🔓 All locked targets cleared — will rescan universe")
+                elif self.top_pick and self.top_pick.ticker == ticker:
+                    self.top_pick = self._locked_targets[0]
+                    self._ensure_focus_stream(quiet=True)
+            if result == "waiting" and attempted >= max_attempts:
+                break
     
-    def _detect_volume_spike(self, df: pd.DataFrame) -> Tuple[bool, float]:
+    def _detect_volume_spike(self, df: pd.DataFrame, min_period: int = 20) -> Tuple[bool, float]:
         """
-        Detect volume spike: current volume vs 20-period average.
-        Returns (is_spike, spike_ratio)
+        Detect volume spike: current volume vs recent average.
+        Uses shorter window when fewer bars available (fast execution).
         """
-        if len(df) < 20:
+        n = len(df)
+        if n < 6:
             return False, 1.0
-        volumes = df["volume"].values[-20:]
-        avg_vol = np.mean(volumes[:-1])  # exclude current bar
+        period = min(min_period, n - 1)
+        volumes = df["volume"].values[-period:]
+        avg_vol = np.mean(volumes[:-1]) if len(volumes) > 1 else float(volumes[0])
         current_vol = volumes[-1]
         if avg_vol <= 0:
             return False, 1.0
         spike_ratio = current_vol / avg_vol
         threshold = getattr(self.cfg, "VOLUME_SPIKE_MIN_RATIO", 1.25)
+        if ai_fast_execution(self.cfg):
+            threshold = min(threshold, float(getattr(self.cfg, "AI_SPIKE_FAST_MIN_RATIO", 1.15)))
         return spike_ratio >= threshold, spike_ratio
     
     def _predict_slippage(self, df: pd.DataFrame, current_px: float) -> float:
@@ -4290,8 +4324,17 @@ class ScalperRunner:
         if self._pending_entry_ticker and time.time() < self._pending_entry_until:
             return
         df_fast = self._scan_data_cache.get(ticker)
-        if df_fast is None or len(df_fast) < 20:
-            return
+        min_bars = self._min_bars_for(ticker)
+        if df_fast is None or len(df_fast) < min_bars:
+            dm = self._target_monitors.get(ticker)
+            if dm and should_spike_fast_entry(
+                self.cfg,
+                float(st.get("spike_ratio", 0) or 0),
+                float(st.get("scan_score", 0) or 0),
+            ):
+                df_fast = dm.get_fast_bar_dataframe(n=24) or dm.get_bar_dataframe()
+            if df_fast is None or len(df_fast) < max(3, min_bars // 2):
+                return
         current_px = self._live_price_for(ticker, float(df_fast["close"].iloc[-1]))
         st["current_px"] = current_px
         st["account"] = self._account_context_for_ai()
