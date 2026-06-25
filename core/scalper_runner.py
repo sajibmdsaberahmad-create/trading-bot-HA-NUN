@@ -5078,6 +5078,7 @@ class ScalperRunner:
                     "shares": shares,
                     "plan": plan,
                     "fill_px": current_px,
+                    "limit_px": entry_parent_px,
                     "polls": 0,
                     "max_polls": fill_polls,
                     "min_fill_ratio": min_fill_ratio,
@@ -5305,6 +5306,8 @@ class ScalperRunner:
                 log.info(f"  🧹 Cleared {n_cancelled} stale {ticker} order(s) before entry")
             self._pending_entry_ticker = ticker
             block_sec = float(getattr(self.cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
+            if ai_fast_execution(self.cfg):
+                block_sec = min(block_sec, 20.0)
             self._pending_entry_until = now + block_sec
 
             # Start pilot flight tracking
@@ -5367,6 +5370,7 @@ class ScalperRunner:
                         "shares": shares,
                         "plan": plan,
                         "fill_px": current_px,
+                        "limit_px": entry_parent_px,
                         "polls": 0,
                         "max_polls": fill_polls,
                         "min_fill_ratio": min_fill_ratio,
