@@ -3005,3 +3005,252 @@ The trade was completed without profit hunting due to the stop breach and exit t
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The market state was open, and the confidence threshold was set to 0.58.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:57:29.947311+00:00
+The trade closed with a trailing profit, and the trader should focus on minimizing losses.
+The trader is closing trades based on trailing profits and taking profits into momentum. The market state is open (no live IB bars).
+• A
+• v
+• o
+• i
+• d
+•  
+• m
+• a
+• k
+• i
+• n
+• g
+•  
+• t
+• r
+• a
+• d
+• e
+• s
+•  
+• b
+• a
+• s
+• e
+• d
+•  
+• o
+• n
+•  
+• t
+• r
+• a
+• i
+• l
+• i
+• n
+• g
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+• s
+•  
+• i
+• n
+•  
+• o
+• p
+• e
+• n
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market state: open, not using live IB bars.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:57:54.364776+00:00
+Market data failure occurred, which prevents us from using past performance to adjust the parameters for future trades.
+The market data is unreliable and the stop-loss points are too high. We need to adjust our entry points based on recent events.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market data failure prevents us from using past performance with the updated parameters.)
+  - ENTRY_FILL_MAX_WAIT_SEC → 20 (We need to adjust our fill limit buffer to account for recent events.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:57:57.250141+00:00
+The trade closed with a negative pnl and profit hunt triggered due to an Ollama exit at 90% PPO hold.
+We observe the trade closed with a negative pnl, which could indicate profit hunting. The profit hunt is triggered by an Ollama exit at 90% PPO hold.
+• T
+• o
+•  
+• p
+• r
+• e
+• v
+• e
+• n
+• t
+•  
+• t
+• h
+• i
+• s
+•  
+• r
+• e
+• c
+• u
+• r
+• r
+• i
+• n
+• g
+•  
+• b
+• e
+• h
+• a
+• v
+• i
+• o
+• r
+• ,
+•  
+• w
+• e
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• h
+• e
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+•  
+• h
+• u
+• n
+• t
+• i
+• n
+• g
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• a
+• n
+• d
+•  
+• e
+• n
+• s
+• u
+• r
+• e
+•  
+• t
+• h
+• a
+• t
+•  
+• t
+• h
+• e
+•  
+• e
+• x
+• i
+• t
+•  
+• c
+• r
+• i
+• t
+• e
+• r
+• i
+• a
+•  
+• a
+• r
+• e
+•  
+• m
+• e
+• t
+•  
+• b
+• e
+• f
+• o
+• r
+• e
+•  
+• t
+• r
+• i
+• g
+• g
+• e
+• r
+• i
+• n
+• g
+•  
+• t
+• h
+• e
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+•  
+• h
+• u
+• n
+• t
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in the trade closed with a negative pnl.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:58:12.064721+00:00
+Observed council_timeout — recorded for learning.
+High scanner score after timeout: score=100 vol=0.8x | ATR R:R 2.0
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:59:03.501628+00:00
+Observed trade_closed — recorded for learning.
+council_exit: Ollama exit 96% (PPO hold)
+
