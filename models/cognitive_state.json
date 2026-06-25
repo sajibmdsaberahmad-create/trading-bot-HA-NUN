@@ -1,10 +1,9 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $+0.00. Preserving capital over action.",
+  "mood": "gathering",
+  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Y",
     "E",
     "N",
     "O",
@@ -103,10 +102,11 @@
     "d",
     ":",
     "Commander: The trader missed the opportunity to take advantage of a gap and close the trade at a higher price, resulting in a profit.",
-    "Commander: hard_take_profit"
+    "Commander: hard_take_profit",
+    "Large loss detected: MARA. Review stop placement."
   ],
-  "last_thought": "```json\n{\n  \"raw_prompt\": \"Write a pilot trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"RIOT\\\", \\\"entry\\\": 66.38, \\\"exit\\\": 66.38, \\\"entry_fill\\\": 66.38, \\\"exit_fill\\\": 66.38, \\\"quote_entry\\\": 66.38, \\\"quote_exit\\\": 27.3535, \\\"shares\\\": 1543.0, \\\"pnl_usd\\\": 0.0, \\\"pnl_pct\\\": 0.0, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"trailing_profit\\\", \\\"entry_slippage_pct\\\": 0.0, \\\"exit_slippage_pct\\\": 1.426746, \\\"limit_px\\\": null, \\\"entry_mode\\\": \\\"paper_market\\\", \\\"regime\\\": \\\"unknown\\\", \\\"hold_sec\\",
+  "last_thought": "```json\n{\n  \"trade_id\": \"closed_trade\",\n  \"journal_entry\": {\n    \"ticker\": \"MARA\",\n    \"entry\": 14.61,\n    \"exit\": 13.64,\n    \"quote_entry\": 14.61,\n    \"quote_exit\": 13.65,\n    \"shares\": 2673.0,\n    \"pnl_usd\": -2592.81,\n    \"pnl_pct\": -6.64,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 16,
-  "updated": "2026-06-25T19:07:58.346220"
+  "trades_observed": 1,
+  "updated": "2026-06-25T19:21:07.455432"
 }
