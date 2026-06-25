@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

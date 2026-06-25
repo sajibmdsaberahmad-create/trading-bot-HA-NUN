@@ -1504,5 +1504,23 @@
     "lessons": [
       "Review market_data_failure on TVBCY"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T13:50:36.439408+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.",
+    "lessons": [
+      "An unexpected spike in the AZI ticker occurred after a timeout.",
+      "We need to investigate the root cause of the spike and take appropriate actions to prevent similar events from happening again"
+    ]
   }
 ]

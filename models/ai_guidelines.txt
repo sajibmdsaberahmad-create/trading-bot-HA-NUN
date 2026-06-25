@@ -1114,3 +1114,9 @@ The event occurred due to a missing historical data query for the ticker 'CMGR'.
 Observed market_data_failure — recorded for learning.
 MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TVBCY@SMART Trades
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:50:36.439074+00:00
+An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.
+The spike was triggered by a scanner failure, and we need to analyze this event with the aim of understanding its potential causes.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.)
+

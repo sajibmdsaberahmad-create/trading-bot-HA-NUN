@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 29,
   "scans_performed": 27,
-  "improvements_applied": 144,
+  "improvements_applied": 145,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8231,6 +8231,29 @@
         "applied": [],
         "lessons": [
           "Review market_data_failure on TVBCY"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T13:50:36.407577",
+      "age": "4d 2h 47m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #145",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "An unexpected spike in the AZI ticker occurred after a timeout.",
+          "We need to investigate the root cause of the spike and take appropriate actions to prevent similar events from happening again"
         ]
       }
     }
