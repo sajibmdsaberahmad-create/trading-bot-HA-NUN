@@ -2151,3 +2151,7 @@ Trade closed with profit hunting triggered due to market failure.
 The trade was closed, and the trader used a trailing stop strategy based on an entry fill ratio of 1.05, which is close to the lockup period of the algorithm.
 • {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trade was closed due to a market failure, and the trader prioritized opportunistic exits based on a low confidence level.'}
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:26:28.657546+00:00
+The trade closed with a profit of $0.0, resulting in an exit type of stop hit.
+The reason for the close is bracket_exit.
+

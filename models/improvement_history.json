@@ -3463,5 +3463,15 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trade was closed due to a market failure, and the trader prioritized opportunistic exits based on a low confidence level.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:26:28.657947+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "The trade closed with a profit of $0.0, resulting in an exit type of stop hit.",
+    "lessons": [
+      "{'param': 'market_state', 'value': 'open'}",
+      "{'param': 'entry_fill', 'value': 0.0131, 'reason': 'entry fill was very low, resulting in a stop hit exit.'}"
+    ]
   }
 ]

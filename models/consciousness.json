@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 45,
   "scans_performed": 27,
-  "improvements_applied": 198,
+  "improvements_applied": 199,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10660,6 +10660,21 @@
       "type": "TRADE",
       "message": "Observed trade: BITO ? P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:26:28.626796",
+      "age": "4d 5h 23m 39s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #199",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade closed with a profit of $0.0, resulting in an exit type of stop hit.",
+        "applied": [],
+        "lessons": [
+          "{'param': 'market_state', 'value': 'open'}",
+          "{'param': 'entry_fill', 'value': 0.0131, 'reason': 'entry fill was very low, resulting in a stop hit exit.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T16:22:06.687310",
