@@ -1,7 +1,7 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 124,
+  "total_awakenings": 125,
   "training_sessions": 27,
   "trades_observed": 188,
   "scans_performed": 27,
@@ -19364,9 +19364,16 @@
           "Review trade_closed on RKLB"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T20:06:38.643069",
+      "age": "4d 9h 3m 49s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #125",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-25T19:38:52.921929",
+  "last_awakening": "2026-06-25T20:06:38.642618",
   "current_version": "v20260625_062906",
   "version_history": [
     {

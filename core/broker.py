@@ -44,7 +44,11 @@ except ImportError:
 
 from core.config import BotConfig
 from core.connector import IBConnector
-from core.market_hours import should_use_extended_hours_orders, orders_allowed
+from core.market_hours import (
+    should_use_extended_hours_orders,
+    orders_allowed,
+    allowed_trading_sessions_label,
+)
 from core.notify import log
 
 
