@@ -1,11 +1,9 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 30% \u00b7 $+504.28. Preserving capital over action.",
-  "confidence": 0.35,
+  "mood": "steady",
+  "mood_message": "Mixed session \u00b7 $+514.72. Watching for cleaner setups.",
+  "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The event occurred within the context of a live trading environment and follows a known process for identifying and handling council exits",
-    "Review loss_streak on SOFI",
     "Review trade_closed on RIOT",
     "Tailoring trades based on market conditions",
     "Understanding trading algorithms for optimal results",
@@ -103,10 +101,12 @@
     "Review loss_streak on RKLB",
     "v",
     ",",
-    "Commander: The event details show that the profit hunting was not successful due to a bracket exit."
+    "Commander: The event details show that the profit hunting was not successful due to a bracket exit.",
+    "b",
+    "Commander: The event shows a bracket exit in the open market, which occurred on day 201. The price was closed at 5.22 USD per share. Profit: -0.01%"
   ],
-  "last_thought": "```json\n{\n    \"entry\": {\n        \"ticker\": \"MARA\",\n        \"side\": \"buy\",\n        \"position_id\": 1,\n        \"volume\": 3975.0,\n        \"open_interest\": 3975.0,\n        \"quote_entry\": 13.85,\n        \"quote_exit\": 13.85\n    },\n    \"result\": {\n        \"entry_slippage_pct\": 0.0,\n        \"exit_slippage_pct\": 0.0,\n        \"limit_px\": null,\n        \"entry_mode\": \"paper_market\",\n        \"regime\": \"unknown\",\n        \"hold_sec\": 64.5,\n        \"peak\": 13.86,\n        \"stop\": 142.3232,\n        \"target\": 13.96",
+  "last_thought": "```json\n{\n    \"gut_feel\": 0.9,\n    \"intuition\": 0.85,\n    \"profit_probability\": 1.0,\n    \"market_data\": {\n        \"ticker\": \"PLTR\",\n        \"entry_price\": 107.23,\n        \"exit_price\": 107.24,\n        \"volume\": 522.0,\n        \"profit\": 0.01\n    }\n}\n```",
   "market_belief": {},
-  "trades_observed": 58,
-  "updated": "2026-06-25T19:59:09.543442"
+  "trades_observed": 61,
+  "updated": "2026-06-25T20:00:06.550036"
 }

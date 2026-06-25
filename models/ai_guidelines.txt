@@ -6818,3 +6818,92 @@ The event details show that the profit hunting was not successful due to a brack
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Adjusting the confidence level from 35 to 58 improves the odds of profitable bracket exits.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T20:00:06.591633+00:00
+The trade closed with a profit of $1,963,471.
+The event shows a bracket exit in the open market, which occurred on day 201. The price was closed at 5.22 USD per share. Profit: -0.01%
+• T
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• i
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• t
+• h
+• e
+•  
+• m
+• a
+• r
+• g
+• i
+• n
+•  
+• o
+• f
+•  
+• s
+• a
+• f
+• e
+• t
+• y
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• l
+• e
+• v
+• e
+• l
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (When event is missed_profit_hunt, reduce confidence threshold from 0.9 to 0.58.)
+
