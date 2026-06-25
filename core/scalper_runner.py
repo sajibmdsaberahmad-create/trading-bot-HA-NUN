@@ -2092,14 +2092,16 @@ class ScalperRunner:
             while True:
                 if getattr(self, "_needs_initial_scan", False):
                     self._needs_initial_scan = False
-                    self.ib.sleep(0.2)  # drain IB event queue before scanner
-                    log.info("🔍 Running initial live IB scanner (may take 10–30s)…")
+                    self.ib.sleep(0.2)  # drain IB event queue before scan
+                    log.info("🔍 Startup scan: instant lock (IB scanner deferred)…")
                     try:
-                        self._scan_and_rank(startup=True)
-                        log.info("✅ Initial scan complete — entering trading loop")
+                        self._scan_and_rank(startup=True, skip_ib_scanner=True)
+                        log.info("✅ Startup lock complete — entering trading loop")
                     except Exception as exc:
                         log.error(f"Initial scan failed: {exc}")
                     self._last_scan_time = time.time()
+                    if getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", True):
+                        self._deferred_ib_scan = True
 
                 in_position = self._in_any_position()
                 have_targets = bool(self._locked_targets)
@@ -2111,6 +2113,18 @@ class ScalperRunner:
                     in_profit=in_profit,
                 )
                 self.ib.sleep(loop_sec)
+
+                if getattr(self, "_deferred_ib_scan", False) and self.conn.is_connected():
+                    self._deferred_ib_scan = False
+                    can_defer, _ms = can_trade_now(self.cfg)
+                    if can_defer and not self._in_any_position():
+                        log.info("🔍 Running deferred IB live scanner…")
+                        try:
+                            self._scan_and_rank(startup=False)
+                            self._last_scan_time = time.time()
+                        except Exception as exc:
+                            log.warning(f"Deferred IB scanner failed: {exc}")
+
                 if in_position:
                     self._sync_all_positions_from_ib()
                 current_px = self._latest_price()
