@@ -6,11 +6,11 @@
   "shadow_open": {
     "PLTR": {
       "ticker": "PLTR",
-      "entry": 108.02,
-      "stop": 107.5879,
-      "target": 108.8842,
+      "entry": 108.04,
+      "stop": 107.6078,
+      "target": 108.9043,
       "shares": 392,
-      "opened_at": 1782412941.438575,
+      "opened_at": 1782412998.080003,
       "regime": "unknown"
     },
     "LCID": {
@@ -39,8 +39,26 @@
       "shares": 2936,
       "opened_at": 1782412911.075594,
       "regime": "unknown"
+    },
+    "SOFI": {
+      "ticker": "SOFI",
+      "entry": 17.3,
+      "stop": 17.2308,
+      "target": 17.4384,
+      "shares": 848,
+      "opened_at": 1782412975.40599,
+      "regime": "unknown"
+    },
+    "COIN": {
+      "ticker": "COIN",
+      "entry": 143.25,
+      "stop": 142.677,
+      "target": 144.396,
+      "shares": 295,
+      "opened_at": 1782413022.678127,
+      "regime": "unknown"
     }
   },
   "shadow_closed": [],
-  "updated_at": 1782412942.992405
+  "updated_at": 1782413022.678442
 }
