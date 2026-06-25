@@ -262,6 +262,7 @@ class ScalperRunner:
         self._stream_modes: Dict[str, str] = {}                 # ticker -> tick | realtime
         self._target_last_bar_count: Dict[str, int] = {}        # ticker -> last seen bar count
         self._active_stream_ticker: Optional[str] = None        # Currently streaming ticker
+        self._risk_plans: Dict[str, TradePlan] = {}             # ticker -> active risk plan
         
         self.trade_journal: List[Dict] = []
         self.trades_today: int = 0
@@ -660,7 +661,17 @@ class ScalperRunner:
         self._last_ai_position_manage = float(s.get("last_ai_position_manage", 0))
         self._last_stagnation_decision = dict(s.get("last_stagnation_decision", {}))
         self.bracket_handle = self._bracket_by_ticker.get(ticker)
+        plan = self._risk_plans.get(ticker)
+        if plan is not None:
+            self.risk.open_position(plan)
         return True
+
+    def _dm_for_ticker(self, ticker: str) -> Optional[DataManager]:
+        """Live bar stream for a held ticker (position stream, not scan focus)."""
+        dm = self._target_monitors.get(ticker or "")
+        if dm is None and self._active_stream_ticker:
+            dm = self._target_monitors.get(self._active_stream_ticker)
+        return dm
 
     def _recalc_bot_nav(self):
         total_pos = 0.0
@@ -3041,9 +3052,8 @@ class ScalperRunner:
         extended = is_extended_session(get_market_state(self.cfg))
 
         fast_df = None
-        dm = None
-        if self._active_stream_ticker and self._active_stream_ticker in self._target_monitors:
-            dm = self._target_monitors[self._active_stream_ticker]
+        dm = self._dm_for_ticker(ticker)
+        if dm is not None:
             fast_df = dm.get_bar_dataframe()
         if fast_df is None:
             fast_df = self._scan_data_cache.get(ticker)

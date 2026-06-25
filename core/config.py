@@ -391,6 +391,12 @@ class BotConfig:
     FLAT_LOOP_SEC: float = 0.25               # Same speed when flat — don't sleep 1s between spike checks
     FLAT_PULSE_SEC: float = 15.0              # WATCHING heartbeat log interval (not the monitor rate)
     AI_POSITION_MANAGE_SEC: float = 10.0    # Ollama position decisions — frequent, priority path
+    AI_POSITION_MANAGE_IN_PROFIT_SEC: float = float(
+        os.getenv("AI_POSITION_MANAGE_IN_PROFIT_SEC", "2.0")
+    )
+    IN_PROFIT_MANAGE_PNL_PCT: float = float(
+        os.getenv("IN_PROFIT_MANAGE_PNL_PCT", "0.003")
+    )  # 0.3% — faster council + trail when green
     AI_EXIT_CHECK_SEC: float = 5.0          # AI early-exit evaluation interval in position loop
     AI_ALWAYS_ACTIVE: bool = True           # Never defer trading decisions to PPO-only fallbacks
     OLLAMA_DECISION_BYPASS_RATE_LIMIT: bool = True  # Entry/exit/position calls skip interval gate
