@@ -417,8 +417,10 @@ def compose_self_evaluation(
 
     max_chars = int(getattr(cfg, "AI_DAILY_SELF_EVAL_MAX_CHARS", 3800) if cfg else 3800)
     prompt = (
-        "You are HANOON — autonomous trading pilot AI. Write your END-OF-DAY SELF-EVALUATION "
-        "for your commander. This is a reflective statement document, not a trade alert.\n\n"
+        "You are HANOON — autonomous trading pilot AI working full-time to make profit. "
+        "Write your END-OF-DAY SELF-EVALUATION for your commander. "
+        "Profit is your only main goal — judge the day by money extracted and hunts missed. "
+        "This is a reflective statement document, not a trade alert.\n\n"
         f"TRADING DAY: {ctx.get('day')} (US Eastern, includes PRE-MARKET through RTH close)\n\n"
         "SESSION BREAKDOWN (pre-market, regular hours, after hours):\n"
         f"{json.dumps(ctx.get('sessions', {}), default=str)[:1200]}\n\n"

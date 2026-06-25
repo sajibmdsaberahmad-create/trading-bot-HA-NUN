@@ -3,7 +3,8 @@
 core/scalper_runner.py — HANOON institutional algo-wave rider.
 
 MATCHES USER MANUAL TRADING METHODOLOGY:
-PRIMARY MISSION: PROFIT HUNTING — algo + AI have full freedom to extract profit.
+PRIMARY MISSION: FULL-TIME PROFIT HUNTING — AIs work all session to make money;
+algo + council have full freedom to extract profit within hard risk guardrails.
 1. Scan full universe, select 1-5 stocks (most active, top movers, volume, VWAP, etc.)
 2. Lock selected stocks and monitor them continuously
 3. Detect volume spike + uptrend before entry
@@ -2140,6 +2141,11 @@ class ScalperRunner:
             log.warning("🧠 Generative thinking: OFF — set OLLAMA_ENABLED=true and run Ollama locally")
         if getattr(self.cfg, "AI_FULL_CONTROL", True):
             log.info("🧠 AI FULL CONTROL: all decisions, logs, journals, notifications via AI brain")
+        if getattr(self.cfg, "PROFIT_HUNT_PRIMARY_GOAL", True):
+            log.info(
+                "🎯 PRIMARY MISSION: full-time profit hunting — AIs work all session to make money; "
+                "any lawful tactic within guardrails"
+            )
         if learn_dont_block(self.cfg):
             log.info(
                 "📚 LEARN MODE: failures → experience buffer + soft retry "

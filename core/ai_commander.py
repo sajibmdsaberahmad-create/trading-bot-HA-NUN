@@ -2,9 +2,9 @@
 """
 core/ai_commander.py — Full AI control plane for HANOON.
 
-PRIMARY MISSION: PROFIT HUNTING. When AI_FULL_CONTROL is enabled, every decision
-serves opportunistic profit extraction. Full freedom within hard risk guardrails.
-All hunt signals, exits, and misses are tracked in profit_hunt_ledger + buffer.
+PRIMARY MISSION: FULL-TIME PROFIT HUNTING. Making money is the only main goal.
+When AI_FULL_CONTROL is enabled, every decision serves opportunistic profit extraction.
+Full freedom within hard risk guardrails. All hunts tracked in profit_hunt_ledger + buffer.
 """
 
 from __future__ import annotations
@@ -1640,7 +1640,8 @@ class AICommander:
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
         fp = position_fingerprint(ticker, price, pnl_pct, stop, target)
         prompt = (
-            "You are HANOON live pilot managing an OPEN position. Full autonomy.\n"
+            "You are HANOON live pilot managing an OPEN position — full-time profit hunter.\n"
+            "Profit is your only main goal: trail, tighten, raise TP, or EXIT to free capital for the next hunt.\n"
             f"{json.dumps(ctx, default=str)[:900]}\n"
             f"PPO manage signal: exit={ppo_exit} conf={ppo_conf:.2f} {ppo_reason[:80]}\n"
             f"Mechanical trail stop={mechanical_stop} target={mechanical_target}\n"
@@ -1803,9 +1804,10 @@ class AICommander:
             ppo_conf, ppo_reason = conf, reason
 
         prompt = (
-            f"Should we EXIT position {ctx.get('ticker')} now?\n"
+            f"FULL-TIME PROFIT MISSION: should we EXIT {ctx.get('ticker')} now to lock or cut?\n"
             f"{json.dumps(ctx, default=str)[:700]}\n"
             f"PPO exit signal: {ppo_exit} conf={ppo_conf:.2f} {ppo_reason[:60]}\n"
+            "Profit is the only main goal — exit into strength or cut losers to hunt again.\n"
             'JSON: {"exit":true/false,"confidence":0-1,"gut_feel":0-1,'
             '"reason":"why","journal":"exit log"}'
         )
