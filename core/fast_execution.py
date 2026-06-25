@@ -27,6 +27,20 @@ def stream_priority_count(cfg: BotConfig) -> int:
     return int(getattr(cfg, "AI_STREAM_PRIORITY_COUNT", 8))
 
 
+def tick_stream_max_count(cfg: BotConfig) -> int:
+    """IB caps concurrent tick-by-tick subscriptions (error 10190 above limit)."""
+    return int(getattr(cfg, "AI_TICK_STREAM_MAX", 5))
+
+
+def stream_mode_for_rank(cfg: BotConfig, rank_index: int, in_position: bool = False) -> str:
+    """Top ranks get tick-by-tick; rest get 5s realtime bars (same pool, no IB 10190)."""
+    if in_position:
+        return "tick"
+    if rank_index < tick_stream_max_count(cfg):
+        return "tick"
+    return "realtime"
+
+
 def warm_priority_count(cfg: BotConfig) -> int:
     return int(getattr(cfg, "AI_WARM_PRIORITY_COUNT", 10))
 

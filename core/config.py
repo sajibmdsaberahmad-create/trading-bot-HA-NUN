@@ -187,6 +187,7 @@ class BotConfig:
         "AI_FAST_EXECUTION", "true"
     ).lower() in ("1", "true", "yes")
     AI_STREAM_PRIORITY_COUNT: int = int(os.getenv("AI_STREAM_PRIORITY_COUNT", "8"))
+    AI_TICK_STREAM_MAX: int = int(os.getenv("AI_TICK_STREAM_MAX", "5"))
     AI_WARM_PRIORITY_COUNT: int = int(os.getenv("AI_WARM_PRIORITY_COUNT", "10"))
     AI_MIN_BARS_FOCUS: int = int(os.getenv("AI_MIN_BARS_FOCUS", "6"))
     AI_MIN_BARS_SCAN: int = int(os.getenv("AI_MIN_BARS_SCAN", "10"))
