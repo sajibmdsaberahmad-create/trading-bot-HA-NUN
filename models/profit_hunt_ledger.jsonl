@@ -117,3 +117,5 @@
 {"timestamp":"2026-06-25T17:25:55.958914+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":-1046.37,"pnl_pct":-0.9851,"primary_goal":true,"reason":"trailing_profit","price":0.0132}
 {"timestamp":"2026-06-25T17:26:17.795383+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T17:29:34.005737+00:00","event":"council_exit","ticker":"GDC","pnl_usd":-0.12,"source":"buffer","reason":"council_exit: Ollama exit 98% (PPO hold)"}
+{"timestamp":"2026-06-25T17:30:26.844348+00:00","event":"hard_take_profit","ticker":"TZA","pnl_usd":35648.4,"pnl_pct":292.1818,"primary_goal":true,"reason":"hard_take_profit","price":3.87}
+{"timestamp":"2026-06-25T17:30:51.777853+00:00","event":"hard_take_profit","ticker":"TZA","pnl_usd":35555.97,"source":"buffer","reason":"hard_take_profit"}

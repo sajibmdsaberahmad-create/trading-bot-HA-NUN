@@ -3851,3 +3851,7 @@ The trade closed occurred at GDC with a council exit at 98% (PPO hold). The mark
 Observed loss_streak — recorded for learning.
 council_exit: Ollama exit 98% (PPO hold)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:30:21.028453+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+

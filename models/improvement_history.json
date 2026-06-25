@@ -275,5 +275,14 @@
     "lessons": [
       "Review loss_streak on GDC"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:30:21.031452+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOXS"
+    ]
   }
 ]
