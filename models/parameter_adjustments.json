@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "Adjusting the confidence level from 35 to 58 improves the odds of profitable bracket exits.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

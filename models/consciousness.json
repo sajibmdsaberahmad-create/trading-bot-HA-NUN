@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 165,
+  "trades_observed": 168,
   "scans_performed": 27,
-  "improvements_applied": 364,
+  "improvements_applied": 368,
   "reports_generated": 26,
   "event_log": [
     {
@@ -18046,6 +18046,214 @@
           "Review loss_streak on SOFI"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:57:50.338704",
+      "age": "4d 8h 55m 1s",
+      "type": "TRADE",
+      "message": "Observed trade: RIVN ? P&L=$+226.98",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:57:54.059823",
+      "age": "4d 8h 55m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #365",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "AI is learning from past trades to adjust parameters for optimal performance.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusted from previous performance metrics.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "1",
+          ".",
+          "L",
+          "e",
+          "a",
+          "r",
+          "n",
+          "f",
+          "r",
+          "o",
+          "m",
+          "p",
+          "a",
+          "s",
+          "t",
+          "r",
+          "e",
+          "s",
+          "u",
+          "l",
+          "t",
+          "s",
+          "(",
+          "C",
+          "O",
+          "N",
+          "F",
+          "I",
+          "D",
+          "E",
+          "N",
+          "C",
+          "E",
+          "_",
+          "T",
+          "H",
+          "R",
+          "E",
+          "S",
+          "H",
+          "O",
+          "L",
+          "D",
+          ")"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:58:04.045430",
+      "age": "4d 8h 55m 15s",
+      "type": "TRADE",
+      "message": "Observed trade: RKLB ? P&L=$-144.09",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:58:07.610091",
+      "age": "4d 8h 55m 18s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #366",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RKLB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:58:11.077123",
+      "age": "4d 8h 55m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #367",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on RKLB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:59:04.243897",
+      "age": "4d 8h 56m 15s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:59:09.544578",
+      "age": "4d 8h 56m 20s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #368",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Event: trade_closed, Detail: bracket_exit, pnl_usd: 0.0, pnl_pct: 0.0",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusting the confidence level from 35 to 58 improves the odds of profitable bracket exits.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "o",
+          "a",
+          "v",
+          "o",
+          "i",
+          "d",
+          "t",
+          "h",
+          "i",
+          "s",
+          "r",
+          "e",
+          "c",
+          "u",
+          "r",
+          "r",
+          "i",
+          "n",
+          "g",
+          "i",
+          "s",
+          "s",
+          "u",
+          "e",
+          ",",
+          "a",
+          "d",
+          "j",
+          "u",
+          "s",
+          "t",
+          "t",
+          "h",
+          "e",
+          "c",
+          "o",
+          "n",
+          "f",
+          "i",
+          "d",
+          "e",
+          "n",
+          "c",
+          "e",
+          "t",
+          "h",
+          "r",
+          "e",
+          "s",
+          "h",
+          "o",
+          "l",
+          "d",
+          "a",
+          "n",
+          "d",
+          "o",
+          "t",
+          "h",
+          "e",
+          "r",
+          "p",
+          "a",
+          "r",
+          "a",
+          "m",
+          "e",
+          "t",
+          "e",
+          "r",
+          "s",
+          "."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -19332,7 +19540,7 @@
   ],
   "last_training": "2026-06-25T06:29:06.143062",
   "mood": "anxious",
-  "total_pnl": 123786.01000000004,
+  "total_pnl": 123868.90000000004,
   "win_history": [
     0.0,
     0.0,
@@ -19498,20 +19706,23 @@
     0.0,
     -46.7,
     -54.42,
-    -31.05
+    -31.05,
+    226.98,
+    -144.09,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 2,
   "worst_streak": 18,
-  "veteran_xp": 2340,
+  "veteran_xp": 2395,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 48,
-    "entry_timing": 66
+    "risk_management": 50,
+    "entry_timing": 68
   },
-  "flights_completed": 160,
-  "hours_flown": 15.99999999999996,
+  "flights_completed": 163,
+  "hours_flown": 16.29999999999996,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -19536,10 +19747,10 @@
     "LCI": 7,
     "RIO": 9,
     "QS": 3,
-    "MAR": 7,
+    "MAR": 8,
     "COI": 1,
-    "RIV": 2,
-    "RKL": 3,
+    "RIV": 3,
+    "RKL": 4,
     "SOF": 4,
     "AST": 2
   },
@@ -19548,5 +19759,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Trading pressure and missed opportunities."
+  "mood_message": "I'm feeling worried about the recent trading performance due to the low win rate and multiple consecutive losses."
 }

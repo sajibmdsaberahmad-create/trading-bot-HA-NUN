@@ -6693,3 +6693,128 @@ tick_micro_loss
 Observed loss_streak — recorded for learning.
 tick_micro_loss
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:57:54.102036+00:00
+AI is learning from past trades to adjust parameters for optimal performance.
+The AI can learn from historical data to improve its trading decisions over time.
+• T
+• h
+• e
+•  
+• A
+• I
+•  
+• c
+• a
+• n
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• i
+• t
+• s
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+• s
+•  
+• b
+• a
+• s
+• e
+• d
+•  
+• o
+• n
+•  
+• h
+• i
+• s
+• t
+• o
+• r
+• i
+• c
+• a
+• l
+•  
+• d
+• a
+• t
+• a
+•  
+• t
+• o
+•  
+• i
+• m
+• p
+• r
+• o
+• v
+• e
+•  
+• t
+• r
+• a
+• d
+• i
+• n
+• g
+•  
+• a
+• c
+• c
+• u
+• r
+• a
+• c
+• y
+•  
+• a
+• n
+• d
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+• a
+• b
+• i
+• l
+• i
+• t
+• y
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusted from previous performance metrics.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:58:07.652757+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:58:11.120671+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:59:09.587437+00:00
+Event: trade_closed, Detail: bracket_exit, pnl_usd: 0.0, pnl_pct: 0.0
+The event details show that the profit hunting was not successful due to a bracket exit.
+• ...
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusting the confidence level from 35 to 58 improves the odds of profitable bracket exits.)
+
