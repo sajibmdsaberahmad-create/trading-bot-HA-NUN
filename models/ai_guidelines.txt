@@ -1128,3 +1128,7 @@ win
 Observed council_timeout — recorded for learning.
 Council timeout — no aligned signal
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:59:47.300547+00:00
+Observed market_data_failure — recorded for learning.
+MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: ONCI@SMART Trades
+

@@ -4,8 +4,6 @@
   "confidence": 0.6900000000000002,
   "mode": "autonomous",
   "learned_lessons": [
-    "i",
-    "s",
     "a",
     "l",
     "m",
@@ -103,10 +101,12 @@
     "Review trade_closed on AZI",
     "Commander: win",
     "Review council_timeout on GNOM",
-    "Commander: Council timeout \u2014 no aligned signal"
+    "Commander: Council timeout \u2014 no aligned signal",
+    "Review market_data_failure on ONCI",
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: ONCI@SMART Trades"
   ],
   "last_thought": "```json\n{\n  \"trade_info\": {\n    \"ticker\": \"AZI\",\n    \"entry_price\": 1.91,\n    \"exit_price\": 1.952,\n    \"shares\": 10.0,\n    \"pnl_usd\": 0.42,\n    \"pnl_pct\": 2.2,\n    \"result\": \"win\"\n  },\n  \"learning_logs\": {\n    \"gut_feel\": 0.65,\n    \"intuition\": 0.80\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T13:53:45.714842"
+  "trades_observed": 0,
+  "updated": "2026-06-25T13:59:47.255070"
 }
