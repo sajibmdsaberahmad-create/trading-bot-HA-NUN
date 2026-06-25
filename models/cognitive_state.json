@@ -1,7 +1,7 @@
 {
-  "mood": "anxious",
-  "mood_message": "I'm feeling overwhelmed with the recent trades and limited experience.",
-  "confidence": 0.3899999999999999,
+  "mood": "gathering",
+  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "confidence": 0.42999999999999994,
   "mode": "autonomous",
   "learned_lessons": [
     "Hi",
@@ -82,10 +82,21 @@
     "Consider optimizing signal alignment based on real-time market dynamics and technical indicators.",
     "Commander: The event indicates a timeout in the Council meeting, which was not aligned with signals.",
     "Review trade_closed on QCMD",
-    "Commander: win:council_exit: Ollama exit 87% (PPO hold)"
+    "Commander: win:council_exit: Ollama exit 87% (PPO hold)",
+    "Review council_timeout on QCMD",
+    "Commander: Scanner+spike after timeout: score=56 vol=6.7x | ATR R:R 2.0",
+    "The scan timeout mechanism helps in identifying potential scanner spikes early on.",
+    "Understanding the spike ratio can help in tailoring trade execution policies for more effective risk management.",
+    "Commander: When a council timeout occurs, it means that the scan timeout has been reached for the council (scanner) algorithm. The scanner is designed to detect and prevent potential scanner spikes by scanning the high-frequency trades. It uses a spik",
+    "Commander: Scanner+spike after timeout: score=52 vol=6.7x | ATR R:R 2.0",
+    "1",
+    "k",
+    "Commander: The algorithm is using a scanner to monitor the system's current state and taking action based on detected spikes. The timeout occurs due to a spike in scores.",
+    "Review council_timeout on NEXR",
+    "Commander: Scanner+spike after timeout: score=87 vol=5.2x | ATR R:R 2.0"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0,\n  \"intuition\": 0,\n  \"trade_decision\": \"hold\",\n  \"stop_loss\": null,\n  \"entry_point\": null,\n  \"execution_strategy\": {\n    \"type\": \"sweep\",\n    \"interval\": \"day\"\n  },\n  \"confidence_level\": 1.0\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": 0.78,\n  \"trade_decisions\": [\n    {\n      \"order_type\": \"BUY\",\n      \"side\": \"SELL\",\n      \"quantity\": 1,\n      \"price\": 0.0\n    },\n    {\n      \"order_type\": \"HOLD\",\n      \"status\": \"WINS\"\n    }\n  ]\n}\n```",
   "market_belief": {},
-  "trades_observed": 1,
-  "updated": "2026-06-25T09:09:31.318086"
+  "trades_observed": 3,
+  "updated": "2026-06-25T09:24:33.127739"
 }

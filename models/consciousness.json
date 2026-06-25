@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 84,
   "training_sessions": 27,
-  "trades_observed": 24,
+  "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 62,
+  "improvements_applied": 69,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5314,6 +5314,166 @@
           "Review council_timeout on INLF"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T09:10:22.876352",
+      "age": "3d 22h 7m 34s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #63",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:11:49.286161",
+      "age": "3d 22h 9m 0s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #64",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:16:32.957574",
+      "age": "3d 22h 13m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #65",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council_timeout event happened during the pre-market session.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold was increased to 0.58, which increases the likelihood of detecting scanner spikes and taking appropriate action.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "The scan timeout mechanism helps in identifying potential scanner spikes early on.",
+          "Understanding the spike ratio can help in tailoring trade execution policies for more effective risk management."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:18:10.854933",
+      "age": "3d 22h 15m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #66",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:19:45.945960",
+      "age": "3d 22h 16m 57s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #67",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:21:13.763304",
+      "age": "3d 22h 18m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #68",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout occurred after a spike in scanner scores.",
+        "applied": [],
+        "lessons": [
+          "1",
+          ".",
+          "A",
+          "n",
+          "a",
+          "l",
+          "y",
+          "z",
+          "e",
+          "s",
+          "c",
+          "a",
+          "n",
+          "n",
+          "e",
+          "r",
+          "d",
+          "a",
+          "t",
+          "a",
+          "f",
+          "o",
+          "r",
+          "t",
+          "r",
+          "e",
+          "n",
+          "d",
+          "s",
+          "a",
+          "n",
+          "d",
+          "s",
+          "p",
+          "i",
+          "k",
+          "e",
+          "s",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:21:57.044739",
+      "age": "3d 22h 19m 8s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #69",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on NEXR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:24:38.409136",
+      "age": "3d 22h 21m 49s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+14.20",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T08:56:11.420390",
@@ -6599,8 +6759,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
-  "total_pnl": -17694.23,
+  "mood": "confident",
+  "total_pnl": -17680.03,
   "win_history": [
     0.0,
     0.0,
@@ -6625,20 +6785,21 @@
     0.0,
     -0.02,
     0.0,
-    0
+    0,
+    14.2
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 10,
-  "veteran_xp": 215,
+  "veteran_xp": 245,
   "veteran_level": "Rookie",
   "skill_points": {
     "exit_timing": 18,
     "risk_management": 2,
-    "entry_timing": 2
+    "entry_timing": 4
   },
-  "flights_completed": 19,
-  "hours_flown": 1.9000000000000006,
+  "flights_completed": 20,
+  "hours_flown": 2.0000000000000004,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -6647,12 +6808,13 @@
     "TAG": 1,
     "SCA": 1,
     "XOC": 2,
-    "EVG": 1
+    "EVG": 1,
+    "NEX": 1
   },
   "best_streak": 2,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I've been observing a pattern of losing consistently over the past few sessions."
+  "mood_message": "Just executed a successful trade, feeling confident in my strategy."
 }
