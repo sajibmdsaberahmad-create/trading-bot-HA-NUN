@@ -1351,6 +1351,7 @@ class ScalperRunner:
             self.bracket_handle = None
             self._position_slots.pop(ticker, None)
             self._bracket_by_ticker.pop(ticker, None)
+            self._risk_plans.pop(ticker, None)
             self._position_stop = 0.0
             self._position_target = 0.0
             self._position_peak = 0.0
@@ -3215,6 +3216,30 @@ class ScalperRunner:
 
         if current_px > self._position_peak:
             self._position_peak = current_px
+        if self.risk.plan:
+            self.risk.plan.peak_price = max(self.risk.plan.peak_price, current_px)
+
+        pnl_frac = ((current_px / self._entry_price) - 1) if self._entry_price else 0.0
+        if (
+            pnl_frac > 0
+            and getattr(self.cfg, "DYNAMIC_TRAILING_ENABLED", False)
+            and self.risk.plan
+        ):
+            try:
+                _, ppo_conf, _ = self._ai_gate_exit(current_px)
+                obs = self._build_ppo_obs(current_px)
+                overrides = self.risk.update_ai_dynamic_trailing(
+                    ai_confidence=float(ppo_conf),
+                    regime_trend_strength=0.0,
+                    regime_label="unknown",
+                    observation=obs,
+                )
+                if overrides.get("early_loss_exit_threshold_pct") is not None:
+                    self.risk._early_loss_threshold_pct = overrides[
+                        "early_loss_exit_threshold_pct"
+                    ]
+            except Exception:
+                pass
 
         pulse_ctx = {
             "ticker": ticker,
@@ -3262,6 +3287,8 @@ class ScalperRunner:
             self._last_pulse_fingerprint = fingerprint
 
         ai_sec = float(getattr(self.cfg, "AI_POSITION_MANAGE_SEC", 10.0))
+        if pnl_frac > float(getattr(self.cfg, "IN_PROFIT_MANAGE_PNL_PCT", 0.003)):
+            ai_sec = float(getattr(self.cfg, "AI_POSITION_MANAGE_IN_PROFIT_SEC", 2.0))
         min_hold = effective_min_position_hold_sec(self.cfg)
         opened = getattr(self, "_position_opened_at", 0.0)
         if now - self._last_ai_position_manage >= ai_sec:
@@ -3343,8 +3370,9 @@ class ScalperRunner:
         vol_ratio = 1.0
         regime = "unknown"
         fast_df = None
-        if self._active_stream_ticker and self._active_stream_ticker in self._target_monitors:
-            fast_df = self._target_monitors[self._active_stream_ticker].get_bar_dataframe()
+        ticker_dm = self._dm_for_ticker(self.current_ticker or "")
+        if ticker_dm is not None:
+            fast_df = ticker_dm.get_bar_dataframe()
         if fast_df is None:
             fast_df = self._scan_data_cache.get(self.current_ticker or "")
         if fast_df is not None and len(fast_df) >= 10:
@@ -3665,21 +3693,23 @@ class ScalperRunner:
         return False, "hold"
     
     def _update_trailing_stops(self, current_px: float):
-        """Ratchet stop / extend TP — mechanical input for manage council when pipeline on."""
+        """Ratchet stop / extend TP — always applies mechanical trail; prefetches council when AI on."""
         if self.shares <= 0 or self._entry_price <= 0 or not self.bracket_handle:
             return
+
+        mech_stop, mech_target = self._compute_mechanical_trail(current_px)
+        entry = self._entry_price
+        pnl_pct = ((current_px / entry) - 1) * 100 if entry else 0
+        peak_pct = (
+            ((self._position_peak / entry) - 1) * 100
+            if self._position_peak > entry else pnl_pct
+        )
+
         pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
         ai_full = getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander
         if pipeline_on and ai_full:
             ticker = self.current_ticker or ""
             if ticker:
-                mech_stop, mech_target = self._compute_mechanical_trail(current_px)
-                entry = self._entry_price
-                pnl_pct = ((current_px / entry) - 1) * 100 if entry else 0
-                peak_pct = (
-                    ((self._position_peak / entry) - 1) * 100
-                    if self._position_peak > entry else pnl_pct
-                )
                 try:
                     self.ai_commander.prefetch_position_manage({
                         "ticker": ticker,
@@ -3693,38 +3723,11 @@ class ScalperRunner:
                     })
                 except Exception:
                     pass
-            return
 
-        entry = self._entry_price
-        pnl_pct = (current_px / entry) - 1
-        peak_pct = (self._position_peak / entry) - 1 if self._position_peak > entry else pnl_pct
-
-        if peak_pct <= 0:
-            return
-
-        # Trail ratio: tighter when AI wants exit, looser when momentum strong
-        trail_ratio = 0.45
-        try:
-            ai_exit, ai_conf, _ = self._ai_gate_exit(current_px)
-            if ai_exit and ai_conf >= self.cfg.CONFIDENCE_THRESHOLD:
-                trail_ratio = 0.25
-            elif pnl_pct > 0.02:
-                trail_ratio = 0.55
-        except Exception:
-            pass
-
-        trail_stop = current_px - (entry * peak_pct * trail_ratio)
-        trail_stop = max(trail_stop, self._hard_stop_floor, self._position_stop)
-
-        if trail_stop > self._position_stop + 0.0001:
-            self._apply_stop_update(trail_stop, f"trail locked +{peak_pct:.2%}")
-
-        # Extend TP when price clears target with volume
-        if current_px >= self._position_target * 0.98:
-            extension = (current_px - entry) * 0.35
-            new_tp = round(current_px + extension, 4)
-            if new_tp > self._position_target + 0.0001:
-                self._apply_target_update(new_tp, "momentum TP extension")
+        if mech_stop:
+            self._apply_stop_update(mech_stop, f"trail locked +{peak_pct / 100:.2%}")
+        if mech_target:
+            self._apply_target_update(mech_target, "momentum TP extension")
     
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         closes = df["close"].values
@@ -3982,6 +3985,21 @@ class ScalperRunner:
         self._load_position_context(ticker)
         self._recalc_bot_nav()
         self._ensure_position_stream(ticker)
+        self._risk_plans[ticker] = plan
+        self.risk.open_position(plan)
+        self._reset_profit_hunt_state()
+        self._active_stream_ticker = ticker
+        slot["last_ai_position_manage"] = 0.0
+        slot["last_position_pulse"] = 0.0
+        self._last_ai_position_manage = 0.0
+        self._last_position_pulse = 0.0
+        if self.risk.plan:
+            self.risk.plan.peak_price = max(self.risk.plan.peak_price, fill_px)
+        try:
+            self._update_trailing_stops(fill_px)
+        except Exception:
+            pass
+        log.info(f"  📡 POST-ENTRY: live monitor + trailing armed on {ticker}")
         if not hasattr(self, "_active_positions"):
             self._active_positions = []
         self._active_positions.append({
@@ -3992,7 +4010,6 @@ class ScalperRunner:
             "target": plan.take_profit_price,
             "entry_time": time.time(),
         })
-        self.risk.open_position(plan)
         self.trades_today += 1
         self.current_ticker = ticker
         log.info(
@@ -4648,6 +4665,8 @@ class ScalperRunner:
         entry = self._entry_price
         pnl_pct = (current_px / entry) - 1
         peak_pct = (self._position_peak / entry) - 1 if self._position_peak > entry else pnl_pct
+        if peak_pct <= 0 and pnl_pct > 0:
+            peak_pct = pnl_pct
         if peak_pct <= 0:
             return None, None
         trail_ratio = 0.45
