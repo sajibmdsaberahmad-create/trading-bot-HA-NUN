@@ -176,3 +176,4 @@
 {"timestamp":"2026-06-25T19:32:48.501076+00:00","event":"trailing_stop","ticker":"RIOT","pnl_usd":55.46,"pnl_pct":0.002,"primary_goal":true,"reason":"trailing_stop","price":27.3739}
 {"timestamp":"2026-06-25T19:33:08.993364+00:00","event":"council_exit","ticker":"COIN","pnl_usd":-80.5,"source":"buffer","reason":"council_exit: Ollama exit 98% (PPO hold)"}
 {"timestamp":"2026-06-25T19:41:50.058128+00:00","event":"trailing_stop","ticker":"MARA","pnl_usd":343.11,"pnl_pct":0.0042,"primary_goal":true,"reason":"trailing_stop","price":13.81}
+{"timestamp":"2026-06-25T19:42:07.403295+00:00","event":"council_exit","ticker":"RIVN","pnl_usd":-132.9,"source":"buffer","reason":"council_exit: Ollama exit 100% (PPO hold)"}

@@ -5358,3 +5358,7 @@ The root cause is the high scanner score after the timeout, indicating that the 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in the algorithm to focus more closely on profitable entries.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:42:12.812264+00:00
+Observed loss_streak — recorded for learning.
+council_exit: Ollama exit 100% (PPO hold)
+

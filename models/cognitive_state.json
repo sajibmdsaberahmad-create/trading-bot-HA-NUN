@@ -4,12 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The event occurred because the trader's position in TZA was halted by an Ollama exit. Profit hunting should be performed to close the position early.",
-    "Large loss detected: NEXR. Review stop placement.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold for exit signals needs to be adjusted.'}",
-    "Commander: The primary reason is that the algorithm was trailing profits during this period.",
-    "Commander: trailing_profit",
-    "Analyze the details",
     "Adjust logic and conditions",
     "Analyze market data and identify potential exits.",
     "Commander: The event occurred due to the Ollama exit being close to the PPO hold ratio, which triggered the council_exit. This was an opportunistic move to avoid losses.",
@@ -103,10 +97,16 @@
     "x",
     "Commander: The event is triggered when the scanner score after a timeout exceeds a certain threshold, which is high in this case (score=77 vol=0.9x | ATR R:R 2.0).",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"This parameter controls the confidence level of the algorithm's decision-making process and should be adjusted based on the current market conditions.\"}",
-    "Commander: The root cause is the high scanner score after the timeout, indicating that the algorithm failed to meet the threshold for the specific entry point."
+    "Commander: The root cause is the high scanner score after the timeout, indicating that the algorithm failed to meet the threshold for the specific entry point.",
+    "Review loss_streak on RIVN",
+    "Commander: council_exit: Ollama exit 100% (PPO hold)",
+    "The algorithm should focus on increasing the likelihood of profitable exits during periods where the market is in a cautious stance.",
+    "Adjusting the confidence threshold can help the algo better capture and profit from moments of uncertainty.",
+    "analyze",
+    "learn from every outcome"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": 1.2,\n  \"trade_decision\": {\n    \"type\": \"hunting\",\n    \"options\": [\n      {\n        \"direction\": \"long\",\n        \"profit_probability\": 0.7,\n        \"fakeouts\": true\n      },\n      {\n        \"direction\": \"short\",\n        \"profit_probability\": 1.0,\n        \"fakeouts\": false\n      }\n    ]\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"entry\": 13.7525,\n  \"exit\": 13.81,\n  \"entry_fill\": 13.7525,\n  \"exit_fill\": 13.81,\n  \"quote_entry\": 13.7525,\n  \"quote_exit\": 13.81,\n  \"shares\": 5964.0,\n  \"pnl_usd\": 343.11,\n  \"pnl_pct\": 0.42,\n  \"result\": \"win\",\n  \"exit_reason\": \"trail_stop\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": 0.0,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 127.3,\n  \"peak\": 27.51,\n  \"stop\": 13.7375,\n  \"target\": 27.72,\n  \"fill_confirmed\": true,\n  \"reconcile_",
   "market_belief": {},
-  "trades_observed": 1,
-  "updated": "2026-06-25T19:41:52.497236"
+  "trades_observed": 5,
+  "updated": "2026-06-25T19:42:37.441928"
 }
