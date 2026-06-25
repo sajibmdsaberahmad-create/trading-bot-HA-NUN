@@ -136,8 +136,8 @@ def track_profit_hunt_event(
         "pnl_usd": round(pnl_usd, 2),
         "pnl_pct": round(pnl_pct, 4),
         "primary_goal": is_profit_hunt_primary(cfg),
-        **{k: v for k, v in ctx.items() if k not in row},
     }
+    row.update({k: v for k, v in ctx.items() if k not in row})
     if getattr(cfg, "PROFIT_HUNT_TRACK_ALL", True):
         _append_ledger(row)
 
@@ -440,8 +440,19 @@ def record_profit_hunt_learning(
     context: Dict[str, Any],
     pnl_usd: float = 0.0,
     won: bool = False,
+    skip_ledger: bool = False,
 ) -> None:
     """Write profit-hunt outcomes to experience buffer for PPO / council."""
+    if not skip_ledger and getattr(cfg, "PROFIT_HUNT_TRACK_ALL", True):
+        _append_ledger({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "event": event,
+            "ticker": ticker,
+            "pnl_usd": round(pnl_usd, 2),
+            "source": "buffer",
+            **{k: v for k, v in context.items() if k != "reason"},
+            "reason": str(context.get("reason", event))[:300],
+        })
     try:
         from core.experience_buffer import append as buffer_append
         from core.reward_shaping import reward_from_profit_hunt
@@ -458,6 +469,7 @@ def record_profit_hunt_learning(
             "spike_ratio": float(context.get("vol_ratio", 1.0) or 1.0),
             "gain_pct": float(context.get("gain_pct", 0) or 0),
             "event": event,
+            "primary_goal": is_profit_hunt_primary(cfg),
             "timestamp": datetime.now(timezone.utc).isoformat(),
             **{k: v for k, v in context.items() if k not in ("reason",)},
         })
@@ -491,11 +503,18 @@ def teach_profit_hunt_lesson(
 
 def profit_hunt_prompt_block(cfg: BotConfig) -> str:
     """Compact doctrine + current tunable thresholds for AI prompts."""
+    ledger_n = 0
+    try:
+        if LEDGER_PATH.exists():
+            ledger_n = sum(1 for _ in open(LEDGER_PATH, encoding="utf-8"))
+    except Exception:
+        pass
     return (
         f"{PROFIT_HUNT_DOCTRINE}\n"
-        f"Current hunt params: "
-        f"SPIKE_TOP_MIN_GAIN_PCT={_f(cfg, 'SPIKE_TOP_MIN_GAIN_PCT', 0.005):.3%} | "
-        f"SPIKE_TOP_MIN_VOL_RATIO={_f(cfg, 'SPIKE_TOP_MIN_VOL_RATIO', 1.15):.2f} | "
-        f"PROFIT_HUNT_MIN_PNL_PCT={effective_profit_hunt_min_pnl(cfg):.3%} | "
-        f"EXTENDED_GIVEBACK={effective_extended_giveback(cfg):.0%}"
+        f"Hunt ledger: {ledger_n} events tracked | "
+        f"full_freedom={profit_hunt_full_freedom(cfg)} | "
+        f"params: GAIN={_f(cfg, 'SPIKE_TOP_MIN_GAIN_PCT', 0.005):.3%} "
+        f"VOL={_f(cfg, 'SPIKE_TOP_MIN_VOL_RATIO', 1.15):.2f} "
+        f"MIN_PNL={effective_profit_hunt_min_pnl(cfg):.3%} "
+        f"EXT_GIVEBACK={effective_extended_giveback(cfg):.0%}"
     )

@@ -45,8 +45,11 @@ from core.profit_hunting import (
     check_missed_profit_hunt,
     record_profit_hunt_learning,
     teach_profit_hunt_lesson,
+    track_profit_hunt_event,
     is_mechanical_profit_exit,
     mechanical_bypass_council,
+    profit_exit_bypasses_council,
+    profit_exit_bypasses_hold,
 )
 from core.connector import IBConnector
 from core.data import DataManager
@@ -2787,8 +2790,23 @@ class ScalperRunner:
             self._profit_hunt_spike_ctx = ctx
             self._profit_hunt_spike_peak = max(self._profit_hunt_spike_peak, current_px)
             self._profit_hunt_spike_at = time.time()
+            track_profit_hunt_event(
+                self.cfg, "spike_detected", ticker,
+                {**ctx, "price": current_px, "pnl_pct": round(pnl_pct * 100, 3)},
+                pnl_usd=(current_px - entry_px) * self.shares,
+                pnl_pct=pnl_pct,
+                record_buffer=True,
+                push_git=False,
+            )
 
         if should_exit:
+            track_profit_hunt_event(
+                self.cfg, "hunt_signal", ticker,
+                {**ctx, "reason": reason, "price": current_px},
+                pnl_usd=(current_px - entry_px) * self.shares,
+                pnl_pct=pnl_pct,
+                record_buffer=True,
+            )
             return True, reason
 
         fade_exit, fade_reason = evaluate_wave_end_on_spike_fade(
@@ -2815,9 +2833,12 @@ class ScalperRunner:
                 f"Missed spike-top exit on {ticker}: peak ${missed['spike_peak']:.2f} "
                 f"left ~${missed['left_on_table_usd']:.0f} on table"
             )
-            record_profit_hunt_learning(
-                self.cfg, event="missed_profit_hunt", ticker=ticker,
-                context=missed, pnl_usd=0.0, won=False,
+            track_profit_hunt_event(
+                self.cfg, "missed_profit_hunt", ticker, missed,
+                pnl_usd=-float(missed.get("left_on_table_usd", 0)),
+                pnl_pct=pnl_pct,
+                record_buffer=True,
+                push_git=True,
             )
             teach_profit_hunt_lesson(
                 self.autopilot, self.consciousness,
@@ -2836,20 +2857,20 @@ class ScalperRunner:
         return False, ""
 
     def _execute_mechanical_profit_exit(self, current_px: float, reason: str) -> bool:
-        """Instant exit for spike-top / mechanical profit hunts (optional council bypass)."""
+        """Instant exit for spike-top / mechanical profit hunts."""
         if not reason:
             return False
-        if mechanical_bypass_council(self.cfg) and is_mechanical_profit_exit(reason):
+        ticker = self.current_ticker or ""
+        entry_px = self._entry_price
+        pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
+        pnl = pnl_pct * self.shares * entry_px if entry_px else 0.0
+
+        if profit_exit_bypasses_council(self.cfg, reason, pnl_pct):
             log.info(f"  🎯 PROFIT HUNT: {reason}")
-            ticker = self.current_ticker or ""
-            pnl = (current_px - self._entry_price) * self.shares if self._entry_price else 0
-            record_profit_hunt_learning(
-                self.cfg,
-                event=reason.split(":")[0],
-                ticker=ticker,
-                context={**self._profit_hunt_spike_ctx, "reason": reason},
-                pnl_usd=pnl,
-                won=pnl > 0,
+            track_profit_hunt_event(
+                self.cfg, reason.split(":")[0].strip(), ticker,
+                {**self._profit_hunt_spike_ctx, "reason": reason, "price": current_px},
+                pnl_usd=pnl, pnl_pct=pnl_pct, record_buffer=True, push_git=True,
             )
             teach_profit_hunt_lesson(
                 self.autopilot, self.consciousness,
@@ -2857,13 +2878,17 @@ class ScalperRunner:
             )
             self._exit_position(current_px, reason)
             return True
-        ticker = self.current_ticker or ""
         if is_ai_council_mode(self.cfg) and self.ai_commander:
             if self._deliberate_exit_council(
                 ticker, current_px, True, 0.65, reason,
                 {"signal": "profit_hunt", "mechanical": True},
             ):
                 return True
+            track_profit_hunt_event(
+                self.cfg, "council_hold", ticker,
+                {"reason": reason, "price": current_px},
+                pnl_usd=pnl, pnl_pct=pnl_pct, record_buffer=True, push_git=False,
+            )
             return False
         self._exit_position(current_px, reason)
         return True
@@ -2986,7 +3011,20 @@ class ScalperRunner:
                 )
             if should_risk_exit and risk_reason:
                 ticker = self.current_ticker or ""
-                if (
+                entry_px = self._entry_price
+                pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
+                if profit_exit_bypasses_council(self.cfg, risk_reason, pnl_pct):
+                    log.info(f"  ⚡ MECHANICAL RISK EXIT: {risk_reason}")
+                    track_profit_hunt_event(
+                        self.cfg, risk_reason, ticker,
+                        {"reason": risk_reason, "price": current_px},
+                        pnl_usd=(current_px - entry_px) * self.shares if entry_px else 0,
+                        pnl_pct=pnl_pct, record_buffer=True, push_git=True,
+                    )
+                    self._exit_position(current_px, risk_reason)
+                    self._active_stream_ticker = None
+                    return
+                elif (
                     mechanical_bypass_council(self.cfg)
                     and is_mechanical_profit_exit(risk_reason)
                 ):

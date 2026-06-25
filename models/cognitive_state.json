@@ -4,8 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    ":",
-    "2",
     "v",
     "-",
     "M",
@@ -103,10 +101,12 @@
     "Ensure the algorithm can handle conditions where it cannot enter or exit positions at any given time, such as IB closing-only.",
     "Commander: The event indicates that the trading algorithm is encountering a technical issue with IB closing only, which prevents it from opening new positions.",
     "Review council_timeout on TECH",
-    "Commander: Scanner+spike after timeout: score=54 vol=2.3x | ATR R:R 2.0"
+    "Commander: Scanner+spike after timeout: score=54 vol=2.3x | ATR R:R 2.0",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We have a high value of 0.58, which indicates that we want a low confidence threshold for the scanner spike.'}",
+    "Commander: The council timeout event suggests that the trading algorithm is handling a spike in the scan pipeline. We need to tighten the risk and adjust the parameters accordingly."
   ],
   "last_thought": "```json\n{\n    \"gut_feel\": 1,\n    \"intuition\": 1,\n    \"analysis\": {\n        \"account_equity\": 1014738.19,\n        \"available_cash\": 1014738.19,\n        \"position_value\": 0.0,\n        \"nav\": 1000.0,\n        \"deployed_pct\": 0.0,\n        \"current_ticker\": \"NONE\",\n        \"position\": \"NONE\",\n        \"win_rate\": 0.0,\n        \"trades_today\": 0,\n        \"top_pick\": \"FMFC\",\n        \"top_score\": 49.8,\n        \"next_best\": null,\n        \"next_best_score\": 0.0,\n        \"scan_results\": [\n            {\n      ",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T13:12:12.711373"
+  "updated": "2026-06-25T13:17:51.067249"
 }

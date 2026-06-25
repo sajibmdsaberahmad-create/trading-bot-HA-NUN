@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 29,
   "scans_performed": 27,
-  "improvements_applied": 136,
+  "improvements_applied": 137,
   "reports_generated": 26,
   "event_log": [
     {
@@ -7843,6 +7843,28 @@
         "applied": [],
         "lessons": [
           "Review council_timeout on TECH"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T13:17:51.068865",
+      "age": "4d 2h 15m 2s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #137",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Event: council_timeout occurred with scanner+spike after timeout.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Setting the confidence threshold to 0.58 will help us increase the risk tolerance of the algorithm.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We have a high value of 0.58, which indicates that we want a low confidence threshold for the scanner spike.'}"
         ]
       }
     }

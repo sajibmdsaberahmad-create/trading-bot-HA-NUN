@@ -156,7 +156,20 @@ def effective_prefetch_top_n(cfg: BotConfig) -> int:
 def effective_min_position_hold_sec(cfg: BotConfig) -> float:
     if is_ai_unlimited(cfg):
         return 0.0
+    if getattr(cfg, "PROFIT_HUNT_PRIMARY_GOAL", True) and getattr(cfg, "PROFIT_HUNT_SKIP_MIN_HOLD", True):
+        return 0.0
     return float(getattr(cfg, "MIN_POSITION_HOLD_SEC", 45.0))
+
+
+def effective_min_hold_for_exit(cfg: BotConfig, pnl_pct: float = 0.0, reason: str = "") -> float:
+    """Min hold for exits — profit hunts bypass when primary goal is on."""
+    try:
+        from core.profit_hunting import profit_exit_bypasses_hold
+        if profit_exit_bypasses_hold(cfg, pnl_pct, reason):
+            return 0.0
+    except Exception:
+        pass
+    return effective_min_position_hold_sec(cfg)
 
 
 def get_effective_confidence_threshold(

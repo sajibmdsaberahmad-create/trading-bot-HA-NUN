@@ -161,6 +161,19 @@ class BotConfig:
     ).lower() in ("1", "true", "yes")
     EXTENDED_PROFIT_GIVEBACK_PCT: float = float(os.getenv("EXTENDED_PROFIT_GIVEBACK_PCT", "0.30"))
     RL_MISSED_PROFIT_HUNT_PENALTY: float = float(os.getenv("RL_MISSED_PROFIT_HUNT_PENALTY", "-0.75"))
+    # Profit hunting is THE primary mission — full freedom within hard risk limits
+    PROFIT_HUNT_PRIMARY_GOAL: bool = os.getenv(
+        "PROFIT_HUNT_PRIMARY_GOAL", "true"
+    ).lower() in ("1", "true", "yes")
+    PROFIT_HUNT_FULL_FREEDOM: bool = os.getenv(
+        "PROFIT_HUNT_FULL_FREEDOM", "true"
+    ).lower() in ("1", "true", "yes")
+    PROFIT_HUNT_TRACK_ALL: bool = os.getenv(
+        "PROFIT_HUNT_TRACK_ALL", "true"
+    ).lower() in ("1", "true", "yes")
+    PROFIT_HUNT_SKIP_MIN_HOLD: bool = os.getenv(
+        "PROFIT_HUNT_SKIP_MIN_HOLD", "true"
+    ).lower() in ("1", "true", "yes")
 
     TAKE_PROFIT_ATR_MULTIPLIER: float = 2.5
     MIN_REWARD_RISK_RATIO:      float = 2.0
@@ -504,7 +517,9 @@ class BotConfig:
     AI_ACCOUNT_EVAL_MIN_SEC: float = 300.0     # Min gap between same event type
     LEARNING_RESTORE_ON_STARTUP: bool = True   # Pull experience from GitHub on boot
     LEARNING_SYNC_INTERVAL_SEC: float = 1800.0 # Push all learning artifacts every 30 min
-    LEARNING_PUSH_ON_TRADE: bool = False       # Defer git sync to session shutdown
+    LEARNING_PUSH_ON_TRADE: bool = os.getenv(
+        "LEARNING_PUSH_ON_TRADE", "true"
+    ).lower() in ("1", "true", "yes")
     # HANOON session: defer git pushes (shutdown hook still syncs). Standalone daemon handles live pushes.
     GIT_PUSH_DURING_SESSION: bool = os.getenv(
         "GIT_PUSH_DURING_SESSION", "false"
