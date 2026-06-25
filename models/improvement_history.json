@@ -1023,5 +1023,23 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We should prioritize opportunistic exits and add a ticker for live IB bars if it occurs.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:41:00.833110+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased confidence threshold for profitable trades",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade closed with a trailing stop loss, resulting in a negative profit.",
+    "lessons": [
+      "Focus on taking profit into momentum to avoid losing profit early.",
+      "Implement stricter parameters and logic hints within the constraints to prevent recurrence."
+    ]
   }
 ]

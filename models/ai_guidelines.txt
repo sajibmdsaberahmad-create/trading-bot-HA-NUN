@@ -4313,3 +4313,9 @@ Market data failure occurred due to missing profit hunting event.
 The market data failure indicates that the algorithm failed to identify profitable trades due to an empty loss streak.
 • ...
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:41:00.831918+00:00
+The trade closed with a trailing stop loss, resulting in a negative profit.
+The event occurred because of a missed profit hunt (trailing stop). The algorithm prioritized opportunistic exits.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold for profitable trades)
+

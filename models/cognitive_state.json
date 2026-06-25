@@ -1,12 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 5% \u00b7 $-14266.86. Preserving capital over action.",
+  "mood_message": "Win rate 0% \u00b7 $-14889.28. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: spike_top_intrabar: +2.28% vol=2.7x",
-    "Commander: The trade was triggered by a trailing profit, which indicates a prolonged period of loss followed by an opportunity for profit.",
-    "{'param': 'market_state', 'value': 'open', 'reason': 'The market state is open, indicating that trades were executed without any live IB bars.'}",
     "{'param': 'entry_limit_buffer_pct', 'value': '0.001', 'reason': 'The entry limit buffer percentage was increased to 0.001.'}",
     "Commander: A loss streak was observed in the GDC portfolio with a negative pnl of -702.02 USD.",
     "Spike-top hunt on NEXR: spike_top_exit: +1.09% vol=1.7x",
@@ -103,10 +100,13 @@
     "Analyze market data and identify potential exits.",
     "Commander: The event occurred due to the Ollama exit being close to the PPO hold ratio, which triggered the council_exit. This was an opportunistic move to avoid losses.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We should prioritize opportunistic exits and add a ticker for live IB bars if it occurs.'}",
-    "Commander: The market data failure indicates that the algorithm failed to identify profitable trades due to an empty loss streak."
+    "Commander: The market data failure indicates that the algorithm failed to identify profitable trades due to an empty loss streak.",
+    "Focus on taking profit into momentum to avoid losing profit early.",
+    "Implement stricter parameters and logic hints within the constraints to prevent recurrence.",
+    "Commander: The event occurred because of a missed profit hunt (trailing stop). The algorithm prioritized opportunistic exits."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.95,\n  \"prompt_data\": {\n    \"trade_order_id\": \"0\",\n    \"order_type\": \"buy\",\n    \"symbol\": \"GDC\",\n    \"price\": 0.0,\n    \"volume\": 0.0\n  },\n  \"realization\": -1427.6899999999995,\n  \"profit\": -137.68999999999995,\n  \"outcome\": {\n    \"symbol\": \"GDC\",\n    \"price\": 0.0,\n    \"volume\": 0.0,\n    \"reason\": \"No profit recorded for the order\"\n  },\n  \"order_confirmation\": true\n}\n```",
+  "last_thought": "```json\n{\n  \"trade_entry\": {\n    \"ticker\": \"BITO\",\n    \"entry\": 0.0132,\n    \"exit\": 0.0132,\n    \"entry_fill\": 0.0132,\n    \"exit_fill\": 0.0132,\n    \"quote_entry\": 0.0132,\n    \"quote_exit\": 8.1,\n    \"shares\": 6712.0,\n    \"pnl_usd\": 0.0,\n    \"pnl_pct\": 0.0,\n    \"result\": \"loss\",\n    \"exit_reason\": \"bracket_exit\",\n    \"entry_slippage_pct\": -0.998374,\n    \"exit_slippage_pct\": -0.99837,\n    \"limit_px\": 8.12,\n    \"entry_mode\": \"limit_smart\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 68.9,\n    \"peak\": 8.",
   "market_belief": {},
-  "trades_observed": 38,
-  "updated": "2026-06-25T17:39:56.518265"
+  "trades_observed": 42,
+  "updated": "2026-06-25T17:41:28.050461"
 }
