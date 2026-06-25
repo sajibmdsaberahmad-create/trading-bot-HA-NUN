@@ -355,6 +355,13 @@ class BotConfig:
     AI_MIN_LOCK_SCORE: float = float(os.getenv("AI_MIN_LOCK_SCORE", "0"))
     AI_MIN_CASH_RESERVE_PCT: float = float(os.getenv("AI_MIN_CASH_RESERVE_PCT", "0"))
     AI_MAX_SHARES_PER_TRADE: int = int(os.getenv("AI_MAX_SHARES_PER_TRADE", "100000"))
+    # When true (default with AI_FULL_CONTROL), deploy/risk/pool/positions are AI session-defined
+    AI_DEFINE_ALL_LIMITS: bool = os.getenv("AI_DEFINE_ALL_LIMITS", "true").lower() in (
+        "1", "true", "yes"
+    )
+    AI_SESSION_LIMITS_OLLAMA: bool = os.getenv("AI_SESSION_LIMITS_OLLAMA", "true").lower() in (
+        "1", "true", "yes"
+    )
 
     # USER RULE: Hard stop $50 per trade when USE_FIXED_RISK_CAP=true
     HARD_STOP_USD: float = 50.0
