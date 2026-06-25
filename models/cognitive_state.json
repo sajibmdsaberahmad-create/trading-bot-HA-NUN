@@ -1,12 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $-14889.28. Preserving capital over action.",
+  "mood_message": "Win rate 0% \u00b7 $-14983.93. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Profit hunt worked on NEXR: spike_top_exit: +0.70% vol=5.1x \u2014 reinforce opportunistic exits.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm prioritized opportunistic exits based on the current market state, which led to missed profit hunting.'}",
-    "Commander: Market data failed, no live IB bars available for analysis. The trade was processed and exited with a stop-hit strategy.",
     "Spike-top hunt on NEXR: spike_top_exit: +4.58% vol=1.8x",
     "Profit hunt worked on NEXR: spike_top_exit: +4.58% vol=1.8x \u2014 reinforce opportunistic exits.",
     "Commander: spike_top_exit: +4.58% vol=1.8x",
@@ -103,10 +100,13 @@
     "n",
     "s",
     ".",
-    "Commander: We are tracking the market state and live IB bars to understand when the event occurred and how it happened."
+    "Commander: We are tracking the market state and live IB bars to understand when the event occurred and how it happened.",
+    "l",
+    "Commander: The loss streak was caused by the council_exit: Ollama exit 95% (PPO hold). The algorithm is not optimizing for this specific situation, and it prioritizes opportunistic exits based on gut feelings.",
+    "Commander: BUY BITO Closes with a council exit"
   ],
-  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"GDC\",\n    \"entry\": 0.0132,\n    \"exit\": 0.0132,\n    \"entry_fill\": 0.0132,\n    \"exit_fill\": 0.0132,\n    \"quote_entry\": 0.0132,\n    \"quote_exit\": 0.0133,\n    \"shares\": 1200.0,\n    \"pnl_usd\": 0.0,\n    \"pnl_pct\": 0.0,\n    \"result\": \"loss\",\n    \"exit_reason\": \"spike_top_intrabar: +0.76% vol=126309.0x\",\n    \"entry_slippage_pct\": -0.007519,\n    \"exit_slippage_pct\": -0.007519,\n    \"limit_px\": 0.0133,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n ",
+  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"entry\": -94.65,\n    \"exit\": -94.65,\n    \"trade_mode\": \"sell\",\n    \"profit_hunter\": true,\n    \"margin_profit\": false,\n    \"limit_px\": 8.11,\n    \"entry_mode\": \"limit_smart\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 46,
-  "updated": "2026-06-25T17:42:47.358788"
+  "trades_observed": 48,
+  "updated": "2026-06-25T17:43:33.165340"
 }

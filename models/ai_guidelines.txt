@@ -4605,3 +4605,102 @@ We are tracking the market state and live IB bars to understand when the event o
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The live IB bars provided a lower CONFIDENCE_THRESHOLD, which is not reflective of the real market.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:43:30.759848+00:00
+Loss streak occurred.
+The loss streak was caused by the council_exit: Ollama exit 95% (PPO hold). The algorithm is not optimizing for this specific situation, and it prioritizes opportunistic exits based on gut feelings.
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:43:33.205611+00:00
+Trade closed with a council exit at Ollama (95% hold) and negative pnl.
+BUY BITO Closes with a council exit
+• A
+• l
+• w
+• a
+• y
+• s
+•  
+• r
+• e
+• v
+• i
+• e
+• w
+•  
+• r
+• e
+• a
+• l
+• -
+• t
+• i
+• m
+• e
+•  
+• e
+• v
+• e
+• n
+• t
+•  
+• l
+• o
+• g
+• s
+•  
+• f
+• o
+• r
+•  
+• a
+• n
+• o
+• m
+• a
+• l
+• i
+• e
+• s
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• r
+• a
+• d
+• e
+•  
+• s
+• t
+• r
+• a
+• t
+• e
+• g
+• i
+• e
+• s
+•  
+• a
+• c
+• c
+• o
+• r
+• d
+• i
+• n
+• g
+• l
+• y
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market data failure detected, add Ollama exit ticker to mental skip list.)
+
