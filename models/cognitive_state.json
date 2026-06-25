@@ -1,7 +1,7 @@
 {
   "mood": "steady",
   "mood_message": "Mixed session \u00b7 $+54586.50. Watching for cleaner setups.",
-  "confidence": 0.39,
+  "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
     "When: The loss streak occurred after a stop_breach event.",
@@ -105,8 +105,8 @@
     "p",
     "Commander: - Council exit occurred due to the exit percentage being too high."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 1,\n  \"analysis\": {\n    \"market_status\": \"market failure\",\n    \"exits_strategy\": \"soft sell into moves\",\n    \"trades_completed\": 5,\n    \"profit_thresholds\": [\n      {\"buying_profit_pct\": 0.50, \"timeframe\": \"day\", \"threshold_value\": 979529.12}\n    ]\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"trade\": {\n    \"ticker\": \"GPUS\",\n    \"entry\": 0.0133,\n    \"exit\": 0.0133,\n    \"entry_fill\": 0.0133,\n    \"exit_fill\": 0.0133,\n    \"quote_entry\": 0.0133,\n    \"quote_exit\": 0.1768,\n    \"shares\": 1200.0,\n    \"pnl_usd\": 0.0,\n    \"pnl_pct\": 0.0,\n    \"result\": \"loss\",\n    \"exit_reason\": \"council_exit: Ollama exit 85% (PPO hold)\",\n    \"entry_slippage_pct\": -0.925239,\n    \"exit_slippage_pct\": -0.924774,\n    \"limit_px\": 0.1779,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hol",
   "market_belief": {},
-  "trades_observed": 12,
-  "updated": "2026-06-25T16:27:30.439736"
+  "trades_observed": 14,
+  "updated": "2026-06-25T16:28:25.427759"
 }

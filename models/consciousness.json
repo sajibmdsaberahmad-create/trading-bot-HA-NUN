@@ -3,7 +3,7 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 104,
   "training_sessions": 27,
-  "trades_observed": 46,
+  "trades_observed": 47,
   "scans_performed": 27,
   "improvements_applied": 200,
   "reports_generated": 26,
@@ -10793,6 +10793,13 @@
           "."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T16:28:29.255486",
+      "age": "4d 5h 25m 40s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T16:22:06.687310",
@@ -12078,7 +12085,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "passive",
+  "mood": "determined",
   "total_pnl": 5948.49,
   "win_history": [
     0.0,
@@ -12126,20 +12133,21 @@
     4304.28,
     1711.48,
     0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 3,
   "worst_streak": 11,
-  "veteran_xp": 540,
+  "veteran_xp": 550,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 35,
+    "exit_timing": 36,
     "risk_management": 4,
     "entry_timing": 12
   },
-  "flights_completed": 41,
-  "hours_flown": 4.100000000000001,
+  "flights_completed": 42,
+  "hours_flown": 4.200000000000001,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -12158,12 +12166,13 @@
     "TZA": 1,
     "GDC": 1,
     "SOX": 1,
-    "BIT": 2
+    "BIT": 2,
+    "GPU": 1
   },
   "best_streak": 3,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Trading sessions are relatively calm with consistent progress."
+  "mood_message": "I am driven to take advantage of opportunities."
 }
