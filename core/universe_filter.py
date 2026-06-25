@@ -84,16 +84,13 @@ def passes_profit_hunt_universe(
         return False, flag
 
     prim = normalize_exchange(primary_exchange)
-    if prim in BLOCKED_PRIMARY_EXCHANGES:
-        return False, f"blocked_exchange:{prim}"
 
     if major_exchanges_only(cfg):
+        if prim in BLOCKED_PRIMARY_EXCHANGES:
+            return False, f"blocked_exchange:{prim}"
         if prim and prim not in ALLOWED_PRIMARY_EXCHANGES:
             return False, f"not_major:{prim}"
-        if not prim:
-            # Strict: unknown venue — likely OTC that IB didn't label yet
-            if getattr(cfg, "PROFIT_HUNT_REJECT_UNKNOWN_EXCHANGE", True):
-                return False, "unknown_exchange"
+        # Empty primary: allow if ticker is clean — exchange filter happens on IB errors
 
     min_px = float(getattr(cfg, "PROFIT_HUNT_MIN_PRICE", 0.50))
     max_px = float(getattr(cfg, "PROFIT_HUNT_MAX_PRICE", 500.0))

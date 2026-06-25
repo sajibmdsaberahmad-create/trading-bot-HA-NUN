@@ -1313,6 +1313,11 @@ class ScalperRunner:
         pattern = str(entry.get("pattern", "md_failure"))
         reason = f"MD {code} {pattern}: {message[:100]}"
         log.info(f"  🚫 MD skip {ticker}: {reason[:120]}")
+        prim = str(entry.get("primary_exchange", "") or "").upper()
+        if prim in ("PINK", "OTC", "OTCBB", "ARCAEDGE", "GREY", "GRAY") or pattern in (
+            "no_historical_data", "no_md_permission", "otc_limited",
+        ):
+            self._contract_blacklist.add(ticker)
         self._stop_target_stream(ticker)
         self._scan_data_cache.pop(ticker, None)
         self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
@@ -2492,10 +2497,17 @@ class ScalperRunner:
         self.scan_results = qualified[: self._max_locked()]
 
         max_price = getattr(self.cfg, "PENNY_STOCK_MAX_PRICE", 500.0)
+        hits = self.scanner.get_scanner_hits()
+        from core.universe_filter import passes_profit_hunt_universe
         pool = [
             r for r in qualified
             if r.get("price", 0.0) <= max_price
-            and is_tradeable_ticker(r["ticker"])
+            and passes_profit_hunt_universe(
+                self.cfg,
+                r["ticker"],
+                str((hits.get(r["ticker"]) or ScannerHit(ticker=r["ticker"])).primary_exchange),
+                price=float(r.get("price", 0) or 0),
+            )[0]
             and r["ticker"] not in self._contract_blacklist
         ]
         pool.sort(key=lambda x: x.get("total_score", 0), reverse=True)
