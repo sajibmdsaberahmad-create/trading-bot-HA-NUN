@@ -5148,3 +5148,78 @@ High scanner score after timeout: score=85 vol=1.1x | ATR R:R 2.0
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:30:27.369646+00:00
+The council timeout event occurred during the session, and we need to analyze why it happened.
+High scanner score after timeout: score=83 vol=1.0x | ATR R:R 2.0
+• I
+• m
+• p
+• l
+• e
+• m
+• e
+• n
+• t
+•  
+• t
+• h
+• e
+•  
+• f
+• o
+• l
+• l
+• o
+• w
+• i
+• n
+• g
+•  
+• c
+• h
+• a
+• n
+• g
+• e
+• s
+•  
+• t
+• o
+•  
+• p
+• r
+• e
+• v
+• e
+• n
+• t
+•  
+• t
+• h
+• i
+• s
+•  
+• f
+• r
+• o
+• m
+•  
+• h
+• a
+• p
+• p
+• e
+• n
+• i
+• n
+• g
+•  
+• a
+• g
+• a
+• i
+• n
+• :
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold of 0.58 is too low, indicating a possible algorithmic error.)
+

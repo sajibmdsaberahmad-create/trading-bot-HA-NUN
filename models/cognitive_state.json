@@ -4,13 +4,6 @@
   "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
-    "b",
-    "Commander: The reason for the profit is not provided in this event detail.",
-    "1",
-    "S",
-    "-",
-    "Commander: Stop breaches are common and should be avoided if possible. The stop-hunt strategy is based on minimizing losses by making trades before reaching the stop loss level.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader was likely confident in holding positions but missed opportunities.'}",
     "Commander: The trader lost control and took profit, possibly due to the market conditions.",
     "Commander: The trade was close with a profit of $0.0, but it occurred at the end of an open session.",
     "Market data failures prevent continuous execution of trades without live IB bars.",
@@ -103,10 +96,17 @@
     "Review trade_closed on MARA",
     "Review council_timeout on RIOT",
     "Commander: High scanner score after timeout: score=85 vol=1.1x | ATR R:R 2.0",
-    "Commander: bracket_exit"
+    "Commander: bracket_exit",
+    "W",
+    "y",
+    "g",
+    "c",
+    "?",
+    "w",
+    "Commander: High scanner score after timeout: score=83 vol=1.0x | ATR R:R 2.0"
   ],
-  "last_thought": "```json\n{\n    \"action\": \"take_profit\",\n    \"profit_probability\": 0.5,\n    \"direction\": \"open\",\n    \"entry_fill_price\": 13.64,\n    \"exit_fill_price\": 13.65\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.7,\n  \"profit_probability\": 0.6,\n  \"direction\": \"into the move\"\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T19:26:48.399433"
+  "trades_observed": 0,
+  "updated": "2026-06-25T19:30:27.347535"
 }
