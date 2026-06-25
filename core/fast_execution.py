@@ -215,7 +215,7 @@ def spike_entry_cooldown_sec(cfg: BotConfig) -> float:
 def stream_watch_cap(cfg: BotConfig) -> int:
     """Max locked names to monitor — match IB stream budget, not full scanner."""
     if ai_fast_execution(cfg):
-        return int(getattr(cfg, "AI_STREAM_WATCH_CAP", 12))
+        return int(getattr(cfg, "AI_STREAM_WATCH_CAP", 10))
     return int(getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30))
 
 

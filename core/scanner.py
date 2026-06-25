@@ -32,6 +32,8 @@ class ScannerHit:
     rank: int = 0
     scan_code: str = ""
     distance: str = ""
+    primary_exchange: str = ""
+    price: float = 0.0
 
 
 @dataclass
@@ -90,12 +92,17 @@ class StockScanner:
         """
         rank_bonus = max(15.0, 88.0 - hit.rank * 2.2)
         code_bonus = {
+            "MOST_ACTIVE": 14.0,
+            "HOT_BY_VOLUME": 12.0,
             "TOP_PERC_GAIN": 12.0,
             "HOT_BY_PRICE": 10.0,
-            "HOT_BY_VOLUME": 8.0,
-            "MOST_ACTIVE": 6.0,
-            "TOP_VOLUME": 6.0,
+            "TOP_VOLUME": 8.0,
         }.get(hit.scan_code, 4.0)
+        try:
+            from core.universe_filter import exchange_score_bonus
+            code_bonus += exchange_score_bonus(hit.primary_exchange)
+        except Exception:
+            pass
         dist_bonus = 0.0
         if hit.distance:
             try:
@@ -140,38 +147,59 @@ class StockScanner:
         if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
             try:
                 from ib_insync import ScannerSubscription
-                # Paper accounts often block TOP_VOLUME — prefer codes that work on paper
-                scan_codes = [
-                    'HOT_BY_VOLUME', 'HOT_BY_PRICE', 'TOP_PERC_GAIN',
-                    'MOST_ACTIVE', 'TOP_VOLUME',
-                ]
+                from core.universe_filter import PROFIT_HUNT_SCAN_CODES, passes_profit_hunt_universe
+                scan_codes = list(PROFIT_HUNT_SCAN_CODES)
                 ib = ib_connector.ib
                 disabled_codes: set = set()
+                skipped_universe = 0
+                location_codes = ["STK.US.MAJOR", "STK.US"]
 
-                for scan_code in scan_codes:
-                    if scan_code in disabled_codes:
-                        continue
-                    scan = ScannerSubscription(
-                        instrument='STK',
-                        locationCode='STK.US',
-                        scanCode=scan_code,
-                    )
-                    try:
-                        scan_results = ib.reqScannerData(scan, 0, '')
-                    except Exception as exc:
-                        if '162' in str(exc) or 'disabled' in str(exc).lower():
-                            disabled_codes.add(scan_code)
-                            log.debug(f"Scanner {scan_code} unavailable — skipping")
-                        continue
-                    finally:
+                for location_code in location_codes:
+                    if tickers:
+                        break
+                    for scan_code in scan_codes:
+                        if scan_code in disabled_codes:
+                            continue
+                        scan = ScannerSubscription(
+                            instrument='STK',
+                            locationCode=location_code,
+                            scanCode=scan_code,
+                        )
                         try:
-                            ib.cancelScannerSubscription(scan)
-                        except Exception:
-                            pass
-                    for idx, result in enumerate(scan_results):
-                        if result.contractDetails and result.contractDetails.contract:
-                            symbol = result.contractDetails.contract.symbol
+                            scan_results = ib.reqScannerData(scan, 0, '')
+                        except Exception as exc:
+                            if '162' in str(exc) or 'disabled' in str(exc).lower():
+                                disabled_codes.add(scan_code)
+                                log.debug(f"Scanner {scan_code} unavailable — skipping")
+                            continue
+                        finally:
+                            try:
+                                ib.cancelScannerSubscription(scan)
+                            except Exception:
+                                pass
+                        for idx, result in enumerate(scan_results):
+                            if not result.contractDetails or not result.contractDetails.contract:
+                                continue
+                            contract = result.contractDetails.contract
+                            symbol = contract.symbol
                             if not symbol or len(symbol) > 5:
+                                continue
+                            primary = (
+                                getattr(contract, "primaryExchange", "")
+                                or getattr(contract, "primaryExch", "")
+                                or ""
+                            )
+                            mpx = 0.0
+                            try:
+                                mpx = float(getattr(result, "benchmark", 0) or 0)
+                            except (TypeError, ValueError):
+                                pass
+                            ok, reason = passes_profit_hunt_universe(
+                                self.cfg, symbol, str(primary), price=mpx,
+                            )
+                            if not ok:
+                                skipped_universe += 1
+                                log.debug(f"  ⏭ scanner skip {symbol}@{primary}: {reason}")
                                 continue
                             dist = getattr(result, "distance", "") or ""
                             prev = hits.get(symbol)
@@ -181,17 +209,22 @@ class StockScanner:
                                     rank=idx,
                                     scan_code=scan_code,
                                     distance=str(dist) if dist else "",
+                                    primary_exchange=str(primary),
+                                    price=mpx,
                                 )
                             if symbol not in tickers:
                                 tickers.append(symbol)
-                    if len(tickers) >= 40:
-                        break
+                        if len(tickers) >= 40:
+                            break
 
                 if tickers:
                     self._dynamic_universe = tickers[:100]
                     self._scanner_hits = hits
                     self._last_dynamic_fetch = now
-                    log.info(f"Dynamic universe: {len(tickers)} live tickers from IB scanner")
+                    log.info(
+                        f"Dynamic universe: {len(tickers)} major-exchange tickers "
+                        f"(skipped {skipped_universe} PINK/OTC/distressed)"
+                    )
                 else:
                     log.warning("No tickers returned from IB scanner — check market hours / subscription")
             except Exception as exc:

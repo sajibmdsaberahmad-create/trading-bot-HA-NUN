@@ -379,6 +379,18 @@ class BotConfig:
     FAST_LOCK_SKIP_HISTORICAL: bool = os.getenv(
         "FAST_LOCK_SKIP_HISTORICAL", "true"
     ).lower() in ("1", "true", "yes")
+    PROFIT_HUNT_MAJOR_EXCHANGES_ONLY: bool = os.getenv(
+        "PROFIT_HUNT_MAJOR_EXCHANGES_ONLY", "true"
+    ).lower() in ("1", "true", "yes")
+    PROFIT_HUNT_REJECT_UNKNOWN_EXCHANGE: bool = os.getenv(
+        "PROFIT_HUNT_REJECT_UNKNOWN_EXCHANGE", "true"
+    ).lower() in ("1", "true", "yes")
+    PROFIT_HUNT_MIN_PRICE: float = float(os.getenv("PROFIT_HUNT_MIN_PRICE", "0.50"))
+    PROFIT_HUNT_MAX_PRICE: float = float(os.getenv("PROFIT_HUNT_MAX_PRICE", "500.0"))
+    PROFIT_LOCK_ULTRA_FAST: bool = os.getenv(
+        "PROFIT_LOCK_ULTRA_FAST", "true"
+    ).lower() in ("1", "true", "yes")
+    AI_STREAM_WATCH_CAP: int = int(os.getenv("AI_STREAM_WATCH_CAP", "10"))
     MICRO_SPIKE_BOOST: float = float(os.getenv("MICRO_SPIKE_BOOST", "0.35"))
     MICRO_FADE_EXIT: float = float(os.getenv("MICRO_FADE_EXIT", "0.55"))
     MICRO_LOSS_EXIT: float = float(os.getenv("MICRO_LOSS_EXIT", "0.58"))

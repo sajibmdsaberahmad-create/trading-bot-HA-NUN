@@ -28,23 +28,12 @@ if TYPE_CHECKING:
     from core.scanner import StockScanner
 
 TRAINED_HASHES_PATH = Path("models/trained_record_hashes.jsonl")
-OTC_EXCLUDED_SUFFIXES = frozenset({".PK", ".OB", ".OTC", ".PINK"})
-OTC_EXCLUDED_TICKERS = frozenset({
-    "CEI", "NKLA", "GOEV", "WKHS", "ARRY", "X",
-})
-
-
-def is_tradeable_ticker(ticker: str, exchange: str = "") -> bool:
-    """Exclude pink sheets, OTC, and known bad contracts."""
-    t = (ticker or "").upper().strip()
-    if not t or len(t) > 5:
-        return False
-    if t in OTC_EXCLUDED_TICKERS:
-        return False
-    ex = (exchange or "").upper()
-    if any(x in ex for x in ("PINK", "OTC", "GREY", "GRAY")):
-        return False
-    return True
+def is_tradeable_ticker(ticker: str, exchange: str = "", cfg: Optional[BotConfig] = None) -> bool:
+    """Exclude pink sheets, OTC, distressed — major US listings for profit hunting."""
+    from core.universe_filter import passes_profit_hunt_universe
+    cfg = cfg or BotConfig()
+    ok, _ = passes_profit_hunt_universe(cfg, ticker, exchange)
+    return ok
 
 
 def get_live_scan_universe(
@@ -75,7 +64,7 @@ def get_live_scan_universe(
     seen = set()
     out = []
     for t in tickers:
-        if t not in seen and is_tradeable_ticker(t):
+        if t not in seen and is_tradeable_ticker(t, cfg=cfg):
             seen.add(t)
             out.append(t)
 
