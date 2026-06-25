@@ -206,3 +206,4 @@
 {"event":"entry_fill","ticker":"RIVN","entry_fill":14.57,"limit_px":null,"entry_slippage_pct":0.0,"shares":4567,"stop":14.5117,"target":14.6866,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:15:23.292796+00:00"}
 {"event":"entry_fill","ticker":"RIVN","entry_fill":14.61,"limit_px":null,"entry_slippage_pct":0.0,"shares":5000,"stop":14.5814,"target":14.7571,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:18:24.114250+00:00"}
 {"event":"entry_fill","ticker":"COIN","entry_fill":14.61,"limit_px":null,"entry_slippage_pct":0.0,"shares":257,"stop":141.3722,"target":143.0755,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:18:58.538631+00:00"}
+{"event":"entry_fill","ticker":"MARA","entry_fill":14.61,"limit_px":null,"entry_slippage_pct":0.0,"shares":2673,"stop":13.6153,"target":13.7794,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:20:31.425119+00:00"}
