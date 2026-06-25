@@ -1,9 +1,9 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 120,
+  "total_awakenings": 121,
   "training_sessions": 27,
-  "trades_observed": 134,
+  "trades_observed": 135,
   "scans_performed": 27,
   "improvements_applied": 309,
   "reports_generated": 26,
@@ -16058,9 +16058,23 @@
           "Review council_timeout on RIOT"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:23:42.188901",
+      "age": "4d 8h 20m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:24:05.000015",
+      "age": "4d 8h 21m 16s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #121",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-25T19:17:27.580177",
+  "last_awakening": "2026-06-25T19:24:04.999134",
   "current_version": "v20260625_062906",
   "version_history": [
     {
@@ -17343,7 +17357,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "Anxious",
+  "mood": "calm",
   "total_pnl": 124242.00000000001,
   "win_history": [
     0.0,
@@ -17479,20 +17493,21 @@
     0.0,
     0.0,
     0.0,
-    -2592.81
+    -2592.81,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 9,
+  "consecutive_losses": 10,
   "worst_streak": 18,
-  "veteran_xp": 1880,
+  "veteran_xp": 1890,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 38,
     "entry_timing": 50
   },
-  "flights_completed": 129,
-  "hours_flown": 12.89999999999997,
+  "flights_completed": 130,
+  "hours_flown": 12.99999999999997,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17517,12 +17532,12 @@
     "LCI": 4,
     "RIO": 4,
     "QS": 2,
-    "MAR": 1
+    "MAR": 2
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I feel a strong sense of urgency and need to execute the trade quickly to avoid further losses."
+  "mood_message": "Today's performance indicates a cautious approach to trading."
 }

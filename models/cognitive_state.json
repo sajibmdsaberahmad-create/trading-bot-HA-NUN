@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"trade_id\": \"closed_trade\",\n  \"journal_entry\": {\n    \"ticker\": \"MARA\",\n    \"entry\": 14.61,\n    \"exit\": 13.64,\n    \"quote_entry\": 14.61,\n    \"quote_exit\": 13.65,\n    \"shares\": 2673.0,\n    \"pnl_usd\": -2592.81,\n    \"pnl_pct\": -6.64,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 3,
-  "updated": "2026-06-25T19:23:24.242595"
+  "trades_observed": 4,
+  "updated": "2026-06-25T19:23:36.921687"
 }

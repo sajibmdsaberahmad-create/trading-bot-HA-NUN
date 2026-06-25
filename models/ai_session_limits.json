@@ -2,11 +2,12 @@
   "max_positions": 20,
   "watch_pool": 50,
   "risk_per_trade_pct": 0.044,
-  "risk_per_trade_usd": 30552.06,
+  "risk_per_trade_usd": 25967.36,
   "deploy_pct_per_slot": 0.95,
   "min_cash_reserve_pct": 0.0,
   "max_shares_per_trade": 100000,
   "min_lock_score": 0.0,
-  "source": "ai_heuristic",
-  "equity_basis": 694364.94
+  "source": "ai_ollama",
+  "equity_basis": 590167.17,
+  "ollama_reason": ""
 }
