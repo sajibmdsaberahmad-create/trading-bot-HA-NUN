@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 101,
   "training_sessions": 27,
-  "trades_observed": 35,
+  "trades_observed": 36,
   "scans_performed": 27,
-  "improvements_applied": 187,
+  "improvements_applied": 188,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10245,6 +10245,27 @@
           "Be cautious when using the same strategy to prevent repeated losses"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T15:32:57.639072",
+      "age": "4d 4h 30m 8s",
+      "type": "TRADE",
+      "message": "Observed trade: MIMI LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:33:01.346194",
+      "age": "4d 4h 30m 12s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #188",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on MIMI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T15:30:51.746910",
@@ -11567,20 +11588,21 @@
     0,
     0,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 5,
+  "consecutive_losses": 6,
   "worst_streak": 10,
-  "veteran_xp": 365,
+  "veteran_xp": 375,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 27,
+    "exit_timing": 28,
     "risk_management": 2,
     "entry_timing": 6
   },
-  "flights_completed": 30,
-  "hours_flown": 3.0000000000000013,
+  "flights_completed": 31,
+  "hours_flown": 3.1000000000000014,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -11591,7 +11613,7 @@
     "XOC": 2,
     "EVG": 1,
     "NEX": 1,
-    "MIM": 3,
+    "MIM": 4,
     "AZI": 1,
     "TPT": 3
   },

@@ -2087,3 +2087,7 @@ IB trading permission denied is a root cause of the issue. The trader should pri
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The trader should increase the confidence threshold for opportunistic exits.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T15:33:01.367816+00:00
+Observed ib_failure — recorded for learning.
+IB closing-only — cannot open new positions
+

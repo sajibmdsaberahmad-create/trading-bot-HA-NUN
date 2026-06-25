@@ -48,9 +48,24 @@ def should_permanent_blacklist(cfg: Optional[BotConfig] = None, reason: str = ""
     r = (reason or "").lower()
     if "no ib contract" in r or "contract not found" in r:
         return True
+    if is_ib_structural_reject(reason):
+        return True
     if learn_dont_block(cfg):
         return False
     return True
+
+
+def is_ib_structural_reject(reason: str = "") -> bool:
+    """IB will not allow new entries — skip for rest of session."""
+    r = (reason or "").lower()
+    return (
+        "closing-only" in r
+        or "closing only" in r
+        or "no trading permission" in r
+        or "customer ineligible" in r
+        or "permission denied" in r
+        or "pending configuration review" in r
+    )
 
 
 def record_failure_for_learning(
