@@ -49,6 +49,7 @@ class IBConnector:
         self._last_reconnect_ts: float = 0.0
         self._reconnect_count: int = 0  # total reconnects in this session
         self._order_errors: Dict[int, Dict[str, Any]] = {}
+        self._md_error_handlers: list = []
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -247,6 +248,10 @@ class IBConnector:
         """Return and clear IB error recorded for an order reqId."""
         return self._order_errors.pop(int(req_id), None)
 
+    def register_market_data_error_handler(self, handler) -> None:
+        """Runner callback: stop streams / rotate focus on MD failures."""
+        self._md_error_handlers.append(handler)
+
     def _on_error(self, reqId, errorCode, errorString, contract):
         # Pure informational error codes from IB that aren't real problems
         BENIGN = {2104, 2106, 2107, 2108, 2109, 2119, 2158}
@@ -264,4 +269,27 @@ class IBConnector:
             self._order_errors[int(reqId)] = info
         if errorCode in BENIGN or errorCode in QUIET_ORDER:
             return
+
+        # Market-data failures → learn + avoid (162 no HMDS, 420 no permissions, …)
+        try:
+            from core.market_data_learning import (
+                MARKET_DATA_ERROR_CODES,
+                handle_ib_market_data_error,
+                extract_ticker_from_error,
+            )
+            if errorCode in MARKET_DATA_ERROR_CODES:
+                entry = handle_ib_market_data_error(
+                    self.cfg, int(reqId), int(errorCode), str(errorString), contract,
+                )
+                if entry:
+                    ticker = entry.get("ticker") or extract_ticker_from_error(contract, errorString)
+                    for handler in self._md_error_handlers:
+                        try:
+                            handler(ticker, int(errorCode), str(errorString), entry)
+                        except Exception:
+                            pass
+                    return
+        except Exception as exc:
+            log.debug(f"MD learning hook: {exc}")
+
         log.warning(f"IB error {errorCode}: {errorString} (reqId={reqId})")

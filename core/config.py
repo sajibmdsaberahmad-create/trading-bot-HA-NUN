@@ -161,6 +161,13 @@ class BotConfig:
     ).lower() in ("1", "true", "yes")
     EXTENDED_PROFIT_GIVEBACK_PCT: float = float(os.getenv("EXTENDED_PROFIT_GIVEBACK_PCT", "0.30"))
     RL_MISSED_PROFIT_HUNT_PENALTY: float = float(os.getenv("RL_MISSED_PROFIT_HUNT_PENALTY", "-0.75"))
+    # Learn from IB market-data failures (162 no data, 420 no permissions) — skip bad tickers
+    MARKET_DATA_LEARN_ENABLED: bool = os.getenv(
+        "MARKET_DATA_LEARN_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    MARKET_DATA_SKIP_COOLDOWN_SEC: float = float(
+        os.getenv("MARKET_DATA_SKIP_COOLDOWN_SEC", "300")
+    )
     # Profit hunting is THE primary mission — full freedom within hard risk limits
     PROFIT_HUNT_PRIMARY_GOAL: bool = os.getenv(
         "PROFIT_HUNT_PRIMARY_GOAL", "true"

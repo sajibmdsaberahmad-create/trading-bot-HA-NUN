@@ -52,6 +52,12 @@ from core.profit_hunting import (
     profit_exit_bypasses_council,
     profit_exit_bypasses_hold,
 )
+from core.market_data_learning import (
+    is_market_data_blocked,
+    filter_tradeable_tickers,
+    record_fetch_failure,
+    prompt_block as market_data_prompt_block,
+)
 from core.connector import IBConnector
 from core.data import DataManager
 from core.features_enhanced import FeatureEngineerEnhanced
@@ -147,6 +153,7 @@ class ScalperRunner:
         self.institutional = InstitutionalDetector()
         self.risk = RiskManager(cfg, cfg.INITIAL_CASH, notifier)
         git_sync_init(cfg)
+        self.conn.register_market_data_error_handler(self._on_market_data_failure)
 
         # AI / PPO wiring
         self.model = None
@@ -1097,6 +1104,60 @@ class ScalperRunner:
         )
         return "learn_skip" if learn_dont_block(self.cfg) else "permanent_skip"
 
+    def _on_market_data_failure(
+        self,
+        ticker: str,
+        code: int,
+        message: str,
+        entry: Dict[str, Any],
+    ) -> None:
+        """IB 162/420/etc. — stop stream, drop from locks, learn, rotate to tradeable names."""
+        if not ticker:
+            return
+        pattern = str(entry.get("pattern", "md_failure"))
+        reason = f"MD {code} {pattern}: {message[:100]}"
+        log.info(f"  🚫 MD skip {ticker}: {reason[:120]}")
+        self._stop_target_stream(ticker)
+        self._scan_data_cache.pop(ticker, None)
+        self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
+        if self.top_pick and self.top_pick.ticker == ticker:
+            remaining = self._locked_targets
+            self.top_pick = remaining[0] if remaining else None
+        teach_profit_hunt_lesson(
+            self.autopilot, self.consciousness,
+            f"No clean data on {ticker} ({pattern}) — profit hunt elsewhere.",
+        )
+        self._observe_runtime(
+            "market_data_failure",
+            ticker=ticker,
+            reason=reason,
+            ib_code=code,
+            pattern=pattern,
+            failures=int(entry.get("failures", 1)),
+            market_state=get_market_state(self.cfg),
+        )
+        if getattr(self.cfg, "LEARNING_PUSH_ON_TRADE", True):
+            try:
+                push_learning_checkpoint_async(f"md_failure:{ticker}")
+            except Exception:
+                pass
+        remaining = list(self._locked_targets)
+        if remaining:
+            try:
+                if self.ai_commander:
+                    next_t = self.ai_commander.pick_next_target(
+                        [t.ticker for t in remaining],
+                        {t.ticker: t.rank_score for t in remaining},
+                        skipped_ticker=ticker,
+                        reason=reason,
+                    )
+                    self.top_pick = next((t for t in remaining if t.ticker == next_t), remaining[0])
+                else:
+                    self.top_pick = max(remaining, key=lambda t: t.rank_score)
+            except Exception:
+                self.top_pick = max(remaining, key=lambda t: t.rank_score)
+            self._ensure_locked_streams(quiet=True)
+
     def _observe_runtime(self, event: str, **context: Any) -> None:
         try:
             self.runtime_observer.observe(event, **context)
@@ -1873,6 +1934,10 @@ class ScalperRunner:
         """
         if ticker in self._contract_blacklist:
             return None
+        blocked, md_reason = is_market_data_blocked(self.cfg, ticker)
+        if blocked:
+            log.debug(f"  ⏭ {ticker}: MD blocked — {md_reason[:80]}")
+            return None
         cfg_ticker = self.cfg.TICKER
         try:
             self.cfg.TICKER = ticker
@@ -1914,6 +1979,7 @@ class ScalperRunner:
             return score if score and score.get("total_score", 0) > 0 else None
         except Exception as exc:
             msg = str(exc)
+            record_fetch_failure(self.cfg, ticker, exc, bar_size="1 min")
             if "Could not qualify" in msg or "No security definition" in msg:
                 if should_permanent_blacklist(self.cfg, "no IB contract"):
                     self._contract_blacklist.add(ticker)
@@ -2333,6 +2399,7 @@ class ScalperRunner:
         wanted = [
             t.ticker for t in self._locked_targets[: self._max_locked()]
         ]
+        wanted = filter_tradeable_tickers(self.cfg, wanted)
 
         if not watch_all:
             for t in list(self._target_monitors.keys()):
@@ -2375,6 +2442,10 @@ class ScalperRunner:
         self, ticker: str, quiet: bool = False, stream_mode: str = "tick",
     ):
         """Start live stream for a locked target."""
+        blocked, reason = is_market_data_blocked(self.cfg, ticker)
+        if blocked:
+            log.debug(f"  ⏭ stream skip {ticker}: {reason[:80]}")
+            return
         if ticker in self._target_monitors:
             return
         try:
@@ -2394,6 +2465,7 @@ class ScalperRunner:
             )
             (log.debug if quiet else log.info)(msg)
         except Exception as exc:
+            record_fetch_failure(self.cfg, ticker, exc, bar_size=f"stream:{stream_mode}")
             log.warning(f"  Stream start failed for {ticker}: {exc}")
 
     def _log_flat_heartbeat(self):
