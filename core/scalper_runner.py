@@ -134,7 +134,7 @@ from core.telegram_listener import TelegramCommandListener
 from core.commander_learning import load_commander_guidance, run_commander_learning_cycle
 from core.ai_guardrails import build_ppo_observation
 from core.ai_runtime_observer import get_runtime_observer
-from core.ollama_vision import ensure_vision_model
+from core.scalper_micro_predict import bars_with_live_tick, micro_forecast
 
 
 def _only_uptrend(df: pd.DataFrame, current_px: float, min_bars: int = 20) -> bool:
@@ -288,7 +288,7 @@ class ScalperRunner:
         # Experience buffer for unified learning
         self._xp_buffer_initialized = False
         self.shadow_circuit = ShadowCircuitBreaker(cfg)
-        self._last_entry_telemetry: Dict[str, Any] = {}
+        self._last_micro_forecast: Dict[str, Any] = {}
         
         # Pilot Experience and Pattern Memory systems
         self.pilot = PilotExperienceSystem(cfg)
@@ -494,6 +494,52 @@ class ScalperRunner:
         if ai_full_capital_access(self.cfg):
             return max(0.0, ib_cash)
         return max(0.0, float(self.bot_cash))
+
+    def _resolve_live_bars(
+        self,
+        ticker: str,
+        min_bars: Optional[int] = None,
+    ) -> Tuple[Optional[pd.DataFrame], float, Optional[DataManager], Dict[str, Any]]:
+        """
+        Freshest 1-min bars (live stream + forming tick bar) and micro forecast.
+        Used for spike monitor, entry, profit exit, and loss exit.
+        """
+        min_b = min_bars if min_bars is not None else self._min_bars_for(ticker)
+        dm = self._target_monitors.get(ticker)
+        df: Optional[pd.DataFrame] = None
+        live_px = 0.0
+
+        if dm and getattr(self.cfg, "SCALPER_LIVE_BARS_FIRST", True):
+            df = dm.get_live_decision_bars(min_bars=min_b)
+            live_px = float(dm.get_latest_price() or 0)
+
+        if df is None or len(df) < min_b:
+            cached = self._scan_data_cache.get(ticker)
+            if cached is not None and len(cached) >= max(3, min_b // 2):
+                df = cached
+                if live_px <= 0:
+                    live_px = float(df["close"].iloc[-1])
+                if live_px > 0 and getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
+                    df = bars_with_live_tick(df, live_px, dm)
+
+        if df is not None and len(df) >= 3:
+            if live_px <= 0:
+                live_px = float(df["close"].iloc[-1])
+            elif getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
+                df = bars_with_live_tick(df, live_px, dm)
+            self._scan_data_cache[ticker] = df
+
+        forecast: Dict[str, Any] = {}
+        if (
+            getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True)
+            and df is not None
+            and len(df) >= 6
+            and live_px > 0
+        ):
+            forecast = micro_forecast(df, live_px, dm)
+            self._last_micro_forecast[ticker] = forecast
+
+        return df, live_px, dm, forecast
 
     def _run_account_eval(self, event: str, force: bool = False):
         """AI account snapshot, compare, log, and Telegram brief."""
@@ -2953,29 +2999,26 @@ class ScalperRunner:
             if ticker == pending_ticker or ticker in holding:
                 continue
             min_bars = self._min_bars_for(ticker)
-            df = self._scan_data_cache.get(ticker)
-            dm = self._target_monitors.get(ticker)
-            if dm:
-                live_df = dm.get_bar_dataframe()
-                if live_df is not None and len(live_df) >= min_bars:
-                    self._scan_data_cache[ticker] = live_df
-                    df = live_df
+            df, live_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=min_bars)
             if df is None or len(df) < min_bars:
                 if dm and ticker.upper() in priority_names:
                     burst, burst_ratio = self._detect_tick_volume_burst(dm, df if df is not None else pd.DataFrame())
                     if burst:
-                        live_px = dm.get_latest_price() or 0.0
+                        if live_px <= 0:
+                            live_px = float(dm.get_latest_price() or 0)
                         if live_px > 0:
                             priority = float(target.rank_score) * float(burst_ratio) * 1.5
                             work_df = df.tail(60).copy() if df is not None and len(df) else pd.DataFrame()
                             spike_candidates.append((priority, target, live_px, burst_ratio, work_df))
                 continue
 
-            live_px = dm.get_latest_price() if dm else None
-            if not live_px or live_px <= 0:
+            if live_px <= 0:
                 live_px = float(df["close"].iloc[-1])
 
             work_df = df.tail(60).copy()
+
+            if forecast.get("dir", 0) < 0 and not forecast.get("breakout"):
+                continue
 
             spike_fast_ok = should_spike_fast_entry(
                 self.cfg, 1.0, float(target.rank_score),
@@ -2986,12 +3029,17 @@ class ScalperRunner:
                 and ticker.upper() in priority_names
                 and spike_fast_ok
             ):
-                continue
+                if forecast.get("spike_likelihood", 0) < 0.5:
+                    continue
 
             is_spike, spike_ratio = self._detect_volume_spike(work_df, min_period=min(20, max(6, min_bars)))
             min_spike = float(getattr(self.cfg, "LOCKED_SPIKE_MIN_RATIO", 1.15))
             if not is_spike and spike_ratio >= min_spike:
                 is_spike, spike_ratio = True, spike_ratio
+
+            if forecast.get("spike_likelihood", 0) >= 0.42:
+                is_spike = True
+                spike_ratio = max(spike_ratio, float(forecast.get("vol_accel", 1.0)))
 
             if dm and ticker.upper() in priority_names:
                 burst, burst_ratio = self._detect_tick_volume_burst(dm, work_df)
@@ -3017,7 +3065,10 @@ class ScalperRunner:
             if not is_spike:
                 continue
 
-            priority = float(target.rank_score) * float(spike_ratio)
+            boost = 1.0 + float(forecast.get("spike_likelihood", 0)) * float(
+                getattr(self.cfg, "MICRO_SPIKE_BOOST", 0.35)
+            )
+            priority = float(target.rank_score) * float(spike_ratio) * boost
             spike_candidates.append((priority, target, live_px, spike_ratio, work_df))
             if priority > best_priority:
                 best_priority = priority
@@ -3067,7 +3118,8 @@ class ScalperRunner:
             self._spike_attempt_until[ticker] = time.time() + spike_cd
             log.info(
                 f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | "
-                f"score={target.rank_score:.0f} | attempting entry..."
+                f"score={target.rank_score:.0f} | micro={forecast.get('spike_likelihood', 0):.0%} "
+                f"pred→${forecast.get('pred_1bar', live_px):.2f} | attempting entry..."
             )
             result = self._attempt_entry()
             attempted += 1

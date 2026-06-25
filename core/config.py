@@ -368,6 +368,17 @@ class BotConfig:
     DEFER_BAR_WARM_ON_LOCK: bool = os.getenv("DEFER_BAR_WARM_ON_LOCK", "true").lower() in (
         "1", "true", "yes"
     )
+    # Scalper micro-forecast — freshest bars + 1–3 bar momentum (spike/entry/exit)
+    SCALPER_MICRO_PREDICT_ENABLED: bool = os.getenv(
+        "SCALPER_MICRO_PREDICT_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    SCALPER_LIVE_BARS_FIRST: bool = os.getenv(
+        "SCALPER_LIVE_BARS_FIRST", "true"
+    ).lower() in ("1", "true", "yes")
+    MICRO_SPIKE_BOOST: float = float(os.getenv("MICRO_SPIKE_BOOST", "0.35"))
+    MICRO_FADE_EXIT: float = float(os.getenv("MICRO_FADE_EXIT", "0.55"))
+    MICRO_LOSS_EXIT: float = float(os.getenv("MICRO_LOSS_EXIT", "0.58"))
+    LOCK_BAR_REFRESH_SEC: float = float(os.getenv("LOCK_BAR_REFRESH_SEC", "90"))
 
     # USER RULE: Hard stop $50 per trade when USE_FIXED_RISK_CAP=true
     HARD_STOP_USD: float = 50.0
@@ -622,7 +633,6 @@ class BotConfig:
     MAX_LOCKED_TARGETS: int = 5  # Always return 1-5 stocks
     MIN_LOCK_SCORE: float = 30.0          # Min MTF+AI score to earn a lock slot
     MIN_LOCK_CANDIDATES: int = 2          # Need at least N quality names before locking
-    LOCK_BAR_REFRESH_SEC: float = 180.0   # Refresh locked bars every 3 min (not 60s)
     LOCK_STALE_RELEASE_SEC: float = float(os.getenv("LOCK_STALE_RELEASE_SEC", "600"))
     LOCK_FOCUS_ROTATE_SEC: float = float(os.getenv("LOCK_FOCUS_ROTATE_SEC", "0"))
     LOCK_BAR_WARM_BUDGET_SEC: float = float(os.getenv("LOCK_BAR_WARM_BUDGET_SEC", "5"))

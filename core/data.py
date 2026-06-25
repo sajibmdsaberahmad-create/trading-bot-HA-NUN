@@ -335,13 +335,37 @@ class DataManager:
             })
         log.debug(f"Buffer seeded from dataframe: {len(self._bar_buffer)} bars")
 
-    def get_bar_dataframe(self) -> Optional[pd.DataFrame]:
+    def get_bar_dataframe(self, min_bars: int = 20) -> Optional[pd.DataFrame]:
         """1-minute decision bars, for the PPO agent."""
-        min_required = 20  # enough for uptrend/spike checks on locked targets
-        if len(self._bar_buffer) < min_required:
+        if len(self._bar_buffer) < min_bars:
             return None
         df = pd.DataFrame(list(self._bar_buffer))
         return df.set_index("datetime").sort_index()
+
+    def get_live_decision_bars(self, min_bars: int = 6) -> Optional[pd.DataFrame]:
+        """
+        Freshest 1-min bars for scalper decisions — includes forming minute
+        updated with live tick price and accumulated volume.
+        """
+        if len(self._bar_buffer) < 3 and self.last_tick_price is None:
+            return None
+        rows = list(self._bar_buffer)
+        if not rows and self.last_tick_price:
+            return None
+        df = pd.DataFrame(rows)
+        if df.empty:
+            return None
+        df = df.set_index("datetime").sort_index()
+        live_px = self.get_latest_price()
+        if live_px and live_px > 0:
+            try:
+                from core.scalper_micro_predict import bars_with_live_tick
+                df = bars_with_live_tick(df, float(live_px), self)
+            except Exception:
+                pass
+        if len(df) < min_bars:
+            return df if len(df) >= max(3, min_bars // 2) else None
+        return df
 
     def get_fast_bar_dataframe(self, n: int = 60) -> Optional[pd.DataFrame]:
         """Recent 5-second bars, for ATR / volatility used in stop sizing."""
