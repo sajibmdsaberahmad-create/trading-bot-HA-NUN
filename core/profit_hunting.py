@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """
-core/profit_hunting.py — Opportunistic spike-top profit hunting.
+core/profit_hunting.py — Primary mission: opportunistic profit extraction.
 
-Detects fast momentum spikes (1-min + intra-bar) while in profit, exits mechanically,
-and records missed hunts for PPO / council learning. Thresholds are AI-tunable via
-param_bounds — not fixed doctrine.
+Profit hunting is THE main goal. Algo + AI have full freedom to pursue profit
+within hard risk limits. Every hunt signal, exit, miss, and council decision
+is logged to the ledger + experience buffer for continuous learning.
 """
 
 from __future__ import annotations
 
+import json
+import threading
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -19,15 +22,27 @@ import pandas as pd
 from core.config import BotConfig
 from core.notify import log
 
+LEDGER_PATH = Path("models/profit_hunt_ledger.jsonl")
+_ledger_lock = threading.Lock()
+
+PROFIT_HUNT_PRIMARY_MISSION = (
+    "PRIMARY MISSION — PROFIT HUNTING:\n"
+    "Your sole purpose is to extract profit from every opportunity. Full freedom to:\n"
+    "- Enter any spike, momentum burst, or scanner signal you believe will profit\n"
+    "- Exit immediately on spike tops, hard TP, trailing profit — sell INTO moves\n"
+    "- Trail, extend targets, hot-swap — whatever makes money in the moment\n"
+    "Hard risk limits (max loss/trade, position count) are the ONLY constraints.\n"
+    "Every decision is logged and learned from — adapt aggressively from the ledger."
+)
+
 PROFIT_HUNT_DOCTRINE = (
-    "PROFIT HUNTING (learn & tune — not passive hold):\n"
-    "- Hunt spikes: single-bar momentum + volume burst = take profit INTO the move.\n"
-    "- Do not wait for 40% giveback when a clean spike top prints (NOK-style 14:20 waves).\n"
-    "- Extended hours: tighter giveback, faster spike-top exits.\n"
-    "- Intra-bar: 5s bars + tick bursts catch spikes before 1-min bar closes.\n"
-    "- Missed spike-top exits are training failures — learn from buffer penalties.\n"
-    "- Tune SPIKE_TOP_MIN_GAIN_PCT, SPIKE_TOP_MIN_VOL_RATIO, PROFIT_HUNT_MIN_PNL_PCT "
-    "from outcomes; stay opportunistic."
+    f"{PROFIT_HUNT_PRIMARY_MISSION}\n"
+    "Tactics (AI-tune from outcomes):\n"
+    "- Hunt spikes: single-bar momentum + volume = take profit INTO the move.\n"
+    "- Do not passively wait for large giveback on clean spike tops (NOK 14:20 waves).\n"
+    "- Extended hours: tighter giveback; intra-bar tick bursts before 1-min close.\n"
+    "- Missed spike-top exits = training failures — buffer penalties apply.\n"
+    "- Tune SPIKE_TOP_MIN_GAIN_PCT, SPIKE_TOP_MIN_VOL_RATIO, PROFIT_HUNT_MIN_PNL_PCT."
 )
 
 MECHANICAL_PROFIT_EXIT_REASONS = frozenset({
@@ -36,7 +51,14 @@ MECHANICAL_PROFIT_EXIT_REASONS = frozenset({
     "hard_take_profit",
     "trailing_profit",
     "wave_end_spike_fade",
+    "profit_lock",
+    "profit_hunt",
+    "council_exit",
 })
+
+
+def is_profit_hunt_primary(cfg: BotConfig) -> bool:
+    return bool(getattr(cfg, "PROFIT_HUNT_PRIMARY_GOAL", True))
 
 
 def is_mechanical_profit_exit(reason: str) -> bool:
@@ -46,6 +68,108 @@ def is_mechanical_profit_exit(reason: str) -> bool:
 
 def mechanical_bypass_council(cfg: BotConfig) -> bool:
     return bool(getattr(cfg, "PROFIT_HUNT_MECHANICAL_BYPASS_COUNCIL", True))
+
+
+def profit_hunt_full_freedom(cfg: BotConfig) -> bool:
+    return bool(getattr(cfg, "PROFIT_HUNT_FULL_FREEDOM", True))
+
+
+def profit_exit_bypasses_hold(cfg: BotConfig, pnl_pct: float = 0.0, reason: str = "") -> bool:
+    """Profit exits skip min-hold when primary goal is on and position is green."""
+    if pnl_pct <= 0:
+        return False
+    if not getattr(cfg, "PROFIT_HUNT_SKIP_MIN_HOLD", True):
+        return False
+    if is_profit_hunt_primary(cfg):
+        return True
+    return is_mechanical_profit_exit(reason)
+
+
+def profit_exit_bypasses_council(
+    cfg: BotConfig,
+    reason: str = "",
+    pnl_pct: float = 0.0,
+) -> bool:
+    """Instant profit exits — council cannot veto when hunting is primary."""
+    if mechanical_bypass_council(cfg) and is_mechanical_profit_exit(reason):
+        return True
+    if not profit_hunt_full_freedom(cfg) or pnl_pct <= 0:
+        return False
+    if is_mechanical_profit_exit(reason):
+        return True
+    r = (reason or "").lower()
+    return any(k in r for k in ("profit", "spike_top", "take_profit", "trailing", "wave_end"))
+
+
+def _append_ledger(row: Dict[str, Any]) -> None:
+    if not getattr(BotConfig(), "PROFIT_HUNT_TRACK_ALL", True):
+        pass
+    try:
+        LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with _ledger_lock:
+            with open(LEDGER_PATH, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(row, default=str, separators=(",", ":")) + "\n")
+    except Exception as exc:
+        log.debug(f"Profit hunt ledger: {exc}")
+
+
+def track_profit_hunt_event(
+    cfg: BotConfig,
+    event: str,
+    ticker: str,
+    context: Optional[Dict[str, Any]] = None,
+    *,
+    pnl_usd: float = 0.0,
+    pnl_pct: float = 0.0,
+    record_buffer: bool = True,
+    push_git: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """
+    Always-on profit hunt telemetry: ledger → buffer → optional git sync.
+    Call on every hunt evaluation, spike detect, exit, miss, and council hold.
+    """
+    ctx = dict(context or {})
+    row: Dict[str, Any] = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "event": event,
+        "ticker": ticker,
+        "pnl_usd": round(pnl_usd, 2),
+        "pnl_pct": round(pnl_pct, 4),
+        "primary_goal": is_profit_hunt_primary(cfg),
+        **{k: v for k, v in ctx.items() if k not in row},
+    }
+    if getattr(cfg, "PROFIT_HUNT_TRACK_ALL", True):
+        _append_ledger(row)
+
+    if record_buffer:
+        record_profit_hunt_learning(
+            cfg,
+            event=event,
+            ticker=ticker,
+            context={**ctx, "reason": ctx.get("reason", event)},
+            pnl_usd=pnl_usd,
+            won=pnl_usd > 0,
+            skip_ledger=True,
+        )
+
+    do_push = push_git if push_git is not None else bool(
+        getattr(cfg, "LEARNING_PUSH_ON_TRADE", True)
+        and event in (
+            "hunt_exit", "missed_profit_hunt", "spike_top_exit", "spike_top_intrabar",
+            "hard_take_profit", "trailing_profit", "wave_end_spike_fade",
+        )
+    )
+    if do_push:
+        try:
+            from core.git_sync import push_learning_checkpoint_async
+            push_learning_checkpoint_async(
+                f"profit_hunt:{event}:{ticker}",
+                files=["models/profit_hunt_ledger.jsonl", "models/experience_buffer.jsonl"],
+            )
+        except Exception:
+            pass
+
+    return row
 
 
 def _f(cfg: BotConfig, name: str, default: float) -> float:
