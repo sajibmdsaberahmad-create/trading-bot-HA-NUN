@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 118,
   "training_sessions": 27,
-  "trades_observed": 132,
+  "trades_observed": 133,
   "scans_performed": 27,
-  "improvements_applied": 305,
+  "improvements_applied": 306,
   "reports_generated": 26,
   "event_log": [
     {
@@ -15957,6 +15957,27 @@
           ":"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:07:33.971835",
+      "age": "4d 8h 4m 45s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:07:58.347945",
+      "age": "4d 8h 5m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #306",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T18:56:25.416498",
@@ -17242,7 +17263,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "determined",
+  "mood": "Confused and unsure",
   "total_pnl": 126834.81000000001,
   "win_history": [
     0.0,
@@ -17376,20 +17397,21 @@
     0.0,
     0.0,
     0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 7,
+  "consecutive_losses": 8,
   "worst_streak": 18,
-  "veteran_xp": 1855,
+  "veteran_xp": 1865,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 36,
     "entry_timing": 50
   },
-  "flights_completed": 127,
-  "hours_flown": 12.69999999999997,
+  "flights_completed": 128,
+  "hours_flown": 12.79999999999997,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17412,7 +17434,7 @@
     "GPU": 19,
     "PLT": 1,
     "LCI": 4,
-    "RIO": 3,
+    "RIO": 4,
     "QS": 2
   },
   "best_streak": 4,
@@ -17420,5 +17442,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I've been feeling more confident and focused lately."
+  "mood_message": "I'm analyzing my recent trades to identify patterns that may have led me astray."
 }

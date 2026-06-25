@@ -5122,3 +5122,7 @@ The trader missed the opportunity to take advantage of a gap and close the trade
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The trader failed to accurately assess the market's volatility and momentum at the time of closing, leading to a missed profit opportunity.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:07:58.385156+00:00
+Observed trade_closed — recorded for learning.
+hard_take_profit
+
