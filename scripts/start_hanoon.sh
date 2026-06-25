@@ -100,6 +100,23 @@ export OLLAMA_MAX_LOADED_MODELS="${OLLAMA_MAX_LOADED_MODELS:-1}"
 export OLLAMA_NUM_PARALLEL="${OLLAMA_NUM_PARALLEL:-1}"
 export PYTHONUNBUFFERED=1
 
+# ── Learning posture: coach learns live; PPO champion frozen until off-hours ──
+export AI_LEARN_DONT_BLOCK="${AI_LEARN_DONT_BLOCK:-true}"
+export AI_LEARN_ON_LOSS_STREAK="${AI_LEARN_ON_LOSS_STREAK:-true}"
+export INCREMENTAL_TRAINING_ENABLED="${INCREMENTAL_TRAINING_ENABLED:-false}"
+export AI_RUNTIME_OBSERVER_ENABLED="${AI_RUNTIME_OBSERVER_ENABLED:-true}"
+export AI_RUNTIME_AUTO_APPLY="${AI_RUNTIME_AUTO_APPLY:-true}"
+export OLLAMA_VISION_SWAP_TEXT_MODEL="${OLLAMA_VISION_SWAP_TEXT_MODEL:-false}"
+export CHART_VISION_ENTRY_ONLY="${CHART_VISION_ENTRY_ONLY:-true}"
+export LIVE_CHART_VISION_OPPORTUNISTIC="${LIVE_CHART_VISION_OPPORTUNISTIC:-true}"
+export CHART_VISION_OPPORTUNISTIC_COOLDOWN_SEC="${CHART_VISION_OPPORTUNISTIC_COOLDOWN_SEC:-120}"
+export GIT_NOTIFY_MODE="${GIT_NOTIFY_MODE:-off}"
+export TELEGRAM_BROADCAST_GIT="${TELEGRAM_BROADCAST_GIT:-false}"
+export OFF_HOURS_HEAVY_TRAINING="${OFF_HOURS_HEAVY_TRAINING:-true}"
+export LOSS_STREAK_LEARNING_MIN_SEC="${LOSS_STREAK_LEARNING_MIN_SEC:-45}"
+export LOSS_STREAK_LEARNING_MAX_SEC="${LOSS_STREAK_LEARNING_MAX_SEC:-300}"
+export LOSS_STREAK_RESUME_CONFIDENCE="${LOSS_STREAK_RESUME_CONFIDENCE:-0.52}"
+
 echo "═══════════════════════════════════════════════════════════════════════"
 echo "  HANOON FULL PILOT LAUNCH"
 echo "  IB: $IB_HOST:$IB_PORT | Client: $CLIENT_ID | Ollama: $OLLAMA_MODEL (${TOTAL_RAM_MB}MB RAM)"
@@ -251,6 +268,7 @@ print(f'   AI council all decisions: {getattr(cfg, \"AI_COUNCIL_ALL_DECISIONS\",
 print(f'   AI unlimited: {getattr(cfg, \"AI_UNLIMITED_MODE\", False)} | Watch pool: {getattr(cfg, \"AI_MAX_LOCKED_TARGETS\", 30)} | Max positions: {getattr(cfg, \"AI_MAX_CONCURRENT_POSITIONS\", 50)}')
 print(f'   Multi-position: {getattr(cfg, \"MAX_CONCURRENT_POSITIONS\", 5)} | Fixed deploy cap: {getattr(cfg, \"USE_FIXED_DEPLOY_CAP\", False)} | Fixed risk cap: {getattr(cfg, \"USE_FIXED_RISK_CAP\", False)} | Account halt: {getattr(cfg, \"USE_ACCOUNT_LOSS_HALT\", False)}')
 print(f'   Ollama: {getattr(cfg, \"OLLAMA_ENABLED\", False)}')
+print(f'   Learn live: AI_LEARN_ON_LOSS_STREAK={getattr(cfg, \"AI_LEARN_ON_LOSS_STREAK\", False)} | INCREMENTAL_TRAINING={getattr(cfg, \"INCREMENTAL_TRAINING_ENABLED\", True)} | runtime_observer={getattr(cfg, \"AI_RUNTIME_OBSERVER_ENABLED\", True)}')
 from core.ollama_vision import is_vision_model_present, vision_model_name
 vm = vision_model_name(cfg)
 print(f'   Vision ({vm}): {\"ready\" if is_vision_model_present(cfg) else \"pulling/missing\"}')

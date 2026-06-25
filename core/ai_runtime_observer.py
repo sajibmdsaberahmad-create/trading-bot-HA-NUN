@@ -147,6 +147,10 @@ class AIRuntimeObserver:
             plan = plan or {}
             heuristic = self._heuristic_mutations(event, context)
             if heuristic:
+                ollama_params = {
+                    m.get("param") for m in (plan.get("mutations") or []) if m.get("param")
+                }
+                heuristic = [m for m in heuristic if m.get("param") not in ollama_params]
                 plan.setdefault("mutations", []).extend(heuristic)
             if not plan.get("summary"):
                 plan["summary"] = f"Heuristic learning for {event} on {context.get('ticker', '?')}"
