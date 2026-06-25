@@ -2,8 +2,9 @@
 """
 core/fill_reconciler.py — Non-blocking IB fill reconciliation for P&L + notifications.
 
-Captures position snapshots on exit, resolves real IB execution prices on the main
-loop (no blocking poll storms), then notifies and feeds learning with confirmed fills.
+Captures position snapshots on exit, then each main-loop tick does an instant cache
+lookup (execDetails → FillExecutionCache). No ib.sleep, no throttle, no blocking.
+Trading continues at full speed; notify/learn fire the moment IB confirms a fill.
 """
 
 from __future__ import annotations
@@ -110,7 +111,6 @@ class PendingClose:
     shares: float
     opened_at: float
     started_at: float = field(default_factory=time.time)
-    last_try_at: float = 0.0
     event: str = "trade_closed"
     flatten_trade: Any = None
     bracket: Any = None

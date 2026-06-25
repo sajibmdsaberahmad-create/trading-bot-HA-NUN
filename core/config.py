@@ -603,8 +603,9 @@ class BotConfig:
     INCREMENTAL_TRAIN_EVERY_N_TRADES: int = 3
     INCREMENTAL_TRAIN_MIN_NEW_RECORDS: int = 2
     DYNAMIC_AI_NOTIFICATIONS: bool = True
-    FILL_RECONCILE_MAX_SEC: float = float(os.getenv("FILL_RECONCILE_MAX_SEC", "8"))
-    FILL_RECONCILE_MIN_GAP_SEC: float = float(os.getenv("FILL_RECONCILE_MIN_GAP_SEC", "0.2"))
+    # Async fill tracking only — never blocks entries/exits/scans. IB execDetails → instant
+    # cache lookup each loop tick; fallback quote P&L for notify/learn if IB silent this long.
+    FILL_RECONCILE_FALLBACK_SEC: float = float(os.getenv("FILL_RECONCILE_FALLBACK_SEC", "8"))
     AI_TELEGRAM_NOTIFICATIONS: bool = True   # Ollama crafts Telegram text
     AI_TELEGRAM_ALL_OUTBOUND: bool = os.getenv("TRADING_BOT_AI_TELEGRAM_ALL", "true").lower() in ("1", "true", "yes")
     AI_TELEGRAM_MIN_INTERVAL_SEC: float = 6.0  # Throttle duplicate event types

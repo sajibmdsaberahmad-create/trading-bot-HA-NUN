@@ -1391,19 +1391,15 @@ class ScalperRunner:
         )
 
     def _service_pending_closes(self) -> None:
-        """Resolve IB fills on main loop without blocking — then notify + learn."""
+        """Instant IB cache lookup each tick — zero sleep, zero throttle; notify when fill lands."""
         if not self._pending_closes:
             return
         cache = self._fill_cache()
-        max_age = float(getattr(self.cfg, "FILL_RECONCILE_MAX_SEC", 8.0))
-        min_gap = float(getattr(self.cfg, "FILL_RECONCILE_MIN_GAP_SEC", 0.2))
+        fallback_sec = float(getattr(self.cfg, "FILL_RECONCILE_FALLBACK_SEC", 8.0))
         now = time.time()
 
         for key, pending in list(self._pending_closes.items()):
-            if now - pending.last_try_at < min_gap:
-                continue
-            pending.last_try_at = now
-            force = (now - pending.started_at) >= max_age
+            force = (now - pending.started_at) >= fallback_sec
             trade_rec = build_close_record(pending, self.ib, cache, force=force)
             if trade_rec is None:
                 continue
