@@ -272,5 +272,65 @@
       "Adapting the trading strategy based on recent wins and losses can lead to more consistent performance in future events.",
       "Adjusting parameters such as CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc., may be necessary depending on the specific market conditions."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T12:34:35.416810+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Updating the confidence threshold from 1.2406854740316666 to 0.58 improved signal alignment during council timeouts.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout occurred after the previous trade of WYY, indicating a potential issue with signal alignment.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold should not be set to 1, as it may lead to overconfidence and missed opportunities.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:35:04.636811+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WYY"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:36:38.767242+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The new confidence threshold is lower than the historical average, which may indicate a need to increase it.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council_timeout event occurred during the live trade in BRAG. The scanner spike after timeout caused an unexpected high score and volatility.",
+    "lessons": [
+      "Tighten your risk management strategies",
+      "Analyze for potential trends",
+      "Adjust your parameters"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:39:27.177769+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "The council_timeout event occurred during the pre-market session.",
+    "lessons": []
   }
 ]

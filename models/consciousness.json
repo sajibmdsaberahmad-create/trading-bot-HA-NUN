@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 89,
   "training_sessions": 27,
-  "trades_observed": 25,
+  "trades_observed": 26,
   "scans_performed": 27,
-  "improvements_applied": 110,
+  "improvements_applied": 114,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6775,6 +6775,93 @@
           "Adjusting parameters such as CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc., may be necessary depending on the specific market conditions."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T12:34:35.392174",
+      "age": "4d 1h 31m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #111",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout occurred after the previous trade of WYY, indicating a potential issue with signal alignment.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Updating the confidence threshold from 1.2406854740316666 to 0.58 improved signal alignment during council timeouts.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold should not be set to 1, as it may lead to overconfidence and missed opportunities.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:35:04.607812",
+      "age": "4d 1h 32m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #112",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WYY"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:36:38.738627",
+      "age": "4d 1h 33m 50s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #113",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council_timeout event occurred during the live trade in BRAG. The scanner spike after timeout caused an unexpected high score and volatility.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The new confidence threshold is lower than the historical average, which may indicate a need to increase it.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Tighten your risk management strategies",
+          "Analyze for potential trends",
+          "Adjust your parameters"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:39:27.150354",
+      "age": "4d 1h 36m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #114",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council_timeout event occurred during the pre-market session.",
+        "applied": [],
+        "lessons": []
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:39:41.917797",
+      "age": "4d 1h 36m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: FMFC LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T12:31:01.138131",
@@ -8060,7 +8147,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "confident",
+  "mood": "anxious",
   "total_pnl": -17680.03,
   "win_history": [
     0.0,
@@ -8087,24 +8174,25 @@
     -0.02,
     0.0,
     0,
-    14.2
+    14.2,
+    0
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 10,
-  "veteran_xp": 245,
+  "veteran_xp": 255,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 18,
+    "exit_timing": 19,
     "risk_management": 2,
     "entry_timing": 4
   },
-  "flights_completed": 20,
-  "hours_flown": 2.0000000000000004,
+  "flights_completed": 21,
+  "hours_flown": 2.1000000000000005,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
-    "FMF": 4,
+    "FMF": 5,
     "CCX": 2,
     "TAG": 1,
     "SCA": 1,
@@ -8117,5 +8205,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Just executed a successful trade, feeling confident in my strategy."
+  "mood_message": "I feel a sense of urgency and fear in my decision-making process due to recent losses."
 }
