@@ -4878,3 +4878,140 @@ The algorithm is learning from historical data, but it's missing a specific cond
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increased the confidence threshold for profitable trading, likely due to market conditions or algorithmic limitations.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T18:40:50.705580+00:00
+Loss streak occurred with negative pnl and consecutive losses.
+The event indicates that the trader is hitting a trailing profit, which can lead to a loss in subsequent trades. The key parameters include market state ('open'), win rate ('50%'), and daily loss ('-58131.45')
+• T
+• h
+• e
+•  
+• t
+• r
+• a
+• d
+• e
+• r
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• i
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• l
+• e
+• v
+• e
+• l
+• s
+•  
+• b
+• y
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+• i
+• n
+• g
+•  
+• t
+• h
+• e
+• s
+• e
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+• s
+•  
+• t
+• o
+•  
+• i
+• m
+• p
+• r
+• o
+• v
+• e
+•  
+• t
+• h
+• e
+• i
+• r
+•  
+• a
+• b
+• i
+• l
+• i
+• t
+• y
+•  
+• t
+• o
+•  
+• m
+• a
+• k
+• e
+•  
+• i
+• n
+• f
+• o
+• r
+• m
+• e
+• d
+•  
+• d
+• e
+• c
+• i
+• s
+• i
+• o
+• n
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.7 (Adjusting CONFIDENCE_THRESHOLD to 0.7 improves the probability of profitable trades.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T18:40:54.339199+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+

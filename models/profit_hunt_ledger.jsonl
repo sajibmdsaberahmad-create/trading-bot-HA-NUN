@@ -147,3 +147,5 @@
 {"timestamp":"2026-06-25T17:44:36.766759+00:00","event":"council_exit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"council_exit: Ollama exit 98% (PPO hold)"}
 {"timestamp":"2026-06-25T18:33:19.187849+00:00","event":"trailing_profit","ticker":"PLTR","pnl_usd":-16138.87,"pnl_pct":-0.2493,"primary_goal":true,"reason":"trailing_profit","price":108.46}
 {"timestamp":"2026-06-25T18:33:38.641320+00:00","event":"trailing_profit","ticker":"PLTR","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T18:40:32.136277+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":-58118.38,"pnl_pct":-0.8129,"primary_goal":true,"reason":"trailing_profit","price":5.115}
+{"timestamp":"2026-06-25T18:40:47.407958+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":-58131.45,"source":"buffer","reason":"trailing_profit"}
