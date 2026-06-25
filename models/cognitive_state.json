@@ -1,13 +1,9 @@
 {
   "mood": "steady",
-  "mood_message": "Mixed session \u00b7 $+67027.81. Watching for cleaner setups.",
+  "mood_message": "Mixed session \u00b7 $+65785.36. Watching for cleaner setups.",
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: Why: The trade was set up for trailing profits, which would typically trigger a profit hunt.",
-    "Adjust entry and exit parameters based on new market state.",
-    "No profit hunting without live IB bars.",
-    "z",
     "f",
     "Commander: The trader had a trailing profit, which is common in scalping strategies.",
     "v",
@@ -103,10 +99,14 @@
     "Commander: High scanner score after timeout: score=100 vol=0.8x | ATR R:R 2.0",
     "Review trade_closed on TZA",
     "Commander: council_exit: Ollama exit 96% (PPO hold)",
-    "Large loss detected: GPUS. Review stop placement."
+    "Large loss detected: GPUS. Review stop placement.",
+    "Adjust the exit criteria and avoid unnecessary exits to prevent frequent losses",
+    "Commander: The reason for this loss is that the algorithm has not achieved its target profit by the specified period.",
+    "-",
+    "Commander: The primary goal is to minimize losses by hunting for high-penalty trading opportunities that can be exited early using a stop-loss strategy."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"learning_plan\": {\n    \"trade_suggestions\": [\n      {\n        \"direction\": \"take profit into momentum\",\n        \"target\": [\"GDC\", \"NEXR\"],\n        \"penalties\": {\n          \"hard TP penalty\": 50\n        }\n      },\n      {\n        \"direction\": \"sell INTO moves\",\n        \"target\": \"TZA\",\n        \"trade_suggestion\": \"Buy TZA\"\n      }\n    ]\n  },\n  \"outcome\": \"profit hunting: take profit into momentum (GDC, NEXR) and sell into TZA\",\n  \"learning_logs\":",
   "market_belief": {},
-  "trades_observed": 47,
-  "updated": "2026-06-25T17:00:12.484984"
+  "trades_observed": 50,
+  "updated": "2026-06-25T17:01:00.155318"
 }

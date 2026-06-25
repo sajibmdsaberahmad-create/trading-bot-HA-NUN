@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "Increased confidence in the stop-loss value to reduce the likelihood of losing more than 1% of the position at the exit point.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

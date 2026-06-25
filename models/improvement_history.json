@@ -1,33 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T13:01:13.330355+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "Adjusted from 0.35 to 0.58",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "The council_timeout event occurred during the pre-market session.",
-    "lessons": [
-      "Adjusting threshold parameters may help mitigate the risk associated with frequent scanner timeouts.",
-      "Monitor scanner performance and adjust thresholds accordingly"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T13:01:37.404343+00:00",
-    "source": "runtime_ib_failure",
-    "adjustments": {},
-    "guidelines_summary": "IB closing-only - cannot open new positions",
-    "lessons": [
-      "Inhibit the algorithm's ability to execute trades in an open position system.",
-      "Ensure the algorithm can handle conditions where it cannot enter or exit positions at any given time, such as IB closing-only."
-    ]
-  },
-  {
     "timestamp": "2026-06-25T13:12:12.748190+00:00",
     "source": "runtime_council_timeout",
     "adjustments": {},
@@ -3743,6 +3715,123 @@
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
       "Review trade_closed on TZA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:00:28.803634+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increase the confidence threshold for profit hunting to further reduce the likelihood of frequent loss occurrences.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The event 'loss_streak' occurred in the live trading system with a negative pnl_USD of -850.17.",
+    "lessons": [
+      "Adjust the exit criteria and avoid unnecessary exits to prevent frequent losses"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:00:31.551134+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased confidence in the stop-loss value to reduce the likelihood of losing more than 1% of the position at the exit point.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade closed with a trailing profit of -850.17 USD, resulting in a loss exit.",
+    "lessons": [
+      "T",
+      "h",
+      "e",
+      "t",
+      "r",
+      "a",
+      "d",
+      "e",
+      "r",
+      "s",
+      "h",
+      "o",
+      "u",
+      "l",
+      "d",
+      "p",
+      "r",
+      "i",
+      "o",
+      "r",
+      "i",
+      "t",
+      "i",
+      "z",
+      "e",
+      "o",
+      "p",
+      "p",
+      "o",
+      "r",
+      "t",
+      "u",
+      "n",
+      "i",
+      "s",
+      "t",
+      "i",
+      "c",
+      "e",
+      "x",
+      "i",
+      "t",
+      "s",
+      "a",
+      "n",
+      "d",
+      "a",
+      "n",
+      "a",
+      "l",
+      "y",
+      "z",
+      "e",
+      "t",
+      "h",
+      "e",
+      "r",
+      "i",
+      "s",
+      "k",
+      "-",
+      "r",
+      "e",
+      "w",
+      "a",
+      "r",
+      "d",
+      "r",
+      "a",
+      "t",
+      "i",
+      "o",
+      "o",
+      "f",
+      "e",
+      "a",
+      "c",
+      "h",
+      "t",
+      "r",
+      "a",
+      "d",
+      "e",
+      "."
     ]
   }
 ]

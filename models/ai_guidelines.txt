@@ -3254,3 +3254,120 @@ High scanner score after timeout: score=100 vol=0.8x | ATR R:R 2.0
 Observed trade_closed — recorded for learning.
 council_exit: Ollama exit 96% (PPO hold)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:00:28.803181+00:00
+The event 'loss_streak' occurred in the live trading system with a negative pnl_USD of -850.17.
+The reason for this loss is that the algorithm has not achieved its target profit by the specified period.
+• ...
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold for profit hunting to further reduce the likelihood of frequent loss occurrences.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:00:31.550707+00:00
+The trade closed with a trailing profit of -850.17 USD, resulting in a loss exit.
+The primary goal is to minimize losses by hunting for high-penalty trading opportunities that can be exited early using a stop-loss strategy.
+• T
+• o
+•  
+• a
+• v
+• o
+• i
+• d
+•  
+• r
+• e
+• p
+• e
+• a
+• t
+• i
+• n
+• g
+•  
+• t
+• h
+• i
+• s
+•  
+• e
+• v
+• e
+• n
+• t
+• ,
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+• s
+•  
+• s
+• u
+• c
+• h
+•  
+• a
+• s
+•  
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+•  
+• a
+• n
+• d
+•  
+• E
+• X
+• I
+• T
+•  
+• S
+• L
+• I
+• P
+• P
+• A
+• G
+• E
+•  
+• P
+• E
+• R
+• C
+• E
+• N
+• T
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in the stop-loss value to reduce the likelihood of losing more than 1% of the position at the exit point.)
+
