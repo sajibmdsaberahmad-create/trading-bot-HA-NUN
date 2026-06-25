@@ -2567,5 +2567,22 @@
       "t",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T15:04:36.097327+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Adjusted from 0.50 to 0.58",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout event occurred, no aligned signal.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of the algorithm is too low, leading to missed profit hunting events.'}"
+    ]
   }
 ]

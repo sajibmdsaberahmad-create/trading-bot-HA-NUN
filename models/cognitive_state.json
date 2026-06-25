@@ -4,8 +4,6 @@
   "confidence": 0.53,
   "mode": "autonomous",
   "learned_lessons": [
-    "z",
-    "f",
     "k",
     "Commander: The council timeout indicates that the scan or scanner was not successful during a specified period of time. It suggests a potential issue with data processing or scanning methods.",
     "No clean data on MINBY (no_md_permission) \u2014 profit hunt elsewhere.",
@@ -103,10 +101,12 @@
     "5",
     "8",
     ")",
-    "Commander: The algorithm detected an issue with the stagnation timeout during the trade closure."
+    "Commander: The algorithm detected an issue with the stagnation timeout during the trade closure.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of the algorithm is too low, leading to missed profit hunting events.'}",
+    "Commander: The council timeout indicates an alignment issue with the algorithm's signals."
   ],
   "last_thought": "```json\n{\n  \"prompt\": \"Write a trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"WAVE\\\", \\\"entry\\\": 9.37, \\\"exit\\\": 9.185, \\\"shares\\\": 2.0, \\\"pnl_usd\\\": -0.37, \\\"pnl_pct\\\": -1.97, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"stop_breach\\\"}\",\n  \"entry\": {\n    \"ticker\": \"WAVE\",\n    \"position\": 2,\n    \"entries\": [\n      { \"action\": \"buy\", \"volume\": 0.5 },\n      { \"action\": \"sell\" }\n    ],\n    \"profit\": -0.37,\n    \"percentage_profit\": -1.97,\n    \"result\": \"loss\",\n    \"exit_reason\": \"stop_breach\"\n  }",
   "market_belief": {},
-  "trades_observed": 8,
-  "updated": "2026-06-25T14:57:08.128030"
+  "trades_observed": 0,
+  "updated": "2026-06-25T15:04:36.063519"
 }

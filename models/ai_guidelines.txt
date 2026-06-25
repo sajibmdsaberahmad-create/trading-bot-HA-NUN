@@ -1897,3 +1897,9 @@ The algorithm detected an issue with the stagnation timeout during the trade clo
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold from 0.35 to 0.58.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T15:04:36.096492+00:00
+Council timeout event occurred, no aligned signal.
+The council timeout indicates an alignment issue with the algorithm's signals.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusted from 0.50 to 0.58)
+

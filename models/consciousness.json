@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 31,
   "scans_performed": 27,
-  "improvements_applied": 171,
+  "improvements_applied": 172,
   "reports_generated": 26,
   "event_log": [
     {
@@ -9487,6 +9487,28 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #99",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:04:36.066347",
+      "age": "4d 4h 1m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #172",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout event occurred, no aligned signal.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusted from 0.50 to 0.58",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of the algorithm is too low, leading to missed profit hunting events.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T15:02:24.119498",
