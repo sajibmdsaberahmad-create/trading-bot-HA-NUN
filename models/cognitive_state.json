@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "k",
-    "e",
-    ",",
     "v",
     "f",
     "Commander: The event occurred due to trailing profit, which was not aligned with the algorithmic strategy. The trader should focus on identifying potential risks and taking appropriate measures.",
@@ -103,10 +100,13 @@
     "Prioritize opportunistic exits when dealing with unexpected events like this.",
     "Commander: The event 'loss_streak' triggered a trade hunt, which was interrupted by a market data failure. This indicates that the algorithm's performance has been compromised due to an error in live trading data.",
     "Commander: The event occurred because the trader's position in TZA was halted by an Ollama exit. Profit hunting should be performed to close the position early.",
-    "Large loss detected: NEXR. Review stop placement."
+    "Large loss detected: NEXR. Review stop placement.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold for exit signals needs to be adjusted.'}",
+    "Commander: The primary reason is that the algorithm was trailing profits during this period.",
+    "Commander: trailing_profit"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.85,\n  \"trade_decisions\": [\n    {\n      \"name\": \"TZA\",\n      \"action\": \"hunting\",\n      \"reason\": \"profit hunting is the main goal.\",\n      \"events\": [\n        { \"ticker\": \"TZA\", \"price\": 0.0, \"score\": 97.6, \"reason\": \"scanner:MOST_ACTIVE#2\" },\n        { \"ticker\": \"NEXR\", \"price\": 0.0, \"score\": 0.0, \"reason\": \"no trade results\" }\n      ]\n    },\n    {\n      \"name\": \"GDC\",\n      \"action\": \"hunting\",\n      \"reason\": \"profit hunting is the main goal.\",\n    ",
   "market_belief": {},
-  "trades_observed": 33,
-  "updated": "2026-06-25T17:38:46.320373"
+  "trades_observed": 35,
+  "updated": "2026-06-25T17:39:11.112927"
 }

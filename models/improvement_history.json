@@ -971,5 +971,31 @@
     },
     "guidelines_summary": "The trade closed with a council exit of Ollama at 100% (PPO hold). The trader's exit type is stop hit.",
     "lessons": []
+  },
+  {
+    "timestamp": "2026-06-25T17:39:02.390696+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Adjusted the confidence threshold from 0.6 to 0.58 for better exit signal detection.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The loss streak NEXR occurred, triggered by trailing_profit.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold for exit signals needs to be adjusted.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:39:05.607037+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on NEXR"
+    ]
   }
 ]

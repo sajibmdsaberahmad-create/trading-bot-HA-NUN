@@ -4292,3 +4292,13 @@ The event occurred because the trader's position in TZA was halted by an Ollama 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The value of CONFIDENCE_THRESHOLD is increased from 0.35 to 0.58, indicating a higher confidence level in the event.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:39:02.389580+00:00
+The loss streak NEXR occurred, triggered by trailing_profit.
+The primary reason is that the algorithm was trailing profits during this period.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusted the confidence threshold from 0.6 to 0.58 for better exit signal detection.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:39:05.606778+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+

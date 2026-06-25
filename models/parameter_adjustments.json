@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "The value of CONFIDENCE_THRESHOLD is increased from 0.35 to 0.58, indicating a higher confidence level in the event.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}
