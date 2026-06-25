@@ -1,11 +1,11 @@
 {
-  "total_xp": 2830,
+  "total_xp": 2900,
   "level": "Ace",
-  "flights_completed": 57,
-  "flights_flown": 257,
-  "takeoffs": 257,
-  "landings": 57,
-  "hours_flown": 5.699999999999996,
+  "flights_completed": 58,
+  "flights_flown": 258,
+  "takeoffs": 258,
+  "landings": 58,
+  "hours_flown": 5.799999999999995,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -35,7 +35,7 @@
     "QS": 1,
     "RIO": 8,
     "SOF": 2,
-    "AST": 1,
+    "AST": 2,
     "RKL": 1
   },
   "aircraft_type": "PPO-Transformer-LSTM",
@@ -43,10 +43,10 @@
   "certifications": {},
   "skill_points": {
     "entry_timing": 8,
-    "exit_timing": 49,
+    "exit_timing": 50,
     "risk_management": 9,
     "regime_recognition": 0,
-    "pattern_recognition": 78,
+    "pattern_recognition": 80,
     "confidence_judgment": 0
   }
 }

@@ -4,10 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The event is a loss streak triggered by a council exit at an Ollama price of 95% (PPO hold).",
-    "1",
-    "A",
-    "e",
     "t",
     "r",
     "f",
@@ -103,10 +99,14 @@
     "w",
     "Commander: We need to analyze the specific parameters and events leading up to this event",
     "Review trade_closed on ASTS",
-    "Commander: council_risk: hard_stop"
+    "Commander: council_risk: hard_stop",
+    "Learn from every outcome.",
+    "Analyze + GUT FEEL + EXPERIENCE",
+    "Commander: The event occurred during the open session with a trailing stop and an exit type of stop hit.",
+    "Commander: bracket_exit"
   ],
-  "last_thought": "```json\n{\n    \"trade_id\": \"1\",\n    \"entry\": 27.58,\n    \"exit\": 27.58,\n    \"entry_fill\": 27.58,\n    \"exit_fill\": 27.58,\n    \"quote_entry\": 27.58,\n    \"quote_exit\": 27.595,\n    \"shares\": 152,\n    \"pnl_usd\": 0,\n    \"pnl_pct\": 0,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_stop\",\n    \"entry_slippage_pct\": 0,\n    \"exit_slippage_pct\": -0.000544,\n    \"limit_px\": null\n}\n```",
+  "last_thought": "```json\n{\n  \"entry\": 107.0912,\n  \"exit\": 107.36,\n  \"quote_entry\": 107.0912,\n  \"quote_exit\": 107.36,\n  \"shares\": 468.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"Loss\",\n  \"exit_reason\": \"Bracket Exit\",\n  \"entry_slippage_pct\": null,\n  \"exit_slippage_pct\": -0.02503,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 96.2,\n  \"peak\": 107.36,\n  \"stop\": 107.2391,\n  \"target\": 107.9467,\n  \"fill_confirmed\": true\n}\n```",
   "market_belief": {},
-  "trades_observed": 37,
-  "updated": "2026-06-25T19:53:07.788606"
+  "trades_observed": 40,
+  "updated": "2026-06-25T19:53:38.700178"
 }

@@ -3246,5 +3246,32 @@
     "lessons": [
       "Review trade_closed on ASTS"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:53:17.890575+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The event occurred during the open session with a trailing stop and an exit type of stop hit, indicating that the confidence threshold is lower than usual.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Event: trade_closed - RIOT",
+    "lessons": [
+      "Learn from every outcome.",
+      "Analyze + GUT FEEL + EXPERIENCE"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:53:38.748209+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on PLTR"
+    ]
   }
 ]
