@@ -4151,3 +4151,106 @@ The reason for the profit is not provided in this event detail.
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Market data was unreliable, leading to a low confidence threshold of 0.58.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:35:07.366330+00:00
+The trade closed in the event of a stop breach, resulting in a profit hunt that did not happen.
+Stop breaches are common and should be avoided if possible. The stop-hunt strategy is based on minimizing losses by making trades before reaching the stop loss level.
+• I
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• t
+• h
+• e
+•  
+• s
+• t
+• o
+• p
+• -
+• h
+• u
+• n
+• t
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• t
+• o
+•  
+• 0
+• .
+• 5
+• 8
+• ,
+•  
+• w
+• h
+• i
+• c
+• h
+•  
+• w
+• i
+• l
+• l
+•  
+• i
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• t
+• h
+• e
+•  
+• l
+• i
+• k
+• e
+• l
+• i
+• h
+• o
+• o
+• d
+•  
+• o
+• f
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+• a
+• b
+• l
+• e
+•  
+• s
+• t
+• o
+• p
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The algorithm's confidence threshold is set too low. This can lead to missed profit hunts.)
+

@@ -4,10 +4,6 @@
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The reason for this loss is that the algorithm has not achieved its target profit by the specified period.",
-    "-",
-    "Commander: The primary goal is to minimize losses by hunting for high-penalty trading opportunities that can be exited early using a stop-loss strategy.",
-    "Commander: The trade closed successfully and was in a trailing profit mode. However, it does not indicate that this was an opportunistic exit or a missed profit hunting.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 indicates that we should be cautious and avoid taking profits when the market is close to a breakout.'}",
     "Commander: We analyzed the trading event and found that the algorithm is profitable, but it has not performed well in recent sessions due to missed opportunities.",
     "Review trade_closed on GPUS",
@@ -103,10 +99,14 @@
     "Commander: The closing trades were made based on real-time events and live IB bars.",
     "'",
     "b",
-    "Commander: The reason for the profit is not provided in this event detail."
+    "Commander: The reason for the profit is not provided in this event detail.",
+    "1",
+    "S",
+    "-",
+    "Commander: Stop breaches are common and should be avoided if possible. The stop-hunt strategy is based on minimizing losses by making trades before reaching the stop loss level."
   ],
-  "last_thought": "```json\n{\n  \"entry\": 0.0132,\n  \"exit\": 0.0132,\n  \"entry_fill\": 0.0132,\n  \"exit_fill\": 0.0132,\n  \"quote_entry\": 0.0132,\n  \"quote_exit\": 0.1799,\n  \"shares\": 600.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"profit\",\n  \"entry_slippage_pct\": -0.926951,\n  \"exit_slippage_pct\": -0.926646,\n  \"limit_px\": 0.1807,\n  \"entry_mode\": \"limit_penny\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 203.5,\n  \"peak\": 3.61,\n  \"stop\": 3.5935,\n  \"target\": 4.8554\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.5,\n  \"actions\": [\n    {\n      \"trade_type\": \"take_profit\",\n      \"action\": \"sell into momentum\",\n      \"event\": {\n        \"ticker\": \"GDC\",\n        \"price\": 0.0,\n        \"reason\": \"scanner:MOST_ACTIVE#1\"\n      }\n    },\n    {\n      \"trade_type\": \"close trade\",\n      \"action\": \"sell into momentum\",\n      \"event\": {\n        \"ticker\": \"SOXS\",\n        \"price\": 0.0,\n        \"reason\": \"scanner:MOST_ACTIVE#2\"\n      }\n    },\n    {\n      \"trade_type\": \"take_profi",
   "market_belief": {},
   "trades_observed": 22,
-  "updated": "2026-06-25T17:35:00.999694"
+  "updated": "2026-06-25T17:35:07.343698"
 }
