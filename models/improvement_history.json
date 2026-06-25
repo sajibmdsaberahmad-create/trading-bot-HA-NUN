@@ -1372,5 +1372,119 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold will help in balancing the risk premium and reward.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T07:57:32.219451+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.88,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout occurred during the live trade, which is a known issue in the trading algo.",
+    "lessons": [
+      "The algo should be adjusted for the given parameters.",
+      "Monitor the trade performance closely during these times to prevent similar issues in the future."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T07:58:28.979206+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.86,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout occurred due to no aligned signal and the pipeline is 'council:timeout_pass'. The algo should adjust the confidence level from 0.9 to 1.0.",
+    "lessons": [
+      "A",
+      "n",
+      "a",
+      "l",
+      "y",
+      "z",
+      "e",
+      "t",
+      "h",
+      "e",
+      "r",
+      "e",
+      "c",
+      "e",
+      "n",
+      "t",
+      "c",
+      "o",
+      "u",
+      "n",
+      "c",
+      "i",
+      "l",
+      "t",
+      "i",
+      "m",
+      "e",
+      "o",
+      "u",
+      "t",
+      "o",
+      "c",
+      "c",
+      "u",
+      "r",
+      "r",
+      "e",
+      "n",
+      "c",
+      "e",
+      "t",
+      "o",
+      "u",
+      "n",
+      "d",
+      "e",
+      "r",
+      "s",
+      "t",
+      "a",
+      "n",
+      "d",
+      "r",
+      "o",
+      "o",
+      "t",
+      "c",
+      "a",
+      "u",
+      "s",
+      "e",
+      "s",
+      "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T07:59:54.271038+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.84,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on XPEG"
+    ]
   }
 ]
