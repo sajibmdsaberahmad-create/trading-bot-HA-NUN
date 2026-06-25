@@ -282,7 +282,7 @@ class IBConnector:
         BENIGN = {2104, 2106, 2107, 2108, 2109, 2119, 2158}
         self.touch()
         # Order lifecycle codes — stored on reqId, not worth WARNING spam
-        QUIET_ORDER = {201, 202, 399, 10148}
+        QUIET_ORDER = {201, 202, 399, 10147, 10148}
         self.touch()
         if errorCode in (2161, 399, 201, 202):
             from core.broker import parse_ib_regulatory_cap

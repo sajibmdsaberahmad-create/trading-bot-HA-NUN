@@ -2092,9 +2092,11 @@ class ScalperRunner:
             while True:
                 if getattr(self, "_needs_initial_scan", False):
                     self._needs_initial_scan = False
+                    self.ib.sleep(0.2)  # drain IB event queue before scanner
                     log.info("🔍 Running initial live IB scanner (may take 10–30s)…")
                     try:
                         self._scan_and_rank()
+                        log.info("✅ Initial scan complete — entering trading loop")
                     except Exception as exc:
                         log.error(f"Initial scan failed: {exc}")
                     self._last_scan_time = time.time()

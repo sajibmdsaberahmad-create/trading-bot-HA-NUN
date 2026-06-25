@@ -206,6 +206,8 @@ class StockScanner:
                     f"(budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s)…"
                 )
 
+                per_code_cap = float(getattr(self.cfg, "IB_SCANNER_PER_CODE_SEC", 12))
+
                 for location_code in location_codes:
                     if tickers:
                         break
@@ -225,20 +227,21 @@ class StockScanner:
                             instrument='STK',
                             locationCode=location_code,
                             scanCode=scan_code,
+                            numberOfRows=50,
                         )
                         try:
-                            log.debug(f"  scanner req {scan_code} @ {location_code}")
-                            scan_results = ib.reqScannerData(scan, 0, '')
+                            remaining = max(4.0, deadline - time.time())
+                            code_budget = min(per_code_cap, remaining)
+                            log.info(
+                                f"  scanner req {scan_code} @ {location_code} "
+                                f"(budget {code_budget:.0f}s)…"
+                            )
+                            scan_results = _req_scanner_with_timeout(ib, scan, code_budget)
                         except Exception as exc:
                             if '162' in str(exc) or 'disabled' in str(exc).lower():
                                 disabled_codes.add(scan_code)
                                 log.debug(f"Scanner {scan_code} unavailable — skipping")
                             continue
-                        finally:
-                            try:
-                                ib.cancelScannerSubscription(scan)
-                            except Exception:
-                                pass
                         for idx, result in enumerate(scan_results):
                             if not result.contractDetails or not result.contractDetails.contract:
                                 continue

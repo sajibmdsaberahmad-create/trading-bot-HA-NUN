@@ -58,8 +58,9 @@ def get_live_scan_universe(
         if tickers:
             break
         if attempt < retries - 1:
-            log.info("IB scanner empty — retrying live fetch in 3s...")
-            time.sleep(3)
+            wait = float(getattr(cfg, "IB_SCANNER_RETRY_WAIT_SEC", 1.0))
+            log.info(f"IB scanner empty — retry {attempt + 2}/{retries} in {wait:.0f}s…")
+            time.sleep(wait)
 
     seen = set()
     out = []
