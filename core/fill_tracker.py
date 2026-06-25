@@ -47,9 +47,11 @@ def poll_trade_fill(
     max_wait: float = 2.0,
     poll_interval: float = 0.15,
 ) -> Tuple[float, float]:
-    """Wait for IB order fill; return (avg_fill_px, filled_qty)."""
+    """Wait for IB order fill; return (avg_fill_px, filled_qty). max_wait=0 → instant read only."""
     if trade is None:
         return float(fallback_px or 0), 0.0
+    if max_wait <= 0:
+        return read_order_fill_instant(trade, fallback_px)
     deadline = time.time() + max_wait
     last_px = float(fallback_px or 0)
     last_qty = 0.0
