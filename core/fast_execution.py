@@ -3,7 +3,7 @@
 core/fast_execution.py — AI-prioritized fast spike execution.
 
 When AI_FAST_EXECUTION is on, the bot warms/streams top names first,
-uses fewer bars on the focus ticker, and enters on strong spikes without
+uses fewer bars on ALL priority tickers, and enters on strong spikes without
 waiting for slow Ollama council deliberation.
 """
 
@@ -31,13 +31,28 @@ def warm_priority_count(cfg: BotConfig) -> int:
     return int(getattr(cfg, "AI_WARM_PRIORITY_COUNT", 10))
 
 
-def min_bars_for_ticker(cfg: BotConfig, ticker: str, focus: Optional[str] = None) -> int:
-    """Focus ticker + tick stream needs fewer bars; others need more."""
+def min_bars_for_ticker(
+    cfg: BotConfig,
+    ticker: str,
+    focus: Optional[str] = None,
+    priority_names: Optional[List[str]] = None,
+) -> int:
+    """Priority tickers need fewer bars; others need more."""
     if not ai_fast_execution(cfg):
         return 20
-    if focus and ticker.upper() == focus.upper():
+    names = {n.upper() for n in (priority_names or [])}
+    if focus:
+        names.add(focus.upper())
+    if names and ticker.upper() in names:
         return int(getattr(cfg, "AI_MIN_BARS_FOCUS", 6))
     return int(getattr(cfg, "AI_MIN_BARS_SCAN", 10))
+
+
+def focus_rotation_enabled(cfg: BotConfig) -> bool:
+    """Single-ticker rotation is OFF during fast execution — all priority names watched."""
+    if ai_fast_execution(cfg):
+        return False
+    return float(getattr(cfg, "LOCK_FOCUS_ROTATE_SEC", 0)) > 0
 
 
 def council_fast_sec(cfg: BotConfig) -> float:
