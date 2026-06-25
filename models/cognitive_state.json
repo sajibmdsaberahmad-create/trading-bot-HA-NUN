@@ -1,10 +1,9 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $-10651.54. Preserving capital over action.",
+  "mood": "concerned",
+  "mood_message": "I need to maintain a positive outlook for the upcoming session.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Spike-top hunt on TZA: spike_top_exit: +0.52% vol=1.6x",
     "Profit hunt worked on TZA: spike_top_exit: +0.52% vol=1.6x \u2014 reinforce opportunistic exits.",
     "Review trade_closed on BITO",
     "Commander: spike_top_exit: +0.52% vol=1.6x",
@@ -103,10 +102,11 @@
     "No clean data on LLOY (no_contract) \u2014 profit hunt elsewhere.",
     "Refine your understanding and parameters to better adapt to changing market conditions.",
     "Adaptively adjust your trade strategy based on ongoing market events.",
-    "Commander: Reason: Market data failure indicates that the current market conditions do not have a defined security definition, which limits the use of this algorithm. The event suggests an update in the technical analysis framework or an unexpected ch"
+    "Commander: Reason: Market data failure indicates that the current market conditions do not have a defined security definition, which limits the use of this algorithm. The event suggests an update in the technical analysis framework or an unexpected ch",
+    "Commander: The algorithm is learning from historical data, but it's missing a specific condition that triggers profit hunting. The current conditions are:"
   ],
-  "last_thought": "```json\n{\n  \"hunt_limit\": {\n    \"max_loss\": \"30%\",\n    \"trade_count\": 5,\n    \"penalties\": [\n      {\n        \"type\": \"buffer_penalty\",\n        \"reason\": \"Missed spike-top exits = training failures\"\n      }\n    ]\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.97,\n  \"reasoning\": {\n    \"trade_decisions\": [\n      {\"event\": \"scanner:live#1\", \"score\": 89.8, \"reason\": \"scan results: SOFI and PLTR\"},\n      {\"event\": \"scanner:live#2\", \"score\": 87.6, \"reason\": \"scan result: MARA\"}\n    ],\n    \"penalties\": [\n      {\n        \"event\": \"scanner:live#1\",\n        \"result\": \"profit\",\n        \"loss_factor\": 0.95,\n        \"trade_value\": 89.8\n      },\n      {\n        \"event\": \"scanner:live#2\",\n        \"result\": \"profit\",\n     ",
   "market_belief": {},
-  "trades_observed": 0,
-  "updated": "2026-06-25T18:19:54.829895"
+  "trades_observed": 2,
+  "updated": "2026-06-25T18:33:41.769131"
 }

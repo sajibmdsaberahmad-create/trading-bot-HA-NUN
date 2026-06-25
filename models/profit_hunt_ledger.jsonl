@@ -146,3 +146,4 @@
 {"timestamp":"2026-06-25T17:43:28.550596+00:00","event":"council_exit","ticker":"BITO","pnl_usd":-94.65,"source":"buffer","reason":"council_exit: Ollama exit 95% (PPO hold)"}
 {"timestamp":"2026-06-25T17:44:36.766759+00:00","event":"council_exit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"council_exit: Ollama exit 98% (PPO hold)"}
 {"timestamp":"2026-06-25T18:33:19.187849+00:00","event":"trailing_profit","ticker":"PLTR","pnl_usd":-16138.87,"pnl_pct":-0.2493,"primary_goal":true,"reason":"trailing_profit","price":108.46}
+{"timestamp":"2026-06-25T18:33:38.641320+00:00","event":"trailing_profit","ticker":"PLTR","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
