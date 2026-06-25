@@ -61,6 +61,10 @@ class AIRuntimeObserver:
             self._last_ts[key] = now
             self._stats["events"] += 1
 
+        ticker = str(context.get("ticker", "") or "")
+        detail = str(context.get("reason", "") or context.get("pipeline", ""))[:80]
+        log.info(f"👁 RUNTIME observe {event}" + (f" {ticker}" if ticker else "") + f": {detail}")
+
         self._append_insight(event, context)
         self._record_experience(event, context)
 
@@ -141,8 +145,12 @@ class AIRuntimeObserver:
             ctx["market_state"] = get_market_state(self.cfg)
 
             plan = generate_runtime_event_plan(self.cfg, ctx, self._think)
-            if not plan or not plan.get("summary"):
-                return
+            plan = plan or {}
+            heuristic = self._heuristic_mutations(event, context)
+            if heuristic:
+                plan.setdefault("mutations", []).extend(heuristic)
+            if not plan.get("summary"):
+                plan["summary"] = f"Heuristic learning for {event} on {context.get('ticker', '?')}"
 
             with _lock:
                 self._stats["reasoned"] += 1
@@ -151,6 +159,8 @@ class AIRuntimeObserver:
                 f"🧠 RUNTIME [{event}] {context.get('ticker', '')}: "
                 f"{(plan.get('summary') or '')[:120]}"
             )
+
+            self._apply_runtime_heuristics(event, context)
 
             if not getattr(self.cfg, "AI_RUNTIME_AUTO_APPLY", True):
                 return
@@ -170,6 +180,59 @@ class AIRuntimeObserver:
                 log.info(f"🧬 RUNTIME applied {n} fix(es) after {event}")
         except Exception as exc:
             log.debug(f"Runtime observer {event}: {exc}")
+
+    def _heuristic_mutations(self, event: str, context: Dict[str, Any]) -> list:
+        """Rule-based mutations when Ollama is busy or returns empty."""
+        muts: list = []
+        pipe = str(context.get("pipeline", ""))
+        if event == "council_timeout" or "timeout" in pipe:
+            wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 6.0))
+            muts.append({
+                "param": "ENTRY_OLLAMA_WAIT_SEC",
+                "value": min(18.0, wait + 2.0),
+                "reason": "Council timed out — extend Ollama wait",
+            })
+            if float(context.get("scan_score", 0) or 0) >= 75:
+                muts.append({
+                    "param": "CONFIDENCE_THRESHOLD",
+                    "value": max(
+                        0.45,
+                        float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55)) - 0.02,
+                    ),
+                    "reason": "Scanner timeout entries — slightly lower bar while council catches up",
+                })
+        if context.get("ib_code") == 2161:
+            penny_cap = float(getattr(self.cfg, "PENNY_MAX_DEPLOY_USD", 350.0))
+            muts.append({
+                "param": "PENNY_MAX_DEPLOY_USD",
+                "value": max(150.0, penny_cap * 0.85),
+                "reason": "IB 2161 regulatory cap — reduce penny deploy",
+            })
+            muts.append({
+                "param": "PENNY_LIMIT_BUFFER_PCT",
+                "value": min(
+                    0.015,
+                    float(getattr(self.cfg, "PENNY_LIMIT_BUFFER_PCT", 0.005)) + 0.001,
+                ),
+                "reason": "IB 2161 — tighter limit buffer toward reference price",
+            })
+        return muts[:3]
+
+    def _apply_runtime_heuristics(self, event: str, context: Dict[str, Any]) -> None:
+        """Direct cfg tweaks for params outside learning bounds."""
+        applied: list = []
+        pipe = str(context.get("pipeline", ""))
+        if event == "council_timeout" or "timeout" in pipe:
+            old_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 6.0))
+            new_wait = min(18.0, old_wait + 2.0)
+            if new_wait > old_wait:
+                self.cfg.AI_COUNCIL_MAX_WAIT_SEC = new_wait
+                applied.append(f"AI_COUNCIL_MAX_WAIT_SEC {old_wait:.0f}→{new_wait:.0f}s")
+            if getattr(self.cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False):
+                self.cfg.LIVE_CHART_VISION_OPPORTUNISTIC = False
+                applied.append("LIVE_CHART_VISION_OPPORTUNISTIC off (vision starves council)")
+        if applied:
+            log.info(f"🧬 RUNTIME heuristic: {', '.join(applied)}")
 
     @staticmethod
     def _format_trigger(event: str, context: Dict[str, Any]) -> str:

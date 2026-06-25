@@ -3797,6 +3797,17 @@ class ScalperRunner:
             return
         self._ai_councils.pop(key, None)
         pipeline = str(ai_dec.get("pipeline", ""))
+        if "timeout" in pipeline:
+            self._observe_runtime(
+                "council_timeout",
+                ticker=ticker,
+                pipeline=pipeline,
+                reason=(ai_dec.get("reason") or "")[:200],
+                spike_ratio=float(st.get("spike_ratio", 0) or 0),
+                scan_score=float(st.get("scan_score", 0) or 0),
+                confidence=float(ai_dec.get("confidence", 0) or 0),
+                market_state=get_market_state(self.cfg),
+            )
         if not ai_dec.get("enter"):
             log.info(
                 f"  🧠 COUNCIL skip {ticker}: {(ai_dec.get('reason') or '')[:80]} | {pipeline}"
@@ -3950,6 +3961,65 @@ class ScalperRunner:
             if new_tp > self._position_target + 0.0001:
                 mech_target = new_tp
         return mech_stop, mech_target
+
+    def _reanchor_bracket_to_limit(
+        self,
+        plan: TradePlan,
+        ai_dec: Dict[str, Any],
+        limit_px: Optional[float],
+        df_fast: pd.DataFrame,
+        shares: int,
+        current_px: float,
+    ) -> Tuple[TradePlan, Dict[str, Any]]:
+        """Recompute stop/TP from limit entry — avoids inverted brackets on wide spreads."""
+        if limit_px is None or float(limit_px) <= 0:
+            return plan, ai_dec
+        anchor = float(limit_px)
+        if abs(anchor - current_px) / max(current_px, 1e-9) < 0.001:
+            return plan, ai_dec
+        from core.bracket_validator import compute_atr_bracket
+        from core.pilot_mode import get_ai_deploy_budget
+
+        atr = float(plan.atr_at_entry or compute_atr(df_fast, period=5))
+        deploy = get_ai_deploy_budget(
+            self.cfg,
+            self.pilot,
+            float(self.account_equity),
+            float(self.bot_cash),
+            int(self._open_position_count()),
+        )
+        reb = compute_atr_bracket(
+            self.cfg,
+            anchor,
+            atr,
+            equity=float(self.account_equity),
+            cash=float(self.bot_cash),
+            deploy_cap=deploy,
+            shares_hint=shares,
+            is_penny=anchor < float(getattr(self.cfg, "PENNY_STOCK_THRESHOLD", 5.0)),
+            avg_vol=float(df_fast["volume"].tail(20).mean()) if len(df_fast) else 0.0,
+        )
+        if not reb.ok:
+            return plan, ai_dec
+        ai_dec = dict(ai_dec)
+        ai_dec["stop"] = reb.stop
+        ai_dec["target"] = reb.target
+        ai_dec["shares"] = reb.shares
+        ai_dec["risk_usd"] = reb.risk_usd
+        plan = TradePlan(
+            side="LONG",
+            entry_price=anchor,
+            shares=float(reb.shares),
+            initial_stop_price=reb.stop,
+            take_profit_price=reb.target,
+            risk_usd=reb.risk_usd,
+            atr_at_entry=atr,
+        )
+        log.debug(
+            f"  📐 Bracket re-anchored to limit ${anchor:.4f}: "
+            f"stop ${reb.stop:.4f} target ${reb.target:.4f}"
+        )
+        return plan, ai_dec
 
     def _submit_ai_entry(
         self,
@@ -4298,6 +4368,18 @@ class ScalperRunner:
                             getattr(self.cfg, "SPIKE_SKIP_SEC", 30.0)
                         )
                     return "waiting"
+                pipeline = str(ai_dec.get("pipeline", ""))
+                if "timeout" in pipeline:
+                    self._observe_runtime(
+                        "council_timeout",
+                        ticker=ticker,
+                        pipeline=pipeline,
+                        reason=(ai_dec.get("reason") or "")[:200],
+                        spike_ratio=spike_ratio,
+                        scan_score=scan_score,
+                        confidence=float(ai_dec.get("confidence", 0) or 0),
+                        market_state=get_market_state(self.cfg),
+                    )
                 self._last_ai_confidence = float(ai_dec.get("confidence", 0.5))
                 return self._submit_ai_entry(ticker, df_fast, ai_dec, market_ctx, current_px)
             else:

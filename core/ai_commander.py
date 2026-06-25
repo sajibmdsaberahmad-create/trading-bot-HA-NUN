@@ -333,8 +333,6 @@ class AICommander:
         mood, conf, lessons = self._mood_context()
         full = enrich_prompt("entry_decision", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons)
         self._live_line.ring(ticker, "entry_decision", full, fp)
-        if df is not None:
-            self.prefetch_chart_vision(ticker, df, current_px, spike_ratio, scan_score)
 
     def think_json(self, prompt: str, cache_key: str = "", ttl: float = 2.0,
                    task: str = "decide") -> Dict[str, Any]:
@@ -580,7 +578,11 @@ class AICommander:
         )
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
-        if df is not None and len(df) >= 20:
+        if (
+            df is not None
+            and len(df) >= 20
+            and getattr(self.cfg, "CHART_VISION_ENTRY_ONLY", True)
+        ):
             self.prefetch_chart_vision(ticker, df, current_px, spike_ratio, scan_score)
         chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
         pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
