@@ -2989,3 +2989,13 @@ The algorithm exits at an Ollama exit (97% PPO hold), which means the trader is 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.6 (To prevent the algorithm exiting at high risk positions.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:55:58.735069+00:00
+Trade closed with a negative pnl, triggered by trailing stop and low volume.
+- Trailing stop is a common strategy for closing trades when price is near the previous close. - Low volume trading often correlates with profit opportunities.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased value of CONFIDENCE_THRESHOLD from 0.35 to 0.58, indicating a more cautious approach.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:56:01.458165+00:00
+Loss streak detected, trailing stop triggered.
+Root cause: Market data failure and live IB bars issues.
+

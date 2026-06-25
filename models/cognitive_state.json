@@ -1,15 +1,9 @@
 {
-  "mood": "in rhythm",
-  "mood_message": "Win streak 5 \u00b7 recent $+111516.28. Riding what works, not forcing size.",
+  "mood": "steady",
+  "mood_message": "Mixed session \u00b7 $+121818.80. Watching for cleaner setups.",
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "Implement momentum trades based on market data.",
-    "Commander: The trade was executed with a profit exit (exit_type: 'profit_exit') and had a significant positive pnl ($80,016.3). The reason for the event is that it ended at an intrabar spike and volatility.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"The trader's confidence level was lower than expected, leading to a missed profit hunt.\"}",
-    "Commander: The trader is using a simple trailing profit strategy with no specific parameters or logic in place. The event likely occurred due to market conditions that prevent the algorithm from repeating this pattern.",
-    "Profit hunting should be performed only when conditions are met (e.g., spikes and high market data accuracy).",
-    "Always ensure that the trader's position remains open for future trades.",
     "Trade closes with trailing_profit indicate a failure in profit hunting.",
     "Commander: The trade closed with trailing_profit, which indicates the trader is losing money on the current order. The profit hunting algorithm should not have been triggered due to a missed opportunity.",
     "{'param': 'market_state', 'value': 'open', 'reason': 'Market state was open, preventing a successful trade.'}",
@@ -103,10 +97,16 @@
     "1",
     "5",
     "3",
-    "Commander: The algorithm exits at an Ollama exit (97% PPO hold), which means the trader is exiting at a high risk position."
+    "Commander: The algorithm exits at an Ollama exit (97% PPO hold), which means the trader is exiting at a high risk position.",
+    "Trailing stops can be effective in helping to prevent profitable exits if the market closes lower.",
+    "Maintain high confidence in your risk management strategies and consider trailing stops strategically.",
+    "Commander: - Trailing stop is a common strategy for closing trades when price is near the previous close. - Low volume trading often correlates with profit opportunities.",
+    "Market data failures prevent profit hunting without live IB bars.",
+    "Live IB bars and market data updates are critical for real-time adjustments in equity trading.",
+    "Commander: Root cause: Market data failure and live IB bars issues."
   ],
-  "last_thought": "```json\n{\n  \"entry\": -0.0134,\n  \"exit\": 3.86,\n  \"quote_entry\": -0.0134,\n  \"quote_exit\": 3.87,\n  \"shares\": 1295.0,\n  \"pnl_usd\": 4981.35,\n  \"pnl_pct\": 28705.97,\n  \"result\": \"win\",\n  \"exit_reason\": \"council_exit: Ollama exit 97% (PPO hold)\",\n  \"entry_slippage_pct\": -0.996555,\n  \"exit_slippage_pct\": -0.002584,\n  \"limit_px\": 3.89,\n  \"entry_mode\": \"limit_smart\",\n  \"regime\": \"unknown|late_chase_risk\",\n  \"hold_sec\": 0.0,\n  \"peak\": 3.87,\n  \"stop\": 1.7489,\n  \"target\": 5.2198\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": \"Profit hunting is the main goal, and full freedom allows for immediate entry into profitable trades.\",\n  \"intuition\": \"Hunting spikes with a high probability of profit is key.\"\n}\n```",
   "market_belief": {},
-  "trades_observed": 36,
-  "updated": "2026-06-25T16:55:11.114645"
+  "trades_observed": 40,
+  "updated": "2026-06-25T16:56:25.238627"
 }
