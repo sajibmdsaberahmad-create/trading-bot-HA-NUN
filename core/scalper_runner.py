@@ -2816,8 +2816,10 @@ class ScalperRunner:
         dm = self._target_monitors.get(ticker)
         if dm is None:
             return None
-        df = dm.get_bar_dataframe()
-        if df is None or len(df) < 20:
+        df = dm.get_live_decision_bars(min_bars=6)
+        if df is None:
+            df = dm.get_bar_dataframe(min_bars=10)
+        if df is None or len(df) < 6:
             return None
         last_count = self._target_last_bar_count.get(ticker, 0)
         if len(df) <= last_count:
@@ -2838,18 +2840,23 @@ class ScalperRunner:
         min_lock = effective_min_lock_score(self.cfg)
         if pick.rank_score < min_lock:
             return
-        df = self._scan_data_cache.get(pick.ticker)
         min_bars = self._min_bars_for(pick.ticker)
+        df, live_px, _, forecast = self._resolve_live_bars(pick.ticker, min_bars=min_bars)
         if df is None or len(df) < min_bars:
             return
         is_spike, spike_ratio = self._detect_volume_spike(df)
         vol_ratio = float(df["volume"].tail(3).mean()) / (float(df["volume"].tail(20).mean()) + 1e-9)
         if not is_spike and vol_ratio >= 1.15:
             is_spike, spike_ratio = True, vol_ratio
+        if forecast.get("spike_likelihood", 0) >= 0.42:
+            is_spike, spike_ratio = True, max(spike_ratio, float(forecast.get("vol_accel", 1.0)))
         if not is_spike:
             return
         self.top_pick = pick
-        log.info(f"📊 SCAN MOMENTUM: {pick.ticker} score={pick.rank_score:.0f} vol={spike_ratio:.1f}x")
+        log.info(
+            f"📊 SCAN MOMENTUM: {pick.ticker} score={pick.rank_score:.0f} vol={spike_ratio:.1f}x "
+            f"micro={forecast.get('spike_likelihood', 0):.0%} pred→${forecast.get('pred_1bar', live_px):.2f}"
+        )
         self._attempt_entry()
 
     def _refresh_locked_bars(self, quiet: bool = False):
