@@ -3728,3 +3728,126 @@ spike_top_exit: +0.58% vol=2.1x
 Observed trade_closed — recorded for learning.
 trailing_profit
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:29:37.108038+00:00
+Analysis of the trade closed event.
+The trade closed occurred at GDC with a council exit at 98% (PPO hold). The market state is open, and the ticker is 'GDC'.
+• M
+• a
+• i
+• n
+• t
+• a
+• i
+• n
+•  
+• a
+•  
+• l
+• e
+• v
+• e
+• l
+•  
+• o
+• f
+•  
+• o
+• p
+• t
+• i
+• m
+• i
+• s
+• m
+•  
+• a
+• n
+• d
+•  
+• v
+• i
+• g
+• i
+• l
+• a
+• n
+• c
+• e
+•  
+• t
+• o
+•  
+• a
+• v
+• o
+• i
+• d
+•  
+• m
+• a
+• k
+• i
+• n
+• g
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+• -
+• h
+• u
+• n
+• t
+• i
+• n
+• g
+•  
+• t
+• r
+• a
+• d
+• e
+• s
+•  
+• u
+• n
+• d
+• e
+• r
+•  
+• e
+• x
+• t
+• r
+• e
+• m
+• e
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+•  
+• c
+• o
+• n
+• d
+• i
+• t
+• i
+• o
+• n
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in the market, allowing for opportunistic exits.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:29:40.613532+00:00
+Observed loss_streak — recorded for learning.
+council_exit: Ollama exit 98% (PPO hold)
+
