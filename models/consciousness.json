@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 162,
+  "trades_observed": 164,
   "scans_performed": 27,
-  "improvements_applied": 358,
+  "improvements_applied": 362,
   "reports_generated": 26,
   "event_log": [
     {
@@ -17931,6 +17931,86 @@
           "Review council_timeout on MARA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:56:40.911161",
+      "age": "4d 8h 53m 52s",
+      "type": "TRADE",
+      "message": "Observed trade: LCID ? P&L=$-46.70",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:56:47.376379",
+      "age": "4d 8h 53m 58s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #359",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Heuristic learning for trade_closed on LCID",
+        "applied": [],
+        "lessons": [
+          "Learn from every outcome to make informed decisions.",
+          "Adjust parameters based on current conditions and analysis."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:56:49.814799",
+      "age": "4d 8h 54m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #360",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Loss streak due to poor execution in bracket_exit",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The CONFIDENCE_THRESHOLD is set to 0.58, which may not be adequate for this specific event.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Prioritize opportunistic exits within guardrails",
+          "Understand and adjust the algo's parameters based on market conditions"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:56:54.351110",
+      "age": "4d 8h 54m 5s",
+      "type": "TRADE",
+      "message": "Observed trade: ASTS ? P&L=$-54.42",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:56:57.366179",
+      "age": "4d 8h 54m 8s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #361",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on ASTS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:57:00.928321",
+      "age": "4d 8h 54m 12s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #362",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on ASTS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -19216,8 +19296,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "confident",
-  "total_pnl": 123918.18000000004,
+  "mood": "anxious",
+  "total_pnl": 123817.06000000004,
   "win_history": [
     0.0,
     0.0,
@@ -19380,20 +19460,22 @@
     0.0,
     100.77,
     200.65,
-    0.0
+    0.0,
+    -46.7,
+    -54.42
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 3,
   "worst_streak": 18,
-  "veteran_xp": 2325,
+  "veteran_xp": 2335,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 48,
     "entry_timing": 66
   },
-  "flights_completed": 157,
-  "hours_flown": 15.69999999999996,
+  "flights_completed": 159,
+  "hours_flown": 15.89999999999996,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -19415,7 +19497,7 @@
     "BIT": 13,
     "GPU": 19,
     "PLT": 5,
-    "LCI": 6,
+    "LCI": 7,
     "RIO": 9,
     "QS": 3,
     "MAR": 7,
@@ -19423,12 +19505,12 @@
     "RIV": 2,
     "RKL": 3,
     "SOF": 3,
-    "AST": 1
+    "AST": 2
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I am confident in my ability to execute trades and achieve profitable outcomes."
+  "mood_message": "Trading pressure and missed opportunities."
 }

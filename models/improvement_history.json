@@ -1,41 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T17:18:15.230516+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Trade closed event occurred, the algorithm missed profit hunting due to market data failure.",
-    "lessons": [
-      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm prioritized opportunistic exits based on the current market state, which led to missed profit hunting.'}"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T17:19:44.811934+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on NEXR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T17:20:35.169053+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOXS"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T17:21:02.360570+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on BITO"
-    ]
-  },
-  {
     "timestamp": "2026-06-25T17:21:11.047876+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
@@ -3220,6 +3184,52 @@
     "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
     "lessons": [
       "Review council_timeout on MARA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:56:47.405039+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Heuristic learning for trade_closed on LCID",
+    "lessons": [
+      "Learn from every outcome to make informed decisions.",
+      "Adjust parameters based on current conditions and analysis."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:56:49.858043+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The CONFIDENCE_THRESHOLD is set to 0.58, which may not be adequate for this specific event.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Loss streak due to poor execution in bracket_exit",
+    "lessons": [
+      "Prioritize opportunistic exits within guardrails",
+      "Understand and adjust the algo's parameters based on market conditions"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:56:57.404058+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on ASTS"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:57:00.971714+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on ASTS"
     ]
   }
 ]

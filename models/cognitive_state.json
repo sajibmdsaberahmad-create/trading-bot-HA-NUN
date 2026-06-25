@@ -4,13 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "o",
-    "b",
-    "n",
-    ".",
-    "Commander: The loss streak was caused by a bracket exit in the RIOT bracket.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold is set at 0.58, which may not be sufficient in real-time trading to prevent profit hunting due to market data failures.'}",
-    "v",
     "s",
     ",",
     "I",
@@ -103,10 +96,17 @@
     "Commander: bracket_exit",
     "Review trade_closed on RIVN",
     "Review council_timeout on MARA",
-    "Commander: High scanner score after timeout: score=88 vol=1.1x | ATR R:R 2.0"
+    "Commander: High scanner score after timeout: score=88 vol=1.1x | ATR R:R 2.0",
+    "Learn from every outcome to make informed decisions.",
+    "Adjust parameters based on current conditions and analysis.",
+    "Commander: Understand that the given event (trade_closed) indicates a potential profit hunt and includes details such as profit target, loss amount, market state, and other relevant information.",
+    "Prioritize opportunistic exits within guardrails",
+    "Understand and adjust the algo's parameters based on market conditions",
+    "Commander: The loss streak occurred when the bracket_exit event happened, and it was a poor execution by the algo.",
+    "Review loss_streak on ASTS"
   ],
-  "last_thought": "```json\n{\n  \"entry\": 107.0912,\n  \"exit\": 107.36,\n  \"quote_entry\": 107.0912,\n  \"quote_exit\": 107.36,\n  \"shares\": 468.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"Loss\",\n  \"exit_reason\": \"Bracket Exit\",\n  \"entry_slippage_pct\": null,\n  \"exit_slippage_pct\": -0.02503,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 96.2,\n  \"peak\": 107.36,\n  \"stop\": 107.2391,\n  \"target\": 107.9467,\n  \"fill_confirmed\": true\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0,\n  \"intuition\": -1,\n  \"trade_decision\": {\n    \"event\": \"tick_micro_loss\",\n    \"reason\": \"upside odds clear on a single-bar momentum trade\"\n  },\n  \"action\": {\n    \"entry_time\": 17.35,\n    \"profit_margin\": 0.500,\n    \"margin_mode\": \"close\",\n    \"trade\": \"single-bar momentum + volume = take profit into the move\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 47,
-  "updated": "2026-06-25T19:56:21.109184"
+  "trades_observed": 51,
+  "updated": "2026-06-25T19:57:02.469485"
 }
