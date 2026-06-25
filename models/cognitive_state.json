@@ -1,10 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $-14983.93. Preserving capital over action.",
+  "mood_message": "Win rate 0% \u00b7 $-10651.54. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Spike-top hunt on NEXR: spike_top_exit: +4.58% vol=1.8x",
     "Profit hunt worked on NEXR: spike_top_exit: +4.58% vol=1.8x \u2014 reinforce opportunistic exits.",
     "Commander: spike_top_exit: +4.58% vol=1.8x",
     "Review trade_closed on SOXS",
@@ -103,10 +102,11 @@
     "Commander: We are tracking the market state and live IB bars to understand when the event occurred and how it happened.",
     "l",
     "Commander: The loss streak was caused by the council_exit: Ollama exit 95% (PPO hold). The algorithm is not optimizing for this specific situation, and it prioritizes opportunistic exits based on gut feelings.",
-    "Commander: BUY BITO Closes with a council exit"
+    "Commander: BUY BITO Closes with a council exit",
+    "Commander: Analysis based on the provided market data. The event occurred during open trading hours and was caused by the PPO (Pay to Pay) exit, which resulted in a 98% loss for the investor."
   ],
-  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"entry\": -94.65,\n    \"exit\": -94.65,\n    \"trade_mode\": \"sell\",\n    \"profit_hunter\": true,\n    \"margin_profit\": false,\n    \"limit_px\": 8.11,\n    \"entry_mode\": \"limit_smart\"\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"actions\": [\n    {\n      \"name\": \"buy TZA\",\n      \"profit\": 500 * 0.500,\n      \"time\": 24\n    },\n    {\n      \"name\": \"sell TZA\",\n      \"profit\": 500 * 0.300,\n      \"time\": 24\n    }\n  ]\n}\n```",
   "market_belief": {},
-  "trades_observed": 48,
-  "updated": "2026-06-25T17:43:33.165340"
+  "trades_observed": 50,
+  "updated": "2026-06-25T17:44:39.009904"
 }

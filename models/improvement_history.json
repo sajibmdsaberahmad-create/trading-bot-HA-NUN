@@ -1435,5 +1435,12 @@
       "y",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:44:39.050230+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "The trade closed with a council exit of Ollama exit 98% (PPO hold), resulting in a loss of -147 units.",
+    "lessons": []
   }
 ]
