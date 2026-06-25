@@ -2079,3 +2079,11 @@ The event indicates that IB closing-only has closed the order books, leading to 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Setting a higher confidence threshold value can prevent frequent failures.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T15:32:27.907018+00:00
+The event IB trading permission denied occurred.
+IB trading permission denied is a root cause of the issue. The trader should prioritize opportunistic exits and avoid using the same strategy repeatedly.
+• Always monitor live trading conditions
+• Be cautious when using the same strategy to prevent repeated losses
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The trader should increase the confidence threshold for opportunistic exits.)
+

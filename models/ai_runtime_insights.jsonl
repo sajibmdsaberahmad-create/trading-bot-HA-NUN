@@ -163,3 +163,4 @@
 {"timestamp":"2026-06-25T15:14:31.988327+00:00","event":"ib_failure","ticker":"TPTS","reason":"IB trading permission denied","spike_ratio":6.666666666,"market_state":"open"}
 {"timestamp":"2026-06-25T15:17:16.558955+00:00","event":"council_timeout","ticker":"MIMI","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 no aligned signal","spike_ratio":0.7128312260745298,"scan_score":91.6,"confidence":0.45126256719231606,"market_state":"open"}
 {"timestamp":"2026-06-25T15:29:38.705302+00:00","event":"ib_failure","ticker":"MIMI","reason":"IB closing-only \u2014 cannot open new positions","spike_ratio":1.1594559718374506,"market_state":"open"}
+{"timestamp":"2026-06-25T15:32:25.072591+00:00","event":"ib_failure","ticker":"TPTS","reason":"IB trading permission denied","spike_ratio":3.1297516472377094,"market_state":"open"}

@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 101,
   "training_sessions": 27,
-  "trades_observed": 34,
+  "trades_observed": 35,
   "scans_performed": 27,
-  "improvements_applied": 186,
+  "improvements_applied": 187,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10215,6 +10215,36 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #101",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:32:25.034710",
+      "age": "4d 4h 29m 36s",
+      "type": "TRADE",
+      "message": "Observed trade: TPTS LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:32:27.875879",
+      "age": "4d 4h 29m 39s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #187",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "The event IB trading permission denied occurred.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The trader should increase the confidence threshold for opportunistic exits.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Always monitor live trading conditions",
+          "Be cautious when using the same strategy to prevent repeated losses"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T15:30:51.746910",
@@ -11500,7 +11530,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
+  "mood": "Anxious",
   "total_pnl": -17679.61,
   "win_history": [
     0.0,
@@ -11536,20 +11566,21 @@
     0,
     0,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 5,
   "worst_streak": 10,
-  "veteran_xp": 355,
+  "veteran_xp": 365,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 26,
+    "exit_timing": 27,
     "risk_management": 2,
     "entry_timing": 6
   },
-  "flights_completed": 29,
-  "hours_flown": 2.9000000000000012,
+  "flights_completed": 30,
+  "hours_flown": 3.0000000000000013,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -11562,12 +11593,12 @@
     "NEX": 1,
     "MIM": 3,
     "AZI": 1,
-    "TPT": 2
+    "TPT": 3
   },
   "best_streak": 2,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "After a long session with low profit margins and missed opportunities, I feel more tense as I focus on my next trade."
+  "mood_message": "I'm feeling anxious because of the recent trade successes and the low session PNL."
 }

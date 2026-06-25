@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Setting a higher confidence threshold value can prevent frequent failures.",
+    "reason": "The trader should increase the confidence threshold for opportunistic exits.",
     "ok": true,
     "msg": "applied"
   }
