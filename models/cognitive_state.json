@@ -1,15 +1,9 @@
 {
-  "mood": "recalibrating",
-  "mood_message": "Four losses in a row ($-225.84 recent). Tightening entries until edge returns.",
+  "mood": "defensive",
+  "mood_message": "Win rate 10% \u00b7 $-178.24. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Tune entry limits to avoid overtrading.",
-    "Commander: The trade closed with a profit of $32.77.",
-    "Review council_timeout on MARA",
-    "Commander: High scanner score after timeout: score=88 vol=0.1x | ATR R:R 2.0",
-    "Optimize entry fill rates for better performance.",
-    "Tune parameters like CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc.",
     "Adapt for more active trading strategies.",
     "Experience is key in learning from outcomes.",
     "Commander: - Why did this happen? Council exit: 95% of Ollama exit (PPO hold).\n- When does it tend to occur? Routine sessions with a high success rate.\n- How should the algo change? Adjust parameters, logic hints, and experience.",
@@ -103,10 +97,16 @@
     "Analyze market dynamics",
     "Adjust strategies according to conditions",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This adjustment increases the confidence level in predicting profitable trades. This helps the algorithm make better informed decisions.'}",
-    "Commander: Confidence level is now at 0.58, which improves the algorithm's accuracy in making decisions."
+    "Commander: Confidence level is now at 0.58, which improves the algorithm's accuracy in making decisions.",
+    "P",
+    "Commander: The trader is using an aggressive take-profit strategy to maximize profits at the cost of potential losses.",
+    "Use the market data failure event to identify potential triggers and make adjustments.",
+    "Refactor the take-profit logic and improve the risk management strategies.",
+    "Commander: The loss streak occurred due to a hard_take_profit trade strategy.",
+    "Large loss detected: ASTS. Review stop placement."
   ],
   "last_thought": "```json\n{\n  \"entry\": \"107.235\",\n  \"exit\": \"106.96\",\n  \"quote_entry\": \"107.235\",\n  \"quote_exit\": \"106.96\",\n  \"shares\": 413,\n  \"pnl_usd\": -2.07,\n  \"pnl_pct\": -0.0,\n  \"result\": \"loss\",\n  \"exit_reason\": \"stop_breach\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": 0.002524,\n  \"limit_px\": null\n}\n```",
   "market_belief": {},
-  "trades_observed": 32,
-  "updated": "2026-06-25T19:52:00.669369"
+  "trades_observed": 35,
+  "updated": "2026-06-25T19:52:45.381063"
 }

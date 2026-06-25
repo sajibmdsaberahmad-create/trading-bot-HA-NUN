@@ -3105,5 +3105,56 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This adjustment increases the confidence level in predicting profitable trades. This helps the algorithm make better informed decisions.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:52:30.929826+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increase confidence in taking profit to minimize risk.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade closed with a hard_take_profit strategy, resulting in a loss of $39.75 USD.",
+    "lessons": [
+      "1",
+      ".",
+      "H",
+      "a",
+      "r",
+      "d",
+      "T",
+      "a",
+      "k",
+      "e",
+      "-",
+      "P",
+      "r",
+      "o",
+      "f",
+      "i",
+      "t",
+      "S",
+      "t",
+      "r",
+      "a",
+      "t",
+      "e",
+      "g",
+      "y"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:52:32.413608+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Heuristic learning for loss_streak on SOFI",
+    "lessons": [
+      "Use the market data failure event to identify potential triggers and make adjustments.",
+      "Refactor the take-profit logic and improve the risk management strategies."
+    ]
   }
 ]

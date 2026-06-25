@@ -186,3 +186,5 @@
 {"timestamp":"2026-06-25T19:49:04.065478+00:00","event":"trailing_stop","ticker":"RIOT","pnl_usd":84785.32,"pnl_pct":1.913,"primary_goal":true,"reason":"trailing_stop","price":80.34}
 {"timestamp":"2026-06-25T19:49:32.854271+00:00","event":"trailing_stop","ticker":"MARA","pnl_usd":225908.42,"pnl_pct":4.8275,"primary_goal":true,"reason":"trailing_stop","price":80.42}
 {"timestamp":"2026-06-25T19:52:11.757966+00:00","event":"hard_take_profit","ticker":"SOFI","pnl_usd":251180.25,"pnl_pct":3.6463,"primary_goal":true,"reason":"hard_take_profit","price":80.52}
+{"timestamp":"2026-06-25T19:52:27.569594+00:00","event":"hard_take_profit","ticker":"SOFI","pnl_usd":-39.75,"source":"buffer","reason":"hard_take_profit"}
+{"timestamp":"2026-06-25T19:52:43.606674+00:00","event":"trailing_stop","ticker":"RIOT","pnl_usd":2.28,"pnl_pct":0.0005,"primary_goal":true,"reason":"trailing_stop","price":27.595}

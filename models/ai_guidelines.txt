@@ -6433,3 +6433,122 @@ Confidence level is now at 0.58, which improves the algorithm's accuracy in maki
   - CONFIDENCE_THRESHOLD → 0.58 (Adjusting this parameter improves the model's ability to identify high-quality opportunities and execute profitable trades more reliably.)
   - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:52:30.929377+00:00
+The trade closed with a hard_take_profit strategy, resulting in a loss of $39.75 USD.
+The trader is using an aggressive take-profit strategy to maximize profits at the cost of potential losses.
+• A
+• d
+• j
+• u
+• s
+• t
+•  
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+•  
+• t
+• o
+•  
+• a
+•  
+• m
+• o
+• r
+• e
+•  
+• c
+• o
+• n
+• s
+• e
+• r
+• v
+• a
+• t
+• i
+• v
+• e
+•  
+• v
+• a
+• l
+• u
+• e
+•  
+• t
+• o
+•  
+• m
+• i
+• t
+• i
+• g
+• a
+• t
+• e
+•  
+• t
+• h
+• e
+•  
+• r
+• i
+• s
+• k
+•  
+• o
+• f
+•  
+• h
+• a
+• r
+• d
+•  
+• t
+• a
+• k
+• e
+• -
+• p
+• r
+• o
+• f
+• i
+• t
+•  
+• s
+• t
+• r
+• a
+• t
+• e
+• g
+• i
+• e
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase confidence in taking profit to minimize risk.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:52:32.413284+00:00
+Heuristic learning for loss_streak on SOFI
+The loss streak occurred due to a hard_take_profit trade strategy.
+
