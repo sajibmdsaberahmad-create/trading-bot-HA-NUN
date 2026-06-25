@@ -105,8 +105,8 @@
     "Commander: The trade closed occurred at GDC with a council exit at 98% (PPO hold). The market state is open, and the ticker is 'GDC'.",
     "Commander: council_exit: Ollama exit 98% (PPO hold)"
   ],
-  "last_thought": "```json\n{\n  \"trade_time\": \"NOK 20:58\",\n  \"entry\": 0.0132,\n  \"exit\": 0.0131,\n  \"entry_fill\": 0.0132,\n  \"exit_fill\": 0.0131,\n  \"quote_entry\": 0.0132,\n  \"quote_exit\": 0.0131,\n  \"shares\": 1200.0,\n  \"pnl_usd\": -0.12,\n  \"result\": \"loss\",\n  \"exit_reason\": \"council_exit: Ollama exit 98% (PPO hold)\",\n  \"entry_slippage_pct\": -0.007519,\n  \"exit_slippage_pct\": 0.0,\n  \"limit_px\": 0.0133,\n  \"entry_mode\": \"limit_penny\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 21.3,\n  \"peak\": 0.0132,\n  \"stop\": 0.0131,\n  \"target\": ",
+  "last_thought": "```json\n{\n  \"entry\": 0.0132,\n  \"exit\": 0.0132,\n  \"quote_entry\": 0.0132,\n  \"quote_exit\": 3.58,\n  \"shares\": 3308.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"profit\",\n  \"exit_reason\": \"sell into the move\",\n  \"entry_slippage_pct\": -0.996333,\n  \"exit_slippage_pct\": -0.996313,\n  \"limit_px\": 3.6,\n  \"entry_mode\": \"limit_smart\",\n  \"regime\": \"unknown|late_chase_risk\",\n  \"hold_sec\": 21.1,\n  \"peak\": 3.58,\n  \"stop\": 3.5856,\n  \"target\": 4.8284\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T17:29:40.576730"
+  "trades_observed": 3,
+  "updated": "2026-06-25T17:30:04.718781"
 }
