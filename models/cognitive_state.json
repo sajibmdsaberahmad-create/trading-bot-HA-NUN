@@ -1,11 +1,9 @@
 {
   "mood": "gathering",
   "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
-  "confidence": 0.47,
+  "confidence": 0.4099999999999999,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review council_timeout on WAVE",
-    "No clean data on FNMAI (no_historical_data) \u2014 profit hunt elsewhere.",
     "-",
     "K",
     "e",
@@ -103,10 +101,12 @@
     "Commander: IB closing-only \u2014 cannot open new positions",
     "No clean data on TMPOQ (no_historical_data) \u2014 profit hunt elsewhere.",
     "Review market_data_failure on TMPOQ",
-    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TMPOQ@SMART Trades"
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TMPOQ@SMART Trades",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 is too low, which means that if it happens again, we would not be willing to take the profit.'}",
+    "Commander: We are analyzing the event to understand the root cause and how we can improve the algorithmic trading strategy."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"margin_hunting\": 1.2,\n    \"risk_tolerance\": 0.8\n  },\n  \"intuition\": {\n    \"long_positions\": [\n      // Long positions list\n    ],\n    \"short_positions\": [],\n    \"profit_hunting_mode\": true\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"KUST\",\n    \"entry\": 1.63,\n    \"exit\": 1.63,\n    \"entry_fill\": 1.63,\n    \"exit_fill\": 1.63,\n    \"quote_entry\": 1.63,\n    \"quote_exit\": 1.6499,\n    \"shares\": 1832.0,\n    \"pnl_usd\": 0.0,\n    \"pnl_pct\": 0.0,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\",\n    \"entry_slippage_pct\": 0.0,\n    \"exit_slippage_pct\": -0.012061,\n    \"limit_px\": 1.63,\n    \"entry_mode\": \"limit_smart\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 151.7,\n    \"peak\": 1.63,\n  ",
   "market_belief": {},
-  "trades_observed": 0,
-  "updated": "2026-06-25T16:04:27.078048"
+  "trades_observed": 2,
+  "updated": "2026-06-25T16:10:00.022183"
 }

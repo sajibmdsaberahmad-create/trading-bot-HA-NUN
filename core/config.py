@@ -375,6 +375,10 @@ class BotConfig:
     SCALPER_LIVE_BARS_FIRST: bool = os.getenv(
         "SCALPER_LIVE_BARS_FIRST", "true"
     ).lower() in ("1", "true", "yes")
+    # Fast lock: build bars from live streams only — skip IB HMDS historical (162 on OTC/PINK).
+    FAST_LOCK_SKIP_HISTORICAL: bool = os.getenv(
+        "FAST_LOCK_SKIP_HISTORICAL", "true"
+    ).lower() in ("1", "true", "yes")
     MICRO_SPIKE_BOOST: float = float(os.getenv("MICRO_SPIKE_BOOST", "0.35"))
     MICRO_FADE_EXIT: float = float(os.getenv("MICRO_FADE_EXIT", "0.55"))
     MICRO_LOSS_EXIT: float = float(os.getenv("MICRO_LOSS_EXIT", "0.58"))

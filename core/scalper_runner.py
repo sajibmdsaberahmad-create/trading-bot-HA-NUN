@@ -90,6 +90,7 @@ from core.fast_execution import (
     entry_pending_block_sec,
     apply_micro_spike_boost,
     should_micro_fast_entry,
+    skip_historical_prefetch,
 )
 from core.connector import IBConnector
 from core.data import DataManager
@@ -556,6 +557,21 @@ class ScalperRunner:
             self._last_micro_forecast[ticker] = forecast
 
         return df, live_px, dm, forecast
+
+    def _bars_from_stream(self, ticker: str, need: int) -> Optional[pd.DataFrame]:
+        """Use live tick/5s stream bars — no IB HMDS historical request."""
+        dm = self._target_monitors.get(ticker)
+        if dm is None:
+            return None
+        df = dm.get_live_decision_bars(min_bars=need)
+        if df is None or len(df) < max(3, need // 2):
+            return None
+        self._scan_data_cache[ticker] = df
+        if df["close"].iloc[-1] > 0:
+            for target in self._locked_targets:
+                if target.ticker == ticker and target.price <= 0:
+                    target.price = float(df["close"].iloc[-1])
+        return df
 
     def _on_locked_stream_tick(self, ticker: str, price: float, _ts: Any) -> None:
         """Tick callback — queue spike entry or fast profit/loss exit (debounced)."""
@@ -2483,6 +2499,8 @@ class ScalperRunner:
             and r["ticker"] not in self._contract_blacklist
         ]
         pool.sort(key=lambda x: x.get("total_score", 0), reverse=True)
+        tradeable = set(filter_tradeable_tickers(self.cfg, [r["ticker"] for r in pool]))
+        pool = [r for r in pool if r["ticker"] in tradeable]
         locked = pool[: self._max_locked()]
         if not locked and qualified:
             locked = sorted(qualified, key=lambda x: x.get("total_score", 0), reverse=True)[:3]
@@ -2549,10 +2567,10 @@ class ScalperRunner:
         else:
             self.notifier.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\nTop score: {self.top_pick.rank_score:.0f}")
 
-        prefetch_tickers = [p.ticker for p in self._locked_targets]
-        self._schedule_bar_prefetch(prefetch_tickers)
         log.info("📡 Streams-first fast lock — bar warm on main loop")
         self._ensure_locked_streams()
+        prefetch_tickers = [p.ticker for p in self._locked_targets]
+        self._schedule_bar_prefetch(prefetch_tickers)
         if getattr(self.cfg, "DEFER_BAR_WARM_ON_LOCK", True):
             self._bar_warm_due = True
             self._bar_warm_idx = 0
@@ -2586,6 +2604,9 @@ class ScalperRunner:
                 and ticker not in self._scan_data_cache
                 and ticker not in self._bar_prefetch_queue
             ):
+                blocked, _ = is_market_data_blocked(self.cfg, ticker)
+                if blocked:
+                    continue
                 self._bar_prefetch_queue.append(ticker)
         if self._bar_prefetch_queue:
             log.debug(f"Bar prefetch queued: {self._bar_prefetch_queue[:12]}")
@@ -2616,13 +2637,25 @@ class ScalperRunner:
         )
 
     def _prefetch_one_ticker_bars(self, ticker: str, quiet: bool = True) -> Optional[pd.DataFrame]:
-        """Fetch short 1-min history for one ticker on the main IB thread."""
+        """Fetch bars for one ticker — live stream first; HMDS only when allowed."""
         if not ticker or ticker in self._contract_blacklist:
+            return None
+        blocked, _ = is_market_data_blocked(self.cfg, ticker)
+        if blocked:
             return None
         need = self._min_bars_for(ticker)
         cached = self._scan_data_cache.get(ticker)
         if cached is not None and len(cached) >= need:
             return cached
+
+        if getattr(self.cfg, "SCALPER_LIVE_BARS_FIRST", True):
+            live_df = self._bars_from_stream(ticker, need)
+            if live_df is not None:
+                return live_df
+
+        if skip_historical_prefetch(self.cfg):
+            return None
+
         cfg_ticker = self.cfg.TICKER
         try:
             self.cfg.TICKER = ticker
@@ -2643,6 +2676,7 @@ class ScalperRunner:
                 self._scan_data_cache[ticker] = fresh
                 return fresh
         except Exception as exc:
+            record_fetch_failure(self.cfg, ticker, exc, bar_size="1 min")
             log.debug(f"Bar prefetch {ticker}: {exc}")
         finally:
             self.cfg.TICKER = cfg_ticker
@@ -3079,6 +3113,12 @@ class ScalperRunner:
             blocked, _ = is_market_data_blocked(self.cfg, ticker)
             if blocked:
                 continue
+            need = self._min_bars_for(ticker)
+            if getattr(self.cfg, "SCALPER_LIVE_BARS_FIRST", True):
+                if self._bars_from_stream(ticker, need) is not None:
+                    continue
+            if skip_historical_prefetch(self.cfg):
+                continue
             cfg_ticker = self.cfg.TICKER
             try:
                 self.cfg.TICKER = ticker
@@ -3107,14 +3147,28 @@ class ScalperRunner:
                 if target.ticker in holding:
                     continue
                 ticker = target.ticker
+                blocked, _ = is_market_data_blocked(self.cfg, ticker)
+                if blocked:
+                    continue
+                need = self._min_bars_for(ticker)
+                if getattr(self.cfg, "SCALPER_LIVE_BARS_FIRST", True):
+                    fresh = self._bars_from_stream(ticker, need)
+                    if fresh is not None and len(fresh) >= need:
+                        pass
+                    elif skip_historical_prefetch(self.cfg):
+                        continue
+                    else:
+                        fresh = None
+                else:
+                    fresh = None
                 try:
-                    self.cfg.TICKER = ticker
-                    dm = DataManager(self.conn, self.cfg)
-                    fresh = dm.fetch_historical(
-                        duration="1800 S", bar_size="1 min", use_rth=False, quiet=True,
-                    )
-                    min_bars = self._min_bars_for(ticker)
-                    if fresh is None or len(fresh) < min_bars:
+                    if fresh is None and not skip_historical_prefetch(self.cfg):
+                        self.cfg.TICKER = ticker
+                        dm = DataManager(self.conn, self.cfg)
+                        fresh = dm.fetch_historical(
+                            duration="1800 S", bar_size="1 min", use_rth=False, quiet=True,
+                        )
+                    if fresh is None or len(fresh) < need:
                         continue
                     self._scan_data_cache[ticker] = fresh
                     px = float(fresh["close"].iloc[-1])

@@ -1,1 +1,16 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.5,
+    "reason": "Adjusting the confidence threshold slightly increases our likelihood of taking profits even with a trailing profit event.",
+    "ok": true,
+    "msg": "applied"
+  },
+  "ENTRY_FILL_MAX_WAIT_SEC": {
+    "param": "ENTRY_FILL_MAX_WAIT_SEC",
+    "value": 30,
+    "reason": "Increasing the maximum wait time for fill actions slightly improves our ability to react quickly to trades.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

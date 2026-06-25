@@ -2095,3 +2095,10 @@ IB closing-only — cannot open new positions
 Observed market_data_failure — recorded for learning.
 MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TMPOQ@SMART Trades
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:10:00.053765+00:00
+The trader closed the trade with a trailing profit, which is not allowed by our rules.
+We are analyzing the event to understand the root cause and how we can improve the algorithmic trading strategy.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.5 (Adjusting the confidence threshold slightly increases our likelihood of taking profits even with a trailing profit event.)
+  - ENTRY_FILL_MAX_WAIT_SEC → 30 (Increasing the maximum wait time for fill actions slightly improves our ability to react quickly to trades.)
+

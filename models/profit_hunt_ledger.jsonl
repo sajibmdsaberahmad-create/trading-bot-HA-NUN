@@ -2,3 +2,5 @@
 {"timestamp":"2026-06-25T14:34:01.977029+00:00","event":"hard_take_profit","ticker":"WAVE","pnl_usd":0.32,"source":"buffer","reason":"hard_take_profit"}
 {"timestamp":"2026-06-25T14:50:17.643230+00:00","event":"hard_take_profit","ticker":"GAID","pnl_usd":-0.6,"pnl_pct":-0.0079,"primary_goal":true,"reason":"hard_take_profit","price":24.99}
 {"timestamp":"2026-06-25T14:50:20.009276+00:00","event":"hard_take_profit","ticker":"GAID","pnl_usd":-0.6,"source":"buffer","reason":"hard_take_profit"}
+{"timestamp":"2026-06-25T16:09:32.630176+00:00","event":"trailing_profit","ticker":"KUST","pnl_usd":36.46,"pnl_pct":0.0122,"primary_goal":true,"reason":"trailing_profit","price":1.6499}
+{"timestamp":"2026-06-25T16:09:56.360378+00:00","event":"trailing_profit","ticker":"KUST","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}

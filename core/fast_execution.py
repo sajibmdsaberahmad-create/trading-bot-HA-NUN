@@ -270,6 +270,11 @@ def apply_micro_spike_boost(
     return is_spike, spike_ratio
 
 
+def skip_historical_prefetch(cfg: BotConfig) -> bool:
+    """Fast lock uses live stream bars — avoid HMDS 162 on OTC names."""
+    return ai_fast_execution(cfg) and bool(getattr(cfg, "FAST_LOCK_SKIP_HISTORICAL", True))
+
+
 def entry_pending_block_sec(cfg: BotConfig) -> float:
     base = float(getattr(cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
     if ai_fast_execution(cfg):
