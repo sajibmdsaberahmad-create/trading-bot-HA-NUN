@@ -3880,3 +3880,9 @@ stop_breach
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:33:55.268951+00:00
+Trade closed with trailing profit in GDC
+Why did this happen? The trade closed due to trailing profit. When does it tend to occur? This occurs at open time.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The algorithm believes the market is in a high risk environment, leading to higher confidence in profit.)
+
