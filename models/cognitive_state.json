@@ -1,10 +1,9 @@
 {
   "mood": "gathering",
   "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
-  "confidence": 0.37,
+  "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
-    "'",
     "b",
     "Commander: The reason for the profit is not provided in this event detail.",
     "1",
@@ -103,10 +102,11 @@
     "Commander: The trader experienced a loss streak, which can be attributed to the missed profit hunt. The margin of profit was lower than expected and it is necessary to increase this margin.",
     "Review trade_closed on MARA",
     "Review council_timeout on RIOT",
-    "Commander: High scanner score after timeout: score=85 vol=1.1x | ATR R:R 2.0"
+    "Commander: High scanner score after timeout: score=85 vol=1.1x | ATR R:R 2.0",
+    "Commander: bracket_exit"
   ],
   "last_thought": "```json\n{\n    \"action\": \"take_profit\",\n    \"profit_probability\": 0.5,\n    \"direction\": \"open\",\n    \"entry_fill_price\": 13.64,\n    \"exit_fill_price\": 13.65\n}\n```",
   "market_belief": {},
-  "trades_observed": 1,
-  "updated": "2026-06-25T19:26:30.677812"
+  "trades_observed": 2,
+  "updated": "2026-06-25T19:26:48.399433"
 }

@@ -1920,5 +1920,14 @@
     "lessons": [
       "Review council_timeout on RIOT"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:26:48.427256+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on MARA"
+    ]
   }
 ]

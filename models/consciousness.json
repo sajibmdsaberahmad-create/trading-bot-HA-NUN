@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 121,
   "training_sessions": 27,
-  "trades_observed": 135,
+  "trades_observed": 136,
   "scans_performed": 27,
-  "improvements_applied": 309,
+  "improvements_applied": 310,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16072,6 +16072,27 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #121",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:26:44.136967",
+      "age": "4d 8h 23m 55s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+31.22",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:26:48.400812",
+      "age": "4d 8h 23m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #310",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:24:04.999134",
@@ -17357,8 +17378,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "calm",
-  "total_pnl": 124242.00000000001,
+  "mood": "determined",
+  "total_pnl": 124273.22000000002,
   "win_history": [
     0.0,
     0.0,
@@ -17494,20 +17515,21 @@
     0.0,
     0.0,
     -2592.81,
-    0.0
+    0.0,
+    31.22
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 10,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 18,
-  "veteran_xp": 1890,
+  "veteran_xp": 1920,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 38,
-    "entry_timing": 50
+    "entry_timing": 52
   },
-  "flights_completed": 130,
-  "hours_flown": 12.99999999999997,
+  "flights_completed": 131,
+  "hours_flown": 13.09999999999997,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17532,12 +17554,12 @@
     "LCI": 4,
     "RIO": 4,
     "QS": 2,
-    "MAR": 2
+    "MAR": 3
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Today's performance indicates a cautious approach to trading."
+  "mood_message": "After observing 136 trades in the last 5 sessions, I remain focused and confident."
 }
