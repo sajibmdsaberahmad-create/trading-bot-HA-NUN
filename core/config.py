@@ -455,11 +455,14 @@ class BotConfig:
     PAPER_MARKET_ENTRIES: bool = os.getenv("PAPER_MARKET_ENTRIES", "true").lower() not in (
         "0", "false", "no",
     )
-    PAPER_MAX_ENTRY_SHARES: int = int(os.getenv("PAPER_MAX_ENTRY_SHARES", "5000"))
+    PAPER_SCAN_BAR_DURATION: str = os.getenv("PAPER_SCAN_BAR_DURATION", "420 S")
     PENDING_SUBMIT_MAX_SEC: float = float(os.getenv("PENDING_SUBMIT_MAX_SEC", "4"))
     ENTRY_PENDING_LOOP_SEC: float = float(os.getenv("ENTRY_PENDING_LOOP_SEC", "0.05"))
     BAR_WARM_PER_LOOP: int = int(os.getenv("BAR_WARM_PER_LOOP", "4"))
     DEFER_LOCK_AI_REVIEW: bool = os.getenv("DEFER_LOCK_AI_REVIEW", "true").lower() not in (
+        "0", "false", "no",
+    )
+    SCAN_BOOTSTRAP_ENTRY: bool = os.getenv("SCAN_BOOTSTRAP_ENTRY", "true").lower() not in (
         "0", "false", "no",
     )
     USE_MULTI_TIMEFRAME_SCAN: bool = True

@@ -313,8 +313,8 @@ class ScalperRunner:
         self._bar_warm_idx = 0
         self._stream_repair: Dict[str, str] = {}
         self._bootstrap_entry_due = False
-        
-        # Pilot Experience and Pattern Memory systems
+        self._lock_review_due = False
+        self._lock_review_picks: List[Dict] = []
         self.pilot = PilotExperienceSystem(cfg)
         self.patterns = PatternMemoryBank(cfg)
         
@@ -2159,6 +2159,29 @@ class ScalperRunner:
                         self._generative_review_locks(picks)
                     except Exception as exc:
                         log.debug(f"Lock review: {exc}")
+                    try:
+                        lock_names = ", ".join(t.ticker for t in self._locked_targets)
+                        if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
+                            send_dynamic_notification(
+                                self.notifier, self.autopilot, "targets_locked",
+                                self._notify_context({
+                                    "targets": lock_names,
+                                    "top_score": self.top_pick.rank_score if self.top_pick else 0,
+                                    "scan_ms": getattr(self, "_last_lock_elapsed_ms", 0),
+                                }),
+                                f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {lock_names}\n"
+                                f"Top score: {self.top_pick.rank_score:.0f}",
+                                ai_commander=self.ai_commander,
+                                consciousness=self.consciousness,
+                                pilot=self.pilot,
+                            )
+                        else:
+                            self.notifier.info(
+                                f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {lock_names}\n"
+                                f"Top score: {self.top_pick.rank_score:.0f}"
+                            )
+                    except Exception as exc:
+                        log.debug(f"Lock notify: {exc}")
 
                 if getattr(self, "_deferred_ib_scan", False) and self.conn.is_connected():
                     self._deferred_ib_scan = False
@@ -2669,6 +2692,7 @@ class ScalperRunner:
         names = ", ".join([p.ticker for p in self._locked_targets])
         lock_tag = "FAST" if fast_lock else "FULL"
         log.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names} | Scan {lock_tag}: {elapsed_ms:.0f}ms")
+        self._last_lock_elapsed_ms = elapsed_ms
         log.info(
             f"🔒 COMMITTED LOCK: scores≥{min_lock_score:.0f} | "
             + (
@@ -2804,6 +2828,8 @@ class ScalperRunner:
             self.cfg.TICKER = ticker
             dm = DataManager(self.conn, self.cfg)
             duration = getattr(self.cfg, "SCAN_BAR_DURATION", "1800 S")
+            if getattr(self.cfg, "PAPER_TRADING", False):
+                duration = getattr(self.cfg, "PAPER_SCAN_BAR_DURATION", "420 S")
             fresh = dm.fetch_historical(
                 duration=duration, bar_size="1 min", use_rth=False, quiet=quiet,
             )
@@ -2899,21 +2925,22 @@ class ScalperRunner:
             warmed += 1
         self._bar_warm_idx = idx
         if idx >= len(priority):
-        self._bar_warm_idx = 0
-        priority_ready = sum(
-            1 for t in priority
-            if t in self._scan_data_cache
-            and len(self._scan_data_cache[t]) >= self._min_bars_for(t)
-        )
-        total_ready = sum(
-            1 for t in self._locked_targets
-            if t.ticker in self._scan_data_cache
-            and len(self._scan_data_cache[t.ticker]) >= self._min_bars_for(t.ticker)
-        )
-        log.info(
-            f"📊 Bar cache: {priority_ready}/{len(priority)} priority ready | "
-            f"{total_ready}/{len(self._locked_targets)} total locked"
-        )
+            self._bar_warm_due = False
+            self._bar_warm_idx = 0
+            priority_ready = sum(
+                1 for t in priority
+                if t in self._scan_data_cache
+                and len(self._scan_data_cache[t]) >= self._min_bars_for(t)
+            )
+            total_ready = sum(
+                1 for t in self._locked_targets
+                if t.ticker in self._scan_data_cache
+                and len(self._scan_data_cache[t.ticker]) >= self._min_bars_for(t.ticker)
+            )
+            log.info(
+                f"📊 Bar cache: {priority_ready}/{len(priority)} priority ready | "
+                f"{total_ready}/{len(self._locked_targets)} total locked"
+            )
 
     def _maybe_release_stale_lock(self, now: float) -> bool:
         """Drop dead locks after no entry — allows universe rescan."""
