@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: Confidence level is now at 0.58, which improves the algorithm's accuracy in making decisions.",
-    "P",
-    "Commander: The trader is using an aggressive take-profit strategy to maximize profits at the cost of potential losses.",
     "Use the market data failure event to identify potential triggers and make adjustments.",
     "Refactor the take-profit logic and improve the risk management strategies.",
     "Commander: The loss streak occurred due to a hard_take_profit trade strategy.",
@@ -103,10 +100,13 @@
     "Profit hunt worked on COIN: wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading \u2014 reinforce opportunistic exits.",
     "Make sure to avoid rejecting orders and instead use the live IB bars for trading.",
     "Always prioritize opportunistic exits when dealing with rejection",
-    "Commander: The IB order was rejected (201). This is a critical issue that will prevent profitable hunting."
+    "Commander: The IB order was rejected (201). This is a critical issue that will prevent profitable hunting.",
+    "Review trade_closed on COIN",
+    "Commander: wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading",
+    "Review loss_streak on COIN"
   ],
   "last_thought": "```json\n{\n  \"entry\": {\n    \"ticker\": \"COIN\",\n    \"volume\": 182.0,\n    \"price\": 142.0337,\n    \"side\": \"buy\"\n  },\n  \"exit\": {\n    \"ticker\": \"COIN\",\n    \"price\": 142.52,\n    \"side\": \"sell\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 79,
-  "updated": "2026-06-25T20:04:50.078279"
+  "trades_observed": 80,
+  "updated": "2026-06-25T20:05:13.384692"
 }

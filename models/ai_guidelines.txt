@@ -7360,3 +7360,19 @@ The IB order was rejected (201). This is a critical issue that will prevent prof
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The system will now lower the confidence threshold to 58%.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T20:05:00.078504+00:00
+Observed loss_streak — recorded for learning.
+wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:05:00.078387+00:00
+Observed trade_closed — recorded for learning.
+wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:05:08.322506+00:00
+Observed loss_streak — recorded for learning.
+spike_top_exit: +0.64% vol=3.5x
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:05:13.438510+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +0.64% vol=3.5x
+

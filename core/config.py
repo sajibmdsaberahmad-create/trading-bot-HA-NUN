@@ -239,10 +239,10 @@ class BotConfig:
         "ALLOW_PRE_MARKET_TRADING", "true"
     ).lower() in ("1", "true", "yes")
     ALLOW_AFTER_HOURS_TRADING: bool = os.getenv(
-        "ALLOW_AFTER_HOURS_TRADING", "true"
+        "ALLOW_AFTER_HOURS_TRADING", "false"
     ).lower() in ("1", "true", "yes")
     ALLOW_OVERNIGHT_TRADING: bool = os.getenv(
-        "ALLOW_OVERNIGHT_TRADING", "true"
+        "ALLOW_OVERNIGHT_TRADING", "false"
     ).lower() in ("1", "true", "yes")
     PRE_MARKET_START:          str  = "04:00"  # ET
     PRE_MARKET_END:            str  = "09:25"   # ET

@@ -44,7 +44,7 @@ except ImportError:
 
 from core.config import BotConfig
 from core.connector import IBConnector
-from core.market_hours import should_use_extended_hours_orders
+from core.market_hours import should_use_extended_hours_orders, orders_allowed
 from core.notify import log
 
 
@@ -115,6 +115,12 @@ class BrokerExecutor:
         if should_use_extended_hours_orders(self.cfg):
             order.outsideRth = True
 
+    def _session_allows_orders(self, action: str = "order") -> bool:
+        allowed, state = orders_allowed(self.cfg)
+        if not allowed:
+            log.debug(f"IB {action} skipped — session {state} (not tradable)")
+        return allowed
+
     def _round_price(self, price: float) -> float:
         """Sub-dollar stocks need 4dp stops/targets on IB."""
         return round(price, 4) if price < 1.0 else round(price, 2)
@@ -136,6 +142,8 @@ class BrokerExecutor:
         float, parent is a marketable LIMIT order at that price (used
         when slippage protection is active).
         """
+        if not self._session_allows_orders("bracket"):
+            raise RuntimeError("Market session closed — bracket entry blocked")
         contract = self.conn.get_contract(symbol)
 
         parent_id = self.ib.client.getReqId()
@@ -236,6 +244,8 @@ class BrokerExecutor:
         IB error 10326 blocks in-place edits to OCA bracket children; we cancel
         the resting stop and submit a new one in the same OCA group.
         """
+        if not self._session_allows_orders("stop update"):
+            return
         if handle.stop_trade is None:
             return
         rounded = self._round_price(new_stop_price)
@@ -277,6 +287,8 @@ class BrokerExecutor:
 
     def update_target_price(self, handle: BracketHandle, new_target_price: float):
         """Re-price take-profit via cancel-and-replace (same OCA constraint as stop)."""
+        if not self._session_allows_orders("target update"):
+            return
         if handle.target_trade is None:
             return
         rounded = self._round_price(new_target_price)

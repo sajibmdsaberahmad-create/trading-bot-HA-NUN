@@ -89,10 +89,29 @@ def _session_trading_allowed(cfg: BotConfig, state: str) -> bool:
 
 
 def can_trade_now(cfg: Optional[BotConfig] = None) -> tuple[bool, str]:
-    """True when the algo may scan, enter, and manage positions."""
+    """True when the algo may scan, enter, exit, and modify IB orders."""
     cfg = cfg or BotConfig()
     state = get_market_state(cfg)
     return _session_trading_allowed(cfg, state), state
+
+
+def orders_allowed(cfg: Optional[BotConfig] = None) -> tuple[bool, str]:
+    """Alias for can_trade_now — gate all IB order submission."""
+    return can_trade_now(cfg)
+
+
+def allowed_trading_sessions_label(cfg: Optional[BotConfig] = None) -> str:
+    """Human-readable list of enabled sessions (default: pre-market + RTH only)."""
+    cfg = cfg or BotConfig()
+    parts: list[str] = []
+    if getattr(cfg, "ALLOW_PRE_MARKET_TRADING", True):
+        parts.append("pre-market")
+    parts.append("regular hours")
+    if getattr(cfg, "ALLOW_AFTER_HOURS_TRADING", False):
+        parts.append("after-hours")
+    if getattr(cfg, "ALLOW_OVERNIGHT_TRADING", False):
+        parts.append("overnight")
+    return " + ".join(parts)
 
 
 def min_confidence_for_state(cfg: Optional[BotConfig] = None, state: Optional[str] = None) -> float:
@@ -145,11 +164,16 @@ def market_status_line(cfg: Optional[BotConfig] = None) -> str:
     cfg = cfg or BotConfig()
     now = now_et()
     state = get_market_state(cfg)
-    ext = ""
-    if is_extended_session(state):
-        ext = " | extended-hours orders ON"
+    allowed, _ = can_trade_now(cfg)
+    sessions = allowed_trading_sessions_label(cfg)
+    if allowed:
+        mode = f"TRADABLE ({sessions})"
+    elif state in ("after_hours", "overnight"):
+        mode = f"DAY FINISHED — {state.upper()} (enabled: {sessions})"
+    else:
+        mode = f"NO SESSION — {state.upper()}"
     return (
-        f"US Market: {state.upper()} | "
+        f"US Market: {mode} | "
         f"ET {now.strftime('%Y-%m-%d %H:%M:%S')} | "
-        f"RTH 09:30–16:00 ET{ext}"
+        f"RTH 09:30–16:00 ET"
     )
