@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 149,
+  "trades_observed": 150,
   "scans_performed": 27,
-  "improvements_applied": 336,
+  "improvements_applied": 338,
   "reports_generated": 26,
   "event_log": [
     {
@@ -17167,6 +17167,50 @@
           "Monitor AI performance and consider tuning parameters to improve accuracy"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:48:53.780244",
+      "age": "4d 8h 46m 5s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$-76.68",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:48:57.850582",
+      "age": "4d 8h 46m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #337",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "In this trade, the algorithm has entered a regime where it was caught in a council exit due to Ollama's exit at 100% PPO hold.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The algorithm was caught in a council exit due to Ollama's exit at 100% PPO hold.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Tailoring responses based on current market conditions is crucial.",
+          "Understanding and adapting to real-time events is key"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:49:01.436887",
+      "age": "4d 8h 46m 12s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #338",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -18452,8 +18496,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
-  "total_pnl": 124537.33000000005,
+  "mood": "focused",
+  "total_pnl": 124460.65000000005,
   "win_history": [
     0.0,
     0.0,
@@ -18603,20 +18647,21 @@
     -32.19,
     200.85,
     -127.79,
-    -10.64
+    -10.64,
+    -76.68
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 3,
   "worst_streak": 18,
-  "veteran_xp": 2155,
+  "veteran_xp": 2170,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 44,
+    "risk_management": 46,
     "entry_timing": 62
   },
-  "flights_completed": 144,
-  "hours_flown": 14.399999999999965,
+  "flights_completed": 145,
+  "hours_flown": 14.499999999999964,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -18645,12 +18690,12 @@
     "COI": 1,
     "RIV": 1,
     "RKL": 1,
-    "SOF": 1
+    "SOF": 2
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I am feeling a bit stressed due to the recent negative session pips."
+  "mood_message": "You are focusing on your recent trades and performance to stay motivated."
 }

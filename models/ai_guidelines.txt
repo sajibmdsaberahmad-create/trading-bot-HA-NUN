@@ -6062,3 +6062,14 @@ High scanner score after a timeout indicates potential problems with AI performa
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The value is outside the provided ranges (0.35, 0.9).)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:48:57.878850+00:00
+In this trade, the algorithm has entered a regime where it was caught in a council exit due to Ollama's exit at 100% PPO hold.
+The event occurred within the context of a live trading environment and follows a known process for identifying and handling council exits
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Tailoring responses based on current market conditions is crucial.', 'actions': ['Adapt to real-time events by increasing or decreasing the confidence threshold.']}
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The algorithm was caught in a council exit due to Ollama's exit at 100% PPO hold.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:49:01.485043+00:00
+Observed loss_streak — recorded for learning.
+council_exit: Ollama exit 100% (PPO hold)
+
