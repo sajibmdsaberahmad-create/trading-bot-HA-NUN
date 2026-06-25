@@ -4,7 +4,6 @@
   "confidence": 0.6900000000000002,
   "mode": "autonomous",
   "learned_lessons": [
-    "m",
     "d",
     "y",
     "B",
@@ -103,10 +102,11 @@
     "Review market_data_failure on ONCI",
     "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: ONCI@SMART Trades",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The order should be more aggressive, closer to the current market price of 4.3141.'}",
-    "Commander: The user is experiencing repeated failed trades where they cannot accept limits and convert orders to algorithms or make opportunistic exits. This event indicates an issue with the order execution strategy."
+    "Commander: The user is experiencing repeated failed trades where they cannot accept limits and convert orders to algorithms or make opportunistic exits. This event indicates an issue with the order execution strategy.",
+    "Review council_timeout on WAVE"
   ],
-  "last_thought": "```json\n{\n  \"trade_info\": {\n    \"ticker\": \"AZI\",\n    \"entry_price\": 1.91,\n    \"exit_price\": 1.952,\n    \"shares\": 10.0,\n    \"pnl_usd\": 0.42,\n    \"pnl_pct\": 2.2,\n    \"result\": \"win\"\n  },\n  \"learning_logs\": {\n    \"gut_feel\": 0.65,\n    \"intuition\": 0.80\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.0,\n  \"intuition\": 0.58,\n  \"trade_decision\": {\n    \"type\": \"spike_top_hunt\",\n    \"score\": 96.0,\n    \"level\": 1,\n    \"volume\": 93.8,\n    \"reason\": \"scanned HOT_BY_VOLUME#1 and took profit into momentum\"\n  },\n  \"order_confirmation\": {\n    \"type\": \"triggered\",\n    \"side\": \"short\",\n    \"price\": \"0.0\",\n    \"level\": 2\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T14:01:40.493405"
+  "updated": "2026-06-25T14:09:45.468550"
 }

@@ -2190,8 +2190,13 @@ class ScalperRunner:
         log.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names} | Scan {lock_tag}: {elapsed_ms:.0f}ms")
         log.info(
             f"🔒 COMMITTED LOCK: scores≥{min_lock_score:.0f} | "
-            f"rotate every {getattr(self.cfg, 'LOCK_FOCUS_ROTATE_SEC', 60):.0f}s | "
-            f"stale release {getattr(self.cfg, 'LOCK_STALE_RELEASE_SEC', 600):.0f}s"
+            + (
+                f"simultaneous priority focus ({warm_priority_count(self.cfg)} warm + "
+                f"{stream_priority_count(self.cfg)} stream)"
+                if ai_fast_execution(self.cfg)
+                else f"rotate every {getattr(self.cfg, 'LOCK_FOCUS_ROTATE_SEC', 0):.0f}s"
+            )
+            + f" | stale release {getattr(self.cfg, 'LOCK_STALE_RELEASE_SEC', 600):.0f}s"
         )
         if ai_fast_execution(self.cfg):
             priority = self._priority_tickers()
@@ -2479,16 +2484,18 @@ class ScalperRunner:
         if not self._locked_targets:
             return
         watch_all = getattr(self.cfg, "WATCH_ALL_LOCKED_STREAMS", True)
-        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
         if watch_all and ai_fast_execution(self.cfg):
-            wanted = stream_ticker_list(self._locked_targets, self.cfg, focus)
-        else:
+            wanted = stream_ticker_list(self._locked_targets, self.cfg)
+        elif watch_all:
             wanted = [
                 t.ticker for t in self._locked_targets[: self._max_locked()]
             ]
+        else:
+            wanted = self._priority_tickers()[: stream_priority_count(self.cfg)]
         wanted = filter_tradeable_tickers(self.cfg, wanted)
 
-        if not watch_all:
+        if not watch_all and not ai_fast_execution(self.cfg):
+            focus = self._focused_ticker()
             for t in list(self._target_monitors.keys()):
                 if t != focus:
                     self._stop_target_stream(t)
@@ -2501,21 +2508,20 @@ class ScalperRunner:
                 self._stop_target_stream(t)
 
         held = self._held_tickers()
+        priority_set = self._priority_ticker_set()
         tick_all = priority_tick_streams(self.cfg)
         for ticker in wanted:
-            if ticker in held or tick_all:
-                mode = "tick"
-            elif ticker == focus:
+            if ticker in held or tick_all or ticker.upper() in priority_set:
                 mode = "tick"
             else:
                 mode = "realtime"
             self._ensure_target_stream(ticker, mode=mode, quiet=quiet)
 
-        if not quiet and len(wanted) > 1:
+        if not quiet and wanted:
             tickers = ",".join(wanted)
-            tick_kind = "tick ALL priority" if tick_all else f"tick focus={focus or wanted[0]}"
             log.info(
-                f"  📡 WATCH PRIORITY: live streams on [{tickers}] | {tick_kind}"
+                f"  📡 PRIORITY STREAMS ({len(wanted)}): [{tickers}] | "
+                f"simultaneous tick monitor"
             )
 
     def _ensure_target_stream(self, ticker: str, mode: str = "realtime", quiet: bool = False):
@@ -2568,12 +2574,13 @@ class ScalperRunner:
             return
         self._last_flat_pulse = now
         focus = self._focused_ticker() or "?"
+        priority = ",".join(self._priority_tickers()[:10]) or focus
         locked = ",".join(t.ticker for t in self._locked_targets[: self._max_locked()])
         n_streams = len(self._target_monitors)
         nxt = self._next_best_pick.ticker if self._next_best_pick else "-"
         log.info(
-            f"💓 WATCHING: {n_streams} streams | focus={focus} | "
-            f"locked=[{locked}] | next_best={nxt}"
+            f"💓 WATCHING: {n_streams} streams | priority=[{priority}] | "
+            f"pool=[{locked}] | next_best={nxt}"
         )
 
     def _detect_tick_volume_burst(self, dm: DataManager, df: pd.DataFrame) -> Tuple[bool, float]:
@@ -2652,8 +2659,15 @@ class ScalperRunner:
         self._attempt_entry()
 
     def _refresh_locked_bars(self, quiet: bool = False):
-        """Refresh 1min bars for locked targets so volume/uptrend checks stay current."""
-        for target in self._locked_targets:
+        """Refresh 1min bars for priority targets so volume/uptrend checks stay current."""
+        if ai_fast_execution(self.cfg):
+            targets = [
+                t for t in self._locked_targets
+                if t.ticker.upper() in self._priority_ticker_set()
+            ]
+        else:
+            targets = self._locked_targets
+        for target in targets:
             ticker = target.ticker
             blocked, _ = is_market_data_blocked(self.cfg, ticker)
             if blocked:
@@ -2665,7 +2679,8 @@ class ScalperRunner:
                 fresh = dm.fetch_historical(
                     duration="1800 S", bar_size="1 min", use_rth=False, quiet=quiet,
                 )
-                if fresh is not None and len(fresh) >= 20:
+                min_bars = self._min_bars_for(ticker)
+                if fresh is not None and len(fresh) >= min_bars:
                     self._scan_data_cache[ticker] = fresh
             except Exception as exc:
                 record_fetch_failure(self.cfg, ticker, exc, bar_size="1 min")
@@ -2691,7 +2706,8 @@ class ScalperRunner:
                     fresh = dm.fetch_historical(
                         duration="1800 S", bar_size="1 min", use_rth=False, quiet=True,
                     )
-                    if fresh is None or len(fresh) < 20:
+                    min_bars = self._min_bars_for(ticker)
+                    if fresh is None or len(fresh) < min_bars:
                         continue
                     self._scan_data_cache[ticker] = fresh
                     px = float(fresh["close"].iloc[-1])
@@ -2767,10 +2783,10 @@ class ScalperRunner:
             self._last_bar_refresh = now
             self._refresh_locked_bars(quiet=True)
 
-        # Pin live tick stream to top_pick — refresh all locked streams when enabled
-        if getattr(self.cfg, "WATCH_ALL_LOCKED_STREAMS", True):
+        # Keep all priority streams alive — simultaneous monitor (no single-ticker rotation)
+        if ai_fast_execution(self.cfg) or getattr(self.cfg, "WATCH_ALL_LOCKED_STREAMS", True):
             self._ensure_locked_streams(quiet=True)
-        elif getattr(self.cfg, "FOCUS_PIN_TOP_PICK", True) and self.top_pick:
+        elif self.top_pick:
             self._ensure_locked_streams(quiet=True)
 
         best_spike: Optional[Tuple[ScanResult, float, float, pd.DataFrame]] = None
@@ -2778,10 +2794,7 @@ class ScalperRunner:
         best_priority = 0.0
 
         holding = self._held_tickers()
-        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
-        priority_names = set(
-            t.upper() for t in monitor_ticker_list(self._locked_targets, self.cfg, focus)
-        )
+        priority_names = self._priority_ticker_set()
         scan_targets = [
             t for t in self._locked_targets[: self._max_locked()]
             if t.ticker.upper() in priority_names
@@ -2791,7 +2804,7 @@ class ScalperRunner:
             ticker = target.ticker
             if ticker == pending_ticker or ticker in holding:
                 continue
-            min_bars = min_bars_for_ticker(self.cfg, ticker, focus)
+            min_bars = self._min_bars_for(ticker)
             df = self._scan_data_cache.get(ticker)
             dm = self._target_monitors.get(ticker)
             if dm:
@@ -4873,8 +4886,7 @@ class ScalperRunner:
         
         try:
             self.cfg.TICKER = ticker
-            focus = self._focused_ticker() or ticker
-            min_bars = min_bars_for_ticker(self.cfg, ticker, focus)
+            min_bars = self._min_bars_for(ticker)
             
             df_fast = self._scan_data_cache.get(ticker)
             dm = self._target_monitors.get(ticker)

@@ -191,4 +191,5 @@ def is_priority_ticker(
     cfg: BotConfig,
     focus: Optional[str] = None,
 ) -> bool:
-    return ticker.upper() in {t.upper() for t in monitor_ticker_list(targets, cfg, focus)}
+    f = None if ai_fast_execution(cfg) else focus
+    return ticker.upper() in {t.upper() for t in monitor_ticker_list(targets, cfg, f)}
