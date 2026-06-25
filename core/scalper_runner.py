@@ -38,6 +38,7 @@ from core.ai_learning_policy import (
     learn_dont_block,
     failure_cooldown_sec,
     should_permanent_blacklist,
+    is_ib_structural_reject,
     record_failure_for_learning,
 )
 from core.profit_hunting import (
@@ -254,6 +255,7 @@ class ScalperRunner:
         self._contract_blacklist: set = (
             set() if learn_dont_block(cfg) else set(CONTRACT_BLACKLIST)
         )
+        self._ib_structural_reject_count: int = 0
         self._last_scan_time: float = 0.0
         self._last_metrics_write: float = 0.0
         self._last_ai_narrative: float = 0.0
@@ -994,6 +996,14 @@ class ScalperRunner:
         )
         if should_permanent_blacklist(self.cfg, reason):
             self._contract_blacklist.add(ticker)
+        if is_ib_structural_reject(reason):
+            self._ib_structural_reject_count += 1
+            if self._ib_structural_reject_count >= 3:
+                self._last_scan_time = 0
+                log.warning(
+                    "🔄 IB blocked 3+ symbols (closing-only / permission) — forcing universe rescan"
+                )
+                self._ib_structural_reject_count = 0
         self._stop_target_stream(ticker)
         self.broker.cancel_open_orders_for_symbol(ticker)
         self.bracket_handle = None
@@ -3001,7 +3011,8 @@ class ScalperRunner:
             if self._open_position_count() >= self._max_concurrent():
                 return
             if self._pending_entry_ticker and time.time() < self._pending_entry_until:
-                return
+                if self._pending_entry_ticker == ticker:
+                    continue
 
             self._scan_data_cache[ticker] = work_df
             self.top_pick = target
@@ -4307,7 +4318,32 @@ class ScalperRunner:
             self._open_position_from_fill(ticker, int(filled_shares), fill_px, plan)
             return
         st["polls"] = int(st.get("polls", 0)) + 1
-        if st["polls"] >= int(st["max_polls"]):
+        polls = st["polls"]
+        max_polls = int(st["max_polls"])
+        if polls == 1 or polls % 5 == 0:
+            live_px = self._live_price_for(ticker, fill_px)
+            limit_px = float(st.get("limit_px") or fill_px)
+            log.info(
+                f"  ⏳ PENDING ENTRY {ticker}: limit ${limit_px:.4f} | "
+                f"market ${live_px:.4f} | poll {polls}/{max_polls} ({parent_status})"
+            )
+        chase_pct = float(getattr(self.cfg, "ENTRY_LIMIT_CHASE_PCT", 0.006))
+        if polls >= 5 and parent_trade and parent_trade.order:
+            live_px = self._live_price_for(ticker, fill_px)
+            limit_px = float(getattr(parent_trade.order, "lmtPrice", 0) or st.get("limit_px") or 0)
+            if live_px > 0 and limit_px > 0 and live_px > limit_px * (1 + chase_pct):
+                new_limit = round(live_px * (1 + chase_pct * 0.5), 4)
+                try:
+                    parent_trade.order.lmtPrice = new_limit
+                    self.ib.placeOrder(parent_trade.contract, parent_trade.order)
+                    st["limit_px"] = new_limit
+                    log.info(
+                        f"  🏃 CHASE LIMIT {ticker}: ${limit_px:.4f} → ${new_limit:.4f} "
+                        f"(market ${live_px:.4f})"
+                    )
+                except Exception as exc:
+                    log.debug(f"Limit chase failed: {exc}")
+        if polls >= max_polls:
             if filled_shares >= 1:
                 log.warning(
                     f"Partial fill {int(filled_shares)}/{shares} below "
@@ -4939,6 +4975,8 @@ class ScalperRunner:
             log.info(f"  🧹 Cleared {n_cancelled} stale {ticker} order(s) before entry")
         self._pending_entry_ticker = ticker
         block_sec = float(getattr(self.cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
+        if ai_fast_execution(self.cfg):
+            block_sec = min(block_sec, 20.0)
         self._pending_entry_until = now + block_sec
         regime_result = (
             self.regime_detector.classify(df_fast)
