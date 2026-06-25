@@ -311,6 +311,7 @@ class ScalperRunner:
         self._last_micro_forecast: Dict[str, Any] = {}
         self._bar_warm_due = False
         self._bar_warm_idx = 0
+        self._stream_repair: Dict[str, str] = {}
         
         # Pilot Experience and Pattern Memory systems
         self.pilot = PilotExperienceSystem(cfg)
@@ -2117,6 +2118,8 @@ class ScalperRunner:
                 )
                 self.ib.sleep(loop_sec)
 
+                self._service_stream_repairs()
+
                 if getattr(self, "_deferred_ib_scan", False) and self.conn.is_connected():
                     self._deferred_ib_scan = False
                     can_defer, _ms = can_trade_now(self.cfg)
@@ -2666,6 +2669,15 @@ class ScalperRunner:
         self._ensure_locked_streams()
         prefetch_tickers = [p.ticker for p in self._locked_targets]
         self._schedule_bar_prefetch(prefetch_tickers)
+        if getattr(self.cfg, "PAPER_TRADING", False) and getattr(
+            self.cfg, "PAPER_USE_HISTORICAL_BARS", True,
+        ):
+            warmed = 0
+            for ticker in self._priority_tickers()[:6]:
+                if self._prefetch_one_ticker_bars(ticker, quiet=True) is not None:
+                    warmed += 1
+            if warmed:
+                log.info(f"📊 Paper warm: {warmed} tickers loaded from IB historical bars")
         if getattr(self.cfg, "DEFER_BAR_WARM_ON_LOCK", True):
             self._bar_warm_due = True
             self._bar_warm_idx = 0
@@ -2974,19 +2986,26 @@ class ScalperRunner:
         priority = self._priority_tickers()
         return priority[0] if priority else self._locked_targets[0].ticker
 
+    def _service_stream_repairs(self) -> None:
+        """Restart streams outside IB error callbacks (avoids nested event loop)."""
+        if not self._stream_repair:
+            return
+        for ticker, mode in list(self._stream_repair.items()):
+            self._stream_repair.pop(ticker, None)
+            if ticker in self._target_monitors:
+                self._stop_target_stream(ticker)
+            log.info(f"  📡 {ticker}: switching to 5s bars")
+            self._start_target_stream(ticker, quiet=True, stream_mode=mode)
+
     def _ensure_focus_stream(self, quiet: bool = False):
         """Backward-compatible alias — starts all locked streams when enabled."""
         self._ensure_locked_streams(quiet=quiet)
 
     def _on_tick_stream_limit(self, ticker: str, error_code: int, message: str):
-        """IB 10189/10190 — tick-by-tick unavailable; fall back to 5s bars."""
+        """IB 10189/10190 — tick-by-tick unavailable; fall back to 5s bars on next loop tick."""
         if ticker:
             self._tick_limit_denied.add(ticker.upper())
-        if ticker and ticker in self._target_monitors:
-            if self._stream_modes.get(ticker) == "tick":
-                log.info(f"  📡 {ticker}: tick cap hit → switching to 5s bars")
-                self._stop_target_stream(ticker)
-                self._start_target_stream(ticker, quiet=True, stream_mode="realtime")
+            self._stream_repair[ticker.upper()] = "realtime"
 
     def _active_tick_stream_count(self) -> int:
         return sum(1 for mode in self._stream_modes.values() if mode == "tick")

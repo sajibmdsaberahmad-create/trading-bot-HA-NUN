@@ -300,6 +300,10 @@ class IBConnector:
         if errorCode == 162 and "scanner subscription cancelled" in (errorString or "").lower():
             return
 
+        # Stale cancel after failed tick-by-tick subscribe
+        if errorCode == 300 and "can't find eid" in (errorString or "").lower():
+            return
+
         # IB tick-by-tick unsupported (10189) or cap (10190) — downgrade to 5s bars
         if errorCode in (10189, 10190):
             try:
