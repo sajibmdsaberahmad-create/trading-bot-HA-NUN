@@ -138,3 +138,4 @@
 {"timestamp":"2026-06-25T17:39:06.595094+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-9502.32,"pnl_pct":-0.9776,"primary_goal":true,"reason":"trailing_profit","price":0.1814}
 {"timestamp":"2026-06-25T17:39:23.796839+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T17:39:48.537704+00:00","event":"council_exit","ticker":"BITO","pnl_usd":-297.52,"source":"buffer","reason":"council_exit: Ollama exit 98% (PPO hold)"}
+{"timestamp":"2026-06-25T17:40:34.960888+00:00","event":"trailing_stop","ticker":"GPUS","pnl_usd":202.56,"pnl_pct":12.7879,"primary_goal":true,"reason":"trailing_stop","price":0.182}
