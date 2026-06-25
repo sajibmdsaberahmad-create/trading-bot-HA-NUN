@@ -1104,3 +1104,13 @@ MD 420 no_md_permission: Invalid Real-time Query:No market data permissions for 
 Observed market_data_failure — recorded for learning.
 MD 420 no_md_permission: Invalid Real-time Query:No market data permissions for ARCAEDGE STK
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:49:49.696966+00:00
+Market Data Failure - No Historical Data Error
+The event occurred due to a missing historical data query for the ticker 'CMGR'. The algorithm needs to improve its ability to fetch recent market data.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Confidence threshold increased to 0.58, reducing the risk of missed profit hunting.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T13:50:19.392166+00:00
+Observed market_data_failure — recorded for learning.
+MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TVBCY@SMART Trades
+

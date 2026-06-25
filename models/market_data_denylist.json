@@ -320,5 +320,19 @@
     "first_seen": "2026-06-25T13:49:45.247862+00:00",
     "last_seen": "2026-06-25T13:49:45.329859+00:00",
     "source": "fetch:1 min"
+  },
+  "TVBCY": {
+    "ticker": "TVBCY",
+    "failures": 2,
+    "last_code": 162,
+    "last_reason": "IB returned no historical data. Possible causes:\n  - Market data subscription does not cover this ticker\n  - IB Gateway is not fully logged in\n  - Outside data availability window\n  - Paper account may need a market data subscription",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "PINK",
+    "skip_until": 1782396314.68759,
+    "skip_until_iso": "2026-06-25T14:05:14.687590+00:00",
+    "first_seen": "2026-06-25T13:50:14.623803+00:00",
+    "last_seen": "2026-06-25T13:50:14.687720+00:00",
+    "source": "fetch:1 min"
   }
 }

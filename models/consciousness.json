@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 29,
   "scans_performed": 27,
-  "improvements_applied": 142,
+  "improvements_applied": 144,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8195,6 +8195,42 @@
         "applied": [],
         "lessons": [
           "Review market_data_failure on KIROY"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T13:49:49.667989",
+      "age": "4d 2h 47m 0s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #143",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Market Data Failure - No Historical Data Error",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Confidence threshold increased to 0.58, reducing the risk of missed profit hunting.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'market_data_failure', 'value': 'No historical data error - This event prevents future profit hunting in the stock market.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T13:50:19.362294",
+      "age": "4d 2h 47m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #144",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Observed market_data_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review market_data_failure on TVBCY"
         ]
       }
     }
