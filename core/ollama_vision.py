@@ -37,6 +37,7 @@ VISION_FALLBACK_CHAIN = (
     "llava:7b-v1.6-mistral-q4_K_M",
     "moondream",
     "llava",
+    "llava:latest",
 )
 
 
@@ -44,20 +45,37 @@ def resolve_vision_model(cfg: BotConfig) -> str:
     """Env override → RAM tier quantized default → first installed fallback."""
     explicit = (getattr(cfg, "OLLAMA_VISION_MODEL", "") or os.getenv("OLLAMA_VISION_MODEL", "") or "").strip()
     if explicit and explicit != "llava":
-        return explicit
+        return installed_vision_tag(cfg, explicit) or explicit
     if explicit == "llava" and os.getenv("OLLAMA_VISION_MODEL"):
-        return explicit
+        return installed_vision_tag(cfg, explicit) or explicit
 
     from core.ram_tier import detect_ram_tier
 
     tier = getattr(cfg, "RAM_TIER", "") or detect_ram_tier()
     tier_model = VISION_MODEL_BY_TIER.get(tier, "llava-phi3:3.8b")
     if is_vision_model_present(cfg, tier_model):
-        return tier_model
+        return installed_vision_tag(cfg, tier_model) or tier_model
     for candidate in VISION_FALLBACK_CHAIN:
         if is_vision_model_present(cfg, candidate):
-            return candidate
-    return tier_model
+            return installed_vision_tag(cfg, candidate) or candidate
+    tag = installed_vision_tag(cfg, tier_model)
+    return tag or tier_model
+
+
+def installed_vision_tag(cfg: BotConfig, model: str) -> Optional[str]:
+    """Map llava → llava:latest for Ollama API."""
+    target = (model or "").strip()
+    if not target:
+        return None
+    installed = _list_models(cfg)
+    full_tags = [n for n in installed if ":" in n]
+    if target in full_tags:
+        return target
+    base = target.split(":")[0]
+    for tag in full_tags:
+        if tag.split(":")[0] == base:
+            return tag
+    return None
 
 
 def vision_model_name(cfg: BotConfig) -> str:

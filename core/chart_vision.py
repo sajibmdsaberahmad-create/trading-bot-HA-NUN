@@ -97,6 +97,9 @@ class ChartVisionSlot:
 class ChartVisionLine:
     """Async llava chart reads — same non-blocking pattern as LiveAILine."""
 
+    _global_vision_lock = threading.Lock()
+    _global_vision_in_flight = 0
+
     def __init__(self, cfg: BotConfig):
         self.cfg = cfg
         self._slots: Dict[str, ChartVisionSlot] = {}
@@ -165,6 +168,14 @@ class ChartVisionLine:
             and getattr(self.cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False)
         )
         if opportunistic:
+            with ChartVisionLine._global_vision_lock:
+                max_parallel = int(getattr(self.cfg, "CHART_VISION_MAX_PARALLEL", 1))
+                if ChartVisionLine._global_vision_in_flight >= max_parallel:
+                    log.debug(
+                        f"ChartVision skip {ticker}: {ChartVisionLine._global_vision_in_flight} "
+                        f"vision call(s) in flight (8GB limit)"
+                    )
+                    return False
             log.info(
                 f"📈 ChartVision opportunistic {ticker} "
                 f"(score={scan_score:.0f}) via {vmodel}"
@@ -196,6 +207,8 @@ class ChartVisionLine:
         def _worker():
             start = time.time()
             read = ""
+            with ChartVisionLine._global_vision_lock:
+                ChartVisionLine._global_vision_in_flight += 1
             try:
                 from core.ollama_vision import prepare_for_vision_call
 
@@ -204,6 +217,10 @@ class ChartVisionLine:
             except Exception as exc:
                 log.debug(f"Chart vision {ticker}: {exc}")
             finally:
+                with ChartVisionLine._global_vision_lock:
+                    ChartVisionLine._global_vision_in_flight = max(
+                        0, ChartVisionLine._global_vision_in_flight - 1
+                    )
                 if getattr(self.cfg, "OLLAMA_VISION_UNLOAD_AFTER_CALL", False):
                     try:
                         from core.ollama_vision import stop_vision_model

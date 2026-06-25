@@ -46,7 +46,7 @@ TEXT_FALLBACK_CHAIN: tuple[str, ...] = (
     "qwen2.5:0.5b",
 )
 
-PRESSURE_FALLBACK = "qwen2.5:1.5b"
+PRESSURE_FALLBACK = "qwen2.5:0.5b"
 PRESSURE_FALLBACK_MINIMAL = "qwen2.5:0.5b"
 
 # Models that should not be default text LLMs on compact RAM.
@@ -190,8 +190,8 @@ def sync_text_model(cfg: BotConfig) -> str:
     if os.getenv("OLLAMA_DYNAMIC_MODEL", "").lower() in ("0", "false", "no"):
         dynamic = False
     if not dynamic:
-        return getattr(cfg, "OLLAMA_MODEL", "qwen2.5:3b")
-    chosen = active_text_model(cfg)
+        return ensure_text_model(cfg)
+    chosen = ensure_text_model(cfg)
     prev = getattr(cfg, "OLLAMA_MODEL", "")
     if chosen != prev:
         log.info(f"🧠 Ollama text model: {prev or '?'} → {chosen}")
@@ -222,10 +222,12 @@ def text_model_startup_warnings(cfg: BotConfig) -> list[str]:
             warnings.append(f"Text model {resolved} may swap on 8GB — prefer phi3:mini or qwen2.5:1.5b")
 
     if tier == "compact" and not is_text_model_present(cfg, resolved):
-        warnings.append(
-            f"Recommended text model {resolved} not installed — run: "
-            "bash scripts/setup_ollama_8gb.sh"
-        )
+        tag = installed_model_tag(cfg, resolved)
+        if not tag:
+            warnings.append(
+                f"Text model {resolved} not installed (Ollama 404) — run: "
+                "ollama pull qwen2.5:3b"
+            )
 
     return warnings
 

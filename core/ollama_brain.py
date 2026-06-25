@@ -159,14 +159,19 @@ class OllamaBrain:
 
     def _active_model(self, override: Optional[str] = None) -> str:
         if override:
-            return override
-        if getattr(self.cfg, "OLLAMA_DYNAMIC_MODEL", True):
             try:
-                from core.ollama_models import active_text_model
+                from core.ollama_models import installed_model_tag
 
-                return active_text_model(self.cfg)
+                tag = installed_model_tag(self.cfg, override)
+                return tag or override
             except Exception:
-                pass
+                return override
+        try:
+            from core.ollama_models import ensure_text_model
+
+            return ensure_text_model(self.cfg)
+        except Exception:
+            pass
         return self.config.model
 
     def _execute_call(self, prompt: str, system: Optional[str] = None,
@@ -214,7 +219,20 @@ class OllamaBrain:
 
         except urllib.error.URLError as exc:
             self._error_count += 1
-            log.warning(f"Ollama connection failed: {exc}")
+            err_s = str(exc)
+            if "404" in err_s:
+                try:
+                    from core.ollama_models import ensure_text_model
+
+                    fixed = ensure_text_model(self.cfg)
+                    self.config.model = fixed
+                    log.warning(
+                        f"Ollama 404 for model — remapped to installed tag: {fixed}"
+                    )
+                except Exception:
+                    log.warning(f"Ollama connection failed: {exc}")
+            else:
+                log.warning(f"Ollama connection failed: {exc}")
         except json.JSONDecodeError:
             self._error_count += 1
             log.warning("Ollama returned invalid JSON")
@@ -279,9 +297,9 @@ class OllamaBrain:
         if not self.config.enabled or not image_bytes:
             return None
 
-        from core.ollama_vision import resolve_vision_model
+        from core.ollama_vision import resolve_vision_model, installed_vision_tag
 
-        model = resolve_vision_model(self.cfg)
+        model = installed_vision_tag(self.cfg, resolve_vision_model(self.cfg)) or resolve_vision_model(self.cfg)
         timeout = int(getattr(self.cfg, "OLLAMA_VISION_TIMEOUT", 45))
         max_tokens = int(getattr(self.cfg, "OLLAMA_VISION_MAX_TOKENS", 512))
         # Short keep-alive on low RAM — unload frees text model slot
