@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 149,
   "scans_performed": 27,
-  "improvements_applied": 335,
+  "improvements_applied": 336,
   "reports_generated": 26,
   "event_log": [
     {
@@ -17143,6 +17143,28 @@
         "lessons": [
           "Optimize trading algorithms to reduce execution speed and improve trading efficiency.",
           "Investigate and adjust the settings of the trade system to ensure optimal performance."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:48:22.456938",
+      "age": "4d 8h 45m 33s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #336",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout event occurred during the real-time council scan.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The value is outside the provided ranges (0.35, 0.9).",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Monitor AI performance and consider tuning parameters to improve accuracy"
         ]
       }
     }

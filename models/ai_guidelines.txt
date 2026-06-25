@@ -5975,3 +5975,90 @@ The event details are related to a loss in the LCID trading algo, specifically i
 AI is experiencing a performance degradation due to the high execution speed of the algorithm.
 The event indicates that the algorithm has become too fast in executing trades, leading to frequent trades and poor trading discipline. The event suggests that the trade system may need to be tuned or optimized for better execution.
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:48:22.480250+00:00
+The council timeout event occurred during the real-time council scan.
+High scanner score after a timeout indicates potential problems with AI performance and data quality.
+• A
+• d
+• j
+• u
+• s
+• t
+•  
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+•  
+• t
+• o
+•  
+• i
+• m
+• p
+• r
+• o
+• v
+• e
+•  
+• A
+• I
+•  
+• p
+• e
+• r
+• f
+• o
+• r
+• m
+• a
+• n
+• c
+• e
+•  
+• a
+• n
+• d
+•  
+• r
+• e
+• d
+• u
+• c
+• e
+•  
+• f
+• a
+• l
+• s
+• e
+•  
+• p
+• o
+• s
+• i
+• t
+• i
+• v
+• e
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The value is outside the provided ranges (0.35, 0.9).)
+
