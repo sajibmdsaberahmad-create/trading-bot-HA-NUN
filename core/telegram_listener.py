@@ -61,7 +61,7 @@ class TelegramCommandListener:
         self.ai_commander = ai_commander
         self.think_fn = think_fn
         self.vision_fn = vision_fn
-        self._token = (getattr(cfg, "TELEGRAM_BOT_TOKEN", "") or "").strip()
+        self._token = (getattr(cfg, "TELEGRAM_BOT_TOKEN", "") or "").strip().strip("'\"")
         self._offset = 0
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
@@ -89,6 +89,11 @@ class TelegramCommandListener:
         self._stop.clear()
         self._ensure_polling_mode()
         self._verify_bot_token()
+        try:
+            from core.telegram_auth import register_primary_chat
+            register_primary_chat(self.cfg)
+        except Exception as exc:
+            log.debug(f"Telegram primary chat register: {exc}")
         self._thread = threading.Thread(target=self._poll_loop, name="telegram-listener", daemon=True)
         self._thread.start()
         secret = (getattr(self.cfg, "TELEGRAM_VERIFY_SECRET", "") or "").strip()
@@ -228,16 +233,20 @@ class TelegramCommandListener:
                     {"offset": self._offset, "timeout": 25, "allowed_updates": json.dumps(["message"])},
                     timeout=40,
                 )
+                if not result.get("ok", True):
+                    log.warning(f"Telegram getUpdates error: {result.get('description', result)}")
+                    time.sleep(5.0)
+                    continue
                 for upd in result.get("result", []):
                     self._offset = max(self._offset, int(upd.get("update_id", 0)) + 1)
                     msg = upd.get("message")
                     if msg:
                         self._handle_message(msg)
             except urllib.error.URLError as exc:
-                log.debug(f"Telegram poll network: {exc}")
+                log.warning(f"Telegram poll network: {exc}")
                 time.sleep(5.0)
             except Exception as exc:
-                log.debug(f"Telegram poll: {exc}")
+                log.warning(f"Telegram poll error: {exc}")
                 time.sleep(2.0)
             if not self._stop.is_set():
                 time.sleep(self._poll_sec)
@@ -293,30 +302,6 @@ class TelegramCommandListener:
             return
 
         low = text.lower().strip()
-        if low.startswith("/verify") or (
-            text and not low.startswith("/") and verification_required(self.cfg)
-        ):
-            phrase = text
-            if low.startswith("/verify"):
-                parts = text.split(maxsplit=1)
-                phrase = parts[1] if len(parts) > 1 else ""
-            if verify_phrase(self.cfg, chat_id, phrase, username=username, first_name=first_name):
-                self.send_instant(
-                    chat_id,
-                    "✅ Verified — full commander access unlocked.\n"
-                    "Try /help · /daily · /positions · /status · /system",
-                    reply_to=reply_id,
-                )
-                return
-            self.send_instant(
-                chat_id,
-                "🔒 Verification failed.\n"
-                "Send: /verify hall of fame\n"
-                "(use your configured secret phrase)",
-                reply_to=reply_id,
-            )
-            return
-
         if low.startswith("/start") or low.startswith("/help"):
             self.send_instant(
                 chat_id,
@@ -328,6 +313,37 @@ class TelegramCommandListener:
                 reply_to=reply_id,
             )
             return
+
+        if low.startswith("/verify"):
+            parts = text.split(maxsplit=1)
+            phrase = parts[1].strip() if len(parts) > 1 else ""
+            if verify_phrase(self.cfg, chat_id, phrase, username=username, first_name=first_name):
+                self.send_instant(
+                    chat_id,
+                    "✅ Verified — full commander access unlocked.\n"
+                    "Try /help · /daily · /positions · /status · /system",
+                    reply_to=reply_id,
+                )
+            else:
+                self.send_instant(
+                    chat_id,
+                    "🔒 Verification failed.\n"
+                    "Send: /verify hall of fame\n"
+                    "(use your configured secret phrase)",
+                    reply_to=reply_id,
+                )
+            return
+
+        # Plain-text secret phrase (no /verify prefix)
+        secret = (getattr(self.cfg, "TELEGRAM_VERIFY_SECRET", "") or "").strip()
+        if text and secret and text.strip() == secret:
+            if verify_phrase(self.cfg, chat_id, text, username=username, first_name=first_name):
+                self.send_instant(
+                    chat_id,
+                    "✅ Verified — full commander access unlocked.",
+                    reply_to=reply_id,
+                )
+                return
 
         self.send_instant(
             chat_id,

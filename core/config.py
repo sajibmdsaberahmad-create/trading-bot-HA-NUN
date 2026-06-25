@@ -583,9 +583,18 @@ class BotConfig:
     # NOTIFICATIONS
     # ════════════════════════════════════════════════════════════════════
     TELEGRAM_ENABLED:  bool = True
-    TELEGRAM_BOT_TOKEN: str = os.getenv("TRADING_BOT_TELEGRAM_TOKEN", "")
+    TELEGRAM_BOT_TOKEN: str = (
+        os.getenv("TRADING_BOT_TELEGRAM_TOKEN", "")
+        or os.getenv("TELEGRAM_BOT_TOKEN", "")
+    ).strip().strip("'\"")
     # Optional legacy default chat — outbound uses verified chats by default
-    TELEGRAM_CHAT_ID:   str = os.getenv("TRADING_BOT_TELEGRAM_CHAT_ID", "")
+    TELEGRAM_CHAT_ID: str = (
+        os.getenv("TRADING_BOT_TELEGRAM_CHAT_ID", "")
+        or os.getenv("TELEGRAM_CHAT_ID", "")
+    ).strip().strip("'\"")
+    TELEGRAM_AUTO_VERIFY_PRIMARY: bool = os.getenv(
+        "TRADING_BOT_TELEGRAM_AUTO_VERIFY_PRIMARY", "true"
+    ).lower() in ("1", "true", "yes")
     TELEGRAM_VERIFIED_ONLY_OUTBOUND: bool = os.getenv(
         "TRADING_BOT_TELEGRAM_VERIFIED_ONLY", "true"
     ).lower() in ("1", "true", "yes")

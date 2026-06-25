@@ -193,3 +193,31 @@ def revoke_chat(cfg: BotConfig, chat_id: int | str) -> bool:
         del verified[key]
         _save_store(cfg, store)
     return True
+
+
+def register_primary_chat(cfg: BotConfig) -> bool:
+    """
+    Register TELEGRAM_CHAT_ID from .env as a verified commander (outbound alerts).
+    Inbound still allows any account to /verify separately.
+    """
+    if not getattr(cfg, "TELEGRAM_AUTO_VERIFY_PRIMARY", True):
+        return False
+    cid = (getattr(cfg, "TELEGRAM_CHAT_ID", "") or "").strip()
+    if not cid:
+        return False
+    key = str(cid)
+    if is_verified(cfg, key):
+        return False
+    now = datetime.now(timezone.utc).isoformat()
+    with _lock:
+        store = _load_store(cfg)
+        verified = store.setdefault("verified", {})
+        verified[key] = {
+            "verified_at": now,
+            "username": "primary",
+            "first_name": "env_chat_id",
+            "source": "TELEGRAM_CHAT_ID",
+        }
+        _save_store(cfg, store)
+    log.info(f"Telegram primary chat {key} registered for outbound alerts")
+    return True

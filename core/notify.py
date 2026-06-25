@@ -126,6 +126,12 @@ class Notifier:
                 "Telegram: no verified commanders yet — message the bot from any account "
                 "and send /verify YOUR_SECRET_PHRASE to receive alerts."
             )
+        try:
+            from core.telegram_auth import register_primary_chat
+            if register_primary_chat(cfg):
+                log.info("Telegram: primary chat_id from .env registered for outbound alerts")
+        except Exception:
+            pass
         if cfg.EMAIL_ENABLED and not self.email_ready:
             log.warning(
                 "Email notifications enabled in config but SMTP env vars "
