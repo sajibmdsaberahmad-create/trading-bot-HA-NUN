@@ -2308,6 +2308,15 @@ class ScalperRunner:
                     )
                 self.ib.sleep(loop_sec)
 
+                # Fill polls first — don't let councils/scans delay IB bracket confirmation
+                if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
+                    can_trade_pe, _ = can_trade_now(self.cfg)
+                    if can_trade_pe:
+                        for _ in range(min(4, max(1, len(self._entry_poll_states)))):
+                            self._service_pending_entry()
+                            if not self._entry_poll_states:
+                                break
+
                 self._service_stream_repairs()
 
                 if getattr(self, "_bootstrap_entry_due", False):
@@ -3614,7 +3623,7 @@ class ScalperRunner:
 
         for target in scan_targets:
             ticker = target.ticker
-            if ticker == pending_ticker or ticker in holding:
+            if ticker in self._entry_poll_states or ticker in holding:
                 continue
             min_bars = self._min_bars_for(ticker)
             df, live_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=min_bars)
@@ -5204,12 +5213,17 @@ class ScalperRunner:
         st["polls"] = int(st.get("polls", 0)) + 1
         polls = st["polls"]
         max_polls = int(st["max_polls"])
-        if polls == 1 or polls % 5 == 0:
+        now_ts = time.time()
+        last_hb = float(st.get("last_heartbeat", 0))
+        if polls == 1 or polls % 5 == 0 or (now_ts - last_hb) >= 3.0:
+            st["last_heartbeat"] = now_ts
             live_px = self._live_price_for(ticker, fill_px)
             limit_px = float(st.get("limit_px") or fill_px)
+            elapsed = now_ts - float(st.get("started_at", now_ts))
             log.info(
                 f"  ⏳ PENDING ENTRY {ticker}: limit ${limit_px:.4f} | "
-                f"market ${live_px:.4f} | poll {polls}/{max_polls} ({parent_status})"
+                f"market ${live_px:.4f} | poll {polls}/{max_polls} "
+                f"({parent_status}) | {elapsed:.1f}s"
             )
         chase_pct = float(getattr(self.cfg, "ENTRY_LIMIT_CHASE_PCT", 0.006))
         if polls >= 5 and parent_trade and parent_trade.order:
@@ -6030,7 +6044,13 @@ class ScalperRunner:
                     "attempt": attempt,
                     "last_ib_error": last_ib_error,
                     "bracket": bracket,
+                    "started_at": time.time(),
+                    "last_heartbeat": 0.0,
                 }
+                log.info(
+                    f"  ⏳ Awaiting IB fill {ticker}: {shares} sh "
+                    f"parent#{bracket.parent_order_id} ({mode_label})"
+                )
                 return "waiting"
         return "waiting"
 
@@ -6056,8 +6076,10 @@ class ScalperRunner:
         if ticker in self._held_tickers():
             return 'waiting'
         now = time.time()
-        if self._pending_entry_ticker and now < self._pending_entry_until:
-            return 'waiting'
+        if ticker in self._entry_poll_states:
+            return "waiting"
+        if self._pending_entry_ticker == ticker and now < self._pending_entry_until:
+            return "waiting"
         if now < self._entry_cooldown_until.get(ticker, 0):
             return 'waiting'
 
