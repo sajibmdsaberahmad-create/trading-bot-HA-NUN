@@ -182,6 +182,20 @@ class BotConfig:
         "PROFIT_HUNT_SKIP_MIN_HOLD", "true"
     ).lower() in ("1", "true", "yes")
 
+    # AI fast execution — prioritize top names, fewer bars, spike fast-entry
+    AI_FAST_EXECUTION: bool = os.getenv(
+        "AI_FAST_EXECUTION", "true"
+    ).lower() in ("1", "true", "yes")
+    AI_STREAM_PRIORITY_COUNT: int = int(os.getenv("AI_STREAM_PRIORITY_COUNT", "8"))
+    AI_WARM_PRIORITY_COUNT: int = int(os.getenv("AI_WARM_PRIORITY_COUNT", "10"))
+    AI_MIN_BARS_FOCUS: int = int(os.getenv("AI_MIN_BARS_FOCUS", "6"))
+    AI_MIN_BARS_SCAN: int = int(os.getenv("AI_MIN_BARS_SCAN", "10"))
+    AI_SPIKE_FAST_ENTRY: bool = os.getenv(
+        "AI_SPIKE_FAST_ENTRY", "true"
+    ).lower() in ("1", "true", "yes")
+    AI_SPIKE_FAST_MIN_RATIO: float = float(os.getenv("AI_SPIKE_FAST_MIN_RATIO", "1.15"))
+    AI_SPIKE_FAST_MIN_SCORE: float = float(os.getenv("AI_SPIKE_FAST_MIN_SCORE", "15"))
+
     TAKE_PROFIT_ATR_MULTIPLIER: float = 2.5
     MIN_REWARD_RISK_RATIO:      float = 2.0
     MIN_REWARD_RISK_TOLERANCE:  float = float(os.getenv("MIN_REWARD_RISK_TOLERANCE", "0.02"))
@@ -362,7 +376,7 @@ class BotConfig:
     FAST_SCANNER_LOCK_FALLBACK: bool = os.getenv("FAST_SCANNER_LOCK_FALLBACK", "false").lower() in ("1", "true", "yes")
     SCAN_MTF_DURING_RTH: bool = os.getenv("SCAN_MTF_DURING_RTH", "false").lower() in ("1", "true", "yes")
     SCAN_PREFETCH_LOCK_N: int = int(os.getenv("SCAN_PREFETCH_LOCK_N", "5"))
-    SCAN_BAR_PREFETCH_PER_LOOP: int = int(os.getenv("SCAN_BAR_PREFETCH_PER_LOOP", "2"))
+    SCAN_BAR_PREFETCH_PER_LOOP: int = int(os.getenv("SCAN_BAR_PREFETCH_PER_LOOP", "8"))
     SCAN_BAR_DURATION: str = "1800 S"       # 30min bars for fast scan (not full day)
     SCAN_REFINE_TOP_N: int = 12             # MTF/AI refine only top N after fast pass
     SCAN_EARLY_EXIT_QUALIFIED: int = 18     # Stop scanning once this many qualify
@@ -445,10 +459,10 @@ class BotConfig:
     ))
     # Strong scanner + spike → decide without waiting for slow Ollama
     COUNCIL_SCANNER_FAST_SEC: float = float(os.getenv(
-        "COUNCIL_SCANNER_FAST_SEC", "4" if _LOW_RAM else "8"
+        "COUNCIL_SCANNER_FAST_SEC", "3" if _LOW_RAM else "3"
     ))
-    COUNCIL_SCANNER_FAST_MIN_SCORE: float = float(os.getenv("COUNCIL_SCANNER_FAST_MIN_SCORE", "78"))
-    COUNCIL_SCANNER_FAST_MIN_SPIKE: float = float(os.getenv("COUNCIL_SCANNER_FAST_MIN_SPIKE", "1.25"))
+    COUNCIL_SCANNER_FAST_MIN_SCORE: float = float(os.getenv("COUNCIL_SCANNER_FAST_MIN_SCORE", "20"))
+    COUNCIL_SCANNER_FAST_MIN_SPIKE: float = float(os.getenv("COUNCIL_SCANNER_FAST_MIN_SPIKE", "1.15"))
     OFF_HOURS_HEAVY_TRAINING: bool = field(
         default_factory=lambda: os.getenv(
             "OFF_HOURS_HEAVY_TRAINING", "false" if _LOW_RAM else "true",
@@ -583,7 +597,7 @@ class BotConfig:
     LOCK_BAR_REFRESH_SEC: float = 180.0   # Refresh locked bars every 3 min (not 60s)
     LOCK_STALE_RELEASE_SEC: float = float(os.getenv("LOCK_STALE_RELEASE_SEC", "600"))
     LOCK_FOCUS_ROTATE_SEC: float = float(os.getenv("LOCK_FOCUS_ROTATE_SEC", "60"))
-    LOCK_BAR_WARM_BUDGET_SEC: float = float(os.getenv("LOCK_BAR_WARM_BUDGET_SEC", "12"))
+    LOCK_BAR_WARM_BUDGET_SEC: float = float(os.getenv("LOCK_BAR_WARM_BUDGET_SEC", "28"))
     ENTRY_PENDING_BLOCK_SEC: float = float(os.getenv("ENTRY_PENDING_BLOCK_SEC", "45"))
     WATCH_ALL_LOCKED_STREAMS: bool = os.getenv(
         "WATCH_ALL_LOCKED_STREAMS", "true"

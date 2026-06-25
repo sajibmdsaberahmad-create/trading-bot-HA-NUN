@@ -332,7 +332,15 @@ def merge_entry_decision(
         return base
 
     if ollama_status == "scanner_fast":
-        if spike_ratio >= 1.25 and scan_score >= 75:
+        try:
+            from core.config import BotConfig
+            from core.fast_execution import council_fast_min_score, council_fast_min_spike
+            _cfg = BotConfig()
+            min_sc = council_fast_min_score(_cfg)
+            min_sp = council_fast_min_spike(_cfg)
+        except Exception:
+            min_sc, min_sp = 20.0, 1.15
+        if spike_ratio >= min_sp and scan_score >= min_sc:
             base.update({
                 "enter": True,
                 "pending": False,

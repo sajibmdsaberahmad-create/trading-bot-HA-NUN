@@ -89,6 +89,10 @@ def extract_ticker_from_error(
     return ""
 
 
+def is_ib_scanner_cancel_162(message: str) -> bool:
+    return "scanner subscription cancelled" in (message or "").lower()
+
+
 def classify_failure(code: int, message: str) -> str:
     msg = (message or "").lower()
     if code == 420 or "arcaedge" in msg or "no market data permissions" in msg:
@@ -231,6 +235,8 @@ def handle_ib_market_data_error(
 ) -> Optional[Dict[str, Any]]:
     """Called from IBConnector._on_error for market-data failure codes."""
     if error_code not in MARKET_DATA_ERROR_CODES:
+        return None
+    if error_code == 162 and is_ib_scanner_cancel_162(error_string):
         return None
     ticker = extract_ticker_from_error(contract, error_string)
     if not ticker:
