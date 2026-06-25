@@ -3168,5 +3168,22 @@
     "lessons": [
       "A no-aligned signal can be caused by poor alignment of signals or inaccurate execution"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T15:29:43.484566+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Setting a higher confidence threshold value can prevent frequent failures.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The ib_failure event occurred, and the algo is experiencing frequent failures.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Inaccurate confidence threshold values may lead to frequent failures.'}"
+    ]
   }
 ]

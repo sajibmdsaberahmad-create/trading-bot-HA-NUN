@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 100,
   "training_sessions": 27,
-  "trades_observed": 33,
+  "trades_observed": 34,
   "scans_performed": 27,
-  "improvements_applied": 185,
+  "improvements_applied": 186,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10179,6 +10179,35 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #100",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:29:38.670742",
+      "age": "4d 4h 26m 49s",
+      "type": "TRADE",
+      "message": "Observed trade: MIMI LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:29:43.463366",
+      "age": "4d 4h 26m 54s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #186",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "The ib_failure event occurred, and the algo is experiencing frequent failures.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Setting a higher confidence threshold value can prevent frequent failures.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Inaccurate confidence threshold values may lead to frequent failures.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T15:28:08.953791",
@@ -11499,20 +11528,21 @@
     0.42,
     0,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 4,
   "worst_streak": 10,
-  "veteran_xp": 345,
+  "veteran_xp": 355,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 25,
+    "exit_timing": 26,
     "risk_management": 2,
     "entry_timing": 6
   },
-  "flights_completed": 28,
-  "hours_flown": 2.800000000000001,
+  "flights_completed": 29,
+  "hours_flown": 2.9000000000000012,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -11523,7 +11553,7 @@
     "XOC": 2,
     "EVG": 1,
     "NEX": 1,
-    "MIM": 2,
+    "MIM": 3,
     "AZI": 1,
     "TPT": 2
   },
@@ -11532,5 +11562,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I'm feeling a bit jumpy and uncertain about my strategy."
+  "mood_message": "After a long session with low profit margins and missed opportunities, I feel more tense as I focus on my next trade."
 }

@@ -2073,3 +2073,9 @@ The council_timeout event occurred due to a no-aligned signal, and we need to an
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was set too low, which may indicate poor alignment of signals.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T15:29:43.483999+00:00
+The ib_failure event occurred, and the algo is experiencing frequent failures.
+The event indicates that IB closing-only has closed the order books, leading to frequent failure events.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Setting a higher confidence threshold value can prevent frequent failures.)
+

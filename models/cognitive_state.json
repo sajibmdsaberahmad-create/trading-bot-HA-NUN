@@ -4,8 +4,6 @@
   "confidence": 0.47,
   "mode": "autonomous",
   "learned_lessons": [
-    "We need to investigate the root cause of the spike and take appropriate actions to prevent similar events from happening again",
-    "Commander: The spike was triggered by a scanner failure, and we need to analyze this event with the aim of understanding its potential causes.",
     "Review trade_closed on AZI",
     "Commander: win",
     "Review council_timeout on GNOM",
@@ -103,10 +101,12 @@
     "{'param': 'market_state', 'value': 'open', 'reason': 'Market state is open. This indicates the system may have experienced a market change that prevented it from executing trades.'}",
     "Commander: IB trading permission denied while attempting to execute trades.",
     "A no-aligned signal can be caused by poor alignment of signals or inaccurate execution",
-    "Commander: The council_timeout event occurred due to a no-aligned signal, and we need to analyze the causes."
+    "Commander: The council_timeout event occurred due to a no-aligned signal, and we need to analyze the causes.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Inaccurate confidence threshold values may lead to frequent failures.'}",
+    "Commander: The event indicates that IB closing-only has closed the order books, leading to frequent failure events."
   ],
   "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"XCH\",\n    \"entry\": 1.01,\n    \"exit\": 0.9645,\n    \"shares\": 19.0,\n    \"pnl_usd\": -0.86,\n    \"pnl_pct\": -4.5,\n    \"result\": \"loss\",\n    \"exit_reason\": \"stop_breach\"\n  },\n  \"tutorial_instructions\": {\n    \"gut_feel\": 0.7,\n    \"intuition\": 0.9\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T15:17:26.206643"
+  "trades_observed": 0,
+  "updated": "2026-06-25T15:29:43.462239"
 }

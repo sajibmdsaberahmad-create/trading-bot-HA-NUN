@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "The confidence threshold was set too low, which may indicate poor alignment of signals.",
+    "reason": "Setting a higher confidence threshold value can prevent frequent failures.",
     "ok": true,
     "msg": "applied"
   }
