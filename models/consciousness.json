@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 164,
+  "trades_observed": 165,
   "scans_performed": 27,
-  "improvements_applied": 362,
+  "improvements_applied": 364,
   "reports_generated": 26,
   "event_log": [
     {
@@ -18011,6 +18011,41 @@
           "Review trade_closed on ASTS"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:57:15.925171",
+      "age": "4d 8h 54m 27s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$-31.05",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:57:20.745755",
+      "age": "4d 8h 54m 32s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #363",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:57:24.306410",
+      "age": "4d 8h 54m 35s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #364",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -19297,7 +19332,7 @@
   ],
   "last_training": "2026-06-25T06:29:06.143062",
   "mood": "anxious",
-  "total_pnl": 123817.06000000004,
+  "total_pnl": 123786.01000000004,
   "win_history": [
     0.0,
     0.0,
@@ -19462,20 +19497,21 @@
     200.65,
     0.0,
     -46.7,
-    -54.42
+    -54.42,
+    -31.05
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 4,
   "worst_streak": 18,
-  "veteran_xp": 2335,
+  "veteran_xp": 2340,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 48,
     "entry_timing": 66
   },
-  "flights_completed": 159,
-  "hours_flown": 15.89999999999996,
+  "flights_completed": 160,
+  "hours_flown": 15.99999999999996,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -19504,7 +19540,7 @@
     "COI": 1,
     "RIV": 2,
     "RKL": 3,
-    "SOF": 3,
+    "SOF": 4,
     "AST": 2
   },
   "best_streak": 4,

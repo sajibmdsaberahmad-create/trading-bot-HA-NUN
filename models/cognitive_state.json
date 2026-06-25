@@ -1,13 +1,9 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 20% \u00b7 $-1060.91. Preserving capital over action.",
+  "mood": "focused",
+  "mood_message": "You are on a high-performing streak with 20 trades in a row and no consecutive losses, showing confidence in your strategy.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "s",
-    ",",
-    "I",
-    "l",
     "Commander: The loss streak is due to the bracket_exit event.",
     "Review council_timeout on PLTR",
     "Commander: High scanner score after timeout: score=90 vol=1.1x | ATR R:R 2.0",
@@ -103,10 +99,14 @@
     "Prioritize opportunistic exits within guardrails",
     "Understand and adjust the algo's parameters based on market conditions",
     "Commander: The loss streak occurred when the bracket_exit event happened, and it was a poor execution by the algo.",
-    "Review loss_streak on ASTS"
+    "Review loss_streak on ASTS",
+    "Review trade_closed on SOFI",
+    "Commander: tick_micro_loss",
+    "Spike-top hunt on RIVN: spike_top_exit: +0.54% vol=2.4x",
+    "Profit hunt worked on RIVN: spike_top_exit: +0.54% vol=2.4x \u2014 reinforce opportunistic exits."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0,\n  \"intuition\": -1,\n  \"trade_decision\": {\n    \"event\": \"tick_micro_loss\",\n    \"reason\": \"upside odds clear on a single-bar momentum trade\"\n  },\n  \"action\": {\n    \"entry_time\": 17.35,\n    \"profit_margin\": 0.500,\n    \"margin_mode\": \"close\",\n    \"trade\": \"single-bar momentum + volume = take profit into the move\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 51,
-  "updated": "2026-06-25T19:57:02.469485"
+  "trades_observed": 53,
+  "updated": "2026-06-25T19:57:34.532816"
 }
