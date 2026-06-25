@@ -326,6 +326,16 @@ def merge_entry_decision(
                     f"vol={spike_ratio:.1f}x"
                 )[:200],
             })
+        elif scan_score >= 65 and ppo_conf >= min_conf * 0.65:
+            base.update({
+                "enter": True,
+                "confidence": max(ppo_conf, 0.55, min(scan_score / 100.0, 0.80)),
+                "pipeline": "council:scanner_timeout",
+                "reason": (
+                    f"High scanner score after timeout: score={scan_score:.0f} "
+                    f"vol={spike_ratio:.1f}x"
+                )[:200],
+            })
         else:
             base["pipeline"] = "council:timeout_pass"
             base["reason"] = "Council timeout — no aligned signal"
@@ -349,6 +359,17 @@ def merge_entry_decision(
                 "reason": (
                     f"Fast scanner lead (Ollama slow): score={scan_score:.0f} "
                     f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%}"
+                )[:200],
+            })
+        elif scan_score >= 65:
+            base.update({
+                "enter": True,
+                "pending": False,
+                "confidence": max(ppo_conf, 0.58, min(scan_score / 100.0, 0.85)),
+                "pipeline": "council:scanner_fast",
+                "reason": (
+                    f"Fast scanner lead (Ollama slow): score={scan_score:.0f} "
+                    f"| PPO {ppo_conf:.0%}"
                 )[:200],
             })
         else:

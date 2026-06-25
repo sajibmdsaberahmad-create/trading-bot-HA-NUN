@@ -88,6 +88,8 @@ from core.fast_execution import (
     background_watch_sec,
     spike_entry_cooldown_sec,
     entry_pending_block_sec,
+    apply_micro_spike_boost,
+    should_micro_fast_entry,
 )
 from core.connector import IBConnector
 from core.data import DataManager
@@ -301,6 +303,8 @@ class ScalperRunner:
         self._xp_buffer_initialized = False
         self.shadow_circuit = ShadowCircuitBreaker(cfg)
         self._last_micro_forecast: Dict[str, Any] = {}
+        self._bar_warm_due = False
+        self._bar_warm_idx = 0
         
         # Pilot Experience and Pattern Memory systems
         self.pilot = PilotExperienceSystem(cfg)
@@ -585,8 +589,7 @@ class ScalperRunner:
             return
 
         is_spike, ratio = self._detect_volume_spike(df, min_period=min(20, max(6, min_bars)))
-        if forecast.get("spike_likelihood", 0) >= 0.48:
-            is_spike, ratio = True, max(ratio, float(forecast.get("vol_accel", 1.0)))
+        is_spike, ratio = apply_micro_spike_boost(is_spike, ratio, forecast)
         if not is_spike and dm:
             burst, br = self._detect_tick_volume_burst(dm, df)
             if burst:
@@ -2205,6 +2208,7 @@ class ScalperRunner:
                                 self._last_fast_monitor = now
                                 self._fast_monitor_locked(scout_only=at_max)
                             self._drain_bar_prefetch_queue()
+                            self._tick_bar_warm_on_main()
                             prefetch_iv = float(getattr(self.cfg, "LIVE_AI_PREFETCH_SEC", 1.0))
                             if now - getattr(self, "_last_ai_prefetch", 0) >= prefetch_iv:
                                 self._last_ai_prefetch = now
@@ -2547,13 +2551,11 @@ class ScalperRunner:
 
         prefetch_tickers = [p.ticker for p in self._locked_targets]
         self._schedule_bar_prefetch(prefetch_tickers)
-        log.info("📡 Streams-first fast lock — bar warm in background")
+        log.info("📡 Streams-first fast lock — bar warm on main loop")
         self._ensure_locked_streams()
         if getattr(self.cfg, "DEFER_BAR_WARM_ON_LOCK", True):
-            try:
-                self._worker._executor.submit(self._warm_locked_bar_cache)
-            except Exception:
-                self._warm_locked_bar_cache()
+            self._bar_warm_due = True
+            self._bar_warm_idx = 0
         else:
             self._warm_locked_bar_cache()
 
@@ -2685,6 +2687,39 @@ class ScalperRunner:
         ]
         if remaining:
             self._schedule_bar_prefetch(remaining)
+        priority_ready = sum(
+            1 for t in priority
+            if t in self._scan_data_cache
+            and len(self._scan_data_cache[t]) >= self._min_bars_for(t)
+        )
+        total_ready = sum(
+            1 for t in self._locked_targets
+            if t.ticker in self._scan_data_cache
+            and len(self._scan_data_cache[t.ticker]) >= self._min_bars_for(t.ticker)
+        )
+        log.info(
+            f"📊 Bar cache: {priority_ready}/{len(priority)} priority ready | "
+            f"{total_ready}/{len(self._locked_targets)} total locked"
+        )
+
+    def _tick_bar_warm_on_main(self) -> None:
+        """One IB bar fetch per main-loop tick — IB is not thread-safe."""
+        if not self._bar_warm_due or not self._locked_targets:
+            return
+        priority = self._priority_tickers()
+        idx = self._bar_warm_idx
+        while idx < len(priority):
+            ticker = priority[idx]
+            need = self._min_bars_for(ticker)
+            cached = self._scan_data_cache.get(ticker)
+            if cached is not None and len(cached) >= need:
+                idx += 1
+                continue
+            self._prefetch_one_ticker_bars(ticker, quiet=True)
+            self._bar_warm_idx = idx + 1
+            return
+        self._bar_warm_due = False
+        self._bar_warm_idx = 0
         priority_ready = sum(
             1 for t in priority
             if t in self._scan_data_cache
@@ -3020,8 +3055,7 @@ class ScalperRunner:
         vol_ratio = float(df["volume"].tail(3).mean()) / (float(df["volume"].tail(20).mean()) + 1e-9)
         if not is_spike and vol_ratio >= 1.15:
             is_spike, spike_ratio = True, vol_ratio
-        if forecast.get("spike_likelihood", 0) >= 0.42:
-            is_spike, spike_ratio = True, max(spike_ratio, float(forecast.get("vol_accel", 1.0)))
+        is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
         if not is_spike:
             return
         self.top_pick = pick
@@ -3216,9 +3250,7 @@ class ScalperRunner:
             if not is_spike and spike_ratio >= min_spike:
                 is_spike, spike_ratio = True, spike_ratio
 
-            if forecast.get("spike_likelihood", 0) >= 0.42:
-                is_spike = True
-                spike_ratio = max(spike_ratio, float(forecast.get("vol_accel", 1.0)))
+            is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
 
             if dm and ticker.upper() in priority_names:
                 burst, burst_ratio = self._detect_tick_volume_burst(dm, work_df)
@@ -4915,6 +4947,7 @@ class ScalperRunner:
         current_px = self._live_price_for(ticker, float(df_fast["close"].iloc[-1]))
         st["current_px"] = current_px
         st["account"] = self._account_context_for_ai()
+        st["micro_forecast"] = st.get("micro_forecast") or self._last_micro_forecast.get(ticker, {})
         ai_dec = self.ai_commander.poll_entry_council(st, df=df_fast)
         if ai_dec.get("pending"):
             return
@@ -5469,8 +5502,7 @@ class ScalperRunner:
             )
             if not is_spike and vol_ratio >= 1.15:
                 is_spike, spike_ratio = True, vol_ratio
-            if forecast.get("spike_likelihood", 0) >= 0.45:
-                is_spike, spike_ratio = True, max(spike_ratio, float(forecast.get("vol_accel", 1.0)))
+            is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
             if (
                 forecast.get("dir", 0) < 0
                 and forecast.get("spike_likelihood", 0) < 0.55
@@ -5499,7 +5531,10 @@ class ScalperRunner:
                 bar_df = pd.DataFrame(self._bar_df_buffer) if self._bar_df_buffer else None
                 ai_dec = self.ai_commander.decide_entry(
                     ticker, df_fast, current_px, spike_ratio, scan_score,
-                    account=self._account_context_for_ai(),
+                    account={
+                        **self._account_context_for_ai(),
+                        "micro_forecast": forecast,
+                    },
                     obs=obs, bar_df=bar_df, pilot=self.pilot, market_ctx=market_ctx,
                 )
                 if ai_dec.get("pending"):
@@ -5512,6 +5547,7 @@ class ScalperRunner:
                         "spike_ratio": spike_ratio,
                         "scan_score": scan_score,
                         "market_ctx": market_ctx,
+                        "micro_forecast": forecast,
                         "pilot": self.pilot,
                         "started_at": now,
                     })

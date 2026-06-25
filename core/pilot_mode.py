@@ -124,9 +124,14 @@ def is_ai_council_mode(cfg: BotConfig) -> bool:
 def effective_max_locked_targets(cfg: BotConfig) -> int:
     if is_ai_unlimited(cfg):
         from core.ai_session_limits import get_session_limit, should_ai_define_limits
+        from core.fast_execution import ai_fast_execution, stream_watch_cap
         if should_ai_define_limits(cfg):
-            return int(get_session_limit(cfg, "watch_pool", getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30)))
-        return int(getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30))
+            base = int(get_session_limit(cfg, "watch_pool", getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30)))
+        else:
+            base = int(getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30))
+        if ai_fast_execution(cfg):
+            return min(base, stream_watch_cap(cfg))
+        return base
     return int(getattr(cfg, "MAX_LOCKED_TARGETS", 5))
 
 

@@ -579,7 +579,34 @@ class AICommander:
         )
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
-        from core.fast_execution import should_spike_fast_entry, council_fast_sec, council_fast_min_score, council_fast_min_spike
+        micro = (account or {}).get("micro_forecast") or {}
+        from core.fast_execution import (
+            should_spike_fast_entry,
+            should_micro_fast_entry,
+            council_fast_sec,
+            council_fast_min_score,
+            council_fast_min_spike,
+        )
+        if should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro):
+            fast_out = {
+                "enter": True,
+                "confidence": max(ppo_conf, 0.58, min(scan_score / 80.0, 0.85)),
+                "reason": (
+                    f"⚡ Micro-fast: score={scan_score:.0f} micro={float(micro.get('spike_likelihood', 0)):.0%} "
+                    f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%}"
+                )[:200],
+                "journal": f"Micro momentum fast path — {ticker}",
+                "pipeline": "ai:micro_fast",
+                "pending": False,
+            }
+            return self._finalize_entry_decision(
+                fast_out, ticker=ticker, current_px=current_px,
+                spike_ratio=spike_ratio, scan_score=scan_score,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
+                use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
+                df=df, equity=equity, cash=float(account.get("cash", 0)),
+            )
         if should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf):
             fast_out = {
                 "enter": True,
@@ -829,21 +856,29 @@ class AICommander:
         parsed = live.get("parsed") or {}
         age = time.time() - float(state.get("started_at", time.time()))
         in_flight_age = float(live.get("age_sec", 0) or 0)
-        max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
-        from core.fast_execution import council_fast_sec, council_fast_min_score, council_fast_min_spike
+        from core.fast_execution import (
+            council_fast_sec,
+            council_fast_min_score,
+            council_fast_min_spike,
+            council_max_wait_sec,
+            should_micro_fast_entry,
+        )
+        max_wait = council_max_wait_sec(self.cfg)
         fast_sec = council_fast_sec(self.cfg)
         fast_score = council_fast_min_score(self.cfg)
         fast_spike = council_fast_min_spike(self.cfg)
         scan_score = float(state.get("scan_score", 0))
         spike_ratio = float(state.get("spike_ratio", 1.0))
-        if (
-            status in ("in_flight", "missing", "empty")
-            and max(in_flight_age, age) >= fast_sec
-            and scan_score >= fast_score
-            and spike_ratio >= fast_spike
-        ):
-            status = "scanner_fast"
-            parsed = {}
+        micro = state.get("micro_forecast") or {}
+        if status in ("in_flight", "missing", "empty") and max(in_flight_age, age) >= fast_sec:
+            if scan_score >= fast_score and spike_ratio >= fast_spike:
+                status = "scanner_fast"
+                parsed = {}
+            elif should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro):
+                status = "scanner_fast"
+                spike_ratio = max(spike_ratio, float(micro.get("vol_accel", spike_ratio)))
+                state["spike_ratio"] = spike_ratio
+                parsed = {}
         elif status != "fresh" and age > max_wait:
             status = "timeout"
             parsed = {}

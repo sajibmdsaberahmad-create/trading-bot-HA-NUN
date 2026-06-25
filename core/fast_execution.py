@@ -9,7 +9,7 @@ waiting for slow Ollama council deliberation.
 
 from __future__ import annotations
 
-from typing import Any, List, Optional, TYPE_CHECKING
+from typing import Any, List, Optional, Tuple, TYPE_CHECKING
 
 from core.config import BotConfig
 
@@ -231,7 +231,9 @@ def should_micro_fast_entry(
     micro = micro or {}
     sl = float(micro.get("spike_likelihood", 0))
     va = float(micro.get("vol_accel", 1.0))
-    if scan_score >= 70 and sl >= 0.40 and va >= 1.0:
+    if scan_score >= 75 and sl >= 0.40:
+        return True
+    if scan_score >= 70 and sl >= 0.45 and va >= 0.95:
         return True
     if scan_score >= 55 and sl >= 0.52 and (spike_ratio >= 1.05 or va >= 1.15):
         return True
@@ -255,6 +257,24 @@ def micro_confirms_spike(
     if sl < min_likelihood:
         return False
     return spike_ratio >= 1.08 or va >= min_vol_accel
+
+
+def apply_micro_spike_boost(
+    is_spike: bool,
+    spike_ratio: float,
+    micro: Optional[dict],
+) -> Tuple[bool, float]:
+    """Only boost spike when micro + volume agree — prevents 0.8x false entries."""
+    if micro_confirms_spike(spike_ratio, micro):
+        return True, max(spike_ratio, float(micro.get("vol_accel", spike_ratio)))
+    return is_spike, spike_ratio
+
+
+def entry_pending_block_sec(cfg: BotConfig) -> float:
+    base = float(getattr(cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
+    if ai_fast_execution(cfg):
+        return min(base, float(getattr(cfg, "ENTRY_PENDING_BLOCK_FAST_SEC", 12.0)))
+    return base
 
 
 def tick_stream_count(cfg: BotConfig) -> int:
