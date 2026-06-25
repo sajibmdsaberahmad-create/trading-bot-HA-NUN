@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "The change in the confidence threshold was made to increase the confidence level.",
+    "reason": "Updated confidence threshold from 0.9 to 0.58",
     "ok": true,
     "msg": "applied"
   }

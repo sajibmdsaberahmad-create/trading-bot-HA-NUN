@@ -1,52 +1,5 @@
 [
   {
-    "timestamp": "2026-06-24T20:25:47.263372",
-    "win_rate": 0.29783029833397906,
-    "buffer_win_rate": 0.3887640449438202,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {
-      "SCAN_INTERVAL_SECONDS": {
-        "old": 827.1509510940002,
-        "new": 900,
-        "reason": "reduce frequency when WR low; increase when WR strong",
-        "confidence": 0.087
-      }
-    },
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:25:47.262981\nCombined win rate: 29.8% (buffer=38.9%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
-    "timestamp": "2026-06-24T20:30:47.678417",
-    "win_rate": 0.3001695873374788,
-    "buffer_win_rate": 0.39344262295081966,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:30:47.677905\nCombined win rate: 30.0% (buffer=39.3%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
-    "timestamp": "2026-06-24T20:30:47.731442",
-    "win_rate": 0.3001695873374788,
-    "buffer_win_rate": 0.39344262295081966,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:30:47.730862\nCombined win rate: 30.0% (buffer=39.3%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
-    "timestamp": "2026-06-24T20:35:47.587651",
-    "win_rate": 0.30238444607483494,
-    "buffer_win_rate": 0.39787234042553193,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:35:47.587220\nCombined win rate: 30.2% (buffer=39.8%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
-    "timestamp": "2026-06-24T20:35:47.639535",
-    "win_rate": 0.30238444607483494,
-    "buffer_win_rate": 0.39787234042553193,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:35:47.639242\nCombined win rate: 30.2% (buffer=39.8%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
     "timestamp": "2026-06-24T20:40:49.796333",
     "win_rate": 0.30448454529212077,
     "buffer_win_rate": 0.40207253886010363,
@@ -2207,6 +2160,187 @@
     "lessons": [
       "Increase the confidence level to make orders closer to the current market price",
       "Reduce the limit price to allow for a more lenient acceptance of limits"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:20:29.270044+00:00",
+    "source": "runtime_order_canceled",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Adjusting the confidence threshold to a value of 0.58.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Order canceled due to limit price aggression.",
+    "lessons": [
+      "T",
+      "h",
+      "e",
+      "a",
+      "l",
+      "g",
+      "o",
+      "r",
+      "i",
+      "t",
+      "h",
+      "m",
+      "s",
+      "h",
+      "o",
+      "u",
+      "l",
+      "d",
+      "a",
+      "d",
+      "j",
+      "u",
+      "s",
+      "t",
+      "i",
+      "t",
+      "s",
+      "p",
+      "a",
+      "r",
+      "a",
+      "m",
+      "e",
+      "t",
+      "e",
+      "r",
+      "s",
+      "s",
+      "u",
+      "c",
+      "h",
+      "a",
+      "s",
+      "C",
+      "O",
+      "N",
+      "F",
+      "I",
+      "D",
+      "E",
+      "N",
+      "C",
+      "E",
+      "_",
+      "T",
+      "H",
+      "R",
+      "E",
+      "S",
+      "H",
+      "O",
+      "L",
+      "D",
+      ",",
+      "w",
+      "h",
+      "i",
+      "c",
+      "h",
+      "a",
+      "d",
+      "j",
+      "u",
+      "s",
+      "t",
+      "s",
+      "t",
+      "h",
+      "e",
+      "r",
+      "i",
+      "s",
+      "k",
+      "t",
+      "o",
+      "l",
+      "e",
+      "r",
+      "a",
+      "n",
+      "c",
+      "e",
+      "b",
+      "a",
+      "s",
+      "e",
+      "d",
+      "o",
+      "n",
+      "t",
+      "h",
+      "e",
+      "c",
+      "u",
+      "r",
+      "r",
+      "e",
+      "n",
+      "t",
+      "m",
+      "a",
+      "r",
+      "k",
+      "e",
+      "t",
+      "p",
+      "r",
+      "i",
+      "c",
+      "e",
+      "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:21:16.853456+00:00",
+    "source": "runtime_order_canceled",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_canceled \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_canceled on INMB"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:22:23.154502+00:00",
+    "source": "runtime_order_canceled",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_canceled \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_canceled on INMB"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:22:59.086296+00:00",
+    "source": "runtime_order_canceled",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_canceled \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_canceled on INMB"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:24:51.020734+00:00",
+    "source": "runtime_order_canceled",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Updated confidence threshold from 0.9 to 0.58",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The order_canceled event occurred due to an aggressive limit price of 1.445366, which is more than the current market price of 1.2085.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm missed that the limit price is closer to the current market price and thus decided it was too aggressive.'}"
     ]
   }
 ]

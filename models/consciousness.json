@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 92,
+  "improvements_applied": 97,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6025,6 +6025,212 @@
         "lessons": [
           "Increase the confidence level to make orders closer to the current market price",
           "Reduce the limit price to allow for a more lenient acceptance of limits"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:20:29.244709",
+      "age": "4d 0h 17m 40s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #93",
+      "metadata": {
+        "source": "runtime_order_canceled",
+        "summary": "Order canceled due to limit price aggression.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusting the confidence threshold to a value of 0.58.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "h",
+          "e",
+          "a",
+          "l",
+          "g",
+          "o",
+          "r",
+          "i",
+          "t",
+          "h",
+          "m",
+          "s",
+          "h",
+          "o",
+          "u",
+          "l",
+          "d",
+          "a",
+          "d",
+          "j",
+          "u",
+          "s",
+          "t",
+          "i",
+          "t",
+          "s",
+          "p",
+          "a",
+          "r",
+          "a",
+          "m",
+          "e",
+          "t",
+          "e",
+          "r",
+          "s",
+          "s",
+          "u",
+          "c",
+          "h",
+          "a",
+          "s",
+          "C",
+          "O",
+          "N",
+          "F",
+          "I",
+          "D",
+          "E",
+          "N",
+          "C",
+          "E",
+          "_",
+          "T",
+          "H",
+          "R",
+          "E",
+          "S",
+          "H",
+          "O",
+          "L",
+          "D",
+          ",",
+          "w",
+          "h",
+          "i",
+          "c",
+          "h",
+          "a",
+          "d",
+          "j",
+          "u",
+          "s",
+          "t",
+          "s",
+          "t",
+          "h",
+          "e",
+          "r",
+          "i",
+          "s",
+          "k",
+          "t",
+          "o",
+          "l",
+          "e",
+          "r",
+          "a",
+          "n",
+          "c",
+          "e",
+          "b",
+          "a",
+          "s",
+          "e",
+          "d",
+          "o",
+          "n",
+          "t",
+          "h",
+          "e",
+          "c",
+          "u",
+          "r",
+          "r",
+          "e",
+          "n",
+          "t",
+          "m",
+          "a",
+          "r",
+          "k",
+          "e",
+          "t",
+          "p",
+          "r",
+          "i",
+          "c",
+          "e",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:21:16.829829",
+      "age": "4d 0h 18m 28s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #94",
+      "metadata": {
+        "source": "runtime_order_canceled",
+        "summary": "Observed order_canceled \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_canceled on INMB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:22:23.127712",
+      "age": "4d 0h 19m 34s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #95",
+      "metadata": {
+        "source": "runtime_order_canceled",
+        "summary": "Observed order_canceled \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_canceled on INMB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:22:59.059071",
+      "age": "4d 0h 20m 10s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #96",
+      "metadata": {
+        "source": "runtime_order_canceled",
+        "summary": "Observed order_canceled \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_canceled on INMB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:24:50.995348",
+      "age": "4d 0h 22m 2s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #97",
+      "metadata": {
+        "source": "runtime_order_canceled",
+        "summary": "The order_canceled event occurred due to an aggressive limit price of 1.445366, which is more than the current market price of 1.2085.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Updated confidence threshold from 0.9 to 0.58",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm missed that the limit price is closer to the current market price and thus decided it was too aggressive.'}"
         ]
       }
     }
