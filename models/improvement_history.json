@@ -3245,5 +3245,83 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 is too low, which means that if it happens again, we would not be willing to take the profit.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:17:58.715014+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased the confidence threshold to 58% for more aggressive profit hunting.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with negative pnl and missed profit hunt.",
+    "lessons": [
+      "Adjust confidence threshold for profit hunting",
+      "Monitor live IB bars for better real-time execution"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:18:02.032896+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {},
+    "guidelines_summary": "The event ib_failure occurred, and the ticker is MIMI.",
+    "lessons": [
+      "P",
+      "r",
+      "i",
+      "d",
+      "e",
+      "c",
+      "o",
+      "m",
+      "e",
+      "s",
+      "b",
+      "e",
+      "f",
+      "o",
+      "r",
+      "e",
+      "t",
+      "h",
+      "e",
+      "f",
+      "a",
+      "l",
+      "l",
+      ";",
+      "f",
+      "o",
+      "c",
+      "u",
+      "s",
+      "o",
+      "n",
+      "p",
+      "r",
+      "o",
+      "f",
+      "i",
+      "t",
+      "a",
+      "b",
+      "l",
+      "e",
+      "t",
+      "r",
+      "a",
+      "d",
+      "e",
+      "s",
+      "f",
+      "i",
+      "r",
+      "s",
+      "t"
+    ]
   }
 ]

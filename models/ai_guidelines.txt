@@ -2102,3 +2102,15 @@ We are analyzing the event to understand the root cause and how we can improve t
   - CONFIDENCE_THRESHOLD → 0.5 (Adjusting the confidence threshold slightly increases our likelihood of taking profits even with a trailing profit event.)
   - ENTRY_FILL_MAX_WAIT_SEC → 30 (Increasing the maximum wait time for fill actions slightly improves our ability to react quickly to trades.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:17:58.713732+00:00
+Trade closed with negative pnl and missed profit hunt.
+Trade closed due to bracket_exit event, which triggered profit hunting.
+• Keep an eye on live IB bars and market data to avoid missed profit hunts.
+• Adjust live settings (e.g., confidence level, lock targets) for better execution.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased the confidence threshold to 58% for more aggressive profit hunting.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:18:02.032638+00:00
+The event ib_failure occurred, and the ticker is MIMI.
+IB closing-only cannot open new positions
+

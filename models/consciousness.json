@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 103,
   "training_sessions": 27,
-  "trades_observed": 37,
+  "trades_observed": 39,
   "scans_performed": 27,
-  "improvements_applied": 190,
+  "improvements_applied": 192,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10330,6 +10330,108 @@
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 is too low, which means that if it happens again, we would not be willing to take the profit.'}"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T16:17:55.526285",
+      "age": "4d 5h 15m 6s",
+      "type": "TRADE",
+      "message": "Observed trade: XCH ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:17:58.218991",
+      "age": "4d 5h 15m 9s",
+      "type": "TRADE",
+      "message": "Observed trade: MIMI LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:17:58.679194",
+      "age": "4d 5h 15m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #191",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed with negative pnl and missed profit hunt.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increased the confidence threshold to 58% for more aggressive profit hunting.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Adjust confidence threshold for profit hunting",
+          "Monitor live IB bars for better real-time execution"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:18:02.013735",
+      "age": "4d 5h 15m 13s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #192",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "The event ib_failure occurred, and the ticker is MIMI.",
+        "applied": [],
+        "lessons": [
+          "P",
+          "r",
+          "i",
+          "d",
+          "e",
+          "c",
+          "o",
+          "m",
+          "e",
+          "s",
+          "b",
+          "e",
+          "f",
+          "o",
+          "r",
+          "e",
+          "t",
+          "h",
+          "e",
+          "f",
+          "a",
+          "l",
+          "l",
+          ";",
+          "f",
+          "o",
+          "c",
+          "u",
+          "s",
+          "o",
+          "n",
+          "p",
+          "r",
+          "o",
+          "f",
+          "i",
+          "t",
+          "a",
+          "b",
+          "l",
+          "e",
+          "t",
+          "r",
+          "a",
+          "d",
+          "e",
+          "s",
+          "f",
+          "i",
+          "r",
+          "s",
+          "t"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T16:02:35.417330",
@@ -11615,7 +11717,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "determined",
+  "mood": "anxious",
   "total_pnl": -17679.61,
   "win_history": [
     0.0,
@@ -11654,20 +11756,22 @@
     0,
     0,
     0,
-    0.0
+    0.0,
+    0.0,
+    0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 7,
+  "consecutive_losses": 9,
   "worst_streak": 10,
-  "veteran_xp": 385,
+  "veteran_xp": 405,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 29,
+    "exit_timing": 31,
     "risk_management": 2,
     "entry_timing": 6
   },
-  "flights_completed": 32,
-  "hours_flown": 3.2000000000000015,
+  "flights_completed": 34,
+  "hours_flown": 3.4000000000000017,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -11678,15 +11782,16 @@
     "XOC": 2,
     "EVG": 1,
     "NEX": 1,
-    "MIM": 4,
+    "MIM": 5,
     "AZI": 1,
     "TPT": 3,
-    "KUS": 1
+    "KUS": 1,
+    "XCH": 1
   },
   "best_streak": 2,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I am confident in my decision-making and execute trades with a clear strategy."
+  "mood_message": "I feel a sense of urgency and need to act quickly."
 }

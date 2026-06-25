@@ -5645,6 +5645,39 @@ class ScalperRunner:
                     obs=obs, bar_df=bar_df, pilot=self.pilot, market_ctx=market_ctx,
                 )
                 if ai_dec.get("pending"):
+                    ppo_a = int(ai_dec.get("ppo_action", 0))
+                    ppo_c = float(ai_dec.get("ppo_conf", 0.5))
+                    min_c = float(ai_dec.get("min_conf", 0.55))
+                    ppo_lead = (
+                        ai_fast_execution(self.cfg)
+                        and getattr(self.cfg, "PPO_LEAD_WHILE_COUNCIL_PENDING", True)
+                        and (
+                            should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_a, ppo_c)
+                            or should_micro_fast_entry(self.cfg, spike_ratio, scan_score, forecast)
+                            or (ppo_a == 1 and ppo_c >= min_c * 0.72)
+                        )
+                    )
+                    if ppo_lead:
+                        lead = self.ai_commander.execute_ppo_led_entry_while_pending(
+                            ticker, df_fast, current_px, spike_ratio, scan_score,
+                            account={
+                                **self._account_context_for_ai(),
+                                "micro_forecast": forecast,
+                            },
+                            ppo_action=ppo_a, ppo_conf=ppo_c,
+                            ppo_reason=str(ai_dec.get("ppo_reason", "")),
+                            min_conf=min_c, pilot=self.pilot, market_ctx=market_ctx,
+                            fingerprint=str(ai_dec.get("fingerprint", "")),
+                            micro=forecast,
+                        )
+                        if lead.get("enter"):
+                            log.info(
+                                f"  ⚡ PPO ENTER {ticker} (council still thinking — logging async)"
+                            )
+                            self._last_ai_confidence = float(lead.get("confidence", 0.5))
+                            return self._submit_ai_entry(
+                                ticker, df_fast, lead, market_ctx, current_px,
+                            )
                     self._set_ai_council(ticker, "entry_decision", {
                         "fingerprint": ai_dec["fingerprint"],
                         "ppo_action": ai_dec["ppo_action"],

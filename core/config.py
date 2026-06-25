@@ -390,6 +390,16 @@ class BotConfig:
     PROFIT_LOCK_ULTRA_FAST: bool = os.getenv(
         "PROFIT_LOCK_ULTRA_FAST", "true"
     ).lower() in ("1", "true", "yes")
+    DEFERRED_COUNCIL_LEARNING: bool = os.getenv(
+        "DEFERRED_COUNCIL_LEARNING", "true"
+    ).lower() in ("1", "true", "yes")
+    DEFERRED_COUNCIL_MAX_AGE_SEC: float = float(
+        os.getenv("DEFERRED_COUNCIL_MAX_AGE_SEC", "120")
+    )
+    PPO_LEARNING_WEIGHT: float = float(os.getenv("PPO_LEARNING_WEIGHT", "1.5"))
+    PPO_LEAD_WHILE_COUNCIL_PENDING: bool = os.getenv(
+        "PPO_LEAD_WHILE_COUNCIL_PENDING", "true"
+    ).lower() in ("1", "true", "yes")
     AI_STREAM_WATCH_CAP: int = int(os.getenv("AI_STREAM_WATCH_CAP", "10"))
     MICRO_SPIKE_BOOST: float = float(os.getenv("MICRO_SPIKE_BOOST", "0.35"))
     MICRO_FADE_EXIT: float = float(os.getenv("MICRO_FADE_EXIT", "0.55"))

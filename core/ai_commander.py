@@ -669,6 +669,72 @@ class AICommander:
             "confidence": float(out.get("confidence", 0.5)),
         }
 
+    def execute_ppo_led_entry_while_pending(
+        self,
+        ticker: str,
+        df: pd.DataFrame,
+        current_px: float,
+        spike_ratio: float,
+        scan_score: float,
+        account: Dict[str, Any],
+        *,
+        ppo_action: int,
+        ppo_conf: float,
+        ppo_reason: str,
+        min_conf: float,
+        pilot=None,
+        market_ctx: Optional[Dict[str, Any]] = None,
+        fingerprint: str = "",
+        micro: Optional[dict] = None,
+    ) -> Dict[str, Any]:
+        """Enter on PPO now — Ollama still ringing for deferred learning."""
+        mctx = market_ctx or {}
+        micro = micro or account.get("micro_forecast") or {}
+        deploy_cap = get_ai_deploy_budget(
+            self.cfg, pilot,
+            float(account.get("equity", 0)),
+            float(account.get("cash", 0)),
+            int(account.get("open_positions", 0)),
+        )
+        equity = float(account.get("equity", 0))
+        max_risk = get_trade_risk_usd(self.cfg, equity)
+        is_penny = current_px < float(getattr(self.cfg, "PENNY_PRICE_THRESHOLD", 1.0))
+        avg_vol = float(mctx.get("avg_volume", 0))
+        fp = fingerprint or entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        if not fingerprint:
+            self._ring_entry_council_for_learning(
+                ticker, current_px, spike_ratio, scan_score,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                account=account, market_ctx=mctx, is_penny=is_penny, df=df,
+            )
+        fast_out = {
+            "enter": True,
+            "confidence": max(ppo_conf, 0.58),
+            "reason": (
+                f"⚡ PPO-led (council pending): {ppo_reason or 'profit hunt'} | "
+                f"spike={spike_ratio:.1f}x score={scan_score:.0f}"
+            )[:200],
+            "journal": f"PPO execute while Ollama deliberates — {ticker}",
+            "pipeline": "ppo:pending_lead",
+            "pending": False,
+        }
+        decision = self._finalize_entry_decision(
+            fast_out, ticker=ticker, current_px=current_px,
+            spike_ratio=spike_ratio, scan_score=scan_score,
+            ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
+            use_fixed_risk=bool(getattr(self.cfg, "USE_FIXED_RISK_CAP", False)),
+            is_penny=is_penny, avg_vol=avg_vol,
+            df=df, equity=equity, cash=float(account.get("cash", 0)),
+        )
+        if decision.get("enter"):
+            self._schedule_deferred_entry(
+                ticker=ticker, fingerprint=fp, decision=decision,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                market_ctx=mctx,
+            )
+        return decision
+
     def decide_entry(
         self,
         ticker: str,
