@@ -23,6 +23,7 @@ import json
 import time
 import threading
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional, List, Dict, Tuple, Any
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -204,6 +205,7 @@ class ScalperRunner:
         self.conn.register_market_data_error_handler(self._on_market_data_failure)
         self.conn.register_tick_limit_handler(self._on_tick_stream_limit)
         self._tick_limit_denied: set = set()
+        self._load_tick_denied()
 
         # AI / PPO wiring
         self.model = None
@@ -1107,7 +1109,7 @@ class ScalperRunner:
         if not ticker:
             return
         self._active_stream_ticker = ticker
-        self._ensure_target_stream(ticker, mode="tick")
+        self._ensure_target_stream(ticker, mode=self._preferred_stream_mode())
     
     def _clear_pending_entry(self, ticker: Optional[str] = None, cooldown_sec: float = 45.0):
         """Reset pending bracket state; optional per-ticker cooldown."""
@@ -2975,13 +2977,45 @@ class ScalperRunner:
         """Backward-compatible alias — starts all locked streams when enabled."""
         self._ensure_locked_streams(quiet=quiet)
 
+    def _preferred_stream_mode(self) -> str:
+        """Paper IB rejects tick-by-tick Last on most symbols (10189) — use 5s bars."""
+        if getattr(self.cfg, "PAPER_TRADING", False) and not getattr(
+            self.cfg, "TICK_STREAM_ON_PAPER", False,
+        ):
+            return "realtime"
+        if not getattr(self.cfg, "USE_TICK_STREAM", True):
+            return "realtime"
+        return "tick"
+
+    def _load_tick_denied(self) -> None:
+        try:
+            path = Path("models/tick_stream_denied.json")
+            if path.exists():
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self._tick_limit_denied = {str(t).upper() for t in data}
+        except Exception:
+            pass
+
+    def _save_tick_denied(self) -> None:
+        try:
+            path = Path("models/tick_stream_denied.json")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                json.dumps(sorted(self._tick_limit_denied), indent=0),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
+
     def _on_tick_stream_limit(self, ticker: str, error_code: int, message: str):
-        """IB 10190 — too many tick-by-tick subs; fall back to 5s bars for this name."""
+        """IB 10189/10190 — downgrade ticker from tick-by-tick to 5s bars."""
         if ticker:
             self._tick_limit_denied.add(ticker.upper())
+            self._save_tick_denied()
         if ticker and ticker in self._target_monitors:
             if self._stream_modes.get(ticker) == "tick":
-                log.info(f"  📡 {ticker}: tick cap hit → switching to 5s bars")
+                why = "not supported" if error_code == 10189 else "cap hit"
+                log.info(f"  📡 {ticker}: tick {why} → switching to 5s bars")
                 self._stop_target_stream(ticker)
                 self._start_target_stream(ticker, quiet=True, stream_mode="realtime")
 
@@ -3012,7 +3046,7 @@ class ScalperRunner:
                 if t != focus:
                     self._stop_target_stream(t)
             if focus:
-                self._ensure_target_stream(focus, mode="tick", quiet=quiet)
+                self._ensure_target_stream(focus, mode=self._preferred_stream_mode(), quiet=quiet)
             return
 
         for t in list(self._target_monitors.keys()):

@@ -300,8 +300,8 @@ class IBConnector:
         if errorCode == 162 and "scanner subscription cancelled" in (errorString or "").lower():
             return
 
-        # IB tick-by-tick subscription cap (typically 5) — downgrade to 5s bars
-        if errorCode == 10190:
+        # IB tick-by-tick cap (10190) or unsupported Last ticks (10189) → 5s bars
+        if errorCode in (10189, 10190):
             try:
                 from core.market_data_learning import extract_ticker_from_error
                 ticker = extract_ticker_from_error(contract, errorString)
@@ -310,11 +310,16 @@ class IBConnector:
                         handler(ticker, int(errorCode), str(errorString))
                     except Exception:
                         pass
-                log.info(
-                    f"IB tick-by-tick cap on {ticker or '?'} — using 5s bars instead"
-                )
+                if errorCode == 10189:
+                    log.info(
+                        f"  📡 {ticker or '?'}: tick-by-tick not supported — using 5s bars"
+                    )
+                else:
+                    log.info(
+                        f"  📡 {ticker or '?'}: tick-by-tick cap — using 5s bars"
+                    )
             except Exception:
-                log.info(f"IB tick-by-tick cap (10190) — using 5s bars instead")
+                log.info(f"IB tick-by-tick unavailable ({errorCode}) — using 5s bars")
             return
 
         # Market-data failures → learn + avoid (162 no HMDS, 420 no permissions, …)

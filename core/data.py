@@ -167,7 +167,10 @@ class DataManager:
         realtime_only=True uses 5-second bars (lighter — run one per locked ticker).
         Default tries tick-by-tick first, then falls back to 5-second bars.
         """
-        if realtime_only:
+        if realtime_only or (
+            getattr(self.cfg, "PAPER_TRADING", False)
+            and not getattr(self.cfg, "TICK_STREAM_ON_PAPER", False)
+        ):
             try:
                 self._start_realtime_bars_fallback()
             except Exception as exc:

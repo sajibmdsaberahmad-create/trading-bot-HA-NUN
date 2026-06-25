@@ -225,6 +225,9 @@ class BotConfig:
     # MARKET DATA / TICK STREAM
     # ════════════════════════════════════════════════════════════════════
     USE_TICK_STREAM:        bool = True
+    TICK_STREAM_ON_PAPER: bool = os.getenv("TICK_STREAM_ON_PAPER", "false").lower() in (
+        "1", "true", "yes",
+    )
     TICK_BUFFER_MAXLEN:     int  = 5_000
     FAST_BAR_SECONDS:       int  = 5
     DECISION_BAR:           str  = "1 min"
