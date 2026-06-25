@@ -4276,3 +4276,9 @@ The event shows a council_exit with Ollama exit at 100% (PPO hold). This is typi
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold (0.58) is too low, indicating a failed market_data_failure event.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:37:30.575945+00:00
+Trade closed with trailing profit, exiting through loss exit and holding
+The trade was made on a trending market with low volatility (open). The key parameters are the confidence threshold and the maximum daily loss percentage.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold from 0.35 to 0.58.)
+
