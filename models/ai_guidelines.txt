@@ -1096,3 +1096,11 @@ The event indicates that the Historical Market Data Service returned no historic
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Historical data error caused a failure with historical market data service, affecting live IB bars.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:48:09.431320+00:00
+Observed market_data_failure — recorded for learning.
+MD 420 no_md_permission: Invalid Real-time Query:No market data permissions for ARCAEDGE STK
+
+🧭 COMMANDER LEARNING | 2026-06-25T13:48:13.898065+00:00
+Observed market_data_failure — recorded for learning.
+MD 420 no_md_permission: Invalid Real-time Query:No market data permissions for ARCAEDGE STK
+

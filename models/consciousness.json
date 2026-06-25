@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 29,
   "scans_performed": 27,
-  "improvements_applied": 140,
+  "improvements_applied": 142,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8169,6 +8169,34 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #93",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T13:48:09.401601",
+      "age": "4d 2h 45m 20s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #141",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Observed market_data_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review market_data_failure on LSANF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T13:48:13.872546",
+      "age": "4d 2h 45m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #142",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Observed market_data_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review market_data_failure on KIROY"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T13:45:24.565457",

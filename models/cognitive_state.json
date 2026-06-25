@@ -4,11 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The cause of the council timeout is a no-aligned signal, which occurs when there are no clear signals for an upcoming market move. The algorithm adjusts based on this event and continues with caution.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold should not be set to 1, as it may lead to overconfidence and missed opportunities.'}",
-    "Commander: The primary root cause is the lack of aligned signals during market events such as council timeouts. This can be mitigated by ensuring that signals are closely aligned with current market conditions.",
-    "Review council_timeout on WYY",
-    "Commander: Council timeout \u2014 no aligned signal",
     "Tighten your risk management strategies",
     "Analyze for potential trends",
     "Adjust your parameters",
@@ -103,10 +98,15 @@
     "Understanding the scanner's behavior can help identify potential issues before they cause significant losses, allowing for more adaptive adjustments to the algorithm.",
     "No clean data on ONCI (no_historical_data) \u2014 profit hunt elsewhere.",
     "v",
-    "Commander: The event indicates that the Historical Market Data Service returned no historical data, causing issues with live IB bars. This likely affects the analysis and execution of trades."
+    "Commander: The event indicates that the Historical Market Data Service returned no historical data, causing issues with live IB bars. This likely affects the analysis and execution of trades.",
+    "No clean data on LSANF (no_md_permission) \u2014 profit hunt elsewhere.",
+    "No clean data on KIROY (no_md_permission) \u2014 profit hunt elsewhere.",
+    "Review market_data_failure on LSANF",
+    "Commander: MD 420 no_md_permission: Invalid Real-time Query:No market data permissions for ARCAEDGE STK",
+    "Review market_data_failure on KIROY"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.7,\n  \"trade_decisions\": [\n    {\n      \"event\": \"scan_results\",\n      \"action\": \"single_bar\",\n      \"type\": \"take_profit_into\"\n    },\n    {\n      \"event\": \"scan_results\",\n      \"action\": \"extended_hours\",\n      \"type\": \"sell_into\"\n    }\n  ]\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T13:34:37.179744"
+  "updated": "2026-06-25T13:48:13.870294"
 }
