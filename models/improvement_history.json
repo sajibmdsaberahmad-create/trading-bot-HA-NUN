@@ -1918,5 +1918,39 @@
     "lessons": [
       "Review loss_streak on GAID"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T14:36:04.958336+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "MAX_CONCURRENT_POSITIONS": {
+        "param": "MAX_CONCURRENT_POSITIONS",
+        "value": 1,
+        "reason": "By adjusting the maximum number of concurrent positions, you can better manage risk and execute trades more efficiently.",
+        "ok": true,
+        "msg": "applied"
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Setting a higher confidence threshold helps in taking more strategic actions when needed.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Loss streak detected during the last trade.",
+    "lessons": [
+      "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': 1, 'reason': 'Monitoring concurrent positions helps in identifying potential risk points.'}",
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 indicates that the loss rate is moderately high, suggesting a need to adjust the stop-loss position.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T14:36:06.919267+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on NEXR"
+    ]
   }
 ]

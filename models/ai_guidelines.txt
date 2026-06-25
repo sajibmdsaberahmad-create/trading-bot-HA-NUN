@@ -1503,3 +1503,14 @@ The trade was triggered by an order to sell, which resulted in a stop-loss actio
 Observed loss_streak — recorded for learning.
 stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-25T14:36:04.957672+00:00
+Loss streak detected during the last trade.
+The loss streak occurred due to a stop-loss breach, which can be corrected by adjusting the stop-loss position or using a more aggressive stop-loss strategy.
+• Applied mutations:
+  - MAX_CONCURRENT_POSITIONS → 1 (By adjusting the maximum number of concurrent positions, you can better manage risk and execute trades more efficiently.)
+  - CONFIDENCE_THRESHOLD → 0.58 (Setting a higher confidence threshold helps in taking more strategic actions when needed.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T14:36:06.918865+00:00
+Observed trade_closed — recorded for learning.
+loss:stop_breach
+
