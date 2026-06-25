@@ -1915,3 +1915,14 @@ The council timeout event indicates that there is a misalignment in the signals 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.5 (The confidence threshold was adjusted from 0.6 to 0.58, indicating that a majority of trades should not be allowed in this scenario.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T15:06:27.919497+00:00
+Council timeout, no aligned signal.
+The council timeout event occurs during live IB bars and the no-aligned signal issue is an alignment problem.
+• Ensure accurate signals using live IB bars for better alignment
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was adjusted from 0.35 to 0.58.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T15:07:19.194331+00:00
+IB trading permission denied
+The event occurred when the IB trading permission was denied, which is not a cause for concern.
+

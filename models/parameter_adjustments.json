@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.5,
-    "reason": "The confidence threshold was adjusted from 0.6 to 0.58, indicating that a majority of trades should not be allowed in this scenario.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}

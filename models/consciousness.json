@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 99,
   "training_sessions": 27,
-  "trades_observed": 31,
+  "trades_observed": 32,
   "scans_performed": 27,
-  "improvements_applied": 174,
+  "improvements_applied": 176,
   "reports_generated": 26,
   "event_log": [
     {
@@ -9553,6 +9553,120 @@
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 reflects that a majority of the trades should not be allowed due to potential misalignment with the market state.'}"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T15:06:27.899514",
+      "age": "4d 4h 3m 39s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #175",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout, no aligned signal.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold was adjusted from 0.35 to 0.58.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Ensure accurate signals using live IB bars for better alignment"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:07:16.906379",
+      "age": "4d 4h 4m 28s",
+      "type": "TRADE",
+      "message": "Observed trade: TPTS LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:07:19.163845",
+      "age": "4d 4h 4m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #176",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "IB trading permission denied",
+        "applied": [],
+        "lessons": [
+          "T",
+          "o",
+          "p",
+          "r",
+          "e",
+          "v",
+          "e",
+          "n",
+          "t",
+          "r",
+          "e",
+          "c",
+          "u",
+          "r",
+          "r",
+          "e",
+          "n",
+          "c",
+          "e",
+          ",",
+          "w",
+          "e",
+          "s",
+          "h",
+          "o",
+          "u",
+          "l",
+          "d",
+          "p",
+          "r",
+          "i",
+          "o",
+          "r",
+          "i",
+          "t",
+          "i",
+          "z",
+          "e",
+          "o",
+          "p",
+          "p",
+          "o",
+          "r",
+          "t",
+          "u",
+          "n",
+          "i",
+          "s",
+          "t",
+          "i",
+          "c",
+          "e",
+          "x",
+          "i",
+          "t",
+          "s",
+          "a",
+          "n",
+          "d",
+          "m",
+          "i",
+          "n",
+          "i",
+          "m",
+          "i",
+          "z",
+          "e",
+          "r",
+          "i",
+          "s",
+          "k",
+          "."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T15:02:24.119498",
@@ -10838,7 +10952,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "miserable",
+  "mood": "calm",
   "total_pnl": -17679.61,
   "win_history": [
     0.0,
@@ -10871,20 +10985,21 @@
     0,
     0,
     0.42,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 10,
-  "veteran_xp": 325,
+  "veteran_xp": 335,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 23,
+    "exit_timing": 24,
     "risk_management": 2,
     "entry_timing": 6
   },
-  "flights_completed": 26,
-  "hours_flown": 2.600000000000001,
+  "flights_completed": 27,
+  "hours_flown": 2.700000000000001,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -10896,12 +11011,13 @@
     "EVG": 1,
     "NEX": 1,
     "MIM": 2,
-    "AZI": 1
+    "AZI": 1,
+    "TPT": 1
   },
   "best_streak": 2,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Today's performance was disappointing."
+  "mood_message": "Today's trade session was successful, with a high profit rate."
 }
