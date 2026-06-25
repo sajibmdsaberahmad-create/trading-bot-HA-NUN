@@ -1,11 +1,9 @@
 {
-  "mood": "gathering",
-  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "mood": "focused",
+  "mood_message": "You are feeling optimistic about your strategies and the momentum in this session.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Adjust logic and conditions",
-    "Analyze market data and identify potential exits.",
     "Commander: The event occurred due to the Ollama exit being close to the PPO hold ratio, which triggered the council_exit. This was an opportunistic move to avoid losses.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We should prioritize opportunistic exits and add a ticker for live IB bars if it occurs.'}",
     "Commander: The market data failure indicates that the algorithm failed to identify profitable trades due to an empty loss streak.",
@@ -103,10 +101,12 @@
     "The algorithm should focus on increasing the likelihood of profitable exits during periods where the market is in a cautious stance.",
     "Adjusting the confidence threshold can help the algo better capture and profit from moments of uncertainty.",
     "analyze",
-    "learn from every outcome"
+    "learn from every outcome",
+    "Review council_timeout on RKLB",
+    "Commander: High scanner score after timeout: score=81 vol=1.1x | ATR R:R 2.0"
   ],
   "last_thought": "```json\n{\n  \"entry\": 13.7525,\n  \"exit\": 13.81,\n  \"entry_fill\": 13.7525,\n  \"exit_fill\": 13.81,\n  \"quote_entry\": 13.7525,\n  \"quote_exit\": 13.81,\n  \"shares\": 5964.0,\n  \"pnl_usd\": 343.11,\n  \"pnl_pct\": 0.42,\n  \"result\": \"win\",\n  \"exit_reason\": \"trail_stop\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": 0.0,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 127.3,\n  \"peak\": 27.51,\n  \"stop\": 13.7375,\n  \"target\": 27.72,\n  \"fill_confirmed\": true,\n  \"reconcile_",
   "market_belief": {},
-  "trades_observed": 5,
-  "updated": "2026-06-25T19:42:37.441928"
+  "trades_observed": 6,
+  "updated": "2026-06-25T19:42:58.873178"
 }

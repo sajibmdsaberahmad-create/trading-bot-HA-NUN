@@ -2227,5 +2227,31 @@
     "lessons": [
       "Review loss_streak on RIVN"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:42:55.380553+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on MARA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:42:58.915171+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on RKLB"
+    ]
   }
 ]

@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 141,
+  "trades_observed": 142,
   "scans_performed": 27,
-  "improvements_applied": 320,
+  "improvements_applied": 322,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16506,6 +16506,49 @@
       "metadata": {
         "xp": 2020
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:42:51.261167",
+      "age": "4d 8h 40m 2s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+343.11",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:42:55.341171",
+      "age": "4d 8h 40m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #321",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:42:58.874322",
+      "age": "4d 8h 40m 10s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #322",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RKLB"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -17791,8 +17834,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "confident",
-  "total_pnl": 124196.70000000003,
+  "mood": "anxious",
+  "total_pnl": 124539.81000000003,
   "win_history": [
     0.0,
     0.0,
@@ -17934,20 +17977,21 @@
     -80.5,
     61.74,
     -132.9,
-    75.14
+    75.14,
+    343.11
   ],
-  "consecutive_wins": 1,
+  "consecutive_wins": 2,
   "consecutive_losses": 0,
   "worst_streak": 18,
-  "veteran_xp": 2020,
+  "veteran_xp": 2050,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 42,
-    "entry_timing": 56
+    "entry_timing": 58
   },
-  "flights_completed": 136,
-  "hours_flown": 13.599999999999968,
+  "flights_completed": 137,
+  "hours_flown": 13.699999999999967,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17972,7 +18016,7 @@
     "LCI": 4,
     "RIO": 6,
     "QS": 3,
-    "MAR": 3,
+    "MAR": 4,
     "COI": 1,
     "RIV": 1
   },
@@ -17981,5 +18025,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I am confident in my ability to execute trades and make profits."
+  "mood_message": "I'm feeling stressed about the recent performance and need to stay focused."
 }
