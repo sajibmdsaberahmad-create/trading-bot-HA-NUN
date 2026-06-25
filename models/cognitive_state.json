@@ -1,7 +1,7 @@
 {
-  "mood": "gathering",
-  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
-  "confidence": 0.42999999999999994,
+  "mood": "in rhythm",
+  "mood_message": "Win streak 4 \u00b7 recent $+29.46. Riding what works, not forcing size.",
+  "confidence": 0.44999999999999996,
   "mode": "autonomous",
   "learned_lessons": [
     "a",
@@ -105,8 +105,8 @@
     "Commander: The council_timeout event indicates that the scanner + spike occurred after a timeout, and it should be fixed to prevent it from happening again.",
     "{'param': 'confidence_threshold', 'value': 0.58, 'reason': \"The algorithm needs to adjust its confidence threshold so it doesn't trigger a timeout event again.\"}"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"intuition\": false,\n    \"pattern_recognition\": true,\n    \"adaptation\": true,\n    \"honesty\": true,\n    \"exposure\": true,\n    \"risk_management\": true\n  },\n  \"trade_decisions\": [\n    {\n      \"position_value\": 0.0,\n      \"nav\": 1013.47,\n      \"deployed_pct\": 0.0,\n      \"scan_results\": []\n    }\n  ]\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0,\n  \"confidence_threshold\": 0.58,\n  \"past_trades\": [\n    {\n      \"ticker\": \"IBX\",\n      \"entry\": 28.0,\n      \"exit\": 28.03,\n      \"shares\": 35.0,\n      \"pnl_usd\": 1.05,\n      \"pnl_pct\": 0.11,\n      \"result\": \"win\",\n      \"exit_reason\": \"council_exit: Ollama exit 96% (PPO hold)\"\n    }\n  ],\n  \"next_trade\": {\n    \"ticker\": \"IBX\",\n    \"entry\": 28.05,\n    \"exit\": 28.1,\n    \"shares\": 35.0,\n    \"pnl_usd\": 1.06,\n    \"pnl_pct\": 0.11,\n    \"result\": \"lose\"\n  },\n  ",
   "market_belief": {},
-  "trades_observed": 3,
-  "updated": "2026-06-25T10:49:03.843892"
+  "trades_observed": 4,
+  "updated": "2026-06-25T10:51:47.158631"
 }
