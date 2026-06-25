@@ -1,7 +1,7 @@
 {
   "mood": "recalibrating",
-  "mood_message": "Four losses in a row ($-34.43 recent). Tightening entries until edge returns.",
-  "confidence": 0.56,
+  "mood_message": "Four losses in a row ($-35.12 recent). Tightening entries until edge returns.",
+  "confidence": 0.53,
   "mode": "autonomous",
   "learned_lessons": [
     "Commander: The council_timeout event indicates that the scanner timeout occurred after a timeout, and this might be due to the recent spike in scanner scores. The algorithm needs to adjust its threshold for scanning.",
@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"prompt\": \"Write a trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"WAVE\\\", \\\"entry\\\": 9.37, \\\"exit\\\": 9.185, \\\"shares\\\": 2.0, \\\"pnl_usd\\\": -0.37, \\\"pnl_pct\\\": -1.97, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"stop_breach\\\"}\",\n  \"entry\": {\n    \"ticker\": \"WAVE\",\n    \"position\": 2,\n    \"entries\": [\n      { \"action\": \"buy\", \"volume\": 0.5 },\n      { \"action\": \"sell\" }\n    ],\n    \"profit\": -0.37,\n    \"percentage_profit\": -1.97,\n    \"result\": \"loss\",\n    \"exit_reason\": \"stop_breach\"\n  }",
   "market_belief": {},
-  "trades_observed": 7,
-  "updated": "2026-06-25T14:50:40.031201"
+  "trades_observed": 8,
+  "updated": "2026-06-25T14:56:56.914679"
 }
