@@ -1713,5 +1713,14 @@
     "lessons": [
       "Review trade_closed on RIOT"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T18:59:46.292531+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on LCID"
+    ]
   }
 ]

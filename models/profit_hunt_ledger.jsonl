@@ -154,3 +154,4 @@
 {"timestamp":"2026-06-25T18:44:09.425390+00:00","event":"spike_top_exit","ticker":"RIOT","pnl_usd":119.7,"pnl_pct":0.0033,"primary_goal":true,"extended":false,"last_gain_pct":0.00587,"last_vol_ratio":1.901,"spike_detected":true,"bar":"last","gain_pct":0.005867253392005872,"vol_ratio":1.9008962316342395,"near_high":true,"reason":"spike_top_exit: +0.59% vol=1.9x","price":27.43}
 {"timestamp":"2026-06-25T18:44:30.791510+00:00","event":"spike_top_exit","ticker":"RIOT","pnl_usd":113.09,"source":"buffer","reason":"spike_top_exit: +0.59% vol=1.9x"}
 {"timestamp":"2026-06-25T18:59:22.599050+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":-239239.82,"pnl_pct":-0.9229,"primary_goal":true,"reason":"trailing_profit","price":5.115}
+{"timestamp":"2026-06-25T18:59:41.514590+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}

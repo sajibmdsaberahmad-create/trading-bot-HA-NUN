@@ -5019,3 +5019,7 @@ trailing_profit
 Observed trade_closed — recorded for learning.
 spike_top_exit: +0.59% vol=1.9x
 
+🧭 COMMANDER LEARNING | 2026-06-25T18:59:46.291878+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+
