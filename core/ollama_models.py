@@ -2,8 +2,9 @@
 """
 core/ollama_models.py — Text LLM selection for RAM tiers (8GB Mac friendly).
 
-Picks the best installed Ollama text model that fits free RAM, with fallbacks
-from reasoning-focused small models down to ultra-light options.
+Picks the best installed Ollama text model that fits free RAM. For HANOON council
+(JSON decisions + market context), Qwen 2.5 3B is preferred on 8GB when it fits;
+smaller models are used only under RAM pressure.
 """
 
 from __future__ import annotations
@@ -29,23 +30,24 @@ MODEL_EST_MB: dict[str, int] = {
 }
 
 TEXT_MODEL_BY_TIER: dict[str, str] = {
-    "compact": "phi3:mini",
+    "compact": "qwen2.5:3b",
     "balanced": "qwen2.5:3b",
     "standard": "qwen2.5:3b",
     "performance": "llama3",
 }
 
-# Best reasoning first; smallest / fastest last.
+# Council quality first on 8GB; lighter models only when RAM is tight.
 TEXT_FALLBACK_CHAIN: tuple[str, ...] = (
+    "qwen2.5:3b",
     "phi4-mini",
     "phi3:mini",
     "gemma3:4b",
     "qwen2.5:1.5b",
-    "qwen2.5:3b",
     "qwen2.5:0.5b",
 )
 
-PRESSURE_FALLBACK = "qwen2.5:0.5b"
+PRESSURE_FALLBACK = "qwen2.5:1.5b"
+PRESSURE_FALLBACK_MINIMAL = "qwen2.5:0.5b"
 
 # Models that should not be default text LLMs on compact RAM.
 HEAVY_TEXT_WARNINGS: tuple[str, ...] = ("llava", "llama3", "mistral", "mixtral")
@@ -131,6 +133,9 @@ def active_text_model(cfg: BotConfig) -> str:
 
     avail = available_ram_mb()
     pressure_mb = int(getattr(cfg, "OLLAMA_PRESSURE_FREE_MB", 1800) or 1800)
+    severe_mb = int(getattr(cfg, "OLLAMA_SEVERE_PRESSURE_FREE_MB", 1200) or 1200)
+    if is_memory_pressured(severe_mb) and is_text_model_present(cfg, PRESSURE_FALLBACK_MINIMAL):
+        return PRESSURE_FALLBACK_MINIMAL
     if is_memory_pressured(pressure_mb) and is_text_model_present(cfg, PRESSURE_FALLBACK):
         return PRESSURE_FALLBACK
     return resolve_text_model(cfg, available_mb=avail)

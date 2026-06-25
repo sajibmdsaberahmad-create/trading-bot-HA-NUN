@@ -59,7 +59,7 @@ def recommended_ollama_model(memory_budget_mb: int = 2560) -> str:
         from core.ram_tier import TIER_PROFILES, detect_ram_tier
 
         tier = detect_ram_tier()
-        return str(TIER_PROFILES.get(tier, {}).get("OLLAMA_MODEL", "phi3:mini"))
+        return str(TIER_PROFILES.get(tier, {}).get("OLLAMA_MODEL", "qwen2.5:3b"))
 
 
 def should_allow_ollama_decide(cfg) -> tuple[bool, str]:

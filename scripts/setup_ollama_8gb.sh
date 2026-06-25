@@ -3,11 +3,12 @@
 set -euo pipefail
 
 echo "=== HANOON 8GB Ollama setup ==="
-echo "Pulling text models (reasoning → speed)..."
-ollama pull phi4-mini    || echo "phi4-mini unavailable — skip"
-ollama pull phi3:mini    || true
-ollama pull qwen2.5:1.5b || true
-ollama pull qwen2.5:0.5b  || true
+echo "Pulling text models (council quality → speed)..."
+ollama pull qwen2.5:3b     || true
+ollama pull qwen2.5:1.5b   || true
+ollama pull qwen2.5:0.5b   || true
+ollama pull phi4-mini      || echo "phi4-mini optional — skip"
+ollama pull phi3:mini      || true
 
 echo "Pulling quantized vision (optional chart reads)..."
 ollama pull llava-phi3:3.8b || echo "llava-phi3 unavailable — vision stays off until installed"
@@ -29,6 +30,6 @@ ollama list
 echo ""
 echo "Set in .env (optional — RAM auto-tune picks best installed):"
 echo "  OLLAMA_DYNAMIC_MODEL=true"
-echo "  OLLAMA_MODEL=phi3:mini"
+echo "  OLLAMA_MODEL=qwen2.5:3b"
 echo ""
 echo "Check RAM while running:  ollama ps"

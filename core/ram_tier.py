@@ -46,7 +46,7 @@ _TIER_ENV_KEYS: Dict[str, str] = {
 
 TIER_PROFILES: Dict[str, Dict[str, Any]] = {
     "compact": {
-        "OLLAMA_MODEL": "phi3:mini",
+        "OLLAMA_MODEL": "qwen2.5:3b",
         "OLLAMA_DYNAMIC_MODEL": True,
         "OLLAMA_MEMORY_BUDGET_MB": 2560,
         "OLLAMA_TIMEOUT": 12,
