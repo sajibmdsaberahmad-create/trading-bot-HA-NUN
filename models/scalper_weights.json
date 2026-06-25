@@ -1,7 +1,7 @@
 {
   "momentum": 0.5,
   "volume": 0.5,
-  "institutional": 0.5551802940925922,
+  "institutional": 0.5,
   "vwap_slope": 0.5,
   "atr_bonus": 0.5,
   "mean_reversion": 0.5,
@@ -10,10 +10,10 @@
   "rsi_filter": 0.5,
   "volatility_gate": 0.5,
   "_meta": {
-    "train_timestamp": "2026-06-25T05:53:37.832305",
-    "buffer_total": 2483,
-    "buffer_win_rate": 0.437,
+    "train_timestamp": "2026-06-25T06:05:47.165382",
+    "buffer_total": 2535,
+    "buffer_win_rate": 0.439,
     "returns_win_rate": 0.207,
-    "combined_win_rate": 0.322
+    "combined_win_rate": 0.323
   }
 }
