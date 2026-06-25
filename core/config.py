@@ -508,6 +508,19 @@ class BotConfig:
     AI_FAILURE_HARD_COOLDOWN_SEC: float = float(
         os.getenv("AI_FAILURE_HARD_COOLDOWN_SEC", "3600")
     )
+    # Loss streak → learn + self-correct instead of long blind cool-off (learn mode)
+    AI_LEARN_ON_LOSS_STREAK: bool = os.getenv(
+        "AI_LEARN_ON_LOSS_STREAK", "true"
+    ).lower() in ("1", "true", "yes")
+    LOSS_STREAK_LEARNING_MIN_SEC: float = float(
+        os.getenv("LOSS_STREAK_LEARNING_MIN_SEC", "45")
+    )
+    LOSS_STREAK_LEARNING_MAX_SEC: float = float(
+        os.getenv("LOSS_STREAK_LEARNING_MAX_SEC", "300")
+    )
+    LOSS_STREAK_RESUME_CONFIDENCE: float = float(
+        os.getenv("LOSS_STREAK_RESUME_CONFIDENCE", "0.52")
+    )
     AI_STATIC_FALLBACK: bool = False      # No rule-based bypass when full control
     AI_HUMAN_COGNITION: bool = True       # Human-like reasoning + gut feel on all decisions
     AI_USE_COMPUTATIONAL_REASONING: bool = True  # Synthesize PPO, scanner, MTF, volume in every call

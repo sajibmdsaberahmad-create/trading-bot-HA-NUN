@@ -203,6 +203,7 @@ class ScalperRunner:
         self._last_scan_time: float = 0.0
         self._last_metrics_write: float = 0.0
         self._last_ai_narrative: float = 0.0
+        self._loss_learning_in_flight: bool = False
         self._scan_data_cache: Dict[str, pd.DataFrame] = {}  # Cache scanned data
         self._bar_prefetch_queue: List[str] = []
         

@@ -60,6 +60,7 @@ MAX_POSITION_PCT, and MAX_SHARES_PER_TRADE as secondary safety limits.
 
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, Dict, Any
+import time
 
 import numpy as np
 import pandas as pd
@@ -171,6 +172,10 @@ class RiskManager:
         self._halt_reason = ""
         self._halt_until_ts: Optional[pd.Timestamp] = None
         self._consecutive_losses = 0
+        self._learning_halt = False
+        self._learning_complete = False
+        self._learning_started = False
+        self._learning_started_at: float = 0.0
 
         self.plan: Optional[TradePlan] = None
 
@@ -193,22 +198,88 @@ class RiskManager:
             self._consecutive_losses = 0
 
         if self._consecutive_losses >= self.cfg.MAX_CONSECUTIVE_LOSSES:
-            reason = (
-                f"{self._consecutive_losses} consecutive losses. "
-                f"Cooling off for {self.cfg.COOL_OFF_MINUTES_AFTER_HALT} minutes."
-            )
-            log.warning(f"RISK HALT: {reason}")
-            self._halted = True
-            self._halt_reason = reason
-            self._halt_until_ts = pd.Timestamp.utcnow() + pd.Timedelta(
-                minutes=self.cfg.COOL_OFF_MINUTES_AFTER_HALT
-            )
+            use_learning = False
+            try:
+                from core.ai_learning_policy import learn_dont_block
+                use_learning = (
+                    learn_dont_block(self.cfg)
+                    and getattr(self.cfg, "AI_LEARN_ON_LOSS_STREAK", True)
+                )
+            except Exception:
+                pass
+
+            if use_learning:
+                reason = (
+                    f"{self._consecutive_losses} consecutive losses — "
+                    "AI learning session before resume"
+                )
+                self._learning_halt = True
+                self._learning_complete = False
+                self._learning_started = False
+                self._learning_started_at = 0.0
+                self._halted = True
+                self._halt_reason = reason
+                max_sec = float(getattr(self.cfg, "LOSS_STREAK_LEARNING_MAX_SEC", 300))
+                self._halt_until_ts = pd.Timestamp.utcnow() + pd.Timedelta(seconds=max_sec)
+                log.warning(f"RISK HALT (learn): {reason}")
+            else:
+                reason = (
+                    f"{self._consecutive_losses} consecutive losses. "
+                    f"Cooling off for {self.cfg.COOL_OFF_MINUTES_AFTER_HALT} minutes."
+                )
+                log.warning(f"RISK HALT: {reason}")
+                self._halted = True
+                self._halt_reason = reason
+                self._halt_until_ts = pd.Timestamp.utcnow() + pd.Timedelta(
+                    minutes=self.cfg.COOL_OFF_MINUTES_AFTER_HALT
+                )
             if self.notifier:
-                self.notifier.risk_halt(reason)
+                self.notifier.risk_halt(self._halt_reason)
+
+    def begin_learning_session(self) -> None:
+        self._learning_started = True
+        self._learning_started_at = time.time()
+
+    def complete_learning_session(self, summary: str, confidence: float) -> bool:
+        """Resume trading after loss-streak review if confidence threshold met."""
+        min_conf = float(getattr(self.cfg, "LOSS_STREAK_RESUME_CONFIDENCE", 0.52))
+        if confidence < min_conf:
+            log.info(
+                f"Loss streak learning: conf {confidence:.0%} < {min_conf:.0%} — "
+                "holding pause briefly"
+            )
+            return False
+        self._learning_complete = True
+        self._learning_halt = False
+        self._halted = False
+        self._halt_until_ts = None
+        self._consecutive_losses = 0
+        log.info(
+            f"🧠 Risk: loss-streak learning complete — trading re-armed "
+            f"(conf={confidence:.0%}) | {(summary or '')[:80]}"
+        )
+        return True
+
+    def force_end_learning_halt(self, reason: str = "max learning cap") -> None:
+        self._learning_complete = True
+        self._learning_halt = False
+        self._halted = False
+        self._halt_until_ts = None
+        log.warning(f"Risk: learning halt ended ({reason}) — cautious re-arm")
+
+    @property
+    def needs_learning_session(self) -> bool:
+        return self._learning_halt and not self._learning_started and not self._learning_complete
 
     def is_halted(self, now_ts: Optional[pd.Timestamp] = None) -> bool:
         if not self._halted:
             return False
+        if self._learning_halt and not self._learning_complete:
+            now_ts = now_ts or pd.Timestamp.utcnow()
+            if self._halt_until_ts is not None and now_ts >= self._halt_until_ts:
+                self.force_end_learning_halt("max learning time")
+                return False
+            return True
         if self._halt_until_ts is not None:
             now_ts = now_ts or pd.Timestamp.utcnow()
             if now_ts >= self._halt_until_ts:
