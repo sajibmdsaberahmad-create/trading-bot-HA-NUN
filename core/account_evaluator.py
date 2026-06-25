@@ -138,7 +138,7 @@ class AccountEvaluator:
                 runner, "market_open", notifier, ai_commander,
                 autopilot, consciousness, pilot,
             )
-        elif new_state == "closed" and old_state in ("open", "after_hours"):
+        elif new_state == "closed" and old_state in ("open", "after_hours", "pre_market", "overnight"):
             self.evaluate(
                 runner, "market_close", notifier, ai_commander,
                 autopilot, consciousness, pilot,

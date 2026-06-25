@@ -40,7 +40,7 @@ def _minutes(hhmm: str) -> int:
 
 def get_market_state(cfg: Optional[BotConfig] = None) -> str:
     """
-    Returns one of: 'open', 'pre_market', 'after_hours', 'closed'
+    Returns one of: 'open', 'pre_market', 'after_hours', 'overnight', 'closed'
     All boundaries are US Eastern Time.
     """
     cfg = cfg or BotConfig()
@@ -66,7 +66,48 @@ def get_market_state(cfg: Optional[BotConfig] = None) -> str:
         return "open"
     if regular_close <= current_minutes < ah_end:
         return "after_hours"
+    # Weekday gap after after-hours until pre-market (e.g. 20:00–04:00 ET)
+    if current_minutes >= ah_end or current_minutes < pre_start:
+        return "overnight"
     return "closed"
+
+
+def is_extended_session(state: str) -> bool:
+    return state in ("pre_market", "after_hours", "overnight")
+
+
+def _session_trading_allowed(cfg: BotConfig, state: str) -> bool:
+    if state == "open":
+        return True
+    if state == "pre_market":
+        return bool(getattr(cfg, "ALLOW_PRE_MARKET_TRADING", True))
+    if state == "after_hours":
+        return bool(getattr(cfg, "ALLOW_AFTER_HOURS_TRADING", True))
+    if state == "overnight":
+        return bool(getattr(cfg, "ALLOW_OVERNIGHT_TRADING", True))
+    return False
+
+
+def can_trade_now(cfg: Optional[BotConfig] = None) -> tuple[bool, str]:
+    """True when the algo may scan, enter, and manage positions."""
+    cfg = cfg or BotConfig()
+    state = get_market_state(cfg)
+    return _session_trading_allowed(cfg, state), state
+
+
+def min_confidence_for_state(cfg: Optional[BotConfig] = None, state: Optional[str] = None) -> float:
+    """Higher bar outside regular hours — only take strong setups."""
+    cfg = cfg or BotConfig()
+    state = state or get_market_state(cfg)
+    if state == "open":
+        return float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+    if state == "pre_market":
+        return float(getattr(cfg, "MIN_CONFIDENCE_PRE_MARKET", 0.70))
+    if state == "after_hours":
+        return float(getattr(cfg, "MIN_CONFIDENCE_AFTER_HOURS", 0.72))
+    if state == "overnight":
+        return float(getattr(cfg, "MIN_CONFIDENCE_OVERNIGHT", 0.78))
+    return 1.0
 
 
 def is_regular_session(cfg: Optional[BotConfig] = None) -> bool:
@@ -74,13 +115,13 @@ def is_regular_session(cfg: Optional[BotConfig] = None) -> bool:
 
 
 def should_use_extended_hours_orders(cfg: Optional[BotConfig] = None) -> bool:
-    """True only when IB should receive outsideRth on orders."""
+    """True when IB orders need outsideRth (pre, after, overnight)."""
     cfg = cfg or BotConfig()
     state = get_market_state(cfg)
-    if state == "pre_market":
-        return bool(getattr(cfg, "ALLOW_PRE_MARKET_TRADING", False))
-    if state == "after_hours":
-        return bool(getattr(cfg, "ALLOW_AFTER_HOURS_TRADING", False))
+    if state == "open":
+        return False
+    if is_extended_session(state):
+        return _session_trading_allowed(cfg, state)
     return False
 
 
@@ -98,8 +139,11 @@ def market_status_line(cfg: Optional[BotConfig] = None) -> str:
     cfg = cfg or BotConfig()
     now = now_et()
     state = get_market_state(cfg)
+    ext = ""
+    if is_extended_session(state):
+        ext = " | extended-hours orders ON"
     return (
         f"US Market: {state.upper()} | "
         f"ET {now.strftime('%Y-%m-%d %H:%M:%S')} | "
-        f"RTH 09:30–16:00 ET"
+        f"RTH 09:30–16:00 ET{ext}"
     )

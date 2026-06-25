@@ -22,6 +22,7 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.notify import log
+from core.market_hours import min_confidence_for_state
 from core.pilot_mode import generative_think, get_effective_confidence_threshold, get_ai_deploy_budget, get_trade_risk_usd, effective_max_concurrent_positions, is_ai_unlimited, is_ai_council_mode
 from core.bracket_validator import (
     compute_atr_bracket,
@@ -542,7 +543,10 @@ class AICommander:
         use_fixed_risk = bool(getattr(self.cfg, "USE_FIXED_RISK_CAP", False))
         equity = float(account.get("equity", 0))
         max_risk = get_trade_risk_usd(self.cfg, equity)
-        min_conf = get_effective_confidence_threshold(self.cfg, pilot)
+        min_conf = max(
+            get_effective_confidence_threshold(self.cfg, pilot),
+            min_confidence_for_state(self.cfg),
+        )
         mctx = market_ctx or {}
         bid = mctx.get("bid")
         ask = mctx.get("ask")

@@ -25,7 +25,7 @@ from typing import Optional, List, Dict, Tuple, Any
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from core.market_hours import get_market_state, market_status_line, now_et
+from core.market_hours import get_market_state, market_status_line, now_et, can_trade_now, is_extended_session
 
 import numpy as np
 import pandas as pd
@@ -1379,7 +1379,13 @@ class ScalperRunner:
         if getattr(self.cfg, "AI_ACCOUNT_EVAL_ON_STARTUP", True):
             self._run_account_eval("session_startup", force=True)
         if market_state != "open":
-            log.info(f"📊 Market state: {market_state.upper()} — extended-hours rules apply")
+            if is_extended_session(market_state):
+                log.info(
+                    f"📊 Extended session: {market_state.upper()} — "
+                    f"pre/after/overnight scouting enabled"
+                )
+            else:
+                log.info(f"📊 Market {market_state.upper()} — no session (weekend/holiday)")
 
         # Block startup scan until IB connection is confirmed live
         if self.conn.is_connected():
@@ -1430,12 +1436,8 @@ class ScalperRunner:
                     except Exception as exc:
                         log.debug(f"Market transition eval: {exc}")
                     self._last_market_state = market_state
-                can_trade = (
-                    market_state == "open" or
-                    (market_state == "pre_market" and self.cfg.ALLOW_PRE_MARKET_TRADING) or
-                    (market_state == "after_hours" and self.cfg.ALLOW_AFTER_HOURS_TRADING)
-                )
-                if not can_trade:
+                can_trade, market_state = can_trade_now(self.cfg)
+                if not can_trade and market_state == "closed":
                     self._halt_trading_for_closed_market(market_state)
 
                 self._service_pending_ai_councils()
@@ -1596,7 +1598,7 @@ class ScalperRunner:
                 else:
                     if now - getattr(self, "_last_market_closed_log", 0) >= 60.0:
                         self._last_market_closed_log = now
-                        log.info(f"⏸ MARKET CLOSED ({market_state}) — training instead")
+                        log.info(f"⏸ NO SESSION ({market_state}) — training instead")
                     train_iv = float(getattr(self.cfg, "OFF_HOURS_TRAIN_INTERVAL_SEC", 3600))
                     if now - getattr(self, "_last_off_hours_train", 0) >= train_iv:
                         self._last_off_hours_train = now
@@ -4033,12 +4035,7 @@ class ScalperRunner:
         Attempt entry on self.top_pick.
         Returns: 'entered', 'permanent_skip', or 'waiting'
         """
-        market_state = get_market_state(self.cfg)
-        can_trade = (
-            market_state == "open" or
-            (market_state == "pre_market" and self.cfg.ALLOW_PRE_MARKET_TRADING) or
-            (market_state == "after_hours" and self.cfg.ALLOW_AFTER_HOURS_TRADING)
-        )
+        can_trade, market_state = can_trade_now(self.cfg)
         if not can_trade:
             return "waiting"
 

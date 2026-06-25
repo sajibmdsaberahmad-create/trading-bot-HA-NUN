@@ -1258,5 +1258,95 @@
       "Hi",
       "Hi"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T06:29:06.106461",
+    "win_rate": 0.3249120604657853,
+    "buffer_win_rate": 0.4429275692074327,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.5760000000000001,
+        "new": 0.4608000000000001,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.072
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.215,
+        "new": 1.0935000000000001,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.035
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 51,
+        "new": 66.3,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.087
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 25055.480659999997,
+        "new": 17538.836461999996,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.008
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 140625.0,
+        "new": 105468.75,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 0.138
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.6200000000000001,
+        "new": 0.6700000000000002,
+        "reason": "raise entry bar when WR low; lower when WR strong",
+        "confidence": 0.091
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-25T06:29:06.105315\nCombined win rate: 32.5% (buffer=44.3%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
+  },
+  {
+    "timestamp": "2026-06-25T06:29:06.815040",
+    "win_rate": 0.3249120604657853,
+    "buffer_win_rate": 0.4429275692074327,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.4608000000000001,
+        "new": 0.4,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.038
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.0935000000000001,
+        "new": 0.9841500000000002,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.031
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 66,
+        "new": 85.8,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.113
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 17538.836461999996,
+        "new": 12277.185523399996,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.005
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 105468.75,
+        "new": 79101.5625,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 0.103
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.6700000000000002,
+        "new": 0.7200000000000002,
+        "reason": "raise entry bar when WR low; lower when WR strong",
+        "confidence": 0.091
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-25T06:29:06.813859\nCombined win rate: 32.5% (buffer=44.3%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
   }
 ]

@@ -167,15 +167,24 @@ class BotConfig:
     DECISION_BAR:           str  = "1 min"
 
     # ════════════════════════════════════════════════════════════════════
-    # PRE-MARKET / EXTENDED HOURS
+    # PRE-MARKET / EXTENDED HOURS / OVERNIGHT
     # ════════════════════════════════════════════════════════════════════
-    ALLOW_PRE_MARKET_TRADING:  bool = True   # Trade before 9:30 ET if high confidence
-    ALLOW_AFTER_HOURS_TRADING: bool = False  # Trade after 4:00 ET
+    ALLOW_PRE_MARKET_TRADING:  bool = os.getenv(
+        "ALLOW_PRE_MARKET_TRADING", "true"
+    ).lower() in ("1", "true", "yes")
+    ALLOW_AFTER_HOURS_TRADING: bool = os.getenv(
+        "ALLOW_AFTER_HOURS_TRADING", "true"
+    ).lower() in ("1", "true", "yes")
+    ALLOW_OVERNIGHT_TRADING: bool = os.getenv(
+        "ALLOW_OVERNIGHT_TRADING", "true"
+    ).lower() in ("1", "true", "yes")
     PRE_MARKET_START:          str  = "04:00"  # ET
     PRE_MARKET_END:            str  = "09:25"   # ET
     AFTER_HOURS_START:         str  = "16:00"   # ET
     AFTER_HOURS_END:           str  = "20:00"   # ET
-    MIN_CONFIDENCE_PRE_MARKET: float = 0.70    # Min fusion confidence to trade pre-market
+    MIN_CONFIDENCE_PRE_MARKET: float = float(os.getenv("MIN_CONFIDENCE_PRE_MARKET", "0.70"))
+    MIN_CONFIDENCE_AFTER_HOURS: float = float(os.getenv("MIN_CONFIDENCE_AFTER_HOURS", "0.72"))
+    MIN_CONFIDENCE_OVERNIGHT: float = float(os.getenv("MIN_CONFIDENCE_OVERNIGHT", "0.78"))
 
     # ════════════════════════════════════════════════════════════════════
     # OBSERVATION WINDOW (PPO input)
