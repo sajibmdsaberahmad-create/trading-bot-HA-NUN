@@ -173,8 +173,12 @@ class TelegramCommandListener:
         reply_to: Optional[int] = None,
         sync: bool = False,
         max_chars: Optional[int] = None,
+        instant_first: bool = False,
     ) -> None:
-        """AI-compose then deliver — all commander/broadcast messages go through Ollama."""
+        """AI-compose then deliver. Use instant_first=True to send fallback immediately."""
+        if instant_first and fallback:
+            self.send(chat_id, fallback, reply_to=reply_to)
+
         def deliver() -> None:
             try:
                 text = format_outbound_message(
@@ -190,7 +194,11 @@ class TelegramCommandListener:
             except Exception as exc:
                 log.debug(f"send_ai {event}: {exc}")
                 text = fallback
-            self.send(chat_id, text or fallback, reply_to=reply_to)
+            if instant_first:
+                if text and text.strip() and text.strip() != (fallback or "").strip():
+                    self.send(chat_id, text, reply_to=None)
+            else:
+                self.send(chat_id, text or fallback, reply_to=reply_id)
 
         if sync:
             deliver()
@@ -249,6 +257,7 @@ class TelegramCommandListener:
         photos = msg.get("photo") or []
 
         if not is_verified(self.cfg, chat_id):
+            log.info(f"Telegram inbound (unverified) chat={chat_id} user=@{username or first_name or '?'}: {text[:80]!r}")
             self._handle_unverified(chat_id, text, username, first_name, reply_id)
             return
 
@@ -275,11 +284,10 @@ class TelegramCommandListener:
 
         if not secret_configured(self.cfg):
             if text.lower().startswith(("/start", "/help")):
-                self.send_ai(
+                self.send_instant(
                     chat_id,
-                    "verify_locked",
-                    {"username": username, "first_name": first_name},
-                    "HANOON commander access is locked. Set TRADING_BOT_TELEGRAM_VERIFY_SECRET on the bot host, then restart.",
+                    "🔒 HANOON commander access is locked.\n"
+                    "Set TRADING_BOT_TELEGRAM_VERIFY_SECRET on the bot host, then restart.",
                     reply_to=reply_id,
                 )
             return
@@ -293,38 +301,37 @@ class TelegramCommandListener:
                 parts = text.split(maxsplit=1)
                 phrase = parts[1] if len(parts) > 1 else ""
             if verify_phrase(self.cfg, chat_id, phrase, username=username, first_name=first_name):
-                self.send_ai(
+                self.send_instant(
                     chat_id,
-                    "verify_success",
-                    {"username": username, "first_name": first_name},
-                    "Verified. Full commander access unlocked. Try /help /daily /positions /system.",
+                    "✅ Verified — full commander access unlocked.\n"
+                    "Try /help · /daily · /positions · /status · /system",
                     reply_to=reply_id,
                 )
                 return
-            self.send_ai(
+            self.send_instant(
                 chat_id,
-                "verify_failed",
-                {"username": username},
-                "Verification failed. Use: /verify YOUR_SECRET_PHRASE",
+                "🔒 Verification failed.\n"
+                "Send: /verify hall of fame\n"
+                "(use your configured secret phrase)",
                 reply_to=reply_id,
             )
             return
 
         if low.startswith("/start") or low.startswith("/help"):
-            self.send_ai(
+            self.send_instant(
                 chat_id,
-                "verify_prompt",
-                {"username": username, "first_name": first_name},
-                "HANOON Commander Access requires verification. Send /verify YOUR_SECRET_PHRASE. Works from any Telegram account once verified.",
+                "🛡 HANOON Commander Copilot\n\n"
+                "1. Verify from ANY Telegram account:\n"
+                "   /verify hall of fame\n\n"
+                "2. Then use /help for commands, or send charts + questions.\n\n"
+                "Outbound alerts require verification first.",
                 reply_to=reply_id,
             )
             return
 
-        self.send_ai(
+        self.send_instant(
             chat_id,
-            "verify_required",
-            {},
-            "Not verified. Send /verify YOUR_SECRET_PHRASE to unlock.",
+            "🔒 Not verified yet.\nSend: /verify hall of fame",
             reply_to=reply_id,
         )
 
