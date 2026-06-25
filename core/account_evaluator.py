@@ -229,6 +229,8 @@ class AccountEvaluator:
         ai_commander: Optional["AICommander"],
     ) -> str:
         fallback = self._structured_statement(event, current, comparison)
+        if event == "session_startup":
+            return fallback
         if not ai_commander or not getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True):
             return fallback
 

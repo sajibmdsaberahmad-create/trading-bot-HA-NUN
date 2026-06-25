@@ -359,7 +359,13 @@ class BotConfig:
     AI_DEFINE_ALL_LIMITS: bool = os.getenv("AI_DEFINE_ALL_LIMITS", "true").lower() in (
         "1", "true", "yes"
     )
-    AI_SESSION_LIMITS_OLLAMA: bool = os.getenv("AI_SESSION_LIMITS_OLLAMA", "true").lower() in (
+    AI_FULL_CAPITAL_ACCESS: bool = os.getenv("AI_FULL_CAPITAL_ACCESS", "true").lower() in (
+        "1", "true", "yes"
+    )
+    DEFER_FEATURE_VALIDATION: bool = os.getenv("DEFER_FEATURE_VALIDATION", "true").lower() in (
+        "1", "true", "yes"
+    )
+    DEFER_BAR_WARM_ON_LOCK: bool = os.getenv("DEFER_BAR_WARM_ON_LOCK", "true").lower() in (
         "1", "true", "yes"
     )
 
@@ -472,7 +478,7 @@ class BotConfig:
         ).lower() in ("1", "true", "yes")
     )
     ENTRY_OLLAMA_WAIT_SEC: float = float(os.getenv(
-        "ENTRY_OLLAMA_WAIT_SEC", "5" if _LOW_RAM else "10"
+        "ENTRY_OLLAMA_WAIT_SEC", "2" if _LOW_RAM else "3"
     ))
     AI_COUNCIL_MAX_WAIT_SEC: float = float(os.getenv(
         "AI_COUNCIL_MAX_WAIT_SEC", "6" if _LOW_RAM else "15"
@@ -554,7 +560,9 @@ class BotConfig:
     AI_TELEGRAM_OLLAMA_TIMEOUT: int = 12       # Seconds — notifications must not stall loop
     OLLAMA_NOTIFY_MIN_FREE_RAM_MB: int = 512   # Lighter gate for Telegram compose (model often warm)
     AI_ACCOUNT_EVALUATION: bool = True         # AI account brief on market open/close
-    AI_ACCOUNT_EVAL_ON_STARTUP: bool = True    # Compare to last close on bot start
+    AI_ACCOUNT_EVAL_ON_STARTUP: bool = os.getenv(
+        "AI_ACCOUNT_EVAL_ON_STARTUP", "false"
+    ).lower() in ("1", "true", "yes")
     AI_ACCOUNT_EVAL_MIN_SEC: float = 300.0     # Min gap between same event type
     LEARNING_RESTORE_ON_STARTUP: bool = True   # Pull experience from GitHub on boot
     LEARNING_SYNC_INTERVAL_SEC: float = 1800.0 # Push all learning artifacts every 30 min
@@ -617,7 +625,7 @@ class BotConfig:
     LOCK_BAR_REFRESH_SEC: float = 180.0   # Refresh locked bars every 3 min (not 60s)
     LOCK_STALE_RELEASE_SEC: float = float(os.getenv("LOCK_STALE_RELEASE_SEC", "600"))
     LOCK_FOCUS_ROTATE_SEC: float = float(os.getenv("LOCK_FOCUS_ROTATE_SEC", "0"))
-    LOCK_BAR_WARM_BUDGET_SEC: float = float(os.getenv("LOCK_BAR_WARM_BUDGET_SEC", "28"))
+    LOCK_BAR_WARM_BUDGET_SEC: float = float(os.getenv("LOCK_BAR_WARM_BUDGET_SEC", "5"))
     ENTRY_PENDING_BLOCK_SEC: float = float(os.getenv("ENTRY_PENDING_BLOCK_SEC", "45"))
     WATCH_ALL_LOCKED_STREAMS: bool = os.getenv(
         "WATCH_ALL_LOCKED_STREAMS", "true"

@@ -15,7 +15,7 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from core.config import BotConfig
 from core.notify import log
-from core.pilot_mode import is_ai_unlimited
+from core.pilot_mode import ai_full_capital_access, is_ai_unlimited
 
 if TYPE_CHECKING:
     from core.scalper_runner import ScalperRunner
@@ -76,8 +76,9 @@ def heuristic_session_limits(
     max_pos = int(max(2, min(20, round((eq / 180.0) * pilot_mult))))
     watch = int(max(8, min(50, round((eq / 35.0) * pilot_mult))))
     risk_pct = float(min(0.10, max(0.015, 0.04 * conf_adj)))
-    deploy_pct = float(min(0.95, max(0.12, 0.88 / max_pos)))
-    cash_reserve = float(max(0.0, min(0.12, 0.06 - (pilot_mult - 1.0) * 0.02)))
+    full_cap = ai_full_capital_access(cfg)
+    deploy_pct = 0.95 if full_cap else float(min(0.95, max(0.12, 0.88 / max_pos)))
+    cash_reserve = 0.0 if full_cap else float(max(0.0, min(0.12, 0.06 - (pilot_mult - 1.0) * 0.02)))
 
     return {
         "max_positions": max_pos,

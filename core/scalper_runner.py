@@ -111,7 +111,7 @@ from core.pilot_mode import (
     effective_prefetch_top_n, effective_min_position_hold_sec, effective_min_hold_for_exit,
     snapshot_features, send_dynamic_notification, observe_trade_everywhere,
     maybe_incremental_train, mtf_score_bonus, is_tradeable_ticker, generative_think,
-    generative_position_decision,
+    generative_position_decision, ai_full_capital_access,
 )
 from core.ai_commander import AICommander
 from core.bracket_validator import validate_decision_bracket, adapt_bracket_to_fill
@@ -412,26 +412,32 @@ class ScalperRunner:
         return ctx
 
     def _validate_features(self):
-        """Run feature pipeline validation to prevent training/serving skew."""
-        try:
-            # Use the feature engineer from enhanced features
-            from core.features_enhanced import FeatureEngineerEnhanced
-            fe = FeatureEngineerEnhanced()
-            
-            # Create a dummy DataManager to get the feature function
-            def feature_fn(df, window_size=30):
-                try:
-                    return fe.compute_features(df, window_size=window_size)
-                except Exception:
-                    # Fallback: return simple features
-                    n = min(window_size, len(df))
-                    return np.zeros((n, 18), dtype=np.float32)
-            
-            ok = validate_features_at_startup(feature_fn)
-            if not ok:
-                log.error("Feature validation failed — this would cause trading errors. Please fix before continuing.")
-        except Exception as exc:
-            log.debug(f"Feature validation skipped: {exc}")
+        """Run feature pipeline validation (deferred so IB connect is not blocked)."""
+        def _run():
+            try:
+                from core.features_enhanced import FeatureEngineerEnhanced
+                fe = FeatureEngineerEnhanced()
+
+                def feature_fn(df, window_size=30):
+                    try:
+                        return fe.compute_features(df, window_size=window_size)
+                    except Exception:
+                        n = min(window_size, len(df))
+                        return np.zeros((n, 18), dtype=np.float32)
+
+                ok = validate_features_at_startup(feature_fn)
+                if not ok:
+                    log.error(
+                        "Feature validation failed — this would cause trading errors. "
+                        "Please fix before continuing."
+                    )
+            except Exception as exc:
+                log.debug(f"Feature validation skipped: {exc}")
+
+        if getattr(self.cfg, "DEFER_FEATURE_VALIDATION", True):
+            threading.Thread(target=_run, daemon=True, name="feature-validate").start()
+        else:
+            _run()
     
     def _init_model(self):
         self._model_fresh = True
@@ -471,12 +477,23 @@ class ScalperRunner:
             if self.available_cash is None:
                 self.available_cash = self.account_equity
             self.cash = self.available_cash
-            if self._ib_starting_balance is None:
+            if self._ib_starting_balance is None and self.account_equity > 0:
                 self._ib_starting_balance = self.account_equity
+                self.cfg.INITIAL_CASH = self.account_equity
+                if ai_full_capital_access(self.cfg):
+                    self.bot_cash = float(self.available_cash or self.account_equity)
+                    self.bot_nav = self.account_equity
             self.cfg._latest_account_balance = self.account_equity
         except Exception as exc:
             log.debug(f"Could not fetch IB account balance: {exc}")
         self.bot_nav = self.bot_cash + self.shares * self._latest_price()
+
+    def _deployable_cash(self) -> float:
+        """Cash available for new entries — IB live balance when AI has full capital access."""
+        ib_cash = float(self.available_cash if self.available_cash is not None else self.account_equity)
+        if ai_full_capital_access(self.cfg):
+            return max(0.0, ib_cash)
+        return max(0.0, float(self.bot_cash))
 
     def _run_account_eval(self, event: str, force: bool = False):
         """AI account snapshot, compare, log, and Telegram brief."""
@@ -537,7 +554,7 @@ class ScalperRunner:
             contract = self.conn.get_contract()
             self.cfg.TICKER = saved
             ticks = self.ib.reqMktData(contract, "", False, False)
-            self.ib.sleep(0.4)
+            self.ib.sleep(0.12)
             bid = float(ticks.bid) if ticks.bid and ticks.bid > 0 else None
             ask = float(ticks.ask) if ticks.ask and ticks.ask > 0 else None
             self.ib.cancelMktData(contract)
@@ -697,7 +714,7 @@ class ScalperRunner:
             deployed += float(s.get("shares", 0)) * px
         return {
             "equity": self.account_equity,
-            "cash": self.bot_cash,
+            "cash": self._deployable_cash(),
             "nav": self.bot_nav,
             "open_positions": self._open_position_count(),
             "max_positions": self._max_concurrent(),
@@ -776,7 +793,7 @@ class ScalperRunner:
             return 0
         if not getattr(self.cfg, "USE_FIXED_DEPLOY_CAP", False):
             reserve_pct = effective_min_cash_reserve_pct(self.cfg)
-            cash_cap = self.bot_cash * (1.0 - reserve_pct)
+            cash_cap = self._deployable_cash() * (1.0 - reserve_pct)
             cash_shares = int(cash_cap / price) if price > 0 else shares
             return max(1, min(shares, cash_shares))
         deploy_usd = min(
@@ -1759,8 +1776,13 @@ class ScalperRunner:
         log.info(f"🕐 {market_status_line(self.cfg)}")
         market_state = get_market_state(self.cfg)
         self._last_market_state = market_state
-        if getattr(self.cfg, "AI_ACCOUNT_EVAL_ON_STARTUP", True):
-            self._run_account_eval("session_startup", force=True)
+        if getattr(self.cfg, "AI_ACCOUNT_EVAL_ON_STARTUP", False):
+            try:
+                self._worker._executor.submit(
+                    lambda: self._run_account_eval("session_startup", force=True)
+                )
+            except Exception:
+                self._run_account_eval("session_startup", force=True)
         if market_state != "open":
             if is_extended_session(market_state):
                 log.info(
@@ -2304,9 +2326,15 @@ class ScalperRunner:
 
         prefetch_tickers = [p.ticker for p in self._locked_targets]
         self._schedule_bar_prefetch(prefetch_tickers)
-        log.info("📡 Opening priority streams (after fast lock)...")
-        self._warm_locked_bar_cache()
+        log.info("📡 Streams-first fast lock — bar warm in background")
         self._ensure_locked_streams()
+        if getattr(self.cfg, "DEFER_BAR_WARM_ON_LOCK", True):
+            try:
+                self._worker._executor.submit(self._warm_locked_bar_cache)
+            except Exception:
+                self._warm_locked_bar_cache()
+        else:
+            self._warm_locked_bar_cache()
 
         self._attempt_scan_bootstrap_entry()
 
@@ -4828,7 +4856,7 @@ class ScalperRunner:
             self.cfg,
             self.pilot,
             float(self.account_equity),
-            float(self.bot_cash),
+            self._deployable_cash(),
             int(self._open_position_count()),
         )
         reb = compute_atr_bracket(
@@ -4836,7 +4864,7 @@ class ScalperRunner:
             anchor,
             atr,
             equity=float(self.account_equity),
-            cash=float(self.bot_cash),
+            cash=self._deployable_cash(),
             deploy_cap=deploy,
             shares_hint=shares,
             is_penny=anchor < float(getattr(self.cfg, "PENNY_STOCK_THRESHOLD", 5.0)),
@@ -4893,7 +4921,7 @@ class ScalperRunner:
                     self.cfg,
                     self.pilot,
                     float(self.account_equity),
-                    float(self.bot_cash),
+                    self._deployable_cash(),
                     int(self._open_position_count()),
                 )
                 reb = compute_atr_bracket(
@@ -4901,7 +4929,7 @@ class ScalperRunner:
                     current_px,
                     atr,
                     equity=float(self.account_equity),
-                    cash=float(self.bot_cash),
+                    cash=self._deployable_cash(),
                     deploy_cap=deploy,
                     shares_hint=int(ai_dec.get("shares", 0) or 0),
                 )
