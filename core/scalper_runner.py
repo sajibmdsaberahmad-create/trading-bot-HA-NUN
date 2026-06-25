@@ -2037,15 +2037,22 @@ class ScalperRunner:
             else:
                 log.info(f"📊 Market {market_state.upper()} — no session (weekend/holiday)")
 
-        # Block startup scan until IB connection is confirmed live
-        if self.conn.is_connected():
-            self._last_scan_time = time.time()
-            self._scan_and_rank()
-        else:
+        # Defer blocking IB scanner to first main-loop tick (avoids silent hang at startup)
+        self._needs_initial_scan = bool(self.conn.is_connected())
+        if not self._needs_initial_scan:
             log.warning("IB Gateway not connected at startup — skipping initial scan until connection is live")
         
         try:
             while True:
+                if getattr(self, "_needs_initial_scan", False):
+                    self._needs_initial_scan = False
+                    log.info("🔍 Running initial live IB scanner (may take 10–30s)…")
+                    try:
+                        self._scan_and_rank()
+                    except Exception as exc:
+                        log.error(f"Initial scan failed: {exc}")
+                    self._last_scan_time = time.time()
+
                 in_position = self._in_any_position()
                 have_targets = bool(self._locked_targets)
                 in_profit = self._any_position_in_profit() if in_position else False
@@ -2379,6 +2386,7 @@ class ScalperRunner:
     
     def _scan_and_rank(self):
         t0 = time.perf_counter()
+        log.info("🔍 HANOON scan: fetching live IB universe…")
         screen_list = get_live_scan_universe(self.scanner, self.conn, self.cfg)
         if not screen_list:
             log.warning("⏸ Scan skipped — live IB scanner returned no tickers (no static fallback)")

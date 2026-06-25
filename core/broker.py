@@ -333,6 +333,12 @@ class BrokerExecutor:
             self.ib.sleep(0.5)
             for trade in list(self.ib.openTrades()):
                 try:
+                    st = trade.orderStatus.status if trade.orderStatus else ""
+                    if st in (
+                        "PendingCancel", "Cancelled", "Filled",
+                        "Inactive", "ApiCancelled",
+                    ):
+                        continue
                     self.ib.cancelOrder(trade.order)
                     cancelled += 1
                 except Exception:
@@ -370,15 +376,20 @@ class BrokerExecutor:
                 order = MarketOrder("BUY", cover_qty)
                 self._configure_order(order)
                 trade = self.ib.placeOrder(contract, order)
-                self.ib.sleep(0.8)
+                self.ib.sleep(0.35)
                 st = trade.orderStatus.status if trade.orderStatus else ""
                 if st in ("Filled", "Submitted", "PreSubmitted"):
                     log.info(f"🧹 Covering orphan short: BUY {cover_qty:,} {sym} ({st})")
                     covered += 1
+                elif st in ("PendingSubmit", "PendingCancel"):
+                    log.warning(
+                        f"Orphan short cover pending for {sym} ({st}) — "
+                        f"skipping (IB still processing prior order)"
+                    )
                 else:
                     log.warning(
-                        f"Orphan short cover rejected for {sym} ({st}) "
-                        f"— will ignore on sync until RTH"
+                        f"Orphan short cover rejected for {sym} ({st}) — "
+                        f"ignored until position clears"
                     )
             if covered:
                 self.ib.sleep(0.5)

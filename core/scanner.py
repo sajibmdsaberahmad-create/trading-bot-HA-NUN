@@ -153,19 +153,35 @@ class StockScanner:
                 disabled_codes: set = set()
                 skipped_universe = 0
                 location_codes = ["STK.US.MAJOR", "STK.US"]
+                deadline = now + float(getattr(self.cfg, "IB_SCANNER_TIMEOUT_SEC", 25))
+
+                log.info(
+                    f"🔍 IB live scanner starting "
+                    f"(budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s)…"
+                )
 
                 for location_code in location_codes:
                     if tickers:
                         break
+                    if time.time() > deadline:
+                        log.warning("IB scanner time budget reached — using partial universe")
+                        break
                     for scan_code in scan_codes:
                         if scan_code in disabled_codes:
                             continue
+                        if time.time() > deadline:
+                            log.warning(
+                                f"IB scanner timeout before {scan_code} — "
+                                f"{len(tickers)} tickers so far"
+                            )
+                            break
                         scan = ScannerSubscription(
                             instrument='STK',
                             locationCode=location_code,
                             scanCode=scan_code,
                         )
                         try:
+                            log.debug(f"  scanner req {scan_code} @ {location_code}")
                             scan_results = ib.reqScannerData(scan, 0, '')
                         except Exception as exc:
                             if '162' in str(exc) or 'disabled' in str(exc).lower():
