@@ -4,12 +4,6 @@
   "confidence": 0.7100000000000002,
   "mode": "autonomous",
   "learned_lessons": [
-    "D",
-    "E",
-    "_",
-    "H",
-    "R",
-    "S",
     "L",
     "0",
     "9",
@@ -103,10 +97,16 @@
     "Commander: The council timeout indicates a lack of alignment in the signals received by the algorithm.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The high value of CONFIDENCE_THRESHOLD (0.58) suggests the algorithm should increase this parameter to better handle closing-only events.'}",
     "Commander: An IB closing-only event occurs when the market is closed and there are no open positions. This prevents real-time analysis and analysis-driven trades.",
-    "Adjustment of trade decisions is crucial for efficient trading"
+    "Adjustment of trade decisions is crucial for efficient trading",
+    "Review trade_closed on WAVE",
+    "Commander: win:hard_take_profit",
+    "B",
+    "Commander: The trade was triggered by an order to sell, which resulted in a stop-loss action.",
+    "Review loss_streak on GAID",
+    "Commander: stop_breach"
   ],
   "last_thought": "```json\n{\n  \"prompt\": \"The live account state for the HANOON trading platform is as follows:\",\n  \"response\": \"HANOON: KUST 0.0, MIMI 93.8, EGRX 91.6, GID 91.6\\n\\nNo further information needed.\"\n}\n```",
   "market_belief": {},
-  "trades_observed": 1,
-  "updated": "2026-06-25T14:34:01.973637"
+  "trades_observed": 2,
+  "updated": "2026-06-25T14:34:17.050137"
 }

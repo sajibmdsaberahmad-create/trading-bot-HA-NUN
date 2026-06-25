@@ -1,9 +1,1 @@
-{
-  "MAX_DAILY_LOSS_PCT": {
-    "param": "MAX_DAILY_LOSS_PCT",
-    "value": 0.3613138686131387,
-    "reason": "The value of MAX_DAILY_LOSS_PCT (0.3613138686131387) suggests the algorithm should increase this parameter to better handle closing-only events.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}

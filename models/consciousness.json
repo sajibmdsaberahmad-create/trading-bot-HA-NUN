@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 31,
   "scans_performed": 27,
-  "improvements_applied": 156,
+  "improvements_applied": 159,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8649,6 +8649,119 @@
         ],
         "lessons": [
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The high value of CONFIDENCE_THRESHOLD (0.58) suggests the algorithm should increase this parameter to better handle closing-only events.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:34:10.033798",
+      "age": "4d 3h 31m 21s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #157",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on WAVE"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:34:13.630348",
+      "age": "4d 3h 31m 24s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #158",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed event with a loss: stop_breach",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Market data was unreliable with an error rate of 162/420, preventing successful profit hunting.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "B",
+          "u",
+          "y",
+          "m",
+          "o",
+          "r",
+          "e",
+          "a",
+          "n",
+          "d",
+          "w",
+          "a",
+          "i",
+          "t",
+          "f",
+          "o",
+          "r",
+          "m",
+          "a",
+          "r",
+          "k",
+          "e",
+          "t",
+          "c",
+          "o",
+          "n",
+          "d",
+          "i",
+          "t",
+          "i",
+          "o",
+          "n",
+          "s",
+          "t",
+          "o",
+          "i",
+          "m",
+          "p",
+          "r",
+          "o",
+          "v",
+          "e",
+          "b",
+          "e",
+          "f",
+          "o",
+          "r",
+          "e",
+          "t",
+          "a",
+          "k",
+          "i",
+          "n",
+          "g",
+          "a",
+          "n",
+          "y",
+          "a",
+          "c",
+          "t",
+          "i",
+          "o",
+          "n",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:34:17.051917",
+      "age": "4d 3h 31m 28s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #159",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on GAID"
         ]
       }
     }
