@@ -1,0 +1,2 @@
+{"timestamp":"2026-06-25T14:33:59.554157+00:00","event":"hard_take_profit","ticker":"WAVE","pnl_usd":0.32,"pnl_pct":0.0117,"primary_goal":true,"reason":"hard_take_profit","price":9.085}
+{"timestamp":"2026-06-25T14:34:01.977029+00:00","event":"hard_take_profit","ticker":"WAVE","pnl_usd":0.32,"source":"buffer","reason":"hard_take_profit"}
