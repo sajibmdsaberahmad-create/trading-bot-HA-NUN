@@ -30,4 +30,4 @@ FILES
 SAFE BY DEFAULT
 ---------------
 Never touches Documents, Desktop, Photos, Keychain, or iCloud.
-Scan is always safe. Clean requires typing YES (or --yes in CLI).
+Scan is always safe. Clean requires typing yes or y (or --yes in CLI).

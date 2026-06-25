@@ -33,8 +33,8 @@ run_unload() {
 
 run_clean_and_unload() {
   echo ""
-  read -r -p "  Type YES to clean disk + unload Ollama RAM: " confirm
-  if [[ "$confirm" == "YES" ]]; then
+  echo "  Clean disk (safe categories) and unload Ollama from RAM."
+  if confirm_yes; then
     "$CLEAN" --unload --yes
     "$CLEAN" --clean --yes
   else
@@ -45,8 +45,7 @@ run_clean_and_unload() {
 run_aggressive() {
   echo ""
   echo "  AGGRESSIVE: docker prune, ollama prune, old Downloads (90+ days)."
-  read -r -p "  Type YES to continue: " confirm
-  if [[ "$confirm" == "YES" ]]; then
+  if confirm_yes; then
     "$CLEAN" --clean docker ollama_disk downloads --older-than 90 --yes
   else
     echo "  Cancelled."
