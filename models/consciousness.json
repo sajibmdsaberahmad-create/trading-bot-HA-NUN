@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 160,
+  "trades_observed": 162,
   "scans_performed": 27,
-  "improvements_applied": 355,
+  "improvements_applied": 358,
   "reports_generated": 26,
   "event_log": [
     {
@@ -17867,6 +17867,70 @@
       "type": "TRADE",
       "message": "Observed trade: RKLB ? P&L=$+100.77",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:55:33.493120",
+      "age": "4d 8h 52m 44s",
+      "type": "TRADE",
+      "message": "Observed trade: RIVN ? P&L=$+200.65",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:55:44.815109",
+      "age": "4d 8h 52m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #356",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIVN"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:55:46.508692",
+      "age": "4d 8h 52m 57s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:55:53.100730",
+      "age": "4d 8h 53m 4s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #357",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:55:55.337426",
+      "age": "4d 8h 53m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #358",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on MARA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -19152,8 +19216,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "patient",
-  "total_pnl": 123717.53000000004,
+  "mood": "confident",
+  "total_pnl": 123918.18000000004,
   "win_history": [
     0.0,
     0.0,
@@ -19314,20 +19378,22 @@
     -765.25,
     0.0,
     0.0,
-    100.77
+    100.77,
+    200.65,
+    0.0
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 18,
-  "veteran_xp": 2285,
+  "veteran_xp": 2325,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 48,
-    "entry_timing": 64
+    "entry_timing": 66
   },
-  "flights_completed": 155,
-  "hours_flown": 15.499999999999961,
+  "flights_completed": 157,
+  "hours_flown": 15.69999999999996,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -19348,13 +19414,13 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 4,
+    "PLT": 5,
     "LCI": 6,
     "RIO": 9,
     "QS": 3,
     "MAR": 7,
     "COI": 1,
-    "RIV": 1,
+    "RIV": 2,
     "RKL": 3,
     "SOF": 3,
     "AST": 1
@@ -19364,5 +19430,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I'm feeling patient with my mental state from the recent trades."
+  "mood_message": "I am confident in my ability to execute trades and achieve profitable outcomes."
 }

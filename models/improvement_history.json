@@ -1,92 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T17:16:26.186603+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "The market data failure indicates that the algo might have missed spike tops.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "The trade closed with a profit exit.",
-    "lessons": [
-      "T",
-      "h",
-      "e",
-      "t",
-      "r",
-      "a",
-      "d",
-      "e",
-      "r",
-      "m",
-      "i",
-      "s",
-      "s",
-      "e",
-      "d",
-      "s",
-      "p",
-      "i",
-      "k",
-      "e",
-      "t",
-      "o",
-      "p",
-      "i",
-      "n",
-      "t",
-      "r",
-      "a",
-      "b",
-      "a",
-      "r",
-      "a",
-      "n",
-      "d",
-      "s",
-      "h",
-      "o",
-      "u",
-      "l",
-      "d",
-      "f",
-      "o",
-      "c",
-      "u",
-      "s",
-      "o",
-      "n",
-      "s",
-      "e",
-      "l",
-      "l",
-      "i",
-      "n",
-      "g",
-      "d",
-      "u",
-      "r",
-      "i",
-      "n",
-      "g",
-      "t",
-      "h",
-      "i",
-      "s",
-      "p",
-      "e",
-      "r",
-      "i",
-      "o",
-      "d",
-      "."
-    ]
-  },
-  {
     "timestamp": "2026-06-25T17:18:15.230516+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
@@ -3272,6 +3185,41 @@
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
       "Review trade_closed on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:55:44.857987+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on RIVN"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:55:53.143472+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:55:55.357465+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on MARA"
     ]
   }
 ]
