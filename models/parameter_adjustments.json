@@ -1,8 +1,8 @@
 {
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.5399999999999999,
-    "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+    "value": 0.58,
+    "reason": "An adjustment of the confidence threshold from 0.35 (confidence = 0.9) to 0.58 would be beneficial.",
     "ok": true,
     "msg": "applied"
   }

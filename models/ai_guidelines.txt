@@ -609,3 +609,190 @@ Council timeout — no aligned signal
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.5399999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-25T12:46:39.367836+00:00
+The council_timeout event occurred after the scanner_timeout and spike ratio.
+The council_timeout is related to the scanner timeout, which in turn is triggered by a spike on the ATR ratio. The spike_ratio indicates that the ATR of the next trade should be more than R2 or R4.
+• .
+• .
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.9 (Adjusting the confidence threshold for the scanner timeout to 0.9.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T12:46:53.189079+00:00
+Observed council_timeout — recorded for learning.
+Council timeout — no aligned signal
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.88 (Scanner timeout entries — slightly lower bar while council catches up)
+
+🧭 COMMANDER LEARNING | 2026-06-25T12:47:19.300076+00:00
+Council timeout occurred, no aligned signal.
+Root cause: Council timeout indicates that there is no aligned signal or alignment within the trading context.
+• T
+• h
+• e
+•  
+• t
+• r
+• a
+• d
+• e
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• b
+• e
+•  
+• e
+• x
+• e
+• c
+• u
+• t
+• e
+• d
+•  
+• w
+• i
+• t
+• h
+•  
+• c
+• a
+• u
+• t
+• i
+• o
+• n
+•  
+• a
+• n
+• d
+•  
+• n
+• o
+• t
+•  
+• r
+• e
+• p
+• e
+• a
+• t
+•  
+• a
+• s
+•  
+• i
+• t
+•  
+• m
+• a
+• y
+•  
+• l
+• e
+• a
+• d
+•  
+• t
+• o
+•  
+• a
+•  
+• l
+• o
+• s
+• s
+• ,
+•  
+• s
+• o
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• l
+• e
+• v
+• e
+• l
+•  
+• n
+• e
+• e
+• d
+• s
+•  
+• t
+• o
+•  
+• b
+• e
+•  
+• i
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+• d
+•  
+• t
+• o
+•  
+• r
+• e
+• f
+• l
+• e
+• c
+• t
+•  
+• t
+• h
+• e
+•  
+• c
+• u
+• r
+• r
+• e
+• n
+• t
+•  
+• l
+• e
+• v
+• e
+• l
+•  
+• o
+• f
+•  
+• r
+• i
+• s
+• k
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (An adjustment of the confidence threshold from 0.35 (confidence = 0.9) to 0.58 would be beneficial.)
+
