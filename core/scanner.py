@@ -27,64 +27,56 @@ from core.risk import safe_vwap
 
 def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
     """
-    Fetch scanner rows with a hard timeout via ``reqScannerDataAsync``.
+    Fetch scanner rows with a hard timeout via streaming subscription.
 
-    Uses IB's blocking scan API (waits for scannerDataEnd) wrapped in
-    ``asyncio.wait_for`` so startup cannot hang forever.
+    Avoids ``ib.run()`` / nested asyncio (breaks tick/bar streams with patchAsyncio).
     """
-    import asyncio
     import time
 
     timeout_sec = max(6.0, float(timeout_sec))
     scan_code = getattr(scan, "scanCode", "?")
     location = getattr(scan, "locationCode", "?")
-
-    async def _fetch() -> List[Any]:
-        task = asyncio.create_task(ib.reqScannerDataAsync(scan))
-        last_log = time.time()
-        while not task.done():
-            await asyncio.sleep(0.4)
-            now = time.time()
-            if now - last_log >= 3.0:
-                log.info(f"  scanner {scan_code}@{location}: awaiting IB response…")
-                last_log = now
-        return list(await task)
-
+    data_list = ib.reqScannerSubscription(scan)
+    deadline = time.time() + timeout_sec
+    last_log = time.time()
+    last_count = 0
+    stable_since = time.time()
     try:
-        rows = ib.run(asyncio.wait_for(_fetch(), timeout=timeout_sec))
-        if rows:
-            log.info(f"  scanner {scan_code}@{location}: {len(rows)} rows")
-        return rows
-    except asyncio.TimeoutError:
-        log.warning(
-            f"  scanner {scan_code}@{location}: timed out after {timeout_sec:.0f}s "
-            f"(no IB response)"
-        )
-        return []
-    except Exception as exc:
-        msg = str(exc)
-        if "162" in msg or "disabled" in msg.lower():
-            raise
-        log.debug(f"  scanner {scan_code}@{location} error: {exc}")
-        return []
+        while time.time() < deadline:
+            ib.sleep(0.25)
+            n = len(data_list)
+            now = time.time()
+            if n != last_count:
+                last_count = n
+                stable_since = now
+            elif n >= 8 and (now - stable_since) >= 1.0:
+                break
+            if n >= 50:
+                break
+            if now - last_log >= 3.0:
+                log.info(
+                    f"  scanner {scan_code}@{location}: {n} rows "
+                    f"({'waiting on IB…' if n == 0 else 'receiving'})"
+                )
+                last_log = now
+        else:
+            log.warning(
+                f"  scanner {scan_code}@{location}: timed out after {timeout_sec:.0f}s "
+                f"({len(data_list)} rows)"
+            )
+    finally:
+        try:
+            ib.cancelScannerSubscription(data_list)
+        except Exception:
+            pass
+    if data_list:
+        log.info(f"  scanner {scan_code}@{location}: {len(data_list)} rows")
+    return list(data_list)
 
 
 def _warm_scanner(ib, timeout_sec: float = 3.0) -> bool:
-    """Optional scanner warm-up — never blocks longer than timeout_sec."""
-    import asyncio
-
-    async def _run():
-        return await asyncio.wait_for(ib.reqScannerParametersAsync(), timeout=timeout_sec)
-
-    try:
-        ib.run(_run())
-        return True
-    except asyncio.TimeoutError:
-        log.debug(f"Scanner warm-up timed out after {timeout_sec:.0f}s — continuing")
-        return False
-    except Exception as exc:
-        log.debug(f"Scanner warm-up skipped: {exc}")
-        return False
+    """Optional scanner warm-up — skipped by default (paper gateways often hang)."""
+    return False
 
 
 def emergency_scan_universe(connector, cfg: BotConfig) -> List[str]:

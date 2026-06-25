@@ -289,11 +289,7 @@ def entry_pending_block_sec(cfg: BotConfig) -> float:
 
 
 def tick_stream_count(cfg: BotConfig) -> int:
-    """IB allows ~5 tick-by-tick subs — paper often rejects Last ticks (10189)."""
-    if getattr(cfg, "PAPER_TRADING", False) and not getattr(cfg, "TICK_STREAM_ON_PAPER", False):
-        return 0
-    if not getattr(cfg, "USE_TICK_STREAM", True):
-        return 0
+    """IB allows ~5 tick-by-tick subs — reserve headroom for open positions."""
     return int(getattr(cfg, "AI_TICK_STREAM_COUNT", 4))
 
 
