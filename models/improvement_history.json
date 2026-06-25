@@ -2584,5 +2584,39 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of the algorithm is too low, leading to missed profit hunting events.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T15:05:11.970029+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on XCH"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T15:05:39.236491+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5,
+        "reason": "The confidence threshold was adjusted from 0.6 to 0.58, indicating that a majority of trades should not be allowed in this scenario.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred, no aligned signal.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 reflects that a majority of the trades should not be allowed due to potential misalignment with the market state.'}"
+    ]
   }
 ]

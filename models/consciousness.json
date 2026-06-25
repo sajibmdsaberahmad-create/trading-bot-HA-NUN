@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 31,
   "scans_performed": 27,
-  "improvements_applied": 172,
+  "improvements_applied": 174,
   "reports_generated": 26,
   "event_log": [
     {
@@ -9507,6 +9507,50 @@
         ],
         "lessons": [
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of the algorithm is too low, leading to missed profit hunting events.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:05:11.949210",
+      "age": "4d 4h 2m 23s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #173",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on XCH"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:05:39.205107",
+      "age": "4d 4h 2m 50s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #174",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred, no aligned signal.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5,
+            "reason": "The confidence threshold was adjusted from 0.6 to 0.58, indicating that a majority of trades should not be allowed in this scenario.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 reflects that a majority of the trades should not be allowed due to potential misalignment with the market state.'}"
         ]
       }
     }
