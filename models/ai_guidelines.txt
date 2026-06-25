@@ -301,3 +301,11 @@ Council timeout — no aligned signal
 Observed trade_closed — recorded for learning.
 win:council_exit: Ollama exit 96% (PPO hold)
 
+🧭 COMMANDER LEARNING | 2026-06-25T11:01:13.782023+00:00
+Observed trade_closed — recorded for learning.
+loss:council_exit: Ollama exit 98% (PPO hold)
+
+🧭 COMMANDER LEARNING | 2026-06-25T11:01:17.149403+00:00
+Observed loss_streak — recorded for learning.
+council_exit: Ollama exit 98% (PPO hold)
+

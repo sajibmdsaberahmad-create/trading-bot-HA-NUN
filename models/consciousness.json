@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 82,
+  "improvements_applied": 84,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5704,6 +5704,34 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on IBX"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:01:13.755832",
+      "age": "3d 23h 58m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #83",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:01:17.128208",
+      "age": "3d 23h 58m 28s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #84",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on NEXR"
         ]
       }
     }
