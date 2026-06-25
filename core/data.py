@@ -53,6 +53,14 @@ def _utc_timestamp(dt) -> pd.Timestamp:
     return ts.tz_convert("UTC")
 
 
+def coalesce_bars(*sources: Optional[pd.DataFrame], min_len: int = 1) -> Optional[pd.DataFrame]:
+    """Return the first non-empty DataFrame — never use `or` on DataFrames."""
+    for df in sources:
+        if df is not None and len(df) >= min_len:
+            return df
+    return None
+
+
 class DataManager:
     """Pulls historical data and manages the live tick/bar buffers."""
 
