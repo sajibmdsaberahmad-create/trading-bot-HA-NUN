@@ -4319,3 +4319,7 @@ The event occurred because of a missed profit hunt (trailing stop). The algorith
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold for profitable trades)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:41:32.673121+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+

@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "Increased confidence threshold for profitable trades",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}

@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 106,
   "training_sessions": 27,
-  "trades_observed": 118,
+  "trades_observed": 119,
   "scans_performed": 27,
-  "improvements_applied": 288,
+  "improvements_applied": 289,
   "reports_generated": 26,
   "event_log": [
     {
@@ -14864,6 +14864,27 @@
       "type": "TRADE",
       "message": "Observed trade: BITO ? P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:41:32.639660",
+      "age": "4d 6h 38m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #289",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on BITO"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:42:14.924061",
+      "age": "4d 6h 39m 26s",
+      "type": "TRADE",
+      "message": "Observed trade: GDC ? P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T17:27:08.460533",
@@ -16149,7 +16170,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "constrained",
+  "mood": "anxious",
   "total_pnl": 184947.82,
   "win_history": [
     0.0,
@@ -16269,20 +16290,21 @@
     0.0,
     -297.52,
     0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 12,
-  "worst_streak": 12,
-  "veteran_xp": 1685,
+  "consecutive_losses": 13,
+  "worst_streak": 13,
+  "veteran_xp": 1695,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 89,
+    "exit_timing": 90,
     "risk_management": 32,
     "entry_timing": 48
   },
-  "flights_completed": 113,
-  "hours_flown": 11.299999999999976,
+  "flights_completed": 114,
+  "hours_flown": 11.399999999999975,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -16299,7 +16321,7 @@
     "KUS": 2,
     "XCH": 1,
     "TZA": 12,
-    "GDC": 13,
+    "GDC": 14,
     "SOX": 11,
     "BIT": 12,
     "GPU": 18
@@ -16309,5 +16331,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "My recent trading performance has been challenging but I've learned to analyze every trade and make informed decisions."
+  "mood_message": "I'm feeling jittery and unsure about my decisions."
 }
