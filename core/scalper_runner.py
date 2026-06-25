@@ -250,9 +250,9 @@ class ScalperRunner:
         self._last_pulse_fingerprint: str = ""
         self._last_stagnation_decision: Dict[str, Any] = {}
         self._pending_entry_ticker: Optional[str] = None
-        self._pending_bracket_handle: Optional[BracketHandle] = None
+        self._pending_brackets_by_ticker: Dict[str, BracketHandle] = {}
         self._pending_entry_until: float = 0.0
-        self._entry_poll_state: Optional[Dict[str, Any]] = None
+        self._entry_poll_states: Dict[str, Dict[str, Any]] = {}
         self._ai_councils: Dict[str, Dict[str, Any]] = {}
         self._entry_cooldown_until: Dict[str, float] = {}
         self._short_warned: set = set()
@@ -1136,30 +1136,45 @@ class ScalperRunner:
         if ticker:
             self._entry_cooldown_until[ticker] = time.time() + cooldown_sec
             self._spike_skip_until[ticker] = time.time() + cooldown_sec
-        self._pending_entry_ticker = None
-        self._pending_bracket_handle = None
-        self._pending_entry_until = 0.0
-        self._entry_poll_state = None
+            self._pending_brackets_by_ticker.pop(ticker, None)
+            self._entry_poll_states.pop(ticker, None)
+            if self._pending_entry_ticker == ticker:
+                self._pending_entry_ticker = (
+                    next(iter(self._entry_poll_states), None)
+                )
+        else:
+            self._pending_brackets_by_ticker.clear()
+            self._entry_poll_states.clear()
+            self._pending_entry_ticker = None
+        if not self._entry_poll_states:
+            self._pending_entry_ticker = None
+            self._pending_entry_until = 0.0
+
+    def _bracket_for_entry_fill(self, ticker: str) -> Optional[BracketHandle]:
+        """Bracket for a specific pending/fresh fill — never another ticker's handle."""
+        st = self._entry_poll_states.get(ticker) or {}
+        if st.get("bracket"):
+            return st["bracket"]
+        return self._pending_brackets_by_ticker.get(ticker)
 
     def _halt_trading_for_closed_market(self, market_state: str) -> None:
         """Cancel in-flight entry orders when session is not tradable."""
         if not (
             self._pending_entry_ticker
-            or self._entry_poll_state
-            or self._pending_bracket_handle
+            or self._entry_poll_states
+            or self._pending_brackets_by_ticker
         ):
             return
-        ticker = (
-            self._pending_entry_ticker
-            or (self._entry_poll_state or {}).get("ticker")
-        )
-        if ticker:
+        tickers = list(self._entry_poll_states.keys()) or list(self._pending_brackets_by_ticker.keys())
+        if self._pending_entry_ticker and self._pending_entry_ticker not in tickers:
+            tickers.append(self._pending_entry_ticker)
+        for ticker in tickers:
             try:
                 self.broker.cancel_open_orders_for_symbol(ticker)
             except Exception:
                 pass
         self.bracket_handle = None
-        self._clear_pending_entry(ticker, cooldown_sec=120.0)
+        self._clear_pending_entry(None, cooldown_sec=120.0)
         log.info(f"⏸ Pending entry halted — market {market_state}")
 
     def _ai_skip_ticker_permanent(self, ticker: str, reason: str) -> str:
@@ -2216,7 +2231,7 @@ class ScalperRunner:
                     have_targets=have_targets,
                     in_profit=in_profit,
                 )
-                if self._entry_poll_state:
+                if self._entry_poll_states:
                     loop_sec = min(
                         loop_sec,
                         float(getattr(self.cfg, "ENTRY_PENDING_LOOP_SEC", 0.05)),
@@ -4593,7 +4608,7 @@ class ScalperRunner:
             return
         if not getattr(self.cfg, "HOT_SWAP_ON_EXIT", True):
             return
-        if self._pending_entry_ticker or self._entry_poll_state:
+        if self._pending_entry_ticker or self._entry_poll_states:
             return
         pick = self._next_best_pick or self.top_pick
         if not pick:

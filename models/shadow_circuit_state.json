@@ -1,8 +1,8 @@
 {
   "in_shadow": false,
-  "consecutive_losses": 0,
+  "consecutive_losses": 1,
   "daily_start_equity": 767536.85,
-  "daily_pnl_usd": 0.0,
+  "daily_pnl_usd": -2592.81,
   "shadow_open": {},
   "shadow_closed": [
     {
@@ -30,5 +30,5 @@
       "closed_at": 1782413576.5514581
     }
   ],
-  "updated_at": 1782415047.8175979
+  "updated_at": 1782415280.904106
 }

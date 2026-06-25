@@ -1876,5 +1876,32 @@
     "lessons": [
       "Review trade_closed on RIOT"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:21:23.971517+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold for profit hunting was too high, and the trader should adjust it to a more reasonable value.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Loss streak occurred due to missed profit hunt.",
+    "lessons": [
+      "Increase margin of profit",
+      "Optimize profit hunting logic"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:21:27.308794+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on MARA"
+    ]
   }
 ]

@@ -5126,3 +5126,15 @@ The trader missed the opportunity to take advantage of a gap and close the trade
 Observed trade_closed — recorded for learning.
 hard_take_profit
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:21:23.970728+00:00
+Loss streak occurred due to missed profit hunt.
+The trader experienced a loss streak, which can be attributed to the missed profit hunt. The margin of profit was lower than expected and it is necessary to increase this margin.
+• Increase margin of profit
+• Optimize profit hunting logic
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold for profit hunting was too high, and the trader should adjust it to a more reasonable value.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:21:27.308531+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+

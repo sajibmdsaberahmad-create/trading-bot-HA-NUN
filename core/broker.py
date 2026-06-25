@@ -93,6 +93,7 @@ class BracketHandle:
     parent_trade: Optional[Trade] = None
     oca_group: str = ""
     quantity: int = 0
+    symbol: str = ""
     last_stop_price: float = 0.0
     last_target_price: float = 0.0
     _last_replace_ts: float = field(default=0.0, repr=False)
@@ -118,8 +119,15 @@ class BrokerExecutor:
         """Sub-dollar stocks need 4dp stops/targets on IB."""
         return round(price, 4) if price < 1.0 else round(price, 2)
 
-    def place_bracket_buy(self, quantity: int, limit_or_market_price: Optional[float],
-                           stop_price: float, target_price: float) -> BracketHandle:
+    def place_bracket_buy(
+        self,
+        quantity: int,
+        limit_or_market_price: Optional[float],
+        stop_price: float,
+        target_price: float,
+        *,
+        symbol: Optional[str] = None,
+    ) -> BracketHandle:
         """
         Submit a bracket BUY: parent entry + stop-loss child + take-profit
         child, OCA-linked so a fill on one cancels the other.
@@ -128,7 +136,7 @@ class BrokerExecutor:
         float, parent is a marketable LIMIT order at that price (used
         when slippage protection is active).
         """
-        contract = self.conn.get_contract()
+        contract = self.conn.get_contract(symbol)
 
         parent_id = self.ib.client.getReqId()
 
@@ -176,9 +184,20 @@ class BrokerExecutor:
             parent_trade=parent_trade,
             oca_group=oca_group,
             quantity=quantity,
+            symbol=(symbol or self.cfg.TICKER or getattr(contract, "symbol", "") or "").upper(),
             last_stop_price=self._round_price(stop_price),
             last_target_price=self._round_price(target_price),
         )
+
+    def _contract_for_handle(self, handle: BracketHandle):
+        """Always use the bracket's own contract — never cfg.TICKER (multi-position safe)."""
+        for trade in (handle.parent_trade, handle.stop_trade, handle.target_trade):
+            if trade is not None and getattr(trade, "contract", None) is not None:
+                return trade.contract
+        sym = (handle.symbol or "").upper()
+        if sym:
+            return self.conn.get_contract(sym)
+        return self.conn.get_contract()
 
     # ── Cancel + replace bracket children (IB rejects in-place OCA edits: 10326) ──
 
@@ -251,7 +270,7 @@ class BrokerExecutor:
         stop_child.ocaGroup = oca_group
         stop_child.ocaType = 1
 
-        contract = self.conn.get_contract()
+        contract = self._contract_for_handle(handle)
         handle.stop_trade = self.ib.placeOrder(contract, stop_child)
         handle.last_stop_price = rounded
         log.debug(f"Stop replaced -> ${rounded:.2f} (order #{stop_child.orderId})")
@@ -292,7 +311,7 @@ class BrokerExecutor:
         target_child.ocaGroup = oca_group
         target_child.ocaType = 1
 
-        contract = self.conn.get_contract()
+        contract = self._contract_for_handle(handle)
         handle.target_trade = self.ib.placeOrder(contract, target_child)
         handle.last_target_price = rounded
         log.debug(f"Target replaced -> ${rounded:.2f} (order #{target_child.orderId})")

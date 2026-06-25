@@ -4,10 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "E",
-    "N",
-    "O",
-    "Commander: Why did this happen? The trade closed due to trailing profit. When does it tend to occur? This occurs at open time.",
     "x",
     "Commander: The closing trades were made based on real-time events and live IB bars.",
     "'",
@@ -103,10 +99,14 @@
     ":",
     "Commander: The trader missed the opportunity to take advantage of a gap and close the trade at a higher price, resulting in a profit.",
     "Commander: hard_take_profit",
-    "Large loss detected: MARA. Review stop placement."
+    "Large loss detected: MARA. Review stop placement.",
+    "Increase margin of profit",
+    "Optimize profit hunting logic",
+    "Commander: The trader experienced a loss streak, which can be attributed to the missed profit hunt. The margin of profit was lower than expected and it is necessary to increase this margin.",
+    "Review trade_closed on MARA"
   ],
   "last_thought": "```json\n{\n  \"trade_id\": \"closed_trade\",\n  \"journal_entry\": {\n    \"ticker\": \"MARA\",\n    \"entry\": 14.61,\n    \"exit\": 13.64,\n    \"quote_entry\": 14.61,\n    \"quote_exit\": 13.65,\n    \"shares\": 2673.0,\n    \"pnl_usd\": -2592.81,\n    \"pnl_pct\": -6.64,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 1,
-  "updated": "2026-06-25T19:21:07.455432"
+  "trades_observed": 2,
+  "updated": "2026-06-25T19:21:27.272059"
 }
