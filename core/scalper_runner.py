@@ -28,7 +28,7 @@ from typing import Optional, List, Dict, Tuple, Any
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from core.market_hours import get_market_state, market_status_line, now_et, can_trade_now, is_extended_session
+from core.market_hours import get_market_state, market_status_line, now_et, can_trade_now, is_extended_session, allowed_trading_sessions_label
 
 import numpy as np
 import pandas as pd
@@ -300,6 +300,7 @@ class ScalperRunner:
         self._last_daily_push_date: Optional[str] = None
         self._last_market_state: Optional[str] = None
         self._last_market_closed_log: float = 0.0
+        self._day_session_ended: bool = False
         self._pending_closes: Dict[str, PendingClose] = {}
         self._deferred_exits: Dict[str, Dict[str, Any]] = {}
         self._last_off_hours_train: float = 0.0
@@ -678,6 +679,9 @@ class ScalperRunner:
 
     def _service_tick_position_exit(self, ticker: str, price: float) -> None:
         """Sub-second micro profit/loss exit on tick (mechanical, no council wait)."""
+        can_trade, _ = can_trade_now(self.cfg)
+        if not can_trade:
+            return
         if not getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
             return
         if not self._load_position_context(ticker):
@@ -972,6 +976,9 @@ class ScalperRunner:
     def _service_deferred_exits(self) -> None:
         if not self._deferred_exits:
             return
+        can_trade, _ = can_trade_now(self.cfg)
+        if not can_trade:
+            return
         for ticker, req in list(self._deferred_exits.items()):
             if ticker in self._pending_closes:
                 self._deferred_exits.pop(ticker, None)
@@ -1237,6 +1244,19 @@ class ScalperRunner:
         self.bracket_handle = None
         self._clear_pending_entry(None, cooldown_sec=120.0)
         log.info(f"⏸ Pending entry halted — market {market_state}")
+
+    def _on_day_session_end(self, market_state: str) -> None:
+        """RTH/pre-market window ended — stop all trading for the day."""
+        if getattr(self, "_day_session_ended", False):
+            return
+        self._day_session_ended = True
+        sessions = allowed_trading_sessions_label(self.cfg)
+        log.info(
+            f"🏁 DAY SESSION FINISHED ({market_state}) — enabled sessions: {sessions}. "
+            f"No new orders until next pre-market. Open brackets remain on IB."
+        )
+        self._halt_trading_for_closed_market(market_state)
+        self._deferred_exits.clear()
 
     def _ai_skip_ticker_permanent(self, ticker: str, reason: str) -> str:
         """IB / venue failure — learn + rotate focus (no permanent block in learn mode)."""
@@ -1823,6 +1843,14 @@ class ScalperRunner:
         if defer:
             self._request_deferred_exit(ticker, current_px, reason)
             return
+        can_trade, market_state = can_trade_now(self.cfg)
+        if not can_trade:
+            log.debug(
+                f"Exit deferred — session {market_state} (no orders outside "
+                f"{allowed_trading_sessions_label(self.cfg)})"
+            )
+            self._request_deferred_exit(ticker, current_px, reason)
+            return
         if ticker and ticker in self._position_slots:
             self._load_position_context(ticker)
         if self.shares <= 0:
@@ -2263,10 +2291,18 @@ class ScalperRunner:
                 self._run_account_eval("session_startup", force=True)
         if market_state != "open":
             if is_extended_session(market_state):
-                log.info(
-                    f"📊 Extended session: {market_state.upper()} — "
-                    f"pre/after/overnight scouting enabled"
-                )
+                can_now, _ = can_trade_now(self.cfg)
+                if can_now:
+                    log.info(
+                        f"📊 Extended session: {market_state.upper()} — "
+                        f"trading enabled ({allowed_trading_sessions_label(self.cfg)})"
+                    )
+                else:
+                    self._day_session_ended = True
+                    log.info(
+                        f"📊 {market_state.upper()} — day finished "
+                        f"(sessions: {allowed_trading_sessions_label(self.cfg)})"
+                    )
             else:
                 log.info(f"📊 Market {market_state.upper()} — no session (weekend/holiday)")
 
@@ -2403,17 +2439,24 @@ class ScalperRunner:
 
                 market_state = get_market_state(self.cfg)
                 if self._last_market_state != market_state:
+                    old_state = self._last_market_state or market_state
                     try:
                         self.account_evaluator.on_market_transition(
-                            self, self._last_market_state or market_state, market_state,
+                            self, old_state, market_state,
                             self.notifier, self.ai_commander, self.autopilot,
                             self.consciousness, self.pilot,
                         )
                     except Exception as exc:
                         log.debug(f"Market transition eval: {exc}")
+                    if old_state in ("open", "pre_market") and market_state in (
+                        "after_hours", "overnight", "closed",
+                    ):
+                        self._on_day_session_end(market_state)
+                    if market_state in ("pre_market", "open"):
+                        self._day_session_ended = False
                     self._last_market_state = market_state
                 can_trade, market_state = can_trade_now(self.cfg)
-                if not can_trade and market_state == "closed":
+                if not can_trade:
                     self._halt_trading_for_closed_market(market_state)
 
                 self._service_pending_ai_councils()
@@ -2425,7 +2468,7 @@ class ScalperRunner:
                     self._service_tick_spike_queue()
 
                 # AI-driven early exit check (when in position, non-blocking)
-                if in_position and self.model is not None:
+                if in_position and self.model is not None and can_trade:
                     ai_exit_interval = ai_exit_check_sec(self.cfg, self._any_position_in_profit())
                     if now - getattr(self, "_last_ai_exit_check", 0) >= ai_exit_interval:
                         self._last_ai_exit_check = now
@@ -2575,7 +2618,10 @@ class ScalperRunner:
                 else:
                     if now - getattr(self, "_last_market_closed_log", 0) >= 60.0:
                         self._last_market_closed_log = now
-                        log.info(f"⏸ NO SESSION ({market_state}) — training instead")
+                        log.info(
+                            f"⏸ NO TRADING SESSION ({market_state}) — "
+                            f"enabled: {allowed_trading_sessions_label(self.cfg)} | training mode"
+                        )
                     train_iv = float(getattr(self.cfg, "OFF_HOURS_TRAIN_INTERVAL_SEC", 3600))
                     if now - getattr(self, "_last_off_hours_train", 0) >= train_iv:
                         self._last_off_hours_train = now

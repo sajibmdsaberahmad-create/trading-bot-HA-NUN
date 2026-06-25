@@ -454,6 +454,13 @@ class BrokerExecutor:
         a market order. `urgent=True` is used for stop/circuit-breaker
         exits, where guaranteed execution matters more than price.
         """
+        if not self._session_allows_orders("flatten"):
+            _, state = orders_allowed(self.cfg)
+            log.info(
+                f"⏸ Flatten skipped — session {state} "
+                f"(orders only during {allowed_trading_sessions_label(self.cfg)})"
+            )
+            return None
         sym = (symbol or self.cfg.TICKER or "").upper()
         contract = self.conn.get_contract(sym or None)
         if sym:
