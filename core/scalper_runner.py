@@ -2200,13 +2200,6 @@ class ScalperRunner:
                 f"[{','.join(priority[:12])}{'...' if len(priority) > 12 else ''}] | "
                 f"monitor {fast_monitor_interval(self.cfg):.2f}s | spike-fast ON"
             )
-        elif ai_fast_execution(self.cfg):
-            log.info(
-                f"⚡ AI FAST EXEC: warm top {warm_priority_count(self.cfg)} | "
-                f"stream top {stream_priority_count(self.cfg)} | "
-                f"tick ALL priority | monitor {fast_monitor_interval(self.cfg):.2f}s | "
-                f"spike-fast entry ON"
-            )
         self._generative_review_locks(penny_results)
         if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
             send_dynamic_notification(
@@ -2247,8 +2240,7 @@ class ScalperRunner:
 
     def _schedule_bar_prefetch(self, tickers: List[str]):
         """Queue 1-min bar prefetch — priority names at front of queue."""
-        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
-        priority = warm_ticker_list(self._locked_targets, self.cfg, focus)
+        priority = self._priority_tickers() if self._locked_targets else []
         priority_set = {t.upper() for t in priority}
         ordered = [t for t in priority if t in tickers]
         ordered += [t for t in tickers if t.upper() not in priority_set]
@@ -2312,8 +2304,19 @@ class ScalperRunner:
         return None
 
     def _drain_bar_prefetch_queue(self):
-        """Non-blocking bar prefetch — one ticker per main-loop tick."""
+        """Non-blocking bar prefetch — priority names first when fast execution on."""
         per_loop = prefetch_per_loop(self.cfg)
+        if ai_fast_execution(self.cfg) and self._locked_targets:
+            priority = self._priority_tickers()
+            for ticker in priority:
+                cached = self._scan_data_cache.get(ticker)
+                need = self._min_bars_for(ticker)
+                if cached is not None and len(cached) >= need:
+                    continue
+                self._prefetch_one_ticker_bars(ticker, quiet=True)
+                per_loop -= 1
+                if per_loop <= 0:
+                    return
         for _ in range(max(1, per_loop)):
             if not self._bar_prefetch_queue:
                 return
@@ -2323,12 +2326,11 @@ class ScalperRunner:
             self._prefetch_one_ticker_bars(ticker, quiet=True)
 
     def _warm_locked_bar_cache(self):
-        """Fetch 1-min bars for priority locked names first — spike monitor ready ASAP."""
+        """Fetch 1-min bars for ALL priority locked names — spike monitor ready ASAP."""
         budget = warm_budget_sec(self.cfg)
         t0 = time.perf_counter()
         warmed = 0
-        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
-        priority = warm_ticker_list(self._locked_targets, self.cfg, focus)
+        priority = self._priority_tickers()
         for ticker in priority:
             if time.perf_counter() - t0 > budget:
                 break
@@ -2340,9 +2342,19 @@ class ScalperRunner:
         ]
         if remaining:
             self._schedule_bar_prefetch(remaining)
+        priority_ready = sum(
+            1 for t in priority
+            if t in self._scan_data_cache
+            and len(self._scan_data_cache[t]) >= self._min_bars_for(t)
+        )
+        total_ready = sum(
+            1 for t in self._locked_targets
+            if t.ticker in self._scan_data_cache
+            and len(self._scan_data_cache[t.ticker]) >= self._min_bars_for(t.ticker)
+        )
         log.info(
-            f"📊 Bar cache: {warmed}/{len(self._locked_targets)} locked tickers ready "
-            f"(priority {len(priority)})"
+            f"📊 Bar cache: {priority_ready}/{len(priority)} priority ready | "
+            f"{total_ready}/{len(self._locked_targets)} total locked"
         )
 
     def _maybe_release_stale_lock(self, now: float) -> bool:
@@ -2370,7 +2382,9 @@ class ScalperRunner:
         return True
 
     def _maybe_rotate_locked_focus(self, now: float):
-        """Rotate live tick stream across locked names — avoid single-ticker deadlock."""
+        """Rotate live tick stream across locked names — disabled when all priority watched."""
+        if ai_fast_execution(self.cfg) or not focus_rotation_enabled(self.cfg):
+            return
         if len(self._locked_targets) < 2:
             return
         rotate_sec = float(getattr(self.cfg, "LOCK_FOCUS_ROTATE_SEC", 60.0))
@@ -2445,13 +2459,13 @@ class ScalperRunner:
                 )
 
     def _focused_ticker(self) -> Optional[str]:
-        """Pinned to top_pick — no rotation across locked names."""
-        if getattr(self.cfg, "FOCUS_PIN_TOP_PICK", True) and self.top_pick:
+        """Best-ranked pick for entry context — NOT the only monitored ticker."""
+        if self.top_pick:
             return self.top_pick.ticker
         if not self._locked_targets:
             return None
-        idx = self._focus_target_index % len(self._locked_targets)
-        return self._locked_targets[idx].ticker
+        priority = self._priority_tickers()
+        return priority[0] if priority else self._locked_targets[0].ticker
 
     def _ensure_focus_stream(self, quiet: bool = False):
         """Backward-compatible alias — starts all locked streams when enabled."""
