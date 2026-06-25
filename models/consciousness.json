@@ -5,7 +5,7 @@
   "training_sessions": 25,
   "trades_observed": 24,
   "scans_performed": 25,
-  "improvements_applied": 27,
+  "improvements_applied": 28,
   "reports_generated": 24,
   "event_log": [
     {
@@ -3805,6 +3805,22 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #78",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T06:21:48.426677",
+      "age": "3d 19h 18m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #28",
+      "metadata": {
+        "source": "commander_chat",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T06:18:28.551094",
