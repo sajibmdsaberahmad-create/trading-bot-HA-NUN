@@ -138,3 +138,5 @@
 {"timestamp":"2026-06-25T14:34:06.081120+00:00","event":"loss_streak","ticker":"GAID","reason":"stop_breach","pnl_usd":-0.35999999999999943,"consecutive_losses":0,"market_state":"open"}
 {"timestamp":"2026-06-25T14:36:00.537856+00:00","event":"trade_closed","ticker":"NEXR","reason":"loss:stop_breach","pnl_usd":-33.5762,"pnl_pct":-7.8761904761904695,"won":false,"exit_type":"stop_hit","hold_sec":819.5110278129578,"regime":"unknown","market_state":"open"}
 {"timestamp":"2026-06-25T14:36:00.539262+00:00","event":"loss_streak","ticker":"NEXR","reason":"stop_breach","pnl_usd":-33.5762,"consecutive_losses":0,"market_state":"open"}
+{"timestamp":"2026-06-25T14:38:28.732507+00:00","event":"trade_closed","ticker":"IQST","reason":"loss:stop_breach","pnl_usd":-0.20100000000000007,"pnl_pct":-1.511278195488719,"won":false,"exit_type":"stop_hit","hold_sec":341.2503778934479,"regime":"unknown","market_state":"open"}
+{"timestamp":"2026-06-25T14:38:28.733761+00:00","event":"loss_streak","ticker":"IQST","reason":"stop_breach","pnl_usd":-0.20100000000000007,"consecutive_losses":0,"market_state":"open"}

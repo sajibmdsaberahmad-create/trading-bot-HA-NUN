@@ -1,7 +1,7 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 33% \u00b7 $-33.62. Preserving capital over action.",
-  "confidence": 0.6800000000000002,
+  "mood_message": "Win rate 25% \u00b7 $-33.82. Preserving capital over action.",
+  "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
     "w",
@@ -105,8 +105,8 @@
     "Review trade_closed on NEXR",
     "Commander: loss:stop_breach"
   ],
-  "last_thought": "```json\n{\n  \"trade_entry\": {\n    \"ticker\": \"NEXR\",\n    \"entry\": 1.05,\n    \"exit\": 0.9673,\n    \"shares\": 406,\n    \"pnl_usd\": -33.58,\n    \"pnl_pct\": -7.88,\n    \"result\": \"loss\",\n    \"exit_reason\": \"stop_breach\"\n  },\n  \"lesson_learned\": \"Stopping below the stop-loss trigger will always result in a loss.\",\n  \"gut_feel\": {\n    \"reasoning\": \"The trader should not wait for large gains on clean spike tops and should exit as soon as possible to avoid unnecessary losses.\"\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"trade_action\": \"sell\",\n  \"entry_price\": 1.3099,\n  \"exit_price\": 1.33,\n  \"shares\": 10.0,\n  \"pnl_usd\": -0.2,\n  \"pnl_pct\": -1.51,\n  \"result\": \"loss\",\n  \"entry_reason\": \"stop_breach\"\n}\n```",
   "market_belief": {},
-  "trades_observed": 3,
-  "updated": "2026-06-25T14:36:06.885715"
+  "trades_observed": 4,
+  "updated": "2026-06-25T14:38:28.730599"
 }
