@@ -1,15 +1,9 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 10% \u00b7 $-238.08. Preserving capital over action.",
+  "mood": "anxious",
+  "mood_message": "I am feeling uneasy about the current trade situation and need to assess it carefully.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "p",
-    "k",
-    "Commander: High scanner score indicates a missed profit hunt, which prevents opportunistic exits.",
-    "Analyze market dynamics",
-    "Adjust strategies according to conditions",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This adjustment increases the confidence level in predicting profitable trades. This helps the algorithm make better informed decisions.'}",
     "Commander: Confidence level is now at 0.58, which improves the algorithm's accuracy in making decisions.",
     "P",
     "Commander: The trader is using an aggressive take-profit strategy to maximize profits at the cost of potential losses.",
@@ -103,10 +97,16 @@
     "Profit hunt worked on RKLB: spike_top_exit: +0.64% vol=3.5x \u2014 reinforce opportunistic exits.",
     "Review ib_failure on RIVN",
     "Review ib_failure on RKLB",
-    "Commander: spike_top_exit: +0.64% vol=3.5x"
+    "Commander: spike_top_exit: +0.64% vol=3.5x",
+    "Commander: council_exit: Ollama exit 100% (PPO hold)",
+    "Spike-top hunt on COIN: wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading",
+    "Profit hunt worked on COIN: wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading \u2014 reinforce opportunistic exits.",
+    "Make sure to avoid rejecting orders and instead use the live IB bars for trading.",
+    "Always prioritize opportunistic exits when dealing with rejection",
+    "Commander: The IB order was rejected (201). This is a critical issue that will prevent profitable hunting."
   ],
-  "last_thought": "```json\n{\n    \"prompt\": \"Write a trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"RIVN\\\", \\\"entry\\\": 14.85, \\\"exit\\\": 14.85, \\\"entry_fill\\\": 14.85, \\\"exit_fill\\\": 14.85, \\\"quote_entry\\\": 17.29, \\\"quote_exit\\\": 14.85, \\\"shares\\\": 2977.0, \\\"pnl_usd\\\": 0.0, \\\"pnl_pct\\\": 0.0, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"bracket_exit\\\", \\\"entry_slippage_pct\\\": -0.141122, \\\"exit_slippage_pct\\\": 0.0, \\\"limit_px\\\": null, \\\"entry_mode\\\": \\\"paper_market\\\", \\\"regime\\\": \\\"unknown\\\", \\\"hold_sec\\\": 204.5, \\\"",
+  "last_thought": "```json\n{\n  \"entry\": {\n    \"ticker\": \"COIN\",\n    \"volume\": 182.0,\n    \"price\": 142.0337,\n    \"side\": \"buy\"\n  },\n  \"exit\": {\n    \"ticker\": \"COIN\",\n    \"price\": 142.52,\n    \"side\": \"sell\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 76,
-  "updated": "2026-06-25T20:04:00.101993"
+  "trades_observed": 79,
+  "updated": "2026-06-25T20:04:50.078279"
 }

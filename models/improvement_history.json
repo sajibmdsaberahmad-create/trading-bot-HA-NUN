@@ -1,32 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T17:41:00.833110+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "Increased confidence threshold for profitable trades",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "The trade closed with a trailing stop loss, resulting in a negative profit.",
-    "lessons": [
-      "Focus on taking profit into momentum to avoid losing profit early.",
-      "Implement stricter parameters and logic hints within the constraints to prevent recurrence."
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T17:41:32.673298+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on BITO"
-    ]
-  },
-  {
     "timestamp": "2026-06-25T17:42:20.725732+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {
@@ -3281,6 +3254,33 @@
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
       "Review trade_closed on RKLB"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T20:04:12.129293+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on ASTS"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T20:04:26.818698+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The system will now lower the confidence threshold to 58%.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The event ib_failure occurred in the after_hours session.",
+    "lessons": [
+      "Make sure to avoid rejecting orders and instead use the live IB bars for trading.",
+      "Always prioritize opportunistic exits when dealing with rejection"
     ]
   }
 ]

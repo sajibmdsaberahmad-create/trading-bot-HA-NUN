@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 184,
+  "trades_observed": 187,
   "scans_performed": 27,
-  "improvements_applied": 388,
+  "improvements_applied": 390,
   "reports_generated": 26,
   "event_log": [
     {
@@ -19243,6 +19243,64 @@
           "Review trade_closed on RKLB"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T20:04:06.436323",
+      "age": "4d 9h 1m 17s",
+      "type": "TRADE",
+      "message": "Observed trade: ASTS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T20:04:12.081555",
+      "age": "4d 9h 1m 23s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #389",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on ASTS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T20:04:17.200706",
+      "age": "4d 9h 1m 28s",
+      "type": "TRADE",
+      "message": "Observed trade: ASTS LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T20:04:26.752751",
+      "age": "4d 9h 1m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #390",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "The event ib_failure occurred in the after_hours session.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The system will now lower the confidence threshold to 58%.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Make sure to avoid rejecting orders and instead use the live IB bars for trading.",
+          "Always prioritize opportunistic exits when dealing with rejection"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T20:04:35.196947",
+      "age": "4d 9h 1m 46s",
+      "type": "TRADE",
+      "message": "Observed trade: COIN ? P&L=$-27.97",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -20528,8 +20586,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
-  "total_pnl": 123749.86000000004,
+  "mood": "calm",
+  "total_pnl": 123721.89000000004,
   "win_history": [
     0.0,
     0.0,
@@ -20714,20 +20772,23 @@
     0,
     0,
     -3.58,
-    0
+    0,
+    0.0,
+    0,
+    -27.97
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 15,
+  "consecutive_losses": 18,
   "worst_streak": 18,
-  "veteran_xp": 2565,
+  "veteran_xp": 2595,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 50,
     "entry_timing": 70
   },
-  "flights_completed": 179,
-  "hours_flown": 17.899999999999984,
+  "flights_completed": 182,
+  "hours_flown": 18.19999999999999,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -20753,16 +20814,16 @@
     "RIO": 12,
     "QS": 5,
     "MAR": 10,
-    "COI": 1,
+    "COI": 2,
     "RIV": 5,
     "RKL": 6,
     "SOF": 6,
-    "AST": 2
+    "AST": 4
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I'm feeling anxious about the recent trades and my performance."
+  "mood_message": "Thank you for providing detailed insights on your trading performance. Your recent success rate is quite high at 1%. I'm glad to hear that you are making money from every trade you execute. The average profit margin of -3.58 USD per trade i"
 }

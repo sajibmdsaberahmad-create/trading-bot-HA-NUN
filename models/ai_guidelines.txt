@@ -7348,3 +7348,15 @@ spike_top_exit: +0.64% vol=3.5x
 Observed loss_streak — recorded for learning.
 spike_top_exit: +0.64% vol=3.5x
 
+🧭 COMMANDER LEARNING | 2026-06-25T20:04:12.128918+00:00
+Observed trade_closed — recorded for learning.
+council_exit: Ollama exit 100% (PPO hold)
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:04:26.818058+00:00
+The event ib_failure occurred in the after_hours session.
+The IB order was rejected (201). This is a critical issue that will prevent profitable hunting.
+• Always use live IB bars for trading
+• Avoid rejecting orders and instead use the live IB bars for trading
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The system will now lower the confidence threshold to 58%.)
+
