@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 """
-core/ollama_vision.py — Ensure Ollama vision model (llava) is available for chart review.
+core/ollama_vision.py — Quantized llava / vision models for chart decisions.
+
+Tier defaults:
+  compact     → llava-phi3:3.8b (~3GB, fits 8GB sometimes)
+  balanced    → llava:7b-v1.6-mistral-q4_K_M (Q4)
+  standard+   → llava:7b-v1.6-mistral-q4_K_M or full llava
 """
 
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import threading
-import urllib.error
 import urllib.request
 from typing import Optional
 
@@ -19,9 +24,44 @@ from core.notify import log
 _pull_lock = threading.Lock()
 _pull_started = False
 
+# Quantized llava variants — smallest first
+VISION_MODEL_BY_TIER: dict[str, str] = {
+    "compact": "llava-phi3:3.8b",
+    "balanced": "llava:7b-v1.6-mistral-q4_K_M",
+    "standard": "llava:7b-v1.6-mistral-q4_K_M",
+    "performance": "llava:13b-v1.6-vicuna-q4_K_M",
+}
+
+VISION_FALLBACK_CHAIN = (
+    "llava-phi3:3.8b",
+    "llava:7b-v1.6-mistral-q4_K_M",
+    "moondream",
+    "llava",
+)
+
+
+def resolve_vision_model(cfg: BotConfig) -> str:
+    """Env override → RAM tier quantized default → first installed fallback."""
+    explicit = (getattr(cfg, "OLLAMA_VISION_MODEL", "") or os.getenv("OLLAMA_VISION_MODEL", "") or "").strip()
+    if explicit and explicit != "llava":
+        return explicit
+    if explicit == "llava" and os.getenv("OLLAMA_VISION_MODEL"):
+        return explicit
+
+    from core.ram_tier import detect_ram_tier
+
+    tier = getattr(cfg, "RAM_TIER", "") or detect_ram_tier()
+    tier_model = VISION_MODEL_BY_TIER.get(tier, "llava-phi3:3.8b")
+    if is_vision_model_present(cfg, tier_model):
+        return tier_model
+    for candidate in VISION_FALLBACK_CHAIN:
+        if is_vision_model_present(cfg, candidate):
+            return candidate
+    return tier_model
+
 
 def vision_model_name(cfg: BotConfig) -> str:
-    return (getattr(cfg, "OLLAMA_VISION_MODEL", None) or "llava").strip() or "llava"
+    return resolve_vision_model(cfg)
 
 
 def _list_models(cfg: BotConfig) -> list[str]:
@@ -62,7 +102,7 @@ def _list_models(cfg: BotConfig) -> list[str]:
 
 
 def is_vision_model_present(cfg: BotConfig, model: Optional[str] = None) -> bool:
-    target = (model or vision_model_name(cfg)).strip()
+    target = (model or resolve_vision_model(cfg)).strip()
     base = target.split(":")[0]
     installed = _list_models(cfg)
     return any(
@@ -71,17 +111,54 @@ def is_vision_model_present(cfg: BotConfig, model: Optional[str] = None) -> bool
     )
 
 
+def stop_vision_model(cfg: BotConfig, model: Optional[str] = None) -> None:
+    """Unload vision model from RAM after one-shot read."""
+    if not shutil.which("ollama"):
+        return
+    name = (model or resolve_vision_model(cfg)).strip()
+    try:
+        subprocess.run(
+            ["ollama", "stop", name],
+            capture_output=True,
+            timeout=12,
+        )
+        log.debug(f"Vision model unloaded: {name}")
+    except Exception as exc:
+        log.debug(f"Vision stop {name}: {exc}")
+
+
+def prepare_for_vision_call(cfg: BotConfig) -> None:
+    """
+    On 8GB, briefly unload the text LLM so quantized llava fits.
+    Text model reloads automatically on the next council ring.
+    """
+    if not getattr(cfg, "OLLAMA_VISION_SWAP_TEXT_MODEL", True):
+        return
+    from core.ram_tier import detect_ram_tier
+
+    if detect_ram_tier() not in ("compact", "balanced"):
+        return
+    if not shutil.which("ollama"):
+        return
+    text = (getattr(cfg, "OLLAMA_MODEL", "") or "").strip()
+    if not text:
+        return
+    try:
+        subprocess.run(["ollama", "stop", text], capture_output=True, timeout=10)
+        log.debug(f"Text model paused for vision slot: {text}")
+    except Exception:
+        pass
+
+
 def ensure_vision_model(cfg: BotConfig, *, background: bool = True) -> bool:
-    """
-    Return True if vision model is installed (or pull was started).
-    """
+    """Return True if vision model is installed (or pull was started)."""
     global _pull_started
 
     if not getattr(cfg, "OLLAMA_ENABLED", True):
         log.debug("Vision model check skipped — Ollama disabled")
         return False
 
-    model = vision_model_name(cfg)
+    model = resolve_vision_model(cfg)
     if is_vision_model_present(cfg, model):
         log.info(f"✅ Ollama vision model ready: {model}")
         return True
@@ -99,7 +176,7 @@ def ensure_vision_model(cfg: BotConfig, *, background: bool = True) -> bool:
         _pull_started = True
 
     def _pull():
-        log.info(f"📥 Pulling Ollama vision model {model} (Telegram chart review)...")
+        log.info(f"📥 Pulling quantized vision model {model}...")
         try:
             proc = subprocess.run(
                 ["ollama", "pull", model],
@@ -108,7 +185,7 @@ def ensure_vision_model(cfg: BotConfig, *, background: bool = True) -> bool:
                 timeout=3600,
             )
             if proc.returncode == 0 and is_vision_model_present(cfg, model):
-                log.info(f"✅ Vision model {model} installed — chart review enabled")
+                log.info(f"✅ Vision model {model} installed — chart decisions enabled")
             else:
                 err = (proc.stderr or proc.stdout or "pull failed")[:300]
                 log.warning(f"Vision model pull failed for {model}: {err}")

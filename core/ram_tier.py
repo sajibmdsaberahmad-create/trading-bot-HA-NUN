@@ -38,6 +38,10 @@ _TIER_ENV_KEYS: Dict[str, str] = {
     "COUNCIL_SCANNER_FAST_SEC": "COUNCIL_SCANNER_FAST_SEC",
     "OFF_HOURS_HEAVY_TRAINING": "OFF_HOURS_HEAVY_TRAINING",
     "TRAINING_MEMORY_LIMIT_MB": "TRAINING_MEMORY_LIMIT_MB",
+    "OLLAMA_VISION_MODEL": "OLLAMA_VISION_MODEL",
+    "LIVE_CHART_VISION_OPPORTUNISTIC": "LIVE_CHART_VISION_OPPORTUNISTIC",
+    "OLLAMA_VISION_UNLOAD_AFTER_CALL": "OLLAMA_VISION_UNLOAD_AFTER_CALL",
+    "OLLAMA_VISION_SWAP_TEXT_MODEL": "OLLAMA_VISION_SWAP_TEXT_MODEL",
 }
 
 TIER_PROFILES: Dict[str, Dict[str, Any]] = {
@@ -60,6 +64,11 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 4.0,
         "OFF_HOURS_HEAVY_TRAINING": False,
         "TRAINING_MEMORY_LIMIT_MB": 2048,
+        "OLLAMA_VISION_MODEL": "llava-phi3:3.8b",
+        "LIVE_CHART_VISION_OPPORTUNISTIC": True,
+        "LIVE_CHART_VISION_MIN_SCORE": 85.0,
+        "OLLAMA_VISION_UNLOAD_AFTER_CALL": True,
+        "OLLAMA_VISION_SWAP_TEXT_MODEL": True,
     },
     "balanced": {
         "OLLAMA_MODEL": "qwen2.5:3b",
@@ -80,6 +89,11 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 6.0,
         "OFF_HOURS_HEAVY_TRAINING": True,
         "TRAINING_MEMORY_LIMIT_MB": 3072,
+        "OLLAMA_VISION_MODEL": "llava:7b-v1.6-mistral-q4_K_M",
+        "LIVE_CHART_VISION_OPPORTUNISTIC": True,
+        "LIVE_CHART_VISION_MIN_SCORE": 78.0,
+        "OLLAMA_VISION_UNLOAD_AFTER_CALL": True,
+        "OLLAMA_VISION_SWAP_TEXT_MODEL": True,
     },
     "standard": {
         "OLLAMA_MODEL": "qwen2.5:3b",
@@ -100,6 +114,10 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 8.0,
         "OFF_HOURS_HEAVY_TRAINING": True,
         "TRAINING_MEMORY_LIMIT_MB": 4096,
+        "OLLAMA_VISION_MODEL": "llava:7b-v1.6-mistral-q4_K_M",
+        "LIVE_CHART_VISION_OPPORTUNISTIC": False,
+        "OLLAMA_VISION_UNLOAD_AFTER_CALL": False,
+        "OLLAMA_VISION_SWAP_TEXT_MODEL": False,
     },
     "performance": {
         "OLLAMA_MODEL": "llama3",
@@ -120,6 +138,10 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 10.0,
         "OFF_HOURS_HEAVY_TRAINING": True,
         "TRAINING_MEMORY_LIMIT_MB": 6144,
+        "OLLAMA_VISION_MODEL": "llava:13b-v1.6-vicuna-q4_K_M",
+        "LIVE_CHART_VISION_OPPORTUNISTIC": False,
+        "OLLAMA_VISION_UNLOAD_AFTER_CALL": False,
+        "OLLAMA_VISION_SWAP_TEXT_MODEL": False,
     },
 }
 
@@ -191,7 +213,10 @@ def ram_tier_summary(cfg) -> Dict[str, Any]:
         "total_ram_mb": total_ram_mb(),
         "auto_tune": getattr(cfg, "RAM_AUTO_TUNE", True),
         "ollama_model": getattr(cfg, "OLLAMA_MODEL", "?"),
-        "chart_vision": getattr(cfg, "LIVE_CHART_VISION_ENABLED", False),
+        "chart_vision": getattr(cfg, "LIVE_CHART_VISION_ENABLED", False)
+        or getattr(cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False),
+        "vision_model": getattr(cfg, "OLLAMA_VISION_MODEL", "?"),
+        "vision_opportunistic": getattr(cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False),
         "heavy_training": getattr(cfg, "OFF_HOURS_HEAVY_TRAINING", False),
         "council_wait_sec": getattr(cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15),
         "prefetch_top_n": getattr(cfg, "LIVE_AI_PREFETCH_TOP_N", 3),
