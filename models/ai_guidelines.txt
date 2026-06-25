@@ -297,3 +297,7 @@ Council timeout — no aligned signal
 Observed council_timeout — recorded for learning.
 Council timeout — no aligned signal
 
+🧭 COMMANDER LEARNING | 2026-06-25T10:51:53.265227+00:00
+Observed trade_closed — recorded for learning.
+win:council_exit: Ollama exit 96% (PPO hold)
+

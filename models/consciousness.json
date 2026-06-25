@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 81,
+  "improvements_applied": 82,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5690,6 +5690,20 @@
         "applied": [],
         "lessons": [
           "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T10:51:53.240573",
+      "age": "3d 23h 49m 4s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #82",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on IBX"
         ]
       }
     }
