@@ -149,7 +149,10 @@ def warm_budget_sec(cfg: BotConfig) -> float:
 
 def fast_monitor_interval(cfg: BotConfig) -> float:
     if ai_fast_execution(cfg):
-        return float(getattr(cfg, "FAST_MONITOR_SEC", 0.15))
+        base = float(getattr(cfg, "FAST_MONITOR_SEC", 0.15))
+        if bool(getattr(cfg, "PROFIT_LOCK_ULTRA_FAST", True)):
+            return min(base, 0.10)
+        return base
     return float(getattr(cfg, "FAST_MONITOR_SEC", 1.0))
 
 
@@ -163,7 +166,10 @@ def main_loop_sec(
     """IB sleep between loop iterations — faster when locked or in profit."""
     if in_position:
         if in_profit and ai_fast_execution(cfg):
-            return float(getattr(cfg, "POSITION_LOOP_IN_PROFIT_SEC", 0.1))
+            base = float(getattr(cfg, "POSITION_LOOP_IN_PROFIT_SEC", 0.1))
+            if bool(getattr(cfg, "PROFIT_LOCK_ULTRA_FAST", True)):
+                return min(base, 0.05)
+            return base
         return float(getattr(cfg, "POSITION_LOOP_SEC", 0.25))
     if have_targets and ai_fast_execution(cfg):
         return float(getattr(cfg, "FLAT_LOOP_LOCKED_SEC", 0.1))
