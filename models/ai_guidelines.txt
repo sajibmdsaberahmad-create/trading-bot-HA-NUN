@@ -6187,3 +6187,249 @@ The trade closed with a negative PNL (profit and loss) of -2.91 USD, indicating 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold for profitable exits within specified bounds.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:50:51.058570+00:00
+The event occurred due to a bracket_exit trade, resulting in a loss of $2.91 USD.
+The primary root cause is the bracket_exit trade causing frequent losses and missed profit hunting attempts.
+• Use a larger CONFIDENCE_THRESHOLD value if bracket_exit trades are frequent and causing significant losses.
+• Adjust confidence levels in your trading strategy based on market conditions.
+• Tune the parameters to optimize your profit hunting performance.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The value of the CONFIDENCE_THRESHOLD parameter was increased from 0.35 to 0.58, which may be necessary for more aggressive strategies.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:50:55.322543+00:00
+The council_timeout event occurred due to a high scanner score after timeout.
+High scanner scores often indicate missed opportunities or excessive risk-taking during scan execution, which may prevent us from making profitable trades.
+• A
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+• i
+• c
+•  
+• d
+• e
+• c
+• i
+• s
+• i
+• o
+• n
+• -
+• m
+• a
+• k
+• i
+• n
+• g
+•  
+• p
+• r
+• o
+• c
+• e
+• s
+• s
+•  
+• a
+• n
+• d
+•  
+• s
+• c
+• a
+• n
+• n
+• e
+• r
+•  
+• s
+• c
+• o
+• r
+• e
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+• s
+•  
+• t
+• o
+•  
+• a
+• v
+• o
+• i
+• d
+•  
+• m
+• i
+• s
+• s
+• e
+• d
+•  
+• o
+• p
+• p
+• o
+• r
+• t
+• u
+• n
+• i
+• t
+• a
+• s
+•  
+• d
+• u
+• r
+• i
+• n
+• g
+•  
+• s
+• c
+• a
+• n
+•  
+• e
+• x
+• e
+• c
+• u
+• t
+• i
+• o
+• n
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Due to the council timeout event, we must adjust our confidence thresholds for optimal performance.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:51:22.508756+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:51:27.012043+00:00
+Observed loss_streak — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:51:31.071966+00:00
+The council timeout occurred due to high scanner score.
+High scanner score indicates a missed profit hunt, which prevents opportunistic exits.
+• T
+• u
+• n
+• e
+•  
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+•  
+• f
+• o
+• r
+•  
+• i
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+• d
+•  
+• s
+• e
+• n
+• s
+• i
+• t
+• i
+• v
+• i
+• t
+• y
+•  
+• a
+• n
+• d
+•  
+• p
+• a
+• t
+• i
+• e
+• n
+• c
+• e
+•  
+• i
+• n
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+•  
+• d
+• a
+• t
+• a
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase to 0.58 to enhance risk management.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:52:00.716483+00:00
+High confidence threshold set to 0.58
+Confidence level is now at 0.58, which improves the algorithm's accuracy in making decisions.
+• .
+• .
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusting this parameter improves the model's ability to identify high-quality opportunities and execute profitable trades more reliably.)
+  - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
+

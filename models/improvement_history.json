@@ -2965,5 +2965,145 @@
       "Properly analyze trades with high and low volatility patterns.",
       "Adjust exit thresholds based on current market conditions."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:50:55.322974+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Due to the council timeout event, we must adjust our confidence thresholds for optimal performance.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council_timeout event occurred due to a high scanner score after timeout.",
+    "lessons": [
+      "High scanner scores can signal missed opportunitas",
+      "Adjustments in the algorithmic decision-making process are necessary to avoid such errors"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:51:22.509943+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:51:27.012412+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:51:31.072166+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increase to 0.58 to enhance risk management.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout occurred due to high scanner score.",
+    "lessons": [
+      "T",
+      "u",
+      "n",
+      "e",
+      "C",
+      "O",
+      "N",
+      "F",
+      "I",
+      "D",
+      "E",
+      "N",
+      "C",
+      "E",
+      "_",
+      "T",
+      "H",
+      "R",
+      "E",
+      "S",
+      "H",
+      "O",
+      "L",
+      "D",
+      "f",
+      "o",
+      "r",
+      "i",
+      "n",
+      "c",
+      "r",
+      "e",
+      "a",
+      "s",
+      "e",
+      "d",
+      "s",
+      "e",
+      "n",
+      "s",
+      "i",
+      "t",
+      "i",
+      "v",
+      "i",
+      "t",
+      "y",
+      "a",
+      "n",
+      "d",
+      "p",
+      "a",
+      "t",
+      "i",
+      "e",
+      "n",
+      "c",
+      "e",
+      "i",
+      "n",
+      "m",
+      "a",
+      "r",
+      "k",
+      "e",
+      "t",
+      "d",
+      "a",
+      "t",
+      "a",
+      "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:52:00.716826+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "High confidence threshold set to 0.58",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This adjustment increases the confidence level in predicting profitable trades. This helps the algorithm make better informed decisions.'}"
+    ]
   }
 ]

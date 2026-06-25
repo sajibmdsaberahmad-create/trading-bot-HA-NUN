@@ -1,11 +1,11 @@
 {
-  "total_xp": 2675,
+  "total_xp": 2755,
   "level": "Ace",
-  "flights_completed": 54,
-  "flights_flown": 252,
-  "takeoffs": 252,
-  "landings": 54,
-  "hours_flown": 5.399999999999997,
+  "flights_completed": 56,
+  "flights_flown": 256,
+  "takeoffs": 256,
+  "landings": 56,
+  "hours_flown": 5.599999999999996,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -27,11 +27,11 @@
     "GDC": 1,
     "TZA": 1,
     "BIT": 2,
-    "PLT": 2,
+    "PLT": 3,
     "RIV": 1,
     "COI": 1,
     "LCI": 4,
-    "MAR": 3,
+    "MAR": 4,
     "QS": 1,
     "RIO": 7,
     "SOF": 2,
@@ -43,10 +43,10 @@
   "certifications": {},
   "skill_points": {
     "entry_timing": 8,
-    "exit_timing": 46,
+    "exit_timing": 48,
     "risk_management": 9,
     "regime_recognition": 0,
-    "pattern_recognition": 74,
+    "pattern_recognition": 76,
     "confidence_judgment": 0
   }
 }

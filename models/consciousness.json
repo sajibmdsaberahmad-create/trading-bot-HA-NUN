@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 153,
+  "trades_observed": 155,
   "scans_performed": 27,
-  "improvements_applied": 344,
+  "improvements_applied": 349,
   "reports_generated": 26,
   "event_log": [
     {
@@ -17448,6 +17448,192 @@
           "Adjust exit thresholds based on current market conditions."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:50:55.266509",
+      "age": "4d 8h 48m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #345",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council_timeout event occurred due to a high scanner score after timeout.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Due to the council timeout event, we must adjust our confidence thresholds for optimal performance.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "High scanner scores can signal missed opportunitas",
+          "Adjustments in the algorithmic decision-making process are necessary to avoid such errors"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:51:18.139850",
+      "age": "4d 8h 48m 29s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$-2.07",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:51:22.467887",
+      "age": "4d 8h 48m 33s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #346",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:51:26.967521",
+      "age": "4d 8h 48m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #347",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:51:31.052077",
+      "age": "4d 8h 48m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #348",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout occurred due to high scanner score.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increase to 0.58 to enhance risk management.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "u",
+          "n",
+          "e",
+          "C",
+          "O",
+          "N",
+          "F",
+          "I",
+          "D",
+          "E",
+          "N",
+          "C",
+          "E",
+          "_",
+          "T",
+          "H",
+          "R",
+          "E",
+          "S",
+          "H",
+          "O",
+          "L",
+          "D",
+          "f",
+          "o",
+          "r",
+          "i",
+          "n",
+          "c",
+          "r",
+          "e",
+          "a",
+          "s",
+          "e",
+          "d",
+          "s",
+          "e",
+          "n",
+          "s",
+          "i",
+          "t",
+          "i",
+          "v",
+          "i",
+          "t",
+          "y",
+          "a",
+          "n",
+          "d",
+          "p",
+          "a",
+          "t",
+          "i",
+          "e",
+          "n",
+          "c",
+          "e",
+          "i",
+          "n",
+          "m",
+          "a",
+          "r",
+          "k",
+          "e",
+          "t",
+          "d",
+          "a",
+          "t",
+          "a",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:51:53.600320",
+      "age": "4d 8h 49m 4s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:52:00.670265",
+      "age": "4d 8h 49m 11s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #349",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "High confidence threshold set to 0.58",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusting this parameter improves the model's ability to identify high-quality opportunities and execute profitable trades more reliably.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This adjustment increases the confidence level in predicting profitable trades. This helps the algorithm make better informed decisions.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -18734,7 +18920,7 @@
   ],
   "last_training": "2026-06-25T06:29:06.143062",
   "mood": "calm",
-  "total_pnl": 124423.83000000005,
+  "total_pnl": 124421.76000000004,
   "win_history": [
     0.0,
     0.0,
@@ -18888,20 +19074,22 @@
     -76.68,
     0.0,
     -33.91,
-    -2.91
+    -2.91,
+    -2.07,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 6,
+  "consecutive_losses": 8,
   "worst_streak": 18,
-  "veteran_xp": 2195,
+  "veteran_xp": 2215,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 46,
     "entry_timing": 62
   },
-  "flights_completed": 148,
-  "hours_flown": 14.799999999999963,
+  "flights_completed": 150,
+  "hours_flown": 14.999999999999963,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -18922,11 +19110,11 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 2,
+    "PLT": 3,
     "LCI": 6,
     "RIO": 8,
     "QS": 3,
-    "MAR": 6,
+    "MAR": 7,
     "COI": 1,
     "RIV": 1,
     "RKL": 2,
@@ -18937,5 +19125,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Your recent trading session has shown a consistent positive momentum with occasional losses."
+  "mood_message": "I'm feeling relaxed and in control today."
 }
