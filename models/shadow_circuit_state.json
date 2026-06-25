@@ -15,29 +15,29 @@
     },
     "LCID": {
       "ticker": "LCID",
-      "entry": 5.1,
-      "stop": 5.0796,
-      "target": 5.1408,
-      "shares": 2993,
-      "opened_at": 1782412942.9920819,
+      "entry": 5.115,
+      "stop": 5.0945,
+      "target": 5.1559,
+      "shares": 4274,
+      "opened_at": 1782413391.002213,
       "regime": "unknown"
     },
     "MARA": {
       "ticker": "MARA",
-      "entry": 13.72,
-      "stop": 13.6651,
-      "target": 13.8298,
-      "shares": 2749,
-      "opened_at": 1782412940.6417768,
+      "entry": 13.73,
+      "stop": 13.6751,
+      "target": 13.8398,
+      "shares": 3264,
+      "opened_at": 1782413392.598397,
       "regime": "unknown"
     },
     "RIVN": {
       "ticker": "RIVN",
-      "entry": 14.43,
-      "stop": 14.3723,
-      "target": 14.5454,
-      "shares": 3969,
-      "opened_at": 1782413251.6883688,
+      "entry": 14.45,
+      "stop": 14.3922,
+      "target": 14.5656,
+      "shares": 5000,
+      "opened_at": 1782413391.801536,
       "regime": "unknown"
     },
     "SOFI": {
@@ -82,5 +82,5 @@
       "closed_at": 1782413174.662103
     }
   ],
-  "updated_at": 1782413356.457385
+  "updated_at": 1782413392.5987358
 }
