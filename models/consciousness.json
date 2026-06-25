@@ -2,9 +2,9 @@
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 76,
-  "training_sessions": 23,
+  "training_sessions": 24,
   "trades_observed": 24,
-  "scans_performed": 23,
+  "scans_performed": 24,
   "improvements_applied": 24,
   "reports_generated": 22,
   "event_log": [
@@ -3425,6 +3425,43 @@
           "Hi"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T05:53:17.848839",
+      "age": "3d 18h 50m 29s",
+      "type": "SCAN",
+      "message": "Market scan #24",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": "live_ib"
+      }
+    },
+    {
+      "timestamp": "2026-06-25T05:53:17.858596",
+      "age": "3d 18h 50m 29s",
+      "type": "TRAIN",
+      "message": "Training session #24",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T05:53:17.862577",
+      "age": "3d 18h 50m 29s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": 0.0,
+        "vix_regime": "low",
+        "timestamp": "2026-06-25T05:53:17.862571"
+      }
+    },
+    {
+      "timestamp": "2026-06-25T05:53:17.866075",
+      "age": "3d 18h 50m 29s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T05:42:19.525021",

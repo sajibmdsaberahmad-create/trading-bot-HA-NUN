@@ -184,6 +184,8 @@ class TelegramCommandListener:
         if instant_first and fallback:
             self.send(chat_id, fallback, reply_to=reply_to)
 
+        captured_reply_to = reply_to
+
         def deliver() -> None:
             try:
                 text = format_outbound_message(
@@ -203,7 +205,7 @@ class TelegramCommandListener:
                 if text and text.strip() and text.strip() != (fallback or "").strip():
                     self.send(chat_id, text, reply_to=None)
             else:
-                self.send(chat_id, text or fallback, reply_to=reply_to)
+                self.send(chat_id, text or fallback, reply_to=captured_reply_to)
 
         if sync:
             deliver()
@@ -279,6 +281,7 @@ class TelegramCommandListener:
             return
 
         if text:
+            log.info(f"Telegram inbound chat={chat_id} user=@{username or first_name or '?'}: {text[:80]!r}")
             self._handle_free_text(chat_id, text, reply_id)
 
     def _handle_unverified(
@@ -431,6 +434,7 @@ class TelegramCommandListener:
             self._cmd_exit(chat_id, f"{ticker} {reason}".strip(), reply_id)
             return
         self._store_guidance(chat_id, text)
+        self.send_instant(chat_id, "🧠 On it — pulling live state…", reply_to=reply_id)
         threading.Thread(
             target=self._ai_reply,
             args=(chat_id, text, reply_id, "commander_chat"),
