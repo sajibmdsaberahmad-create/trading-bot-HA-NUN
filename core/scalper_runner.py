@@ -1940,6 +1940,30 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"Could not write live_metrics.json: {exc}")
 
+    def _maybe_resume_ib_from_shadow(self) -> None:
+        """Paper: clear shadow gate on startup so orders reach IB Gateway."""
+        paper_bypass = (
+            getattr(self.cfg, "PAPER_TRADING", False)
+            and not getattr(self.cfg, "SHADOW_ON_PAPER", False)
+        )
+        if not paper_bypass and not getattr(self.cfg, "SHADOW_RESUME_ON_START", True):
+            return
+        reason = (
+            "paper account — shadow sim disabled (SHADOW_ON_PAPER=false)"
+            if paper_bypass
+            else "SHADOW_RESUME_ON_START"
+        )
+        if self.shadow_circuit.force_resume_live(reason=reason):
+            msg = (
+                "☀️ SHADOW CLEARED — entries will place **real IB paper orders** "
+                "(you will get IB app notifications again)."
+            )
+            log.info(msg)
+            try:
+                self.notifier.info(msg)
+            except Exception:
+                pass
+
     def _log_tick_stream_config(self) -> None:
         """Startup audit — tick-by-tick vs 5s fallback and IB stream budget."""
         from core.data import tick_by_tick_type
@@ -2087,12 +2111,20 @@ class ScalperRunner:
                 f"in-profit={getattr(self.cfg, 'POSITION_LOOP_IN_PROFIT_SEC', 0.1)}s | "
                 f"monitor={fast_monitor_interval(self.cfg):.2f}s"
             )
+        if getattr(self.cfg, "SHADOW_CIRCUIT_ENABLED", True):
+            self._maybe_resume_ib_from_shadow()
         if getattr(self.cfg, "SHADOW_CIRCUIT_ENABLED", True) and self.shadow_circuit.in_shadow:
-            st = self.shadow_circuit.shadow_stats()
-            log.warning(
-                f"  🌑 SHADOW MODE active — IB blocked | shadow_closed={st.get('count', 0)} "
-                f"open={st.get('open', 0)}"
-            )
+            if self.shadow_circuit.block_broker():
+                st = self.shadow_circuit.shadow_stats()
+                log.warning(
+                    f"  🌑 SHADOW MODE active — IB orders BLOCKED (no IB app fills) | "
+                    f"shadow_closed={st.get('count', 0)} open={st.get('open', 0)} | "
+                    f"run ./scripts/resume_ib_trading.sh or set SHADOW_RESUME_ON_START=true"
+                )
+            else:
+                log.info(
+                    "  ☀️ Shadow state on disk ignored on paper — real IB orders enabled"
+                )
         if self._ib_starting_balance:
             log.info(f"IB Starting Balance: ${self._ib_starting_balance:,.2f}")
             try:
@@ -5750,6 +5782,9 @@ class ScalperRunner:
             plan, ai_dec, entry_parent_px, df_fast, shares, current_px,
         )
         if self.shadow_circuit.block_broker():
+            log.warning(
+                f"  🌑 SHADOW — simulating {ticker} entry (NO IB order — no mobile notification)"
+            )
             self.shadow_circuit.open_shadow_trade(
                 ticker, current_px, plan.initial_stop_price,
                 plan.take_profit_price, shares, regime=regime_label,

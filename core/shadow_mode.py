@@ -124,6 +124,23 @@ class ShadowCircuitBreaker:
         log.info(f"  ☀️ SHADOW MODE OFF — resuming IB routing | {reason}")
         self._save()
 
+    def force_resume_live(self, reason: str = "manual", clear_open: bool = True) -> bool:
+        """Clear shadow gate so bracket orders reach IB again."""
+        if not self.in_shadow and not (clear_open and self.shadow_open):
+            return False
+        was_shadow = self.in_shadow
+        self.in_shadow = False
+        self.consecutive_losses = 0
+        n_open = len(self.shadow_open)
+        if clear_open:
+            self.shadow_open.clear()
+        log.warning(
+            f"  ☀️ IB LIVE ROUTING RESTORED | {reason}"
+            + (f" | cleared {n_open} simulated shadow position(s)" if n_open else "")
+        )
+        self._save()
+        return was_shadow or n_open > 0
+
     def can_resume_live(self) -> bool:
         min_n = int(getattr(self.cfg, "SHADOW_REENTRY_MIN_TRADES", 20))
         min_wr = float(getattr(self.cfg, "SHADOW_REENTRY_MIN_WIN_RATE", 0.45))

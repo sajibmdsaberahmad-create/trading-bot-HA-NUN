@@ -1,82 +1,9 @@
 {
-  "in_shadow": true,
+  "in_shadow": false,
   "consecutive_losses": 0,
   "daily_start_equity": 841557.86,
   "daily_pnl_usd": 0.0,
-  "shadow_open": {
-    "PLTR": {
-      "ticker": "PLTR",
-      "entry": 107.91,
-      "stop": 107.4784,
-      "target": 108.7733,
-      "shares": 532,
-      "opened_at": 1782413664.891903,
-      "regime": "unknown"
-    },
-    "LCID": {
-      "ticker": "LCID",
-      "entry": 5.115,
-      "stop": 5.0945,
-      "target": 5.1559,
-      "shares": 4274,
-      "opened_at": 1782413457.5445042,
-      "regime": "unknown"
-    },
-    "RIVN": {
-      "ticker": "RIVN",
-      "entry": 14.45,
-      "stop": 14.3922,
-      "target": 14.5656,
-      "shares": 5000,
-      "opened_at": 1782413459.8111281,
-      "regime": "unknown"
-    },
-    "SOFI": {
-      "ticker": "SOFI",
-      "entry": 17.31,
-      "stop": 17.2408,
-      "target": 17.4485,
-      "shares": 1151,
-      "opened_at": 1782413662.265085,
-      "regime": "unknown"
-    },
-    "COIN": {
-      "ticker": "COIN",
-      "entry": 143.49,
-      "stop": 142.916,
-      "target": 144.6379,
-      "shares": 39,
-      "opened_at": 1782413679.884023,
-      "regime": "unknown"
-    },
-    "RIOT": {
-      "ticker": "RIOT",
-      "entry": 27.35,
-      "stop": 27.3192,
-      "target": 27.6483,
-      "shares": 258,
-      "opened_at": 1782413666.542727,
-      "regime": "unknown"
-    },
-    "RKLB": {
-      "ticker": "RKLB",
-      "entry": 81.1,
-      "stop": 80.7756,
-      "target": 81.7488,
-      "shares": 159,
-      "opened_at": 1782413601.65043,
-      "regime": "unknown"
-    },
-    "MARA": {
-      "ticker": "MARA",
-      "entry": 13.78,
-      "stop": 13.7249,
-      "target": 13.8902,
-      "shares": 416,
-      "opened_at": 1782413665.719244,
-      "regime": "unknown"
-    }
-  },
+  "shadow_open": {},
   "shadow_closed": [
     {
       "ticker": "QS",
@@ -103,5 +30,5 @@
       "closed_at": 1782413576.5514581
     }
   ],
-  "updated_at": 1782413679.8846521
+  "updated_at": 1782413710.5279732
 }
