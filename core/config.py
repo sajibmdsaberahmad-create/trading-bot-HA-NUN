@@ -714,3 +714,15 @@ class BotConfig:
         "META_OPTIMIZER_MODEL",
         os.getenv("OLLAMA_MODEL", "qwen2.5:3b" if _LOW_RAM else "llama3"),
     )
+
+    # RAM auto-tune — upgrades features when more physical RAM is detected
+    RAM_AUTO_TUNE: bool = field(
+        default_factory=lambda: os.getenv("RAM_AUTO_TUNE", "true").lower() in ("1", "true", "yes")
+    )
+    RAM_TIER: str = "auto"
+    RAM_TIER_LABEL: str = ""
+    RAM_TIER_FORCE: str = os.getenv("RAM_TIER_FORCE", "")
+
+    def __post_init__(self) -> None:
+        from core.ram_tier import apply_ram_tier_to_config
+        apply_ram_tier_to_config(self)

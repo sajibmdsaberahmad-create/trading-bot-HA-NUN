@@ -1246,13 +1246,21 @@ class ScalperRunner:
         log.info(f"Account: {acct[0].account if acct else 'unknown'} | Universe: live IB scanner (no static list)")
         if getattr(self.cfg, "OLLAMA_ENABLED", False):
             from core.memory_guard import memory_status, is_low_ram_machine
+            from core.ram_tier import ram_tier_summary
             mem = memory_status(self.cfg)
+            tier_info = ram_tier_summary(self.cfg)
             log.info(
                 f"🧠 Generative thinking: ON | model={self.cfg.OLLAMA_MODEL} @ {self.cfg.OLLAMA_HOST} | "
                 f"budget={getattr(self.cfg, 'OLLAMA_MEMORY_BUDGET_MB', 2560)}MB | "
-                f"warm={not getattr(self.cfg, 'OLLAMA_UNLOAD_AFTER_CALL', False)} | "
-                f"RAM free={mem['available_ram_mb']}MB"
+                f"RAM tier={tier_info['label']} ({mem['total_ram_mb']}MB) | "
+                f"chart_vision={'on' if tier_info['chart_vision'] else 'off'} | "
+                f"heavy_train={'on' if tier_info['heavy_training'] else 'off'} | "
+                f"free={mem['available_ram_mb']}MB"
             )
+            if getattr(self.cfg, "RAM_AUTO_TUNE", True):
+                log.info(
+                    f"⚙️ RAM auto-tune active — upgrade RAM to unlock more (set RAM_AUTO_TUNE=false to disable)"
+                )
             if is_low_ram_machine() and "llama3" in self.cfg.OLLAMA_MODEL.lower():
                 log.warning(
                     "⚠️ llama3 uses ~4.7GB RAM — on 8GB Mac use OLLAMA_MODEL=qwen2.5:3b"

@@ -48,16 +48,10 @@ def is_memory_pressured(min_free_mb: int = 2048) -> bool:
 
 def recommended_ollama_model(memory_budget_mb: int = 2560) -> str:
     """Pick model that fits the reserved Ollama RAM budget."""
-    ram = total_ram_mb()
-    if memory_budget_mb >= 2300 and ram <= 10_240:
-        return "qwen2.5:3b"      # ~2GB GQA — best JSON/instruction fit for 2.5GB budget
-    if memory_budget_mb >= 1200:
-        return "qwen2.5:1.5b"   # ~1GB GQA fallback
-    if ram <= 8_192:
-        return "qwen2.5:0.5b"
-    if ram <= 16_384:
-        return "phi3:mini"
-    return "llama3"
+    from core.ram_tier import TIER_PROFILES, detect_ram_tier
+
+    tier = detect_ram_tier()
+    return str(TIER_PROFILES.get(tier, {}).get("OLLAMA_MODEL", "qwen2.5:1.5b"))
 
 
 def should_allow_ollama_decide(cfg) -> tuple[bool, str]:
@@ -87,14 +81,19 @@ def should_allow_ollama_notify(cfg) -> tuple[bool, str]:
 
 
 def should_allow_chart_vision(cfg) -> tuple[bool, str]:
-    """llava is heavy — skip when RAM is tight or disabled."""
+    """llava is heavy — tier-aware; skip when disabled or RAM tight."""
     if not getattr(cfg, "LIVE_CHART_VISION_ENABLED", True):
         return False, "disabled"
     if not getattr(cfg, "OLLAMA_ENABLED", False):
         return False, "ollama_disabled"
+    tier = getattr(cfg, "RAM_TIER", "")
     avail = available_ram_mb()
-    if is_low_ram_machine() and avail < 1600:
-        return False, f"low_ram_{avail}mb"
+    if tier == "compact" and avail < 1800:
+        return False, f"compact_tier_{avail}mb"
+    if tier == "balanced" and avail < 1400:
+        return False, f"balanced_tier_{avail}mb"
+    if avail < 1200:
+        return False, f"critical_{avail}mb"
     return True, "ok"
 
 
@@ -136,11 +135,19 @@ def should_allow_ollama(cfg) -> tuple[bool, str]:
 
 def memory_status(cfg=None) -> dict:
     budget = int(getattr(cfg, "OLLAMA_MEMORY_BUDGET_MB", 2560)) if cfg else 2560
-    return {
+    from core.ram_tier import detect_ram_tier, ram_tier_summary
+
+    tier = getattr(cfg, "RAM_TIER", detect_ram_tier()) if cfg else detect_ram_tier()
+    out = {
         "total_ram_mb": total_ram_mb(),
         "available_ram_mb": available_ram_mb(),
         "ollama_budget_mb": budget,
+        "ram_tier": tier,
+        "ram_tier_label": getattr(cfg, "RAM_TIER_LABEL", "") if cfg else "",
         "low_ram": is_low_ram_machine(),
         "pressured": is_memory_pressured(int(getattr(cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024)) if cfg else 1024),
         "recommended_model": recommended_ollama_model(budget),
     }
+    if cfg:
+        out["tier_profile"] = ram_tier_summary(cfg)
+    return out
