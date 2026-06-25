@@ -4254,3 +4254,10 @@ Stop breaches are common and should be avoided if possible. The stop-hunt strate
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The algorithm's confidence threshold is set too low. This can lead to missed profit hunts.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:35:59.350359+00:00
+Trade closed with a hard_take_profit event.
+The trader lost control and took profit, possibly due to the market conditions.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence without the market conditions were a cause of the hard_take_profit event.)
+  - CONFIDENCE_THRESHOLD → 0.95 (The trader had enough confidence in holding positions to avoid taking profit prematurely.)
+

@@ -727,5 +727,22 @@
       "o",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:35:59.350744+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.95,
+        "reason": "The trader had enough confidence in holding positions to avoid taking profit prematurely.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with a hard_take_profit event.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader was likely confident in holding positions but missed opportunities.'}"
+    ]
   }
 ]

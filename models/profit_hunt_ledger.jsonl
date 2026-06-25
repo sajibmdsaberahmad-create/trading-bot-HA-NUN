@@ -126,3 +126,5 @@
 {"timestamp":"2026-06-25T17:33:46.625928+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T17:33:49.252336+00:00","event":"trailing_stop","ticker":"NEXR","pnl_usd":325.92,"pnl_pct":67.4621,"primary_goal":true,"reason":"trailing_stop","price":0.9037}
 {"timestamp":"2026-06-25T17:35:36.113870+00:00","event":"hard_take_profit","ticker":"SOXS","pnl_usd":-69.56,"pnl_pct":-0.0006,"primary_goal":true,"reason":"hard_take_profit","price":8.075}
+{"timestamp":"2026-06-25T17:35:56.067430+00:00","event":"hard_take_profit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"hard_take_profit"}
+{"timestamp":"2026-06-25T17:36:03.081147+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-9480.0,"pnl_pct":-0.9777,"primary_goal":true,"reason":"trailing_profit","price":0.18}

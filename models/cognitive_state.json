@@ -1,11 +1,9 @@
 {
   "mood": "steady",
-  "mood_message": "Mixed session \u00b7 $+118809.50. Watching for cleaner setups.",
+  "mood_message": "Mixed session \u00b7 $+118809.74. Watching for cleaner setups.",
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 indicates that we should be cautious and avoid taking profits when the market is close to a breakout.'}",
-    "Commander: We analyzed the trading event and found that the algorithm is profitable, but it has not performed well in recent sessions due to missed opportunities.",
     "Review trade_closed on GPUS",
     "Commander: trailing_profit",
     "Large loss detected: GDC. Review stop placement.",
@@ -103,10 +101,12 @@
     "1",
     "S",
     "-",
-    "Commander: Stop breaches are common and should be avoided if possible. The stop-hunt strategy is based on minimizing losses by making trades before reaching the stop loss level."
+    "Commander: Stop breaches are common and should be avoided if possible. The stop-hunt strategy is based on minimizing losses by making trades before reaching the stop loss level.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader was likely confident in holding positions but missed opportunities.'}",
+    "Commander: The trader lost control and took profit, possibly due to the market conditions."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.5,\n  \"actions\": [\n    {\n      \"trade_type\": \"take_profit\",\n      \"action\": \"sell into momentum\",\n      \"event\": {\n        \"ticker\": \"GDC\",\n        \"price\": 0.0,\n        \"reason\": \"scanner:MOST_ACTIVE#1\"\n      }\n    },\n    {\n      \"trade_type\": \"close trade\",\n      \"action\": \"sell into momentum\",\n      \"event\": {\n        \"ticker\": \"SOXS\",\n        \"price\": 0.0,\n        \"reason\": \"scanner:MOST_ACTIVE#2\"\n      }\n    },\n    {\n      \"trade_type\": \"take_profi",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.65,\n  \"intuition\": 0.8,\n  \"journal_entry\": {\n    \"entry\": {\n      \"ticker\": \"GPUS\",\n      \"quote_entry\": 8.08,\n      \"quote_exit\": 0.18,\n      \"shares\": 1200.0,\n      \"pnl_usd\": 0.0,\n      \"pnl_pct\": 0.0,\n      \"result\": \"loss\",\n      \"exit_reason\": \"trailing_profit\"\n    },\n    \"trade_date\": \"2023-06-0\",\n    \"entry_fill\": 8.08,\n    \"exit_fill\": 8.08,\n    \"limit_px\": 0.1811,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 7.5,\n    \"peak\": 8.08,\n",
   "market_belief": {},
-  "trades_observed": 22,
-  "updated": "2026-06-25T17:35:07.343698"
+  "trades_observed": 25,
+  "updated": "2026-06-25T17:36:10.596974"
 }
