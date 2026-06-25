@@ -1233,46 +1233,129 @@ class ScalperRunner:
 
         threading.Thread(target=_worker, name="loss-streak-learn", daemon=True).start()
 
-    def _record_early_exit_learning(
+    def _build_trade_close_record(
         self,
         ticker: str,
-        entry: float,
-        exit_px: float,
-        shares: float,
-        pnl: float,
-        reason: str,
-    ) -> None:
-        """Early exits previously skipped post-mortem + experience buffer."""
-        pnl_pct = ((exit_px / entry) - 1) * 100 if entry else 0.0
-        result = "win" if pnl > 0 else "loss"
-        trade_rec = {
-            "ticker": ticker,
-            "entry": entry,
-            "exit": exit_px,
-            "shares": shares,
-            "pnl_usd": round(pnl, 2),
-            "pnl_pct": round(pnl_pct, 2),
-            "result": result,
-            "exit_reason": reason,
-        }
+        quote_exit_px: float,
+        reason: str = "",
+        *,
+        flatten_trade=None,
+        bracket: Optional[BracketHandle] = None,
+    ) -> Dict[str, Any]:
+        """Resolve IB entry/exit fills and build a round-trip trade record."""
+        slot = dict(self._position_slots.get(ticker, {}))
+        entry_quote = float(slot.get("entry_price") or self._entry_price or 0)
+        entry_fill = float(slot.get("entry_fill_px") or entry_quote)
+        shares = float(slot.get("shares") or self._prev_shares or self.shares or 0)
+        opened_at = float(slot.get("opened_at") or getattr(self, "_position_opened_at", 0))
+        exit_fill = resolve_exit_fill(
+            self.ib,
+            symbol=ticker,
+            bracket=bracket or self._bracket_by_ticker.get(ticker) or self.bracket_handle,
+            flatten_trade=flatten_trade,
+            quote_px=quote_exit_px,
+            since_ts=opened_at,
+        )
+        return build_round_trip_record(
+            ticker=ticker,
+            entry_fill=entry_fill,
+            exit_fill=exit_fill,
+            quote_entry=entry_quote,
+            quote_exit=quote_exit_px,
+            shares=shares,
+            exit_reason=reason,
+            limit_px=slot.get("limit_px"),
+            entry_mode=str(slot.get("entry_mode", "")),
+            regime=str(slot.get("regime") or getattr(self, "_last_entry_regime", "")),
+            hold_sec=max(0.0, time.time() - opened_at) if opened_at else 0.0,
+            peak_px=float(slot.get("peak") or self._position_peak or 0),
+            stop_px=float(slot.get("stop") or self._position_stop or 0),
+            target_px=float(slot.get("target") or self._position_target or 0),
+        )
+
+    def _apply_trade_close_learning(self, trade_rec: Dict[str, Any], ticker: str) -> None:
+        """Feed round-trip fills into every learning / telemetry hook."""
+        pnl = float(trade_rec.get("pnl_usd", 0))
+        pnl_pct = float(trade_rec.get("pnl_pct", 0))
+        result = trade_rec.get("result", "loss")
+        exit_fill = float(trade_rec.get("exit_fill") or trade_rec.get("exit", 0))
+        entry_fill = float(trade_rec.get("entry_fill") or trade_rec.get("entry", 0))
+        shares = float(trade_rec.get("shares", 0))
+        reason = str(trade_rec.get("exit_reason", ""))
+        regime = str(trade_rec.get("regime", ""))
+        hold_sec = float(trade_rec.get("hold_sec", 0))
+        entry_slip = float(trade_rec.get("entry_slippage_pct", 0))
+        exit_slip = float(trade_rec.get("exit_slippage_pct", 0))
+        stop_px = float(trade_rec.get("stop", 0))
+        target_px = float(trade_rec.get("target", 0))
+
+        append_fill_ledger({**trade_rec, "event": "round_trip"})
+        log_round_trip_fills(
+            ticker=ticker,
+            entry_fill=entry_fill,
+            exit_fill=exit_fill,
+            quote_entry=float(trade_rec.get("quote_entry", entry_fill)),
+            quote_exit=float(trade_rec.get("quote_exit", exit_fill)),
+            shares=shares,
+            pnl_usd=pnl,
+            pnl_pct=pnl_pct,
+            result=result,
+            exit_reason=reason,
+            entry_slippage_pct=entry_slip,
+            exit_slippage_pct=exit_slip,
+            regime=regime,
+            hold_sec=hold_sec,
+            entry_mode=str(trade_rec.get("entry_mode", "")),
+            limit_px=trade_rec.get("limit_px"),
+        )
         self.trade_journal.append(trade_rec)
         if self.ai_commander:
             try:
                 self.ai_commander.record_trade(trade_rec)
             except Exception:
                 pass
-        hold_sec = max(0.0, time.time() - getattr(self, "_position_opened_at", 0.0))
-        regime = getattr(self, "_last_entry_regime", "")
-        entry_slip = float(self._last_entry_telemetry.get("slippage_pct", 0))
-        stop_px = float(getattr(self, "_position_stop", 0) or 0)
-        target_px = float(getattr(self, "_position_target", 0) or 0)
-        exit_type = "loss_exit" if pnl < 0 else "profit_exit"
-        if "hard_stop" in reason or "stop" in reason.lower():
+        try:
+            self.account_evaluator.evaluate(
+                self, "trade_closed", ai_commander=self.ai_commander,
+            )
+        except Exception:
+            pass
+        observe_trade_everywhere(
+            trade_rec, self.autopilot, self.consciousness, self.pilot, cfg=self.cfg,
+        )
+        exit_type = "other"
+        if stop_px > 0 and exit_fill <= stop_px * 1.003:
             exit_type = "stop_hit"
+        elif target_px > 0 and exit_fill >= target_px * 0.997:
+            exit_type = "target_hit"
+        elif pnl > 0:
+            exit_type = "profit_exit"
+        elif pnl < 0:
+            exit_type = "loss_exit"
+        if "stop" in reason.lower():
+            exit_type = "stop_hit"
+        atr = float(self._last_entry_telemetry.get("atr", 0) or 0)
+        noise_sec = float(getattr(self.cfg, "REGIME_ATR_NOISE_STOP_SEC", 120.0))
+        noise_stop = exit_type == "stop_hit" and hold_sec < noise_sec
+        from core.trade_telemetry import _raw_rr
+        log_regime_atr_outcome(
+            ticker=ticker,
+            regime=regime,
+            exit_type=exit_type,
+            entry=entry_fill,
+            exit_px=exit_fill,
+            stop=stop_px,
+            target=target_px,
+            atr=atr,
+            hold_sec=hold_sec,
+            pnl_usd=pnl,
+            planned_rr=_raw_rr(entry_fill, stop_px, target_px),
+            noise_stop=noise_stop,
+        )
         log_exit_postmortem(
             ticker=ticker,
-            entry=entry,
-            exit_px=exit_px,
+            entry=entry_fill,
+            exit_px=exit_fill,
             shares=shares,
             pnl_usd=pnl,
             pnl_pct=pnl_pct,
@@ -1285,13 +1368,17 @@ class ScalperRunner:
         self._observe_runtime(
             "trade_closed",
             ticker=ticker,
-            reason=f"{result}:{reason}",
+            reason=reason or result,
             pnl_usd=pnl,
             pnl_pct=pnl_pct,
             won=(pnl > 0),
             exit_type=exit_type,
             hold_sec=hold_sec,
             regime=regime,
+            entry_fill=entry_fill,
+            exit_fill=exit_fill,
+            entry_slippage_pct=entry_slip,
+            exit_slippage_pct=exit_slip,
             market_state=get_market_state(self.cfg),
         )
         if pnl < 0:
@@ -1303,22 +1390,60 @@ class ScalperRunner:
                 consecutive_losses=int(getattr(self.risk, "_consecutive_losses", 0)),
                 market_state=get_market_state(self.cfg),
             )
+        slot = self._position_slots.get(ticker, {})
+        combined_slip = abs(entry_slip) + abs(exit_slip)
         try:
             buffer_append({
-                "source": "early_exit",
+                "source": "live_trade",
                 "ticker": ticker,
                 "action": "SELL",
-                "exit_price": exit_px,
-                "entry_price": entry,
+                "entry_price": entry_fill,
+                "exit_price": exit_fill,
+                "quote_entry": trade_rec.get("quote_entry"),
+                "quote_exit": trade_rec.get("quote_exit"),
+                "entry_slippage_pct": entry_slip,
+                "exit_slippage_pct": exit_slip,
                 "pnl_usd": round(pnl, 2),
                 "win": 1 if pnl > 0 else 0,
-                "reward": reward_from_trade(pnl, self.cfg, slippage_pct=entry_slip),
+                "reward": reward_from_trade(
+                    pnl, self.cfg,
+                    slippage_pct=combined_slip,
+                    spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0)),
+                ),
                 "regime": regime,
                 "confidence": getattr(self, "_last_ai_confidence", 0.5),
+                "vision_read": (slot.get("vision_read") or "")[:800],
+                "features": snapshot_features(self._feature_buffer, self.cfg),
+                "exit_reason": reason[:200],
+                "hold_sec": hold_sec,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             })
         except Exception:
             pass
+        if getattr(self.cfg, "LEARNING_PUSH_ON_TRADE", True):
+            try:
+                push_learning_checkpoint_async(f"trade_closed_{ticker}")
+            except Exception:
+                pass
+
+    def _record_early_exit_learning(
+        self,
+        ticker: str,
+        entry: float,
+        exit_px: float,
+        shares: float,
+        pnl: float,
+        reason: str,
+        *,
+        flatten_trade=None,
+        trade_rec: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        """Early exits — resolve IB exit fill and feed all learning hooks."""
+        if trade_rec is None:
+            trade_rec = self._build_trade_close_record(
+                ticker, exit_px, reason, flatten_trade=flatten_trade,
+            )
+        self._apply_trade_close_learning(trade_rec, ticker)
 
     def _exit_position(self, current_px: float, reason: str, ticker: Optional[str] = None):
         """Manually exit position (early exit, AI exit, etc.)."""
@@ -1329,27 +1454,38 @@ class ScalperRunner:
             return
         quantity = int(self.shares)
         entry_price = self._entry_price
+        handle = self._bracket_by_ticker.get(ticker) or self.bracket_handle
+        flatten_trade = None
         try:
-            handle = self._bracket_by_ticker.get(ticker) or self.bracket_handle
-            self.broker.flatten_position(quantity, handle=handle, urgent=True, symbol=ticker)
-            self.ib.sleep(1)
-            pnl = (current_px - entry_price) * quantity
-            log.info(f"⚡ EARLY EXIT: {ticker} @ ${current_px:.2f} | Reason: {reason} | P&L: ${pnl:+.2f}")
+            flatten_trade = self.broker.flatten_position(
+                quantity, handle=handle, urgent=True, symbol=ticker,
+            )
+            trade_rec = self._build_trade_close_record(
+                ticker, current_px, reason, flatten_trade=flatten_trade, bracket=handle,
+            )
+            exit_fill = float(trade_rec.get("exit_fill") or current_px)
+            pnl = float(trade_rec.get("pnl_usd", 0))
+            log.info(
+                f"⚡ EARLY EXIT: {ticker} fill ${exit_fill:.4f} "
+                f"(quote ${current_px:.4f}) | Reason: {reason} | P&L: ${pnl:+.2f}"
+            )
             if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
                 send_dynamic_notification(
                     self.notifier, self.autopilot, "early_exit",
                     self._notify_context({
-                        "ticker": ticker, "price": current_px, "pnl_usd": round(pnl, 2),
+                        "ticker": ticker, "price": exit_fill, "pnl_usd": round(pnl, 2),
                         "reason": reason, "entry": entry_price,
                     }),
-                    f"⚡ EARLY EXIT\n{ticker} @ ${current_px:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}",
+                    f"⚡ EARLY EXIT\n{ticker} @ ${exit_fill:.4f}\nReason: {reason}\nP&L: ${pnl:+.2f}",
                     ai_commander=self.ai_commander,
                     consciousness=self.consciousness,
                     pilot=self.pilot,
                 )
             else:
-                self.notifier.info(f"⚡ EARLY EXIT\n{ticker} @ ${current_px:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}")
-            self._credit_exit_proceeds(quantity, current_px)
+                self.notifier.info(
+                    f"⚡ EARLY EXIT\n{ticker} @ ${exit_fill:.4f}\nReason: {reason}\nP&L: ${pnl:+.2f}"
+                )
+            self._credit_exit_proceeds(quantity, exit_fill)
             self.shares = 0.0
             self._prev_shares = 0.0
             self.bracket_handle = None
@@ -1364,7 +1500,8 @@ class ScalperRunner:
                 self.risk.record_trade_result(pnl)
                 self.risk.close_position()
             self._record_early_exit_learning(
-                ticker, entry_price, current_px, float(quantity), pnl, reason,
+                ticker, entry_price, exit_fill, float(quantity), pnl, reason,
+                flatten_trade=flatten_trade, trade_rec=trade_rec,
             )
             if is_mechanical_profit_exit(reason):
                 record_profit_hunt_learning(
