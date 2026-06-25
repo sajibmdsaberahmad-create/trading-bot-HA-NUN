@@ -309,3 +309,11 @@ loss:council_exit: Ollama exit 98% (PPO hold)
 Observed loss_streak — recorded for learning.
 council_exit: Ollama exit 98% (PPO hold)
 
+🧭 COMMANDER LEARNING | 2026-06-25T11:05:24.123873+00:00
+The trading algo closed the trade for BCDA with a win: Council_exit: Ollama exit 100% (PPO hold).
+The event occurred due to a successful close in the BCDA ticker.
+• {'param': 'MAX_CONCURRENT_POSITIONS', 'value': [1, 500], 'reason': 'The algorithm now limits the maximum number of concurrent positions to 500.'}
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Increased confidence threshold for successful trades.'}
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (It increased the confidence threshold to make the trade more profitable.)
+

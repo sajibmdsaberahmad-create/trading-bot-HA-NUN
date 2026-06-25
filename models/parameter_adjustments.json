@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "It increased the confidence threshold to make the trade more profitable.",
+    "ok": true,
+    "msg": "applied"
+  }
+}
