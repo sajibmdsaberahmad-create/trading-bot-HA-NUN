@@ -4,9 +4,6 @@
   "confidence": 0.42999999999999994,
   "mode": "autonomous",
   "learned_lessons": [
-    "Hi",
-    "Commander: off_hours_review",
-    "ping - are you there ?",
     "Commander: Hi",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold will help in balancing the risk premium and reward.'}",
     "Commander: The root cause is that the scanner spike during the scan timeout caused a large deviation in the score. This led to an excessive risk premium for the algorithm. The high confidence level of 0.58 indicates the need to tighten or expand risk ",
@@ -103,10 +100,13 @@
     "Enhance your understanding of the market's dynamics and use it to make more informed decisions.",
     "Commander: The council_timeout event indicates that there was a scanner spike after a timeout in the live trading session.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Scanner spikes are indicative of increased risk.'}",
-    "Commander: The root cause is likely an increase in scanner spikes after timeout, which could indicate a potential risk factor. The algorithm needs to adjust its parameters to account for this spike."
+    "Commander: The root cause is likely an increase in scanner spikes after timeout, which could indicate a potential risk factor. The algorithm needs to adjust its parameters to account for this spike.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Increased confidence threshold to prevent potential stall issues.'}",
+    "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': 1, 'reason': 'Tighter max concurrent positions for better control over execution speed.'}",
+    "Commander: The algorithm is stuck due to scanner spike after timeout, which causes poor performance."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": 0.98,\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1022413.01,\n  \"available_cash\": 1022413.01,\n  \"position_value\": 0.0,\n  \"nav\": 1013.47,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 2,\n  \"top_pick\": \"QCMD\",\n  \"top_score\": 52.0,\n  \"next_best\": \"QCMD\",\n  \"next_best_score\": 346.7\n}\n```",
+  "last_thought": "```json\n{\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1022385.13,\n  \"available_cash\": 1022385.13,\n  \"position_value\": 0.0,\n  \"nav\": 1013.47,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 2,\n  \"top_pick\": \"QCMD\",\n  \"top_score\": 47.6,\n  \"next_best\": \"QCMD\",\n  \"next_best_score\": 346.7\n}\n```",
   "market_belief": {},
   "trades_observed": 3,
-  "updated": "2026-06-25T09:47:01.981962"
+  "updated": "2026-06-25T10:02:19.133806"
 }

@@ -2,14 +2,14 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Adjusting the CONFIDENCE_THRESHOLD to account for scanner spikes.",
+    "reason": "Increased confidence threshold to prevent stall issues during council processing.",
     "ok": true,
     "msg": "applied"
   },
-  "ENTRY_FILL_MAX_WAIT_SEC": {
-    "param": "ENTRY_FILL_MAX_WAIT_SEC",
-    "value": 45.0,
-    "reason": "Increasing the maximum wait time between entries.",
+  "MAX_CONCURRENT_POSITIONS": {
+    "param": "MAX_CONCURRENT_POSITIONS",
+    "value": 1,
+    "reason": "Tighter max concurrent positions for better control over execution speed.",
     "ok": true,
     "msg": "applied"
   }

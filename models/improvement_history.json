@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-06-21T12:12:58.103127",
-    "win_rate": 0.5466300940438872,
-    "buffer_win_rate": 0.8863636363636364,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-21T12:12:58.102083\nCombined win rate: 54.7% (buffer=88.6%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
-  },
-  {
     "timestamp": "2026-06-21T12:12:58.993599",
     "win_rate": 0.5466300940438872,
     "buffer_win_rate": 0.8863636363636364,
@@ -2205,6 +2197,31 @@
     "guidelines_summary": "The council_timeout event occurred, which suggests a spike in the scanner during the timeout.",
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Scanner spikes are indicative of increased risk.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T10:02:19.160489+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased confidence threshold to prevent stall issues during council processing.",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MAX_CONCURRENT_POSITIONS": {
+        "param": "MAX_CONCURRENT_POSITIONS",
+        "value": 1,
+        "reason": "Tighter max concurrent positions for better control over execution speed.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Scalper experienced a timeout issue during council processing in QCMD.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Increased confidence threshold to prevent potential stall issues.'}",
+      "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': 1, 'reason': 'Tighter max concurrent positions for better control over execution speed.'}"
     ]
   }
 ]

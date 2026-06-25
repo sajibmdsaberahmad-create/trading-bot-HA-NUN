@@ -260,3 +260,10 @@ The root cause is likely an increase in scanner spikes after timeout, which coul
   - CONFIDENCE_THRESHOLD → 0.58 (Adjusting the CONFIDENCE_THRESHOLD to account for scanner spikes.)
   - ENTRY_FILL_MAX_WAIT_SEC → 45.0 (Increasing the maximum wait time between entries.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T10:02:19.159741+00:00
+Scalper experienced a timeout issue during council processing in QCMD.
+The algorithm is stuck due to scanner spike after timeout, which causes poor performance.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold to prevent stall issues during council processing.)
+  - MAX_CONCURRENT_POSITIONS → 1 (Tighter max concurrent positions for better control over execution speed.)
+
