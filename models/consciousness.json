@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 87,
+  "improvements_applied": 90,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5916,6 +5916,68 @@
         "lessons": [
           "Adapt your strategy based on recent wins and losses.",
           "Use advanced monitoring techniques like advanced monitoring (PPO) to detect anomalies effectively."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:14:14.572166",
+      "age": "4d 0h 11m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #88",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Loss streak occurred, the algorithm should not repeat.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold has been increased, indicating a more cautious approach to exits.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "The loss streak is caused by a specific exit pattern that needs to be identified.",
+          "The algorithm should maintain flexibility to handle different market scenarios.",
+          "Adaptability and robustness are crucial for long-term success."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:14:27.127326",
+      "age": "4d 0h 11m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #89",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on WYY"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:14:51.130519",
+      "age": "4d 0h 12m 2s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #90",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout triggered with scanner spike and high volatility.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increased the confidence threshold from 0.35 to 0.58, reducing the risk of falling back into a volatile market.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Adjust the confidence threshold to reduce the risk of falling back into a volatile market",
+          "Increase the number of concurrent positions and lock targets to mitigate losses",
+          "Implement multi-timeframe analysis to capture more complex patterns"
         ]
       }
     }

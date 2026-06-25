@@ -1,74 +1,5 @@
 [
   {
-    "timestamp": "2026-06-24T20:16:09.590230",
-    "win_rate": 0.29273399014778323,
-    "buffer_win_rate": 0.37857142857142856,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {
-      "SCALP_TP_ATR_MULTIPLIER": {
-        "old": 0.7971615000000002,
-        "new": 0.7174453500000002,
-        "reason": "increase targets when WR strong; reduce when WR weak",
-        "confidence": 0.023
-      },
-      "SCAN_INTERVAL_SECONDS": {
-        "old": 222.77580000000006,
-        "new": 289.60854000000006,
-        "reason": "reduce frequency when WR low; increase when WR strong",
-        "confidence": 0.08
-      },
-      "MAX_TRADE_SIZE_USD": {
-        "old": 117.64899999999994,
-        "new": 100,
-        "reason": "reduce size when WR poor; increase when WR strong",
-        "confidence": 0.004
-      }
-    },
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:16:09.589267\nCombined win rate: 29.3% (buffer=37.9%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
-    "timestamp": "2026-06-24T20:16:09.651432",
-    "win_rate": 0.29273399014778323,
-    "buffer_win_rate": 0.37857142857142856,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {
-      "SCALP_TP_ATR_MULTIPLIER": {
-        "old": 0.7174453500000002,
-        "new": 0.6457008150000002,
-        "reason": "increase targets when WR strong; reduce when WR weak",
-        "confidence": 0.02
-      },
-      "SCAN_INTERVAL_SECONDS": {
-        "old": 289.60854000000006,
-        "new": 376.49110200000007,
-        "reason": "reduce frequency when WR low; increase when WR strong",
-        "confidence": 0.103
-      }
-    },
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:16:09.650999\nCombined win rate: 29.3% (buffer=37.9%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
-    "timestamp": "2026-06-24T20:20:47.056699",
-    "win_rate": 0.295355790312936,
-    "buffer_win_rate": 0.3838150289017341,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {
-      "SCALP_TP_ATR_MULTIPLIER": {
-        "old": 0.6457008150000002,
-        "new": 0.5811307335000002,
-        "reason": "increase targets when WR strong; reduce when WR weak",
-        "confidence": 0.018
-      },
-      "SCAN_INTERVAL_SECONDS": {
-        "old": 376.49110200000007,
-        "new": 489.4384326000001,
-        "reason": "reduce frequency when WR low; increase when WR strong",
-        "confidence": 0.134
-      }
-    },
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:20:47.056149\nCombined win rate: 29.5% (buffer=38.4%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
     "timestamp": "2026-06-24T20:20:47.103171",
     "win_rate": 0.295355790312936,
     "buffer_win_rate": 0.3838150289017341,
@@ -2234,6 +2165,53 @@
     "lessons": [
       "Adapt your strategy based on recent wins and losses.",
       "Use advanced monitoring techniques like advanced monitoring (PPO) to detect anomalies effectively."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:14:14.600392+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold has been increased, indicating a more cautious approach to exits.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Loss streak occurred, the algorithm should not repeat.",
+    "lessons": [
+      "The loss streak is caused by a specific exit pattern that needs to be identified.",
+      "The algorithm should maintain flexibility to handle different market scenarios.",
+      "Adaptability and robustness are crucial for long-term success."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:14:27.156206+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on WYY"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:14:51.156964+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased the confidence threshold from 0.35 to 0.58, reducing the risk of falling back into a volatile market.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout triggered with scanner spike and high volatility.",
+    "lessons": [
+      "Adjust the confidence threshold to reduce the risk of falling back into a volatile market",
+      "Increase the number of concurrent positions and lock targets to mitigate losses",
+      "Implement multi-timeframe analysis to capture more complex patterns"
     ]
   }
 ]

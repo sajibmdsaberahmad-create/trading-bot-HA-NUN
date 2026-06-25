@@ -329,3 +329,19 @@ The council timeout is due to a spike in scanner scores that exceeded the thresh
   - CONFIDENCE_THRESHOLD → 0.58 (The current confidence threshold is set at 0.58, but it's recommended to adjust based on market conditions.)
   - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-25T11:14:14.599706+00:00
+Loss streak occurred, the algorithm should not repeat.
+The loss streak was caused by a council_exit entry with an Ollama exit strategy (PPO hold). The agent had adjusted the system to avoid such exits. We need to ensure that the algorithm remains flexible and adaptive in response to new market conditions.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold has been increased, indicating a more cautious approach to exits.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T11:14:27.155664+00:00
+Observed trade_closed — recorded for learning.
+loss:council_exit: Ollama exit 100% (PPO hold)
+
+🧭 COMMANDER LEARNING | 2026-06-25T11:14:51.156420+00:00
+The council timeout triggered with scanner spike and high volatility.
+Why: The scanner spike likely caused the volatility increase, which in turn was causing the council timeout. The algorithm needs to be adjusted for better stress management.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased the confidence threshold from 0.35 to 0.58, reducing the risk of falling back into a volatile market.)
+
