@@ -87,14 +87,13 @@ export AI_PRIORITY_TICK_STREAMS="${AI_PRIORITY_TICK_STREAMS:-false}"
 export FAST_MONITOR_SEC="${FAST_MONITOR_SEC:-0.25}"
 export USE_FIXED_DEPLOY_CAP="${USE_FIXED_DEPLOY_CAP:-false}"
 export USE_FIXED_RISK_CAP="${USE_FIXED_RISK_CAP:-false}"
+export AI_DEFINE_ALL_LIMITS="${AI_DEFINE_ALL_LIMITS:-true}"
+export AI_SESSION_LIMITS_OLLAMA="${AI_SESSION_LIMITS_OLLAMA:-true}"
 export USE_ACCOUNT_LOSS_HALT="${USE_ACCOUNT_LOSS_HALT:-false}"
 export USE_MULTI_POSITION="${USE_MULTI_POSITION:-true}"
 export AI_UNLIMITED_MODE="${AI_UNLIMITED_MODE:-true}"
 export AI_COUNCIL_ALL_DECISIONS="${AI_COUNCIL_ALL_DECISIONS:-true}"
-export AI_MAX_LOCKED_TARGETS="${AI_MAX_LOCKED_TARGETS:-30}"
-export AI_MAX_CONCURRENT_POSITIONS="${AI_MAX_CONCURRENT_POSITIONS:-50}"
 export AI_SCAN_UNIVERSE_MAX="${AI_SCAN_UNIVERSE_MAX:-80}"
-export MAX_CONCURRENT_POSITIONS="${MAX_CONCURRENT_POSITIONS:-50}"
 export PARALLEL_ENTRY_EXIT="${PARALLEL_ENTRY_EXIT:-true}"
 export HOT_SWAP_ON_EXIT="${HOT_SWAP_ON_EXIT:-true}"
 export FOCUS_PIN_TOP_PICK="${FOCUS_PIN_TOP_PICK:-false}"
@@ -271,8 +270,15 @@ print(f'   Live IB scanner: {getattr(cfg, \"USE_LIVE_IB_SCANNER\", True)} (no st
 print(f'   Fast scanner lock: {getattr(cfg, \"FAST_SCANNER_LOCK\", True)} (bars prefetch after lock)')
 print(f'   AI full control: {getattr(cfg, \"AI_FULL_CONTROL\", True)} | Ollama fast-path bypass: {getattr(cfg, \"HYBRID_DISTILL_AUTO_FAST_PATH\", True)}')
 print(f'   AI council all decisions: {getattr(cfg, \"AI_COUNCIL_ALL_DECISIONS\", True)}')
-print(f'   AI unlimited: {getattr(cfg, \"AI_UNLIMITED_MODE\", False)} | Watch pool: {getattr(cfg, \"AI_MAX_LOCKED_TARGETS\", 30)} | Max positions: {getattr(cfg, \"AI_MAX_CONCURRENT_POSITIONS\", 50)}')
-print(f'   Multi-position: {getattr(cfg, \"MAX_CONCURRENT_POSITIONS\", 5)} | Fixed deploy cap: {getattr(cfg, \"USE_FIXED_DEPLOY_CAP\", False)} | Fixed risk cap: {getattr(cfg, \"USE_FIXED_RISK_CAP\", False)} | Account halt: {getattr(cfg, \"USE_ACCOUNT_LOSS_HALT\", False)}')
+from core.ai_session_limits import should_ai_define_limits, heuristic_session_limits, apply_session_limits, format_limits_log
+if should_ai_define_limits(cfg):
+    eq = float(getattr(cfg, \"INITIAL_CASH\", 1000))
+    lim = heuristic_session_limits(cfg, eq)
+    apply_session_limits(cfg, lim)
+    print(f'   {format_limits_log(cfg, eq)}')
+else:
+    print(f'   AI unlimited: {getattr(cfg, \"AI_UNLIMITED_MODE\", False)} | Watch pool: {getattr(cfg, \"MAX_LOCKED_TARGETS\", 5)} | Max positions: {getattr(cfg, \"MAX_CONCURRENT_POSITIONS\", 5)}')
+    print(f'   Fixed deploy cap: {getattr(cfg, \"USE_FIXED_DEPLOY_CAP\", False)} | Fixed risk cap: {getattr(cfg, \"USE_FIXED_RISK_CAP\", False)} | Account halt: {getattr(cfg, \"USE_ACCOUNT_LOSS_HALT\", False)}')
 print(f'   Ollama: {getattr(cfg, \"OLLAMA_ENABLED\", False)}')
 print(f'   Learn live: AI_LEARN_ON_LOSS_STREAK={getattr(cfg, \"AI_LEARN_ON_LOSS_STREAK\", False)} | INCREMENTAL_TRAINING={getattr(cfg, \"INCREMENTAL_TRAINING_ENABLED\", True)} | runtime_observer={getattr(cfg, \"AI_RUNTIME_OBSERVER_ENABLED\", True)}')
 from core.ollama_vision import is_vision_model_present, vision_model_name

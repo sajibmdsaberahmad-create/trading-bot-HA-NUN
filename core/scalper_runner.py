@@ -125,6 +125,7 @@ from core.fill_tracker import (
     resolve_exit_fill,
 )
 from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
+from core.account_evaluator import AccountEvaluator
 from core.ai_session_limits import (
     bootstrap_ai_session_limits, format_limits_log, maybe_refresh_session_limits,
     should_ai_define_limits,
@@ -1342,6 +1343,10 @@ class ScalperRunner:
                 push_learning_checkpoint_async(f"trade_closed_{ticker}")
             except Exception:
                 pass
+        try:
+            maybe_refresh_session_limits(self, min_interval_sec=300.0)
+        except Exception:
+            pass
 
     def _record_early_exit_learning(
         self,
@@ -1980,6 +1985,7 @@ class ScalperRunner:
                         self._train_off_hours()
                 
                 self._refresh_account_balance()
+                maybe_refresh_session_limits(self)
                 self._write_live_metrics()
                 self._maybe_daily_push()
                 if getattr(self.cfg, "LEARNING_SYNC_INTERVAL_SEC", 1800) > 0:
