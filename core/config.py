@@ -441,6 +441,10 @@ class BotConfig:
     SCAN_DEFER_IB_ON_STARTUP: bool = os.getenv("SCAN_DEFER_IB_ON_STARTUP", "true").lower() not in (
         "0", "false", "no",
     )
+    # Off by default — paper IB scanner usually returns 0 rows and blocks ~50s
+    SCAN_RUN_DEFERRED_IB: bool = os.getenv("SCAN_RUN_DEFERRED_IB", "false").lower() in (
+        "1", "true", "yes",
+    )
     IB_SCANNER_WARMUP_SEC: float = float(os.getenv("IB_SCANNER_WARMUP_SEC", "3"))
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30

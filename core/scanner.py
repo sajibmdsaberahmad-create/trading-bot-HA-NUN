@@ -82,31 +82,52 @@ def _warm_scanner(ib, timeout_sec: float = 3.0) -> bool:
 def emergency_scan_universe(connector, cfg: BotConfig) -> List[str]:
     """
     Last-resort universe when IB live scanner returns nothing — keeps bot trading.
-    Uses open IB positions + curated momentum list (no blocking scanner).
+    Curated US momentum list first; open USD positions with known US primary only.
     """
     from core.scanner import PENNY_STOCK_UNIVERSE
+    from core.universe_filter import ALLOWED_PRIMARY_EXCHANGES, passes_profit_hunt_universe
 
-    tickers: List[str] = []
+    position_tickers: List[str] = []
     seen: set = set()
     try:
         ib = connector.ib
         ib.reqPositions()
         ib.sleep(0.25)
         for p in ib.positions():
-            sym = (getattr(p.contract, "symbol", "") or "").upper().strip()
-            if sym and sym not in seen:
-                seen.add(sym)
-                tickers.append(sym)
+            if abs(float(p.position)) < 0.5:
+                continue
+            c = p.contract
+            sym = (getattr(c, "symbol", "") or "").upper().strip()
+            if not sym or sym in seen:
+                continue
+            currency = (getattr(c, "currency", "") or "USD").upper()
+            if currency != "USD":
+                continue
+            primary = str(
+                getattr(c, "primaryExchange", "")
+                or getattr(c, "primaryExch", "")
+                or ""
+            ).upper()
+            if not primary or primary not in ALLOWED_PRIMARY_EXCHANGES:
+                continue
+            ok, _ = passes_profit_hunt_universe(cfg, sym, primary)
+            if not ok:
+                continue
+            seen.add(sym)
+            position_tickers.append(sym)
     except Exception:
         pass
 
+    tickers: List[str] = []
     for sym in PENNY_STOCK_UNIVERSE:
         if sym not in seen:
             seen.add(sym)
             tickers.append(sym)
 
+    combined = position_tickers + [t for t in tickers if t not in set(position_tickers)]
+
     out: List[str] = []
-    for t in tickers:
+    for t in combined:
         if is_tradeable_ticker_local(t, cfg):
             out.append(t)
         if len(out) >= int(getattr(cfg, "SCAN_UNIVERSE_MAX", 30)):

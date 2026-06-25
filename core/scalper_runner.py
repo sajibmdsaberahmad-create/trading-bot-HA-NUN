@@ -2100,7 +2100,10 @@ class ScalperRunner:
                     except Exception as exc:
                         log.error(f"Initial scan failed: {exc}")
                     self._last_scan_time = time.time()
-                    if getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", True):
+                    if (
+                        getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", True)
+                        and getattr(self.cfg, "SCAN_RUN_DEFERRED_IB", False)
+                    ):
                         self._deferred_ib_scan = True
 
                 in_position = self._in_any_position()
@@ -2976,7 +2979,7 @@ class ScalperRunner:
         self._ensure_locked_streams(quiet=quiet)
 
     def _on_tick_stream_limit(self, ticker: str, error_code: int, message: str):
-        """IB 10190 — too many tick-by-tick subs; fall back to 5s bars for this name."""
+        """IB 10189/10190 — tick-by-tick unavailable; fall back to 5s bars."""
         if ticker:
             self._tick_limit_denied.add(ticker.upper())
         if ticker and ticker in self._target_monitors:
