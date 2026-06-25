@@ -517,3 +517,7 @@ Scanner+spike after timeout: score=83 vol=1.9x | ATR R:R 2.0
 A trade closed with a loss: council_risk: hard_stop, resulting in -25.909064999999973, PNL_USD: -25.909064999999973, PNL_PCT: -3.6945731727389353, win_rate: 36.7%
 The trade was closed with a loss and resulted in a negative profit of -25.909064999999973.
 
+🧭 COMMANDER LEARNING | 2026-06-25T12:04:38.193070+00:00
+Observed loss_streak — recorded for learning.
+council_risk: hard_stop
+
