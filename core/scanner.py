@@ -27,48 +27,103 @@ from core.risk import safe_vwap
 
 def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
     """
-    Fetch scanner rows with a hard timeout.
+    Fetch scanner rows with a hard timeout via ``reqScannerDataAsync``.
 
-    ``ib.reqScannerData`` blocks until IB sends scannerDataEnd and can hang
-    indefinitely — this uses a subscription + chunked ``ib.sleep`` instead.
+    Uses IB's blocking scan API (waits for scannerDataEnd) wrapped in
+    ``asyncio.wait_for`` so startup cannot hang forever.
     """
+    import asyncio
     import time
 
-    timeout_sec = max(4.0, float(timeout_sec))
-    deadline = time.time() + timeout_sec
-    data_list = ib.reqScannerSubscription(scan)
-    last_count = 0
-    stable_since = time.time()
-    last_log = time.time()
-    try:
-        while time.time() < deadline:
-            ib.sleep(0.2)
-            n = len(data_list)
+    timeout_sec = max(6.0, float(timeout_sec))
+    scan_code = getattr(scan, "scanCode", "?")
+    location = getattr(scan, "locationCode", "?")
+
+    async def _fetch() -> List[Any]:
+        task = asyncio.create_task(ib.reqScannerDataAsync(scan))
+        last_log = time.time()
+        while not task.done():
+            await asyncio.sleep(0.4)
             now = time.time()
-            if n != last_count:
-                last_count = n
-                stable_since = now
-            elif n >= 8 and (now - stable_since) >= 1.0:
-                break
-            if n >= 50:
-                break
             if now - last_log >= 3.0:
-                log.info(
-                    f"  scanner {scan.scanCode}@{scan.locationCode}: "
-                    f"{n} rows (waiting on IB…)"
-                )
+                log.info(f"  scanner {scan_code}@{location}: awaiting IB response…")
                 last_log = now
-        else:
-            log.warning(
-                f"  scanner {scan.scanCode}@{scan.locationCode}: "
-                f"timed out after {timeout_sec:.0f}s ({len(data_list)} rows)"
-            )
-    finally:
-        try:
-            ib.cancelScannerSubscription(data_list)
-        except Exception:
-            pass
-    return list(data_list)
+        return list(await task)
+
+    try:
+        rows = ib.run(asyncio.wait_for(_fetch(), timeout=timeout_sec))
+        if rows:
+            log.info(f"  scanner {scan_code}@{location}: {len(rows)} rows")
+        return rows
+    except asyncio.TimeoutError:
+        log.warning(
+            f"  scanner {scan_code}@{location}: timed out after {timeout_sec:.0f}s "
+            f"(no IB response)"
+        )
+        return []
+    except Exception as exc:
+        msg = str(exc)
+        if "162" in msg or "disabled" in msg.lower():
+            raise
+        log.debug(f"  scanner {scan_code}@{location} error: {exc}")
+        return []
+
+
+def _warm_scanner(ib) -> None:
+    """One-shot scanner warm-up — helps paper/live gateways return first scan."""
+    try:
+        ib.run(ib.reqScannerParametersAsync())
+    except Exception:
+        pass
+
+
+def emergency_scan_universe(connector, cfg: BotConfig) -> List[str]:
+    """
+    Last-resort universe when IB live scanner returns nothing — keeps bot trading.
+    Uses open IB positions + curated momentum list (no blocking scanner).
+    """
+    from core.scanner import PENNY_STOCK_UNIVERSE
+
+    tickers: List[str] = []
+    seen: set = set()
+    try:
+        ib = connector.ib
+        ib.reqPositions()
+        ib.sleep(0.25)
+        for p in ib.positions():
+            sym = (getattr(p.contract, "symbol", "") or "").upper().strip()
+            if sym and sym not in seen:
+                seen.add(sym)
+                tickers.append(sym)
+    except Exception:
+        pass
+
+    for sym in PENNY_STOCK_UNIVERSE:
+        if sym not in seen:
+            seen.add(sym)
+            tickers.append(sym)
+
+    out: List[str] = []
+    for t in tickers:
+        if is_tradeable_ticker_local(t, cfg):
+            out.append(t)
+        if len(out) >= int(getattr(cfg, "SCAN_UNIVERSE_MAX", 30)):
+            break
+
+    if out:
+        log.warning(
+            f"⚠️ IB scanner empty — emergency universe: {len(out)} tickers "
+            f"({', '.join(out[:8])}{'…' if len(out) > 8 else ''})"
+        )
+    return out
+
+
+def is_tradeable_ticker_local(ticker: str, cfg: BotConfig) -> bool:
+    try:
+        from core.pilot_mode import is_tradeable_ticker
+        return is_tradeable_ticker(ticker, cfg=cfg)
+    except Exception:
+        return bool(ticker and len(ticker) <= 5)
 
 
 @dataclass
