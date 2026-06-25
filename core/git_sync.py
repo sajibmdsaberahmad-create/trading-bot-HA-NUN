@@ -429,7 +429,7 @@ def flush_git_telegram_summary(cfg: Optional[BotConfig] = None) -> None:
     mode = _git_notify_mode(c)
     summary = write_git_session_summary()
     if mode == "off" or mode == "log":
-        log.info(f"📋 Git session logged → {_GIT_SESSION_SUMMARY_PATH}")
+        log.debug(f"Git push logged only [{category}]: {message[:80]}")
         return
     if mode != "session" and mode != "all":
         return
@@ -2063,10 +2063,11 @@ def push_learning_checkpoint(reason: str = "checkpoint", full_sync: bool = False
             except Exception as exc:
                 log.debug(f"Full learning sync: {exc}")
 
-        if ok:
+        if ok and cfg_bot is not None:
             try:
                 from core.telegram_broadcast import notify_learning_checkpoint
-                if cfg_bot is not None:
+                from core.git_sync import _git_notify_mode
+                if _git_notify_mode(cfg_bot) not in ("off", "log"):
                     notify_learning_checkpoint(cfg_bot, f"{reason} | {tag}", ok=True)
             except Exception:
                 pass

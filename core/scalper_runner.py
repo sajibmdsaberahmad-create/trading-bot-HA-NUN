@@ -816,17 +816,7 @@ class ScalperRunner:
             observe_trade_everywhere(
                 trade_rec, self.autopilot, self.consciousness, self.pilot, cfg=self.cfg,
             )
-            self._observe_runtime(
-                "trade_closed",
-                ticker=trade_rec.get("ticker", ""),
-                reason=result,
-                pnl_usd=pnl,
-                pnl_pct=pnl_pct,
-                won=(result == "win"),
-                exit_type=exit_type if 'exit_type' in dir() else result,
-                hold_sec=hold_sec if 'hold_sec' in dir() else 0,
-                market_state=get_market_state(self.cfg),
-            )
+            hold_sec = time.time() - getattr(self, "_position_opened_at", 0.0)
             regime = getattr(self, "_last_entry_regime", "")
             entry_slip = float(self._last_entry_telemetry.get("slippage_pct", 0))
             entry_px = self._entry_price
@@ -1371,6 +1361,11 @@ class ScalperRunner:
             log.info(
                 "📚 LEARN MODE: failures → experience buffer + soft retry "
                 "(no permanent ticker blocks; AI_UNLIMITED filters lifted)"
+            )
+        if getattr(self.cfg, "AI_RUNTIME_OBSERVER_ENABLED", True):
+            log.info(
+                "🧠 RUNTIME OBSERVER: live 5W reasoning on cancels/trades/errors → "
+                "auto-apply guardrailed fixes + PPO buffer"
             )
         log.info(
             f"Max per trade: {'$' + format(self.cfg.MAX_TRADE_SIZE_USD, ',.0f') if getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False) else 'AI-sized'} "

@@ -84,8 +84,27 @@ def broadcast_ops(
     threading.Thread(target=_run, name=f"tg-broadcast-{event}", daemon=True).start()
 
 
+def _should_broadcast_learning(cfg: BotConfig) -> bool:
+    if not getattr(cfg, "TELEGRAM_ENABLED", True):
+        return False
+    if not getattr(cfg, "TELEGRAM_BROADCAST_LEARNING", False):
+        return False
+    try:
+        from core.git_sync import _git_notify_mode
+        return _git_notify_mode(cfg) == "all"
+    except Exception:
+        return False
+
+
 def notify_git_push(cfg: BotConfig, message: str, category: str = "general", *, ok: bool = True) -> None:
-    if not getattr(cfg, "TELEGRAM_BROADCAST_GIT", True):
+    try:
+        from core.git_sync import _git_notify_mode
+        mode = _git_notify_mode(cfg)
+    except Exception:
+        mode = getattr(cfg, "GIT_NOTIFY_MODE", "off")
+    if mode not in ("all", "failures") and not getattr(cfg, "TELEGRAM_BROADCAST_GIT", False):
+        return
+    if mode == "failures" and ok:
         return
     fallback = f"GIT {'PUSH' if ok else 'FAIL'} [{category}]: {message}"
     broadcast_ops(
@@ -107,6 +126,8 @@ def notify_model_release(cfg: BotConfig, version: str, tag: str, notes: str = ""
 
 
 def notify_learning_checkpoint(cfg: BotConfig, reason: str, *, ok: bool = True) -> None:
+    if not _should_broadcast_learning(cfg):
+        return
     fallback = f"LEARNING CHECKPOINT: {reason}"
     broadcast_ops(
         cfg,

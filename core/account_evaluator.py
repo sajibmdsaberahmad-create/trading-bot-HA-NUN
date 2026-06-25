@@ -113,11 +113,12 @@ class AccountEvaluator:
             )
 
         if event in notify_events or event == "trade_closed":
-            try:
-                from core.git_sync import push_learning_checkpoint_async
-                push_learning_checkpoint_async(f"account_{event}")
-            except Exception:
-                pass
+            if getattr(self.cfg, "GIT_PUSH_DURING_SESSION", False):
+                try:
+                    from core.git_sync import push_learning_checkpoint_async
+                    push_learning_checkpoint_async(f"account_{event}")
+                except Exception:
+                    pass
 
         return record
 
