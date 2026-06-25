@@ -310,18 +310,21 @@ class AICommander:
         ppo_conf: float = 0.5,
         ppo_reason: str = "",
         market_ctx: Optional[Dict[str, Any]] = None,
+        df: Optional[pd.DataFrame] = None,
     ) -> None:
         """Keep Ollama hotline open on watchlist — non-blocking."""
         if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
             return
         mctx = market_ctx or {}
+        chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
         prompt = (
             f"DECIDE ENTRY for {ticker} @ ${current_px:.4f}\n"
             f"Volume spike {spike_ratio:.2f}x | Scan score {scan_score:.0f}\n"
             f"PPO entry signal: action={ppo_action} conf={ppo_conf:.2f} reason={ppo_reason[:80]}\n"
             f"Bid ${mctx.get('bid') or 0:.4f} Ask ${mctx.get('ask') or 0:.4f} "
             f"Spread {mctx.get('spread_pct', 0):.2%}\n"
-            "You are the pilot on the LIVE hotline. Judgment only — no stop, target, or shares.\n"
+            + (chart_line if chart_line else "")
+            + "You are the pilot on the LIVE hotline. Judgment only — no stop, target, or shares.\n"
             '{"enter":true/false,"confidence":0-1,"gut_feel":0-1,"intuition":"brief",'
             '"reason":"why","journal":"log"}'
         )
@@ -329,6 +332,8 @@ class AICommander:
         mood, conf, lessons = self._mood_context()
         full = enrich_prompt("entry_decision", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons)
         self._live_line.ring(ticker, "entry_decision", full, fp)
+        if df is not None:
+            self.prefetch_chart_vision(ticker, df, current_px, spike_ratio, scan_score)
 
     def think_json(self, prompt: str, cache_key: str = "", ttl: float = 2.0,
                    task: str = "decide") -> Dict[str, Any]:
@@ -571,6 +576,8 @@ class AICommander:
         )
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        if df is not None and len(df) >= 20:
+            self.prefetch_chart_vision(ticker, df, current_px, spike_ratio, scan_score)
         chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
         pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
 

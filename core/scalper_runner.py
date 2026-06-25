@@ -853,6 +853,7 @@ class ScalperRunner:
             except Exception:
                 pass
             try:
+                slot = self._position_slots.get(self.current_ticker or "", {})
                 buffer_append({
                     "source": "live_trade",
                     "ticker": self.current_ticker,
@@ -864,6 +865,7 @@ class ScalperRunner:
                     "reward": reward_from_trade(pnl, self.cfg, slippage_pct=entry_slip),
                     "regime": regime,
                     "confidence": getattr(self, "_last_ai_confidence", 0.5),
+                    "vision_read": (slot.get("vision_read") or "")[:800],
                     "features": snapshot_features(self._feature_buffer, self.cfg),
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 })
@@ -2289,6 +2291,7 @@ class ScalperRunner:
                         "avg_volume": float(df["volume"].tail(20).mean()),
                         "recent_volume": float(df["volume"].iloc[-1]),
                     },
+                    df=df,
                 )
             except Exception as exc:
                 log.debug(f"Prefetch {ticker}: {exc}")
@@ -3195,6 +3198,16 @@ class ScalperRunner:
         cost = shares * fill_px * (1 + self.cfg.TRANSACTION_COST_PCT)
         self.bot_cash -= cost
         opened_at = time.time()
+        vision_read = ""
+        if self.ai_commander:
+            try:
+                vision_read = self.ai_commander.chart_read_for(
+                    ticker, fill_px,
+                    float(getattr(self, "_last_spike_ratio", 1.0)),
+                    float(getattr(self, "_last_scan_score", 0.0)),
+                )
+            except Exception:
+                pass
         slot = {
             "shares": float(shares),
             "entry_price": fill_px,
@@ -3211,6 +3224,7 @@ class ScalperRunner:
             "last_position_pulse": 0.0,
             "last_ai_position_manage": 0.0,
             "last_stagnation_decision": {},
+            "vision_read": vision_read[:800],
         }
         self._position_slots[ticker] = slot
         if self.bracket_handle:
