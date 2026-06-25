@@ -446,6 +446,12 @@ class BotConfig:
         "1", "true", "yes",
     )
     IB_SCANNER_WARMUP_SEC: float = float(os.getenv("IB_SCANNER_WARMUP_SEC", "3"))
+    PAPER_REALTIME_BARS_ONLY: bool = os.getenv("PAPER_REALTIME_BARS_ONLY", "true").lower() not in (
+        "0", "false", "no",
+    )
+    PAPER_USE_HISTORICAL_BARS: bool = os.getenv("PAPER_USE_HISTORICAL_BARS", "true").lower() not in (
+        "0", "false", "no",
+    )
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30
     FAST_SCAN_ENABLED: bool = True
@@ -969,3 +975,5 @@ class BotConfig:
     def __post_init__(self) -> None:
         from core.ram_tier import apply_ram_tier_to_config
         apply_ram_tier_to_config(self)
+        if self.PAPER_TRADING and os.getenv("USE_TICK_STREAM") is None:
+            self.USE_TICK_STREAM = False

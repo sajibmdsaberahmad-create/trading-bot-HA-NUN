@@ -278,6 +278,8 @@ def apply_micro_spike_boost(
 
 def skip_historical_prefetch(cfg: BotConfig) -> bool:
     """Fast lock uses live stream bars — avoid HMDS 162 on OTC names."""
+    if getattr(cfg, "PAPER_TRADING", False) and getattr(cfg, "PAPER_USE_HISTORICAL_BARS", True):
+        return False
     return ai_fast_execution(cfg) and bool(getattr(cfg, "FAST_LOCK_SKIP_HISTORICAL", True))
 
 
@@ -310,7 +312,11 @@ def assign_stream_modes(
     """
     held_u = {str(t).upper() for t in (held or set())}
     denied = {str(t).upper() for t in (tick_denied or set())}
-    tick_budget = tick_stream_count(cfg)
+    paper_rt_only = bool(
+        getattr(cfg, "PAPER_TRADING", False)
+        and getattr(cfg, "PAPER_REALTIME_BARS_ONLY", True)
+    )
+    tick_budget = 0 if paper_rt_only else tick_stream_count(cfg)
     rt_budget = max_realtime_bar_streams(cfg)
     modes: dict = {}
     tick_used = 0
