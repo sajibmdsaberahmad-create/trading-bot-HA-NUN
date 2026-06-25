@@ -2782,3 +2782,67 @@ The trade closed with an exit for BitO at 100% profit and a hold period of 47.5 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.6 (When an exit is triggered, it's crucial to increase the confidence level of the trade.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:52:56.313895+00:00
+The trade was triggered by a loss streak in the 'GDC' ticker.
+The event is related to a spike top intrabar, which occurred at +0.75% vol.
+• 1
+• .
+•  
+• M
+• a
+• i
+• n
+• t
+• a
+• i
+• n
+•  
+• a
+•  
+• c
+• o
+• n
+• s
+• e
+• r
+• v
+• a
+• t
+• i
+• v
+• e
+•  
+• r
+• i
+• s
+• k
+•  
+• m
+• a
+• n
+• a
+• g
+• e
+• m
+• e
+• n
+• t
+•  
+• a
+• p
+• p
+• r
+• o
+• a
+• c
+• h
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold to prevent frequent losses.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:53:00.201572+00:00
+Trade closed with negative profit of -0.12 USD per transaction.
+The trade was executed at a volume of 56,025 x, and the trader noted that the spike-top intrabar gain was +0.75% vol = 56,025.0x.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was set too high, indicating that the trade was likely profitable.)
+

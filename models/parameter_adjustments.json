@@ -1,8 +1,8 @@
 {
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.6,
-    "reason": "When an exit is triggered, it's crucial to increase the confidence level of the trade.",
+    "value": 0.58,
+    "reason": "The confidence threshold was set too high, indicating that the trade was likely profitable.",
     "ok": true,
     "msg": "applied"
   }
