@@ -101,10 +101,12 @@
     "Adaptively adjust your trade signals based on recent losses and confirmations.",
     "Consider implementing multi-timeframe algorithms for better risk management.",
     "Enhance your understanding of the market's dynamics and use it to make more informed decisions.",
-    "Commander: The council_timeout event indicates that there was a scanner spike after a timeout in the live trading session."
+    "Commander: The council_timeout event indicates that there was a scanner spike after a timeout in the live trading session.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Scanner spikes are indicative of increased risk.'}",
+    "Commander: The root cause is likely an increase in scanner spikes after timeout, which could indicate a potential risk factor. The algorithm needs to adjust its parameters to account for this spike."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": \"The live account state suggests a high volume and high trading volume, which could indicate potential momentum or scalping opportunities.\",\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1022454.45,\n  \"available_cash\": 1022454.45,\n  \"position_value\": 0.0,\n  \"nav\": 1013.47,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 2,\n  \"top_pick\": \"MUZ\",\n  \"top_score\": 76.2,\n  \"next_best\": \"QCMD\",\n  \"next_be",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": 0.98,\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1022413.01,\n  \"available_cash\": 1022413.01,\n  \"position_value\": 0.0,\n  \"nav\": 1013.47,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 2,\n  \"top_pick\": \"QCMD\",\n  \"top_score\": 52.0,\n  \"next_best\": \"QCMD\",\n  \"next_best_score\": 346.7\n}\n```",
   "market_belief": {},
   "trades_observed": 3,
-  "updated": "2026-06-25T09:36:25.276760"
+  "updated": "2026-06-25T09:47:01.981962"
 }

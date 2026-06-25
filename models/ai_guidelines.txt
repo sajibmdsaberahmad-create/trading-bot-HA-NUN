@@ -253,3 +253,10 @@ The council_timeout event indicates that there was a scanner spike after a timeo
 Observed council_timeout — recorded for learning.
 Scanner+spike after timeout: score=52 vol=6.7x | ATR R:R 2.0
 
+🧭 COMMANDER LEARNING | 2026-06-25T09:47:02.010317+00:00
+The council_timeout event occurred, which suggests a spike in the scanner during the timeout.
+The root cause is likely an increase in scanner spikes after timeout, which could indicate a potential risk factor. The algorithm needs to adjust its parameters to account for this spike.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusting the CONFIDENCE_THRESHOLD to account for scanner spikes.)
+  - ENTRY_FILL_MAX_WAIT_SEC → 45.0 (Increasing the maximum wait time between entries.)
+

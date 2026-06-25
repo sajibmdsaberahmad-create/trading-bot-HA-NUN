@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 72,
+  "improvements_applied": 73,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5525,6 +5525,35 @@
         "applied": [],
         "lessons": [
           "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:47:01.984463",
+      "age": "3d 22h 44m 13s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #73",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council_timeout event occurred, which suggests a spike in the scanner during the timeout.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusting the CONFIDENCE_THRESHOLD to account for scanner spikes.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "ENTRY_FILL_MAX_WAIT_SEC",
+            "value": 45.0,
+            "reason": "Increasing the maximum wait time between entries.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Scanner spikes are indicative of increased risk.'}"
         ]
       }
     }
