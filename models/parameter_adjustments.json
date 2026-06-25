@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "Decreasing the confidence threshold to 58% could help in avoiding future missed profit hunts.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

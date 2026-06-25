@@ -3617,5 +3617,22 @@
       "Use live IB bars to track volatility and adjust strategies accordingly.",
       "Implement momentum trades based on market data."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:39:11.116077+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Decreasing the confidence threshold to 58% could help in avoiding future missed profit hunts.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trader closed the trade after trailing profit, and it did not recur.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"The trader's confidence level was lower than expected, leading to a missed profit hunt.\"}"
+    ]
   }
 ]

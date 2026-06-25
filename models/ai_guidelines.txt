@@ -2265,3 +2265,9 @@ bracket_exit
 Trade closed with a profit exit and high volume.
 The trade was executed with a profit exit (exit_type: 'profit_exit') and had a significant positive pnl ($80,016.3). The reason for the event is that it ended at an intrabar spike and volatility.
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:39:11.115515+00:00
+The trader closed the trade after trailing profit, and it did not recur.
+The trader is using a simple trailing profit strategy with no specific parameters or logic in place. The event likely occurred due to market conditions that prevent the algorithm from repeating this pattern.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Decreasing the confidence threshold to 58% could help in avoiding future missed profit hunts.)
+
