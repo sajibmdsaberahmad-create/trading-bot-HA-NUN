@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 103,
+  "improvements_applied": 105,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6411,6 +6411,34 @@
         "lessons": [
           "Maintaining a wide range of parameters",
           "Using advanced algorithms like PPO for robust optimization"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:02:30.587097",
+      "age": "4d 0h 59m 41s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #105",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on PBK"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:02:30.587215",
+      "age": "4d 0h 59m 41s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #105",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PBK"
         ]
       }
     }
