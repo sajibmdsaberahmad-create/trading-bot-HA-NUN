@@ -1,6 +1,6 @@
 {
-  "mood": "in rhythm",
-  "mood_message": "Win streak 5 \u00b7 recent $+228640.21. Riding what works, not forcing size.",
+  "mood": "steady",
+  "mood_message": "Mixed session \u00b7 $+229386.08. Watching for cleaner setups.",
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
@@ -105,8 +105,8 @@
     "Review trade_closed on NEXR",
     "Commander: spike_top_exit: +0.58% vol=2.1x"
   ],
-  "last_thought": "```json\n{\n  \"event\": \"trade\",\n  \"ticker\": \"SOXS\",\n  \"entry\": 0.8852,\n  \"exit\": 0.8852,\n  \"entry_fill\": 0.8852,\n  \"exit_fill\": 0.8852,\n  \"quote_entry\": 0.8852,\n  \"quote_exit\": 3.6,\n  \"shares\": 13630.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"loss\",\n  \"exit_reason\": \"bracket_exit\",\n  \"entry_slippage_pct\": -0.756821,\n  \"exit_slippage_pct\": -0.754119,\n  \"limit_px\": 3.64,\n  \"entry_mode\": \"limit_smart\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 62.9,\n  \"peak\": 3.61,\n  \"stop\": 3.573,\n  \"target\": 4.",
+  "last_thought": "```json\n{\n    \"raw_prompt\": \"Write a trade journal entry for the NEXR trade:\\n{\\\"ticker\\\": \\\"TZA\\\", \\\"entry\\\": 0.8852, \\\"exit\\\": 0.8852, \\\"entry_fill\\\": 0.8852, \\\"exit_fill\\\": 0.8852, \\\"quote_entry\\\": 0.8852, \\\"quote_exit\\\": 3.86, \\\"shares\\\": 15870.0, \\\"pnl_usd\\\": -4.96, \\\"pnl_pct\\\": -4.97, \\\"result\\\": \\\"profit\\\", \\\"exit_reason\\\": \\\"hard TP to NOK 14:20 waves\\\", \\\"entry_slippage_pct\\\": 0.358398, \\\"exit_slippage_pct\\\": 0.301602, \\\"limit_px\\\": 3.92, \\\"entry_mode\\\": \\\"limit_smart\\\", \\\"regime\\\": \\\"s",
   "market_belief": {},
-  "trades_observed": 92,
-  "updated": "2026-06-25T17:23:38.872366"
+  "trades_observed": 95,
+  "updated": "2026-06-25T17:26:38.484327"
 }

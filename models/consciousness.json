@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 105,
   "training_sessions": 27,
-  "trades_observed": 96,
+  "trades_observed": 97,
   "scans_performed": 27,
-  "improvements_applied": 264,
+  "improvements_applied": 265,
   "reports_generated": 26,
   "event_log": [
     {
@@ -13674,6 +13674,27 @@
           "Review trade_closed on NEXR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T17:26:17.756397",
+      "age": "4d 6h 23m 29s",
+      "type": "TRADE",
+      "message": "Observed trade: GDC ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:26:29.896614",
+      "age": "4d 6h 23m 41s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #265",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GDC"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T16:37:32.647905",
@@ -14959,7 +14980,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "confident",
+  "mood": "concrete",
   "total_pnl": 132987.71,
   "win_history": [
     0.0,
@@ -15057,20 +15078,21 @@
     0.0,
     98688.34,
     17300.06,
-    55.68
+    55.68,
+    0.0
   ],
-  "consecutive_wins": 3,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 12,
-  "veteran_xp": 1370,
+  "veteran_xp": 1380,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 71,
+    "exit_timing": 72,
     "risk_management": 26,
     "entry_timing": 40
   },
-  "flights_completed": 91,
-  "hours_flown": 9.099999999999984,
+  "flights_completed": 92,
+  "hours_flown": 9.199999999999983,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15087,7 +15109,7 @@
     "KUS": 2,
     "XCH": 1,
     "TZA": 10,
-    "GDC": 9,
+    "GDC": 10,
     "SOX": 7,
     "BIT": 8,
     "GPU": 12
@@ -15097,5 +15119,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I'm feeling confident in my strategy today."
+  "mood_message": "Last trade success at a high point of $986,883.40; close with a win rate of 30%."
 }

@@ -3724,3 +3724,7 @@ spike_top_exit: +0.52% vol=1.6x
 Observed trade_closed — recorded for learning.
 spike_top_exit: +0.58% vol=2.1x
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:26:29.920138+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+
