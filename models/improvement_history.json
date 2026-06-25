@@ -225,5 +225,29 @@
     "lessons": [
       "Review loss_streak on PBK"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T12:05:33.967393+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "MAX_CONCURRENT_POSITIONS": {
+        "param": "MAX_CONCURRENT_POSITIONS",
+        "value": 1,
+        "reason": "This limit helps manage concurrent positions without becoming overly sensitive to single trades.",
+        "ok": true,
+        "msg": "applied"
+      },
+      "LOCKED_SPIKE_MIN_RATIO": {
+        "param": "LOCKED_SPIKE_MIN_RATIO",
+        "value": 1.05,
+        "reason": "The minimum ratio for the locked spike is too conservative, as it can lead to unnecessary risk-taking if not controlled properly.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout occurred, which triggered a scanner spike after an expected timeout.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold indicates that if a scan fails, it can cause significant volatility.'}"
+    ]
   }
 ]

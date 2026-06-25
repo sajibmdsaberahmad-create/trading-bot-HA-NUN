@@ -4,8 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'To avoid such events in the future.'}",
-    "Commander: The council_timeout event indicates that the scanner + spike occurred after a timeout, and it should be fixed to prevent it from happening again.",
     "{'param': 'confidence_threshold', 'value': 0.58, 'reason': \"The algorithm needs to adjust its confidence threshold so it doesn't trigger a timeout event again.\"}",
     "Review trade_closed on IBX",
     "Commander: win:council_exit: Ollama exit 96% (PPO hold)",
@@ -103,10 +101,12 @@
     "-",
     "M",
     "Commander: The trade was closed with a loss and resulted in a negative profit of -25.909064999999973.",
-    "Commander: council_risk: hard_stop"
+    "Commander: council_risk: hard_stop",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold indicates that if a scan fails, it can cause significant volatility.'}",
+    "Commander: Scanning and spikes are common issues in the trading environment."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": \"The trader is likely experiencing high risk for a limited time window and may be considering a hard stop to mitigate losses.\",\n  \"entry\": -25.91,\n  \"exit\": -3.69,\n  \"shares\": 855.0,\n  \"pnl_usd\": -25.91,\n  \"pnl_pct\": -3.69,\n  \"result\": \"loss\",\n  \"exit_reason\": \"council_risk: hard_stop\"\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": \"The account is currently in a high-risk, low-reward state with a scanner that shows the highest volume for all three indicators (HOT_BY_VOLUME#0, HOT_BY_VOLUME#1, HOT_BY_VOLUME#2). The current top score is 78.4, and the next best trade is from KUST with a price of 0.0, which scored 96.0.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 14,
-  "updated": "2026-06-25T12:04:38.177891"
+  "updated": "2026-06-25T12:05:33.937821"
 }

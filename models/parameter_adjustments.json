@@ -1,1 +1,16 @@
-{}
+{
+  "MAX_CONCURRENT_POSITIONS": {
+    "param": "MAX_CONCURRENT_POSITIONS",
+    "value": 1,
+    "reason": "This limit helps manage concurrent positions without becoming overly sensitive to single trades.",
+    "ok": true,
+    "msg": "applied"
+  },
+  "LOCKED_SPIKE_MIN_RATIO": {
+    "param": "LOCKED_SPIKE_MIN_RATIO",
+    "value": 1.05,
+    "reason": "The minimum ratio for the locked spike is too conservative, as it can lead to unnecessary risk-taking if not controlled properly.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

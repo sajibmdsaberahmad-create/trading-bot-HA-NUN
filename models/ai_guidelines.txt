@@ -521,3 +521,10 @@ The trade was closed with a loss and resulted in a negative profit of -25.909064
 Observed loss_streak — recorded for learning.
 council_risk: hard_stop
 
+🧭 COMMANDER LEARNING | 2026-06-25T12:05:33.966944+00:00
+The council timeout occurred, which triggered a scanner spike after an expected timeout.
+Scanning and spikes are common issues in the trading environment.
+• Applied mutations:
+  - MAX_CONCURRENT_POSITIONS → 1 (This limit helps manage concurrent positions without becoming overly sensitive to single trades.)
+  - LOCKED_SPIKE_MIN_RATIO → 1.05 (The minimum ratio for the locked spike is too conservative, as it can lead to unnecessary risk-taking if not controlled properly.)
+
