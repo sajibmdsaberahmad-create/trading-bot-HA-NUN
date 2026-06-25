@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "The algorithm believes the market is in a high risk environment, leading to higher confidence in profit.",
+    "reason": "Market data was unreliable, leading to a low confidence threshold of 0.58.",
     "ok": true,
     "msg": "applied"
   }
