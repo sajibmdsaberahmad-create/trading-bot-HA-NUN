@@ -1,7 +1,7 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 25% \u00b7 $-33.82. Preserving capital over action.",
-  "confidence": 0.6500000000000001,
+  "mood": "recalibrating",
+  "mood_message": "Four losses in a row ($-33.83 recent). Tightening entries until edge returns.",
+  "confidence": 0.6200000000000001,
   "mode": "autonomous",
   "learned_lessons": [
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithmic parameters have been reset to reduce risk.'}",
@@ -105,8 +105,8 @@
     "w",
     "Commander: Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be cautious around this."
   ],
-  "last_thought": "```json\n{\n  \"trade_action\": \"sell\",\n  \"entry_price\": 1.3099,\n  \"exit_price\": 1.33,\n  \"shares\": 10.0,\n  \"pnl_usd\": -0.2,\n  \"pnl_pct\": -1.51,\n  \"result\": \"loss\",\n  \"entry_reason\": \"stop_breach\"\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"trade_decision\": {\n    \"action\": \"hunting\",\n    \"target\": \"MIMI\",\n    \"volume\": 93.8,\n    \"profit_target\": {\n      \"amount\": 121.1,\n      \"type\": \"hot_by_volume\"\n    },\n    \"strategy\": \"single_bar_momentum + volume = take profit into MIMI.\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-25T14:38:34.814572"
+  "trades_observed": 5,
+  "updated": "2026-06-25T14:44:25.814098"
 }
