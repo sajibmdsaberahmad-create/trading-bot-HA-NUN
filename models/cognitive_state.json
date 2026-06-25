@@ -4,11 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "v",
-    "-",
-    "M",
-    "Commander: The trade was closed with a loss and resulted in a negative profit of -25.909064999999973.",
-    "Commander: council_risk: hard_stop",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold indicates that if a scan fails, it can cause significant volatility.'}",
     "Commander: Scanning and spikes are common issues in the trading environment.",
     "The algorithm should be more aware of alignment and consider using multi-timeframe indicators to improve its ability to identify potential market moves.",
@@ -103,10 +98,15 @@
     "Review council_timeout on TECH",
     "Commander: Scanner+spike after timeout: score=54 vol=2.3x | ATR R:R 2.0",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We have a high value of 0.58, which indicates that we want a low confidence threshold for the scanner spike.'}",
-    "Commander: The council timeout event suggests that the trading algorithm is handling a spike in the scan pipeline. We need to tighten the risk and adjust the parameters accordingly."
+    "Commander: The council timeout event suggests that the trading algorithm is handling a spike in the scan pipeline. We need to tighten the risk and adjust the parameters accordingly.",
+    "1",
+    "z",
+    "f",
+    "k",
+    "Commander: The council timeout indicates that the scan or scanner was not successful during a specified period of time. It suggests a potential issue with data processing or scanning methods."
   ],
-  "last_thought": "```json\n{\n    \"gut_feel\": 1,\n    \"intuition\": 1,\n    \"analysis\": {\n        \"account_equity\": 1014738.19,\n        \"available_cash\": 1014738.19,\n        \"position_value\": 0.0,\n        \"nav\": 1000.0,\n        \"deployed_pct\": 0.0,\n        \"current_ticker\": \"NONE\",\n        \"position\": \"NONE\",\n        \"win_rate\": 0.0,\n        \"trades_today\": 0,\n        \"top_pick\": \"FMFC\",\n        \"top_score\": 49.8,\n        \"next_best\": null,\n        \"next_best_score\": 0.0,\n        \"scan_results\": [\n            {\n      ",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.7,\n  \"trade_decisions\": [\n    {\n      \"event\": \"scan_results\",\n      \"action\": \"single_bar\",\n      \"type\": \"take_profit_into\"\n    },\n    {\n      \"event\": \"scan_results\",\n      \"action\": \"extended_hours\",\n      \"type\": \"sell_into\"\n    }\n  ]\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T13:17:51.067249"
+  "updated": "2026-06-25T13:24:55.460314"
 }

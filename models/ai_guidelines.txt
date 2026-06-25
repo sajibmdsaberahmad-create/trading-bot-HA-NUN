@@ -996,3 +996,91 @@ The council timeout event suggests that the trading algorithm is handling a spik
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Setting the confidence threshold to 0.58 will help us increase the risk tolerance of the algorithm.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:24:55.476229+00:00
+Council timeout occurred on WAVE, scanner timeout triggered.
+The council timeout indicates that the scan or scanner was not successful during a specified period of time. It suggests a potential issue with data processing or scanning methods.
+• 1
+• .
+•  
+• I
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• t
+• o
+•  
+• i
+• m
+• p
+• r
+• o
+• v
+• e
+•  
+• s
+• c
+• a
+• n
+•  
+• r
+• e
+• l
+• i
+• a
+• b
+• i
+• l
+• i
+• t
+• y
+•  
+• i
+• n
+•  
+• f
+• u
+• t
+• u
+• r
+• e
+•  
+• e
+• v
+• e
+• n
+• t
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold can help mitigate unexpected scanner timeouts.)
+

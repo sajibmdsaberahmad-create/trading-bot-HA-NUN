@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Setting the confidence threshold to 0.58 will help us increase the risk tolerance of the algorithm.",
+    "reason": "Increased confidence threshold can help mitigate unexpected scanner timeouts.",
     "ok": true,
     "msg": "applied"
   }
