@@ -529,16 +529,18 @@ class BotConfig:
         default_factory=lambda: os.getenv("OLLAMA_ENABLED", "true").lower() in ("1", "true", "yes")
     )
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-    OLLAMA_MEMORY_BUDGET_MB: int = int(os.getenv("OLLAMA_MEMORY_BUDGET_MB", "2560"))
+    OLLAMA_MEMORY_BUDGET_MB: int = int(os.getenv(
+        "OLLAMA_MEMORY_BUDGET_MB", "2048" if _8GB_RAM else ("2560" if _LOW_RAM else "3072")
+    ))
     OLLAMA_MODEL: str = os.getenv(
         "OLLAMA_MODEL",
-        "qwen2.5:3b" if _LOW_RAM else "llama3",
+        "qwen2.5:1.5b" if _8GB_RAM else ("qwen2.5:3b" if _LOW_RAM else "llama3"),
     )
-    OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "20"))
-    OLLAMA_MAX_TOKENS: int = int(os.getenv("OLLAMA_MAX_TOKENS", "256" if _LOW_RAM else "384"))
+    OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "12" if _LOW_RAM else "20"))
+    OLLAMA_MAX_TOKENS: int = int(os.getenv("OLLAMA_MAX_TOKENS", "192" if _LOW_RAM else "384"))
     OLLAMA_TEMPERATURE: float = float(os.getenv("OLLAMA_TEMPERATURE", "0.7"))
-    OLLAMA_KEEP_ALIVE: int = int(os.getenv("OLLAMA_KEEP_ALIVE", "600"))  # keep warm 10 min
-    OLLAMA_NUM_CTX: int = int(os.getenv("OLLAMA_NUM_CTX", "2048" if _LOW_RAM else "4096"))
+    OLLAMA_KEEP_ALIVE: int = int(os.getenv("OLLAMA_KEEP_ALIVE", "300" if _LOW_RAM else "600"))
+    OLLAMA_NUM_CTX: int = int(os.getenv("OLLAMA_NUM_CTX", "1536" if _LOW_RAM else "4096"))
     OLLAMA_MIN_CALL_INTERVAL_SEC: float = float(os.getenv("OLLAMA_MIN_CALL_INTERVAL_SEC", "1"))
     OLLAMA_UNLOAD_AFTER_CALL: bool = os.getenv("OLLAMA_UNLOAD_AFTER_CALL", "false").lower() in ("1", "true", "yes")
     OLLAMA_MIN_FREE_RAM_MB: int = int(os.getenv("OLLAMA_MIN_FREE_RAM_MB", "1024"))

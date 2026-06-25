@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import logging
+import shutil
 from typing import Optional
 
 logger = logging.getLogger("MEMORY_GUARD")
@@ -85,20 +86,49 @@ def should_allow_ollama_notify(cfg) -> tuple[bool, str]:
     return True, "ok"
 
 
+def should_allow_chart_vision(cfg) -> tuple[bool, str]:
+    """llava is heavy — skip when RAM is tight or disabled."""
+    if not getattr(cfg, "LIVE_CHART_VISION_ENABLED", True):
+        return False, "disabled"
+    if not getattr(cfg, "OLLAMA_ENABLED", False):
+        return False, "ollama_disabled"
+    avail = available_ram_mb()
+    if is_low_ram_machine() and avail < 1600:
+        return False, f"low_ram_{avail}mb"
+    return True, "ok"
+
+
+def unload_heavy_ollama_models() -> None:
+    """Free RAM — stop vision + oversized text models (disk copies remain)."""
+    if not shutil.which("ollama"):
+        return
+    import subprocess
+
+    for model in (
+        "llava", "llava:7b", "llama3", "llama3.2:3b", "qwen2.5:3b",
+        "phi3:mini", "moondream",
+    ):
+        try:
+            subprocess.run(
+                ["ollama", "stop", model],
+                capture_output=True,
+                timeout=8,
+            )
+        except Exception:
+            pass
+
+
 def should_allow_ollama(cfg) -> tuple[bool, str]:
     """Return (allowed, reason)."""
     if not getattr(cfg, "OLLAMA_ENABLED", False):
         return False, "ollama_disabled"
     if not getattr(cfg, "GENERATIVE_THINKING_ENABLED", True):
         return False, "generative_disabled"
-    # Reserve OLLAMA_MEMORY_BUDGET_MB for the model; only block when OS+bot would starve
     budget = int(getattr(cfg, "OLLAMA_MEMORY_BUDGET_MB", 2560))
     min_free = int(getattr(cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024))
     avail = available_ram_mb()
-    # Hard floor: never call if critically low
     if avail < min_free:
         return False, f"critical_ram_{avail}mb"
-    # Soft check: need budget + min_free headroom (approximate)
     if avail < budget + min_free and getattr(cfg, "OLLAMA_UNLOAD_AFTER_CALL", False):
         return False, f"budget_wait_{avail}mb_need_{budget + min_free}mb"
     return True, "ok"

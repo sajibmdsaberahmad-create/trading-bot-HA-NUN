@@ -136,6 +136,12 @@ class ChartVisionLine:
     ) -> bool:
         if not getattr(self.cfg, "LIVE_CHART_VISION_ENABLED", True):
             return False
+        from core.memory_guard import should_allow_chart_vision
+
+        allowed, reason = should_allow_chart_vision(self.cfg)
+        if not allowed:
+            log.debug(f"ChartVision skip {ticker}: {reason}")
+            return False
         min_score = float(getattr(self.cfg, "LIVE_CHART_VISION_MIN_SCORE", 65.0))
         if scan_score < min_score:
             return False

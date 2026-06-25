@@ -50,7 +50,7 @@ from core.pilot_experience import PilotExperienceSystem, pilot_experience_to_git
 from core.pattern_memory_bank import PatternMemoryBank, pattern_memory_to_git
 from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary, push_model_release, sync_all_learning_artifacts, push_full_shutdown_sync, push_learning_checkpoint_async
-from core.local_cleanup import cleanup_local_workspace
+from core.local_cleanup import cleanup_local_workspace, run_periodic_cleanup
 from core.async_utils import get_background_worker, AtomicFileWriter
 from core.feature_drift import validate_features_at_startup
 from core.train_subprocess import launch_training

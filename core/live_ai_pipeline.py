@@ -331,6 +331,23 @@ def merge_entry_decision(
             base["reason"] = "Council timeout — no aligned signal"
         return base
 
+    if ollama_status == "scanner_fast":
+        if spike_ratio >= 1.25 and scan_score >= 75:
+            base.update({
+                "enter": True,
+                "pending": False,
+                "confidence": max(ppo_conf, 0.58, min(scan_score / 100.0, 0.85)),
+                "pipeline": "council:scanner_fast",
+                "reason": (
+                    f"Fast scanner lead (Ollama slow): score={scan_score:.0f} "
+                    f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%}"
+                )[:200],
+            })
+        else:
+            base["pipeline"] = "council:scanner_fast_pass"
+            base["reason"] = "Scanner fast-path: signal not strong enough"
+        return base
+
     if ollama_status == "fresh" and ollama:
         o_enter = bool(ollama.get("enter", ppo_buy))
         o_conf = float(ollama.get("confidence", ppo_conf) or ppo_conf)

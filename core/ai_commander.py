@@ -791,8 +791,22 @@ class AICommander:
         status = live.get("status", "missing")
         parsed = live.get("parsed") or {}
         age = time.time() - float(state.get("started_at", time.time()))
+        in_flight_age = float(live.get("age_sec", 0) or 0)
         max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
-        if status != "fresh" and age > max_wait:
+        fast_sec = float(getattr(self.cfg, "COUNCIL_SCANNER_FAST_SEC", 8.0))
+        fast_score = float(getattr(self.cfg, "COUNCIL_SCANNER_FAST_MIN_SCORE", 78.0))
+        fast_spike = float(getattr(self.cfg, "COUNCIL_SCANNER_FAST_MIN_SPIKE", 1.25))
+        scan_score = float(state.get("scan_score", 0))
+        spike_ratio = float(state.get("spike_ratio", 1.0))
+        if (
+            status in ("in_flight", "missing", "empty")
+            and max(in_flight_age, age) >= fast_sec
+            and scan_score >= fast_score
+            and spike_ratio >= fast_spike
+        ):
+            status = "scanner_fast"
+            parsed = {}
+        elif status != "fresh" and age > max_wait:
             status = "timeout"
             parsed = {}
         merged = merge_entry_decision(
