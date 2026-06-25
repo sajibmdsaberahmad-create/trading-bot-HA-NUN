@@ -134,6 +134,54 @@ def _parse_plan_json(raw: str) -> Dict[str, Any]:
         return {}
 
 
+def generate_runtime_event_plan(
+    cfg: BotConfig,
+    context: Dict[str, Any],
+    think_fn: Callable[[str], str],
+) -> Dict[str, Any]:
+    """5W real-time diagnosis → mutations + lessons (same JSON shape as commander plan)."""
+    from core.paper_mode import is_paper_free_learning
+
+    bounds_text = format_bounds_for_prompt(cfg, 30)
+    allowed = ", ".join(tunable_param_names(cfg)[:20])
+    event = context.get("runtime_event", "event")
+    detail = context.get("runtime_detail", {})
+    paper = (
+        "PAPER FREE LEARNING — apply fixes aggressively within bounds.\n"
+        if is_paper_free_learning(cfg) else ""
+    )
+    prompt = (
+        "You are HANOON pilot AI — live self-correction loop watching the trading algo.\n"
+        f"{paper}"
+        "A runtime event just occurred. Use rigorous 5W reasoning:\n"
+        "  WHY did this happen? (root cause)\n"
+        "  WHEN does it tend to occur? (session, regime)\n"
+        "  HOW should the algo change? (params, logic hints)\n"
+        "  WHAT prevents recurrence? (concrete mutations)\n\n"
+        f"EVENT: {event}\n"
+        f"DETAIL:\n{json.dumps(detail, default=str)[:1500]}\n\n"
+        f"TRIGGER:\n{context.get('trigger', '')[:800]}\n\n"
+        f"SESSION:\n{json.dumps({k: context[k] for k in ('day_summary', 'live', 'buffer_stats', 'market_state') if k in context}, default=str)[:1200]}\n\n"
+        f"BOUNDS:\n{bounds_text}\n"
+        f"TUNABLE: {allowed}\n\n"
+        "Respond ONLY JSON:\n"
+        '{"summary":"...","understanding":"...","lessons":["..."],'
+        '"mutations":[{"param":"CONFIDENCE_THRESHOLD","value":0.58,"reason":"..."}],'
+        '"guidelines":["..."]}'
+    )
+    raw = think_fn(prompt)
+    parsed = _parse_plan_json(raw)
+    if parsed:
+        return parsed
+    return {
+        "summary": f"Observed {event} — recorded for learning.",
+        "understanding": str(detail.get("reason", ""))[:200],
+        "lessons": [f"Review {event} on {detail.get('ticker', '?')}"],
+        "mutations": [],
+        "guidelines": [],
+    }
+
+
 def generate_commander_plan(
     cfg: BotConfig,
     context: Dict[str, Any],
