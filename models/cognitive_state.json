@@ -4,9 +4,6 @@
   "confidence": 0.6100000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Integrate advanced scanning techniques to improve system response time and reduce timeouts.",
-    "Adaptively adjust your trade signals based on recent losses and confirmations.",
-    "Consider implementing multi-timeframe algorithms for better risk management.",
     "Enhance your understanding of the market's dynamics and use it to make more informed decisions.",
     "Commander: The council_timeout event indicates that there was a scanner spike after a timeout in the live trading session.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Scanner spikes are indicative of increased risk.'}",
@@ -103,10 +100,13 @@
     "f",
     "x",
     "k",
-    "Commander: Root cause: The scanner spike triggered by a timeout event."
+    "Commander: Root cause: The scanner spike triggered by a timeout event.",
+    "Maintaining a wide range of parameters",
+    "Using advanced algorithms like PPO for robust optimization",
+    "Commander: The algorithm is learning from the recent trade outcomes, but it's experiencing a sudden spike in scanner momentum that requires adjustment. The strategy should focus on maintaining a wide range of parameters and using advanced algorithms l"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0,\n  \"intuition\": \"The trade closed on KUST with a high closing price of 0.0, indicating strong volume and potential for the market to move up quickly.\",\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1017004.0,\n  \"available_cash\": 1017004.0,\n  \"position_value\": 0.0,\n  \"nav\": 1552.08,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 10,\n  \"top_pick\": \"IWMW\",\n  \"top_score\": 80.6,\n  \"next_best\": \"BRAG\",\n  \"next_best_scor",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": \"The scanner spike triggered by a timeout event suggests that the account is experiencing a high volume environment, likely due to trading in a fast-moving market. The other signals indicate that the account has potential for gains but also carries higher risk.\",\n  \"trade_decisions\": {\n    \"enter\": \"If this indicates an opportunity for positive momentum and growth, enter into the trade with caution.\",\n    \"skip\": \"Avoid entering if no clear signal is pre",
   "market_belief": {},
   "trades_observed": 12,
-  "updated": "2026-06-25T11:56:07.865909"
+  "updated": "2026-06-25T12:01:21.929552"
 }

@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 102,
+  "improvements_applied": 103,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6381,6 +6381,36 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on KUST"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:01:21.933257",
+      "age": "4d 0h 58m 33s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #103",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Scalping on council timeout event.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The algorithm should focus on maintaining a wide range of parameters and using advanced algorithms to avoid unnecessary risk.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5199999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Maintaining a wide range of parameters",
+          "Using advanced algorithms like PPO for robust optimization"
         ]
       }
     }
