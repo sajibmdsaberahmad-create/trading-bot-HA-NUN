@@ -348,5 +348,19 @@
     "first_seen": "2026-06-25T14:20:07.070654+00:00",
     "last_seen": "2026-06-25T14:20:07.070662+00:00",
     "source": "ib_error"
+  },
+  "TMPOQ": {
+    "ticker": "TMPOQ",
+    "failures": 1,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:HMDS query returned no data: TMPOQ@SMART Trades",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "PINK",
+    "skip_until": 1782403758.4034612,
+    "skip_until_iso": "2026-06-25T16:09:18.403461+00:00",
+    "first_seen": "2026-06-25T16:04:18.404875+00:00",
+    "last_seen": "2026-06-25T16:04:18.404883+00:00",
+    "source": "ib_error"
   }
 }
