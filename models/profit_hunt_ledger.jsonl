@@ -122,3 +122,4 @@
 {"timestamp":"2026-06-25T17:31:35.800435+00:00","event":"trailing_stop","ticker":"GPUS","pnl_usd":199.56,"pnl_pct":12.5985,"primary_goal":true,"reason":"trailing_stop","price":0.1795}
 {"timestamp":"2026-06-25T17:31:56.039675+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":24043.25,"pnl_pct":270.9697,"primary_goal":true,"reason":"trailing_profit","price":3.59}
 {"timestamp":"2026-06-25T17:32:12.932722+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:33:26.714733+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":-0.36,"pnl_pct":-0.0227,"primary_goal":true,"reason":"trailing_profit","price":0.0129}

@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 104,
   "scans_performed": 27,
-  "improvements_applied": 272,
+  "improvements_applied": 273,
   "reports_generated": 26,
   "event_log": [
     {
@@ -13976,6 +13976,20 @@
       "type": "TRADE",
       "message": "Observed trade: GDC ? P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:33:02.465382",
+      "age": "4d 6h 30m 13s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #273",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GDC"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T17:27:08.460533",

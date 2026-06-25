@@ -3876,3 +3876,7 @@ The trade was executed with an exit type of 'stop_hit' and the margin system is 
 Observed trade_closed — recorded for learning.
 stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:33:02.483907+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+

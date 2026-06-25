@@ -108,5 +108,5 @@
   "last_thought": "```json\n{\n  \"trade_time\": 14,\n  \"trade_type\": \"open\",\n  \"entry_mode\": \"limit_penny\",\n  \"profit_loss\": {\n    \"result\": \"loss\",\n    \"net_profit\": -0.0738,\n    \"net_loss\": -0.0738\n  },\n  \"margin_system\": {\n    \"active\": true,\n    \"close_margin\": false,\n    \"hold_sec\": 125.9,\n    \"profit_target\": 1.268,\n    \"hold_duration\": 46.0,\n    \"hold_slippage_pct\": 0.007634\n  },\n  \"margin_system_type\": \"hard\",\n  \"trade_status\": {\n    \"status\": \"open\",\n    \"is_trade\": true,\n    \"exit_reason\": \"bracket_exit\"\n  }",
   "market_belief": {},
   "trades_observed": 14,
-  "updated": "2026-06-25T17:32:50.698995"
+  "updated": "2026-06-25T17:33:02.465080"
 }
