@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 105,
   "training_sessions": 27,
-  "trades_observed": 86,
+  "trades_observed": 93,
   "scans_performed": 27,
-  "improvements_applied": 251,
+  "improvements_applied": 260,
   "reports_generated": 26,
   "event_log": [
     {
@@ -13269,6 +13269,334 @@
       "type": "TRADE",
       "message": "Observed trade: NEXR ? P&L=$+11.83",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:13:48.145399",
+      "age": "4d 6h 10m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #252",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:14:05.013806",
+      "age": "4d 6h 11m 16s",
+      "type": "TRADE",
+      "message": "Observed trade: GDC ? P&L=$-702.02",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:14:12.388458",
+      "age": "4d 6h 11m 23s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #253",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed due to trailing profit occurrence.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The trade was triggered when the confidence threshold (0.9) was exceeded.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "o",
+          "a",
+          "v",
+          "o",
+          "i",
+          "d",
+          "r",
+          "e",
+          "p",
+          "e",
+          "a",
+          "t",
+          "e",
+          "d",
+          "t",
+          "r",
+          "a",
+          "i",
+          "l",
+          "i",
+          "n",
+          "g",
+          "p",
+          "r",
+          "o",
+          "f",
+          "i",
+          "t",
+          "s",
+          "a",
+          "n",
+          "d",
+          "o",
+          "p",
+          "t",
+          "i",
+          "m",
+          "a",
+          "l",
+          "e",
+          "x",
+          "e",
+          "c",
+          "u",
+          "t",
+          "i",
+          "o",
+          "n",
+          "s",
+          "t",
+          "r",
+          "a",
+          "t",
+          "e",
+          "g",
+          "i",
+          "e",
+          "s"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:14:16.805551",
+      "age": "4d 6h 11m 28s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #254",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Loss streak detected, trailing profit triggered.",
+        "applied": [
+          {
+            "param": "ENTRY_LIMIT_BUFFER_PCT",
+            "value": "0.012",
+            "reason": "The entry limit buffer percentage was increased to 0.012.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'market_state', 'value': 'open', 'reason': 'The market state is open, indicating that trades were executed without any live IB bars.'}",
+          "{'param': 'entry_limit_buffer_pct', 'value': '0.001', 'reason': 'The entry limit buffer percentage was increased to 0.001.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:14:53.457481",
+      "age": "4d 6h 12m 4s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:15:17.683489",
+      "age": "4d 6h 12m 29s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #255",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:15:40.753700",
+      "age": "4d 6h 12m 52s",
+      "type": "TRADE",
+      "message": "Observed trade: GDC ? P&L=$-1046.49",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:16:05.093134",
+      "age": "4d 6h 13m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #257",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GDC"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:16:05.093451",
+      "age": "4d 6h 13m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #257",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on GDC"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:16:17.493141",
+      "age": "4d 6h 13m 28s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+16.77",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:16:26.143902",
+      "age": "4d 6h 13m 37s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #258",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade closed with a profit exit.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The market data failure indicates that the algo might have missed spike tops.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "h",
+          "e",
+          "t",
+          "r",
+          "a",
+          "d",
+          "e",
+          "r",
+          "m",
+          "i",
+          "s",
+          "s",
+          "e",
+          "d",
+          "s",
+          "p",
+          "i",
+          "k",
+          "e",
+          "t",
+          "o",
+          "p",
+          "i",
+          "n",
+          "t",
+          "r",
+          "a",
+          "b",
+          "a",
+          "r",
+          "a",
+          "n",
+          "d",
+          "s",
+          "h",
+          "o",
+          "u",
+          "l",
+          "d",
+          "f",
+          "o",
+          "c",
+          "u",
+          "s",
+          "o",
+          "n",
+          "s",
+          "e",
+          "l",
+          "l",
+          "i",
+          "n",
+          "g",
+          "d",
+          "u",
+          "r",
+          "i",
+          "n",
+          "g",
+          "t",
+          "h",
+          "i",
+          "s",
+          "p",
+          "e",
+          "r",
+          "i",
+          "o",
+          "d",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:18:04.022686",
+      "age": "4d 6h 15m 15s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:18:15.181517",
+      "age": "4d 6h 15m 26s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #259",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed event occurred, the algorithm missed profit hunting due to market data failure.",
+        "applied": [],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm prioritized opportunistic exits based on the current market state, which led to missed profit hunting.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:19:20.515218",
+      "age": "4d 6h 16m 31s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+29.69",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:19:44.763206",
+      "age": "4d 6h 16m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #260",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:20:10.836689",
+      "age": "4d 6h 17m 22s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T16:37:32.647905",
@@ -14554,8 +14882,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "calm and focused",
-  "total_pnl": 18645.680000000004,
+  "mood": "defensive",
+  "total_pnl": 16943.63,
   "win_history": [
     0.0,
     0.0,
@@ -14642,20 +14970,27 @@
     0.0,
     -1046.61,
     -848.25,
-    11.83
+    11.83,
+    -702.02,
+    0.0,
+    -1046.49,
+    16.77,
+    0.0,
+    29.69,
+    0.0
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 12,
-  "veteran_xp": 1160,
+  "veteran_xp": 1280,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 66,
-    "risk_management": 22,
-    "entry_timing": 30
+    "exit_timing": 71,
+    "risk_management": 26,
+    "entry_timing": 34
   },
-  "flights_completed": 81,
-  "hours_flown": 8.099999999999987,
+  "flights_completed": 88,
+  "hours_flown": 8.799999999999985,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14665,15 +15000,15 @@
     "SCA": 1,
     "XOC": 2,
     "EVG": 1,
-    "NEX": 6,
+    "NEX": 10,
     "MIM": 5,
     "AZI": 1,
     "TPT": 3,
     "KUS": 2,
     "XCH": 1,
     "TZA": 9,
-    "GDC": 7,
-    "SOX": 6,
+    "GDC": 9,
+    "SOX": 7,
     "BIT": 7,
     "GPU": 12
   },
@@ -14682,5 +15017,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Understood and prepared for today's trade session."
+  "mood_message": "Win rate 15% \u00b7 $-7140.15. Preserving capital over action."
 }

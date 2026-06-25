@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "Market data failure occurred, with a confidence threshold of 0.58. This means the algorithm did not execute due to insufficient data or other factors.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}

@@ -3456,3 +3456,255 @@ The trade was triggered by a trailing profit and ended without being executed.
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Market data failure occurred, with a confidence threshold of 0.58. This means the algorithm did not execute due to insufficient data or other factors.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:13:48.166683+00:00
+Observed trade_closed — recorded for learning.
+spike_top_intrabar: +2.28% vol=2.7x
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:14:12.425976+00:00
+Trade closed due to trailing profit occurrence.
+The trade was triggered by a trailing profit, which indicates a prolonged period of loss followed by an opportunity for profit.
+• A
+• d
+• o
+• p
+• t
+•  
+• a
+•  
+• m
+• o
+• r
+• e
+•  
+• n
+• u
+• a
+• n
+• c
+• e
+• d
+•  
+• a
+• p
+• p
+• r
+• o
+• a
+• c
+• h
+• ,
+•  
+• c
+• o
+• n
+• s
+• i
+• d
+• e
+• r
+• i
+• n
+• g
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+•  
+• s
+• t
+• a
+• t
+• e
+•  
+• a
+• n
+• d
+•  
+• r
+• i
+• s
+• k
+•  
+• m
+• a
+• n
+• a
+• g
+• e
+• m
+• e
+• n
+• t
+•  
+• s
+• t
+• r
+• a
+• t
+• e
+• g
+• i
+• e
+• s
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The trade was triggered when the confidence threshold (0.9) was exceeded.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:14:16.826744+00:00
+Loss streak detected, trailing profit triggered.
+A loss streak was observed in the GDC portfolio with a negative pnl of -702.02 USD.
+• Applied mutations:
+  - ENTRY_LIMIT_BUFFER_PCT → 0.012 (The entry limit buffer percentage was increased to 0.012.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:15:17.722900+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +1.09% vol=1.7x
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:16:05.152620+00:00
+Observed loss_streak — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:16:05.152965+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:16:26.184230+00:00
+The trade closed with a profit exit.
+When the market data failure occurs, the algo should change its strategy to prioritize opportunistic exits.
+• T
+• h
+• e
+•  
+• t
+• r
+• a
+• d
+• e
+• r
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• c
+• o
+• n
+• t
+• i
+• n
+• u
+• e
+•  
+• t
+• o
+•  
+• m
+• o
+• n
+• i
+• t
+• o
+• r
+•  
+• t
+• h
+• e
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+•  
+• f
+• o
+• r
+•  
+• a
+• n
+• y
+•  
+• p
+• o
+• t
+• e
+• n
+• t
+• i
+• a
+• l
+•  
+• n
+• e
+• w
+•  
+• i
+• n
+• t
+• r
+• a
+• b
+• a
+• r
+• s
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• h
+• e
+•  
+• t
+• r
+• a
+• d
+• e
+•  
+• s
+• t
+• r
+• a
+• t
+• e
+• g
+• y
+•  
+• a
+• c
+• c
+• o
+• r
+• d
+• i
+• n
+• g
+• l
+• y
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The market data failure indicates that the algo might have missed spike tops.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:18:15.229878+00:00
+Trade closed event occurred, the algorithm missed profit hunting due to market data failure.
+Market data failed, no live IB bars available for analysis. The trade was processed and exited with a stop-hit strategy.
+• ...
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:19:44.810551+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +4.58% vol=1.8x
+
