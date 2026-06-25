@@ -2095,7 +2095,7 @@ class ScalperRunner:
                     self.ib.sleep(0.2)  # drain IB event queue before scanner
                     log.info("🔍 Running initial live IB scanner (may take 10–30s)…")
                     try:
-                        self._scan_and_rank()
+                        self._scan_and_rank(startup=True)
                         log.info("✅ Initial scan complete — entering trading loop")
                     except Exception as exc:
                         log.error(f"Initial scan failed: {exc}")
@@ -2433,12 +2433,14 @@ class ScalperRunner:
                 refined.append(r)
         return refined
     
-    def _scan_and_rank(self):
+    def _scan_and_rank(self, startup: bool = False):
         t0 = time.perf_counter()
         log.info("🔍 HANOON scan: fetching live IB universe…")
-        screen_list = get_live_scan_universe(self.scanner, self.conn, self.cfg)
+        screen_list = get_live_scan_universe(
+            self.scanner, self.conn, self.cfg, startup=startup,
+        )
         if not screen_list:
-            log.warning("⏸ Scan skipped — live IB scanner returned no tickers (no static fallback)")
+            log.warning("⏸ Scan skipped — no tickers in universe")
             return
 
         if getattr(self.cfg, "FAST_SCANNER_LOCK", True):

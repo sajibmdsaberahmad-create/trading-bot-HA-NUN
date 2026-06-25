@@ -66,6 +66,7 @@ class IBConnector:
             try:
                 import ib_insync as ibi
                 ibi.util.log.level = 30  # WARNING
+                ibi.util.logToConsole(False)
                 # Allow tick/stream subscriptions from the synchronous main loop.
                 ibi.util.patchAsyncio()
             except Exception:
@@ -293,6 +294,10 @@ class IBConnector:
                     info["price_cap"] = cap
             self._order_errors[int(reqId)] = info
         if errorCode in BENIGN or errorCode in QUIET_ORDER:
+            return
+
+        # Expected when we time out / rotate scanner subscriptions
+        if errorCode == 162 and "scanner subscription cancelled" in (errorString or "").lower():
             return
 
         # IB tick-by-tick subscription cap (typically 5) — downgrade to 5s bars

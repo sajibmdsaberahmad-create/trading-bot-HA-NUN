@@ -333,6 +333,9 @@ class BrokerExecutor:
             self.ib.sleep(0.5)
             for trade in list(self.ib.openTrades()):
                 try:
+                    oid = int(getattr(trade.order, "orderId", 0) or 0)
+                    if oid <= 0:
+                        continue
                     st = trade.orderStatus.status if trade.orderStatus else ""
                     if st in (
                         "PendingCancel", "Cancelled", "Filled",

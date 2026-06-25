@@ -40,15 +40,20 @@ def get_live_scan_universe(
     scanner: "StockScanner",
     connector,
     cfg: BotConfig,
+    *,
+    startup: bool = False,
 ) -> List[str]:
-    """Live IB scanner ONLY — no static ticker list fallback."""
+    """Live IB scanner with optional emergency fallback so startup never blocks."""
     if not getattr(cfg, "USE_LIVE_IB_SCANNER", True):
         log.warning("USE_LIVE_IB_SCANNER is off — universe empty (static fallback disabled)")
         return []
 
     tickers: List[str] = []
-    retries = int(getattr(cfg, "IB_SCANNER_RETRIES", 3))
-    for attempt in range(retries):
+    retries = int(
+        getattr(cfg, "IB_SCANNER_STARTUP_RETRIES", 1) if startup
+        else getattr(cfg, "IB_SCANNER_RETRIES", 2)
+    )
+    for attempt in range(max(1, retries)):
         try:
             force = attempt > 0
             tickers = scanner.get_dynamic_universe(connector, force=force) or []
@@ -75,9 +80,12 @@ def get_live_scan_universe(
     except Exception:
         pass
 
-    if not out:
+    if not out and getattr(cfg, "SCAN_EMERGENCY_FALLBACK", True):
+        from core.scanner import emergency_scan_universe
+        out = emergency_scan_universe(connector, cfg)
+    elif not out:
         log.warning(
-            "🔴 Live IB scanner returned 0 tickers — no static fallback. "
+            "🔴 Live IB scanner returned 0 tickers — no fallback. "
             "Check IB Gateway login, market hours, and scanner subscription."
         )
     return out[: effective_scan_universe_max(cfg)]

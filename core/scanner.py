@@ -180,6 +180,7 @@ class StockScanner:
         self._scanner_hits: Dict[str, ScannerHit] = {}
         self._last_dynamic_fetch: float = 0.0
         self._dynamic_fetch_interval: int = 20  # Faster refresh  # Refresh every 30 seconds
+        self._scanner_warmed: bool = False
 
     def get_scanner_hits(self) -> Dict[str, ScannerHit]:
         """Last IB scanner metadata keyed by ticker (rank, scan code, distance)."""
@@ -249,53 +250,60 @@ class StockScanner:
             try:
                 from ib_insync import ScannerSubscription
                 from core.universe_filter import PROFIT_HUNT_SCAN_CODES, passes_profit_hunt_universe
-                scan_codes = list(PROFIT_HUNT_SCAN_CODES)
                 ib = ib_connector.ib
+                if not self._scanner_warmed:
+                    _warm_scanner(ib)
+                    self._scanner_warmed = True
+                    ib.sleep(0.3)
+
+                priority_codes = ("MOST_ACTIVE", "TOP_PERC_GAIN", "HOT_BY_VOLUME")
+                scan_codes = [c for c in priority_codes if c in PROFIT_HUNT_SCAN_CODES]
+                scan_codes += [c for c in PROFIT_HUNT_SCAN_CODES if c not in scan_codes]
+                max_codes = int(getattr(self.cfg, "IB_SCANNER_MAX_CODES_PER_RUN", 2))
                 disabled_codes: set = set()
                 skipped_universe = 0
-                location_codes = ["STK.US.MAJOR", "STK.US"]
+                # Paper gateways often respond on STK.US before STK.US.MAJOR
+                location_codes = ["STK.US", "STK.US.MAJOR"]
                 deadline = now + float(getattr(self.cfg, "IB_SCANNER_TIMEOUT_SEC", 25))
+                per_code_cap = float(getattr(self.cfg, "IB_SCANNER_PER_CODE_SEC", 18))
+                codes_tried = 0
 
                 log.info(
                     f"🔍 IB live scanner starting "
                     f"(budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s)…"
                 )
 
-                per_code_cap = float(getattr(self.cfg, "IB_SCANNER_PER_CODE_SEC", 12))
-
                 for location_code in location_codes:
                     if tickers:
                         break
-                    if time.time() > deadline:
-                        log.warning("IB scanner time budget reached — using partial universe")
+                    if time.time() > deadline or codes_tried >= max_codes:
                         break
                     for scan_code in scan_codes:
                         if scan_code in disabled_codes:
                             continue
-                        if time.time() > deadline:
-                            log.warning(
-                                f"IB scanner timeout before {scan_code} — "
-                                f"{len(tickers)} tickers so far"
-                            )
+                        if time.time() > deadline or codes_tried >= max_codes:
                             break
                         scan = ScannerSubscription(
                             instrument='STK',
                             locationCode=location_code,
                             scanCode=scan_code,
-                            numberOfRows=50,
                         )
                         try:
-                            remaining = max(4.0, deadline - time.time())
+                            remaining = max(6.0, deadline - time.time())
                             code_budget = min(per_code_cap, remaining)
                             log.info(
                                 f"  scanner req {scan_code} @ {location_code} "
                                 f"(budget {code_budget:.0f}s)…"
                             )
                             scan_results = _req_scanner_with_timeout(ib, scan, code_budget)
+                            codes_tried += 1
                         except Exception as exc:
                             if '162' in str(exc) or 'disabled' in str(exc).lower():
                                 disabled_codes.add(scan_code)
                                 log.debug(f"Scanner {scan_code} unavailable — skipping")
+                            continue
+                        if not scan_results:
+                            ib.sleep(0.35)
                             continue
                         for idx, result in enumerate(scan_results):
                             if not result.contractDetails or not result.contractDetails.contract:

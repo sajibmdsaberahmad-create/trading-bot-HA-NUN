@@ -429,10 +429,15 @@ class BotConfig:
     COGNITIVE_MODE_ENABLED: bool = True
     USE_LIVE_IB_SCANNER: bool = True
     USE_STATIC_SCAN_FALLBACK: bool = False
-    IB_SCANNER_RETRIES: int = 3
+    IB_SCANNER_RETRIES: int = 2
+    IB_SCANNER_STARTUP_RETRIES: int = int(os.getenv("IB_SCANNER_STARTUP_RETRIES", "1"))
     IB_SCANNER_TIMEOUT_SEC: float = float(os.getenv("IB_SCANNER_TIMEOUT_SEC", "25"))
-    IB_SCANNER_PER_CODE_SEC: float = float(os.getenv("IB_SCANNER_PER_CODE_SEC", "12"))
+    IB_SCANNER_PER_CODE_SEC: float = float(os.getenv("IB_SCANNER_PER_CODE_SEC", "18"))
     IB_SCANNER_RETRY_WAIT_SEC: float = float(os.getenv("IB_SCANNER_RETRY_WAIT_SEC", "1"))
+    IB_SCANNER_MAX_CODES_PER_RUN: int = int(os.getenv("IB_SCANNER_MAX_CODES_PER_RUN", "2"))
+    SCAN_EMERGENCY_FALLBACK: bool = os.getenv("SCAN_EMERGENCY_FALLBACK", "true").lower() not in (
+        "0", "false", "no",
+    )
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30
     FAST_SCAN_ENABLED: bool = True
