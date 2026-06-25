@@ -4,14 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "{'param': 'confidence_threshold', 'value': 0.58, 'reason': \"The algorithm needs to adjust its confidence threshold so it doesn't trigger a timeout event again.\"}",
-    "Review trade_closed on IBX",
-    "Commander: win:council_exit: Ollama exit 96% (PPO hold)",
-    "Commander: loss:council_exit: Ollama exit 98% (PPO hold)",
-    "Review loss_streak on NEXR",
-    "Commander: council_exit: Ollama exit 98% (PPO hold)",
-    "a",
-    "l",
     "t",
     "h",
     "e",
@@ -103,10 +95,18 @@
     "Commander: The trade was closed with a loss and resulted in a negative profit of -25.909064999999973.",
     "Commander: council_risk: hard_stop",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold indicates that if a scan fails, it can cause significant volatility.'}",
-    "Commander: Scanning and spikes are common issues in the trading environment."
+    "Commander: Scanning and spikes are common issues in the trading environment.",
+    "The algorithm should be more aware of alignment and consider using multi-timeframe indicators to improve its ability to identify potential market moves.",
+    "It is important to monitor the market closely and avoid blind trading if there are no clear signals for a move.",
+    "Adding advanced indicators such as multiple timeframes, PPO, or multi-timeframe indicators can help the algorithm make better decisions in uncertain markets.",
+    "The trade decision should be based on evidence rather than relying solely on FOMO/fear.",
+    "Continuously learning from past trades and incorporating new insights is key to improving the algorithm's performance over time.",
+    "Adapting the trading strategy based on recent wins and losses can lead to more consistent performance in future events.",
+    "Adjusting parameters such as CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc., may be necessary depending on the specific market conditions.",
+    "Commander: The cause of the council timeout is a no-aligned signal, which occurs when there are no clear signals for an upcoming market move. The algorithm adjusts based on this event and continues with caution."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": \"The account is currently in a high-risk, low-reward state with a scanner that shows the highest volume for all three indicators (HOT_BY_VOLUME#0, HOT_BY_VOLUME#1, HOT_BY_VOLUME#2). The current top score is 78.4, and the next best trade is from KUST with a price of 0.0, which scored 96.0.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T12:19:42.219383"
+  "updated": "2026-06-25T12:33:42.219259"
 }

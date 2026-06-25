@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 109,
+  "improvements_applied": 110,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6747,6 +6747,34 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #89",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T12:33:42.221009",
+      "age": "4d 1h 30m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #110",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred due to no aligned signal.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "The algorithm should be more aware of alignment and consider using multi-timeframe indicators to improve its ability to identify potential market moves.",
+          "It is important to monitor the market closely and avoid blind trading if there are no clear signals for a move.",
+          "Adding advanced indicators such as multiple timeframes, PPO, or multi-timeframe indicators can help the algorithm make better decisions in uncertain markets.",
+          "The trade decision should be based on evidence rather than relying solely on FOMO/fear.",
+          "Continuously learning from past trades and incorporating new insights is key to improving the algorithm's performance over time.",
+          "Adapting the trading strategy based on recent wins and losses can lead to more consistent performance in future events.",
+          "Adjusting parameters such as CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc., may be necessary depending on the specific market conditions."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T12:31:01.138131",
