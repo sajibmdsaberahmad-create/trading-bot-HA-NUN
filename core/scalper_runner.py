@@ -312,6 +312,7 @@ class ScalperRunner:
         self._bar_warm_due = False
         self._bar_warm_idx = 0
         self._stream_repair: Dict[str, str] = {}
+        self._bootstrap_entry_due = False
         
         # Pilot Experience and Pattern Memory systems
         self.pilot = PilotExperienceSystem(cfg)
@@ -2684,7 +2685,8 @@ class ScalperRunner:
         else:
             self._warm_locked_bar_cache()
 
-        self._attempt_scan_bootstrap_entry()
+        if getattr(self.cfg, "SCAN_BOOTSTRAP_ENTRY", True):
+            self._bootstrap_entry_due = True
 
         try:
             buffer_append({

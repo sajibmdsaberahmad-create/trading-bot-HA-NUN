@@ -452,6 +452,15 @@ class BotConfig:
     PAPER_USE_HISTORICAL_BARS: bool = os.getenv("PAPER_USE_HISTORICAL_BARS", "true").lower() not in (
         "0", "false", "no",
     )
+    PAPER_MARKET_ENTRIES: bool = os.getenv("PAPER_MARKET_ENTRIES", "true").lower() not in (
+        "0", "false", "no",
+    )
+    PAPER_MAX_ENTRY_SHARES: int = int(os.getenv("PAPER_MAX_ENTRY_SHARES", "5000"))
+    PENDING_SUBMIT_MAX_SEC: float = float(os.getenv("PENDING_SUBMIT_MAX_SEC", "4"))
+    ENTRY_PENDING_LOOP_SEC: float = float(os.getenv("ENTRY_PENDING_LOOP_SEC", "0.05"))
+    SCAN_BOOTSTRAP_ENTRY: bool = os.getenv("SCAN_BOOTSTRAP_ENTRY", "true").lower() not in (
+        "0", "false", "no",
+    )
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30
     FAST_SCAN_ENABLED: bool = True
