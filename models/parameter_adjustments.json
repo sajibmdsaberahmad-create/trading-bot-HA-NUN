@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Tuning the confidence threshold to 0.58 prevents a council timeout from occurring again.",
+    "reason": "The scanner score exceeded the threshold, indicating an opportune exit.",
     "ok": true,
     "msg": "applied"
   }

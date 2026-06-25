@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The trade was made on a trending market with low volatility (open). The key parameters are the confidence threshold and the maximum daily loss percentage.",
-    "Always monitor and analyze live trading data for real-time insights.",
-    "Adapt your trading strategy based on current market conditions and live data updates.",
     "Prioritize opportunistic exits when dealing with unexpected events like this.",
     "Commander: The event 'loss_streak' triggered a trade hunt, which was interrupted by a market data failure. This indicates that the algorithm's performance has been compromised due to an error in live trading data.",
     "Commander: The event occurred because the trader's position in TZA was halted by an Ollama exit. Profit hunting should be performed to close the position early.",
@@ -103,10 +100,13 @@
     "Review trade_closed on COIN",
     "Commander: trailing_stop",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold can help prevent council timeouts.'}",
-    "Commander: The council timeout is caused by a scanner score of 92, which has an ATR R:R value of 2.0 and a spike ratio of 0.8319322870473913. The algorithm should tune the MIN_PROFIT_PROBABILITY to prevent this from happening again."
+    "Commander: The council timeout is caused by a scanner score of 92, which has an ATR R:R value of 2.0 and a spike ratio of 0.8319322870473913. The algorithm should tune the MIN_PROFIT_PROBABILITY to prevent this from happening again.",
+    "z",
+    "x",
+    "Commander: The event is triggered when the scanner score after a timeout exceeds a certain threshold, which is high in this case (score=77 vol=0.9x | ATR R:R 2.0)."
   ],
-  "last_thought": "```json\n{\n    \"journals\": {\n        \"profit_hunting\": [\n            {\n                \"ticker\": \"QS\",\n                \"entry\": 7,\n                \"exit\": 6.97,\n                \"entry_fill\": 7,\n                \"exit_fill\": 6.97,\n                \"quote_entry\": 7,\n                \"quote_exit\": 6.975,\n                \"shares\": 563,\n                \"pnl_usd\": -0.05,\n                \"pnl_pct\": -5.0,\n                \"result\": \"loss\",\n                \"exit_reason\": \"tick_micro_loss\",\n                \"en",
+  "last_thought": "```json\n{\n  \"status\": \"error\",\n  \"message\": \"The provided JSON data does not contain a valid prompt for session limits.\",\n  \"input\": {\n    \"task\": \"session_limits\",\n    \"mental_state\": \"defensive\",\n    \"self_confidence\": \"35%\",\n    \"trade_guidelines\": [\n      {\n        \"commander\": \"no_md_permission\",\n        \"strategy\": \"hunting_spikes\"\n      },\n      {\n        \"reason\": \"adjusting the confidence threshold can help prevent council timeouts.\"\n      }\n    ],\n    \"recent_lessons\": [\n      {\n      ",
   "market_belief": {},
-  "trades_observed": 6,
-  "updated": "2026-06-25T19:33:44.704742"
+  "trades_observed": 0,
+  "updated": "2026-06-25T19:36:37.827825"
 }

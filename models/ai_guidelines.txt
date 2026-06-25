@@ -5251,3 +5251,104 @@ The council timeout is caused by a scanner score of 92, which has an ATR R:R val
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Tuning the confidence threshold to 0.58 prevents a council timeout from occurring again.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:36:37.855276+00:00
+The council timeout event occurred.
+The event is triggered when the scanner score after a timeout exceeds a certain threshold, which is high in this case (score=77 vol=0.9x | ATR R:R 2.0).
+• T
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• m
+• o
+• n
+• i
+• t
+• o
+• r
+•  
+• s
+• c
+• a
+• n
+• n
+• e
+• r
+•  
+• s
+• c
+• o
+• r
+• e
+• s
+•  
+• a
+• f
+• t
+• e
+• r
+•  
+• t
+• i
+• m
+• e
+• o
+• u
+• t
+• s
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• i
+• t
+• s
+•  
+• s
+• t
+• r
+• a
+• t
+• e
+• g
+• y
+•  
+• a
+• c
+• c
+• o
+• r
+• d
+• i
+• n
+• g
+• l
+• y
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The scanner score exceeded the threshold, indicating an opportune exit.)
+
