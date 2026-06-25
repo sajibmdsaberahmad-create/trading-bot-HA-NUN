@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 85,
+  "improvements_applied": 87,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5872,6 +5872,50 @@
           "n",
           "s",
           "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:07:47.576346",
+      "age": "4d 0h 4m 58s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #86",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed with a win: council_exit: Ollama exit 95% (PPO hold). Fixed by reducing CONFIDENCE_THRESHOLD to 0.58.",
+        "applied": [],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Reducing this parameter increases the likelihood of winning trades, thus reducing risk.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:08:03.887875",
+      "age": "4d 0h 5m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #87",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout occurred on the WYY ticker during the pre-market session.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The current confidence threshold is set at 0.58, but it's recommended to adjust based on market conditions.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Adapt your strategy based on recent wins and losses.",
+          "Use advanced monitoring techniques like advanced monitoring (PPO) to detect anomalies effectively."
         ]
       }
     }

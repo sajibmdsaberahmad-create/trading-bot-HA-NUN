@@ -4,11 +4,6 @@
   "confidence": 0.51,
   "mode": "autonomous",
   "learned_lessons": [
-    "p",
-    "w",
-    "C",
-    "'",
-    "f",
     "j",
     "-",
     "Commander: Event details indicate a Council timeout, which may prevent the algorithm from aligning signals correctly.",
@@ -103,10 +98,15 @@
     "y",
     "d",
     ".",
-    "Commander: The event occurred due to a successful close in the BCDA ticker."
+    "Commander: The event occurred due to a successful close in the BCDA ticker.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Reducing this parameter increases the likelihood of winning trades, thus reducing risk.'}",
+    "Commander: The trader has increased the confidence threshold to reduce risk, which is a good practice for robust trading strategies.",
+    "Adapt your strategy based on recent wins and losses.",
+    "Use advanced monitoring techniques like advanced monitoring (PPO) to detect anomalies effectively.",
+    "Commander: The council timeout is due to a spike in scanner scores that exceeded the threshold."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.3,\n  \"recommendation\": \"Live account state analysis: NEXR has the highest scanner score with a high volume and potential for quick moves. Ollama's PPO strategy is more conservative but offers better returns compared to WYY.\"\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"analysis\": {\n    \"live_account_state\": {\n      \"account_equity\": 1019897.68,\n      \"available_cash\": 1019897.68,\n      \"position_value\": 0.0,\n      \"nav\": 1033.74,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": null,\n      \"position\": null,\n      \"win_rate\": 0.0,\n      \"trades_today\": 6,\n      \"top_pick\": \"WYY\",\n      \"top_score\": 89.4,\n      \"next_best\": \"WYY\",\n      \"next_best_score\": 363.5,\n      \"scan_results\": [\n        { \"ticker\": \"WA",
   "market_belief": {},
   "trades_observed": 7,
-  "updated": "2026-06-25T11:07:40.726392"
+  "updated": "2026-06-25T11:08:03.886423"
 }
