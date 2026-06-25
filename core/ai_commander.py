@@ -320,6 +320,7 @@ class AICommander:
         market_ctx: Optional[Dict[str, Any]] = None,
         is_penny: bool = False,
         chart_line: str = "",
+        extra_lines: str = "",
     ) -> str:
         mctx = market_ctx or {}
         bid = mctx.get("bid")
@@ -338,6 +339,7 @@ class AICommander:
             f"NAV ${account.get('nav', 0):,.0f}\n"
             f"Open: {open_n}/{max_pos} | Held: {', '.join(held) if held else 'none'} | "
             f"Deployed ${deployed:,.0f}\n"
+            f"{extra_lines}"
             f"Bid ${bid or 0:.4f} Ask ${ask or 0:.4f} Spread {spread:.2%} | Avg vol {avg_vol:,.0f}\n"
             + (chart_line if chart_line else "")
             + (
@@ -814,26 +816,11 @@ class AICommander:
         chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
         pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
 
-        prompt = (
-            f"DECIDE ENTRY for {ticker} @ ${current_px:.4f}\n"
-            f"Volume spike {spike_ratio:.2f}x | Scan score {scan_score:.0f}\n"
-            f"PPO entry signal: action={ppo_action} conf={ppo_conf:.2f} reason={ppo_reason[:80]}\n"
-            f"Account: equity ${account.get('equity', 0):,.0f} | cash ${account.get('cash', 0):,.0f} | "
-            f"NAV ${account.get('nav', 0):,.0f}\n"
-            f"Open: {open_n}/{max_pos} | Held: {', '.join(held) if held else 'none'} | "
-            f"Deployed ${deployed:,.0f}\n"
-            f"{cap_line}"
-            f"Bid ${bid or 0:.4f} Ask ${ask or 0:.4f} Spread {spread:.2%} | Avg vol {avg_vol:,.0f}\n"
-            + (chart_line if chart_line else "")
-            + (
-                "PENNY STOCK: IB rejects large MARKET orders (error 2161). "
-                "Use smaller size — max deploy $350, max ~1200 shares. Limit entry only.\n"
-                if is_penny else ""
-            )
-            + "You are the STRATEGIST pilot — judgment only. Do NOT output stop, target, or share prices.\n"
-            "Math engine sets brackets from ATR after you decide enter/skip.\n"
-            'JSON: {"enter":true/false,"confidence":0-1,"gut_feel":0-1,"intuition":"gut read",'
-            '"reason":"why","journal":"first-person pilot log"}'
+        prompt = self._entry_council_prompt(
+            ticker, current_px, spike_ratio, scan_score,
+            ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            account=account, market_ctx=mctx, is_penny=is_penny,
+            chart_line=chart_line, extra_lines=cap_line,
         )
         if pipeline_on:
             mood, conf_m, lessons = self._mood_context()
@@ -901,15 +888,21 @@ class AICommander:
                     confidence = max(confidence, ppo_conf)
                     out["reason"] = f"PPO+AI ensemble: {ppo_reason}"
 
-        # Momentum / PPO overrides — AI fast execution always hunts spikes
+        # PPO-led momentum — execute now, Ollama logs async when council paths timeout
         if not enter and getattr(self.cfg, "AI_FAST_EXECUTION", True):
             if should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf):
                 enter = True
                 confidence = max(confidence, 0.58)
                 out["reason"] = (
-                    f"⚡ Fast spike hunt: vol={spike_ratio:.1f}x score={scan_score:.0f}"
+                    f"⚡ PPO spike hunt: vol={spike_ratio:.1f}x score={scan_score:.0f} "
+                    f"(Ollama logging async)"
                 )[:200]
-                out["pipeline"] = "ai:spike_fast_fallback"
+                out["pipeline"] = "ppo:spike_fast_fallback"
+            elif ppo_action == 1 and ppo_conf >= min_conf * 0.85:
+                enter = True
+                confidence = max(confidence, ppo_conf)
+                out["reason"] = f"PPO buy lead: {ppo_reason or 'ensemble'} (Ollama logging async)"
+                out["pipeline"] = "ppo:buy_lead"
         if not enter and not is_ai_unlimited(self.cfg) and not self.council_mode:
             if spike_ratio >= 1.5 and scan_score >= 35:
                 enter = True
@@ -1235,6 +1228,25 @@ class AICommander:
                 "pending": False,
             }
         self._record_council_learning(ticker, decision, "entry_decision", ppo_action, ppo_conf)
+        pipeline = str(decision.get("pipeline", ""))
+        if pipeline.startswith(("ppo:", "council:scanner_fast", "council:scanner_timeout")):
+            fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+            self._schedule_deferred_entry(
+                ticker=ticker, fingerprint=fp, decision=decision,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            )
+            if deferred_learning_enabled(self.cfg) and pipeline.startswith("council:"):
+                self._ring_entry_council_for_learning(
+                    ticker, current_px, spike_ratio, scan_score,
+                    ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                    account={
+                        "equity": equity, "cash": cash, "nav": equity,
+                        "open_positions": 0,
+                        "max_positions": effective_max_concurrent_positions(self.cfg),
+                        "held_tickers": [], "deployed_usd": 0,
+                    },
+                    is_penny=is_penny, df=df,
+                )
         self.journal("ENTRY_DECISION", journal_note, decision)
         self.ai_log("ENTRY_DECISION", {**decision, "ticker": ticker, "price": current_px})
         return decision
@@ -1288,22 +1300,28 @@ class AICommander:
         ppo_signal: Any,
         ppo_conf: float,
     ):
-        """Log Ollama+PPO council outcomes for incremental learning."""
+        """Log PPO-led + council outcomes for incremental learning."""
         try:
             from core.experience_buffer import append as buffer_append
+            pipeline = str(decision.get("pipeline", ""))
+            ppo_primary = pipeline.startswith("ppo:") or "spike_fast" in pipeline
+            weight = float(getattr(self.cfg, "PPO_LEARNING_WEIGHT", 1.5)) if ppo_primary else 1.0
             buffer_append({
-                "source": "ai_council",
+                "source": "ppo_led" if ppo_primary else "ai_council",
                 "task": task,
                 "ticker": ticker,
                 "ppo_signal": ppo_signal,
                 "ppo_conf": round(ppo_conf, 4),
+                "ppo_primary": ppo_primary,
                 "final_enter": decision.get("enter"),
                 "final_exit": decision.get("exit"),
                 "final_action": decision.get("action"),
                 "confidence": float(decision.get("confidence", 0)),
-                "pipeline": str(decision.get("pipeline", "")),
+                "pipeline": pipeline,
                 "council_agreement": decision.get("council_agreement"),
                 "reason": str(decision.get("reason", ""))[:200],
+                "training_weight": weight,
+                "ollama_deferred": ppo_primary or pipeline.startswith("council:scanner"),
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             })
         except Exception:

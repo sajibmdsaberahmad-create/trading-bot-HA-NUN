@@ -59,6 +59,7 @@ from core.market_data_learning import (
     record_fetch_failure,
     prompt_block as market_data_prompt_block,
 )
+from core.deferred_council_learning import deferred_learning_enabled
 from core.fast_execution import (
     ai_fast_execution,
     min_bars_for_ticker,
@@ -3586,6 +3587,22 @@ class ScalperRunner:
 
         if profit_exit_bypasses_council(self.cfg, reason, pnl_pct):
             log.info(f"  🎯 PROFIT HUNT: {reason}")
+            if self.ai_commander:
+                ppo_exit, ppo_conf, ppo_reason = (True, 0.65, reason)
+                obs = self._build_ppo_obs(current_px)
+                if obs is not None and self.ai_commander.model is not None:
+                    action, conf, ppo_reason = self.ai_commander.ppo_action(obs)
+                    ppo_exit = action == 2
+                    ppo_conf = conf
+                self.ai_commander.ring_exit_for_deferred_learning(
+                    {
+                        "ticker": ticker, "price": current_px,
+                        "pnl_pct": round(pnl_pct * 100, 2),
+                        "entry": entry_px, "reason": reason,
+                    },
+                    ppo_exit=ppo_exit, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                    executed_exit=True, pipeline="ppo:profit_lock",
+                )
             track_profit_hunt_event(
                 self.cfg, reason.split(":")[0].strip(), ticker,
                 {**self._profit_hunt_spike_ctx, "reason": reason, "price": current_px},
@@ -4966,6 +4983,11 @@ class ScalperRunner:
 
     def _service_pending_ai_councils(self):
         """Poll all Ollama+PPO councils without blocking the main loop."""
+        if self.ai_commander:
+            try:
+                self.ai_commander.service_deferred_learning()
+            except Exception as exc:
+                log.debug(f"Deferred council learning: {exc}")
         if not self.ai_commander or not self._ai_councils:
             return
         self._service_stale_councils()
@@ -4991,7 +5013,26 @@ class ScalperRunner:
 
     def _resolve_entry_council(self, key: str, st: Dict[str, Any]):
         ticker = str(st["ticker"])
-        if ticker in self._contract_blacklist or ticker in self._held_tickers():
+        if ticker in self._contract_blacklist:
+            self._ai_councils.pop(key, None)
+            return
+        if ticker in self._held_tickers():
+            if self.ai_commander and deferred_learning_enabled(self.cfg):
+                executed = {
+                    "enter": True,
+                    "pipeline": "ppo:executed_before_council",
+                    "reason": "position already open",
+                }
+                self.ai_commander._deferred.schedule(
+                    ticker=ticker,
+                    task="entry_decision",
+                    fingerprint=str(st.get("fingerprint", "")),
+                    executed=executed,
+                    ppo_signal=int(st.get("ppo_action", 0)),
+                    ppo_conf=float(st.get("ppo_conf", 0.5)),
+                    ppo_reason=str(st.get("ppo_reason", "")),
+                    market_ctx=st.get("market_ctx") or {},
+                )
             self._ai_councils.pop(key, None)
             return
         if self._open_position_count() >= self._max_concurrent():
