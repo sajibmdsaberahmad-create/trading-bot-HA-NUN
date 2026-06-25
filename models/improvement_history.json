@@ -311,5 +311,32 @@
     "lessons": [
       "Review trade_closed on GPUS"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:32:19.864545+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold has been adjusted to 58%.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with trailing profit: Profit at -1,249.24 USD.",
+    "lessons": [
+      "{'param': 'market_state', 'value': 'open', 'reason': 'The market is open at a low level.'}",
+      "{'param': 'entry_fill', 'value': 0.132, 'reason': 'The entry fill was 0.132 USD per tick.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:32:35.031100+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on BITO"
+    ]
   }
 ]
