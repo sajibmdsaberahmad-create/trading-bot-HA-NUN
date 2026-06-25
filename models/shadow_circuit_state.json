@@ -1,8 +1,8 @@
 {
   "in_shadow": true,
-  "consecutive_losses": 1,
+  "consecutive_losses": 0,
   "daily_start_equity": 876338.78,
-  "daily_pnl_usd": -58131.45,
+  "daily_pnl_usd": -58018.36,
   "shadow_open": {
     "PLTR": {
       "ticker": "PLTR",
@@ -57,8 +57,26 @@
       "shares": 295,
       "opened_at": 1782413022.678127,
       "regime": "unknown"
+    },
+    "RIOT": {
+      "ticker": "RIOT",
+      "entry": 27.52,
+      "stop": 27.4099,
+      "target": 27.7402,
+      "shares": 1511,
+      "opened_at": 1782413101.4054139,
+      "regime": "unknown"
+    },
+    "QS": {
+      "ticker": "QS",
+      "entry": 7.06,
+      "stop": 7.0318,
+      "target": 7.1165,
+      "shares": 2030,
+      "opened_at": 1782413088.525952,
+      "regime": "unknown"
     }
   },
   "shadow_closed": [],
-  "updated_at": 1782413022.678442
+  "updated_at": 1782413101.4060009
 }

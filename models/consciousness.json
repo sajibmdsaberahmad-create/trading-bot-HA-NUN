@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 116,
   "training_sessions": 27,
-  "trades_observed": 124,
+  "trades_observed": 125,
   "scans_performed": 27,
-  "improvements_applied": 298,
+  "improvements_applied": 299,
   "reports_generated": 26,
   "event_log": [
     {
@@ -15689,6 +15689,27 @@
           "Review trade_closed on LCID"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T18:44:30.751411",
+      "age": "4d 7h 41m 42s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$+113.09",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T18:44:34.763698",
+      "age": "4d 7h 41m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #299",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T18:38:56.130205",
@@ -16974,8 +16995,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "confident",
-  "total_pnl": 126721.72000000002,
+  "mood": "calm",
+  "total_pnl": 126834.81000000001,
   "win_history": [
     0.0,
     0.0,
@@ -17100,20 +17121,21 @@
     -94.65,
     0.0,
     0.0,
-    -58131.45
+    -58131.45,
+    113.09
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 18,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 18,
-  "veteran_xp": 1755,
+  "veteran_xp": 1785,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 95,
     "risk_management": 36,
-    "entry_timing": 48
+    "entry_timing": 50
   },
-  "flights_completed": 119,
-  "hours_flown": 11.899999999999974,
+  "flights_completed": 120,
+  "hours_flown": 11.999999999999973,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17135,12 +17157,13 @@
     "BIT": 13,
     "GPU": 19,
     "PLT": 1,
-    "LCI": 1
+    "LCI": 1,
+    "RIO": 1
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "You've shown steady progress with your recent trades, but the session's performance seems inconsistent. Adjust your strategy to handle any spikes better."
+  "mood_message": "Enjoy the steady progress and focus that comes with owning a profitable position."
 }
