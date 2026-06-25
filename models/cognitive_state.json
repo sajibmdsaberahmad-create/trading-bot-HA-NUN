@@ -1,6 +1,6 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 15% \u00b7 $-1285.59. Preserving capital over action.",
+  "mood_message": "Win rate 20% \u00b7 $-1060.91. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"entry\": 107.0912,\n  \"exit\": 107.36,\n  \"quote_entry\": 107.0912,\n  \"quote_exit\": 107.36,\n  \"shares\": 468.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"Loss\",\n  \"exit_reason\": \"Bracket Exit\",\n  \"entry_slippage_pct\": null,\n  \"exit_slippage_pct\": -0.02503,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 96.2,\n  \"peak\": 107.36,\n  \"stop\": 107.2391,\n  \"target\": 107.9467,\n  \"fill_confirmed\": true\n}\n```",
   "market_belief": {},
-  "trades_observed": 46,
-  "updated": "2026-06-25T19:55:55.337011"
+  "trades_observed": 47,
+  "updated": "2026-06-25T19:56:21.109184"
 }
