@@ -7182,3 +7182,135 @@ Why: Hard_take_profit occurs when the price goes above the entry point. The prof
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.7 (...)
 
+🧭 COMMANDER LEARNING | 2026-06-25T20:02:04.839659+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:02:24.292697+00:00
+This event occurred due to a bracket exit with a profit of $0.0, resulting in no profit hunting.
+The reason for this event is that the trade closed without achieving the desired outcome or not meeting the specified conditions.
+• T
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• i
+• m
+• p
+• l
+• e
+• m
+• e
+• n
+• t
+•  
+• t
+• h
+• e
+•  
+• f
+• o
+• l
+• l
+• o
+• w
+• i
+• n
+• g
+•  
+• g
+• u
+• i
+• d
+• e
+• l
+• i
+• n
+• e
+• s
+•  
+• t
+• o
+•  
+• e
+• n
+• h
+• a
+• n
+• c
+• e
+•  
+• i
+• t
+• s
+•  
+• p
+• e
+• r
+• f
+• o
+• r
+• m
+• a
+• n
+• c
+• e
+•  
+• a
+• n
+• d
+•  
+• a
+• c
+• c
+• u
+• r
+• a
+• c
+• y
+•  
+• i
+• n
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+• a
+• b
+• l
+• e
+•  
+• t
+• r
+• a
+• d
+• e
+• s
+• :
+•  
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (This value indicates that there are no specific conditions that prevent profit hunting within this event.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:02:36.639088+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+

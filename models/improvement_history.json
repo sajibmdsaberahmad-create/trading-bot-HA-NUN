@@ -1,73 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T17:35:59.350744+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.95,
-        "reason": "The trader had enough confidence in holding positions to avoid taking profit prematurely.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Trade closed with a hard_take_profit event.",
-    "lessons": [
-      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader was likely confident in holding positions but missed opportunities.'}"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T17:36:25.986667+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "The event is a trailing profit close due to incorrect usage of the CONFIDENCE_THRESHOLD parameter.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Trade closed due to trailing profit.",
-    "lessons": [
-      "W",
-      "h",
-      "y",
-      "d",
-      "i",
-      "d",
-      "t",
-      "h",
-      "i",
-      "s",
-      "h",
-      "a",
-      "p",
-      "p",
-      "e",
-      "n",
-      "?"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T17:36:52.862055+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "The confidence threshold (0.58) is too low, indicating a failed market_data_failure event.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Market_data failure occurred due to missing IB bars.",
-    "lessons": [
-      "Market data failures prevent continuous execution of trades without live IB bars.",
-      "Always monitor real-time market data and use live IB bars to avoid missing opportunities."
-    ]
-  },
-  {
     "timestamp": "2026-06-25T17:37:30.576333+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {
@@ -3226,6 +3158,170 @@
       "5",
       "%",
       "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T20:02:04.839998+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T20:02:24.293874+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "This value indicates that there are no specific conditions that prevent profit hunting within this event.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "This event occurred due to a bracket exit with a profit of $0.0, resulting in no profit hunting.",
+    "lessons": [
+      "T",
+      "h",
+      "e",
+      "a",
+      "l",
+      "g",
+      "o",
+      "r",
+      "i",
+      "t",
+      "h",
+      "m",
+      "s",
+      "h",
+      "o",
+      "u",
+      "l",
+      "d",
+      "f",
+      "o",
+      "c",
+      "u",
+      "s",
+      "o",
+      "n",
+      "t",
+      "r",
+      "a",
+      "c",
+      "k",
+      "i",
+      "n",
+      "g",
+      "t",
+      "h",
+      "e",
+      "e",
+      "x",
+      "e",
+      "c",
+      "u",
+      "t",
+      "i",
+      "o",
+      "n",
+      "d",
+      "e",
+      "t",
+      "a",
+      "i",
+      "l",
+      "s",
+      "a",
+      "n",
+      "d",
+      "a",
+      "d",
+      "j",
+      "u",
+      "s",
+      "t",
+      "i",
+      "n",
+      "g",
+      "i",
+      "t",
+      "s",
+      "p",
+      "a",
+      "r",
+      "a",
+      "m",
+      "e",
+      "t",
+      "e",
+      "r",
+      "s",
+      "a",
+      "c",
+      "c",
+      "o",
+      "r",
+      "d",
+      "i",
+      "n",
+      "g",
+      "l",
+      "y",
+      "t",
+      "o",
+      "i",
+      "m",
+      "p",
+      "r",
+      "o",
+      "v",
+      "e",
+      "t",
+      "h",
+      "e",
+      "p",
+      "e",
+      "r",
+      "f",
+      "o",
+      "r",
+      "m",
+      "a",
+      "n",
+      "c",
+      "e",
+      "o",
+      "f",
+      "p",
+      "r",
+      "o",
+      "f",
+      "i",
+      "t",
+      "a",
+      "b",
+      "l",
+      "e",
+      "t",
+      "r",
+      "a",
+      "d",
+      "e",
+      "s",
+      "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T20:02:36.639388+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on LCID"
     ]
   }
 ]
