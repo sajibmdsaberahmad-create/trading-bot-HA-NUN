@@ -551,8 +551,13 @@ class BotConfig:
     ))
     OLLAMA_MODEL: str = os.getenv(
         "OLLAMA_MODEL",
-        "qwen2.5:1.5b" if _8GB_RAM else ("qwen2.5:3b" if _LOW_RAM else "llama3"),
+        "phi3:mini" if _8GB_RAM else ("qwen2.5:3b" if _LOW_RAM else "llama3"),
     )
+    OLLAMA_DYNAMIC_MODEL: bool = os.getenv(
+        "OLLAMA_DYNAMIC_MODEL", "true" if _LOW_RAM else "false"
+    ).lower() in ("1", "true", "yes")
+    OLLAMA_PRESSURE_FREE_MB: int = int(os.getenv("OLLAMA_PRESSURE_FREE_MB", "1800"))
+    OLLAMA_OS_RESERVE_MB: int = int(os.getenv("OLLAMA_OS_RESERVE_MB", "1500"))
     OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "12" if _LOW_RAM else "20"))
     OLLAMA_MAX_TOKENS: int = int(os.getenv("OLLAMA_MAX_TOKENS", "192" if _LOW_RAM else "384"))
     OLLAMA_TEMPERATURE: float = float(os.getenv("OLLAMA_TEMPERATURE", "0.7"))

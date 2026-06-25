@@ -1263,9 +1263,16 @@ class ScalperRunner:
                 log.info(
                     f"⚙️ RAM auto-tune active — upgrade RAM to unlock more (set RAM_AUTO_TUNE=false to disable)"
                 )
+            try:
+                from core.ollama_models import text_model_startup_warnings
+
+                for warn in text_model_startup_warnings(self.cfg):
+                    log.warning(f"⚠️ {warn}")
+            except Exception:
+                pass
             if is_low_ram_machine() and "llama3" in self.cfg.OLLAMA_MODEL.lower():
                 log.warning(
-                    "⚠️ llama3 uses ~4.7GB RAM — on 8GB Mac use OLLAMA_MODEL=qwen2.5:3b"
+                    "⚠️ llama3 uses ~4.7GB RAM — on 8GB Mac use phi3:mini or qwen2.5:1.5b"
                 )
         else:
             log.warning("🧠 Generative thinking: OFF — set OLLAMA_ENABLED=true and run Ollama locally")

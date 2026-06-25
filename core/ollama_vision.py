@@ -140,7 +140,12 @@ def prepare_for_vision_call(cfg: BotConfig) -> None:
         return
     if not shutil.which("ollama"):
         return
-    text = (getattr(cfg, "OLLAMA_MODEL", "") or "").strip()
+    try:
+        from core.ollama_models import active_text_model
+
+        text = active_text_model(cfg)
+    except Exception:
+        text = (getattr(cfg, "OLLAMA_MODEL", "") or "").strip()
     if not text:
         return
     try:

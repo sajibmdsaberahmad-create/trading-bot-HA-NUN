@@ -46,7 +46,8 @@ _TIER_ENV_KEYS: Dict[str, str] = {
 
 TIER_PROFILES: Dict[str, Dict[str, Any]] = {
     "compact": {
-        "OLLAMA_MODEL": "qwen2.5:1.5b",
+        "OLLAMA_MODEL": "phi3:mini",
+        "OLLAMA_DYNAMIC_MODEL": True,
         "OLLAMA_MEMORY_BUDGET_MB": 2048,
         "OLLAMA_TIMEOUT": 12,
         "OLLAMA_MAX_TOKENS": 192,
@@ -202,6 +203,13 @@ def apply_ram_tier_to_config(cfg) -> str:
     cfg._ram_tier_applied = applied  # noqa: SLF001 — debug
     if not os.getenv("META_OPTIMIZER_MODEL"):
         cfg.META_OPTIMIZER_MODEL = getattr(cfg, "OLLAMA_MODEL", profile.get("OLLAMA_MODEL", "qwen2.5:3b"))
+    if getattr(cfg, "OLLAMA_DYNAMIC_MODEL", True) and not _env_overrides_key("OLLAMA_MODEL"):
+        try:
+            from core.ollama_models import sync_text_model
+
+            sync_text_model(cfg)
+        except Exception:
+            pass
     return tier
 
 

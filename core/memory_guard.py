@@ -48,10 +48,18 @@ def is_memory_pressured(min_free_mb: int = 2048) -> bool:
 
 def recommended_ollama_model(memory_budget_mb: int = 2560) -> str:
     """Pick model that fits the reserved Ollama RAM budget."""
-    from core.ram_tier import TIER_PROFILES, detect_ram_tier
+    try:
+        from core.config import BotConfig
+        from core.ollama_models import resolve_text_model
 
-    tier = detect_ram_tier()
-    return str(TIER_PROFILES.get(tier, {}).get("OLLAMA_MODEL", "qwen2.5:1.5b"))
+        cfg = BotConfig()
+        cfg.OLLAMA_MEMORY_BUDGET_MB = memory_budget_mb
+        return resolve_text_model(cfg)
+    except Exception:
+        from core.ram_tier import TIER_PROFILES, detect_ram_tier
+
+        tier = detect_ram_tier()
+        return str(TIER_PROFILES.get(tier, {}).get("OLLAMA_MODEL", "phi3:mini"))
 
 
 def should_allow_ollama_decide(cfg) -> tuple[bool, str]:

@@ -86,6 +86,12 @@ class OllamaBrain:
     
     def __init__(self, cfg: BotConfig):
         self.cfg = cfg
+        try:
+            from core.ollama_models import sync_text_model
+
+            sync_text_model(cfg)
+        except Exception:
+            pass
         self.config = OllamaConfig(
             enabled=getattr(cfg, 'OLLAMA_ENABLED', False),
             host=getattr(cfg, 'OLLAMA_HOST', 'http://localhost:11434'),
@@ -151,12 +157,24 @@ class OllamaBrain:
             return None
         return self._execute_call(prompt, system=system, model=model, update_rate_clock=True)
 
+    def _active_model(self, override: Optional[str] = None) -> str:
+        if override:
+            return override
+        if getattr(self.cfg, "OLLAMA_DYNAMIC_MODEL", True):
+            try:
+                from core.ollama_models import active_text_model
+
+                return active_text_model(self.cfg)
+            except Exception:
+                pass
+        return self.config.model
+
     def _execute_call(self, prompt: str, system: Optional[str] = None,
                       model: Optional[str] = None, update_rate_clock: bool = True) -> Optional[str]:
         """Shared HTTP generate — used by standard, decide, and notify paths."""
         try:
             url = f"{self.config.host}/api/generate"
-            use_model = model or self.config.model
+            use_model = self._active_model(model)
             use_system = system or self._system_prompt
             payload = {
                 "model": use_model,
