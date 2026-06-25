@@ -2864,5 +2864,106 @@
       "9",
       "]"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:50:00.816780+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "...",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout triggered by the high scanner score and ATR ratio.",
+    "lessons": [
+      "1",
+      ".",
+      "A",
+      "d",
+      "j",
+      "u",
+      "s",
+      "t",
+      "t",
+      "h",
+      "e",
+      "t",
+      "h",
+      "r",
+      "e",
+      "s",
+      "h",
+      "o",
+      "l",
+      "d",
+      "f",
+      "o",
+      "r",
+      "h",
+      "i",
+      "g",
+      "h",
+      "s",
+      "c",
+      "o",
+      "r",
+      "e",
+      "s",
+      "i",
+      "n",
+      "c",
+      "o",
+      "u",
+      "n",
+      "c",
+      "i",
+      "l",
+      "t",
+      "i",
+      "m",
+      "e",
+      "o",
+      "u",
+      "t",
+      "s"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:50:47.641815+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increase the confidence threshold for profitable exits within specified bounds.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade close event occurred.",
+    "lessons": [
+      "Why: The event suggests that the trading algo is capable of generating positive profits but may not be able to consistently perform at this level due to various factors such as market conditions or internal algorithmic issues."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:50:51.058769+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The value of the CONFIDENCE_THRESHOLD parameter was increased from 0.35 to 0.58, which may be necessary for more aggressive strategies.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The event occurred due to a bracket_exit trade, resulting in a loss of $2.91 USD.",
+    "lessons": [
+      "Properly analyze trades with high and low volatility patterns.",
+      "Adjust exit thresholds based on current market conditions."
+    ]
   }
 ]

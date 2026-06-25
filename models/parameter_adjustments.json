@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Adjusting from 0.58 to a value closer to the minimum allowed (0.35) helps mitigate potential risks.",
+    "reason": "The value of the CONFIDENCE_THRESHOLD parameter was increased from 0.35 to 0.58, which may be necessary for more aggressive strategies.",
     "ok": true,
     "msg": "applied"
   }

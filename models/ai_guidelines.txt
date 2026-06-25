@@ -6171,3 +6171,19 @@ The loss streak occurred due to the trailing stop parameter.
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Adjusting from 0.58 to a value closer to the minimum allowed (0.35) helps mitigate potential risks.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:50:00.816443+00:00
+The council timeout triggered by the high scanner score and ATR ratio.
+High scanner score after a timeout indicates that the algorithm was not performing well and needs to be adjusted. The ATR R:R of 2.0 is relatively low, which could indicate poor momentum or lack of significant trends.
+• .
+• .
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (...)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:50:47.641121+00:00
+Trade close event occurred.
+The trade closed with a negative PNL (profit and loss) of -2.91 USD, indicating that the trader made a profit on the entry.
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Increase the confidence threshold for profitable exits within specified bounds.', 'details': 'The updated trade settings can be implemented to increase the likelihood of successful executions.'}
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold for profitable exits within specified bounds.)
+
