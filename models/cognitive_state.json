@@ -4,10 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Profit hunt worked on NEXR: spike_top_exit: +4.58% vol=1.8x \u2014 reinforce opportunistic exits.",
-    "Commander: spike_top_exit: +4.58% vol=1.8x",
-    "Review trade_closed on SOXS",
-    "Commander: bracket_exit",
     "Spike-top hunt on TZA: spike_top_exit: +0.52% vol=1.6x",
     "Profit hunt worked on TZA: spike_top_exit: +0.52% vol=1.6x \u2014 reinforce opportunistic exits.",
     "Review trade_closed on BITO",
@@ -103,10 +99,14 @@
     "l",
     "Commander: The loss streak was caused by the council_exit: Ollama exit 95% (PPO hold). The algorithm is not optimizing for this specific situation, and it prioritizes opportunistic exits based on gut feelings.",
     "Commander: BUY BITO Closes with a council exit",
-    "Commander: Analysis based on the provided market data. The event occurred during open trading hours and was caused by the PPO (Pay to Pay) exit, which resulted in a 98% loss for the investor."
+    "Commander: Analysis based on the provided market data. The event occurred during open trading hours and was caused by the PPO (Pay to Pay) exit, which resulted in a 98% loss for the investor.",
+    "No clean data on LLOY (no_contract) \u2014 profit hunt elsewhere.",
+    "Refine your understanding and parameters to better adapt to changing market conditions.",
+    "Adaptively adjust your trade strategy based on ongoing market events.",
+    "Commander: Reason: Market data failure indicates that the current market conditions do not have a defined security definition, which limits the use of this algorithm. The event suggests an update in the technical analysis framework or an unexpected ch"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"actions\": [\n    {\n      \"name\": \"buy TZA\",\n      \"profit\": 500 * 0.500,\n      \"time\": 24\n    },\n    {\n      \"name\": \"sell TZA\",\n      \"profit\": 500 * 0.300,\n      \"time\": 24\n    }\n  ]\n}\n```",
+  "last_thought": "```json\n{\n  \"hunt_limit\": {\n    \"max_loss\": \"30%\",\n    \"trade_count\": 5,\n    \"penalties\": [\n      {\n        \"type\": \"buffer_penalty\",\n        \"reason\": \"Missed spike-top exits = training failures\"\n      }\n    ]\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 50,
-  "updated": "2026-06-25T17:44:39.009904"
+  "trades_observed": 0,
+  "updated": "2026-06-25T18:19:54.829895"
 }

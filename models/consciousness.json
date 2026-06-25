@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 122,
   "scans_performed": 27,
-  "improvements_applied": 294,
+  "improvements_applied": 295,
   "reports_generated": 26,
   "event_log": [
     {
@@ -15358,6 +15358,29 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #111",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T18:19:54.831785",
+      "age": "4d 7h 17m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #295",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Market data failure occurred, market state is open.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Market data failure indicates a lack of security definition, which limits the use of this algorithm. This suggests an update in the technical analysis framework or an unexpected change in trading rules.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Refine your understanding and parameters to better adapt to changing market conditions.",
+          "Adaptively adjust your trade strategy based on ongoing market events."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T18:19:09.390776",

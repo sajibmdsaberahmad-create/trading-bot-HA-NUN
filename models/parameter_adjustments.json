@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "Market data failure indicates a lack of security definition, which limits the use of this algorithm. This suggests an update in the technical analysis framework or an unexpected change in trading rules.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

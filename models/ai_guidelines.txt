@@ -4708,3 +4708,9 @@ BUY BITO Closes with a council exit
 The trade closed with a council exit of Ollama exit 98% (PPO hold), resulting in a loss of -147 units.
 Analysis based on the provided market data. The event occurred during open trading hours and was caused by the PPO (Pay to Pay) exit, which resulted in a 98% loss for the investor.
 
+🧭 COMMANDER LEARNING | 2026-06-25T18:19:54.904663+00:00
+Market data failure occurred, market state is open.
+Reason: Market data failure indicates that the current market conditions do not have a defined security definition, which limits the use of this algorithm. The event suggests an update in the technical analysis framework or an unexpected change in trading rules.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market data failure indicates a lack of security definition, which limits the use of this algorithm. This suggests an update in the technical analysis framework or an unexpected change in trading rules.)
+

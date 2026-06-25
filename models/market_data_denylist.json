@@ -376,5 +376,19 @@
     "first_seen": "2026-06-25T16:30:08.403952+00:00",
     "last_seen": "2026-06-25T16:30:08.403966+00:00",
     "source": "ib_error"
+  },
+  "LLOY": {
+    "ticker": "LLOY",
+    "failures": 1,
+    "last_code": 200,
+    "last_reason": "No security definition has been found for the request",
+    "pattern": "no_contract",
+    "exchange": "SMART",
+    "primary_exchange": "",
+    "skip_until": 1782411890.790022,
+    "skip_until_iso": "2026-06-25T18:24:50.790022+00:00",
+    "first_seen": "2026-06-25T18:19:50.790909+00:00",
+    "last_seen": "2026-06-25T18:19:50.790936+00:00",
+    "source": "ib_error"
   }
 }
