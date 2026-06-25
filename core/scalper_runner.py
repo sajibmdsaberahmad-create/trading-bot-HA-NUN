@@ -3347,6 +3347,7 @@ class ScalperRunner:
 
         if getattr(self.cfg, "DYNAMIC_TRAILING_ENABLED", False) and self.risk.plan:
             try:
+                _, ppo_conf, _ = self._ai_gate_exit(current_px)
                 obs = self._build_ppo_obs(current_px)
                 overrides = self.risk.update_ai_dynamic_trailing(
                     ai_confidence=float(ppo_conf),
@@ -3898,6 +3899,10 @@ class ScalperRunner:
             self._pending_bracket_handle = None
             self._entry_poll_state = None
             self._clear_pending_entry(ticker, cooldown_sec=60.0)
+            for task in ("entry_decision", "exit_decision", "position_manage"):
+                self._ai_councils.pop(self._council_key(ticker, task), None)
+            self._position_slots.pop(ticker, None)
+            self._refresh_aggregate_position_state()
             return "aborted_slippage"
 
         if adapt.adjusted or adapt.ok:
@@ -4509,6 +4514,16 @@ class ScalperRunner:
         st["current_px"] = px
         ai_dec = self.ai_commander.poll_exit_council(st)
         if ai_dec.get("pending"):
+            max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
+            age = time.time() - float(st.get("started_at", time.time()))
+            if age > max_wait:
+                self._ai_councils.pop(key, None)
+                ppo_reason = str(st.get("ppo_reason", "") or "")
+                if "shape" in ppo_reason.lower() or "observation" in ppo_reason.lower():
+                    log.warning(
+                        f"  ⚠️ COUNCIL exit {ticker}: clearing stuck council (bad PPO obs)"
+                    )
+                return
             return
         self._ai_councils.pop(key, None)
         pipeline = str(ai_dec.get("pipeline", ""))

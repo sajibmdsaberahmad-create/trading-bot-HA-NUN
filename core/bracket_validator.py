@@ -263,12 +263,15 @@ def adapt_bracket_to_fill(
             )
             return base
         if atr > 0 and slip_usd > atr * _max_fill_slippage_atr(cfg):
-            base.abort = True
-            base.reason = (
-                f"fill slipped ${slip_usd:.4f} > {_max_fill_slippage_atr(cfg):.1f}×ATR "
-                f"(${atr:.4f}) — spike chase abort"
-            )
-            return base
+            # Skip ATR abort when ATR is unrealistically tiny vs price (bad bar data)
+            atr_floor = fill_px * float(getattr(cfg, "POST_FILL_MIN_ATR_PCT", 0.002))
+            if atr >= atr_floor:
+                base.abort = True
+                base.reason = (
+                    f"fill slipped ${slip_usd:.4f} > {_max_fill_slippage_atr(cfg):.1f}×ATR "
+                    f"(${atr:.4f}) — spike chase abort"
+                )
+                return base
 
     ok, reason, risk_usd, rr = validate_long_bracket(cfg, fill_px, stop, target, shares)
     if ok:
