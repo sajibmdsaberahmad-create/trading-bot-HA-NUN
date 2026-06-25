@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 50,
   "scans_performed": 27,
-  "improvements_applied": 203,
+  "improvements_applied": 204,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10863,6 +10863,22 @@
       "type": "TRADE",
       "message": "Observed trade: SOXS ? P&L=$+8001.63",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:31:08.066205",
+      "age": "4d 5h 28m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #204",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed with a profit exit and high volume.",
+        "applied": [],
+        "lessons": [
+          "Analyze trading patterns to identify high-risk intrabars.",
+          "Use live IB bars to track volatility and adjust strategies accordingly.",
+          "Implement momentum trades based on market data."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T16:22:06.687310",
