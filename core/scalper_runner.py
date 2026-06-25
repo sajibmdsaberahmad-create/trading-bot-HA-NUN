@@ -4635,7 +4635,18 @@ class ScalperRunner:
         self, ticker: str, shares: int, fill_px: float, plan: TradePlan,
     ) -> str:
         """Bookkeeping after IB confirms an entry fill."""
+        from core.fill_tracker import _sane_fill_ratio, position_avg_cost
+
         planned_entry = float(plan.entry_price)
+        fill_bracket = self._bracket_for_entry_fill(ticker)
+        if not _sane_fill_ratio(fill_px, planned_entry):
+            avg = position_avg_cost(self.ib, ticker)
+            if avg > 0 and _sane_fill_ratio(avg, planned_entry):
+                log.warning(
+                    f"  🔧 Fill price corrected {ticker}: ${fill_px:.4f} → ${avg:.4f} "
+                    f"(planned ${planned_entry:.4f})"
+                )
+                fill_px = avg
         old_stop = float(plan.initial_stop_price)
         old_target = float(plan.take_profit_price)
         adapt = adapt_bracket_to_fill(
@@ -4678,7 +4689,7 @@ class ScalperRunner:
                 })
             except Exception:
                 pass
-            handle = self.bracket_handle or self._pending_bracket_handle
+            handle = fill_bracket
             try:
                 self.broker.flatten_position(
                     int(shares), handle=handle, urgent=True, symbol=ticker,
@@ -4687,9 +4698,8 @@ class ScalperRunner:
             except Exception as exc:
                 log.warning(f"  Flatten after slippage abort failed: {exc}")
             self.broker.cancel_open_orders_for_symbol(ticker)
-            self.bracket_handle = None
-            self._pending_bracket_handle = None
-            self._entry_poll_state = None
+            if self.bracket_handle is handle:
+                self.bracket_handle = None
             self._clear_pending_entry(ticker, cooldown_sec=60.0)
             for task in ("entry_decision", "exit_decision", "position_manage"):
                 self._ai_councils.pop(self._council_key(ticker, task), None)
@@ -4707,7 +4717,7 @@ class ScalperRunner:
                 risk_usd=adapt.risk_usd or plan.risk_usd,
                 atr_at_entry=plan.atr_at_entry,
             )
-            handle = self.bracket_handle or self._pending_bracket_handle
+            handle = fill_bracket
             if handle and adapt.adjusted:
                 try:
                     self.broker.update_stop_price(handle, adapt.stop)
@@ -4719,19 +4729,18 @@ class ScalperRunner:
                 except Exception as exc:
                     log.warning(f"  IB bracket re-anchor failed: {exc}")
 
-        self._clear_pending_entry()
-        self._entry_poll_state = None
+        self._clear_pending_entry(ticker)
         opened_at = time.time()
         tel = getattr(self, "_last_entry_telemetry", {}) or {}
         limit_px = tel.get("limit_px")
         parent_trade = None
-        if self.bracket_handle and self.bracket_handle.parent_trade:
-            parent_trade = self.bracket_handle.parent_trade
+        if fill_bracket and fill_bracket.parent_trade:
+            parent_trade = fill_bracket.parent_trade
         entry_fill = resolve_entry_fill(
             self.ib, symbol=ticker, parent_trade=parent_trade, quote_px=fill_px,
             max_wait=0.0, cache=self._fill_cache(),
         )
-        if entry_fill > 0:
+        if entry_fill > 0 and _sane_fill_ratio(entry_fill, planned_entry):
             fill_px = entry_fill
         cost = shares * fill_px * (1 + self.cfg.TRANSACTION_COST_PCT)
         self.bot_cash -= cost
@@ -4772,8 +4781,8 @@ class ScalperRunner:
             "vision_read": vision_read[:800],
         }
         self._position_slots[ticker] = slot
-        if self.bracket_handle:
-            self._bracket_by_ticker[ticker] = self.bracket_handle
+        if fill_bracket:
+            self._bracket_by_ticker[ticker] = fill_bracket
         self._load_position_context(ticker)
         self._recalc_bot_nav()
         self._ensure_position_stream(ticker)
@@ -4970,18 +4979,25 @@ class ScalperRunner:
                 pass
 
     def _service_pending_entry(self):
-        """One non-blocking IB fill poll — exit monitor keeps running between polls."""
-        st = self._entry_poll_state
-        if not st or not self._pending_bracket_handle:
+        """Non-blocking IB fill polls — one pass per pending ticker."""
+        if not self._entry_poll_states:
             return
-        ticker = st["ticker"]
+        for ticker in list(self._entry_poll_states.keys()):
+            self._service_one_pending_entry(ticker)
+
+    def _service_one_pending_entry(self, ticker: str):
+        """Poll a single ticker's pending bracket fill."""
+        st = self._entry_poll_states.get(ticker)
+        bracket = (st or {}).get("bracket") or self._pending_brackets_by_ticker.get(ticker)
+        if not st or not bracket:
+            self._entry_poll_states.pop(ticker, None)
+            return
         shares = int(st["shares"])
         plan: TradePlan = st["plan"]
         fill_px = float(st["fill_px"])
         min_fill_ratio = float(st["min_fill_ratio"])
         fail_cd = float(st["fail_cd"])
         self.ib.sleep(0.05)
-        bracket = self._pending_bracket_handle
         parent_trade = getattr(bracket, "parent_trade", None)
         parent_id = bracket.parent_order_id
         parent_status = (
@@ -5005,7 +5021,7 @@ class ScalperRunner:
         if parent_status in ("Cancelled", "Inactive", "ApiCancelled"):
             block_reason = parse_ib_order_block(ierr)
             if block_reason:
-                self._entry_poll_state = None
+                self._entry_poll_states.pop(ticker, None)
                 self._ai_skip_ticker_permanent(ticker, block_reason)
                 return
             if (
@@ -5028,11 +5044,13 @@ class ScalperRunner:
                 )
                 st["plan"] = plan
                 entry_px = cap if cap and cap > 0 else None
-                self.bracket_handle = self.broker.place_bracket_buy(
+                new_bracket = self.broker.place_bracket_buy(
                     quantity=retry_sh, limit_or_market_price=entry_px,
                     stop_price=plan.initial_stop_price, target_price=plan.take_profit_price,
+                    symbol=ticker,
                 )
-                self._pending_bracket_handle = self.bracket_handle
+                st["bracket"] = new_bracket
+                self._pending_brackets_by_ticker[ticker] = new_bracket
                 log.info(f"  🔄 IB2161 retry: {retry_sh} sh limit @ ${entry_px or fill_px:.4f}")
                 return
             log.warning(f"Entry order rejected by IB ({parent_status}) — not opening position")
@@ -5044,8 +5062,6 @@ class ScalperRunner:
                 parent_status=parent_status,
                 market_state=get_market_state(self.cfg),
             )
-            self.bracket_handle = None
-            self._entry_poll_state = None
             self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
             return
         filled_shares = 0.0
@@ -5093,13 +5109,15 @@ class ScalperRunner:
                         int(getattr(self.cfg, "PAPER_MAX_ENTRY_SHARES", 5000)),
                     )
                 try:
-                    self.bracket_handle = self.broker.place_bracket_buy(
+                    new_bracket = self.broker.place_bracket_buy(
                         quantity=retry_sh,
                         limit_or_market_price=None,
                         stop_price=plan.initial_stop_price,
                         target_price=plan.take_profit_price,
+                        symbol=ticker,
                     )
-                    self._pending_bracket_handle = self.bracket_handle
+                    st["bracket"] = new_bracket
+                    self._pending_brackets_by_ticker[ticker] = new_bracket
                     st["shares"] = retry_sh
                     st["polls"] = 0
                     st["pending_submit_since"] = None
