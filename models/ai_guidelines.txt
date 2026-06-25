@@ -4323,3 +4323,285 @@ The event occurred because of a missed profit hunt (trailing stop). The algorith
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:42:20.725475+00:00
+A spike_top intrabar of +0.76% with a volatility ratio of 126309.0x occurred in the 'GDC' trade, resulting in no profit hunting.
+The event is triggered by a spike_top intrabar that gained +0.76% on the day in 'GDC'. This indicates an opportunity for profitable trades and an ongoing trend of such spikes.
+• T
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• f
+• o
+• c
+• u
+• s
+•  
+• o
+• n
+•  
+• i
+• d
+• e
+• n
+• t
+• i
+• f
+• y
+• i
+• n
+• g
+•  
+• a
+• n
+• d
+•  
+• c
+• a
+• p
+• t
+• u
+• r
+• i
+• n
+• g
+•  
+• p
+• o
+• t
+• e
+• n
+• t
+• i
+• a
+• l
+•  
+• p
+• r
+• i
+• c
+• e
+•  
+• m
+• o
+• v
+• e
+• m
+• e
+• n
+• t
+• s
+•  
+• u
+• s
+• i
+• n
+• g
+•  
+• r
+• e
+• l
+• e
+• v
+• a
+• n
+• t
+•  
+• m
+• e
+• t
+• r
+• i
+• c
+• s
+•  
+• s
+• u
+• c
+• h
+•  
+• a
+• s
+•  
+• v
+• o
+• l
+• a
+• t
+• i
+• l
+• i
+• t
+• y
+•  
+• r
+• a
+• t
+• i
+• o
+• s
+• ,
+•  
+• e
+• n
+• t
+• r
+• y
+•  
+• f
+• i
+• l
+• l
+•  
+• r
+• a
+• t
+• e
+• s
+• ,
+•  
+• a
+• n
+• d
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+•  
+• s
+• t
+• a
+• t
+• e
+•  
+• i
+• n
+• d
+• i
+• c
+• a
+• t
+• o
+• r
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusting the confidence threshold can help prevent overconfidence in trade decisions.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:42:47.398760+00:00
+The trade closed with a net profit of 0.0.
+We are tracking the market state and live IB bars to understand when the event occurred and how it happened.
+• U
+• s
+• e
+•  
+• t
+• h
+• e
+•  
+• l
+• i
+• v
+• e
+•  
+• I
+• B
+•  
+• b
+• a
+• r
+• s
+•  
+• t
+• o
+•  
+• i
+• d
+• e
+• n
+• t
+• i
+• f
+• y
+•  
+• w
+• h
+• e
+• n
+•  
+• e
+• v
+• e
+• n
+• t
+• s
+•  
+• o
+• c
+• c
+• u
+• r
+• r
+• e
+• d
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• h
+• e
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+• s
+•  
+• a
+• c
+• c
+• o
+• r
+• d
+• i
+• n
+• g
+• l
+• y
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The live IB bars provided a lower CONFIDENCE_THRESHOLD, which is not reflective of the real market.)
+

@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "The live IB bars provided a lower CONFIDENCE_THRESHOLD, which is not reflective of the real market.",
+    "ok": true,
+    "msg": "applied"
+  }
+}
