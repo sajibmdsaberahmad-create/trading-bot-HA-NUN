@@ -1,7 +1,7 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 122,
+  "total_awakenings": 123,
   "training_sessions": 27,
   "trades_observed": 139,
   "scans_performed": 27,
@@ -16324,9 +16324,16 @@
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold can help prevent council timeouts.'}"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:34:52.731066",
+      "age": "4d 8h 32m 4s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #123",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-25T19:28:38.033071",
+  "last_awakening": "2026-06-25T19:34:52.730761",
   "current_version": "v20260625_062906",
   "version_history": [
     {
