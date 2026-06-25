@@ -1938,7 +1938,35 @@ class ScalperRunner:
                 json.dump(metrics, f, indent=2)
         except Exception as exc:
             log.debug(f"Could not write live_metrics.json: {exc}")
-    
+
+    def _log_tick_stream_config(self) -> None:
+        """Startup audit — tick-by-tick vs 5s fallback and IB stream budget."""
+        from core.data import tick_by_tick_type
+
+        tbt = tick_by_tick_type(self.cfg)
+        use_tick = bool(getattr(self.cfg, "USE_TICK_STREAM", True))
+        paper_rt_only = bool(
+            getattr(self.cfg, "PAPER_TRADING", False)
+            and getattr(self.cfg, "PAPER_REALTIME_BARS_ONLY", False)
+        )
+        if paper_rt_only:
+            mode = "5s bars only (PAPER_REALTIME_BARS_ONLY)"
+        elif use_tick:
+            mode = f"tick-by-tick ({tbt})"
+        else:
+            mode = "5s bars (USE_TICK_STREAM=false)"
+        n_tick = tick_stream_count(self.cfg)
+        n_rt = max_realtime_bar_streams(self.cfg)
+        log.info(
+            f"📡 Market data: {mode} | IB budget {n_tick} tick + {n_rt} 5s-bars "
+            f"(cap ~5 each — extras deferred)"
+        )
+        if getattr(self.cfg, "PAPER_TRADING", False) and use_tick and not paper_rt_only:
+            log.info(
+                "📡 Paper tick-by-tick: enabled — log out of live TWS/Gateway "
+                "or IB may throttle paper streams (data mirroring rule)"
+            )
+
     def run(self):
         self._register_shutdown_signals()
         from core.architecture_epoch import apply_full_epoch_reset
@@ -1999,6 +2027,7 @@ class ScalperRunner:
                 "auto-apply guardrailed fixes + PPO buffer"
             )
         self._refresh_account_balance()
+        self._log_tick_stream_config()
         bootstrap_ai_session_limits(self)
         if ai_full_capital_access(self.cfg):
             log.info(

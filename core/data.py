@@ -38,9 +38,18 @@ try:
 except ImportError:
     raise SystemExit("ERROR: ib_insync not installed. Fix: pip install ib_insync")
 
-from core.config import BotConfig, tick_by_tick_type
+from core.config import BotConfig
 from core.connector import IBConnector
 from core.notify import log
+
+
+_VALID_TICK_BY_TICK_TYPES = frozenset({"Last", "AllLast", "BidAsk", "MidPoint"})
+
+
+def tick_by_tick_type(cfg: BotConfig) -> str:
+    """IB tickType string — case-sensitive; AllLast includes odd-lot/off-exchange."""
+    raw = str(getattr(cfg, "TICK_BY_TICK_TYPE", "AllLast") or "AllLast")
+    return raw if raw in _VALID_TICK_BY_TICK_TYPES else "AllLast"
 
 
 def _utc_timestamp(dt) -> pd.Timestamp:
