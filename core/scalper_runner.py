@@ -20,6 +20,7 @@ import os
 import sys
 import json
 import time
+import threading
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Tuple, Any
 from collections import deque
@@ -875,6 +876,9 @@ class ScalperRunner:
                 regime=regime,
                 market_state=get_market_state(self.cfg),
             )
+            self.risk.record_trade_result(pnl)
+            if self.risk.needs_learning_session:
+                self._service_loss_streak_learning()
             try:
                 self.shadow_circuit.on_live_trade_closed(pnl, self.account_equity)
             except Exception:
@@ -1082,6 +1086,122 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"Runtime observe {event}: {exc}")
 
+    def _service_loss_streak_learning(self) -> None:
+        """Run AI review on loss-streak halt — resume when confident, not after 60 min."""
+        risk = self.risk
+        if not getattr(risk, "needs_learning_session", False):
+            return
+        if self._loss_learning_in_flight:
+            return
+        self._loss_learning_in_flight = True
+        risk.begin_learning_session()
+        log.info("🧠 LOSS STREAK: starting review of recent losses…")
+
+        def _worker():
+            try:
+                from core.loss_streak_learning import run_loss_streak_learning
+                result = run_loss_streak_learning(self.cfg, self)
+                ok = risk.complete_learning_session(
+                    str(result.get("summary", "")),
+                    float(result.get("confidence", 0.55)),
+                )
+                if not ok:
+                    risk.force_end_learning_halt("learning confidence below threshold")
+            except Exception as exc:
+                log.warning(f"Loss streak learning failed: {exc}")
+                risk.force_end_learning_halt(f"learning error: {exc}")
+            finally:
+                self._loss_learning_in_flight = False
+
+        threading.Thread(target=_worker, name="loss-streak-learn", daemon=True).start()
+
+    def _record_early_exit_learning(
+        self,
+        ticker: str,
+        entry: float,
+        exit_px: float,
+        shares: float,
+        pnl: float,
+        reason: str,
+    ) -> None:
+        """Early exits previously skipped post-mortem + experience buffer."""
+        pnl_pct = ((exit_px / entry) - 1) * 100 if entry else 0.0
+        result = "win" if pnl > 0 else "loss"
+        trade_rec = {
+            "ticker": ticker,
+            "entry": entry,
+            "exit": exit_px,
+            "shares": shares,
+            "pnl_usd": round(pnl, 2),
+            "pnl_pct": round(pnl_pct, 2),
+            "result": result,
+            "exit_reason": reason,
+        }
+        self.trade_journal.append(trade_rec)
+        if self.ai_commander:
+            try:
+                self.ai_commander.record_trade(trade_rec)
+            except Exception:
+                pass
+        hold_sec = max(0.0, time.time() - getattr(self, "_position_opened_at", 0.0))
+        regime = getattr(self, "_last_entry_regime", "")
+        entry_slip = float(self._last_entry_telemetry.get("slippage_pct", 0))
+        stop_px = float(getattr(self, "_position_stop", 0) or 0)
+        target_px = float(getattr(self, "_position_target", 0) or 0)
+        exit_type = "loss_exit" if pnl < 0 else "profit_exit"
+        if "hard_stop" in reason or "stop" in reason.lower():
+            exit_type = "stop_hit"
+        log_exit_postmortem(
+            ticker=ticker,
+            entry=entry,
+            exit_px=exit_px,
+            shares=shares,
+            pnl_usd=pnl,
+            pnl_pct=pnl_pct,
+            result=result,
+            regime=regime,
+            hold_sec=hold_sec,
+            entry_slippage_pct=entry_slip,
+            exit_reason=reason,
+        )
+        self._observe_runtime(
+            "trade_closed",
+            ticker=ticker,
+            reason=f"{result}:{reason}",
+            pnl_usd=pnl,
+            pnl_pct=pnl_pct,
+            won=(pnl > 0),
+            exit_type=exit_type,
+            hold_sec=hold_sec,
+            regime=regime,
+            market_state=get_market_state(self.cfg),
+        )
+        if pnl < 0:
+            self._observe_runtime(
+                "loss_streak",
+                ticker=ticker,
+                reason=reason,
+                pnl_usd=pnl,
+                consecutive_losses=int(getattr(self.risk, "_consecutive_losses", 0)),
+                market_state=get_market_state(self.cfg),
+            )
+        try:
+            buffer_append({
+                "source": "early_exit",
+                "ticker": ticker,
+                "action": "SELL",
+                "exit_price": exit_px,
+                "entry_price": entry,
+                "pnl_usd": round(pnl, 2),
+                "win": 1 if pnl > 0 else 0,
+                "reward": reward_from_trade(pnl, self.cfg, slippage_pct=entry_slip),
+                "regime": regime,
+                "confidence": getattr(self, "_last_ai_confidence", 0.5),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            })
+        except Exception:
+            pass
+
     def _exit_position(self, current_px: float, reason: str, ticker: Optional[str] = None):
         """Manually exit position (early exit, AI exit, etc.)."""
         ticker = ticker or self.current_ticker
@@ -1124,6 +1244,11 @@ class ScalperRunner:
             if self.risk.plan:
                 self.risk.record_trade_result(pnl)
                 self.risk.close_position()
+            self._record_early_exit_learning(
+                ticker, entry_price, current_px, float(quantity), pnl, reason,
+            )
+            if self.risk.needs_learning_session:
+                self._service_loss_streak_learning()
             if hasattr(self, '_active_positions'):
                 self._active_positions = [p for p in self._active_positions if p["ticker"] != ticker]
             self._position_opened_at = 0.0
@@ -1644,6 +1769,8 @@ class ScalperRunner:
                         parallel = getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True)
                         at_max = self._open_position_count() >= self._max_concurrent()
                         if self._locked_targets and (not in_position or parallel):
+                            if self.risk.is_halted():
+                                self._service_loss_streak_learning()
                             if not in_position:
                                 self._maybe_rotate_locked_focus(now)
                             if now - getattr(self, '_last_fast_monitor', 0) > 1.0:
@@ -2536,6 +2663,9 @@ class ScalperRunner:
         if time.time() < self._spike_skip_until.get(ticker, 0):
             return
         if time.time() < self._entry_cooldown_until.get(ticker, 0):
+            return
+
+        if self.risk.is_halted():
             return
 
         self._scan_data_cache[ticker] = work_df
@@ -4279,6 +4409,9 @@ class ScalperRunner:
         if self._pending_entry_ticker and now < self._pending_entry_until:
             return 'waiting'
         if now < self._entry_cooldown_until.get(ticker, 0):
+            return 'waiting'
+
+        if self.risk.is_halted():
             return 'waiting'
 
         if self._open_position_count() >= self._max_concurrent():
