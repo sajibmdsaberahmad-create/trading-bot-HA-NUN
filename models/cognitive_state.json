@@ -1,6 +1,6 @@
 {
-  "mood": "gathering",
-  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "mood": "defensive",
+  "mood_message": "Win rate 0% \u00b7 $-5185.62. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"trade_id\": \"closed_trade\",\n  \"journal_entry\": {\n    \"ticker\": \"MARA\",\n    \"entry\": 14.61,\n    \"exit\": 13.64,\n    \"quote_entry\": 14.61,\n    \"quote_exit\": 13.65,\n    \"shares\": 2673.0,\n    \"pnl_usd\": -2592.81,\n    \"pnl_pct\": -6.64,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T19:22:33.154105"
+  "trades_observed": 3,
+  "updated": "2026-06-25T19:23:24.242595"
 }

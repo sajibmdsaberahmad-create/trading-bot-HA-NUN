@@ -171,3 +171,4 @@
 {"timestamp":"2026-06-25T19:07:34.015194+00:00","event":"hard_take_profit","ticker":"RIOT","pnl_usd":0.0,"source":"buffer","reason":"hard_take_profit"}
 {"timestamp":"2026-06-25T19:21:02.236774+00:00","event":"trailing_profit","ticker":"MARA","pnl_usd":-2566.08,"pnl_pct":-0.0657,"primary_goal":true,"reason":"trailing_profit","price":13.65}
 {"timestamp":"2026-06-25T19:21:20.858568+00:00","event":"trailing_profit","ticker":"MARA","pnl_usd":-2592.81,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T19:23:22.481291+00:00","event":"trailing_profit","ticker":"MARA","pnl_usd":-2683.99,"pnl_pct":-0.0664,"primary_goal":true,"reason":"trailing_profit","price":13.64}
