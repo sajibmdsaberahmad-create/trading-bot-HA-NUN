@@ -6446,6 +6446,20 @@ class ScalperRunner:
                     )
                 else:
                     self.notifier.info(f"📊 HANOON DAILY COMPLETE\n{stmt}\n\n{guidelines}")
+                try:
+                    from core.daily_self_evaluation import schedule_daily_self_evaluation
+                    schedule_daily_self_evaluation(
+                        self.cfg,
+                        self,
+                        notifier=self.notifier,
+                        ai_commander=self.ai_commander,
+                        autopilot=self.autopilot,
+                        consciousness=self.consciousness,
+                        pilot=self.pilot,
+                        connector=self.conn,
+                    )
+                except Exception as exc:
+                    log.debug(f"Daily self-eval schedule: {exc}")
         except Exception as exc:
             log.debug(f"Daily push skipped: {exc}")
     

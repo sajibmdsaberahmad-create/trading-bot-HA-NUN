@@ -144,6 +144,17 @@ class AccountEvaluator:
                 runner, "market_close", notifier, ai_commander,
                 autopilot, consciousness, pilot,
             )
+            self._schedule_self_evaluation(
+                runner, notifier, ai_commander, autopilot, consciousness, pilot,
+            )
+        elif new_state == "after_hours" and old_state == "open":
+            self.evaluate(
+                runner, "market_close", notifier, ai_commander,
+                autopilot, consciousness, pilot,
+            )
+            self._schedule_self_evaluation(
+                runner, notifier, ai_commander, autopilot, consciousness, pilot,
+            )
 
     def _capture_snapshot(self, runner: "ScalperRunner", event: str) -> Dict[str, Any]:
         baseline = float(getattr(self.cfg, "INITIAL_CASH", 1000))
@@ -405,6 +416,31 @@ class AccountEvaluator:
         except Exception:
             pass
         return "Cadet"
+
+    def _schedule_self_evaluation(
+        self,
+        runner: "ScalperRunner",
+        notifier=None,
+        ai_commander=None,
+        autopilot=None,
+        consciousness=None,
+        pilot=None,
+    ) -> None:
+        """Background end-of-day self-evaluation (premarket → close)."""
+        try:
+            from core.daily_self_evaluation import schedule_daily_self_evaluation
+            schedule_daily_self_evaluation(
+                self.cfg,
+                runner,
+                notifier=notifier,
+                ai_commander=ai_commander,
+                autopilot=autopilot,
+                consciousness=consciousness,
+                pilot=pilot,
+                connector=getattr(runner, "conn", None),
+            )
+        except Exception as exc:
+            log.debug(f"Self-eval schedule: {exc}")
 
     @staticmethod
     def _append_jsonl(path: Path, record: Dict):

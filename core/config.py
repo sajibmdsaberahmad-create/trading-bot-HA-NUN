@@ -611,6 +611,10 @@ class BotConfig:
     AI_TELEGRAM_OLLAMA_TIMEOUT: int = 12       # Seconds — notifications must not stall loop
     OLLAMA_NOTIFY_MIN_FREE_RAM_MB: int = 512   # Lighter gate for Telegram compose (model often warm)
     AI_ACCOUNT_EVALUATION: bool = True         # AI account brief on market open/close
+    AI_DAILY_SELF_EVALUATION: bool = os.getenv(
+        "AI_DAILY_SELF_EVALUATION", "true"
+    ).lower() in ("1", "true", "yes")
+    AI_DAILY_SELF_EVAL_MAX_CHARS: int = int(os.getenv("AI_DAILY_SELF_EVAL_MAX_CHARS", "3800"))
     AI_ACCOUNT_EVAL_ON_STARTUP: bool = os.getenv(
         "AI_ACCOUNT_EVAL_ON_STARTUP", "false"
     ).lower() in ("1", "true", "yes")

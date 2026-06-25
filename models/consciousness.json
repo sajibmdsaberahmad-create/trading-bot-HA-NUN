@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 105,
   "training_sessions": 27,
-  "trades_observed": 95,
+  "trades_observed": 96,
   "scans_performed": 27,
-  "improvements_applied": 263,
+  "improvements_applied": 264,
   "reports_generated": 26,
   "event_log": [
     {
@@ -13653,6 +13653,27 @@
           "Review trade_closed on TZA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T17:23:30.608420",
+      "age": "4d 6h 20m 41s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+55.68",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:23:38.874206",
+      "age": "4d 6h 20m 50s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #264",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T16:37:32.647905",
@@ -14938,8 +14959,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
-  "total_pnl": 132932.03,
+  "mood": "confident",
+  "total_pnl": 132987.71,
   "win_history": [
     0.0,
     0.0,
@@ -15035,20 +15056,21 @@
     29.69,
     0.0,
     98688.34,
-    17300.06
+    17300.06,
+    55.68
   ],
-  "consecutive_wins": 2,
+  "consecutive_wins": 3,
   "consecutive_losses": 0,
   "worst_streak": 12,
-  "veteran_xp": 1340,
+  "veteran_xp": 1370,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 71,
     "risk_management": 26,
-    "entry_timing": 38
+    "entry_timing": 40
   },
-  "flights_completed": 90,
-  "hours_flown": 8.999999999999984,
+  "flights_completed": 91,
+  "hours_flown": 9.099999999999984,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15058,7 +15080,7 @@
     "SCA": 1,
     "XOC": 2,
     "EVG": 1,
-    "NEX": 10,
+    "NEX": 11,
     "MIM": 5,
     "AZI": 1,
     "TPT": 3,
@@ -15075,5 +15097,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I feel a sense of urgency and readiness to act on my trades."
+  "mood_message": "I'm feeling confident in my strategy today."
 }

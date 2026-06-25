@@ -713,20 +713,27 @@ class TelegramCommandListener:
             connector = getattr(self.runner, "conn", None) if self.runner else None
             report = collect_day_report(self.cfg, self.runner, connector)
             structured = format_structured_report(report, max_lines=60)
-            event = "daily_brief" if ai_brief else "daily_report"
+            event = "daily_self_eval" if ai_brief else "daily_report"
             max_chars = int(getattr(self.cfg, "TELEGRAM_DAILY_REPORT_MAX_CHARS", 3800)) if ai_brief else None
 
             if ai_brief:
-                prompt = (
-                    "Write a detailed end-of-day briefing for your commander — "
-                    "like an IBKR activity statement in pilot voice.\n\n"
-                    f"STRUCTURED REPORT:\n{structured[:2800]}\n\n"
-                    f"SUMMARY:\n{json.dumps(report.get('summary', {}), default=str)}\n"
-                    f"TRADES:\n{json.dumps(report.get('trades', [])[:25], default=str)[:2000]}"
+                from core.daily_self_evaluation import (
+                    collect_self_eval_context,
+                    compose_self_evaluation,
+                    write_self_evaluation_files,
                 )
-                ai_text = self._think(prompt)
+                ctx = collect_self_eval_context(self.cfg, self.runner, connector)
+                prompt_think = self._think
+                statement = compose_self_evaluation(ctx, prompt_think, self.cfg)
+                paths = write_self_evaluation_files(ctx, statement)
+                ai_text = statement
                 fallback = ai_text if ai_text and len(ai_text) > 80 else structured
-                ctx = {"report": report.get("summary", {}), "trades_count": len(report.get("trades", []))}
+                ctx = {
+                    "report": report.get("summary", {}),
+                    "trades_count": len(report.get("trades", [])),
+                    "self_eval_paths": paths,
+                    "sessions": ctx.get("sessions", {}),
+                }
             else:
                 fallback = structured
                 ctx = {"report_summary": report.get("summary", {}), "structured_excerpt": structured[:2000]}

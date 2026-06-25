@@ -38,6 +38,10 @@ _EVENT_GUIDANCE: Dict[str, str] = {
     "mood": "Your current mental state as pilot + session context.",
     "daily_report": "Full-day trading activity like a TWS statement in pilot voice.",
     "daily_brief": "End-of-day AI briefing: headline P&L, narrative, lessons.",
+    "daily_self_eval": (
+        "End-of-day self-evaluation: premarket→close narrative, what you learned, "
+        "before vs after improvements, what you're looking toward tomorrow."
+    ),
     "daily_progress": "Short ack that you're building their report.",
     "commander_chat": "Reply to commander message with analysis and direction.",
     "vision_analysis": "Chart analysis from uploaded image.",
