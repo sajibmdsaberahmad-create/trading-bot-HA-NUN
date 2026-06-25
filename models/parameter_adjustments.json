@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Increased the confidence threshold from 0.35 to 0.58, reducing the risk of falling back into a volatile market.",
+    "reason": "Increased confidence threshold can help prevent overconfidence in the algorithm's decisions.",
     "ok": true,
     "msg": "applied"
   }

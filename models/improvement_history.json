@@ -1,26 +1,5 @@
 [
   {
-    "timestamp": "2026-06-24T20:20:47.103171",
-    "win_rate": 0.295355790312936,
-    "buffer_win_rate": 0.3838150289017341,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {
-      "SCALP_TP_ATR_MULTIPLIER": {
-        "old": 0.5811307335000002,
-        "new": 0.5230176601500002,
-        "reason": "increase targets when WR strong; reduce when WR weak",
-        "confidence": 0.017
-      },
-      "SCAN_INTERVAL_SECONDS": {
-        "old": 489.4384326000001,
-        "new": 636.2699623800002,
-        "reason": "reduce frequency when WR low; increase when WR strong",
-        "confidence": 0.175
-      }
-    },
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:20:47.102842\nCombined win rate: 29.5% (buffer=38.4%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
     "timestamp": "2026-06-24T20:25:47.220477",
     "win_rate": 0.29783029833397906,
     "buffer_win_rate": 0.3887640449438202,
@@ -2212,6 +2191,25 @@
       "Adjust the confidence threshold to reduce the risk of falling back into a volatile market",
       "Increase the number of concurrent positions and lock targets to mitigate losses",
       "Implement multi-timeframe analysis to capture more complex patterns"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:18:57.326393+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased confidence threshold can help prevent overconfidence in the algorithm's decisions.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed due to a quick win, but the algorithm's parameters and logic need adjustment.",
+    "lessons": [
+      "Rigorous analysis is crucial for refining trading algorithms. Adjusting the confidence threshold can help prevent overconfidence.",
+      "Understanding market dynamics is essential. If a trade closes due to a quick win, analyze the underlying factors.",
+      "Adapting to future market conditions requires ongoing monitoring and learning from recent performances."
     ]
   }
 ]

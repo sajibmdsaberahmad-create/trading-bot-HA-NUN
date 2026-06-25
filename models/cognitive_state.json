@@ -4,10 +4,6 @@
   "confidence": 0.55,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The council timeout event occurred during a live session.",
-    "Understand the limitations and boundaries of your trading algo.",
-    "Adapt based on recent wins and losses to improve performance.",
-    "Refactor code and optimize algorithms to reduce complexity.",
     "Commander: The council timeout happened after the scanner spike, which suggests that the algorithm's execution was too complex for the system to handle. This could indicate issues with the current model or the data pipeline.",
     "Review council_timeout on EHGO",
     "Review council_timeout on INLF",
@@ -103,10 +99,14 @@
     "Adjust the confidence threshold to reduce the risk of falling back into a volatile market",
     "Increase the number of concurrent positions and lock targets to mitigate losses",
     "Implement multi-timeframe analysis to capture more complex patterns",
-    "Commander: Why: The scanner spike likely caused the volatility increase, which in turn was causing the council timeout. The algorithm needs to be adjusted for better stress management."
+    "Commander: Why: The scanner spike likely caused the volatility increase, which in turn was causing the council timeout. The algorithm needs to be adjusted for better stress management.",
+    "Rigorous analysis is crucial for refining trading algorithms. Adjusting the confidence threshold can help prevent overconfidence.",
+    "Understanding market dynamics is essential. If a trade closes due to a quick win, analyze the underlying factors.",
+    "Adapting to future market conditions requires ongoing monitoring and learning from recent performances.",
+    "Commander: The trade closed due to a quick win (PPO hold) but the algorithm must consider future market conditions and adjust its strategies accordingly."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.7,\n  \"analysis\": {\n    \"live_account_state\": {\n      \"mode\": \"HANOON\",\n      \"account_equity\": 1018910.68,\n      \"available_cash\": 1018910.68,\n      \"position_value\": 0.0,\n      \"nav\": 963.83,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": \"NONE\",\n      \"position\": \"NONE\",\n      \"win_rate\": 0.0,\n      \"trades_today\": 7,\n      \"top_pick\": \"BCDA\",\n      \"top_score\": 49.8,\n      \"next_best\": \"BCDA\",\n      \"next_best_score\": 352.5,\n      \"scan_result",
   "market_belief": {},
   "trades_observed": 9,
-  "updated": "2026-06-25T11:18:50.216005"
+  "updated": "2026-06-25T11:18:57.298152"
 }

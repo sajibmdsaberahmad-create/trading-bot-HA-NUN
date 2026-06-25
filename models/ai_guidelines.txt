@@ -345,3 +345,9 @@ Why: The scanner spike likely caused the volatility increase, which in turn was 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increased the confidence threshold from 0.35 to 0.58, reducing the risk of falling back into a volatile market.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T11:18:57.325529+00:00
+Trade closed due to a quick win, but the algorithm's parameters and logic need adjustment.
+The trade closed due to a quick win (PPO hold) but the algorithm must consider future market conditions and adjust its strategies accordingly.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold can help prevent overconfidence in the algorithm's decisions.)
+
