@@ -1,10 +1,9 @@
 {
-  "mood": "confident",
-  "mood_message": "Good recent performance and a few consecutive wins, indicating a promising start.",
+  "mood": "defensive",
+  "mood_message": "Win rate 10% \u00b7 $-10924.36. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review loss_streak on GDC",
     "k",
     "e",
     ",",
@@ -103,10 +102,11 @@
     "Adapt your trading strategy based on current market conditions and live data updates.",
     "Prioritize opportunistic exits when dealing with unexpected events like this.",
     "Commander: The event 'loss_streak' triggered a trade hunt, which was interrupted by a market data failure. This indicates that the algorithm's performance has been compromised due to an error in live trading data.",
-    "Commander: The event occurred because the trader's position in TZA was halted by an Ollama exit. Profit hunting should be performed to close the position early."
+    "Commander: The event occurred because the trader's position in TZA was halted by an Ollama exit. Profit hunting should be performed to close the position early.",
+    "Large loss detected: NEXR. Review stop placement."
   ],
-  "last_thought": "```json\n{\n    \"entry\": 4.0,\n    \"exit\": 3.9755,\n    \"quote_entry\": 3.88,\n    \"quote_exit\": 3.8755,\n    \"shares\": 1,\n    \"pnl_usd\": 0.0,\n    \"profit_loss_pct\": -0.0246,\n    \"result\": \"loss\",\n    \"entry_slippage_pct\": \"-0.002577\",\n    \"exit_slippage_pct\": \"-0.002577\",\n    \"limit_px\": 3.8755,\n    \"entry_mode\": \"limit_smart\",\n    \"regime\": \"unknown\"\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.85,\n  \"trade_decisions\": [\n    {\n      \"name\": \"TZA\",\n      \"action\": \"hunting\",\n      \"reason\": \"profit hunting is the main goal.\",\n      \"events\": [\n        { \"ticker\": \"TZA\", \"price\": 0.0, \"score\": 97.6, \"reason\": \"scanner:MOST_ACTIVE#2\" },\n        { \"ticker\": \"NEXR\", \"price\": 0.0, \"score\": 0.0, \"reason\": \"no trade results\" }\n      ]\n    },\n    {\n      \"name\": \"GDC\",\n      \"action\": \"hunting\",\n      \"reason\": \"profit hunting is the main goal.\",\n    ",
   "market_belief": {},
-  "trades_observed": 32,
-  "updated": "2026-06-25T17:38:04.682954"
+  "trades_observed": 33,
+  "updated": "2026-06-25T17:38:46.320373"
 }
