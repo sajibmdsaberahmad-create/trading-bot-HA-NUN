@@ -3323,5 +3323,32 @@
       "s",
       "t"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:21:15.249074+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold was set too high, leading to an overly optimistic risk assessment.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The loss streak occurred due to a spike in the equity price, which triggered an exit strategy.",
+    "lessons": [
+      "Analyze the root cause of the spike",
+      "Implement robust entry and exit strategies to minimize losses"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:21:17.867027+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on KUST"
+    ]
   }
 ]

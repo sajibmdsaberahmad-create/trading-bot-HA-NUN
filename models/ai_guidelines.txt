@@ -2114,3 +2114,15 @@ Trade closed due to bracket_exit event, which triggered profit hunting.
 The event ib_failure occurred, and the ticker is MIMI.
 IB closing-only cannot open new positions
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:21:15.248373+00:00
+The loss streak occurred due to a spike in the equity price, which triggered an exit strategy.
+The reason for the loss is an increase in volatility. The spike_top_intrabar event was tracked during the live trade system and identified as a potential profit hunting opportunity.
+• Maintain a conservative confidence level when entering trades
+• Adjust the confidence level based on market conditions and trading experience
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was set too high, leading to an overly optimistic risk assessment.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:21:17.866211+00:00
+Observed trade_closed — recorded for learning.
+spike_top_intrabar: +0.61% vol=5853.0x
+

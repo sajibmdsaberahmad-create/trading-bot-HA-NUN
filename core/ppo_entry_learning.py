@@ -310,7 +310,7 @@ def ppo_micro_improve(
         if feats.shape[1] != n_feat:
             return False
         prices = np.array(
-            [float(r.get("entry_price", 100.0) or 100.0) for r in feat_recs[-32:]],
+            [float(r.get("entry_price", 100.0) or 100.0) for r in records[-32:]],
             dtype=np.float32,
         )
         if len(prices) < cfg.WINDOW_SIZE + 2:
