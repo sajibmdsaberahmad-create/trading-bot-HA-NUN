@@ -1,11 +1,9 @@
 {
-  "mood": "in rhythm",
-  "mood_message": "Win streak 5 \u00b7 recent $+603.47. Riding what works, not forcing size.",
+  "mood": "focused",
+  "mood_message": "Win rate 67% on recent trades \u00b7 $+598.34. Executing the plan.",
   "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The event occurred because of a missed profit hunt (trailing stop). The algorithm prioritized opportunistic exits.",
-    "Spike-top hunt on GDC: spike_top_intrabar: +0.76% vol=126309.0x",
     "Profit hunt worked on GDC: spike_top_intrabar: +0.76% vol=126309.0x \u2014 reinforce opportunistic exits.",
     "e",
     "f",
@@ -103,10 +101,12 @@
     "Profit hunt worked on LCID: wave_end_spike_fade: peak +432.36% now +0.34% vol=0.3x fading \u2014 reinforce opportunistic exits.",
     "Use confidence intervals for market data.",
     "Tune entry limits to avoid overtrading.",
-    "Commander: The trade closed with a profit of $32.77."
+    "Commander: The trade closed with a profit of $32.77.",
+    "Review council_timeout on MARA",
+    "Commander: High scanner score after timeout: score=88 vol=0.1x | ATR R:R 2.0"
   ],
   "last_thought": "```json\n{\n  \"entry\": 5.1676,\n  \"exit\": 5.18,\n  \"shares\": 2635.0,\n  \"pnl_usd\": 32.77,\n  \"pnl_pct\": 0.24,\n  \"result\": \"win\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": -0.000964,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 186.8,\n  \"peak\": 27.51,\n  \"stop\": 27.5055,\n  \"target\": 27.72,\n  \"fill_confirmed\": true\n}\n```",
   "market_belief": {},
-  "trades_observed": 8,
-  "updated": "2026-06-25T19:43:52.812968"
+  "trades_observed": 9,
+  "updated": "2026-06-25T19:44:30.114879"
 }

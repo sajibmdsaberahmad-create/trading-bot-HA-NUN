@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 143,
   "scans_performed": 27,
-  "improvements_applied": 323,
+  "improvements_applied": 324,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16577,6 +16577,28 @@
         "lessons": [
           "Use confidence intervals for market data.",
           "Tune entry limits to avoid overtrading."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:43:58.099993",
+      "age": "4d 8h 41m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #324",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on MARA"
         ]
       }
     }
