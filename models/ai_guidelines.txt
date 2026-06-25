@@ -2139,3 +2139,15 @@ The event occurred due to an Ollama exit, which might be indicative of a misalig
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold is set at 58%, which seems to be too high for this specific trade. The trader should reduce the threshold or consider a more conservative approach.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:25:42.430013+00:00
+Trade closed due to stop_breach in GDC, triggered by a high-risk entry and low-volume exit.
+The trade closed because of a spike that triggered the stop_loss. The reason is unknown but likely caused by an overbought market.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Confidence level raised from low (0.35) to high (0.58))
+  - ENTRY_FILL_MAX_WAIT_SEC → 45.0 (Increased wait time for the entry fill to ensure sufficient time for risk mitigation.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:26:17.556068+00:00
+Trade closed with profit hunting triggered due to market failure.
+The trade was closed, and the trader used a trailing stop strategy based on an entry fill ratio of 1.05, which is close to the lockup period of the algorithm.
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trade was closed due to a market failure, and the trader prioritized opportunistic exits based on a low confidence level.'}
+

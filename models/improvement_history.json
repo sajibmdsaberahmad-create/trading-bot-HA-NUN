@@ -3430,5 +3430,38 @@
       "y",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:25:42.430358+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Confidence level raised from low (0.35) to high (0.58)",
+        "ok": true,
+        "msg": "applied"
+      },
+      "ENTRY_FILL_MAX_WAIT_SEC": {
+        "param": "ENTRY_FILL_MAX_WAIT_SEC",
+        "value": 45.0,
+        "reason": "Increased wait time for the entry fill to ensure sufficient time for risk mitigation.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed due to stop_breach in GDC, triggered by a high-risk entry and low-volume exit.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"Trade was set to 'medium' with a 98% confidence in the stop_loss event.\"}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:26:17.556987+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Trade closed with profit hunting triggered due to market failure.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trade was closed due to a market failure, and the trader prioritized opportunistic exits based on a low confidence level.'}"
+    ]
   }
 ]

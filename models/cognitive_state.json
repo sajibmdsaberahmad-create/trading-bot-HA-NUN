@@ -1,13 +1,9 @@
 {
-  "mood": "in rhythm",
-  "mood_message": "Win streak 4 \u00b7 recent $+51163.54. Riding what works, not forcing size.",
-  "confidence": 0.35,
+  "mood": "calm",
+  "mood_message": "Great session with 10 trades and a high PNL of $54,586.5.",
+  "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: loss:stop_breach",
-    "Review loss_streak on IQST",
-    "T",
-    "w",
     "Commander: Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be cautious around this.",
     "Always monitor live IB bars and adjust your strategy accordingly. If the market data fails, skip this trade.",
     "Commander: When the market data failed, it is typically due to a sudden decline in market conditions or technical issues.",
@@ -103,10 +99,14 @@
     "u",
     "i",
     "g",
-    "Commander: The event occurred due to an Ollama exit, which might be indicative of a misalignment or a missed opportunity. The trader is currently focused on the execution of the Ollama trade and will continue to monitor this action closely."
+    "Commander: The event occurred due to an Ollama exit, which might be indicative of a misalignment or a missed opportunity. The trader is currently focused on the execution of the Ollama trade and will continue to monitor this action closely.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"Trade was set to 'medium' with a 98% confidence in the stop_loss event.\"}",
+    "Commander: The trade closed because of a spike that triggered the stop_loss. The reason is unknown but likely caused by an overbought market.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trade was closed due to a market failure, and the trader prioritized opportunistic exits based on a low confidence level.'}",
+    "Commander: The trade was closed, and the trader used a trailing stop strategy based on an entry fill ratio of 1.05, which is close to the lockup period of the algorithm."
   ],
-  "last_thought": "```json\n{\n  \"journals\": [\n    {\n      \"entry\": 0.0131,\n      \"shares\": 1200.0,\n      \"trade_type\": \"hot-swap\",\n      \"vol\": 14619.0,\n      \"pnl\": 4304.28,\n      \"result\": \"win\",\n      \"exit_reason\": \"stop_breach\",\n      \"entry_slippage_pct\": -0.007576,\n      \"exit_slippage_pct\": 273.80916,\n      \"limit_px\": 0.0132,\n      \"entry_mode\": \"limit_penny\",\n      \"regime\": \"unknown|late_chase_risk\",\n      \"hold_sec\": 47.3\n    }\n  ],\n  \"trade_history\": [\n    {\n      \"ticker\": \"GDC\",\n      \"entry\": 0.0131",
+  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"SOXS\",\n    \"entry\": 0.0131,\n    \"exit\": 3.6,\n    \"entry_fill\": 0.0131,\n    \"exit_fill\": 3.6,\n    \"quote_entry\": 0.0131,\n    \"quote_exit\": 0.8316,\n    \"shares\": 2091,\n    \"pnl_usd\": 1711.48,\n    \"pnl_pct\": 6248.09,\n    \"result\": \"win\",\n    \"exit_reason\": \"trailing_stop\",\n    \"entry_slippage_pct\": -0.996391,\n    \"exit_slippage_pct\": -0.769,\n    \"limit_px\": 3.63,\n    \"entry_mode\": \"limit_smart\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 77.8,\n    \"peak\":",
   "market_belief": {},
-  "trades_observed": 6,
-  "updated": "2026-06-25T16:25:36.646466"
+  "trades_observed": 10,
+  "updated": "2026-06-25T16:26:25.036695"
 }

@@ -13,3 +13,4 @@
 {"timestamp":"2026-06-25T16:23:39.130262+00:00","event":"spike_top_intrabar","ticker":"NEXR","pnl_usd":2.63,"pnl_pct":0.0055,"primary_goal":true,"spike_detected":true,"intrabar":true,"gain_pct":0.004879790526065346,"vol_ratio":14619.0,"near_high":true,"reason":"spike_top_intrabar: +0.49% vol=14619.0x","price":0.8466}
 {"timestamp":"2026-06-25T16:24:02.802807+00:00","event":"spike_top_intrabar","ticker":"NEXR","pnl_usd":0.0,"source":"buffer","spike_detected":true,"intrabar":true,"gain_pct":0.004879790526065346,"vol_ratio":14619.0,"near_high":true,"reason":"spike_top_intrabar: +0.49% vol=14619.0x"}
 {"timestamp":"2026-06-25T16:25:07.390702+00:00","event":"council_exit","ticker":"TZA","pnl_usd":21277.49,"source":"buffer","reason":"council_exit: Ollama exit 100% (PPO hold)"}
+{"timestamp":"2026-06-25T16:25:41.866900+00:00","event":"trailing_stop","ticker":"SOXS","pnl_usd":7500.21,"pnl_pct":273.8092,"primary_goal":true,"reason":"trailing_stop","price":3.6}
