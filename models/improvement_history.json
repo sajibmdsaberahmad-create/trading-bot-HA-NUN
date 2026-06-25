@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-06-24T20:50:48.878125",
-    "win_rate": 0.3083743842364532,
-    "buffer_win_rate": 0.4098522167487685,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:50:48.877492\nCombined win rate: 30.8% (buffer=41.0%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
     "timestamp": "2026-06-24T20:50:48.929454",
     "win_rate": 0.3083743842364532,
     "buffer_win_rate": 0.4098522167487685,
@@ -2418,6 +2410,15 @@
       "e",
       "s",
       "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:56:07.900980+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on KUST"
     ]
   }
 ]

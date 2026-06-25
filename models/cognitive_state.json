@@ -108,5 +108,5 @@
   "last_thought": "```json\n{\n  \"gut_feel\": 0,\n  \"intuition\": \"The trade closed on KUST with a high closing price of 0.0, indicating strong volume and potential for the market to move up quickly.\",\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1017004.0,\n  \"available_cash\": 1017004.0,\n  \"position_value\": 0.0,\n  \"nav\": 1552.08,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 10,\n  \"top_pick\": \"IWMW\",\n  \"top_score\": 80.6,\n  \"next_best\": \"BRAG\",\n  \"next_best_scor",
   "market_belief": {},
   "trades_observed": 12,
-  "updated": "2026-06-25T11:55:56.752280"
+  "updated": "2026-06-25T11:56:07.865909"
 }

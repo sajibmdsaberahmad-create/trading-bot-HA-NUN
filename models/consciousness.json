@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 101,
+  "improvements_applied": 102,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6367,6 +6367,20 @@
           "e",
           "s",
           "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:56:07.867844",
+      "age": "4d 0h 53m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #102",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on KUST"
         ]
       }
     }
