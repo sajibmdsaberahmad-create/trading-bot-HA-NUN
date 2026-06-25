@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 78,
+  "improvements_applied": 79,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5648,6 +5648,20 @@
         ],
         "lessons": [
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'To avoid such events in the future.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T10:39:19.602424",
+      "age": "3d 23h 36m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #79",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
         ]
       }
     }
