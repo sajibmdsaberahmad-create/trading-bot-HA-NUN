@@ -1,11 +1,9 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $-3665.15. Preserving capital over action.",
+  "mood": "gathering",
+  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "g",
-    "Commander: The council timeout indicates a lack of alignment in the signals received by the algorithm.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The high value of CONFIDENCE_THRESHOLD (0.58) suggests the algorithm should increase this parameter to better handle closing-only events.'}",
     "Commander: An IB closing-only event occurs when the market is closed and there are no open positions. This prevents real-time analysis and analysis-driven trades.",
     "Adjustment of trade decisions is crucial for efficient trading",
@@ -103,10 +101,12 @@
     "Implement robust entry and exit strategies to minimize losses",
     "Commander: The reason for the loss is an increase in volatility. The spike_top_intrabar event was tracked during the live trade system and identified as a potential profit hunting opportunity.",
     "Review trade_closed on KUST",
-    "Commander: spike_top_intrabar: +0.61% vol=5853.0x"
+    "Commander: spike_top_intrabar: +0.61% vol=5853.0x",
+    "Spike-top hunt on NEXR: spike_top_intrabar: +0.49% vol=14619.0x",
+    "Profit hunt worked on NEXR: spike_top_intrabar: +0.49% vol=14619.0x \u2014 reinforce opportunistic exits."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.75,\n  \"trade_decisions\": [\n    {\n      \"action\": \"sell\",\n      \"reason\": \"Profit hunt worked on KUST, taking into account momentum and volume gain.\"\n    }\n  ]\n}\n```",
+  "last_thought": "```json\n{\n  \"entry\": 0.842,\n  \"exit\": 0.842,\n  \"entry_fill\": 0.842,\n  \"exit_fill\": 0.842,\n  \"quote_entry\": 0.842,\n  \"quote_exit\": 0.8466,\n  \"shares\": 571.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"loss\",\n  \"exit_reason\": \"spike_top_intrabar: +0.49% vol=14619.0x\",\n  \"entry_slippage_pct\": -0.006021,\n  \"exit_slippage_pct\": -0.005433,\n  \"limit_px\": 0.8471,\n  \"entry_mode\": \"limit_penny\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 8.8,\n  \"peak\": 0.8443,\n  \"stop\": 0.8433,\n  \"target\": 0.848",
   "market_belief": {},
-  "trades_observed": 6,
-  "updated": "2026-06-25T16:21:17.823323"
+  "trades_observed": 1,
+  "updated": "2026-06-25T16:23:49.341749"
 }
