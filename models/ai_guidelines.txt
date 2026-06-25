@@ -398,3 +398,91 @@ The algorithm is learning from the recent scanner spike, which suggests it may n
 Observed trade_closed — recorded for learning.
 win:council_exit: Ollama exit 100% (PPO hold)
 
+🧭 COMMANDER LEARNING | 2026-06-25T11:55:15.217659+00:00
+The council timeout occurred, leading to a scanner spike after the timeout.
+Root cause: The scanner spike triggered by a timeout event.
+• A
+• d
+• a
+• p
+• t
+• i
+• v
+• e
+•  
+• t
+• o
+•  
+• r
+• e
+• c
+• e
+• n
+• t
+•  
+• l
+• o
+• s
+• s
+• e
+• s
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+• s
+•  
+• a
+• c
+• c
+• o
+• r
+• d
+• i
+• n
+• g
+• l
+• y
+•  
+• f
+• o
+• r
+•  
+• b
+• e
+• t
+• t
+• e
+• r
+•  
+• e
+• x
+• e
+• c
+• u
+• t
+• i
+• o
+• n
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was increased, indicating more stringent risk constraints.)
+  - CONFIDENCE_THRESHOLD → 0.5399999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
+

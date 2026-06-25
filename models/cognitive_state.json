@@ -1,13 +1,9 @@
 {
-  "mood": "focused",
-  "mood_message": "Win rate 82% on recent trades \u00b7 $+125.10. Executing the plan.",
-  "confidence": 0.5900000000000001,
+  "mood": "in rhythm",
+  "mood_message": "Win streak 4 \u00b7 recent $+152.02. Riding what works, not forcing size.",
+  "confidence": 0.6100000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: Scanner+spike after timeout: score=87 vol=5.2x | ATR R:R 2.0",
-    "Review trade_closed on NEXR",
-    "Commander: win",
-    "sensitivity of the scanner should be reduced to prevent sudden spikes in volume",
     "Integrate advanced scanning techniques to improve system response time and reduce timeouts.",
     "Adaptively adjust your trade signals based on recent losses and confirmations.",
     "Consider implementing multi-timeframe algorithms for better risk management.",
@@ -103,10 +99,14 @@
     "Adaptively adjust the algo's parameters based on recent performance trends and market conditions.",
     "Commander: The algorithm is learning from the recent scanner spike, which suggests it may need to tighten its risk management strategy or adapt based on subsequent events.",
     "Review trade_closed on KUST",
-    "Commander: win:council_exit: Ollama exit 100% (PPO hold)"
+    "Commander: win:council_exit: Ollama exit 100% (PPO hold)",
+    "f",
+    "x",
+    "k",
+    "Commander: Root cause: The scanner spike triggered by a timeout event."
   ],
-  "last_thought": "```json\n{\n  \"entry_time\": \"recent trade entry\",\n  \"trade_type\": \"pilot trade\",\n  \"risk_management_adjustment\": \"tighten risk management strategy or adapt based on subsequent events.\",\n  \"intuition\": \"adjust the scan score accordingly to reflect recent scanner spike.\"\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0,\n  \"intuition\": \"The trade closed on KUST with a high closing price of 0.0, indicating strong volume and potential for the market to move up quickly.\",\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1017004.0,\n  \"available_cash\": 1017004.0,\n  \"position_value\": 0.0,\n  \"nav\": 1552.08,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 10,\n  \"top_pick\": \"IWMW\",\n  \"top_score\": 80.6,\n  \"next_best\": \"BRAG\",\n  \"next_best_scor",
   "market_belief": {},
-  "trades_observed": 11,
-  "updated": "2026-06-25T11:47:14.110926"
+  "trades_observed": 12,
+  "updated": "2026-06-25T11:55:56.752280"
 }

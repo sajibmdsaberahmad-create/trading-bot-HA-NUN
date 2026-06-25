@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 100,
+  "improvements_applied": 101,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6282,6 +6282,91 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on KUST"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:55:15.191737",
+      "age": "4d 0h 52m 26s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #101",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout occurred, leading to a scanner spike after the timeout.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold was increased, indicating more stringent risk constraints.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5399999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "L",
+          "e",
+          "a",
+          "r",
+          "n",
+          "f",
+          "r",
+          "o",
+          "m",
+          "t",
+          "h",
+          "e",
+          "e",
+          "x",
+          "p",
+          "e",
+          "r",
+          "i",
+          "e",
+          "n",
+          "c",
+          "e",
+          "a",
+          "n",
+          "d",
+          "t",
+          "i",
+          "g",
+          "h",
+          "t",
+          "e",
+          "n",
+          "r",
+          "i",
+          "s",
+          "k",
+          "m",
+          "a",
+          "n",
+          "a",
+          "g",
+          "e",
+          "m",
+          "e",
+          "n",
+          "t",
+          "s",
+          "t",
+          "r",
+          "a",
+          "t",
+          "e",
+          "g",
+          "i",
+          "e",
+          "s",
+          "."
         ]
       }
     }
