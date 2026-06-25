@@ -97,6 +97,8 @@ class AIRuntimeObserver:
                 reward = reward_from_profit_hunt(
                     self.cfg, event=event, context=context,
                 )
+            elif event == "market_data_failure":
+                reward = -0.4
             else:
                 reward = shaped_reward(
                     self.cfg,

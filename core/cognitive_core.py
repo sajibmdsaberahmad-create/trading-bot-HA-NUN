@@ -561,6 +561,13 @@ class CognitiveCore:
             )
             if lesson not in self.state.learned_lessons:
                 self.state.learned_lessons.append(lesson)
+        if "market_data" in reason.lower() or trade.get("event") == "market_data_failure":
+            lesson = (
+                f"Skip {trade.get('ticker', '?')} — no IB market data; "
+                "profit hunt only on names with live bars."
+            )
+            if lesson not in self.state.learned_lessons:
+                self.state.learned_lessons.append(lesson)
         if len(self.state.learned_lessons) > 100:
             self.state.learned_lessons = self.state.learned_lessons[-100:]
 

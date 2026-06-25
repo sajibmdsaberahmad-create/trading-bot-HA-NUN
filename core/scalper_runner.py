@@ -2564,6 +2564,9 @@ class ScalperRunner:
         """Refresh 1min bars for locked targets so volume/uptrend checks stay current."""
         for target in self._locked_targets:
             ticker = target.ticker
+            blocked, _ = is_market_data_blocked(self.cfg, ticker)
+            if blocked:
+                continue
             cfg_ticker = self.cfg.TICKER
             try:
                 self.cfg.TICKER = ticker
@@ -2573,8 +2576,8 @@ class ScalperRunner:
                 )
                 if fresh is not None and len(fresh) >= 20:
                     self._scan_data_cache[ticker] = fresh
-            except Exception:
-                pass
+            except Exception as exc:
+                record_fetch_failure(self.cfg, ticker, exc, bar_size="1 min")
             finally:
                 self.cfg.TICKER = cfg_ticker
 

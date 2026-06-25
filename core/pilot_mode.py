@@ -79,6 +79,12 @@ def get_live_scan_universe(
             seen.add(t)
             out.append(t)
 
+    try:
+        from core.market_data_learning import filter_tradeable_tickers
+        out = filter_tradeable_tickers(cfg, out)
+    except Exception:
+        pass
+
     if not out:
         log.warning(
             "🔴 Live IB scanner returned 0 tickers — no static fallback. "

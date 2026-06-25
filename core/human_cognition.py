@@ -96,12 +96,21 @@ def enrich_prompt(
     except Exception:
         pass
 
+    md_line = ""
+    try:
+        from core.market_data_learning import prompt_block as md_prompt
+        if cfg is not None:
+            md_line = md_prompt(cfg) + "\n"
+    except Exception:
+        pass
+
     return (
         f"TASK: {task}\n"
         f"Mental state: mood={mood} | self-confidence={confidence:.0%}\n"
         f"{lesson_line}"
         f"{commander_line}"
         f"{profit_hunt_line}"
+        f"{md_line}"
         f"Use full computational reasoning AND gut feel — profit hunting is the main goal.\n"
         f"DATA:\n{json.dumps(context, default=str)[:3500]}\n"
     )
