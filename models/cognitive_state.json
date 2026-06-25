@@ -1,13 +1,9 @@
 {
-  "mood": "steady",
-  "mood_message": "Mixed session \u00b7 $+54586.50. Watching for cleaner setups.",
+  "mood": "anxious",
+  "mood_message": "I'm feeling stressed due to the high recent trade counts and lower winning rate.",
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "When: The loss streak occurred after a stop_breach event.",
-    "How: Follow the trades closely and analyze the trading algo to identify areas for improvement.",
-    "Commander: Why: The trader was in a low position due to the stop_breach event, leading to losses.",
-    "b",
     "Commander: The trade closed due to a loss: stop_breach at -0.36999999999999744.",
     ",",
     "Commander: The event indicates that the algorithm is experiencing a temporary halt during execution and triggers an opportunity hunt for profit. The market data failure suggests potential missed profit hunting without live IB bars.",
@@ -103,10 +99,14 @@
     "m",
     "j",
     "p",
-    "Commander: - Council exit occurred due to the exit percentage being too high."
+    "Commander: - Council exit occurred due to the exit percentage being too high.",
+    "Review trade_closed on GPUS",
+    "Commander: council_exit: Ollama exit 85% (PPO hold)",
+    "Spike-top hunt on GDC: spike_top_intrabar: +1.52% vol=240460.0x",
+    "Profit hunt worked on GDC: spike_top_intrabar: +1.52% vol=240460.0x \u2014 reinforce opportunistic exits."
   ],
   "last_thought": "```json\n{\n  \"trade\": {\n    \"ticker\": \"GPUS\",\n    \"entry\": 0.0133,\n    \"exit\": 0.0133,\n    \"entry_fill\": 0.0133,\n    \"exit_fill\": 0.0133,\n    \"quote_entry\": 0.0133,\n    \"quote_exit\": 0.1768,\n    \"shares\": 1200.0,\n    \"pnl_usd\": 0.0,\n    \"pnl_pct\": 0.0,\n    \"result\": \"loss\",\n    \"exit_reason\": \"council_exit: Ollama exit 85% (PPO hold)\",\n    \"entry_slippage_pct\": -0.925239,\n    \"exit_slippage_pct\": -0.924774,\n    \"limit_px\": 0.1779,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hol",
   "market_belief": {},
-  "trades_observed": 14,
-  "updated": "2026-06-25T16:28:25.427759"
+  "trades_observed": 16,
+  "updated": "2026-06-25T16:29:06.208799"
 }

@@ -2249,3 +2249,7 @@ Trade closed, council_exit: Ollama exit 100% (PPO hold)
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence level by 13%.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:28:39.326145+00:00
+Observed trade_closed — recorded for learning.
+council_exit: Ollama exit 85% (PPO hold)
+

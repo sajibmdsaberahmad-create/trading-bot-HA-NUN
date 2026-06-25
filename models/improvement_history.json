@@ -3579,5 +3579,14 @@
       "s",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:28:39.326633+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on GPUS"
+    ]
   }
 ]
