@@ -832,13 +832,22 @@ class ScalperRunner:
             opened_at = getattr(self, "_position_opened_at", 0.0)
             if opened_at and (time.time() - opened_at) < 60.0:
                 return
-            self._credit_exit_proceeds(self._prev_shares, current_px)
-            pnl = (current_px - self._entry_price) * self._prev_shares
-            pnl_pct = ((current_px / self._entry_price) - 1) * 100 if self._entry_price else 0
-            result = "win" if pnl > 0 else "loss"
-            log.info(f"📕 EXIT: {self.current_ticker} @ ${current_px:.2f} | P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%) | {result.upper()}")
+            closed_ticker = self.current_ticker or ""
+            bracket = self._bracket_by_ticker.get(closed_ticker) or self.bracket_handle
+            trade_rec = self._build_trade_close_record(
+                closed_ticker, current_px, "bracket_exit", bracket=bracket,
+            )
+            exit_fill = float(trade_rec.get("exit_fill") or current_px)
+            pnl = float(trade_rec.get("pnl_usd", 0))
+            pnl_pct = float(trade_rec.get("pnl_pct", 0))
+            result = trade_rec.get("result", "loss")
+            self._credit_exit_proceeds(self._prev_shares, exit_fill)
+            log.info(
+                f"📕 EXIT: {closed_ticker} fill ${exit_fill:.4f} "
+                f"(quote ${current_px:.4f}) | P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%) | {result.upper()}"
+            )
             exit_ctx = {
-                "ticker": self.current_ticker,
+                "ticker": closed_ticker,
                 "pnl_usd": round(pnl, 2),
                 "pnl_pct": round(pnl_pct, 2),
                 "result": result,
@@ -848,7 +857,7 @@ class ScalperRunner:
                 send_dynamic_notification(
                     self.notifier, self.autopilot, "trade_closed",
                     self._notify_context(exit_ctx),
-                    f"📕 EXIT {self.current_ticker} | P&L ${pnl:+.2f} ({pnl_pct:+.1f}%) | {result.upper()}",
+                    f"📕 EXIT {closed_ticker} | P&L ${pnl:+.2f} ({pnl_pct:+.1f}%) | {result.upper()}",
                     ai_commander=self.ai_commander,
                     consciousness=self.consciousness,
                     pilot=self.pilot,
@@ -856,90 +865,13 @@ class ScalperRunner:
             else:
                 self.notifier.info(
                     f"📕 HANOON EXIT\n"
-                    f"Ticker: {self.current_ticker}\n"
-                    f"Exit: ${current_px:.2f}\n"
-                    f"Entry: ${self._entry_price:.2f}\n"
+                    f"Ticker: {closed_ticker}\n"
+                    f"Exit fill: ${exit_fill:.4f}\n"
+                    f"Entry fill: ${trade_rec.get('entry_fill', self._entry_price):.4f}\n"
                     f"P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%)\n"
                     f"Result: {result.upper()}"
                 )
-            trade_rec = {
-                "ticker": self.current_ticker,
-                "entry": self._entry_price,
-                "exit": current_px,
-                "shares": self._prev_shares,
-                "pnl_usd": round(pnl, 2),
-                "pnl_pct": round(pnl_pct, 2),
-                "result": result,
-            }
-            self.trade_journal.append(trade_rec)
-            if self.ai_commander:
-                self.ai_commander.record_trade(trade_rec)
-            try:
-                self.account_evaluator.evaluate(
-                    self, "trade_closed", ai_commander=self.ai_commander,
-                )
-            except Exception:
-                pass
-            observe_trade_everywhere(
-                trade_rec, self.autopilot, self.consciousness, self.pilot, cfg=self.cfg,
-            )
-            hold_sec = time.time() - getattr(self, "_position_opened_at", 0.0)
-            regime = getattr(self, "_last_entry_regime", "")
-            entry_slip = float(self._last_entry_telemetry.get("slippage_pct", 0))
-            entry_px = self._entry_price
-            stop_px = float(getattr(self, "_position_stop", 0) or 0)
-            target_px = float(getattr(self, "_position_target", 0) or 0)
-            atr = float(self._last_entry_telemetry.get("atr", 0) or 0)
-            exit_type = "other"
-            if stop_px > 0 and current_px <= stop_px * 1.003:
-                exit_type = "stop_hit"
-            elif target_px > 0 and current_px >= target_px * 0.997:
-                exit_type = "target_hit"
-            elif pnl > 0:
-                exit_type = "profit_exit"
-            elif pnl < 0:
-                exit_type = "loss_exit"
-            noise_sec = float(getattr(self.cfg, "REGIME_ATR_NOISE_STOP_SEC", 120.0))
-            noise_stop = exit_type == "stop_hit" and hold_sec < noise_sec
-            from core.trade_telemetry import _raw_rr
-            log_regime_atr_outcome(
-                ticker=self.current_ticker or trade_rec.get("ticker", "?"),
-                regime=regime,
-                exit_type=exit_type,
-                entry=entry_px,
-                exit_px=current_px,
-                stop=stop_px,
-                target=target_px,
-                atr=atr,
-                hold_sec=hold_sec,
-                pnl_usd=pnl,
-                planned_rr=_raw_rr(entry_px, stop_px, target_px),
-                noise_stop=noise_stop,
-            )
-            log_exit_postmortem(
-                ticker=self.current_ticker or trade_rec.get("ticker", "?"),
-                entry=self._entry_price,
-                exit_px=current_px,
-                shares=self._prev_shares,
-                pnl_usd=pnl,
-                pnl_pct=pnl_pct,
-                result=result,
-                regime=regime,
-                hold_sec=hold_sec,
-                entry_slippage_pct=entry_slip,
-            )
-            self._observe_runtime(
-                "trade_closed",
-                ticker=trade_rec.get("ticker", ""),
-                reason=result,
-                pnl_usd=pnl,
-                pnl_pct=pnl_pct,
-                won=(result == "win"),
-                exit_type=exit_type,
-                hold_sec=hold_sec,
-                regime=regime,
-                market_state=get_market_state(self.cfg),
-            )
+            self._apply_trade_close_learning(trade_rec, closed_ticker)
             self.risk.record_trade_result(pnl)
             if self.risk.needs_learning_session:
                 self._service_loss_streak_learning()
@@ -947,33 +879,7 @@ class ScalperRunner:
                 self.shadow_circuit.on_live_trade_closed(pnl, self.account_equity)
             except Exception:
                 pass
-            try:
-                slot = self._position_slots.get(self.current_ticker or "", {})
-                buffer_append({
-                    "source": "live_trade",
-                    "ticker": self.current_ticker,
-                    "action": "SELL",
-                    "exit_price": current_px,
-                    "entry_price": self._entry_price,
-                    "pnl_usd": round(pnl, 2),
-                    "win": 1 if pnl > 0 else 0,
-                    "reward": reward_from_trade(pnl, self.cfg, slippage_pct=entry_slip),
-                    "regime": regime,
-                    "confidence": getattr(self, "_last_ai_confidence", 0.5),
-                    "vision_read": (slot.get("vision_read") or "")[:800],
-                    "features": snapshot_features(self._feature_buffer, self.cfg),
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                })
-            except Exception:
-                pass
-            if getattr(self.cfg, "LEARNING_PUSH_ON_TRADE", True):
-                try:
-                    push_learning_checkpoint_async(f"trade_closed_{trade_rec.get('ticker', '?')}")
-                except Exception:
-                    pass
-            
-            # Remove from active positions
-            closed_ticker = self.current_ticker
+
             if hasattr(self, '_active_positions'):
                 self._active_positions = [
                     p for p in self._active_positions if p["ticker"] != closed_ticker
@@ -981,23 +887,21 @@ class ScalperRunner:
             if closed_ticker:
                 self._position_slots.pop(closed_ticker, None)
                 self._bracket_by_ticker.pop(closed_ticker, None)
-            
+                self._risk_plans.pop(closed_ticker, None)
+
             self.current_ticker = None
             self.bracket_handle = None
             self._position_opened_at = 0.0
-            # Queue next opportunity if background watch found one
             if getattr(self, "_next_best_pick", None) and self._next_best_score >= 25:
                 self.top_pick = self._next_best_pick
             self._position_stop = 0.0
             self._position_target = 0.0
             self._position_peak = 0.0
             self._hard_stop_floor = 0.0
-            # Clean up live stream for closed position
             if self._active_stream_ticker:
                 self._stop_target_stream(self._active_stream_ticker)
                 self._active_stream_ticker = None
-            
-            # Train from exit event (background — must not block scan/entry loop)
+
             try:
                 self._schedule_self_train()
             except Exception:
@@ -4089,9 +3993,22 @@ class ScalperRunner:
 
         self._clear_pending_entry()
         self._entry_poll_state = None
+        opened_at = time.time()
+        tel = getattr(self, "_last_entry_telemetry", {}) or {}
+        limit_px = tel.get("limit_px")
+        parent_trade = None
+        if self.bracket_handle and self.bracket_handle.parent_trade:
+            parent_trade = self.bracket_handle.parent_trade
+        entry_fill = resolve_entry_fill(
+            self.ib, symbol=ticker, parent_trade=parent_trade, quote_px=fill_px,
+        )
+        if entry_fill > 0:
+            fill_px = entry_fill
         cost = shares * fill_px * (1 + self.cfg.TRANSACTION_COST_PCT)
         self.bot_cash -= cost
-        opened_at = time.time()
+        slippage_pct = 0.0
+        if limit_px and float(limit_px) > 0:
+            slippage_pct = (fill_px - float(limit_px)) / float(limit_px)
         vision_read = ""
         if self.ai_commander:
             try:
@@ -4105,6 +4022,11 @@ class ScalperRunner:
         slot = {
             "shares": float(shares),
             "entry_price": fill_px,
+            "entry_fill_px": fill_px,
+            "limit_px": float(limit_px) if limit_px else None,
+            "entry_slippage_pct": round(slippage_pct, 6),
+            "entry_mode": str(tel.get("entry_mode", "market")),
+            "regime": str(tel.get("regime", getattr(self, "_last_entry_regime", ""))),
             "stop": plan.initial_stop_price,
             "target": plan.take_profit_price,
             "peak": fill_px,
@@ -4181,11 +4103,18 @@ class ScalperRunner:
                 f"Target: ${plan.take_profit_price:.2f}\nDeployed: ${cost:,.0f}"
             )
         push_trade(ticker, "BUY", fill_px, shares)
-        tel = getattr(self, "_last_entry_telemetry", {}) or {}
-        limit_px = tel.get("limit_px")
-        slippage_pct = 0.0
-        if limit_px and float(limit_px) > 0:
-            slippage_pct = (fill_px - float(limit_px)) / float(limit_px)
+        append_fill_ledger({
+            "event": "entry_fill",
+            "ticker": ticker,
+            "entry_fill": round(fill_px, 4),
+            "limit_px": float(limit_px) if limit_px else None,
+            "entry_slippage_pct": round(slippage_pct, 6),
+            "shares": shares,
+            "stop": plan.initial_stop_price,
+            "target": plan.take_profit_price,
+            "entry_mode": str(tel.get("entry_mode", "market")),
+            "regime": str(tel.get("regime", getattr(self, "_last_entry_regime", ""))),
+        })
         snap_parsed = {}
         if self.ai_commander:
             snap = self.ai_commander.ollama_audit_snapshot(ticker)
