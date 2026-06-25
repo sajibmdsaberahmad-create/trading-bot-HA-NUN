@@ -542,12 +542,27 @@ class CognitiveCore:
 
     def _extract_lessons(self, trade: Dict):
         pnl = trade.get("pnl_usd", 0)
+        reason = str(trade.get("exit_reason", "") or "")
         if pnl < -500:
             lesson = f"Large loss detected: {trade.get('ticker', '?')}. Review stop placement."
             if lesson not in self.state.learned_lessons:
                 self.state.learned_lessons.append(lesson)
-                if len(self.state.learned_lessons) > 100:
-                    self.state.learned_lessons = self.state.learned_lessons[-100:]
+        if "missed_profit_hunt" in reason.lower() or trade.get("event") == "missed_profit_hunt":
+            lesson = (
+                f"Missed spike-top on {trade.get('ticker', '?')}: "
+                "hunt momentum bursts — do not wait for passive giveback."
+            )
+            if lesson not in self.state.learned_lessons:
+                self.state.learned_lessons.append(lesson)
+        if any(k in reason for k in ("spike_top", "profit_hunt", "wave_end_spike")):
+            lesson = (
+                f"Profit hunt worked on {trade.get('ticker', '?')}: "
+                f"{reason[:80]} — reinforce opportunistic exits."
+            )
+            if lesson not in self.state.learned_lessons:
+                self.state.learned_lessons.append(lesson)
+        if len(self.state.learned_lessons) > 100:
+            self.state.learned_lessons = self.state.learned_lessons[-100:]
 
     # ── Knowledge Management ──────────────────────────────────────────────
 

@@ -91,13 +91,20 @@ class AIRuntimeObserver:
 
     def _record_experience(self, event: str, context: Dict[str, Any]) -> None:
         try:
-            reward = shaped_reward(
-                self.cfg,
-                float(context.get("pnl_usd", 0) or 0),
-                event=event,
-                bracket_rejected=event == "bracket_reject",
-                spike_ratio=float(context.get("spike_ratio", 1.0) or 1.0),
-            )
+            from core.reward_shaping import shaped_reward, reward_from_profit_hunt
+
+            if event == "missed_profit_hunt":
+                reward = reward_from_profit_hunt(
+                    self.cfg, event=event, context=context,
+                )
+            else:
+                reward = shaped_reward(
+                    self.cfg,
+                    float(context.get("pnl_usd", 0) or 0),
+                    event=event,
+                    bracket_rejected=event == "bracket_reject",
+                    spike_ratio=float(context.get("spike_ratio", 1.0) or 1.0),
+                )
             buffer_append({
                 "source": "runtime_observer",
                 "action": event.upper(),

@@ -150,6 +150,7 @@ def _update_weights_from_buffer():
         "buffer_total": stats.get("total", 0),
         "buffer_win_rate": round(win_rate, 3),
         "sources": stats.get("sources", {}),
+        "missed_profit_hunts": stats.get("missed_profit_hunts", 0),
     }
     with open(WEIGHTS_PATH, "w") as f:
         json.dump(weights, f, indent=2)
@@ -206,6 +207,16 @@ def _generate_guidelines(weights: dict) -> str:
             rules.append("Win rate strong: consider larger size and wider targets")
         else:
             rules.append("Win rate stable: maintain current risk parameters")
+        rules.append(
+            "Profit hunting: tune SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO — "
+            "exit into momentum spikes, not passive giveback waits"
+        )
+        missed = weights.get("_meta", {}).get("missed_profit_hunts", 0)
+        if missed and int(missed) >= 3:
+            rules.append(
+                f"Missed profit hunts ({missed}): lower SPIKE_TOP thresholds, "
+                "enable faster intra-bar exits"
+            )
         rules_text = "\n".join(f"• {r}" for r in rules)
         return rules_text
     except Exception:

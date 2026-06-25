@@ -1635,6 +1635,8 @@ class AICommander:
             f"Risk engine signal for {ticker}: {risk_signal}\n"
             f"{json.dumps(ctx, default=str)[:700]}\n"
             f"PPO exit: {ppo_exit} conf={ppo_conf:.2f} {ppo_reason[:80]}\n"
+            "Mechanical profit hunts (spike_top, trailing_profit, hard_take_profit) "
+            "should EXIT unless clear continuation evidence — be opportunistic.\n"
             'JSON: {"exit":true/false,"confidence":0-1,"reason":"why"}'
         )
         if getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):

@@ -158,6 +158,8 @@ def generate_runtime_event_plan(
         "  WHEN does it tend to occur? (session, regime)\n"
         "  HOW should the algo change? (params, logic hints)\n"
         "  WHAT prevents recurrence? (concrete mutations)\n\n"
+        "If event is missed_profit_hunt: lower SPIKE_TOP_MIN_GAIN_PCT or "
+        "SPIKE_TOP_MIN_VOL_RATIO within bounds; prioritize opportunistic exits.\n\n"
         f"EVENT: {event}\n"
         f"DETAIL:\n{json.dumps(detail, default=str)[:1500]}\n\n"
         f"TRIGGER:\n{context.get('trigger', '')[:800]}\n\n"

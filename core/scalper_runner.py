@@ -1260,6 +1260,16 @@ class ScalperRunner:
             self._record_early_exit_learning(
                 ticker, entry_price, current_px, float(quantity), pnl, reason,
             )
+            if is_mechanical_profit_exit(reason):
+                record_profit_hunt_learning(
+                    self.cfg,
+                    event=reason.split(":")[0],
+                    ticker=ticker,
+                    context={"reason": reason, **getattr(self, "_profit_hunt_spike_ctx", {})},
+                    pnl_usd=pnl,
+                    won=pnl > 0,
+                )
+            self._reset_profit_hunt_state()
             if self.risk.needs_learning_session:
                 self._service_loss_streak_learning()
             if hasattr(self, '_active_positions'):

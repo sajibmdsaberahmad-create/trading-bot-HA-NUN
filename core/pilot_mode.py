@@ -484,8 +484,11 @@ def generative_position_decision(
         "- WIDEN_STOP: lower stop for volatility noise ONLY if still above hard_floor\n"
         "- TIGHTEN_STOP: raise stop to lock profit\n"
         "- RAISE_TP: extend take-profit when momentum strong\n"
-        "- EXIT: close now if gut says momentum is dead or slippage risk high\n"
+        "- EXIT: close now if gut says momentum is dead, slippage risk high, "
+        "OR a clean spike top just printed (profit hunt — sell INTO the burst)\n"
         "- HOLD: no change\n"
+        "Profit hunting: opportunistically take profit on spike tops + volume bursts; "
+        "learn SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO from outcomes.\n"
         'Reply ONLY valid JSON: {"action":"HOLD|WIDEN_STOP|TIGHTEN_STOP|RAISE_TP|EXIT",'
         '"stop":0.00,"target":0.00,"gut_feel":0.0-1.0,"intuition":"gut read","reason":"brief"}'
     )
