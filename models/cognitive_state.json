@@ -58,10 +58,20 @@
     "Adapt based on recent wins and losses to improve performance.",
     "Refactor code and optimize algorithms to reduce complexity.",
     "Commander: The council timeout happened after the scanner spike, which suggests that the algorithm's execution was too complex for the system to handle. This could indicate issues with the current model or the data pipeline.",
-    "Review council_timeout on EHGO"
+    "Review council_timeout on EHGO",
+    "Review council_timeout on INLF",
+    "W",
+    ":",
+    "I",
+    "b",
+    "`",
+    "_",
+    ",",
+    "x",
+    "Commander: Why: The algo detects a council timeout due to no aligned signal. When it occurs, it increases the scan score and confidence level. It then executes the `timeout_pass` strategy to align signals correctly."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": \"The recent data shows a consistent trading strategy with the scanner spikes indicating complex models and data pipelines. I am cautiously optimistic about the current model's performance, but the algorithm complexity might need further optimization.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T08:52:37.897630"
+  "updated": "2026-06-25T08:58:16.450862"
 }
