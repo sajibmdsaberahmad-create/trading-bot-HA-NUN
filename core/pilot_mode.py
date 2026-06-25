@@ -114,18 +114,27 @@ def is_ai_council_mode(cfg: BotConfig) -> bool:
 
 def effective_max_locked_targets(cfg: BotConfig) -> int:
     if is_ai_unlimited(cfg):
+        from core.ai_session_limits import get_session_limit, should_ai_define_limits
+        if should_ai_define_limits(cfg):
+            return int(get_session_limit(cfg, "watch_pool", getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30)))
         return int(getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30))
     return int(getattr(cfg, "MAX_LOCKED_TARGETS", 5))
 
 
 def effective_max_concurrent_positions(cfg: BotConfig) -> int:
     if is_ai_unlimited(cfg):
+        from core.ai_session_limits import get_session_limit, should_ai_define_limits
+        if should_ai_define_limits(cfg):
+            return int(get_session_limit(cfg, "max_positions", getattr(cfg, "AI_MAX_CONCURRENT_POSITIONS", 50)))
         return int(getattr(cfg, "AI_MAX_CONCURRENT_POSITIONS", 50))
     return int(getattr(cfg, "MAX_CONCURRENT_POSITIONS", 5))
 
 
 def effective_min_lock_score(cfg: BotConfig) -> float:
     if is_ai_unlimited(cfg):
+        from core.ai_session_limits import get_session_limit, should_ai_define_limits
+        if should_ai_define_limits(cfg):
+            return float(get_session_limit(cfg, "min_lock_score", getattr(cfg, "AI_MIN_LOCK_SCORE", 0.0)))
         return float(getattr(cfg, "AI_MIN_LOCK_SCORE", 0.0))
     return float(getattr(cfg, "MIN_LOCK_SCORE", 30.0))
 
@@ -224,6 +233,11 @@ def get_ai_deploy_budget(
     deployable = max(0.0, available_cash * (1.0 - reserve_pct))
     per_slot = deployable / slots_left
 
+    limits = getattr(cfg, "_ai_session_limits", None) or {}
+    deploy_pct_slot = limits.get("deploy_pct_per_slot")
+    if deploy_pct_slot and account_equity > 0:
+        per_slot = min(per_slot, account_equity * float(deploy_pct_slot))
+
     max_pct = float(getattr(cfg, "AI_MAX_DEPLOY_PCT", 0.0))
     if max_pct > 0 and account_equity > 0:
         per_slot = min(per_slot, account_equity * max_pct)
@@ -241,6 +255,14 @@ def get_trade_risk_usd(cfg: BotConfig, account_equity: float = 0.0) -> float:
     """Per-trade risk budget — paper free uses full equity %; live uses capped risk."""
     if getattr(cfg, "USE_FIXED_RISK_CAP", False):
         return float(getattr(cfg, "HARD_STOP_USD", 50.0))
+    try:
+        from core.ai_session_limits import get_ai_risk_usd, should_ai_define_limits
+        if should_ai_define_limits(cfg):
+            ai_risk = get_ai_risk_usd(cfg, account_equity)
+            if ai_risk is not None and ai_risk > 0:
+                return ai_risk
+    except Exception:
+        pass
     if account_equity > 0:
         return cfg.risk_amount_usd(account_equity)
     if is_paper_free_learning(cfg):

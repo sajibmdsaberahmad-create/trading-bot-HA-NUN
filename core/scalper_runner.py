@@ -125,7 +125,10 @@ from core.fill_tracker import (
     resolve_exit_fill,
 )
 from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
-from core.account_evaluator import AccountEvaluator
+from core.ai_session_limits import (
+    bootstrap_ai_session_limits, format_limits_log, maybe_refresh_session_limits,
+    should_ai_define_limits,
+)
 from core.telegram_listener import TelegramCommandListener
 from core.commander_learning import load_commander_guidance, run_commander_learning_cycle
 from core.ai_guardrails import build_ppo_observation
@@ -1675,16 +1678,17 @@ class ScalperRunner:
                 "🧠 RUNTIME OBSERVER: live 5W reasoning on cancels/trades/errors → "
                 "auto-apply guardrailed fixes + PPO buffer"
             )
-        log.info(
-            f"Max per trade: {'$' + format(self.cfg.MAX_TRADE_SIZE_USD, ',.0f') if getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False) else 'AI-sized'} "
-            f"| Multi-position: {self._max_concurrent()} "
-            f"| Watch pool: {self._max_locked()} "
-            f"| AI unlimited: {is_ai_unlimited(self.cfg)} "
-            f"| Fixed deploy: {getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False)} "
-            f"| Fixed risk: {getattr(self.cfg, 'USE_FIXED_RISK_CAP', False)} "
-            f"| Account halt: {getattr(self.cfg, 'USE_ACCOUNT_LOSS_HALT', False)} "
-            f"| Risk/trade: ${self.cfg.risk_amount_usd(self.account_equity):.2f}"
-        )
+        self._refresh_account_balance()
+        bootstrap_ai_session_limits(self)
+        if not should_ai_define_limits(self.cfg):
+            log.info(
+                f"Max per trade: {'$' + format(self.cfg.MAX_TRADE_SIZE_USD, ',.0f') if getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False) else 'AI-sized'} "
+                f"| Multi-position: {self._max_concurrent()} "
+                f"| Watch pool: {self._max_locked()} "
+                f"| Fixed deploy: {getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False)} "
+                f"| Fixed risk: {getattr(self.cfg, 'USE_FIXED_RISK_CAP', False)} "
+                f"| Risk/trade: ${get_trade_risk_usd(self.cfg, self.account_equity):.2f}"
+            )
         if getattr(self.cfg, "PILOT_MODE_ENABLED", True) and hasattr(self, "pilot"):
             vs = self.pilot.get_veteran_status()
             log.info(
