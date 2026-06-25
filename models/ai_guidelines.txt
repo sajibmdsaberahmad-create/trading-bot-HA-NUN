@@ -4302,3 +4302,14 @@ The primary reason is that the algorithm was trailing profits during this period
 Observed trade_closed — recorded for learning.
 trailing_profit
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:39:53.755876+00:00
+A trade closed with a council_exit: Ollama exit 98% (PPO hold) event.
+The event occurred due to the Ollama exit being close to the PPO hold ratio, which triggered the council_exit. This was an opportunistic move to avoid losses.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The event occurred due to the PPO hold ratio being close to 98%, which triggered the council_exit.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:39:56.549103+00:00
+Market data failure occurred due to missing profit hunting event.
+The market data failure indicates that the algorithm failed to identify profitable trades due to an empty loss streak.
+• ...
+

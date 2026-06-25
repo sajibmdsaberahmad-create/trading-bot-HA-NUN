@@ -997,5 +997,31 @@
     "lessons": [
       "Review trade_closed on NEXR"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:39:53.756661+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The event occurred due to the PPO hold ratio being close to 98%, which triggered the council_exit.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "A trade closed with a council_exit: Ollama exit 98% (PPO hold) event.",
+    "lessons": [
+      "Analyze market data and identify potential exits."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:39:56.549331+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Market data failure occurred due to missing profit hunting event.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We should prioritize opportunistic exits and add a ticker for live IB bars if it occurs.'}"
+    ]
   }
 ]

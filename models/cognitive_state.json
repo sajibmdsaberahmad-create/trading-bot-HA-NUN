@@ -1,15 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 10% \u00b7 $-10924.36. Preserving capital over action.",
+  "mood_message": "Win rate 5% \u00b7 $-14266.86. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "v",
-    "f",
-    "Commander: The event occurred due to trailing profit, which was not aligned with the algorithmic strategy. The trader should focus on identifying potential risks and taking appropriate measures.",
-    "Commander: The trade was triggered by a trailing profit and ended without being executed.",
-    "Spike-top hunt on NEXR: spike_top_intrabar: +2.28% vol=2.7x",
-    "Profit hunt worked on NEXR: spike_top_intrabar: +2.28% vol=2.7x \u2014 reinforce opportunistic exits.",
     "Commander: spike_top_intrabar: +2.28% vol=2.7x",
     "Commander: The trade was triggered by a trailing profit, which indicates a prolonged period of loss followed by an opportunity for profit.",
     "{'param': 'market_state', 'value': 'open', 'reason': 'The market state is open, indicating that trades were executed without any live IB bars.'}",
@@ -103,10 +97,16 @@
     "Large loss detected: NEXR. Review stop placement.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold for exit signals needs to be adjusted.'}",
     "Commander: The primary reason is that the algorithm was trailing profits during this period.",
-    "Commander: trailing_profit"
+    "Commander: trailing_profit",
+    "Analyze the details",
+    "Adjust logic and conditions",
+    "Analyze market data and identify potential exits.",
+    "Commander: The event occurred due to the Ollama exit being close to the PPO hold ratio, which triggered the council_exit. This was an opportunistic move to avoid losses.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'We should prioritize opportunistic exits and add a ticker for live IB bars if it occurs.'}",
+    "Commander: The market data failure indicates that the algorithm failed to identify profitable trades due to an empty loss streak."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.85,\n  \"trade_decisions\": [\n    {\n      \"name\": \"TZA\",\n      \"action\": \"hunting\",\n      \"reason\": \"profit hunting is the main goal.\",\n      \"events\": [\n        { \"ticker\": \"TZA\", \"price\": 0.0, \"score\": 97.6, \"reason\": \"scanner:MOST_ACTIVE#2\" },\n        { \"ticker\": \"NEXR\", \"price\": 0.0, \"score\": 0.0, \"reason\": \"no trade results\" }\n      ]\n    },\n    {\n      \"name\": \"GDC\",\n      \"action\": \"hunting\",\n      \"reason\": \"profit hunting is the main goal.\",\n    ",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 0.95,\n  \"prompt_data\": {\n    \"trade_order_id\": \"0\",\n    \"order_type\": \"buy\",\n    \"symbol\": \"GDC\",\n    \"price\": 0.0,\n    \"volume\": 0.0\n  },\n  \"realization\": -1427.6899999999995,\n  \"profit\": -137.68999999999995,\n  \"outcome\": {\n    \"symbol\": \"GDC\",\n    \"price\": 0.0,\n    \"volume\": 0.0,\n    \"reason\": \"No profit recorded for the order\"\n  },\n  \"order_confirmation\": true\n}\n```",
   "market_belief": {},
-  "trades_observed": 35,
-  "updated": "2026-06-25T17:39:11.112927"
+  "trades_observed": 38,
+  "updated": "2026-06-25T17:39:56.518265"
 }
