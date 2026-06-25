@@ -86,13 +86,22 @@ def record_failure_for_learning(
         log.debug(f"Failure learning record: {exc}")
 
     try:
-        from core.post_mortem_audit import append_post_mortem
+        from datetime import datetime, timezone
+        from pathlib import Path
+        import json
 
-        append_post_mortem(
-            ticker=ticker,
-            event=event,
-            reason=reason,
-            learn_mode=True,
-        )
+        path = Path("models/post_mortem_audit.jsonl")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        row = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "event": event,
+            "ticker": ticker,
+            "reason": (reason or "")[:300],
+            "learn_mode": True,
+        }
+        if extra:
+            row.update(extra)
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, separators=(",", ":")) + "\n")
     except Exception:
         pass

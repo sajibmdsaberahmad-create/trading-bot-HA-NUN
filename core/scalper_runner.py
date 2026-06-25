@@ -32,6 +32,12 @@ import pandas as pd
 import requests
 
 from core.config import BotConfig
+from core.ai_learning_policy import (
+    learn_dont_block,
+    failure_cooldown_sec,
+    should_permanent_blacklist,
+    record_failure_for_learning,
+)
 from core.connector import IBConnector
 from core.data import DataManager
 from core.features_enhanced import FeatureEngineerEnhanced
@@ -189,7 +195,9 @@ class ScalperRunner:
         self._focus_target_index: int = 0
         self._last_focus_rotate: float = 0.0
         self._last_entry_attempt_at: float = 0.0
-        self._contract_blacklist: set = set(CONTRACT_BLACKLIST)
+        self._contract_blacklist: set = (
+            set() if learn_dont_block(cfg) else set(CONTRACT_BLACKLIST)
+        )
         self._last_scan_time: float = 0.0
         self._last_metrics_write: float = 0.0
         self._last_ai_narrative: float = 0.0
