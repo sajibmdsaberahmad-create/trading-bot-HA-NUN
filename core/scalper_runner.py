@@ -69,6 +69,11 @@ from core.fast_execution import (
     prioritize_locked_targets,
     stream_priority_count,
     warm_priority_count,
+    fast_monitor_interval,
+    priority_tick_streams,
+    max_spike_attempts_per_cycle,
+    monitor_ticker_list,
+    is_priority_ticker,
 )
 from core.connector import IBConnector
 from core.data import DataManager
@@ -1874,7 +1879,8 @@ class ScalperRunner:
                                 self._service_loss_streak_learning()
                             if not in_position:
                                 self._maybe_rotate_locked_focus(now)
-                            if now - getattr(self, '_last_fast_monitor', 0) > 1.0:
+                            monitor_iv = fast_monitor_interval(self.cfg)
+                            if now - getattr(self, '_last_fast_monitor', 0) > monitor_iv:
                                 self._last_fast_monitor = now
                                 self._fast_monitor_locked(scout_only=at_max)
                             self._drain_bar_prefetch_queue()
@@ -2211,9 +2217,10 @@ class ScalperRunner:
 
         prefetch_tickers = [p.ticker for p in self._locked_targets]
         self._schedule_bar_prefetch(prefetch_tickers)
+        # Streams first — tick data accumulates while bars warm in parallel
+        self._ensure_locked_streams()
         self._warm_locked_bar_cache()
 
-        self._ensure_locked_streams()
         self._attempt_scan_bootstrap_entry()
 
         try:
@@ -2230,8 +2237,13 @@ class ScalperRunner:
         return True
 
     def _schedule_bar_prefetch(self, tickers: List[str]):
-        """Queue 1-min bar prefetch for locked names (drained on main IB thread)."""
-        for ticker in tickers:
+        """Queue 1-min bar prefetch — priority names at front of queue."""
+        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
+        priority = warm_ticker_list(self._locked_targets, self.cfg, focus)
+        priority_set = {t.upper() for t in priority}
+        ordered = [t for t in priority if t in tickers]
+        ordered += [t for t in tickers if t.upper() not in priority_set]
+        for ticker in ordered:
             if (
                 ticker
                 and ticker not in self._scan_data_cache
@@ -2239,14 +2251,20 @@ class ScalperRunner:
             ):
                 self._bar_prefetch_queue.append(ticker)
         if self._bar_prefetch_queue:
-            log.debug(f"Bar prefetch queued: {self._bar_prefetch_queue}")
+            log.debug(f"Bar prefetch queued: {self._bar_prefetch_queue[:12]}")
+
+    def _min_bars_for(self, ticker: str) -> int:
+        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
+        return min_bars_for_ticker(self.cfg, ticker, focus)
 
     def _prefetch_one_ticker_bars(self, ticker: str, quiet: bool = True) -> Optional[pd.DataFrame]:
         """Fetch short 1-min history for one ticker on the main IB thread."""
         if not ticker or ticker in self._contract_blacklist:
             return None
-        if ticker in self._scan_data_cache and len(self._scan_data_cache[ticker]) >= 20:
-            return self._scan_data_cache[ticker]
+        need = self._min_bars_for(ticker)
+        cached = self._scan_data_cache.get(ticker)
+        if cached is not None and len(cached) >= need:
+            return cached
         cfg_ticker = self.cfg.TICKER
         try:
             self.cfg.TICKER = ticker
@@ -2255,12 +2273,16 @@ class ScalperRunner:
             fresh = dm.fetch_historical(
                 duration=duration, bar_size="1 min", use_rth=False, quiet=quiet,
             )
-            if fresh is not None and len(fresh) >= 20:
+            min_accept = need if ai_fast_execution(self.cfg) else 20
+            if fresh is not None and len(fresh) >= min_accept:
                 self._scan_data_cache[ticker] = fresh
                 if fresh["close"].iloc[-1] > 0:
                     for target in self._locked_targets:
                         if target.ticker == ticker and target.price <= 0:
                             target.price = float(fresh["close"].iloc[-1])
+                return fresh
+            if fresh is not None and len(fresh) >= 3 and ai_fast_execution(self.cfg):
+                self._scan_data_cache[ticker] = fresh
                 return fresh
         except Exception as exc:
             log.debug(f"Bar prefetch {ticker}: {exc}")
@@ -2444,8 +2466,11 @@ class ScalperRunner:
                 self._stop_target_stream(t)
 
         held = self._held_tickers()
+        tick_all = priority_tick_streams(self.cfg)
         for ticker in wanted:
-            if ticker in held or ticker == focus:
+            if ticker in held or tick_all:
+                mode = "tick"
+            elif ticker == focus:
                 mode = "tick"
             else:
                 mode = "realtime"
@@ -2453,9 +2478,9 @@ class ScalperRunner:
 
         if not quiet and len(wanted) > 1:
             tickers = ",".join(wanted)
+            tick_kind = "tick ALL priority" if tick_all else f"tick focus={focus or wanted[0]}"
             log.info(
-                f"  📡 WATCH ALL: live streams on [{tickers}] "
-                f"| tick focus={focus or wanted[0]}"
+                f"  📡 WATCH PRIORITY: live streams on [{tickers}] | {tick_kind}"
             )
 
     def _ensure_target_stream(self, ticker: str, mode: str = "realtime", quiet: bool = False):

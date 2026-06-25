@@ -195,6 +195,11 @@ class BotConfig:
     ).lower() in ("1", "true", "yes")
     AI_SPIKE_FAST_MIN_RATIO: float = float(os.getenv("AI_SPIKE_FAST_MIN_RATIO", "1.15"))
     AI_SPIKE_FAST_MIN_SCORE: float = float(os.getenv("AI_SPIKE_FAST_MIN_SCORE", "15"))
+    AI_PRIORITY_TICK_STREAMS: bool = os.getenv(
+        "AI_PRIORITY_TICK_STREAMS", "true"
+    ).lower() in ("1", "true", "yes")
+    AI_SPIKE_ATTEMPTS_PER_CYCLE: int = int(os.getenv("AI_SPIKE_ATTEMPTS_PER_CYCLE", "3"))
+    FAST_MONITOR_SEC: float = float(os.getenv("FAST_MONITOR_SEC", "0.25"))
 
     TAKE_PROFIT_ATR_MULTIPLIER: float = 2.5
     MIN_REWARD_RISK_RATIO:      float = 2.0

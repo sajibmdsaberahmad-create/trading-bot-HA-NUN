@@ -133,3 +133,49 @@ def warm_budget_sec(cfg: BotConfig) -> float:
     if ai_fast_execution(cfg):
         return float(getattr(cfg, "LOCK_BAR_WARM_BUDGET_SEC", 28.0))
     return float(getattr(cfg, "LOCK_BAR_WARM_BUDGET_SEC", 12.0))
+
+
+def fast_monitor_interval(cfg: BotConfig) -> float:
+    if ai_fast_execution(cfg):
+        return float(getattr(cfg, "FAST_MONITOR_SEC", 0.25))
+    return float(getattr(cfg, "FAST_MONITOR_SEC", 1.0))
+
+
+def priority_tick_streams(cfg: BotConfig) -> bool:
+    """All priority stream names get tick-by-tick — not just one focus."""
+    if not ai_fast_execution(cfg):
+        return False
+    return bool(getattr(cfg, "AI_PRIORITY_TICK_STREAMS", True))
+
+
+def max_spike_attempts_per_cycle(cfg: BotConfig) -> int:
+    if ai_fast_execution(cfg):
+        return int(getattr(cfg, "AI_SPIKE_ATTEMPTS_PER_CYCLE", 3))
+    return 1
+
+
+def monitor_ticker_list(
+    targets: List["ScanResult"],
+    cfg: BotConfig,
+    focus: Optional[str] = None,
+) -> List[str]:
+    """Union of stream + warm priority — scanned every fast-monitor tick."""
+    stream = stream_ticker_list(targets, cfg, focus)
+    warm = warm_ticker_list(targets, cfg, focus)
+    seen: set[str] = set()
+    out: List[str] = []
+    for name in stream + warm:
+        u = name.upper()
+        if u not in seen:
+            seen.add(u)
+            out.append(name)
+    return out
+
+
+def is_priority_ticker(
+    ticker: str,
+    targets: List["ScanResult"],
+    cfg: BotConfig,
+    focus: Optional[str] = None,
+) -> bool:
+    return ticker.upper() in {t.upper() for t in monitor_ticker_list(targets, cfg, focus)}
