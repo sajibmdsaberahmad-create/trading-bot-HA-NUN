@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 174,
+  "trades_observed": 175,
   "scans_performed": 27,
-  "improvements_applied": 373,
+  "improvements_applied": 377,
   "reports_generated": 26,
   "event_log": [
     {
@@ -18661,6 +18661,110 @@
       "type": "TRADE",
       "message": "Observed trade: PLTR LEARN_FAILURE P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T20:01:19.055320",
+      "age": "4d 8h 58m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #374",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T20:01:32.687148",
+      "age": "4d 8h 58m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #375",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on QS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T20:01:34.923892",
+      "age": "4d 8h 58m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #376",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T20:01:41.582622",
+      "age": "4d 8h 58m 52s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T20:01:44.344188",
+      "age": "4d 8h 58m 55s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #377",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade was a hard_take_profit, the profit threshold is too low.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.7,
+            "reason": "...",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "1",
+          ".",
+          "I",
+          "n",
+          "c",
+          "r",
+          "e",
+          "a",
+          "s",
+          "e",
+          "t",
+          "h",
+          "e",
+          "p",
+          "r",
+          "o",
+          "f",
+          "i",
+          "t",
+          "t",
+          "h",
+          "r",
+          "e",
+          "s",
+          "h",
+          "o",
+          "l",
+          "d",
+          "t",
+          "o",
+          "1",
+          "5",
+          "%",
+          "."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -20122,20 +20226,21 @@
     -19.79,
     0,
     0,
-    0
+    0,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 5,
+  "consecutive_losses": 6,
   "worst_streak": 18,
-  "veteran_xp": 2470,
+  "veteran_xp": 2480,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 50,
     "entry_timing": 70
   },
-  "flights_completed": 169,
-  "hours_flown": 16.89999999999997,
+  "flights_completed": 170,
+  "hours_flown": 16.99999999999997,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -20160,7 +20265,7 @@
     "LCI": 7,
     "RIO": 11,
     "QS": 5,
-    "MAR": 8,
+    "MAR": 9,
     "COI": 1,
     "RIV": 3,
     "RKL": 4,

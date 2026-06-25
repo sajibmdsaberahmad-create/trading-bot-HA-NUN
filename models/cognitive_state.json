@@ -1,16 +1,9 @@
 {
-  "mood": "steady",
-  "mood_message": "Mixed session \u00b7 $+514.72. Watching for cleaner setups.",
+  "mood": "calming down",
+  "mood_message": "I'm ready to analyze my performance and adjust my strategies accordingly.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "0",
-    "3",
-    "5",
-    "9",
-    "]",
-    "Commander: The loss streak occurred due to the trailing stop parameter.",
-    "d",
     "j",
     "h",
     "i",
@@ -103,10 +96,17 @@
     "Review trade_closed on QS",
     "Review loss_streak on RIOT",
     "u",
-    "Commander: Bracket_exit occurs when a stop-loss hit is triggered after taking profit into momentum, preventing opportunistic exits. We need to analyze the entry strategy to understand why this might happen."
+    "Commander: Bracket_exit occurs when a stop-loss hit is triggered after taking profit into momentum, preventing opportunistic exits. We need to analyze the entry strategy to understand why this might happen.",
+    "Review ib_failure on RIOT",
+    "Commander: IB order rejected (201)",
+    "Review ib_failure on QS",
+    "Review ib_failure on PLTR",
+    "5",
+    "%",
+    "Commander: Why: Hard_take_profit occurs when the price goes above the entry point. The profit threshold of 10% is high and may not be sufficient."
   ],
-  "last_thought": "```json\n{\n  \"ticker\": \"RIOT\",\n  \"entry\": 27.81,\n  \"exit\": 27.815,\n  \"entry_fill\": 27.81,\n  \"exit_fill\": 27.81,\n  \"quote_entry\": 27.81,\n  \"quote_exit\": 27.715,\n  \"shares\": 1979,\n  \"pnl_usd\": -19.79,\n  \"pnl_pct\": -0.04,\n  \"result\": \"loss\",\n  \"exit_reason\": \"bracket_exit\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": 0.003067,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 158.6,\n  \"peak\": 27.815,\n  \"stop\": 27.8128,\n  \"target\": 28.0677,\n  \"fill_confi",
+  "last_thought": "```json\n{\n  \"ticker\": \"SOFI\",\n  \"entry\": 17.29,\n  \"exit\": 17.3,\n  \"entry_fill\": 17.29,\n  \"exit_fill\": 17.29,\n  \"quote_entry\": 17.29,\n  \"quote_exit\": 17.3,\n  \"shares\": 2977,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"loss\",\n  \"exit_reason\": \"bracket_exit\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": -0.000578,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 184.5,\n  \"peak\": 17.3,\n  \"stop\": 17.2955,\n  \"target\": 17.4283,\n  \"fill_confirmed\": tru",
   "market_belief": {},
-  "trades_observed": 64,
-  "updated": "2026-06-25T20:00:35.232856"
+  "trades_observed": 67,
+  "updated": "2026-06-25T20:01:49.099424"
 }

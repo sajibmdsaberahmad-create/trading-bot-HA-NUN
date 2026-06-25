@@ -367,3 +367,4 @@
 {"timestamp":"2026-06-25T20:01:08.122627+00:00","event":"ib_failure","ticker":"RIOT","reason":"IB order rejected (201)","spike_ratio":3.9610588152339656,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:01:08.538226+00:00","event":"ib_failure","ticker":"QS","reason":"IB order rejected (201)","spike_ratio":3.9610588152339656,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:01:10.771266+00:00","event":"ib_failure","ticker":"PLTR","reason":"IB order rejected (201)","spike_ratio":3.9610588152339656,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:01:41.620968+00:00","event":"trade_closed","ticker":"MARA","reason":"hard_take_profit","pnl_usd":0.0,"pnl_pct":0.0,"won":false,"exit_type":"other","hold_sec":99.2,"regime":"unknown","entry_fill":13.87,"exit_fill":13.87,"entry_slippage_pct":0.0,"exit_slippage_pct":-0.828065,"market_state":"after_hours"}
