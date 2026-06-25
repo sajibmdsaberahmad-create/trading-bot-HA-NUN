@@ -463,7 +463,9 @@ class BotConfig:
     STALE_PRICE_REFRESH_PULSES: int = 4    # Force IB snapshot after N identical pulses
     STALE_PRICE_REFRESH_SEC: float = 20.0  # Or force snapshot if price frozen this long
     VOLATILITY_STOP_WIDEN_MAX_PCT: float = 0.025  # Unrealized noise cushion (not below $50 risk)
-    INCREMENTAL_TRAINING_ENABLED: bool = True
+    INCREMENTAL_TRAINING_ENABLED: bool = os.getenv(
+        "INCREMENTAL_TRAINING_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
     INCREMENTAL_TRAIN_EVERY_N_TRADES: int = 3
     INCREMENTAL_TRAIN_MIN_NEW_RECORDS: int = 2
     DYNAMIC_AI_NOTIFICATIONS: bool = True
