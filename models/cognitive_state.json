@@ -1,6 +1,6 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 33% \u00b7 $-116149.81. Preserving capital over action.",
+  "mood": "gathering",
+  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
@@ -105,8 +105,8 @@
     "Review trade_closed on RIOT",
     "Commander: spike_top_exit: +0.59% vol=1.9x"
   ],
-  "last_thought": "```json\n{\n    \"gut_feel\": 1,\n    \"intuition\": 0,\n    \"main_points\": {\n        \"market_state\": \"open\",\n        \"win_rate\": 0.0,\n        \"daily_loss\": -58131.45,\n        \"profit_hunting_main_points\": {\n            \"spike_top_hunt\": {\n                \"volume\": 1.9x,\n                \"exit_volume\": +0.59%,\n                \"max_loss_trades\": 2\n            },\n            \"extended_hours\": {\n                \"giveback\": 30%\n            }\n        }\n    }\n}\n```",
+  "last_thought": "```json\n{\n  \"trade_id\": \"closed\",\n  \"entry_price\": 66.38,\n  \"exit_price\": 5.115,\n  \"profit_loss\": -0.48,\n  \"margin_status\": \"\",\n  \"volume\": 3905,\n  \"earnings_per_share\": null,\n  \"commission_paid\": null,\n  \"trade_mode\": \"paper_market\",\n  \"profit_hunting_min_pnl_pct\": 0.300,\n  \"entry_volume\": 1000,\n  \"hold_time\": 27,\n  \"margin_fees\": 0\n}\n```",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-25T18:44:34.763098"
+  "trades_observed": 1,
+  "updated": "2026-06-25T18:59:28.270618"
 }
