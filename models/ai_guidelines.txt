@@ -2853,3 +2853,13 @@ The trade was stopped due to a breach in the barrier, resulting in profit loss.
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence level (58%) indicates that we should be cautious with this stop-loss event. We need to analyze further and ensure the system is robust.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:54:22.194343+00:00
+Trade closed with a positive pnl and profit hunt triggered by a spike.
+The trade closed with a positive pips and profit hunting initiated based on an increasing price at the peak of the spike. The 'wave_end_spike_fade' event indicates that the highest value of the current spike has shifted to its maximum, suggesting the next wave could be more significant.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The trade was triggered by a spike that had a high probability of being the next wave, indicating an increased likelihood of another significant price movement.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:54:41.243736+00:00
+Observed trade_closed — recorded for learning.
+trailing_stop
+
