@@ -4,12 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Market data failures prevent continuous execution of trades without live IB bars.",
-    "Always monitor real-time market data and use live IB bars to avoid missing opportunities.",
-    "Commander: The event shows a council_exit with Ollama exit at 100% (PPO hold). This is typical for such exits in open positions.",
-    "Large loss detected: GPUS. Review stop placement.",
-    "L",
-    "I",
     "Commander: The trade was made on a trending market with low volatility (open). The key parameters are the confidence threshold and the maximum daily loss percentage.",
     "Always monitor and analyze live trading data for real-time insights.",
     "Adapt your trading strategy based on current market conditions and live data updates.",
@@ -103,10 +97,16 @@
     "w",
     "Commander: High scanner score after timeout: score=83 vol=1.0x | ATR R:R 2.0",
     "Commander: tick_micro_loss",
-    "Commander: High scanner score after timeout: score=85 vol=0.9x | ATR R:R 2.0"
+    "Commander: High scanner score after timeout: score=85 vol=0.9x | ATR R:R 2.0",
+    "Review loss_streak on COIN",
+    "Commander: council_exit: Ollama exit 98% (PPO hold)",
+    "Review trade_closed on COIN",
+    "Commander: trailing_stop",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold can help prevent council timeouts.'}",
+    "Commander: The council timeout is caused by a scanner score of 92, which has an ATR R:R value of 2.0 and a spike ratio of 0.8319322870473913. The algorithm should tune the MIN_PROFIT_PROBABILITY to prevent this from happening again."
   ],
   "last_thought": "```json\n{\n    \"journals\": {\n        \"profit_hunting\": [\n            {\n                \"ticker\": \"QS\",\n                \"entry\": 7,\n                \"exit\": 6.97,\n                \"entry_fill\": 7,\n                \"exit_fill\": 6.97,\n                \"quote_entry\": 7,\n                \"quote_exit\": 6.975,\n                \"shares\": 563,\n                \"pnl_usd\": -0.05,\n                \"pnl_pct\": -5.0,\n                \"result\": \"loss\",\n                \"exit_reason\": \"tick_micro_loss\",\n                \"en",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-25T19:33:03.136327"
+  "trades_observed": 6,
+  "updated": "2026-06-25T19:33:44.704742"
 }

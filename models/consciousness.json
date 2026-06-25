@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 122,
   "training_sessions": 27,
-  "trades_observed": 137,
+  "trades_observed": 139,
   "scans_performed": 27,
-  "improvements_applied": 313,
+  "improvements_applied": 317,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16246,6 +16246,84 @@
           "Review council_timeout on RIOT"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:33:08.960576",
+      "age": "4d 8h 30m 20s",
+      "type": "TRADE",
+      "message": "Observed trade: COIN ? P&L=$-80.50",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:33:33.363094",
+      "age": "4d 8h 30m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #314",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on COIN"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:33:33.376491",
+      "age": "4d 8h 30m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #315",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on COIN"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:33:34.221777",
+      "age": "4d 8h 30m 45s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$+61.74",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:33:38.403341",
+      "age": "4d 8h 30m 49s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #316",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:33:44.706374",
+      "age": "4d 8h 30m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #317",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council Timeout occurred due to a high scanner score and low volatility.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Tuning the confidence threshold to 0.58 prevents a council timeout from occurring again.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold can help prevent council timeouts.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:28:38.033071",
@@ -17531,8 +17609,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "determined",
-  "total_pnl": 124273.22000000002,
+  "mood": "calm",
+  "total_pnl": 124254.46000000002,
   "win_history": [
     0.0,
     0.0,
@@ -17670,20 +17748,22 @@
     -2592.81,
     0.0,
     31.22,
-    0.0
+    0.0,
+    -80.5,
+    61.74
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 18,
-  "veteran_xp": 1930,
+  "veteran_xp": 1975,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 38,
-    "entry_timing": 52
+    "risk_management": 40,
+    "entry_timing": 54
   },
-  "flights_completed": 132,
-  "hours_flown": 13.199999999999969,
+  "flights_completed": 134,
+  "hours_flown": 13.399999999999968,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17706,14 +17786,15 @@
     "GPU": 19,
     "PLT": 1,
     "LCI": 4,
-    "RIO": 4,
+    "RIO": 5,
     "QS": 3,
-    "MAR": 3
+    "MAR": 3,
+    "COI": 1
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I am ready to execute the trade regardless of outcome."
+  "mood_message": "After a successful trade today, I feel more composed."
 }
