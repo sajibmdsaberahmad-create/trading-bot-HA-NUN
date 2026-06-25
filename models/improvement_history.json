@@ -2156,5 +2156,173 @@
       "s",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T14:50:27.718865+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence level of the CONFIDENCE_THRESHOLD has been adjusted to a higher value (0.58).",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MAX_CONCURRENT_POSITIONS": {
+        "param": "MAX_CONCURRENT_POSITIONS",
+        "value": 1,
+        "reason": "Increase concurrent positions to reduce risk exposure.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trader experienced a loss streak with a hard take-profit strategy.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader should be more cautious with confidence levels, aiming for values below 0.6.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T14:50:30.689220+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "MAX_DAILY_LOSS_PCT": {
+        "param": "MAX_DAILY_LOSS_PCT",
+        "value": 1.0,
+        "reason": "The market is currently in choppy consolidation, and the loss is severe.",
+        "ok": true,
+        "msg": "applied"
+      },
+      "LOCKED_SPIKE_MIN_RATIO": {
+        "param": "LOCKED_SPIKE_MIN_RATIO",
+        "value": 2.5,
+        "reason": "The spike was too high, leading to a large spread and a sharp decline.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with loss: hard_take_profit",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm cannot rely on past performance to predict future outcomes.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T14:50:37.561466+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "...",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trader experienced a loss streak with a negative daily pnl of -0.36999999999999744.",
+    "lessons": [
+      "When: The loss streak occurred after a stop_breach event.",
+      "How: Follow the trades closely and analyze the trading algo to identify areas for improvement."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T14:50:40.062663+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold was set to 0.5, which seems reasonable given the current market conditions.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with loss: stop_breach",
+    "lessons": [
+      "T",
+      "h",
+      "i",
+      "s",
+      "e",
+      "v",
+      "e",
+      "n",
+      "t",
+      "s",
+      "u",
+      "g",
+      "g",
+      "e",
+      "s",
+      "t",
+      "s",
+      "a",
+      "n",
+      "i",
+      "n",
+      "c",
+      "o",
+      "r",
+      "r",
+      "e",
+      "c",
+      "t",
+      "a",
+      "s",
+      "s",
+      "u",
+      "m",
+      "p",
+      "t",
+      "i",
+      "o",
+      "n",
+      "a",
+      "b",
+      "o",
+      "u",
+      "t",
+      "t",
+      "h",
+      "e",
+      "m",
+      "a",
+      "r",
+      "k",
+      "e",
+      "t",
+      "s",
+      "t",
+      "a",
+      "t",
+      "e",
+      "a",
+      "n",
+      "d",
+      "p",
+      "o",
+      "s",
+      "s",
+      "i",
+      "b",
+      "l",
+      "e",
+      "m",
+      "i",
+      "s",
+      "s",
+      "e",
+      "d",
+      "p",
+      "r",
+      "o",
+      "f",
+      "i",
+      "t",
+      "h",
+      "u",
+      "n",
+      "t",
+      "s",
+      "."
+    ]
   }
 ]

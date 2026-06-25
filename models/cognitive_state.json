@@ -1,18 +1,9 @@
 {
   "mood": "recalibrating",
-  "mood_message": "Four losses in a row ($-33.83 recent). Tightening entries until edge returns.",
-  "confidence": 0.6200000000000001,
+  "mood_message": "Four losses in a row ($-34.43 recent). Tightening entries until edge returns.",
+  "confidence": 0.56,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The algorithmic trade system is experiencing an alignment issue due to the council timeout.",
-    ",",
-    "Commander: The council timeout indicates that the algorithm is not aligning signals with the market. This is a common issue in trading systems when signals do not match the current market conditions.",
-    "Review council_timeout on MIMI",
-    "Commander: Scanner+spike after timeout: score=94 vol=3.6x | ATR R:R 2.0",
-    "Review ib_failure on MIMI",
-    "Commander: IB closing-only \u2014 cannot open new positions",
-    "Adjusting threshold parameters may help mitigate the risk associated with frequent scanner timeouts.",
-    "Monitor scanner performance and adjust thresholds accordingly",
     "Commander: The council_timeout event indicates that the scanner timeout occurred after a timeout, and this might be due to the recent spike in scanner scores. The algorithm needs to adjust its threshold for scanning.",
     "Inhibit the algorithm's ability to execute trades in an open position system.",
     "Ensure the algorithm can handle conditions where it cannot enter or exit positions at any given time, such as IB closing-only.",
@@ -103,10 +94,19 @@
     "Commander: Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be cautious around this.",
     "Always monitor live IB bars and adjust your strategy accordingly. If the market data fails, skip this trade.",
     "Commander: When the market data failed, it is typically due to a sudden decline in market conditions or technical issues.",
-    "Commander: The loss streak was triggered by stagnation and locked out positions due to high risk parameters."
+    "Commander: The loss streak was triggered by stagnation and locked out positions due to high risk parameters.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader should be more cautious with confidence levels, aiming for values below 0.6.'}",
+    "Commander: The event shows the trader took profit into momentum, but it also indicates that the risk management and learning mechanisms were not up to par. We need to focus on improving the algorithm's ability to adapt based on current conditions.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm cannot rely on past performance to predict future outcomes.'}",
+    "Commander: The trade is a profit hunt and the algorithm has failed to take advantage of any previous gains.",
+    "When: The loss streak occurred after a stop_breach event.",
+    "How: Follow the trades closely and analyze the trading algo to identify areas for improvement.",
+    "Commander: Why: The trader was in a low position due to the stop_breach event, leading to losses.",
+    "b",
+    "Commander: The trade closed due to a loss: stop_breach at -0.36999999999999744."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"trade_decision\": {\n    \"action\": \"hunting\",\n    \"target\": \"MIMI\",\n    \"volume\": 93.8,\n    \"profit_target\": {\n      \"amount\": 121.1,\n      \"type\": \"hot_by_volume\"\n    },\n    \"strategy\": \"single_bar_momentum + volume = take profit into MIMI.\"\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"prompt\": \"Write a trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"WAVE\\\", \\\"entry\\\": 9.37, \\\"exit\\\": 9.185, \\\"shares\\\": 2.0, \\\"pnl_usd\\\": -0.37, \\\"pnl_pct\\\": -1.97, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"stop_breach\\\"}\",\n  \"entry\": {\n    \"ticker\": \"WAVE\",\n    \"position\": 2,\n    \"entries\": [\n      { \"action\": \"buy\", \"volume\": 0.5 },\n      { \"action\": \"sell\" }\n    ],\n    \"profit\": -0.37,\n    \"percentage_profit\": -1.97,\n    \"result\": \"loss\",\n    \"exit_reason\": \"stop_breach\"\n  }",
   "market_belief": {},
-  "trades_observed": 5,
-  "updated": "2026-06-25T14:44:31.622877"
+  "trades_observed": 7,
+  "updated": "2026-06-25T14:50:40.031201"
 }
