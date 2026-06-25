@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 32,
   "scans_performed": 27,
-  "improvements_applied": 179,
+  "improvements_applied": 181,
   "reports_generated": 26,
   "event_log": [
     {
@@ -9857,6 +9857,137 @@
         ],
         "lessons": [
           "Review council_timeout on MIMI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:12:29.868760",
+      "age": "4d 4h 9m 41s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #180",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Loss: Stop-Breach - Profit Hunt",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Market data failure prevents effective trading strategies.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data failure and missing profit hunt prevent effective trading strategies.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:12:32.323822",
+      "age": "4d 4h 9m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #181",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Loss streak due to stop-breach in XCH",
+        "applied": [
+          {
+            "param": "MAX_DAILY_LOSS_PCT",
+            "value": 0,
+            "reason": "Optimize daily loss percentage.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "LOCKED_SPIKE_MIN_RATIO",
+            "value": 1.25,
+            "reason": "Increase lockable spike ratio to reduce frequent stop-breach conditions.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "r",
+          "a",
+          "d",
+          "e",
+          "b",
+          "a",
+          "s",
+          "e",
+          "d",
+          "o",
+          "n",
+          "m",
+          "a",
+          "r",
+          "k",
+          "e",
+          "t",
+          "s",
+          "t",
+          "a",
+          "t",
+          "e",
+          "a",
+          "n",
+          "d",
+          "c",
+          "u",
+          "r",
+          "r",
+          "e",
+          "n",
+          "t",
+          "p",
+          "o",
+          "s",
+          "i",
+          "t",
+          "i",
+          "o",
+          "n",
+          "d",
+          "e",
+          "t",
+          "a",
+          "i",
+          "l",
+          "s",
+          ".",
+          "O",
+          "p",
+          "t",
+          "i",
+          "m",
+          "i",
+          "z",
+          "e",
+          "e",
+          "x",
+          "i",
+          "t",
+          "s",
+          "f",
+          "o",
+          "r",
+          "s",
+          "u",
+          "c",
+          "c",
+          "e",
+          "s",
+          "s",
+          "f",
+          "u",
+          "l",
+          "h",
+          "u",
+          "n",
+          "t",
+          "s",
+          "."
         ]
       }
     }

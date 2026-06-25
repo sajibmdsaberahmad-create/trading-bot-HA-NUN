@@ -1,13 +1,9 @@
 {
-  "mood": "recalibrating",
-  "mood_message": "Four losses in a row ($-35.12 recent). Tightening entries until edge returns.",
-  "confidence": 0.53,
+  "mood": "gathering",
+  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "confidence": 0.5,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review market_data_failure on LSANF",
-    "Commander: MD 420 no_md_permission: Invalid Real-time Query:No market data permissions for ARCAEDGE STK",
-    "Review market_data_failure on KIROY",
-    "No clean data on CMGR (no_historical_data) \u2014 profit hunt elsewhere.",
     "{'param': 'market_data_failure', 'value': 'No historical data error - This event prevents future profit hunting in the stock market.'}",
     "Commander: The event occurred due to a missing historical data query for the ticker 'CMGR'. The algorithm needs to improve its ability to fetch recent market data.",
     "No clean data on TVBCY (no_historical_data) \u2014 profit hunt elsewhere.",
@@ -103,10 +99,14 @@
     "Commander: The council timeout event indicates that there is a problem with the current alignment of signals within the system.",
     "f",
     "Commander: The event indicates that there is a council timeout and the algo is not aligned with the signal.",
-    "Review council_timeout on MIMI"
+    "Review council_timeout on MIMI",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data failure and missing profit hunt prevent effective trading strategies.'}",
+    "Commander: - Market data failure prevents profit hunting without live IB bars.",
+    "O",
+    "Commander: The event occurred because the stop-breach condition was triggered, leading to a loss streak."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.85,\n  \"intuition\": 0.70,\n  \"output\": {\n    \"trade_order\": [\n      {\n        \"order_type\": \"buy\",\n        \"symbol\": \"MIMI\",\n        \"quantity\": 1,\n        \"side\": \"buy\",\n        \"position_value\": 14200\n      }\n    ]\n  },\n  \"ledger_entry\": [\n    {\n      \"market_data\": {\n        \"ticker\": \"PRAB\",\n        \"price\": 0.0,\n        \"score\": 96.0,\n        \"reason\": \"scanner:HOT_BY_VOLUME#0\"\n      },\n      \"side\": \"sell\",\n      \"volume\": 14200\n    }\n  ],\n  \"trading_schedule\": [\n  ",
+  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"XCH\",\n    \"entry\": 1.01,\n    \"exit\": 0.9645,\n    \"shares\": 19.0,\n    \"pnl_usd\": -0.86,\n    \"pnl_pct\": -4.5,\n    \"result\": \"loss\",\n    \"exit_reason\": \"stop_breach\"\n  },\n  \"tutorial_instructions\": {\n    \"gut_feel\": 0.7,\n    \"intuition\": 0.9\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 0,
-  "updated": "2026-06-25T15:08:52.416237"
+  "trades_observed": 1,
+  "updated": "2026-06-25T15:12:32.322196"
 }

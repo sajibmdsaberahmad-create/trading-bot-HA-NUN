@@ -1,8 +1,15 @@
 {
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.5599999999999999,
-    "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+  "MAX_DAILY_LOSS_PCT": {
+    "param": "MAX_DAILY_LOSS_PCT",
+    "value": 0,
+    "reason": "Optimize daily loss percentage.",
+    "ok": true,
+    "msg": "applied"
+  },
+  "LOCKED_SPIKE_MIN_RATIO": {
+    "param": "LOCKED_SPIKE_MIN_RATIO",
+    "value": 1.25,
+    "reason": "Increase lockable spike ratio to reduce frequent stop-breach conditions.",
     "ok": true,
     "msg": "applied"
   }
