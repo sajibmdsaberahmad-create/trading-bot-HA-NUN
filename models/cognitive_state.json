@@ -1,7 +1,7 @@
 {
-  "mood": "steady",
-  "mood_message": "Mixed session \u00b7 $-12.85. Watching for cleaner setups.",
-  "confidence": 0.53,
+  "mood": "focused",
+  "mood_message": "Win rate 78% on recent trades \u00b7 $+3.14. Executing the plan.",
+  "confidence": 0.55,
   "mode": "autonomous",
   "learned_lessons": [
     "Commander: The council timeout event occurred during a live session.",
@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.7,\n  \"analysis\": {\n    \"live_account_state\": {\n      \"mode\": \"HANOON\",\n      \"account_equity\": 1018910.68,\n      \"available_cash\": 1018910.68,\n      \"position_value\": 0.0,\n      \"nav\": 963.83,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": \"NONE\",\n      \"position\": \"NONE\",\n      \"win_rate\": 0.0,\n      \"trades_today\": 7,\n      \"top_pick\": \"BCDA\",\n      \"top_score\": 49.8,\n      \"next_best\": \"BCDA\",\n      \"next_best_score\": 352.5,\n      \"scan_result",
   "market_belief": {},
-  "trades_observed": 8,
-  "updated": "2026-06-25T11:14:51.128827"
+  "trades_observed": 9,
+  "updated": "2026-06-25T11:18:50.216005"
 }
