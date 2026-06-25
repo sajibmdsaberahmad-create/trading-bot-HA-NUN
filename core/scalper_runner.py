@@ -3,6 +3,7 @@
 core/scalper_runner.py — HANOON institutional algo-wave rider.
 
 MATCHES USER MANUAL TRADING METHODOLOGY:
+PRIMARY MISSION: PROFIT HUNTING — algo + AI have full freedom to extract profit.
 1. Scan full universe, select 1-5 stocks (most active, top movers, volume, VWAP, etc.)
 2. Lock selected stocks and monitor them continuously
 3. Detect volume spike + uptrend before entry
