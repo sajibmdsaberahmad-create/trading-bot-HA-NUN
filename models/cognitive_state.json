@@ -1,7 +1,7 @@
 {
-  "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $-5185.62. Preserving capital over action.",
-  "confidence": 0.35,
+  "mood": "gathering",
+  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "confidence": 0.37,
   "mode": "autonomous",
   "learned_lessons": [
     "'",
@@ -105,8 +105,8 @@
     "Review council_timeout on RIOT",
     "Commander: High scanner score after timeout: score=85 vol=1.1x | ATR R:R 2.0"
   ],
-  "last_thought": "```json\n{\n  \"trade_id\": \"closed_trade\",\n  \"journal_entry\": {\n    \"ticker\": \"MARA\",\n    \"entry\": 14.61,\n    \"exit\": 13.64,\n    \"quote_entry\": 14.61,\n    \"quote_exit\": 13.65,\n    \"shares\": 2673.0,\n    \"pnl_usd\": -2592.81,\n    \"pnl_pct\": -6.64,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\"\n  }\n}\n```",
+  "last_thought": "```json\n{\n    \"action\": \"take_profit\",\n    \"profit_probability\": 0.5,\n    \"direction\": \"open\",\n    \"entry_fill_price\": 13.64,\n    \"exit_fill_price\": 13.65\n}\n```",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-25T19:23:36.921687"
+  "trades_observed": 1,
+  "updated": "2026-06-25T19:26:30.677812"
 }

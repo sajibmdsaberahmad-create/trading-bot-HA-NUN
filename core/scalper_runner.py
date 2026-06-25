@@ -300,6 +300,7 @@ class ScalperRunner:
         self._last_market_state: Optional[str] = None
         self._last_market_closed_log: float = 0.0
         self._pending_closes: Dict[str, PendingClose] = {}
+        self._deferred_exits: Dict[str, Dict[str, Any]] = {}
         self._last_off_hours_train: float = 0.0
         self._last_learning_push: float = 0.0
         self._weights_file = "models/scalper_weights.json"
@@ -704,7 +705,7 @@ class ScalperRunner:
             and forecast.get("dir", 0) <= 0
         ):
             if self._execute_mechanical_profit_exit(
-                price, f"tick_micro_fade:{forecast.get('fade_risk', 0):.2f}",
+                price, f"tick_micro_fade:{forecast.get('fade_risk', 0):.2f}", defer=True,
             ):
                 self._save_position_context(ticker)
                 return
@@ -714,7 +715,7 @@ class ScalperRunner:
                 f"  ⚡ TICK LOSS EXIT {ticker}: ${price:.4f} | "
                 f"pressure={forecast.get('loss_pressure', 0):.2f}"
             )
-            self._exit_position(price, "tick_micro_loss", ticker=ticker)
+            self._exit_position(price, "tick_micro_loss", ticker=ticker, defer=True)
             self._save_position_context(ticker)
 
     def _any_position_in_profit(self, threshold_pct: float = 0.003) -> bool:
@@ -903,6 +904,8 @@ class ScalperRunner:
         s = self._position_slots.get(ticker)
         if not s:
             return False
+        self._repair_slot_entry_price(ticker)
+        s = self._position_slots.get(ticker)
         self.current_ticker = ticker
         self.shares = float(s.get("shares", 0))
         self._entry_price = float(s.get("entry_price", 0))
@@ -924,6 +927,63 @@ class ScalperRunner:
         if plan is not None:
             self.risk.open_position(plan)
         return True
+
+    def _repair_slot_entry_price(self, ticker: str) -> None:
+        """Fix cross-ticker contamination — refresh entry from IB if price is implausible."""
+        slot = self._position_slots.get(ticker)
+        if not slot:
+            return
+        entry = float(slot.get("entry_price", 0) or 0)
+        if entry <= 0:
+            return
+        live = self._live_price_for(ticker, entry)
+        if live <= 0:
+            return
+        ratio = entry / live
+        if 0.85 <= ratio <= 1.15:
+            return
+        try:
+            from core.fill_tracker import position_avg_cost
+            avg = position_avg_cost(self.ib, ticker)
+        except Exception:
+            avg = 0.0
+        if avg > 0 and 0.85 <= (avg / live) <= 1.15:
+            log.warning(
+                f"  🔧 Entry price repair {ticker}: ${entry:.4f} → ${avg:.4f} "
+                f"(live ${live:.4f})"
+            )
+            slot["entry_price"] = avg
+            slot["entry_fill_px"] = avg
+
+    def _request_deferred_exit(self, ticker: str, price: float, reason: str) -> None:
+        """Queue exit for main loop — safe when called from IB tick callbacks."""
+        ticker = (ticker or "").upper()
+        if not ticker or ticker not in self._position_slots:
+            return
+        if ticker in self._pending_closes or ticker in self._deferred_exits:
+            return
+        self._deferred_exits[ticker] = {
+            "price": float(price),
+            "reason": str(reason),
+            "requested_at": time.time(),
+        }
+
+    def _service_deferred_exits(self) -> None:
+        if not self._deferred_exits:
+            return
+        for ticker, req in list(self._deferred_exits.items()):
+            if ticker in self._pending_closes:
+                self._deferred_exits.pop(ticker, None)
+                continue
+            if ticker not in self._position_slots:
+                self._deferred_exits.pop(ticker, None)
+                continue
+            self._deferred_exits.pop(ticker, None)
+            self._exit_position(
+                float(req.get("price", 0)),
+                str(req.get("reason", "deferred_exit")),
+                ticker=ticker,
+            )
 
     def _dm_for_ticker(self, ticker: str) -> Optional[DataManager]:
         """Live bar stream for a held ticker (position stream, not scan focus)."""
@@ -1749,9 +1809,19 @@ class ScalperRunner:
             )
         self._apply_trade_close_learning(trade_rec, ticker)
 
-    def _exit_position(self, current_px: float, reason: str, ticker: Optional[str] = None):
+    def _exit_position(
+        self,
+        current_px: float,
+        reason: str,
+        ticker: Optional[str] = None,
+        *,
+        defer: bool = False,
+    ):
         """Manually exit position — submit flatten, reconcile IB fill async."""
         ticker = (ticker or self.current_ticker or "").upper()
+        if defer:
+            self._request_deferred_exit(ticker, current_px, reason)
+            return
         if ticker and ticker in self._position_slots:
             self._load_position_context(ticker)
         if self.shares <= 0:
@@ -2313,6 +2383,7 @@ class ScalperRunner:
                 
                 # Detect exits (bracket orders hitting stop/target)
                 self._detect_all_exits()
+                self._service_deferred_exits()
                 self._service_pending_closes()
 
                 market_state = get_market_state(self.cfg)
@@ -3871,7 +3942,9 @@ class ScalperRunner:
 
         return False, ""
 
-    def _execute_mechanical_profit_exit(self, current_px: float, reason: str) -> bool:
+    def _execute_mechanical_profit_exit(
+        self, current_px: float, reason: str, *, defer: bool = False,
+    ) -> bool:
         """Instant exit for spike-top / mechanical profit hunts."""
         if not reason:
             return False
@@ -3907,7 +3980,7 @@ class ScalperRunner:
                 self.autopilot, self.consciousness,
                 f"Spike-top hunt on {ticker}: {reason}",
             )
-            self._exit_position(current_px, reason)
+            self._exit_position(current_px, reason, ticker=ticker, defer=defer)
             return True
         if is_ai_council_mode(self.cfg) and self.ai_commander:
             if self._deliberate_exit_council(
@@ -3921,7 +3994,7 @@ class ScalperRunner:
                 pnl_usd=pnl, pnl_pct=pnl_pct, record_buffer=True, push_git=False,
             )
             return False
-        self._exit_position(current_px, reason)
+        self._exit_position(current_px, reason, ticker=ticker, defer=defer)
         return True
 
     def _reset_profit_hunt_state(self):
