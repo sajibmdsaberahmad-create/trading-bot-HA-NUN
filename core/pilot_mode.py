@@ -88,7 +88,13 @@ def get_live_scan_universe(
 
 
 def is_ai_unlimited(cfg: BotConfig) -> bool:
-    return bool(getattr(cfg, "AI_UNLIMITED_MODE", False))
+    if bool(getattr(cfg, "AI_UNLIMITED_MODE", False)):
+        return True
+    try:
+        from core.ai_learning_policy import learn_dont_block
+        return learn_dont_block(cfg)
+    except Exception:
+        return False
 
 
 def is_ai_council_mode(cfg: BotConfig) -> bool:

@@ -96,8 +96,14 @@ def can_trade_now(cfg: Optional[BotConfig] = None) -> tuple[bool, str]:
 
 
 def min_confidence_for_state(cfg: Optional[BotConfig] = None, state: Optional[str] = None) -> float:
-    """Higher bar outside regular hours — only take strong setups."""
+    """Higher bar outside regular hours — skipped when AI learns from failures."""
     cfg = cfg or BotConfig()
+    try:
+        from core.ai_learning_policy import learn_dont_block
+        if learn_dont_block(cfg):
+            return float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+    except Exception:
+        pass
     state = state or get_market_state(cfg)
     if state == "open":
         return float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))

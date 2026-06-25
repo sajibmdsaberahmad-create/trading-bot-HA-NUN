@@ -490,7 +490,16 @@ class BotConfig:
     ENV_SYNC_PUSH_KEY: bool = os.getenv("ENV_SYNC_PUSH_KEY", "true").lower() in ("1", "true", "yes")
     TELEGRAM_ASYNC_DURING_SESSION: bool = True # Ollama Telegram off hot path
     GENERATIVE_THINKING_ENABLED: bool = True
-    AI_FULL_CONTROL: bool = True          # AI owns all decisions, logs, journals, notifications
+    # AI learns from failures instead of permanent blacklists / rigid gates
+    AI_LEARN_DONT_BLOCK: bool = os.getenv(
+        "AI_LEARN_DONT_BLOCK", "true"
+    ).lower() in ("1", "true", "yes")
+    AI_FAILURE_SOFT_COOLDOWN_SEC: float = float(
+        os.getenv("AI_FAILURE_SOFT_COOLDOWN_SEC", "30")
+    )
+    AI_FAILURE_HARD_COOLDOWN_SEC: float = float(
+        os.getenv("AI_FAILURE_HARD_COOLDOWN_SEC", "3600")
+    )
     AI_STATIC_FALLBACK: bool = False      # No rule-based bypass when full control
     AI_HUMAN_COGNITION: bool = True       # Human-like reasoning + gut feel on all decisions
     AI_USE_COMPUTATIONAL_REASONING: bool = True  # Synthesize PPO, scanner, MTF, volume in every call
