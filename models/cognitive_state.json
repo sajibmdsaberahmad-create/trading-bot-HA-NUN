@@ -1,19 +1,9 @@
 {
   "mood": "focused",
-  "mood_message": "Win rate 77% on recent trades \u00b7 $+149.79. Executing the plan.",
-  "confidence": 0.6300000000000001,
+  "mood_message": "Win rate 71% on recent trades \u00b7 $+123.88. Executing the plan.",
+  "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The root cause is likely an increase in scanner spikes after timeout, which could indicate a potential risk factor. The algorithm needs to adjust its parameters to account for this spike.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Increased confidence threshold to prevent potential stall issues.'}",
-    "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': 1, 'reason': 'Tighter max concurrent positions for better control over execution speed.'}",
-    "Commander: The algorithm is stuck due to scanner spike after timeout, which causes poor performance.",
-    "Commander: Scanner+spike after timeout: score=48 vol=6.7x | ATR R:R 2.0",
-    "Commander: Scanner+spike after timeout: score=45 vol=6.7x | ATR R:R 2.0",
-    "Analyze and learn from recent trades.",
-    "Adapt strategies based on recent successes and failures.",
-    "Keep track of market conditions and real-time events.",
-    "Regularly monitor trading algo performance.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'To avoid such events in the future.'}",
     "Commander: The council_timeout event indicates that the scanner + spike occurred after a timeout, and it should be fixed to prevent it from happening again.",
     "{'param': 'confidence_threshold', 'value': 0.58, 'reason': \"The algorithm needs to adjust its confidence threshold so it doesn't trigger a timeout event again.\"}",
@@ -103,13 +93,20 @@
     "Commander: The algorithm is learning from the recent trade outcomes, but it's experiencing a sudden spike in scanner momentum that requires adjustment. The strategy should focus on maintaining a wide range of parameters and using advanced algorithms l",
     "Review loss_streak on PBK",
     "Commander: council_exit: Ollama exit 100% (PPO hold)",
-    "Review trade_closed on PBK"
+    "Review trade_closed on PBK",
+    "Review council_timeout on PBK",
+    "Commander: Scanner+spike after timeout: score=83 vol=1.9x | ATR R:R 2.0",
+    "1",
+    ":",
+    "2",
+    "v",
+    "-",
+    "M",
+    "Commander: The trade was closed with a loss and resulted in a negative profit of -25.909064999999973.",
+    "Commander: council_risk: hard_stop"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": \"The live account state shows that the trader is trading with a wide range of parameters and using advanced algorithms for optimization. The current trade outcomes suggest that the current strategy may need some adjustments based on recent performance.\"\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": \"The trader is likely experiencing high risk for a limited time window and may be considering a hard stop to mitigate losses.\",\n  \"entry\": -25.91,\n  \"exit\": -3.69,\n  \"shares\": 855.0,\n  \"pnl_usd\": -25.91,\n  \"pnl_pct\": -3.69,\n  \"result\": \"loss\",\n  \"exit_reason\": \"council_risk: hard_stop\"\n}\n```",
   "market_belief": {},
-  "trades_observed": 13,
-  "updated": "2026-06-25T12:02:30.586514"
-}et_belief": {},
-  "trades_observed": 13,
-  "updated": "2026-06-25T12:02:30.586322"
+  "trades_observed": 14,
+  "updated": "2026-06-25T12:04:38.177891"
 }
