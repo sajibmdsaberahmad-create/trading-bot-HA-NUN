@@ -125,6 +125,14 @@ class ChartVisionLine:
                 return False
             return True
 
+    def _vision_active(self, scan_score: float) -> bool:
+        if getattr(self.cfg, "LIVE_CHART_VISION_ENABLED", False):
+            return True
+        if getattr(self.cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False):
+            min_score = float(getattr(self.cfg, "LIVE_CHART_VISION_MIN_SCORE", 85.0))
+            return scan_score >= min_score
+        return False
+
     def ring(
         self,
         ticker: str,
@@ -134,7 +142,7 @@ class ChartVisionLine:
         scan_score: float,
         analyze_fn,
     ) -> bool:
-        if not getattr(self.cfg, "LIVE_CHART_VISION_ENABLED", True):
+        if not self._vision_active(scan_score):
             return False
         from core.memory_guard import should_allow_chart_vision
 
@@ -146,10 +154,21 @@ class ChartVisionLine:
         if scan_score < min_score:
             return False
 
-        from core.ollama_vision import is_vision_model_present
+        from core.ollama_vision import is_vision_model_present, resolve_vision_model
 
-        if not is_vision_model_present(self.cfg):
+        vmodel = resolve_vision_model(self.cfg)
+        if not is_vision_model_present(self.cfg, vmodel):
             return False
+
+        opportunistic = (
+            not getattr(self.cfg, "LIVE_CHART_VISION_ENABLED", False)
+            and getattr(self.cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False)
+        )
+        if opportunistic:
+            log.info(
+                f"📈 ChartVision opportunistic {ticker} "
+                f"(score={scan_score:.0f}) via {vmodel}"
+            )
 
         key = self._key(ticker)
         fp = chart_fingerprint(ticker, current_px, spike_ratio, scan_score)
@@ -178,9 +197,20 @@ class ChartVisionLine:
             start = time.time()
             read = ""
             try:
+                from core.ollama_vision import prepare_for_vision_call
+
+                prepare_for_vision_call(self.cfg)
                 read = (analyze_fn(_VISION_ENTRY_PROMPT, png) or "").strip()
             except Exception as exc:
                 log.debug(f"Chart vision {ticker}: {exc}")
+            finally:
+                if getattr(self.cfg, "OLLAMA_VISION_UNLOAD_AFTER_CALL", False):
+                    try:
+                        from core.ollama_vision import stop_vision_model
+
+                        stop_vision_model(self.cfg)
+                    except Exception:
+                        pass
             elapsed_ms = (time.time() - start) * 1000
             with self._lock:
                 current = self._slots.get(key)
@@ -191,9 +221,9 @@ class ChartVisionLine:
                 current.in_flight = False
                 current.latency_ms = elapsed_ms
                 if read:
-                    log.debug(
+                    log.info(
                         f"📈 ChartVision {ticker} ready {elapsed_ms:.0f}ms | "
-                        f"{read[:80]}…"
+                        f"{read[:100]}"
                     )
 
         try:

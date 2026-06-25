@@ -1253,7 +1253,9 @@ class ScalperRunner:
                 f"🧠 Generative thinking: ON | model={self.cfg.OLLAMA_MODEL} @ {self.cfg.OLLAMA_HOST} | "
                 f"budget={getattr(self.cfg, 'OLLAMA_MEMORY_BUDGET_MB', 2560)}MB | "
                 f"RAM tier={tier_info['label']} ({mem['total_ram_mb']}MB) | "
-                f"chart_vision={'on' if tier_info['chart_vision'] else 'off'} | "
+                f"chart_vision={'on' if tier_info['chart_vision'] else 'off'} "
+                f"({'opportunistic' if tier_info.get('vision_opportunistic') else 'always'}) | "
+                f"vision_model={tier_info.get('vision_model', '?')} | "
                 f"heavy_train={'on' if tier_info['heavy_training'] else 'off'} | "
                 f"free={mem['available_ram_mb']}MB"
             )

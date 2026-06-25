@@ -361,6 +361,23 @@ class BotConfig:
     ))
     LIVE_CHART_VISION_MAX_AGE_SEC: float = float(os.getenv("LIVE_CHART_VISION_MAX_AGE_SEC", "12"))
     LIVE_CHART_VISION_MIN_RING_SEC: float = float(os.getenv("LIVE_CHART_VISION_MIN_RING_SEC", "2.5"))
+    # Opportunistic quantized llava — high-score setups only on 8GB (RAM tier enables this)
+    LIVE_CHART_VISION_OPPORTUNISTIC: bool = field(
+        default_factory=lambda: os.getenv(
+            "LIVE_CHART_VISION_OPPORTUNISTIC", "true" if _LOW_RAM else "false",
+        ).lower() in ("1", "true", "yes")
+    )
+    LIVE_CHART_VISION_MIN_FREE_RAM_MB: int = int(os.getenv("LIVE_CHART_VISION_MIN_FREE_RAM_MB", "1300"))
+    OLLAMA_VISION_UNLOAD_AFTER_CALL: bool = field(
+        default_factory=lambda: os.getenv(
+            "OLLAMA_VISION_UNLOAD_AFTER_CALL", "true" if _LOW_RAM else "false",
+        ).lower() in ("1", "true", "yes")
+    )
+    OLLAMA_VISION_SWAP_TEXT_MODEL: bool = field(
+        default_factory=lambda: os.getenv(
+            "OLLAMA_VISION_SWAP_TEXT_MODEL", "true" if _LOW_RAM else "false",
+        ).lower() in ("1", "true", "yes")
+    )
     ENTRY_OLLAMA_WAIT_SEC: float = float(os.getenv(
         "ENTRY_OLLAMA_WAIT_SEC", "5" if _LOW_RAM else "10"
     ))
@@ -664,10 +681,10 @@ class BotConfig:
     ).lower() in ("1", "true", "yes")
     GENERATIVE_MOOD_MIN_SEC: float = float(os.getenv("GENERATIVE_MOOD_MIN_SEC", "45"))
 
-    # Vision model for chart review via Telegram
-    OLLAMA_VISION_MODEL: str = os.getenv("OLLAMA_VISION_MODEL", "llava")
-    OLLAMA_VISION_TIMEOUT: int = int(os.getenv("OLLAMA_VISION_TIMEOUT", "45"))
-    OLLAMA_VISION_MAX_TOKENS: int = int(os.getenv("OLLAMA_VISION_MAX_TOKENS", "512"))
+    # Vision — quantized llava per RAM tier (see core/ollama_vision.py)
+    OLLAMA_VISION_MODEL: str = os.getenv("OLLAMA_VISION_MODEL", "llava-phi3:3.8b" if _LOW_RAM else "llava")
+    OLLAMA_VISION_TIMEOUT: int = int(os.getenv("OLLAMA_VISION_TIMEOUT", "30" if _LOW_RAM else "45"))
+    OLLAMA_VISION_MAX_TOKENS: int = int(os.getenv("OLLAMA_VISION_MAX_TOKENS", "160" if _LOW_RAM else "512"))
 
     EMAIL_ENABLED: bool = False
     EMAIL_SMTP_HOST: str = os.getenv("TRADING_BOT_SMTP_HOST", "")

@@ -81,19 +81,17 @@ def should_allow_ollama_notify(cfg) -> tuple[bool, str]:
 
 
 def should_allow_chart_vision(cfg) -> tuple[bool, str]:
-    """llava is heavy — tier-aware; skip when disabled or RAM tight."""
-    if not getattr(cfg, "LIVE_CHART_VISION_ENABLED", True):
+    """Quantized llava — always if enabled; opportunistic on 8GB when RAM + score OK."""
+    always = getattr(cfg, "LIVE_CHART_VISION_ENABLED", False)
+    opportunistic = getattr(cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False)
+    if not always and not opportunistic:
         return False, "disabled"
     if not getattr(cfg, "OLLAMA_ENABLED", False):
         return False, "ollama_disabled"
-    tier = getattr(cfg, "RAM_TIER", "")
     avail = available_ram_mb()
-    if tier == "compact" and avail < 1800:
-        return False, f"compact_tier_{avail}mb"
-    if tier == "balanced" and avail < 1400:
-        return False, f"balanced_tier_{avail}mb"
-    if avail < 1200:
-        return False, f"critical_{avail}mb"
+    min_free = int(getattr(cfg, "LIVE_CHART_VISION_MIN_FREE_RAM_MB", 1300))
+    if avail < min_free:
+        return False, f"need_{min_free}mb_have_{avail}mb"
     return True, "ok"
 
 

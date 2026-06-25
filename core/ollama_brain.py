@@ -261,9 +261,13 @@ class OllamaBrain:
         if not self.config.enabled or not image_bytes:
             return None
 
-        model = getattr(self.cfg, "OLLAMA_VISION_MODEL", "llava")
+        from core.ollama_vision import resolve_vision_model
+
+        model = resolve_vision_model(self.cfg)
         timeout = int(getattr(self.cfg, "OLLAMA_VISION_TIMEOUT", 45))
         max_tokens = int(getattr(self.cfg, "OLLAMA_VISION_MAX_TOKENS", 512))
+        # Short keep-alive on low RAM — unload frees text model slot
+        keep_alive = 0 if getattr(self.cfg, "OLLAMA_VISION_UNLOAD_AFTER_CALL", False) else self._keep_alive
         b64 = base64.b64encode(image_bytes).decode("ascii")
         use_system = system or (
             "You are HANOON trading pilot AI reviewing a chart or screenshot. "
@@ -276,7 +280,7 @@ class OllamaBrain:
             payload = {
                 "model": model,
                 "stream": False,
-                "keep_alive": self._keep_alive,
+                "keep_alive": keep_alive,
                 "messages": [
                     {"role": "system", "content": use_system},
                     {
