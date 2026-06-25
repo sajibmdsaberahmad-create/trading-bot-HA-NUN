@@ -1,22 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T12:49:57.677920+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "The confidence threshold has been increased to prevent the algo from executing if no aligned signal is found.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Council timeout occurred due to no aligned signal in the pipeline.",
-    "lessons": [
-      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithmic parameters have been reset to reduce risk.'}"
-    ]
-  },
-  {
     "timestamp": "2026-06-25T12:50:34.705792+00:00",
     "source": "runtime_council_timeout",
     "adjustments": {
@@ -3616,6 +3599,23 @@
     "lessons": [
       "Market data failures prevent profit hunting without live IB bars.",
       "Live IB bars and market data updates are critical for real-time adjustments in equity trading."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:56:33.133623+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The market state was open, and the confidence threshold was set to 0.58.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade closed with a stop breach, resulting in a loss of -1137.16 USD.",
+    "lessons": [
+      "{'param': 'market_state', 'value': 'open'}"
     ]
   }
 ]
