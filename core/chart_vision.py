@@ -99,6 +99,7 @@ class ChartVisionLine:
 
     _global_vision_lock = threading.Lock()
     _global_vision_in_flight = 0
+    _last_opportunistic_ring_at: float = 0.0
 
     def __init__(self, cfg: BotConfig):
         self.cfg = cfg
@@ -168,14 +169,15 @@ class ChartVisionLine:
             and getattr(self.cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False)
         )
         if opportunistic:
+            cooldown = float(getattr(self.cfg, "CHART_VISION_OPPORTUNISTIC_COOLDOWN_SEC", 120.0))
             with ChartVisionLine._global_vision_lock:
+                if time.time() - ChartVisionLine._last_opportunistic_ring_at < cooldown:
+                    return False
                 max_parallel = int(getattr(self.cfg, "CHART_VISION_MAX_PARALLEL", 1))
                 if ChartVisionLine._global_vision_in_flight >= max_parallel:
-                    log.debug(
-                        f"ChartVision skip {ticker}: {ChartVisionLine._global_vision_in_flight} "
-                        f"vision call(s) in flight (8GB limit)"
-                    )
                     return False
+                ChartVisionLine._global_vision_in_flight += 1
+                ChartVisionLine._last_opportunistic_ring_at = time.time()
             log.info(
                 f"📈 ChartVision opportunistic {ticker} "
                 f"(score={scan_score:.0f}) via {vmodel}"
@@ -184,12 +186,22 @@ class ChartVisionLine:
         key = self._key(ticker)
         fp = chart_fingerprint(ticker, current_px, spike_ratio, scan_score)
         if not self._should_ring(key, fp):
+            if opportunistic:
+                with ChartVisionLine._global_vision_lock:
+                    ChartVisionLine._global_vision_in_flight = max(
+                        0, ChartVisionLine._global_vision_in_flight - 1
+                    )
             return False
 
         try:
             png = render_intraday_chart_png(df, ticker)
         except Exception as exc:
             log.debug(f"Chart render {ticker}: {exc}")
+            if opportunistic:
+                with ChartVisionLine._global_vision_lock:
+                    ChartVisionLine._global_vision_in_flight = max(
+                        0, ChartVisionLine._global_vision_in_flight - 1
+                    )
             return False
 
         with self._lock:
@@ -207,8 +219,7 @@ class ChartVisionLine:
         def _worker():
             start = time.time()
             read = ""
-            with ChartVisionLine._global_vision_lock:
-                ChartVisionLine._global_vision_in_flight += 1
+            reserved = opportunistic
             try:
                 from core.ollama_vision import prepare_for_vision_call
 
@@ -217,10 +228,11 @@ class ChartVisionLine:
             except Exception as exc:
                 log.debug(f"Chart vision {ticker}: {exc}")
             finally:
-                with ChartVisionLine._global_vision_lock:
-                    ChartVisionLine._global_vision_in_flight = max(
-                        0, ChartVisionLine._global_vision_in_flight - 1
-                    )
+                if reserved:
+                    with ChartVisionLine._global_vision_lock:
+                        ChartVisionLine._global_vision_in_flight = max(
+                            0, ChartVisionLine._global_vision_in_flight - 1
+                        )
                 if getattr(self.cfg, "OLLAMA_VISION_UNLOAD_AFTER_CALL", False):
                     try:
                         from core.ollama_vision import stop_vision_model
@@ -249,6 +261,11 @@ class ChartVisionLine:
             get_background_worker()._executor.submit(_worker)
         except Exception as exc:
             log.debug(f"ChartVision submit {ticker}: {exc}")
+            if opportunistic:
+                with ChartVisionLine._global_vision_lock:
+                    ChartVisionLine._global_vision_in_flight = max(
+                        0, ChartVisionLine._global_vision_in_flight - 1
+                    )
             with self._lock:
                 s = self._slots.get(key)
                 if s and s.seq == seq:
