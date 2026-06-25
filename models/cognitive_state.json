@@ -1,6 +1,6 @@
 {
-  "mood": "focused",
-  "mood_message": "Win rate 67% on recent trades \u00b7 $+598.34. Executing the plan.",
+  "mood": "steady",
+  "mood_message": "Mixed session \u00b7 $+532.86. Watching for cleaner setups.",
   "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
@@ -105,8 +105,8 @@
     "Take advantage of opportunistically exiting from the highest selling price",
     "Commander: The event is a loss streak triggered by a council exit at an Ollama price of 95% (PPO hold)."
   ],
-  "last_thought": "```json\n{\n  \"entry\": 5.1676,\n  \"exit\": 5.18,\n  \"shares\": 2635.0,\n  \"pnl_usd\": 32.77,\n  \"pnl_pct\": 0.24,\n  \"result\": \"win\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": -0.000964,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 186.8,\n  \"peak\": 27.51,\n  \"stop\": 27.5055,\n  \"target\": 27.72,\n  \"fill_confirmed\": true\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 0.0,\n  \"action\": {\n    \"entry\": {\n      \"ticker\": \"RIOT\",\n      \"volume\": \"197\",\n      \"price\": \"27.54\",\n      \"profit\": -0.51\n    },\n    \"exit\": null,\n    \"shares\": 197.0,\n    \"pnl_usd\": -27.58,\n    \"pnl_pct\": -0.51,\n    \"result\": \"loss\",\n    \"exit_reason\": \"bracket_exit\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 10,
-  "updated": "2026-06-25T19:44:56.665047"
+  "trades_observed": 11,
+  "updated": "2026-06-25T19:45:27.713485"
 }
