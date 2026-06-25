@@ -4,8 +4,6 @@
   "confidence": 0.5900000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The algorithm is using a scanner to monitor the system's current state and taking action based on detected spikes. The timeout occurs due to a spike in scores.",
-    "Review council_timeout on NEXR",
     "Commander: Scanner+spike after timeout: score=87 vol=5.2x | ATR R:R 2.0",
     "Review trade_closed on NEXR",
     "Commander: win",
@@ -103,10 +101,12 @@
     "Commander: I learned that the trader is holding onto the Ollama position as they are in pain. The reason for this could be due to FOMO or fear.",
     "Tighten risk management by increasing the confidence threshold and adjusting the scan score accordingly.",
     "Adaptively adjust the algo's parameters based on recent performance trends and market conditions.",
-    "Commander: The algorithm is learning from the recent scanner spike, which suggests it may need to tighten its risk management strategy or adapt based on subsequent events."
+    "Commander: The algorithm is learning from the recent scanner spike, which suggests it may need to tighten its risk management strategy or adapt based on subsequent events.",
+    "Review trade_closed on KUST",
+    "Commander: win:council_exit: Ollama exit 100% (PPO hold)"
   ],
   "last_thought": "```json\n{\n  \"entry_time\": \"recent trade entry\",\n  \"trade_type\": \"pilot trade\",\n  \"risk_management_adjustment\": \"tighten risk management strategy or adapt based on subsequent events.\",\n  \"intuition\": \"adjust the scan score accordingly to reflect recent scanner spike.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 11,
-  "updated": "2026-06-25T11:47:06.403958"
+  "updated": "2026-06-25T11:47:14.110926"
 }

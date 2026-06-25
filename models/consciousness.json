@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 99,
+  "improvements_applied": 100,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6268,6 +6268,20 @@
         "lessons": [
           "Tighten risk management by increasing the confidence threshold and adjusting the scan score accordingly.",
           "Adaptively adjust the algo's parameters based on recent performance trends and market conditions."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:47:14.112141",
+      "age": "4d 0h 44m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #100",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on KUST"
         ]
       }
     }
