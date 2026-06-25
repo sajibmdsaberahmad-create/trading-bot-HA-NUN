@@ -191,3 +191,19 @@ class DeferredCouncilLearner:
           f"ollama={'Y' if ollama_enter else 'N'} | "
           f"PPO {ppo_conf:.0%} | agree={agreement} | {latency_ms:.0f}ms late"
       )
+
+      try:
+          from core.ppo_entry_learning import on_council_response
+          on_council_response(
+              self.cfg,
+              ticker=ticker,
+              task=task,
+              executed=executed,
+              ollama_parsed=parsed,
+              ppo_signal=ppo_signal,
+              ppo_conf=ppo_conf,
+              ppo_reason=str(job.get("ppo_reason", "")),
+              latency_ms=latency_ms,
+          )
+      except Exception as exc:
+          log.debug(f"PPO council eval: {exc}")

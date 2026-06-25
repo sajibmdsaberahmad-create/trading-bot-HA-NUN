@@ -117,6 +117,7 @@ class AICommander:
         self._live_line = LiveAILine(cfg, self._ollama_decide_raw)
         self._chart_line = ChartVisionLine(cfg)
         self._deferred = DeferredCouncilLearner(cfg, self._live_line)
+        self._ppo_model_ref: Any = None
         DECISION_LOG.parent.mkdir(parents=True, exist_ok=True)
         self._load_journal()
 
@@ -302,8 +303,15 @@ class AICommander:
     def live_status(self, ticker: str, task: str) -> Dict[str, Any]:
         return self._live_line.status(ticker, task)
 
+    def bind_ppo_model(self, model: Any) -> None:
+        """Scalper attaches live PPO for per-entry micro-improvement."""
+        self._ppo_model_ref = model
+
     def service_deferred_learning(self) -> int:
         """Log late Ollama answers after PPO-led execute — non-blocking."""
+        from core.ppo_entry_learning import set_ppo_model
+        if self._ppo_model_ref is not None:
+            set_ppo_model(self._ppo_model_ref)
         return self._deferred.service()
 
     def _entry_council_prompt(

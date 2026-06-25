@@ -400,6 +400,10 @@ class BotConfig:
     PPO_LEAD_WHILE_COUNCIL_PENDING: bool = os.getenv(
         "PPO_LEAD_WHILE_COUNCIL_PENDING", "true"
     ).lower() in ("1", "true", "yes")
+    PPO_LEARN_EVERY_ENTRY: bool = os.getenv(
+        "PPO_LEARN_EVERY_ENTRY", "true"
+    ).lower() in ("1", "true", "yes")
+    PPO_ENTRY_MICRO_STEPS: int = int(os.getenv("PPO_ENTRY_MICRO_STEPS", "512"))
     AI_STREAM_WATCH_CAP: int = int(os.getenv("AI_STREAM_WATCH_CAP", "10"))
     MICRO_SPIKE_BOOST: float = float(os.getenv("MICRO_SPIKE_BOOST", "0.35"))
     MICRO_FADE_EXIT: float = float(os.getenv("MICRO_FADE_EXIT", "0.55"))

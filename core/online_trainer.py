@@ -169,7 +169,14 @@ def _train_ppo_on_buffer(cfg: BotConfig, steps: int = 20_000):
     if not records:
         log.warning("No experience buffer records for PPO training")
         return False
-    trade_recs = [r for r in records if r.get("source") in ("backtest", "live_trade", "scan_pick") and r.get("features")]
+    trade_recs = [
+        r for r in records
+        if r.get("source") in (
+            "backtest", "live_trade", "live_entry", "scan_pick",
+            "ppo_entry", "ppo_entry_eval", "ppo_led", "deferred_council",
+        )
+        and r.get("features")
+    ]
     if not trade_recs:
         log.warning("No feature-rich records for PPO training yet — skipping neural update")
         return False
