@@ -323,17 +323,27 @@ def merge_entry_decision(
                 "pipeline": "council:ppo_timeout_lead",
                 "reason": f"PPO lead after council timeout: {ppo_reason}"[:200],
             })
-        elif spike_ratio >= 1.4 and scan_score >= 40 and ppo_conf >= min_conf * 0.7:
+        elif spike_ratio >= 1.4 and scan_score >= timeout_min_scan and ppo_conf >= min_conf * 0.7:
             base.update({
                 "enter": True,
-                "confidence": max(ppo_conf, 0.55),
+                "confidence": max(ppo_conf, profit_prob, 0.55),
                 "pipeline": "council:scanner_timeout",
                 "reason": (
                     f"Scanner+spike after timeout: score={scan_score:.0f} "
-                    f"vol={spike_ratio:.1f}x"
+                    f"vol={spike_ratio:.1f}x prob={profit_prob:.0%}"
                 )[:200],
             })
-        elif scan_score >= 65 and ppo_conf >= min_conf * 0.65:
+        elif profit_prob >= min_prob and scan_score >= timeout_min_scan * 0.8:
+            base.update({
+                "enter": True,
+                "confidence": max(ppo_conf, profit_prob, 0.55),
+                "pipeline": "council:scanner_timeout",
+                "reason": (
+                    f"Quality+scanner after timeout: prob={profit_prob:.0%} "
+                    f"score={scan_score:.0f}"
+                )[:200],
+            })
+        elif scan_score >= timeout_min_scan * 1.5 and ppo_conf >= min_conf * 0.65:
             base.update({
                 "enter": True,
                 "confidence": max(ppo_conf, 0.55, min(scan_score / 100.0, 0.80)),
@@ -350,25 +360,40 @@ def merge_entry_decision(
 
     if ollama_status == "scanner_fast":
         try:
-            from core.config import BotConfig
             from core.fast_execution import council_fast_min_score, council_fast_min_spike
-            _cfg = BotConfig()
-            min_sc = council_fast_min_score(_cfg)
-            min_sp = council_fast_min_spike(_cfg)
+            if cfg is not None:
+                min_sc = council_fast_min_score(cfg)
+                min_sp = council_fast_min_spike(cfg)
+            else:
+                from core.config import BotConfig
+                _cfg = BotConfig()
+                min_sc = council_fast_min_score(_cfg)
+                min_sp = council_fast_min_spike(_cfg)
         except Exception:
             min_sc, min_sp = 20.0, 1.15
         if spike_ratio >= min_sp and scan_score >= min_sc:
             base.update({
                 "enter": True,
                 "pending": False,
-                "confidence": max(ppo_conf, 0.58, min(scan_score / 100.0, 0.85)),
+                "confidence": max(ppo_conf, profit_prob, 0.58, min(scan_score / 100.0, 0.85)),
                 "pipeline": "council:scanner_fast",
                 "reason": (
                     f"Fast scanner lead (Ollama slow): score={scan_score:.0f} "
-                    f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%}"
+                    f"vol={spike_ratio:.1f}x prob={profit_prob:.0%} | PPO {ppo_conf:.0%}"
                 )[:200],
             })
-        elif scan_score >= 65:
+        elif profit_prob >= min_prob and scan_score >= min_sc * 0.85:
+            base.update({
+                "enter": True,
+                "pending": False,
+                "confidence": max(ppo_conf, profit_prob, 0.58),
+                "pipeline": "council:scanner_fast",
+                "reason": (
+                    f"Quality lead (Ollama slow): prob={profit_prob:.0%} "
+                    f"score={scan_score:.0f}"
+                )[:200],
+            })
+        elif scan_score >= min_sc * 1.5:
             base.update({
                 "enter": True,
                 "pending": False,

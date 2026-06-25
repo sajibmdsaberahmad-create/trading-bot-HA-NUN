@@ -85,19 +85,19 @@ def should_spike_fast_entry(
     min_score = float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15.0))
     min_conf = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55)) * 0.75
     if spike_ratio >= min_spike and scan_score >= min_score:
-        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
+        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
             return _passes_entry_quality_gate(
                 cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
             )
         return True
     if spike_ratio >= min_spike * 1.1 and ppo_action == 1 and ppo_conf >= min_conf:
-        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
+        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
             return _passes_entry_quality_gate(
                 cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
             )
         return True
     if spike_ratio >= 1.3:
-        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
+        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
             return _passes_entry_quality_gate(
                 cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
             )
@@ -275,9 +275,9 @@ def _passes_entry_quality_gate(
     ppo_action: int,
     ppo_conf: float,
 ) -> bool:
-    if not getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
+    if not getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
         return True
-    from core.entry_quality import assess_entry_quality
+    from core.entry_quality import assess_entry_quality, quality_blocks_entry
     q = assess_entry_quality(
         cfg, micro,
         spike_ratio=spike_ratio,
@@ -286,13 +286,14 @@ def _passes_entry_quality_gate(
         ppo_conf=ppo_conf,
         live_px=float((micro or {}).get("pred_1bar", 0) or 0),
     )
-    micro.update({
-        "profit_probability": q.get("profit_probability"),
-        "fakeout_risk": q.get("fakeout_risk"),
-        "setup_type": q.get("setup_type"),
-        "quality_reason": q.get("reason"),
-    })
-    return bool(q.get("enter_ok"))
+    if micro is not None:
+        micro.update({
+            "profit_probability": q.get("profit_probability"),
+            "fakeout_risk": q.get("fakeout_risk"),
+            "setup_type": q.get("setup_type"),
+            "quality_reason": q.get("reason"),
+        })
+    return not quality_blocks_entry(cfg, q)
 
 
 def micro_confirms_spike(

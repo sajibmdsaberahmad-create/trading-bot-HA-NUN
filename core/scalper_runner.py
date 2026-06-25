@@ -5431,7 +5431,17 @@ class ScalperRunner:
         current_px = self._live_price_for(ticker, float(df_fast["close"].iloc[-1]))
         st["current_px"] = current_px
         st["account"] = self._account_context_for_ai()
-        st["micro_forecast"] = st.get("micro_forecast") or self._last_micro_forecast.get(ticker, {})
+        micro_fc = st.get("micro_forecast") or self._last_micro_forecast.get(ticker, {})
+        from core.entry_quality import assess_entry_quality
+        st["account"]["entry_quality"] = assess_entry_quality(
+            self.cfg, micro_fc,
+            spike_ratio=float(st.get("spike_ratio", 1.0)),
+            scan_score=float(st.get("scan_score", 0)),
+            ppo_action=int(st.get("ppo_action", 0)),
+            ppo_conf=float(st.get("ppo_conf", 0.5)),
+            live_px=current_px,
+        )
+        st["micro_forecast"] = micro_fc
         ai_dec = self.ai_commander.poll_entry_council(st, df=df_fast)
         if ai_dec.get("pending"):
             return
