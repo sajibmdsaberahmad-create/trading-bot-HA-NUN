@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 74,
+  "improvements_applied": 75,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5584,6 +5584,20 @@
         "lessons": [
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Increased confidence threshold to prevent potential stall issues.'}",
           "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': 1, 'reason': 'Tighter max concurrent positions for better control over execution speed.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T10:03:49.790608",
+      "age": "3d 23h 1m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #75",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
         ]
       }
     }
