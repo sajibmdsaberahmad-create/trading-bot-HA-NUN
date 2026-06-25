@@ -140,6 +140,28 @@ class BotConfig:
     TRAILING_PROFIT_ACTIVATE_PCT:   float = 0.01
     TRAILING_PROFIT_GIVEBACK_PCT:   float = 0.40
 
+    # Opportunistic profit hunting — thresholds AI-tunes via param_bounds (not static doctrine)
+    PROFIT_HUNT_ENABLED: bool = os.getenv(
+        "PROFIT_HUNT_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    PROFIT_HUNT_MECHANICAL_BYPASS_COUNCIL: bool = os.getenv(
+        "PROFIT_HUNT_MECHANICAL_BYPASS_COUNCIL", "true"
+    ).lower() in ("1", "true", "yes")
+    SPIKE_TOP_EXIT_ENABLED: bool = os.getenv(
+        "SPIKE_TOP_EXIT_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    SPIKE_TOP_INTRABAR_ENABLED: bool = os.getenv(
+        "SPIKE_TOP_INTRABAR_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    SPIKE_TOP_MIN_GAIN_PCT: float = float(os.getenv("SPIKE_TOP_MIN_GAIN_PCT", "0.005"))
+    SPIKE_TOP_MIN_VOL_RATIO: float = float(os.getenv("SPIKE_TOP_MIN_VOL_RATIO", "1.15"))
+    PROFIT_HUNT_MIN_PNL_PCT: float = float(os.getenv("PROFIT_HUNT_MIN_PNL_PCT", "0.003"))
+    HARD_TP_OVERRIDE_TRAILING: bool = os.getenv(
+        "HARD_TP_OVERRIDE_TRAILING", "true"
+    ).lower() in ("1", "true", "yes")
+    EXTENDED_PROFIT_GIVEBACK_PCT: float = float(os.getenv("EXTENDED_PROFIT_GIVEBACK_PCT", "0.30"))
+    RL_MISSED_PROFIT_HUNT_PENALTY: float = float(os.getenv("RL_MISSED_PROFIT_HUNT_PENALTY", "-0.75"))
+
     TAKE_PROFIT_ATR_MULTIPLIER: float = 2.5
     MIN_REWARD_RISK_RATIO:      float = 2.0
     MIN_REWARD_RISK_TOLERANCE:  float = float(os.getenv("MIN_REWARD_RISK_TOLERANCE", "0.02"))

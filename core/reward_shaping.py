@@ -51,3 +51,27 @@ def reward_from_bracket_reject(cfg: BotConfig, spike_ratio: float = 1.0, inverte
         spike_ratio=spike_ratio,
         late_chase=spike_ratio >= float(getattr(cfg, "RL_LATE_SPIKE_VOL_THRESHOLD", 3.0)),
     )
+
+
+def reward_from_profit_hunt(
+    cfg: BotConfig,
+    *,
+    event: str,
+    pnl_usd: float = 0.0,
+    context: Optional[Dict[str, Any]] = None,
+) -> float:
+    """
+    Shape rewards for opportunistic profit hunting.
+    Missed spike-top exits are penalized; successful hunts get a small bonus.
+    """
+    ctx = context or {}
+    if event == "missed_profit_hunt":
+        penalty = float(getattr(cfg, "RL_MISSED_PROFIT_HUNT_PENALTY", -0.75))
+        left = float(ctx.get("left_on_table_usd", 0) or 0)
+        if left > 50:
+            penalty -= 0.25
+        return round(penalty, 4)
+    if event in ("spike_top_exit", "spike_top_intrabar", "wave_end_spike_fade"):
+        bonus = 0.15 if pnl_usd > 0 else 0.05
+        return round(shaped_reward(cfg, pnl_usd, event=event) + bonus, 4)
+    return shaped_reward(cfg, pnl_usd, event=event)
