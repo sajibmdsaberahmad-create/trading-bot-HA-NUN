@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "The value of 0.58 suggests a moderate confidence threshold for the scanner spike.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}

@@ -103,8 +103,8 @@
     "Enhance your understanding of the market's dynamics and use it to make more informed decisions.",
     "Commander: The council_timeout event indicates that there was a scanner spike after a timeout in the live trading session."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"intuition\": true,\n    \"pattern recognition\": false,\n    \"adaptability\": true,\n    \"wisdom\": true,\n    \"focus_on_errors\": true\n  },\n  \"trade_decision\": {\n    \"entry_points\": [\n      {\n        \"strategy\": \"HOLD\",\n        \"reasoning\": \"scanner: HOT_BY_VOLUME#0, scanner: HOT_BY_VOLUME#1, scanner: HOT_BY_VOLUME#2\",\n        \"volume\": 5,\n        \"strategy_type\": \"BUY\"\n      },\n      {\n        \"strategy\": \"SPLIT\",\n        \"entry_points\": [\n          {\n            \"ticker\":",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": \"The live account state suggests a high volume and high trading volume, which could indicate potential momentum or scalping opportunities.\",\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1022454.45,\n  \"available_cash\": 1022454.45,\n  \"position_value\": 0.0,\n  \"nav\": 1013.47,\n  \"deployed_pct\": 0.0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0.0,\n  \"trades_today\": 2,\n  \"top_pick\": \"MUZ\",\n  \"top_score\": 76.2,\n  \"next_best\": \"QCMD\",\n  \"next_be",
   "market_belief": {},
   "trades_observed": 3,
-  "updated": "2026-06-25T09:34:40.957356"
+  "updated": "2026-06-25T09:36:25.276760"
 }

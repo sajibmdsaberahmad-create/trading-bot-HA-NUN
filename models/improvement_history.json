@@ -1,28 +1,5 @@
 [
   {
-    "ticker": "SOFI",
-    "trades": 71,
-    "wins": 27,
-    "losses": 44,
-    "win_rate": 0.38,
-    "pnl_usd": 57.35,
-    "return_pct": -6.57,
-    "max_dd": 10.38,
-    "weights_active": {
-      "momentum": 1.9762760000000001,
-      "volume": 14.822070000000002,
-      "institutional": 19.76276,
-      "vwap_slope": 4.94069,
-      "atr_bonus": 4.94069,
-      "mean_reversion": 4.94069,
-      "trend_filter": 9.88138,
-      "price_rising": 7.905104000000001,
-      "rsi_filter": 2.964414,
-      "volatility_gate": 3.9525520000000003
-    },
-    "timestamp": "2026-06-21T10:22:58.305703"
-  },
-  {
     "timestamp": "2026-06-21T10:54:49.721247",
     "ppo_trained": false,
     "steps": 4096,
@@ -2221,6 +2198,15 @@
       "Adaptively adjust your trade signals based on recent losses and confirmations.",
       "Consider implementing multi-timeframe algorithms for better risk management.",
       "Enhance your understanding of the market's dynamics and use it to make more informed decisions."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:36:25.295734+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on QCMD"
     ]
   }
 ]

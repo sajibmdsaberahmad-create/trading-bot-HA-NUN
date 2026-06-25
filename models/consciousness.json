@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 71,
+  "improvements_applied": 72,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5511,6 +5511,20 @@
           "Adaptively adjust your trade signals based on recent losses and confirmations.",
           "Consider implementing multi-timeframe algorithms for better risk management.",
           "Enhance your understanding of the market's dynamics and use it to make more informed decisions."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T09:36:25.278790",
+      "age": "3d 22h 33m 36s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #72",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
         ]
       }
     }
