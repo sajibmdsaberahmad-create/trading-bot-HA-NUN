@@ -189,6 +189,7 @@ class ScalperRunner:
         self._next_best_pick: Optional[ScanResult] = None
         self._next_best_score: float = 0.0
         self._spike_skip_until: Dict[str, float] = {}
+        self._spike_attempt_until: Dict[str, float] = {}
         self._last_flat_pulse: float = 0.0
         self.top_pick: Optional[ScanResult] = None
         self._locked_targets: List[ScanResult] = []
@@ -2529,6 +2530,8 @@ class ScalperRunner:
                 )
             return
 
+        if time.time() < self._spike_attempt_until.get(ticker, 0):
+            return
         if time.time() < self._spike_skip_until.get(ticker, 0):
             return
         if time.time() < self._entry_cooldown_until.get(ticker, 0):
@@ -2537,6 +2540,8 @@ class ScalperRunner:
         self._scan_data_cache[ticker] = work_df
         self.top_pick = target
         self._last_entry_attempt_at = time.time()
+        spike_cd = float(getattr(self.cfg, "SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC", 20.0))
+        self._spike_attempt_until[ticker] = time.time() + spike_cd
         log.info(f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | score={target.rank_score:.0f} | attempting entry...")
         result = self._attempt_entry()
         if ticker in self._held_tickers():
@@ -3522,6 +3527,15 @@ class ScalperRunner:
             st["last_ib_error"] = ierr
         if ierr and ierr.get("code") == 2161:
             log.warning(f"  IB 2161 regulatory cap on {ticker} — will retry smaller limit")
+            self._observe_runtime(
+                "ib_failure",
+                ticker=ticker,
+                reason=str((ierr or {}).get("message", ""))[:200],
+                ib_code=2161,
+                price_cap=(ierr or {}).get("price_cap"),
+                parent_status=parent_status,
+                market_state=get_market_state(self.cfg),
+            )
         if parent_status in ("Cancelled", "Inactive", "ApiCancelled"):
             block_reason = parse_ib_order_block(ierr)
             if block_reason:
@@ -4088,6 +4102,9 @@ class ScalperRunner:
         entry_parent_px, entry_mode = self.broker.decide_smart_entry(
             current_px, bid, ask, shares, avg_volume,
         )
+        plan, ai_dec = self._reanchor_bracket_to_limit(
+            plan, ai_dec, entry_parent_px, df_fast, shares, current_px,
+        )
         if self.shadow_circuit.block_broker():
             self.shadow_circuit.open_shadow_trade(
                 ticker, current_px, plan.initial_stop_price,
@@ -4124,10 +4141,16 @@ class ScalperRunner:
                     risk_usd=float(ai_dec.get("risk_usd", 50.0)),
                     atr_at_entry=plan.atr_at_entry,
                 )
+                plan, ai_dec = self._reanchor_bracket_to_limit(
+                    plan, ai_dec, entry_parent_px, df_fast, shares, current_px,
+                )
                 log.info(f"  🔄 IB2161 retry: {shares} sh limit @ ${entry_parent_px:.4f}")
             else:
                 entry_parent_px, entry_mode = self.broker.decide_smart_entry(
                     current_px, bid, ask, shares, avg_volume,
+                )
+                plan, ai_dec = self._reanchor_bracket_to_limit(
+                    plan, ai_dec, entry_parent_px, df_fast, shares, current_px,
                 )
             self._last_entry_telemetry = {
                 "limit_px": entry_parent_px,
