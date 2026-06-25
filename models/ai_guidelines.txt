@@ -5023,3 +5023,7 @@ spike_top_exit: +0.59% vol=1.9x
 Observed trade_closed — recorded for learning.
 trailing_profit
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:01:23.966613+00:00
+Heuristic learning for trade_closed on LCID
+• ...
+

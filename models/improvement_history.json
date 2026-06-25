@@ -1722,5 +1722,14 @@
     "lessons": [
       "Review trade_closed on LCID"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:01:23.967272+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Heuristic learning for trade_closed on LCID",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Confidence threshold is set too low, could be a sign of poor execution or market conditions.'}"
+    ]
   }
 ]

@@ -1,11 +1,9 @@
 {
-  "mood": "gathering",
-  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "mood": "defensive",
+  "mood_message": "Win rate 0% \u00b7 $+0.00. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "d",
-    "p",
     "m",
     "c",
     "Commander: The trade closed occurred at GDC with a council exit at 98% (PPO hold). The market state is open, and the ticker is 'GDC'.",
@@ -103,10 +101,12 @@
     "Spike-top hunt on RIOT: spike_top_exit: +0.59% vol=1.9x",
     "Profit hunt worked on RIOT: spike_top_exit: +0.59% vol=1.9x \u2014 reinforce opportunistic exits.",
     "Review trade_closed on RIOT",
-    "Commander: spike_top_exit: +0.59% vol=1.9x"
+    "Commander: spike_top_exit: +0.59% vol=1.9x",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Confidence threshold is set too low, could be a sign of poor execution or market conditions.'}",
+    "Commander: Heuristic learning for trade_closed on LCID"
   ],
   "last_thought": "```json\n{\n  \"trade_id\": \"closed\",\n  \"entry_price\": 66.38,\n  \"exit_price\": 5.115,\n  \"profit_loss\": -0.48,\n  \"margin_status\": \"\",\n  \"volume\": 3905,\n  \"earnings_per_share\": null,\n  \"commission_paid\": null,\n  \"trade_mode\": \"paper_market\",\n  \"profit_hunting_min_pnl_pct\": 0.300,\n  \"entry_volume\": 1000,\n  \"hold_time\": 27,\n  \"margin_fees\": 0\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T18:59:46.244752"
+  "trades_observed": 4,
+  "updated": "2026-06-25T19:01:23.932150"
 }
