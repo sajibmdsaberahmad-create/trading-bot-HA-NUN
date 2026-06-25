@@ -1,6 +1,6 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $-7306.58. Preserving capital over action.",
+  "mood_message": "Win rate 0% \u00b7 $-8351.27. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
@@ -105,8 +105,8 @@
     "Commander: The reason for the negative outcome is that the trader chose not to execute a stop hit, which occurred at a high exit point. The trader should have executed the stop hit.",
     "Review loss_streak on GDC"
   ],
-  "last_thought": "```json\n{\n  \"entry\": 0.8852,\n  \"exit\": 0.013,\n  \"entry_fill\": 0.8852,\n  \"exit_fill\": 0.013,\n  \"quote_entry\": 0.8852,\n  \"quote_exit\": 0.0131,\n  \"shares\": 1200.0,\n  \"pnl_usd\": -1046.61,\n  \"pnl_pct\": -98.53,\n  \"result\": \"loss\",\n  \"exit_reason\": \"trailing_profit\",\n  \"entry_slippage_pct\": 66.570382,\n  \"exit_slippage_pct\": -0.007634,\n  \"limit_px\": 0.0131,\n  \"entry_mode\": \"limit_penny\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 9.9,\n  \"peak\": 0.8852,\n  \"stop\": 0.013,\n  \"target\": 0.0133\n}\n```",
+  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"entry\": 0.8852,\n    \"exit\": 0.1783,\n    \"shares\": 1200.0,\n    \"pnl_usd\": -848.25,\n    \"pnl_pct\": -79.86,\n    \"result\": \"loss\",\n    \"entry_slippage_pct\": 3.93132,\n    \"exit_slippage_pct\": -0.000561,\n    \"limit_px\": 0.1795,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 14.5,\n    \"peak\": 0.8852,\n    \"stop\": 0.1777,\n    \"target\": 0.1798\n  },\n  \"reasoning\": {\n    \"lesson_learned\": \"The trader chose to execute the stop hit at a high exit ",
   "market_belief": {},
-  "trades_observed": 68,
-  "updated": "2026-06-25T17:12:09.343805"
+  "trades_observed": 70,
+  "updated": "2026-06-25T17:12:32.318747"
 }
