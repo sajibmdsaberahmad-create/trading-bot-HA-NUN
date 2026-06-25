@@ -103,6 +103,15 @@ def is_ai_unlimited(cfg: BotConfig) -> bool:
         return False
 
 
+def ai_full_capital_access(cfg: BotConfig) -> bool:
+    """AI may deploy from full IB cash/equity — no $1k training-wheel cap."""
+    if getattr(cfg, "USE_FIXED_DEPLOY_CAP", False):
+        return False
+    if not getattr(cfg, "AI_FULL_CAPITAL_ACCESS", True):
+        return False
+    return is_ai_unlimited(cfg) or is_paper_free_learning(cfg)
+
+
 def is_ai_council_mode(cfg: BotConfig) -> bool:
     """All trading decisions flow through non-blocking Ollama+PPO council."""
     return bool(
@@ -201,9 +210,13 @@ def get_effective_confidence_threshold(
 
 
 def get_deploy_usd(cfg: BotConfig, pilot: Optional["PilotExperienceSystem"] = None) -> float:
-    """Deploy per stock — paper free uses equity hint; veterans scale within equity."""
+    """Deploy per stock — paper free / AI unlimited use live equity, not fixed $1k."""
+    eq = resolve_account_equity(cfg)
+    if ai_full_capital_access(cfg):
+        reserve = effective_min_cash_reserve_pct(cfg)
+        return max(0.0, eq * (1.0 - reserve))
     if is_paper_free_learning(cfg):
-        return resolve_account_equity(cfg) * 0.10
+        return eq * 0.95
     base = float(getattr(cfg, "DEPLOY_PER_STOCK_USD", 1000.0))
     if not getattr(cfg, "PILOT_MODE_ENABLED", True) or pilot is None:
         return base
