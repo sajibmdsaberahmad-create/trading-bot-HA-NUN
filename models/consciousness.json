@@ -3,7 +3,7 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 76,
   "training_sessions": 22,
-  "trades_observed": 23,
+  "trades_observed": 24,
   "scans_performed": 22,
   "improvements_applied": 22,
   "reports_generated": 21,
@@ -3229,6 +3229,13 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #76",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T05:45:49.039846",
+      "age": "3d 18h 43m 0s",
+      "type": "TRADE",
+      "message": "Observed trade: FMFC BLOCKED P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T05:42:19.525021",
@@ -4149,7 +4156,7 @@
     }
   ],
   "last_training": "2026-06-25T05:17:54.864352",
-  "mood": "learning",
+  "mood": "recalibrating",
   "total_pnl": -17694.23,
   "win_history": [
     0.0,
@@ -4174,24 +4181,25 @@
     -0.01,
     0.0,
     -0.02,
-    0.0
+    0.0,
+    0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 4,
   "worst_streak": 10,
-  "veteran_xp": 205,
+  "veteran_xp": 215,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 17,
+    "exit_timing": 18,
     "risk_management": 2,
     "entry_timing": 2
   },
-  "flights_completed": 18,
-  "hours_flown": 1.8000000000000005,
+  "flights_completed": 19,
+  "hours_flown": 1.9000000000000006,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
-    "FMF": 3,
+    "FMF": 4,
     "CCX": 2,
     "TAG": 1,
     "SCA": 1,
@@ -4202,5 +4210,6 @@
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
-  "architecture_version": "hybrid_atr_v1"
+  "architecture_version": "hybrid_atr_v1",
+  "mood_message": "Four losses in a row ($-0.02 recent). Tightening entries until edge returns."
 }
