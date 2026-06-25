@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "The confidence threshold was set too high, indicating that the trade was likely profitable.",
+    "reason": "The confidence level (58%) indicates that we should be cautious with this stop-loss event. We need to analyze further and ensure the system is robust.",
     "ok": true,
     "msg": "applied"
   }

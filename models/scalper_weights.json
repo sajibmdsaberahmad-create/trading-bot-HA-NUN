@@ -10,9 +10,9 @@
   "rsi_filter": 0.5,
   "volatility_gate": 0.5,
   "_meta": {
-    "train_timestamp": "2026-06-25T16:52:50.105518",
-    "buffer_total": 3772,
-    "buffer_win_rate": 0.325,
+    "train_timestamp": "2026-06-25T16:53:31.260282",
+    "buffer_total": 3780,
+    "buffer_win_rate": 0.324,
     "sources": {
       "backtest": 1247,
       "market_context": 24,
@@ -29,10 +29,10 @@
       "ib_failure": 11,
       "market_data_failure": 33,
       "profit_hunt": 48,
-      "ppo_led": 37,
-      "ppo_entry": 29,
-      "deferred_council": 68,
-      "ppo_entry_eval": 34
+      "ppo_led": 38,
+      "ppo_entry": 30,
+      "deferred_council": 72,
+      "ppo_entry_eval": 36
     },
     "missed_profit_hunts": 0,
     "profit_hunt_events": 48

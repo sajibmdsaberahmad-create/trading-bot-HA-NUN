@@ -1,22 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T12:44:46.291662+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.5399999999999999,
-        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review council_timeout on WYY"
-    ]
-  },
-  {
     "timestamp": "2026-06-25T12:46:39.368369+00:00",
     "source": "runtime_council_timeout",
     "adjustments": {
@@ -3698,6 +3681,23 @@
       "l",
       "y",
       "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:54:03.327453+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence level (58%) indicates that we should be cautious with this stop-loss event. We need to analyze further and ensure the system is robust.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with stop_breach event.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence level (58%) indicates that we should be cautious with this stop-loss event. We need to analyze further and ensure the system is robust.'}"
     ]
   }
 ]
