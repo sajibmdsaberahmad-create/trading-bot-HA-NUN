@@ -24,6 +24,18 @@ ABSOLUTE_LOCK_PARAMS: FrozenSet[str] = frozenset({
     "IB_PORT",
 })
 
+# Runtime auto-apply must not crush trading limits mid-session
+RUNTIME_BLOCKED_PARAMS: FrozenSet[str] = frozenset({
+    "MAX_DAILY_LOSS_PCT",
+    "MAX_WEEKLY_LOSS_PCT",
+    "LOCKED_SPIKE_MIN_RATIO",
+    "VOLUME_SPIKE_MIN_RATIO",
+    "AI_MAX_LOCKED_TARGETS",
+    "MAX_CONCURRENT_POSITIONS",
+    "AI_MAX_CONCURRENT_POSITIONS",
+    "USE_ACCOUNT_LOSS_HALT",
+})
+
 # Live / small-account learning bounds
 LIVE_PARAM_BOUNDS: Dict[str, Tuple[Union[int, float], Union[int, float]]] = {
     "MAX_RISK_PER_TRADE_USD": (15.0, 100.0),
@@ -127,6 +139,10 @@ def is_tunable(param: str, cfg=None) -> bool:
 
 def is_locked(param: str) -> bool:
     return normalize_param(param) in ABSOLUTE_LOCK_PARAMS
+
+
+def is_runtime_blocked(param: str) -> bool:
+    return normalize_param(param) in RUNTIME_BLOCKED_PARAMS
 
 
 def bounds_for(param: str, cfg=None) -> Optional[Tuple]:

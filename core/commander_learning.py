@@ -301,6 +301,13 @@ def apply_commander_plan(
         reason = mut.get("reason", "commander plan")
         if value is None:
             continue
+        from core.param_bounds import is_runtime_blocked, normalize_param
+        if str(source).startswith("runtime_") and is_runtime_blocked(normalize_param(param)):
+            rejected.append({
+                "param": normalize_param(param), "value": value,
+                "reason": reason, "ok": False, "msg": "runtime-blocked param",
+            })
+            continue
         ok, msg = _apply_mutation(cfg, param, value, reason, autopilot)
         rec = {"param": normalize_param(param), "value": value, "reason": reason, "ok": ok, "msg": msg}
         if ok:

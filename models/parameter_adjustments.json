@@ -1,15 +1,8 @@
 {
-  "MAX_DAILY_LOSS_PCT": {
-    "param": "MAX_DAILY_LOSS_PCT",
-    "value": 0,
-    "reason": "Optimize daily loss percentage.",
-    "ok": true,
-    "msg": "applied"
-  },
-  "LOCKED_SPIKE_MIN_RATIO": {
-    "param": "LOCKED_SPIKE_MIN_RATIO",
-    "value": 1.25,
-    "reason": "Increase lockable spike ratio to reduce frequent stop-breach conditions.",
+  "ENTRY_LIMIT_BUFFER_PCT": {
+    "param": "ENTRY_LIMIT_BUFFER_PCT",
+    "value": "0.012",
+    "reason": "The entry limit buffer was set to 0.012, which may be too small.",
     "ok": true,
     "msg": "applied"
   }

@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 99,
   "training_sessions": 27,
-  "trades_observed": 32,
+  "trades_observed": 33,
   "scans_performed": 27,
-  "improvements_applied": 181,
+  "improvements_applied": 184,
   "reports_generated": 26,
   "event_log": [
     {
@@ -9990,6 +9990,166 @@
           "."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T15:14:04.718302",
+      "age": "4d 4h 11m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #182",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Loss streak occurred due to stop breach.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increased confidence threshold to prevent stop breaches.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "S",
+          "t",
+          "o",
+          "p",
+          "b",
+          "r",
+          "e",
+          "a",
+          "c",
+          "h",
+          "e",
+          "s",
+          "c",
+          "a",
+          "n",
+          "b",
+          "e",
+          "m",
+          "i",
+          "t",
+          "i",
+          "g",
+          "a",
+          "t",
+          "e",
+          "d",
+          "b",
+          "y",
+          "i",
+          "n",
+          "c",
+          "r",
+          "e",
+          "a",
+          "s",
+          "i",
+          "n",
+          "g",
+          "c",
+          "o",
+          "n",
+          "f",
+          "i",
+          "d",
+          "e",
+          "n",
+          "c",
+          "e",
+          "t",
+          "h",
+          "r",
+          "e",
+          "s",
+          "h",
+          "o",
+          "l",
+          "d",
+          "s",
+          "a",
+          "n",
+          "d",
+          "m",
+          "o",
+          "n",
+          "i",
+          "t",
+          "o",
+          "r",
+          "i",
+          "n",
+          "g",
+          "f",
+          "o",
+          "r",
+          "s",
+          "p",
+          "e",
+          "c",
+          "i",
+          "f",
+          "i",
+          "c",
+          "t",
+          "r",
+          "a",
+          "d",
+          "e",
+          "p",
+          "a",
+          "t",
+          "t",
+          "e",
+          "r",
+          "n",
+          "s",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:14:07.945828",
+      "age": "4d 4h 11m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #183",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:14:31.956497",
+      "age": "4d 4h 11m 43s",
+      "type": "TRADE",
+      "message": "Observed trade: TPTS LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T15:14:37.853815",
+      "age": "4d 4h 11m 49s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #184",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Event: ib_failure - Market data failure, no live IB bars.",
+        "applied": [
+          {
+            "param": "ENTRY_LIMIT_BUFFER_PCT",
+            "value": "0.012",
+            "reason": "The entry limit buffer was set to 0.012, which may be too small.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'market_state', 'value': 'open', 'reason': 'Market state is open. This indicates the system may have experienced a market change that prevented it from executing trades.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T15:02:24.119498",
@@ -11275,7 +11435,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "calm",
+  "mood": "anxious",
   "total_pnl": -17679.61,
   "win_history": [
     0.0,
@@ -11309,20 +11469,21 @@
     0,
     0.42,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 3,
   "worst_streak": 10,
-  "veteran_xp": 335,
+  "veteran_xp": 345,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 24,
+    "exit_timing": 25,
     "risk_management": 2,
     "entry_timing": 6
   },
-  "flights_completed": 27,
-  "hours_flown": 2.700000000000001,
+  "flights_completed": 28,
+  "hours_flown": 2.800000000000001,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -11335,12 +11496,12 @@
     "NEX": 1,
     "MIM": 2,
     "AZI": 1,
-    "TPT": 1
+    "TPT": 2
   },
   "best_streak": 2,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Today's trade session was successful, with a high profit rate."
+  "mood_message": "I'm feeling a bit jumpy and uncertain about my strategy."
 }

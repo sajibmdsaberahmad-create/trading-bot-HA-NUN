@@ -1957,3 +1957,19 @@ The event occurred because the stop-breach condition was triggered, leading to a
   - MAX_DAILY_LOSS_PCT → 0 (Optimize daily loss percentage.)
   - LOCKED_SPIKE_MIN_RATIO → 1.25 (Increase lockable spike ratio to reduce frequent stop-breach conditions.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T15:14:04.750490+00:00
+Loss streak occurred due to stop breach.
+The algorithm is learning and adjusting based on the event details.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold to prevent stop breaches.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T15:14:07.990626+00:00
+Observed trade_closed — recorded for learning.
+loss:stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-25T15:14:37.879990+00:00
+Event: ib_failure - Market data failure, no live IB bars.
+IB trading permission denied while attempting to execute trades.
+• Applied mutations:
+  - ENTRY_LIMIT_BUFFER_PCT → 0.012 (The entry limit buffer was set to 0.012, which may be too small.)
+

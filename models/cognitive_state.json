@@ -1,13 +1,9 @@
 {
   "mood": "gathering",
   "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
-  "confidence": 0.5,
+  "confidence": 0.47,
   "mode": "autonomous",
   "learned_lessons": [
-    "{'param': 'market_data_failure', 'value': 'No historical data error - This event prevents future profit hunting in the stock market.'}",
-    "Commander: The event occurred due to a missing historical data query for the ticker 'CMGR'. The algorithm needs to improve its ability to fetch recent market data.",
-    "No clean data on TVBCY (no_historical_data) \u2014 profit hunt elsewhere.",
-    "Review market_data_failure on TVBCY",
     "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TVBCY@SMART Trades",
     "An unexpected spike in the AZI ticker occurred after a timeout.",
     "We need to investigate the root cause of the spike and take appropriate actions to prevent similar events from happening again",
@@ -103,10 +99,14 @@
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data failure and missing profit hunt prevent effective trading strategies.'}",
     "Commander: - Market data failure prevents profit hunting without live IB bars.",
     "O",
-    "Commander: The event occurred because the stop-breach condition was triggered, leading to a loss streak."
+    "Commander: The event occurred because the stop-breach condition was triggered, leading to a loss streak.",
+    "S",
+    "Commander: The algorithm is learning and adjusting based on the event details.",
+    "{'param': 'market_state', 'value': 'open', 'reason': 'Market state is open. This indicates the system may have experienced a market change that prevented it from executing trades.'}",
+    "Commander: IB trading permission denied while attempting to execute trades."
   ],
   "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"XCH\",\n    \"entry\": 1.01,\n    \"exit\": 0.9645,\n    \"shares\": 19.0,\n    \"pnl_usd\": -0.86,\n    \"pnl_pct\": -4.5,\n    \"result\": \"loss\",\n    \"exit_reason\": \"stop_breach\"\n  },\n  \"tutorial_instructions\": {\n    \"gut_feel\": 0.7,\n    \"intuition\": 0.9\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 1,
-  "updated": "2026-06-25T15:12:32.322196"
+  "trades_observed": 2,
+  "updated": "2026-06-25T15:14:37.851717"
 }
