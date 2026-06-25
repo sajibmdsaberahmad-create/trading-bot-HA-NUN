@@ -157,3 +157,5 @@
 {"timestamp":"2026-06-25T18:59:41.514590+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T19:01:04.159889+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":-210322.74,"pnl_pct":-0.9229,"primary_goal":true,"reason":"trailing_profit","price":5.115}
 {"timestamp":"2026-06-25T19:01:21.595685+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T19:02:27.351308+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":-216957.07,"pnl_pct":-0.923,"primary_goal":true,"reason":"trailing_profit","price":5.11}
+{"timestamp":"2026-06-25T19:02:45.104544+00:00","event":"trailing_profit","ticker":"LCID","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}

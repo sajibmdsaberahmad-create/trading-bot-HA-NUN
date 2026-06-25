@@ -5027,3 +5027,7 @@ trailing_profit
 Heuristic learning for trade_closed on LCID
 • ...
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:02:47.449102+00:00
+Profit hunting triggered due to missed trailing profit in the market data.
+The algorithm is tracking market data and taking profit into momentum, but it experienced a situation where there was no profit. The trader observed a trailing profit that prevented them from making more trades.
+

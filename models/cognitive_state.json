@@ -4,15 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "m",
-    "c",
-    "Commander: The trade closed occurred at GDC with a council exit at 98% (PPO hold). The market state is open, and the ticker is 'GDC'.",
-    "Commander: council_exit: Ollama exit 98% (PPO hold)",
-    "Market data failure is another crucial factor that needs to be considered.",
-    "We need to learn from this mistake and ensure our trading strategy remains robust in the face of such deviations.",
-    "Commander: The market data failure occurred, and we need to analyze why it happened so that the algo can learn from this event and prevent recurrence.",
-    "Commander: trailing_stop",
-    "{'param': 'market_state', 'value': 'open', 'reason': 'The market is open at a low level.'}",
     "{'param': 'entry_fill', 'value': 0.132, 'reason': 'The entry fill was 0.132 USD per tick.'}",
     "Commander: The trade was executed with an exit type of 'stop_hit' and the margin system is open. The loss was -1,249.24 USD.",
     "H",
@@ -103,10 +94,19 @@
     "Review trade_closed on RIOT",
     "Commander: spike_top_exit: +0.59% vol=1.9x",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Confidence threshold is set too low, could be a sign of poor execution or market conditions.'}",
-    "Commander: Heuristic learning for trade_closed on LCID"
+    "Commander: Heuristic learning for trade_closed on LCID",
+    "P",
+    "i",
+    "\u2014",
+    "h",
+    "u",
+    "p",
+    "a",
+    "m",
+    "Commander: The algorithm is tracking market data and taking profit into momentum, but it experienced a situation where there was no profit. The trader observed a trailing profit that prevented them from making more trades."
   ],
   "last_thought": "```json\n{\n  \"trade_id\": \"closed\",\n  \"entry_price\": 66.38,\n  \"exit_price\": 5.115,\n  \"profit_loss\": -0.48,\n  \"margin_status\": \"\",\n  \"volume\": 3905,\n  \"earnings_per_share\": null,\n  \"commission_paid\": null,\n  \"trade_mode\": \"paper_market\",\n  \"profit_hunting_min_pnl_pct\": 0.300,\n  \"entry_volume\": 1000,\n  \"hold_time\": 27,\n  \"margin_fees\": 0\n}\n```",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-25T19:01:23.932150"
+  "trades_observed": 6,
+  "updated": "2026-06-25T19:02:47.410224"
 }
