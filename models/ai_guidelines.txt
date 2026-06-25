@@ -7314,3 +7314,21 @@ The reason for this event is that the trade closed without achieving the desired
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-25T20:02:40.085344+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:02:44.677742+00:00
+Observed ib_failure — recorded for learning.
+IB order rejected (201)
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:03:07.131652+00:00
+In the event of ib_failure (IB order rejected), adjust the confidence threshold for future analysis.
+The main goal is to increase opportunistic extraction within guardrails. The event suggests a rejection due to an IB order rejected, indicating that the system may be malfunctioning or causing issues with live IB bars.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusting this parameter to a more conservative level (e.g., 0.58) will help the system focus on increasing opportunistic exits, which may reduce the likelihood of future similar events.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:03:10.581052+00:00
+Observed ib_failure — recorded for learning.
+IB order rejected (201)
+

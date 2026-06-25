@@ -373,3 +373,6 @@
 {"timestamp":"2026-06-25T20:02:34.104101+00:00","event":"trade_closed","ticker":"LCID","reason":"bracket_exit","pnl_usd":-43.16,"pnl_pct":-0.39,"won":false,"exit_type":"stop_hit","hold_sec":165.2,"regime":"unknown","entry_fill":5.13,"exit_fill":5.11,"entry_slippage_pct":0.0,"exit_slippage_pct":-0.001953,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:02:34.104486+00:00","event":"loss_streak","ticker":"LCID","reason":"bracket_exit","pnl_usd":-43.16,"consecutive_losses":0,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:02:34.873294+00:00","event":"ib_failure","ticker":"RIOT","reason":"IB order rejected (201)","spike_ratio":10.732072501495058,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:02:57.659707+00:00","event":"ib_failure","ticker":"MARA","reason":"IB order rejected (201)","spike_ratio":1.6820940707574341,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:02:58.427982+00:00","event":"ib_failure","ticker":"SOFI","reason":"IB order rejected (201)","spike_ratio":1.6820940707574341,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:02:58.930065+00:00","event":"ib_failure","ticker":"RIVN","reason":"IB order rejected (201)","spike_ratio":1.6820940707574341,"market_state":"after_hours"}
