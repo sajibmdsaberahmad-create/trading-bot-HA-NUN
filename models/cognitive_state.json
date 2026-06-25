@@ -1,14 +1,9 @@
 {
-  "mood": "calm",
-  "mood_message": "Great session with 10 trades and a high PNL of $54,586.5.",
+  "mood": "steady",
+  "mood_message": "Mixed session \u00b7 $+54586.50. Watching for cleaner setups.",
   "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The loss streak was triggered by stagnation and locked out positions due to high risk parameters.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader should be more cautious with confidence levels, aiming for values below 0.6.'}",
-    "Commander: The event shows the trader took profit into momentum, but it also indicates that the risk management and learning mechanisms were not up to par. We need to focus on improving the algorithm's ability to adapt based on current conditions.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm cannot rely on past performance to predict future outcomes.'}",
-    "Commander: The trade is a profit hunt and the algorithm has failed to take advantage of any previous gains.",
     "When: The loss streak occurred after a stop_breach event.",
     "How: Follow the trades closely and analyze the trading algo to identify areas for improvement.",
     "Commander: Why: The trader was in a low position due to the stop_breach event, leading to losses.",
@@ -103,10 +98,15 @@
     "Commander: The trade was closed, and the trader used a trailing stop strategy based on an entry fill ratio of 1.05, which is close to the lockup period of the algorithm.",
     "{'param': 'market_state', 'value': 'open'}",
     "{'param': 'entry_fill', 'value': 0.0131, 'reason': 'entry fill was very low, resulting in a stop hit exit.'}",
-    "Commander: The reason for the close is bracket_exit."
+    "Commander: The reason for the close is bracket_exit.",
+    "T",
+    "m",
+    "j",
+    "p",
+    "Commander: - Council exit occurred due to the exit percentage being too high."
   ],
-  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"SOXS\",\n    \"entry\": 0.0131,\n    \"exit\": 3.6,\n    \"entry_fill\": 0.0131,\n    \"exit_fill\": 3.6,\n    \"quote_entry\": 0.0131,\n    \"quote_exit\": 0.8316,\n    \"shares\": 2091,\n    \"pnl_usd\": 1711.48,\n    \"pnl_pct\": 6248.09,\n    \"result\": \"win\",\n    \"exit_reason\": \"trailing_stop\",\n    \"entry_slippage_pct\": -0.996391,\n    \"exit_slippage_pct\": -0.769,\n    \"limit_px\": 3.63,\n    \"entry_mode\": \"limit_smart\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 77.8,\n    \"peak\":",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 1,\n  \"analysis\": {\n    \"market_status\": \"market failure\",\n    \"exits_strategy\": \"soft sell into moves\",\n    \"trades_completed\": 5,\n    \"profit_thresholds\": [\n      {\"buying_profit_pct\": 0.50, \"timeframe\": \"day\", \"threshold_value\": 979529.12}\n    ]\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 10,
-  "updated": "2026-06-25T16:26:28.625922"
+  "trades_observed": 12,
+  "updated": "2026-06-25T16:27:30.439736"
 }

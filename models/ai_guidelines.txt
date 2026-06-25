@@ -2155,3 +2155,97 @@ The trade was closed, and the trader used a trailing stop strategy based on an e
 The trade closed with a profit of $0.0, resulting in an exit type of stop hit.
 The reason for the close is bracket_exit.
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:27:30.464849+00:00
+Trade closed, council_exit: Ollama exit 100% (PPO hold)
+- Council exit occurred due to the exit percentage being too high.
+• A
+• d
+• j
+• u
+• s
+• t
+• i
+• n
+• g
+•  
+• t
+• h
+• e
+• s
+• e
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+• s
+•  
+• e
+• n
+• s
+• u
+• r
+• e
+• s
+•  
+• m
+• o
+• r
+• e
+•  
+• a
+• c
+• c
+• u
+• r
+• a
+• t
+• e
+•  
+• p
+• r
+• e
+• d
+• i
+• c
+• t
+• i
+• o
+• n
+• s
+•  
+• a
+• n
+• d
+•  
+• b
+• e
+• t
+• t
+• e
+• r
+•  
+• r
+• i
+• s
+• k
+•  
+• m
+• a
+• n
+• a
+• g
+• e
+• m
+• e
+• n
+• t
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence level by 13%.)
+
