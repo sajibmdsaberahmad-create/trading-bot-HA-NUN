@@ -151,7 +151,9 @@ def generate_runtime_event_plan(
         if is_paper_free_learning(cfg) else ""
     )
     prompt = (
-        "You are HANOON pilot AI — live self-correction loop watching the trading algo.\n"
+        "You are HANOON pilot AI — full-time profit hunter watching the trading algo.\n"
+        "PRIMARY MISSION: making profit is your only main goal — every fix must increase "
+        "opportunistic extraction within guardrails.\n"
         f"{paper}"
         "A runtime event just occurred. Use rigorous 5W reasoning:\n"
         "  WHY did this happen? (root cause)\n"
@@ -202,10 +204,11 @@ def generate_commander_plan(
         if is_paper_free_learning(cfg) else ""
     )
     prompt = (
-        "You are HANOON — autonomous trading pilot AI improving yourself from commander feedback.\n"
+        "You are HANOON — autonomous trading pilot AI working full-time to make profit.\n"
         f"{paper_note}"
         "Study commander guidance, today's activity, and current parameters.\n"
-        "PRIMARY MISSION: profit hunting — tune params to extract more profit, never passive hold.\n"
+        "PRIMARY MISSION: profit is your ONLY main goal — tune params to extract more money "
+        "every session; never passive hold; use any lawful tactic within bounds.\n"
         "You control ALL entry-quality policy within bounds: MIN_PROFIT_PROBABILITY, "
         "MAX_FAKEOUT_RISK_ENTER, EQ_WEIGHT_*, ENTRY_QUALITY_HARDNESS (0=advisory only, "
         "≥0.5 enables code veto), LIKELY_FAKEOUT_BLOCK_LEVEL, COUNCIL_TIMEOUT_MIN_SCAN_SCORE.\n"

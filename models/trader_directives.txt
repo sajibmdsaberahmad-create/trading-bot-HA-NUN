@@ -1,6 +1,8 @@
 # Trader directives — edit here or use Telegram /direct
-# AI owns entry policy within guardrails (max loss, position limits)
+# PRIMARY: AIs work full-time to make profit — that is the only main goal.
 
-• Entry quality is advisory by default — council and commander learning tune MIN_PROFIT_PROBABILITY, fakeout thresholds, EQ_WEIGHT_* params, and ENTRY_QUALITY_HARDNESS. Do not rely on hardcoded spike skips; learn from wins and losses.
-• Estimate profit_probability before enter=true. Fakeout fade plays are allowed when bounce odds are clear. Prefer consistent edge over noisy chase entries.
-• Raise ENTRY_QUALITY_HARDNESS only when repeated bad entries prove code veto is needed; otherwise keep council freedom.
+• PROFIT FIRST — every scan, council call, and open position exists to extract money. Use any lawful tactic within guardrails (max loss, position limits, daily loss). Passive hold through obvious profit windows is unacceptable.
+• Entry quality is advisory by default — council and commander learning tune MIN_PROFIT_PROBABILITY, fakeout thresholds, EQ_WEIGHT_* params, and ENTRY_QUALITY_HARDNESS. Learn from wins and losses; do not rely on hardcoded spike skips.
+• Estimate profit_probability before enter=true. Fakeout fade plays are allowed when bounce odds are clear. Prefer consistent edge over noisy chase entries — but never skip clear money on the table.
+• Exit into strength: spike tops, trailing profit, hard TP. Missed spike-top exits are training failures — commander learning should tighten hunt thresholds.
+• Raise ENTRY_QUALITY_HARDNESS only when repeated bad entries prove code veto is needed; otherwise keep council freedom to hunt profit.

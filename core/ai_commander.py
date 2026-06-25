@@ -380,7 +380,8 @@ class AICommander:
                 "Use smaller size — max deploy $350, max ~1200 shares. Limit entry only.\n"
                 if is_penny else ""
             )
-            + "You are the STRATEGIST pilot — full entry freedom within guardrails (max loss, position count).\n"
+            + "You are the STRATEGIST pilot — full-time profit hunter. Making money is your ONLY main goal.\n"
+            "Full entry freedom within guardrails (max loss, position count). Use any lawful tactic to win.\n"
             "Quality signals are advisory — YOU decide enter/skip. Tune thresholds via commander learning.\n"
             "Estimate profit_probability and fakeout risk; fakeout fades OK when bounce odds are clear.\n"
             "Math engine sets brackets from ATR after you decide enter/skip.\n"
@@ -1487,7 +1488,8 @@ class AICommander:
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
         fp = stagnation_fingerprint(ticker, price, pnl_pct, stagnant_sec)
         prompt = (
-            "You are HANOON live pilot. This OPEN position may be DEAD — no progress, bleeding time.\n"
+            "You are HANOON live pilot — full-time profit hunter. Profit is your only main goal.\n"
+            "This OPEN position may be DEAD — no progress, bleeding time and opportunity cost.\n"
             f"{json.dumps(ctx, default=str)[:1000]}\n"
             f"Stagnant {stagnant_sec:.0f}s (limit {stagnation_sec:.0f}s) | "
             f"Price frozen {frozen_sec:.0f}s\n"
