@@ -1,14 +1,9 @@
 {
-  "mood": "steady",
-  "mood_message": "Mixed session \u00b7 $+641.75. Watching for cleaner setups.",
+  "mood": "focused",
+  "mood_message": "You are performing well based on recent trade count and winning rate.",
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "Profit hunt worked on RIOT: spike_top_exit: +0.59% vol=1.9x \u2014 reinforce opportunistic exits.",
-    "Review trade_closed on RIOT",
-    "Commander: spike_top_exit: +0.59% vol=1.9x",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Confidence threshold is set too low, could be a sign of poor execution or market conditions.'}",
-    "Commander: Heuristic learning for trade_closed on LCID",
     "P",
     "i",
     "\u2014",
@@ -103,10 +98,15 @@
     "Adjust parameters according to market dynamics",
     "Commander: The algorithm adjusts for market conditions, takes profit into momentum, and learns from every outcome.",
     "Review loss_streak on PLTR",
-    "Commander: council_exit: Ollama exit 58% (PPO hold)"
+    "Commander: council_exit: Ollama exit 58% (PPO hold)",
+    "-",
+    "Commander: The event details are related to a loss in the LCID trading algo, specifically involving stop breaches.",
+    "Optimize trading algorithms to reduce execution speed and improve trading efficiency.",
+    "Investigate and adjust the settings of the trade system to ensure optimal performance.",
+    "Commander: The event indicates that the algorithm has become too fast in executing trades, leading to frequent trades and poor trading discipline. The event suggests that the trade system may need to be tuned or optimized for better execution."
   ],
   "last_thought": "```json\n{\n  \"ticker\": \"LCID\",\n  \"entry\": 5.1905,\n  \"exit\": 5.18,\n  \"entry_fill\": 5.1905,\n  \"exit_fill\": 5.18,\n  \"quote_entry\": 5.1905,\n  \"quote_exit\": 5.185,\n  \"shares\": 1009.0,\n  \"pnl_usd\": -10.64,\n  \"pnl_pct\": -0.2,\n  \"result\": \"loss\",\n  \"exit_reason\": \"stop_breach\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": -0.000964,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown|late_chase_risk\",\n  \"hold_sec\": 127.7,\n  \"peak\": 17.32,\n  \"stop\": 17.3065,\n  \"target\": 17.4384",
   "market_belief": {},
-  "trades_observed": 19,
-  "updated": "2026-06-25T19:47:32.478707"
+  "trades_observed": 20,
+  "updated": "2026-06-25T19:47:50.876621"
 }
