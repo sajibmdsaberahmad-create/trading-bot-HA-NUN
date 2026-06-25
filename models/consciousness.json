@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 98,
+  "improvements_applied": 99,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6245,6 +6245,29 @@
         "applied": [],
         "lessons": [
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': '0.58', 'reason': 'This parameter controls how confident the trader is about their decision-making process, and it should be increased to make the trade more reliable.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:45:28.719584",
+      "age": "4d 0h 42m 40s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #99",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout occurred after the scanner spiked. The algo should now be more aggressive to avoid similar issues.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Tighten risk management by increasing the confidence threshold and adjusting the scan score accordingly.",
+          "Adaptively adjust the algo's parameters based on recent performance trends and market conditions."
         ]
       }
     }

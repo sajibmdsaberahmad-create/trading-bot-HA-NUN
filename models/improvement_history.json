@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-06-24T20:40:49.845249",
-    "win_rate": 0.30448454529212077,
-    "buffer_win_rate": 0.40207253886010363,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:40:49.844928\nCombined win rate: 30.4% (buffer=40.2%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
     "timestamp": "2026-06-24T20:45:48.864779",
     "win_rate": 0.306478578892372,
     "buffer_win_rate": 0.40606060606060607,
@@ -2342,6 +2334,24 @@
     "guidelines_summary": "The trade closed with a win: council_exit: Ollama exit 98% (PPO hold).",
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': '0.58', 'reason': 'This parameter controls how confident the trader is about their decision-making process, and it should be increased to make the trade more reliable.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:45:28.746192+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout occurred after the scanner spiked. The algo should now be more aggressive to avoid similar issues.",
+    "lessons": [
+      "Tighten risk management by increasing the confidence threshold and adjusting the scan score accordingly.",
+      "Adaptively adjust the algo's parameters based on recent performance trends and market conditions."
     ]
   }
 ]
