@@ -108,5 +108,5 @@
   "last_thought": "```json\n{\n  \"transaction_id\": \"tx_10197\",\n  \"entry_time\": \"2023-06-25T18:00:00Z\",\n  \"exit_time\": \"2023-06-25T19:00:00Z\",\n  \"quote_entry\": {\n    \"price\": 0.0133,\n    \"volume\": 352531.0\n  },\n  \"quote_exit\": {\n    \"price\": 3.84,\n    \"volume\": 352531.0 * 1.15\n  },\n  \"shares\": 2091.0,\n  \"pnl_usd\": 8001.63,\n  \"pnl_pct\": 28772.18,\n  \"result\": \"win\",\n  \"exit_reason\": \"spike_top_intrabar: +0.56% vol=352531.0x\"\n}\n```",
   "market_belief": {},
   "trades_observed": 20,
-  "updated": "2026-06-25T16:31:08.065217"
+  "updated": "2026-06-25T16:32:51.984652"
 }
