@@ -44,22 +44,26 @@ VISION_FALLBACK_CHAIN = (
 def resolve_vision_model(cfg: BotConfig) -> str:
     """Env override → RAM tier quantized default → first installed fallback."""
     explicit = (getattr(cfg, "OLLAMA_VISION_MODEL", "") or os.getenv("OLLAMA_VISION_MODEL", "") or "").strip()
-    if explicit and explicit != "llava":
-        return installed_vision_tag(cfg, explicit) or explicit
-    if explicit == "llava" and os.getenv("OLLAMA_VISION_MODEL"):
-        return installed_vision_tag(cfg, explicit) or explicit
 
     from core.ram_tier import detect_ram_tier
 
     tier = getattr(cfg, "RAM_TIER", "") or detect_ram_tier()
     tier_model = VISION_MODEL_BY_TIER.get(tier, "llava-phi3:3.8b")
-    if is_vision_model_present(cfg, tier_model):
-        return installed_vision_tag(cfg, tier_model) or tier_model
-    for candidate in VISION_FALLBACK_CHAIN:
+
+    candidates: list[str] = []
+    if explicit:
+        candidates.append(explicit)
+    if tier_model not in candidates:
+        candidates.append(tier_model)
+    for c in VISION_FALLBACK_CHAIN:
+        if c not in candidates:
+            candidates.append(c)
+
+    for candidate in candidates:
         if is_vision_model_present(cfg, candidate):
             return installed_vision_tag(cfg, candidate) or candidate
-    tag = installed_vision_tag(cfg, tier_model)
-    return tag or tier_model
+
+    return installed_vision_tag(cfg, explicit) or explicit or tier_model
 
 
 def installed_vision_tag(cfg: BotConfig, model: str) -> Optional[str]:
