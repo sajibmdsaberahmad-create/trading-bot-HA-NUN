@@ -436,7 +436,9 @@ class AICommander:
         if self.model is None or not self.ai_components:
             return 0, 0.5, "no model"
         try:
+            from core.ai_guardrails import normalize_ppo_obs
             from core.agent import predict_with_reasoning
+            obs = normalize_ppo_obs(obs, self.cfg)
             action, conf, reason = predict_with_reasoning(
                 self.model, obs, self.cfg, self.ai_components, bar_df=bar_df,
                 for_entry=for_entry,

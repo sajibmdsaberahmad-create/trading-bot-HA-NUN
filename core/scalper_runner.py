@@ -123,7 +123,7 @@ from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
 from core.account_evaluator import AccountEvaluator
 from core.telegram_listener import TelegramCommandListener
 from core.commander_learning import load_commander_guidance, run_commander_learning_cycle
-from core.ai_runtime_observer import get_runtime_observer
+from core.ai_guardrails import build_ppo_observation
 from core.ollama_vision import ensure_vision_model
 
 
@@ -1776,13 +1776,7 @@ class ScalperRunner:
                                         "stop": self._position_stop,
                                         "target": self._position_target,
                                     }
-                                    obs = None
-                                    if len(self._feature_buffer) >= self.cfg.WINDOW_SIZE:
-                                        window = np.array(
-                                            list(self._feature_buffer)[-self.cfg.WINDOW_SIZE:],
-                                            dtype=np.float32,
-                                        ).flatten()
-                                        obs = window.astype(np.float32)
+                                    obs = self._build_ppo_obs(px)
                                     bar_df = (
                                         pd.DataFrame(self._bar_df_buffer)
                                         if self._bar_df_buffer else None
@@ -2274,6 +2268,15 @@ class ScalperRunner:
 
     def _priority_ticker_set(self) -> set:
         return {t.upper() for t in self._priority_tickers()}
+
+    def _build_ppo_obs(self, current_px: float) -> Optional[np.ndarray]:
+        return build_ppo_observation(
+            self._feature_buffer,
+            self.cfg,
+            current_px,
+            float(self.bot_cash),
+            float(self.shares),
+        )
 
     def _min_bars_for(self, ticker: str) -> int:
         return min_bars_for_ticker(
@@ -3344,11 +3347,7 @@ class ScalperRunner:
 
         if getattr(self.cfg, "DYNAMIC_TRAILING_ENABLED", False) and self.risk.plan:
             try:
-                obs = None
-                _, ppo_conf, _ = self._ai_gate_exit(current_px)
-                if self._feature_buffer and len(self._feature_buffer) >= self.cfg.WINDOW_SIZE:
-                    window = np.array(self._feature_buffer[-self.cfg.WINDOW_SIZE:]).flatten()
-                    obs = window.astype(np.float32)
+                obs = self._build_ppo_obs(current_px)
                 overrides = self.risk.update_ai_dynamic_trailing(
                     ai_confidence=float(ppo_conf),
                     regime_trend_strength=0.0,

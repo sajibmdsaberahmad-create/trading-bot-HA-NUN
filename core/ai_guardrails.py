@@ -39,6 +39,63 @@ from core.notify import log
 # VALIDATORS & SANITIZERS
 # ═════════════════════════════════════════════════════════════════════════════
 
+def ppo_obs_dim(cfg) -> int:
+    """PPO observation size: WINDOW_SIZE × N_FEATURES + cash/position ratios."""
+    return int(getattr(cfg, "WINDOW_SIZE", 30)) * int(getattr(cfg, "N_FEATURES", 18)) + 2
+
+
+def normalize_ppo_obs(obs, cfg) -> "np.ndarray":
+    """
+    Ensure observation matches trained PPO shape.
+    Common bug: 540-dim window without the +2 account ratios (expects 542).
+    """
+    import numpy as np
+    from core.config import BotConfig
+
+    expected = ppo_obs_dim(cfg)
+    if obs is None:
+        return np.zeros(expected, dtype=np.float32)
+    flat = np.asarray(obs, dtype=np.float32).flatten()
+    if flat.shape[0] == expected:
+        return flat
+    if flat.shape[0] == expected - 2:
+        return np.concatenate([flat, np.array([0.5, 0.5], dtype=np.float32)])
+    if flat.shape[0] > expected:
+        return flat[:expected].copy()
+    out = np.zeros(expected, dtype=np.float32)
+    out[: min(flat.shape[0], expected)] = flat[:expected]
+    return out
+
+
+def build_ppo_observation(
+    feature_buffer,
+    cfg,
+    current_px: float,
+    bot_cash: float,
+    shares: float,
+):
+    """Build a full PPO observation from the rolling feature buffer."""
+    import numpy as np
+
+    window_size = int(getattr(cfg, "WINDOW_SIZE", 30))
+    if len(feature_buffer) < window_size:
+        return None
+    window = np.array(list(feature_buffer)[-window_size:], dtype=np.float32).flatten()
+    n_feat = int(getattr(cfg, "N_FEATURES", 18))
+    need = window_size * n_feat
+    if window.shape[0] != need:
+        if window.shape[0] > need:
+            window = window[:need]
+        else:
+            padded = np.zeros(need, dtype=np.float32)
+            padded[: window.shape[0]] = window
+            window = padded
+    total = float(bot_cash) + float(shares) * float(current_px)
+    c_rat = float(bot_cash) / (total + 1e-9)
+    p_rat = (float(shares) * float(current_px)) / (total + 1e-9) if shares > 0 else 0.0
+    return normalize_ppo_obs(np.concatenate([window, [c_rat, p_rat]]), cfg)
+
+
 def sanitize_observation(obs: np.ndarray, expected_shape: tuple,
                           min_val: float = -1e6, max_val: float = 1e6) -> Tuple[np.ndarray, bool]:
     """
@@ -55,9 +112,22 @@ def sanitize_observation(obs: np.ndarray, expected_shape: tuple,
     
     if obs.shape != expected_shape:
         log.warning(f"GUARDRAIL: Observation shape mismatch: got {obs.shape}, expected {expected_shape}")
-        # Attempt reshape if possible
+        # Pad or trim 1-D observations (e.g. 540 → 542)
         try:
-            obs = obs.reshape(expected_shape)
+            flat = np.asarray(obs, dtype=np.float32).flatten()
+            exp_n = int(expected_shape[0]) if expected_shape else flat.shape[0]
+            if len(expected_shape) == 1 and flat.ndim == 1:
+                if flat.shape[0] == exp_n - 2:
+                    flat = np.concatenate([flat, np.array([0.5, 0.5], dtype=np.float32)])
+                elif flat.shape[0] > exp_n:
+                    flat = flat[:exp_n]
+                elif flat.shape[0] < exp_n:
+                    padded = np.zeros(exp_n, dtype=np.float32)
+                    padded[: flat.shape[0]] = flat
+                    flat = padded
+                obs = flat
+            else:
+                obs = obs.reshape(expected_shape)
         except Exception:
             return np.zeros(expected_shape, dtype=np.float32), False
     

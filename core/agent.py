@@ -179,7 +179,8 @@ def predict_with_reasoning(model: PPO, obs: np.ndarray, cfg: BotConfig,
         (action, confidence_score, reasoning_summary)
     """
     if not _enhanced_available or not cfg.USE_ENHANCED_AI:
-        # Fall back to basic prediction
+        from core.ai_guardrails import normalize_ppo_obs, ppo_obs_dim
+        obs = normalize_ppo_obs(obs, cfg)
         action, _ = model.predict(obs, deterministic=True)
         return int(action), 0.5, None
     
@@ -188,8 +189,9 @@ def predict_with_reasoning(model: PPO, obs: np.ndarray, cfg: BotConfig,
     ensemble = components.get('ensemble')
     confidence_scorer = components.get('confidence_scorer')
     
-    # Step 1: Sanitize observation
-    expected_shape = obs.shape
+    from core.ai_guardrails import normalize_ppo_obs, ppo_obs_dim
+    obs = normalize_ppo_obs(obs, cfg)
+    expected_shape = (ppo_obs_dim(cfg),)
     obs, obs_valid = sanitize_observation(obs, expected_shape)
     if not obs_valid:
         log.warning("Observation sanitization failed — returning HOLD")
