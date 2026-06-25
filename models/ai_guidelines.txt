@@ -2091,3 +2091,7 @@ IB trading permission denied is a root cause of the issue. The trader should pri
 Observed ib_failure — recorded for learning.
 IB closing-only — cannot open new positions
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:04:27.110039+00:00
+Observed market_data_failure — recorded for learning.
+MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TMPOQ@SMART Trades
+

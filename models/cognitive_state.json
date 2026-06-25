@@ -4,9 +4,6 @@
   "confidence": 0.47,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: ONCI@SMART Trades",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The order should be more aggressive, closer to the current market price of 4.3141.'}",
-    "Commander: The user is experiencing repeated failed trades where they cannot accept limits and convert orders to algorithms or make opportunistic exits. This event indicates an issue with the order execution strategy.",
     "Review council_timeout on WAVE",
     "No clean data on FNMAI (no_historical_data) \u2014 profit hunt elsewhere.",
     "-",
@@ -103,10 +100,13 @@
     "Be cautious when using the same strategy to prevent repeated losses",
     "Commander: IB trading permission denied is a root cause of the issue. The trader should prioritize opportunistic exits and avoid using the same strategy repeatedly.",
     "Review ib_failure on MIMI",
-    "Commander: IB closing-only \u2014 cannot open new positions"
+    "Commander: IB closing-only \u2014 cannot open new positions",
+    "No clean data on TMPOQ (no_historical_data) \u2014 profit hunt elsewhere.",
+    "Review market_data_failure on TMPOQ",
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TMPOQ@SMART Trades"
   ],
-  "last_thought": "```json\n{\n    \"prompt\": \"Summarize live account state for dashboard (2 sentences):\",\n    \"response\": \"Your current equity is $993,883.27. You have no available cash or position value. Your NAV is 1000.0.\",\n    \"details\": {\n        \"market_data\": null,\n        \"available_cash\": null,\n        \"position_value\": null,\n        \"nav\": null\n    }\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"margin_hunting\": 1.2,\n    \"risk_tolerance\": 0.8\n  },\n  \"intuition\": {\n    \"long_positions\": [\n      // Long positions list\n    ],\n    \"short_positions\": [],\n    \"profit_hunting_mode\": true\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T15:33:01.344731"
+  "updated": "2026-06-25T16:04:27.078048"
 }
