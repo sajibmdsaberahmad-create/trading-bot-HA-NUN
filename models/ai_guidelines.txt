@@ -2447,3 +2447,7 @@ The trade was successful but the profit hunting process has been paused due to a
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold has been lowered to ensure the analysis is robust.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:48:51.461329+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+

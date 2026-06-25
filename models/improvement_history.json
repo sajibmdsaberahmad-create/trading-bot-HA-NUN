@@ -1,24 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T12:40:20.128975+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "The algorithm is experiencing a high level of volatility, and the current risk management strategy is not effective. Adjusting the confidence threshold to reflect this higher risk can help maintain a more stable portfolio.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Event: council_timeout - Council timeout, no aligned signal",
-    "lessons": [
-      "Implement more robust risk management strategies to mitigate potential losses caused by such events.",
-      "Diversify the portfolio for higher confidence in signals.",
-      "Analyze recent trades to identify patterns and trends."
-    ]
-  },
-  {
     "timestamp": "2026-06-25T12:41:14.340911+00:00",
     "source": "runtime_council_timeout",
     "adjustments": {
@@ -3411,6 +3392,15 @@
       "i",
       "c",
       "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:48:51.461696+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on GDC"
     ]
   }
 ]

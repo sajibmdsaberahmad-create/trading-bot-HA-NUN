@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "The confidence threshold has been lowered to ensure the analysis is robust.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}
