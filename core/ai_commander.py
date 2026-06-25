@@ -380,9 +380,9 @@ class AICommander:
                 "Use smaller size — max deploy $350, max ~1200 shares. Limit entry only.\n"
                 if is_penny else ""
             )
-            + "You are the STRATEGIST pilot — judgment only. Do NOT output stop, target, or share prices.\n"
-            "Estimate profit_probability and fakeout risk BEFORE enter=true. "
-            "Skip blind spike chases; fakeout fade plays OK when bounce odds are clear.\n"
+            + "You are the STRATEGIST pilot — full entry freedom within guardrails (max loss, position count).\n"
+            "Quality signals are advisory — YOU decide enter/skip. Tune thresholds via commander learning.\n"
+            "Estimate profit_probability and fakeout risk; fakeout fades OK when bounce odds are clear.\n"
             "Math engine sets brackets from ATR after you decide enter/skip.\n"
             'JSON: {"enter":true/false,"confidence":0-1,"profit_probability":0-1,'
             '"fakeout_risk":0-1,"setup_type":"momentum_breakout|fakeout_fade|skip",'
@@ -838,7 +838,7 @@ class AICommander:
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         micro = (account or {}).get("micro_forecast") or {}
-        from core.entry_quality import assess_entry_quality, quality_blocks_entry
+        from core.entry_quality import assess_entry_quality, apply_ai_entry_quality
         quality = assess_entry_quality(
             self.cfg, micro,
             spike_ratio=spike_ratio,
@@ -849,16 +849,6 @@ class AICommander:
         )
         account = dict(account or {})
         account["entry_quality"] = quality
-        if quality_blocks_entry(self.cfg, quality):
-            return {
-                "enter": False,
-                "pending": False,
-                "confidence": ppo_conf,
-                "reason": quality.get("reason", "quality gate"),
-                "pipeline": f"quality:{quality.get('setup_type', 'skip')}",
-                "profit_probability": quality.get("profit_probability"),
-                "fakeout_risk": quality.get("fakeout_risk"),
-            }
         from core.fast_execution import (
             should_spike_fast_entry,
             should_micro_fast_entry,
@@ -958,6 +948,7 @@ class AICommander:
                 live.get("status", "missing"),
                 ppo_action, ppo_conf, ppo_reason, min_conf,
                 scan_score=scan_score, spike_ratio=spike_ratio,
+                quality=quality, cfg=self.cfg,
             )
             out = merged
             if out.get("pending"):
@@ -1046,6 +1037,16 @@ class AICommander:
                 enter = True
                 confidence = max(confidence, ppo_conf)
                 out["reason"] = f"PPO buy signal: {ppo_reason or 'ensemble confirmed'}"
+
+        out["enter"] = enter
+        out["confidence"] = confidence
+        if pipeline_on and live.get("status") == "fresh":
+            parsed_live = live.get("parsed") or {}
+            if parsed_live.get("profit_probability") is not None:
+                out["ollama_profit_probability"] = parsed_live.get("profit_probability")
+        out = apply_ai_entry_quality(self.cfg, out, quality)
+        enter = bool(out.get("enter"))
+        confidence = float(out.get("confidence", confidence))
 
         if not enter:
             return {
@@ -1185,6 +1186,8 @@ class AICommander:
             float(state.get("min_conf", 0.5)),
             scan_score=float(state.get("scan_score", 0)),
             spike_ratio=float(state.get("spike_ratio", 1.0)),
+            quality=(state.get("account") or {}).get("entry_quality"),
+            cfg=self.cfg,
         )
         if merged.get("pending"):
             return {
@@ -1212,6 +1215,11 @@ class AICommander:
         ppo_reason = str(state.get("ppo_reason", ""))
         is_penny = current_px < float(getattr(self.cfg, "PENNY_PRICE_THRESHOLD", 1.0))
         avg_vol = float(mctx.get("avg_volume", 0))
+        from core.entry_quality import apply_ai_entry_quality
+        quality = (account or {}).get("entry_quality")
+        if status == "fresh" and parsed.get("profit_probability") is not None:
+            merged["ollama_profit_probability"] = parsed.get("profit_probability")
+        merged = apply_ai_entry_quality(self.cfg, merged, quality)
         return self._finalize_entry_decision(
             merged, ticker=ticker, current_px=current_px,
             spike_ratio=float(state.get("spike_ratio", 1)),

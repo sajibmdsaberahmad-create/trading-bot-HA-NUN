@@ -276,12 +276,19 @@ def merge_entry_decision(
     min_conf: float,
     scan_score: float = 0.0,
     spike_ratio: float = 1.0,
+    quality: Optional[Dict[str, Any]] = None,
+    cfg: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """
     Collaborative Ollama + PPO council — non-blocking.
     Returns pending=True while Ollama is still thinking; never skips on PPO alone mid-deliberation.
     """
     ppo_buy = ppo_action == 1
+    profit_prob = float((quality or {}).get("profit_probability", 0.5))
+    min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42)) if cfg else 0.42
+    timeout_min_scan = float(
+        getattr(cfg, "COUNCIL_TIMEOUT_MIN_SCAN_SCORE", 40.0),
+    ) if cfg else 40.0
     base: Dict[str, Any] = {
         "enter": False,
         "pending": False,

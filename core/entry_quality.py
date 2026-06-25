@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-core/entry_quality.py — Profit probability + fakeout read before any spike entry.
+core/entry_quality.py — Profit probability + fakeout read for council/PPO.
 
-Heavy on micro + PPO context; Ollama council still deliberates async for learning.
+All weights and thresholds are cfg params (AI-learnable within param_bounds).
+Code never hard-vetoes unless ENTRY_QUALITY_HARD_BLOCK or hardness ≥ 0.5.
 """
 
 from __future__ import annotations
@@ -10,6 +11,19 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 from core.config import BotConfig
+
+
+def _eq_weights(cfg: BotConfig) -> Dict[str, float]:
+    return {
+        "profit_run": float(getattr(cfg, "EQ_WEIGHT_PROFIT_RUN", 0.22)),
+        "spike_lik": float(getattr(cfg, "EQ_WEIGHT_SPIKE_LIK", 0.18)),
+        "scan": float(getattr(cfg, "EQ_WEIGHT_SCAN", 0.16)),
+        "ppo": float(getattr(cfg, "EQ_WEIGHT_PPO", 0.14)),
+        "vol_spike": float(getattr(cfg, "EQ_WEIGHT_VOL_SPIKE", 0.12)),
+        "mom": float(getattr(cfg, "EQ_WEIGHT_MOM", 0.10)),
+        "penalty_fade": float(getattr(cfg, "EQ_PENALTY_FADE", 0.28)),
+        "penalty_loss": float(getattr(cfg, "EQ_PENALTY_LOSS", 0.22)),
+    }
 
 
 def assess_entry_quality(
@@ -25,9 +39,10 @@ def assess_entry_quality(
     """
     Estimate odds of a profitable long scalp and classify setup type.
 
-    Returns profit_probability, fakeout_risk, setup_type, enter_ok, reason.
+    Returns profit_probability, fakeout_risk, setup_type, enter_ok (recommendation), reason.
     """
     micro = micro or {}
+    w = _eq_weights(cfg)
     sl = float(micro.get("spike_likelihood", 0))
     fade = float(micro.get("fade_risk", 0))
     loss_p = float(micro.get("loss_pressure", 0))
@@ -46,24 +61,25 @@ def assess_entry_quality(
         pred_up = min((pred_1 / live_px - 1.0) * 50.0, 0.35)
 
     profit_probability = (
-        0.22 * profit_run
-        + 0.18 * sl
-        + 0.16 * score_norm
-        + 0.14 * ppo_up
-        + 0.12 * spike_norm
-        + 0.10 * max(0.0, mom)
+        w["profit_run"] * profit_run
+        + w["spike_lik"] * sl
+        + w["scan"] * score_norm
+        + w["ppo"] * ppo_up
+        + w["vol_spike"] * spike_norm
+        + w["mom"] * max(0.0, mom)
         + pred_up
-        - 0.28 * fade
-        - 0.22 * loss_p
+        - w["penalty_fade"] * fade
+        - w["penalty_loss"] * loss_p
     )
     profit_probability = float(max(0.0, min(1.0, profit_probability)))
 
     fakeout_risk = float(max(0.0, min(1.0, fade * 0.55 + sl * 0.25 + (0.2 if va > 1.8 and mom < 0.05 else 0.0))))
 
-    # Fakeout fade-play: volume spike exhausting, price extended, micro projects bounce
+    min_fade = float(getattr(cfg, "FAKEOUT_FADE_MIN_FADE", 0.40))
+    min_sl = float(getattr(cfg, "FAKEOUT_FADE_MIN_SL", 0.35))
     fakeout_fade_play = (
-        fade >= 0.40
-        and sl >= 0.35
+        fade >= min_fade
+        and sl >= min_sl
         and spike_ratio >= 1.15
         and live_px > 0
         and pred_1 >= live_px * 1.0008
@@ -85,31 +101,35 @@ def assess_entry_quality(
     min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42))
     min_fakeout = float(getattr(cfg, "MIN_FAKEOUT_FADE_PROB", 0.50))
     max_fakeout_risk = float(getattr(cfg, "MAX_FAKEOUT_RISK_ENTER", 0.62))
-    gate = getattr(cfg, "ENTRY_QUALITY_GATE", True)
+    fakeout_block = float(getattr(cfg, "LIKELY_FAKEOUT_BLOCK_LEVEL", 0.0))
 
     enter_ok = True
     reason = f"profit_prob={profit_probability:.0%} setup={setup_type}"
-
-    if not gate:
-        return _pack(
-            profit_probability, fakeout_risk, setup_type, True, reason,
-            fakeout_fade_play, micro,
-        )
 
     if setup_type == "fakeout_fade":
         enter_ok = profit_probability >= min_fakeout
         reason = (
             f"fakeout fade-play prob={profit_probability:.0%} "
-            f"(need {min_fakeout:.0%}) fade={fade:.0%}"
+            f"(target {min_fakeout:.0%}) fade={fade:.0%}"
         )
     elif setup_type == "likely_fakeout":
-        enter_ok = False
-        reason = f"likely fakeout — fade={fade:.0%} spike without follow-through"
+        if fakeout_block >= 0.5:
+            enter_ok = False
+            reason = f"likely fakeout (block_level={fakeout_block:.0%}) fade={fade:.0%}"
+        else:
+            enter_ok = (
+                profit_probability >= min_prob * 0.85
+                and fakeout_risk <= max_fakeout_risk
+            )
+            reason = (
+                f"likely fakeout advisory prob={profit_probability:.0%} "
+                f"fakeout_risk={fakeout_risk:.0%}"
+            )
     else:
         enter_ok = profit_probability >= min_prob and fakeout_risk <= max_fakeout_risk
         reason = (
-            f"profit_prob={profit_probability:.0%} (need {min_prob:.0%}) "
-            f"fakeout_risk={fakeout_risk:.0%}"
+            f"profit_prob={profit_probability:.0%} (target {min_prob:.0%}) "
+            f"fakeout_risk={fakeout_risk:.0%} (max {max_fakeout_risk:.0%})"
         )
 
     return _pack(
@@ -142,6 +162,55 @@ def _pack(
 
 
 def quality_blocks_entry(cfg: BotConfig, quality: Dict[str, Any]) -> bool:
-    if not getattr(cfg, "ENTRY_QUALITY_GATE", True):
-        return False
-    return not bool(quality.get("enter_ok", True))
+    """True only when AI has raised hardness/block — otherwise advisory."""
+    if getattr(cfg, "ENTRY_QUALITY_HARD_BLOCK", False):
+        return not bool(quality.get("enter_ok", True))
+    hardness = float(getattr(cfg, "ENTRY_QUALITY_HARDNESS", 0.0))
+    if hardness >= 0.5 and not bool(quality.get("enter_ok", True)):
+        return True
+    if getattr(cfg, "ENTRY_QUALITY_GATE", False) and not bool(quality.get("enter_ok", True)):
+        return True
+    return False
+
+
+def apply_ai_entry_quality(
+    cfg: BotConfig,
+    decision: Dict[str, Any],
+    quality: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Blend quality signals into council decision; veto only when hardness enabled."""
+    if not quality:
+        return decision
+
+    prob = float(quality.get("profit_probability", 0.5))
+    fake = float(quality.get("fakeout_risk", 0))
+    decision["profit_probability"] = prob
+    decision["fakeout_risk"] = fake
+    decision["setup_type"] = quality.get("setup_type")
+    decision["quality_recommendation"] = bool(quality.get("enter_ok", True))
+
+    if quality_blocks_entry(cfg, quality):
+        decision["enter"] = False
+        decision["reason"] = f"quality veto: {quality.get('reason', '')}"[:200]
+        decision["pipeline"] = f"quality:{quality.get('setup_type', 'skip')}"
+        return decision
+
+    blend_w = float(getattr(cfg, "ENTRY_QUALITY_BLEND_WEIGHT", 0.35))
+    if blend_w <= 0.01:
+        return decision
+
+    conf = float(decision.get("confidence", 0.5))
+    min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42))
+    ollama_prob = decision.get("ollama_profit_probability")
+    if ollama_prob is not None:
+        prob = float(ollama_prob)
+
+    if prob >= min_prob:
+        decision["confidence"] = min(1.0, conf + blend_w * (prob - conf))
+    else:
+        gap = min_prob - prob
+        decision["confidence"] = max(0.0, conf - blend_w * gap)
+        if fake > float(getattr(cfg, "MAX_FAKEOUT_RISK_ENTER", 0.62)):
+            decision["confidence"] = min(decision["confidence"], conf * 0.9)
+
+    return decision

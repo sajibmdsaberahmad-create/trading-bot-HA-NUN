@@ -3663,9 +3663,13 @@ class ScalperRunner:
             )
             fc.update(quality)
             self._last_micro_forecast[ticker] = fc
+            if not quality.get("enter_ok", True):
+                log.info(
+                    f"  📊 QUALITY advisory {ticker}: {quality.get('reason', '')[:100]}"
+                )
             if quality_blocks_entry(self.cfg, quality):
                 log.info(
-                    f"  ⏭ QUALITY skip {ticker}: {quality.get('reason', '')[:100]}"
+                    f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}"
                 )
                 self._spike_skip_until[ticker] = time.time() + float(
                     getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
