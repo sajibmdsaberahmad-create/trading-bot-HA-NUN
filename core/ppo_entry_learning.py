@@ -29,6 +29,28 @@ if TYPE_CHECKING:
 LEDGER_PATH = Path("models/ppo_entry_ledger.jsonl")
 _pending: Dict[str, Dict[str, Any]] = {}
 _lock = threading.Lock()
+_model_ref: Any = None
+
+
+def set_ppo_model(model: Any) -> None:
+    global _model_ref
+    _model_ref = model
+
+
+def get_ppo_model() -> Any:
+    return _model_ref
+
+
+def _feat_vector(raw: Any, cfg: BotConfig) -> Optional[np.ndarray]:
+    if not raw:
+        return None
+    n_feat = int(getattr(cfg, "N_FEATURES", 18))
+    arr = np.array(raw, dtype=np.float32).flatten()
+    if arr.size == n_feat:
+        return arr
+    if arr.size >= n_feat:
+        return arr[-n_feat:]
+    return None
 
 
 def ppo_learn_every_entry(cfg: BotConfig) -> bool:
@@ -271,17 +293,19 @@ def ppo_micro_improve(
     """Small PPO fine-tune on entry evaluation records (features required)."""
     if model is None or not records:
         return False
-    feat_recs = [r for r in records if r.get("features") and len(r["features"]) >= 4]
-    if not feat_recs:
+    feat_rows: List[np.ndarray] = []
+    for r in records:
+        vec = _feat_vector(r.get("obs") or r.get("features"), cfg)
+        if vec is not None:
+            feat_rows.append(vec)
+    if not feat_rows:
         return False
     steps = int(getattr(cfg, "PPO_ENTRY_MICRO_STEPS", 512))
     try:
         from stable_baselines3.common.vec_env import DummyVecEnv
         from core.env import TradingEnv
 
-        feats = np.array([r["features"] for r in feat_recs[-32:]], dtype=np.float32)
-        if feats.ndim == 1:
-            feats = feats.reshape(1, -1)
+        feats = np.stack(feat_rows[-32:], axis=0).astype(np.float32)
         n_feat = int(getattr(cfg, "N_FEATURES", 18))
         if feats.shape[1] != n_feat:
             return False
@@ -301,7 +325,7 @@ def ppo_micro_improve(
         model.set_env(vec_env)
         model.learn(total_timesteps=steps, reset_num_timesteps=False, progress_bar=False)
         model.save(cfg.MODEL_PATH)
-        log.info(f"  🧠 PPO micro-improve: {len(feat_recs)} entry evals | {steps} steps")
+        log.info(f"  🧠 PPO micro-improve: {len(feat_rows)} entry evals | {steps} steps")
         return True
     except Exception as exc:
         log.debug(f"PPO micro-improve: {exc}")
@@ -376,18 +400,27 @@ def on_entry_fill(
         slippage_pct=slippage_pct,
         regime=regime,
     )
+    with _lock:
+        if entry_id in _pending:
+            if obs is not None:
+                _pending[entry_id]["obs"] = (
+                    obs.tolist() if hasattr(obs, "tolist") else list(obs)
+                )
     rec = {
         "source": "ppo_entry",
         "entry_id": entry_id,
         "ticker": ticker,
         "features": features or [],
+        "obs": (
+            obs.tolist() if obs is not None and hasattr(obs, "tolist") else obs
+        ),
         "reward": _entry_reward_at_fill(
             cfg, ppo_action=ppo_action, ppo_conf=ppo_conf, entered=True,
             spike_ratio=spike_ratio, scan_score=scan_score, slippage_pct=slippage_pct,
         ),
         "entry_price": entry_price,
     }
-    evaluate_and_improve_ppo(cfg, model=model, records=[rec])
+    evaluate_and_improve_ppo(cfg, model=model or get_ppo_model(), records=[rec])
     return entry_id
 
 
@@ -418,4 +451,6 @@ def on_council_response(
     )
     with _lock:
         rec = _pending.get(entry_id or "", {})
-    evaluate_and_improve_ppo(cfg, model=model, records=[rec] if rec else [])
+    evaluate_and_improve_ppo(
+        cfg, model=model or get_ppo_model(), records=[rec] if rec else [],
+    )

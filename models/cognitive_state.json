@@ -1,12 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $+0.00. Preserving capital over action.",
+  "mood_message": "Win rate 0% \u00b7 $-3665.15. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "d",
-    "u",
-    ".",
     "Commander: The market data service returned an error code (162) indicating that the historical financial data was not available.",
     "c",
     "x",
@@ -103,10 +100,13 @@
     "l",
     "s",
     "r",
-    "Commander: IB closing-only cannot open new positions"
+    "Commander: IB closing-only cannot open new positions",
+    "Spike-top hunt on KUST: spike_top_intrabar: +0.61% vol=5853.0x",
+    "Large loss detected: KUST. Review stop placement.",
+    "Profit hunt worked on KUST: spike_top_intrabar: +0.61% vol=5853.0x \u2014 reinforce opportunistic exits."
   ],
   "last_thought": "```json\n{\n  \"entry\": 1.66,\n  \"exit\": 1.66,\n  \"entry_fill\": 1.66,\n  \"exit_fill\": 1.66,\n  \"quote_entry\": 1.66,\n  \"quote_exit\": 0.8699,\n  \"shares\": 255,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"loss\",\n  \"exit_reason\": \"bracket_exit\",\n  \"entry_slippage_pct\": 0.896926,\n  \"exit_slippage_pct\": 0.908265,\n  \"limit_px\": 0.8751,\n  \"entry_mode\": \"limit_penny\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 207.3,\n  \"peak\": 1.66,\n  \"stop\": 0.8651,\n  \"target\": 0.8952\n}\n```",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-25T16:18:02.013034"
+  "trades_observed": 5,
+  "updated": "2026-06-25T16:20:57.645415"
 }

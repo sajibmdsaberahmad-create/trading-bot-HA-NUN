@@ -347,6 +347,8 @@ class ScalperRunner:
         self.ai_commander = AICommander(
             self.cfg, self.autopilot, self.consciousness, self.model, self.ai_components,
         )
+        if self.model is not None:
+            self.ai_commander.bind_ppo_model(self.model)
         self.notifier.attach_ai_brain(
             ai_commander=self.ai_commander,
             autopilot=self.autopilot,
@@ -4597,6 +4599,41 @@ class ScalperRunner:
             })
         except Exception:
             pass
+        try:
+            from core.ppo_entry_learning import on_entry_fill
+            from core.pilot_mode import snapshot_features
+
+            features = snapshot_features(self._feature_buffer, self.cfg)
+            council = tel.get("council") or {}
+            obs = None
+            if len(self._feature_buffer) >= self.cfg.WINDOW_SIZE:
+                window = np.array(
+                    list(self._feature_buffer)[-self.cfg.WINDOW_SIZE:],
+                    dtype=np.float32,
+                ).flatten()
+                total = self.bot_cash + self.shares * fill_px
+                c_rat = self.bot_cash / (total + 1e-9)
+                p_rat = (self.shares * fill_px) / (total + 1e-9)
+                obs = np.concatenate([window, [c_rat, p_rat]]).astype(np.float32)
+            entry_id = on_entry_fill(
+                self.cfg,
+                ticker=ticker,
+                entry_price=fill_px,
+                shares=shares,
+                features=features,
+                ai_commander=self.ai_commander,
+                council_decision=council,
+                spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0)),
+                scan_score=float(getattr(self, "_last_scan_score", 0)),
+                slippage_pct=slippage_pct,
+                regime=str(tel.get("regime", getattr(self, "_last_entry_regime", ""))),
+                model=self.model,
+                obs=obs,
+            )
+            if ticker in self._position_slots:
+                self._position_slots[ticker]["ppo_entry_id"] = entry_id
+        except Exception as exc:
+            log.debug(f"PPO entry learning: {exc}")
         return "entered"
 
     def _service_shadow_positions(self) -> None:
