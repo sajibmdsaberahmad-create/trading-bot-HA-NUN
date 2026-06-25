@@ -4,14 +4,6 @@
   "confidence": 0.6900000000000002,
   "mode": "autonomous",
   "learned_lessons": [
-    "W",
-    "j",
-    "p",
-    "T",
-    "F",
-    "C",
-    "O",
-    "N",
     "I",
     "D",
     "E",
@@ -103,10 +95,18 @@
     "d",
     "u",
     ".",
-    "Commander: The market data service returned an error code (162) indicating that the historical financial data was not available."
+    "Commander: The market data service returned an error code (162) indicating that the historical financial data was not available.",
+    "c",
+    "x",
+    "j",
+    "p",
+    "g",
+    "Commander: The council timeout indicates a lack of alignment in the signals received by the algorithm.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The high value of CONFIDENCE_THRESHOLD (0.58) suggests the algorithm should increase this parameter to better handle closing-only events.'}",
+    "Commander: An IB closing-only event occurs when the market is closed and there are no open positions. This prevents real-time analysis and analysis-driven trades."
   ],
   "last_thought": "```json\n{\n  \"prompt\": \"The live account state for the HANOON trading platform is as follows:\",\n  \"response\": \"HANOON: KUST 0.0, MIMI 93.8, EGRX 91.6, GID 91.6\\n\\nNo further information needed.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T14:20:49.028411"
+  "updated": "2026-06-25T14:21:41.040155"
 }

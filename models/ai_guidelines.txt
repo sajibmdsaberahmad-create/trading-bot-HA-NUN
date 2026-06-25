@@ -1286,3 +1286,128 @@ Council timeout — no aligned signal
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-25T14:21:02.185947+00:00
+Observed council_timeout — recorded for learning.
+Council timeout — no aligned signal
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.5399999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
+
+🧭 COMMANDER LEARNING | 2026-06-25T14:21:23.492978+00:00
+Council timeout occurred with no aligned signal.
+The council timeout indicates a lack of alignment in the signals received by the algorithm.
+• I
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• t
+• o
+•  
+• i
+• m
+• p
+• r
+• o
+• v
+• e
+•  
+• a
+• c
+• c
+• u
+• r
+• a
+• c
+• y
+•  
+• a
+• n
+• d
+•  
+• r
+• e
+• d
+• u
+• c
+• e
+•  
+• t
+• h
+• e
+•  
+• l
+• i
+• k
+• e
+• l
+• i
+• h
+• o
+• o
+• d
+•  
+• o
+• f
+•  
+• h
+• i
+• t
+• t
+• i
+• n
+• g
+•  
+• f
+• a
+• l
+• s
+• e
+•  
+• p
+• o
+• s
+• i
+• t
+• i
+• v
+• e
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was too low (0.58). Adjusting it to a higher value will increase the likelihood of making correct signals.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T14:21:41.069667+00:00
+The IB closing-only event occurred, preventing the analysis of new positions.
+An IB closing-only event occurs when the market is closed and there are no open positions. This prevents real-time analysis and analysis-driven trades.
+• Applied mutations:
+  - MAX_DAILY_LOSS_PCT → 0.3613138686131387 (The value of MAX_DAILY_LOSS_PCT (0.3613138686131387) suggests the algorithm should increase this parameter to better handle closing-only events.)
+

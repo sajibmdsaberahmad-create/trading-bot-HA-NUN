@@ -1691,5 +1691,134 @@
     "lessons": [
       "Review council_timeout on WAVE"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T14:21:02.186560+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5399999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on MIMI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T14:21:23.493609+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold was too low (0.58). Adjusting it to a higher value will increase the likelihood of making correct signals.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred with no aligned signal.",
+    "lessons": [
+      "T",
+      "o",
+      "p",
+      "r",
+      "e",
+      "v",
+      "e",
+      "n",
+      "t",
+      "r",
+      "e",
+      "c",
+      "u",
+      "r",
+      "r",
+      "e",
+      "n",
+      "c",
+      "e",
+      ",",
+      "p",
+      "r",
+      "i",
+      "o",
+      "r",
+      "i",
+      "t",
+      "i",
+      "z",
+      "e",
+      "o",
+      "p",
+      "p",
+      "o",
+      "r",
+      "t",
+      "u",
+      "n",
+      "i",
+      "s",
+      "t",
+      "i",
+      "c",
+      "e",
+      "x",
+      "i",
+      "t",
+      "s",
+      "a",
+      "n",
+      "d",
+      "a",
+      "d",
+      "j",
+      "u",
+      "s",
+      "t",
+      "p",
+      "a",
+      "r",
+      "a",
+      "m",
+      "e",
+      "t",
+      "e",
+      "r",
+      "s",
+      "a",
+      "c",
+      "c",
+      "o",
+      "r",
+      "d",
+      "i",
+      "n",
+      "g",
+      "l",
+      "y",
+      "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T14:21:41.070605+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "MAX_DAILY_LOSS_PCT": {
+        "param": "MAX_DAILY_LOSS_PCT",
+        "value": 0.3613138686131387,
+        "reason": "The value of MAX_DAILY_LOSS_PCT (0.3613138686131387) suggests the algorithm should increase this parameter to better handle closing-only events.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The IB closing-only event occurred, preventing the analysis of new positions.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The high value of CONFIDENCE_THRESHOLD (0.58) suggests the algorithm should increase this parameter to better handle closing-only events.'}"
+    ]
   }
 ]

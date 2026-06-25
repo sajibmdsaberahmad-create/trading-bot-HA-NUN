@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 97,
   "training_sessions": 27,
-  "trades_observed": 30,
+  "trades_observed": 31,
   "scans_performed": 27,
-  "improvements_applied": 153,
+  "improvements_applied": 156,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8500,6 +8500,157 @@
           "Review council_timeout on WAVE"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T14:21:02.164684",
+      "age": "4d 3h 18m 13s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #154",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5399999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on MIMI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:21:23.465706",
+      "age": "4d 3h 18m 34s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #155",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred with no aligned signal.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold was too low (0.58). Adjusting it to a higher value will increase the likelihood of making correct signals.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "o",
+          "p",
+          "r",
+          "e",
+          "v",
+          "e",
+          "n",
+          "t",
+          "r",
+          "e",
+          "c",
+          "u",
+          "r",
+          "r",
+          "e",
+          "n",
+          "c",
+          "e",
+          ",",
+          "p",
+          "r",
+          "i",
+          "o",
+          "r",
+          "i",
+          "t",
+          "i",
+          "z",
+          "e",
+          "o",
+          "p",
+          "p",
+          "o",
+          "r",
+          "t",
+          "u",
+          "n",
+          "i",
+          "s",
+          "t",
+          "i",
+          "c",
+          "e",
+          "x",
+          "i",
+          "t",
+          "s",
+          "a",
+          "n",
+          "d",
+          "a",
+          "d",
+          "j",
+          "u",
+          "s",
+          "t",
+          "p",
+          "a",
+          "r",
+          "a",
+          "m",
+          "e",
+          "t",
+          "e",
+          "r",
+          "s",
+          "a",
+          "c",
+          "c",
+          "o",
+          "r",
+          "d",
+          "i",
+          "n",
+          "g",
+          "l",
+          "y",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:21:31.977982",
+      "age": "4d 3h 18m 43s",
+      "type": "TRADE",
+      "message": "Observed trade: MIMI LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T14:21:41.041083",
+      "age": "4d 3h 18m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #156",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "The IB closing-only event occurred, preventing the analysis of new positions.",
+        "applied": [
+          {
+            "param": "MAX_DAILY_LOSS_PCT",
+            "value": 0.3613138686131387,
+            "reason": "The value of MAX_DAILY_LOSS_PCT (0.3613138686131387) suggests the algorithm should increase this parameter to better handle closing-only events.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The high value of CONFIDENCE_THRESHOLD (0.58) suggests the algorithm should increase this parameter to better handle closing-only events.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T14:17:06.695869",
@@ -9785,7 +9936,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "patient",
+  "mood": "miserable",
   "total_pnl": -17679.61,
   "win_history": [
     0.0,
@@ -9817,20 +9968,21 @@
     0,
     0,
     0,
-    0.42
+    0.42,
+    0
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 10,
-  "veteran_xp": 315,
+  "veteran_xp": 325,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 22,
+    "exit_timing": 23,
     "risk_management": 2,
     "entry_timing": 6
   },
-  "flights_completed": 25,
-  "hours_flown": 2.500000000000001,
+  "flights_completed": 26,
+  "hours_flown": 2.600000000000001,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -9841,7 +9993,7 @@
     "XOC": 2,
     "EVG": 1,
     "NEX": 1,
-    "MIM": 1,
+    "MIM": 2,
     "AZI": 1
   },
   "best_streak": 2,
@@ -9849,5 +10001,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Observing your recent trading performance and analyzing the last five PNLs provide insights that can help you make informed decisions."
+  "mood_message": "Today's performance was disappointing."
 }
