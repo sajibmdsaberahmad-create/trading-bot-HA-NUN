@@ -90,6 +90,47 @@ def _fits_ram(cfg: BotConfig, model: str, available_mb: Optional[int] = None) ->
     return est <= min(budget, headroom)
 
 
+def installed_model_tag(cfg: BotConfig, model: str) -> Optional[str]:
+    """Exact Ollama tag for API calls (e.g. llava → llava:latest)."""
+    target = (model or "").strip()
+    if not target:
+        return None
+    installed = _list_models(cfg)
+    full_tags = [n for n in installed if ":" in n]
+    if target in full_tags:
+        return target
+    base = target.split(":")[0]
+    for tag in full_tags:
+        if tag.split(":")[0] == base:
+            return tag
+    if target in installed:
+        return target
+    return None
+
+
+def ensure_text_model(cfg: BotConfig) -> str:
+    """Return an installed text model tag — never a missing name (avoids HTTP 404)."""
+    dynamic = getattr(cfg, "OLLAMA_DYNAMIC_MODEL", True)
+    if os.getenv("OLLAMA_DYNAMIC_MODEL", "").lower() in ("0", "false", "no"):
+        dynamic = False
+    raw = active_text_model(cfg) if dynamic else (getattr(cfg, "OLLAMA_MODEL", "") or "")
+    tag = installed_model_tag(cfg, raw)
+    if tag:
+        if tag != getattr(cfg, "OLLAMA_MODEL", ""):
+            cfg.OLLAMA_MODEL = tag
+        return tag
+    for candidate in TEXT_FALLBACK_CHAIN:
+        tag = installed_model_tag(cfg, candidate)
+        if tag:
+            log.warning(
+                f"🧠 Ollama model {raw or '?'} not installed — using {tag} "
+                f"(run: ollama pull {candidate})"
+            )
+            cfg.OLLAMA_MODEL = tag
+            return tag
+    return raw or "qwen2.5:3b"
+
+
 def resolve_text_model(cfg: BotConfig, *, available_mb: Optional[int] = None) -> str:
     """
     Env override → tier default → first installed model in fallback chain that fits RAM.
@@ -122,9 +163,11 @@ def resolve_text_model(cfg: BotConfig, *, available_mb: Optional[int] = None) ->
 
     for candidate in TEXT_FALLBACK_CHAIN:
         if is_text_model_present(cfg, candidate):
-            return candidate
+            tag = installed_model_tag(cfg, candidate)
+            return tag or candidate
 
-    return explicit or tier_model
+    tag = installed_model_tag(cfg, explicit or tier_model)
+    return tag or explicit or tier_model
 
 
 def active_text_model(cfg: BotConfig) -> str:
