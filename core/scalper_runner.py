@@ -117,7 +117,11 @@ from core.bracket_validator import validate_decision_bracket, adapt_bracket_to_f
 from core.shadow_mode import ShadowCircuitBreaker
 from core.trade_telemetry import (
     log_bracket_reject, log_entry_execution, log_exit_postmortem,
-    log_post_fill_adapt, log_regime_atr_outcome, regime_tag,
+    log_post_fill_adapt, log_regime_atr_outcome, log_round_trip_fills, regime_tag,
+)
+from core.fill_tracker import (
+    append_fill_ledger, build_round_trip_record, resolve_entry_fill,
+    resolve_exit_fill,
 )
 from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
 from core.account_evaluator import AccountEvaluator

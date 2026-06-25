@@ -187,6 +187,51 @@ def log_entry_execution(
     _append(rec)
 
 
+def log_round_trip_fills(
+    *,
+    ticker: str,
+    entry_fill: float,
+    exit_fill: float,
+    quote_entry: float,
+    quote_exit: float,
+    shares: float,
+    pnl_usd: float,
+    pnl_pct: float,
+    result: str,
+    exit_reason: str = "",
+    entry_slippage_pct: float = 0.0,
+    exit_slippage_pct: float = 0.0,
+    regime: str = "",
+    hold_sec: float = 0.0,
+    entry_mode: str = "",
+    limit_px: Optional[float] = None,
+) -> None:
+    rec = {
+        "event": "round_trip_fill",
+        "ticker": ticker,
+        "entry_fill": round(entry_fill, 4),
+        "exit_fill": round(exit_fill, 4),
+        "quote_entry": round(quote_entry, 4),
+        "quote_exit": round(quote_exit, 4),
+        "shares": shares,
+        "pnl_usd": round(pnl_usd, 2),
+        "pnl_pct": round(pnl_pct, 2),
+        "result": result,
+        "exit_reason": exit_reason[:200],
+        "entry_slippage_pct": entry_slippage_pct,
+        "exit_slippage_pct": exit_slippage_pct,
+        "regime_tag": regime,
+        "hold_sec": round(hold_sec, 1),
+        "entry_mode": entry_mode,
+        "limit_px": limit_px,
+    }
+    _append(rec)
+    log.info(
+        f"  💰 FILL LEDGER {ticker}: in ${entry_fill:.4f} → out ${exit_fill:.4f} | "
+        f"P&L ${pnl_usd:+.2f} ({pnl_pct:+.2f}%) | {result}"
+    )
+
+
 def log_exit_postmortem(
     *,
     ticker: str,
