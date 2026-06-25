@@ -2201,5 +2201,22 @@
       "s",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:41:15.184514+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased confidence in the algorithm to focus more closely on profitable entries.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout event occurred in the recent session with a high scanner score and ATR R:R of 2.0.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"This parameter controls the confidence level of the algorithm's decision-making process and should be adjusted based on the current market conditions.\"}"
+    ]
   }
 ]

@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 139,
   "scans_performed": 27,
-  "improvements_applied": 318,
+  "improvements_applied": 319,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16447,6 +16447,28 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #124",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:41:15.142852",
+      "age": "4d 8h 38m 26s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #319",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council timeout event occurred in the recent session with a high scanner score and ATR R:R of 2.0.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increased confidence in the algorithm to focus more closely on profitable entries.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"This parameter controls the confidence level of the algorithm's decision-making process and should be adjusted based on the current market conditions.\"}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",

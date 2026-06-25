@@ -5352,3 +5352,9 @@ The event is triggered when the scanner score after a timeout exceeds a certain 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The scanner score exceeded the threshold, indicating an opportune exit.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:41:15.183826+00:00
+The council timeout event occurred in the recent session with a high scanner score and ATR R:R of 2.0.
+The root cause is the high scanner score after the timeout, indicating that the algorithm failed to meet the threshold for the specific entry point.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in the algorithm to focus more closely on profitable entries.)
+

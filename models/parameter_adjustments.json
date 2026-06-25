@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "The scanner score exceeded the threshold, indicating an opportune exit.",
+    "reason": "Increased confidence in the algorithm to focus more closely on profitable entries.",
     "ok": true,
     "msg": "applied"
   }
