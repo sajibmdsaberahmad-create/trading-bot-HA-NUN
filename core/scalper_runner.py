@@ -75,6 +75,9 @@ from core.fast_execution import (
     monitor_ticker_list,
     is_priority_ticker,
     focus_rotation_enabled,
+    tick_stream_count,
+    max_realtime_bar_streams,
+    assign_stream_modes,
 )
 from core.connector import IBConnector
 from core.data import DataManager
@@ -173,6 +176,8 @@ class ScalperRunner:
         self.risk = RiskManager(cfg, cfg.INITIAL_CASH, notifier)
         git_sync_init(cfg)
         self.conn.register_market_data_error_handler(self._on_market_data_failure)
+        self.conn.register_tick_limit_handler(self._on_tick_stream_limit)
+        self._tick_limit_denied: set = set()
 
         # AI / PPO wiring
         self.model = None
@@ -2224,9 +2229,9 @@ class ScalperRunner:
 
         prefetch_tickers = [p.ticker for p in self._locked_targets]
         self._schedule_bar_prefetch(prefetch_tickers)
-        # Streams first — tick data accumulates while bars warm in parallel
-        self._ensure_locked_streams()
+        log.info("📡 Opening priority streams (after fast lock)...")
         self._warm_locked_bar_cache()
+        self._ensure_locked_streams()
 
         self._attempt_scan_bootstrap_entry()
 
@@ -2476,10 +2481,23 @@ class ScalperRunner:
         """Backward-compatible alias — starts all locked streams when enabled."""
         self._ensure_locked_streams(quiet=quiet)
 
+    def _on_tick_stream_limit(self, ticker: str, error_code: int, message: str):
+        """IB 10190 — too many tick-by-tick subs; fall back to 5s bars for this name."""
+        if ticker:
+            self._tick_limit_denied.add(ticker.upper())
+        if ticker and ticker in self._target_monitors:
+            if self._stream_modes.get(ticker) == "tick":
+                log.info(f"  📡 {ticker}: tick cap hit → switching to 5s bars")
+                self._stop_target_stream(ticker)
+                self._start_target_stream(ticker, quiet=True, stream_mode="realtime")
+
+    def _active_tick_stream_count(self) -> int:
+        return sum(1 for mode in self._stream_modes.values() if mode == "tick")
+
     def _ensure_locked_streams(self, quiet: bool = False):
         """
-        Keep live data on every locked ticker while flat.
-        All names get 5s realtime bars; focus name also gets tick-by-tick for entries.
+        Keep live data on priority locked tickers.
+        Top N get tick-by-tick (IB cap ~5); rest get 5-second real-time bars.
         """
         if not self._locked_targets:
             return
@@ -2507,21 +2525,29 @@ class ScalperRunner:
             if t not in wanted:
                 self._stop_target_stream(t)
 
-        held = self._held_tickers()
-        priority_set = self._priority_ticker_set()
-        tick_all = priority_tick_streams(self.cfg)
-        for ticker in wanted:
-            if ticker in held or tick_all or ticker.upper() in priority_set:
-                mode = "tick"
-            else:
-                mode = "realtime"
+        held = set(self._held_tickers())
+        modes = assign_stream_modes(
+            wanted, self.cfg, held=held, tick_denied=self._tick_limit_denied,
+        )
+        n_tick = n_rt = n_skip = 0
+        for ticker, mode in modes.items():
+            if mode == "skip":
+                n_skip += 1
+                if ticker in self._target_monitors:
+                    self._stop_target_stream(ticker)
+                continue
             self._ensure_target_stream(ticker, mode=mode, quiet=quiet)
+            if mode == "tick":
+                n_tick += 1
+            else:
+                n_rt += 1
 
         if not quiet and wanted:
             tickers = ",".join(wanted)
             log.info(
-                f"  📡 PRIORITY STREAMS ({len(wanted)}): [{tickers}] | "
-                f"simultaneous tick monitor"
+                f"  📡 PRIORITY STREAMS: {n_tick} tick + {n_rt} 5s-bars"
+                + (f" ({n_skip} deferred)" if n_skip else "")
+                + f" [{tickers}]"
             )
 
     def _ensure_target_stream(self, ticker: str, mode: str = "realtime", quiet: bool = False):
@@ -2544,21 +2570,25 @@ class ScalperRunner:
             return
         if ticker in self._target_monitors:
             return
+        if stream_mode == "tick":
+            if ticker.upper() in self._tick_limit_denied:
+                stream_mode = "realtime"
+            elif self._active_tick_stream_count() >= tick_stream_count(self.cfg):
+                stream_mode = "realtime"
         try:
             cfg = BotConfig(TICKER=ticker)
             dm = DataManager(self.conn, cfg)
             cached = self._scan_data_cache.get(ticker)
-            if cached is not None and len(cached) > 0:
+            n_cached = len(cached) if cached is not None else 0
+            if cached is not None and n_cached > 0:
                 dm.seed_buffer_from_dataframe(cached, n_bars=60)
             dm.start_tick_stream(realtime_only=(stream_mode == "realtime"))
             self._target_monitors[ticker] = dm
             self._stream_modes[ticker] = stream_mode
-            self._target_last_bar_count[ticker] = len(cached) if cached is not None else 0
+            self._target_last_bar_count[ticker] = n_cached
             kind = "5s" if stream_mode == "realtime" else "tick"
-            msg = (
-                f"  📡 LIVE STREAM {kind} {ticker} "
-                f"({self._target_last_bar_count[ticker]} bars)"
-            )
+            warm = "warming" if n_cached < self._min_bars_for(ticker) else f"{n_cached} bars"
+            msg = f"  📡 LIVE STREAM {kind} {ticker} ({warm})"
             (log.debug if quiet else log.info)(msg)
         except Exception as exc:
             record_fetch_failure(self.cfg, ticker, exc, bar_size=f"stream:{stream_mode}")
