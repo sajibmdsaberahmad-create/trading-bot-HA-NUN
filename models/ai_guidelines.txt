@@ -1524,3 +1524,108 @@ Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold of 0.58 is too high for this specific stop-loss trigger.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T14:44:28.748800+00:00
+The trade closed with a loss: ai_stagnation: Stagnation timeout 99s
+When the market data failed, it is typically due to a sudden decline in market conditions or technical issues.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The value is too high. It's better to avoid stagnant markets in live data.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T14:44:31.643087+00:00
+Loss streak occurred in INMB. This is a missed profit hunt.
+The loss streak was triggered by stagnation and locked out positions due to high risk parameters.
+• I
+• m
+• p
+• l
+• e
+• m
+• e
+• n
+• t
+• i
+• n
+• g
+•  
+• a
+•  
+• h
+• i
+• g
+• h
+• e
+• r
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• w
+• i
+• l
+• l
+•  
+• r
+• e
+• d
+• u
+• c
+• e
+•  
+• t
+• h
+• e
+•  
+• l
+• i
+• k
+• e
+• l
+• i
+• h
+• o
+• o
+• d
+•  
+• o
+• f
+•  
+• m
+• i
+• s
+• s
+• e
+• d
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+•  
+• h
+• u
+• n
+• t
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold for lockouts.)
+

@@ -4,9 +4,6 @@
   "confidence": 0.6200000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithmic parameters have been reset to reduce risk.'}",
-    "Commander: The council timeout indicates that there is a problem with the alignment of signals in the pipeline, which may prevent the algo from executing correctly.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been decreased, indicating potential systemic issues.'}",
     "Commander: The algorithmic trade system is experiencing an alignment issue due to the council timeout.",
     ",",
     "Commander: The council timeout indicates that the algorithm is not aligning signals with the market. This is a common issue in trading systems when signals do not match the current market conditions.",
@@ -103,10 +100,13 @@
     "Review loss_streak on IQST",
     "T",
     "w",
-    "Commander: Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be cautious around this."
+    "Commander: Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be cautious around this.",
+    "Always monitor live IB bars and adjust your strategy accordingly. If the market data fails, skip this trade.",
+    "Commander: When the market data failed, it is typically due to a sudden decline in market conditions or technical issues.",
+    "Commander: The loss streak was triggered by stagnation and locked out positions due to high risk parameters."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"trade_decision\": {\n    \"action\": \"hunting\",\n    \"target\": \"MIMI\",\n    \"volume\": 93.8,\n    \"profit_target\": {\n      \"amount\": 121.1,\n      \"type\": \"hot_by_volume\"\n    },\n    \"strategy\": \"single_bar_momentum + volume = take profit into MIMI.\"\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 5,
-  "updated": "2026-06-25T14:44:25.814098"
+  "updated": "2026-06-25T14:44:31.622877"
 }
