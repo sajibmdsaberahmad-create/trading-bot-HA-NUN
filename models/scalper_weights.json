@@ -10,20 +10,10 @@
   "rsi_filter": 0.5,
   "volatility_gate": 0.5,
   "_meta": {
-    "train_timestamp": "2026-06-25T06:23:47.330403",
+    "train_timestamp": "2026-06-25T06:24:07.792383",
     "buffer_total": 2587,
     "buffer_win_rate": 0.441,
-    "sources": {
-      "backtest": 1218,
-      "market_context": 23,
-      "scan_pick": 61,
-      "ai_scan": 320,
-      "live_entry": 147,
-      "consciousness": 16,
-      "live_trade": 475,
-      "scan_complete": 1,
-      "ai_council": 317,
-      "fill_slippage_abort": 9
-    }
+    "returns_win_rate": 0.207,
+    "combined_win_rate": 0.324
   }
 }
