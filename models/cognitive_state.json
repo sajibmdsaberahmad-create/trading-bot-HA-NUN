@@ -1,6 +1,6 @@
 {
-  "mood": "gathering",
-  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "mood": "defensive",
+  "mood_message": "Win rate 0% \u00b7 $-80.50. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n    \"journals\": {\n        \"profit_hunting\": [\n            {\n                \"ticker\": \"QS\",\n                \"entry\": 7,\n                \"exit\": 6.97,\n                \"entry_fill\": 7,\n                \"exit_fill\": 6.97,\n                \"quote_entry\": 7,\n                \"quote_exit\": 6.975,\n                \"shares\": 563,\n                \"pnl_usd\": -0.05,\n                \"pnl_pct\": -5.0,\n                \"result\": \"loss\",\n                \"exit_reason\": \"tick_micro_loss\",\n                \"en",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T19:32:29.465218"
+  "trades_observed": 4,
+  "updated": "2026-06-25T19:33:03.136327"
 }
