@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 118,
   "training_sessions": 27,
-  "trades_observed": 128,
+  "trades_observed": 129,
   "scans_performed": 27,
-  "improvements_applied": 302,
+  "improvements_applied": 303,
   "reports_generated": 26,
   "event_log": [
     {
@@ -15835,6 +15835,27 @@
           "."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:03:17.572276",
+      "age": "4d 8h 0m 28s",
+      "type": "TRADE",
+      "message": "Observed trade: QS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:03:21.638470",
+      "age": "4d 8h 0m 32s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #303",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on QS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T18:56:25.416498",
@@ -17250,20 +17271,21 @@
     113.09,
     0.0,
     0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 4,
   "worst_streak": 18,
-  "veteran_xp": 1815,
+  "veteran_xp": 1825,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 98,
+    "exit_timing": 99,
     "risk_management": 36,
     "entry_timing": 50
   },
-  "flights_completed": 123,
-  "hours_flown": 12.299999999999972,
+  "flights_completed": 124,
+  "hours_flown": 12.399999999999972,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17286,7 +17308,8 @@
     "GPU": 19,
     "PLT": 1,
     "LCI": 4,
-    "RIO": 1
+    "RIO": 1,
+    "QS": 1
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
