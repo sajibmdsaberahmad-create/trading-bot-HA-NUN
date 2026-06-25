@@ -3116,10 +3116,11 @@ class ScalperRunner:
             if ai_fast_execution(self.cfg):
                 spike_cd = min(spike_cd, 8.0)
             self._spike_attempt_until[ticker] = time.time() + spike_cd
+            fc = self._last_micro_forecast.get(ticker, {})
             log.info(
                 f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | "
-                f"score={target.rank_score:.0f} | micro={forecast.get('spike_likelihood', 0):.0%} "
-                f"pred→${forecast.get('pred_1bar', live_px):.2f} | attempting entry..."
+                f"score={target.rank_score:.0f} | micro={fc.get('spike_likelihood', 0):.0%} "
+                f"pred→${fc.get('pred_1bar', live_px):.2f} | attempting entry..."
             )
             result = self._attempt_entry()
             attempted += 1
@@ -3204,14 +3205,27 @@ class ScalperRunner:
 
         extended = is_extended_session(get_market_state(self.cfg))
 
-        fast_df = None
-        dm = self._dm_for_ticker(ticker)
-        if dm is not None:
-            fast_df = dm.get_bar_dataframe()
+        fast_df, live_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=6)
         if fast_df is None:
-            fast_df = self._scan_data_cache.get(ticker)
-        if fast_df is None and hasattr(self.data, "get_bar_dataframe"):
-            fast_df = self.data.get_bar_dataframe()
+            dm = self._dm_for_ticker(ticker)
+            if dm is not None:
+                fast_df = dm.get_live_decision_bars(min_bars=6) or dm.get_bar_dataframe(min_bars=10)
+            if fast_df is None:
+                fast_df = self._scan_data_cache.get(ticker)
+        if live_px <= 0:
+            live_px = current_px
+
+        fade_thr = float(getattr(self.cfg, "MICRO_FADE_EXIT", 0.55))
+        if (
+            getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True)
+            and pnl_pct > 0.002
+            and forecast.get("fade_risk", 0) >= fade_thr
+            and forecast.get("dir", 0) <= 0
+        ):
+            return True, (
+                f"micro_fade: risk={forecast['fade_risk']:.2f} "
+                f"pred↓${forecast.get('pred_1bar', live_px):.2f}"
+            )
 
         should_exit, reason, ctx = evaluate_spike_top_exit(
             self.cfg, fast_df, dm, current_px, entry_px,
@@ -3523,10 +3537,9 @@ class ScalperRunner:
         regime = "unknown"
         fast_df = None
         ticker_dm = self._dm_for_ticker(self.current_ticker or "")
-        if ticker_dm is not None:
-            fast_df = ticker_dm.get_bar_dataframe()
-        if fast_df is None:
-            fast_df = self._scan_data_cache.get(self.current_ticker or "")
+        fast_df, _, _, forecast = self._resolve_live_bars(self.current_ticker or "", min_bars=6)
+        if fast_df is None and ticker_dm is not None:
+            fast_df = ticker_dm.get_live_decision_bars(min_bars=6)
         if fast_df is not None and len(fast_df) >= 10:
             _, vol_ratio = self._detect_volume_spike(fast_df)
             try:
@@ -3652,9 +3665,29 @@ class ScalperRunner:
         opened = getattr(self, "_position_opened_at", 0.0)
         if min_hold > 0 and opened and (time.time() - opened) < min_hold:
             return False, "hold (min hold)"
-        
+
         peak_pct = (self._position_peak / entry_px) - 1 if self._position_peak > 0 else pnl_pct
 
+        if getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
+            _, _, _, forecast = self._resolve_live_bars(self.current_ticker or "", min_bars=6)
+            loss_thr = float(getattr(self.cfg, "MICRO_LOSS_EXIT", 0.58))
+            if pnl_pct < -0.002 and forecast.get("loss_pressure", 0) >= loss_thr and forecast.get("dir", 0) < 0:
+                return True, (
+                    f"micro_loss: pressure={forecast['loss_pressure']:.2f} "
+                    f"pred↓${forecast.get('pred_1bar', current_px):.2f}"
+                )
+            fade_thr = float(getattr(self.cfg, "MICRO_FADE_EXIT", 0.55))
+            if (
+                pnl_pct > 0.004
+                and peak_pct > 0.008
+                and forecast.get("fade_risk", 0) >= fade_thr
+                and forecast.get("profit_run", 1.0) < 0.35
+            ):
+                return True, (
+                    f"micro_profit_fade: fade={forecast['fade_risk']:.2f} "
+                    f"peak +{peak_pct:.2%} now +{pnl_pct:.2%}"
+                )
+        
         # Dead trade: Ollama + PPO decide (rules are guardrail fallback only)
         ai_check_sec = float(getattr(self.cfg, "AI_STAGNATION_CHECK_SEC", 30.0))
         if getattr(self.cfg, "STAGNATION_EXIT_ENABLED", True) and stagnant_sec >= ai_check_sec:
@@ -5221,16 +5254,8 @@ class ScalperRunner:
         try:
             self.cfg.TICKER = ticker
             min_bars = self._min_bars_for(ticker)
-            
-            df_fast = self._scan_data_cache.get(ticker)
-            dm = self._target_monitors.get(ticker)
-            if dm:
-                live_df = dm.get_bar_dataframe()
-                if live_df is not None and len(live_df) >= min_bars:
-                    df_fast = live_df
-                    self._scan_data_cache[ticker] = live_df
-            if df_fast is None or len(df_fast) < min_bars:
-                df_fast = self.data.fetch_historical(duration="2 D", bar_size="1 min", use_rth=False)
+
+            df_fast, current_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=min_bars)
             if df_fast is None or len(df_fast) < min_bars:
                 if dm:
                     burst, burst_ratio = self._detect_tick_volume_burst(dm, df_fast if df_fast is not None else pd.DataFrame())
@@ -5238,14 +5263,13 @@ class ScalperRunner:
                         self.cfg, burst_ratio, self.top_pick.rank_score if self.top_pick else 0,
                     ):
                         df_fast = dm.get_fast_bar_dataframe(n=24)
-                        if df_fast is None or len(df_fast) < 3:
+                        current_px = float(dm.get_latest_price() or 0)
+                        if df_fast is None or len(df_fast) < 3 or current_px <= 0:
                             return 'waiting'
                     else:
                         return 'waiting'
                 else:
                     return 'waiting'
-            
-            current_px = self._live_price_for(ticker, float(df_fast["close"].iloc[-1]))
             avg_volume = float(df_fast["volume"].tail(20).mean())
             bid, ask = self._get_bid_ask(ticker)
             spread_pct = (ask - bid) / current_px if bid and ask and current_px > 0 else 0.0
@@ -5269,6 +5293,15 @@ class ScalperRunner:
             )
             if not is_spike and vol_ratio >= 1.15:
                 is_spike, spike_ratio = True, vol_ratio
+            if forecast.get("spike_likelihood", 0) >= 0.45:
+                is_spike, spike_ratio = True, max(spike_ratio, float(forecast.get("vol_accel", 1.0)))
+            if (
+                forecast.get("dir", 0) < 0
+                and forecast.get("spike_likelihood", 0) < 0.55
+                and not forecast.get("breakout")
+            ):
+                log.debug(f"Entry skip {ticker}: micro bearish forecast")
+                return 'waiting'
             if not is_spike and not is_ai_unlimited(self.cfg):
                 log.debug(f"Entry skip {ticker}: no volume spike (ratio={spike_ratio:.2f})")
                 return 'waiting'
