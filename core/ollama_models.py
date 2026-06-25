@@ -19,7 +19,7 @@ MODEL_EST_MB: dict[str, int] = {
     "qwen2.5:0.5b": 450,
     "qwen2.5:1.5b": 1100,
     "qwen2.5:3b": 2000,
-    "phi3:mini": 2200,
+    "phi3:mini": 2100,
     "phi4-mini": 2600,
     "phi4:mini": 2600,
     "gemma3:4b": 3000,

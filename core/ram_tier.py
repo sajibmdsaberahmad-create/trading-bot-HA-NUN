@@ -48,7 +48,7 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
     "compact": {
         "OLLAMA_MODEL": "phi3:mini",
         "OLLAMA_DYNAMIC_MODEL": True,
-        "OLLAMA_MEMORY_BUDGET_MB": 2048,
+        "OLLAMA_MEMORY_BUDGET_MB": 2560,
         "OLLAMA_TIMEOUT": 12,
         "OLLAMA_MAX_TOKENS": 192,
         "OLLAMA_NUM_CTX": 1536,
