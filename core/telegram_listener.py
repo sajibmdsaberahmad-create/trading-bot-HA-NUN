@@ -203,7 +203,7 @@ class TelegramCommandListener:
                 if text and text.strip() and text.strip() != (fallback or "").strip():
                     self.send(chat_id, text, reply_to=None)
             else:
-                self.send(chat_id, text or fallback, reply_to=reply_id)
+                self.send(chat_id, text or fallback, reply_to=reply_to)
 
         if sync:
             deliver()
@@ -422,7 +422,7 @@ class TelegramCommandListener:
             self._cmd_exitall(chat_id, arg or "all", reply_id)
             return
 
-        self.send_ai(chat_id, "unknown_command", {"text": text}, "Unknown command. Try /help", reply_to=reply_id)
+        self.send_instant(chat_id, "Unknown command. Try /help", reply_to=reply_id)
 
     def _handle_free_text(self, chat_id: int, text: str, reply_id: Optional[int]) -> None:
         exit_match = self._parse_exit_intent(text)
