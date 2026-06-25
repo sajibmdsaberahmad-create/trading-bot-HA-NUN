@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 27,
   "scans_performed": 27,
-  "improvements_applied": 119,
+  "improvements_applied": 122,
   "reports_generated": 26,
   "event_log": [
     {
@@ -7150,6 +7150,157 @@
       "type": "TRADE",
       "message": "Observed trade: FMFC LEARN_FAILURE P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T12:43:45.092571",
+      "age": "4d 1h 40m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #120",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "IB closing-only trading is preventing the algo from making profitable trades.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increased confidence threshold can prevent the algo from losing patience.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "h",
+          "e",
+          "A",
+          "I",
+          "s",
+          "h",
+          "o",
+          "u",
+          "l",
+          "d",
+          "c",
+          "o",
+          "n",
+          "s",
+          "i",
+          "d",
+          "e",
+          "r",
+          "t",
+          "i",
+          "g",
+          "h",
+          "t",
+          "e",
+          "n",
+          "i",
+          "n",
+          "g",
+          "i",
+          "t",
+          "s",
+          "p",
+          "a",
+          "r",
+          "a",
+          "m",
+          "e",
+          "t",
+          "e",
+          "r",
+          "s",
+          "a",
+          "n",
+          "d",
+          "i",
+          "m",
+          "p",
+          "l",
+          "e",
+          "m",
+          "e",
+          "n",
+          "t",
+          "i",
+          "n",
+          "g",
+          "a",
+          "m",
+          "o",
+          "r",
+          "e",
+          "a",
+          "g",
+          "g",
+          "r",
+          "e",
+          "s",
+          "s",
+          "i",
+          "v",
+          "e",
+          "e",
+          "n",
+          "t",
+          "r",
+          "y",
+          "s",
+          "t",
+          "r",
+          "a",
+          "t",
+          "e",
+          "g",
+          "y",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:44:20.058268",
+      "age": "4d 1h 41m 31s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #121",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WYY"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:44:46.264821",
+      "age": "4d 1h 41m 57s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #122",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5399999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WYY"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T12:31:01.138131",

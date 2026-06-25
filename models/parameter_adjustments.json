@@ -1,15 +1,8 @@
 {
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
-    "value": "0.58",
-    "reason": "Adjusted from 0.35 to 0.58 for better risk management.",
-    "ok": true,
-    "msg": "applied"
-  },
-  "MAX_CONCURRENT_POSITIONS": {
-    "param": "MAX_CONCURRENT_POSITIONS",
-    "value": "1",
-    "reason": "Reduced the maximum concurrent positions to 1 position.",
+    "value": 0.5399999999999999,
+    "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
     "ok": true,
     "msg": "applied"
   }

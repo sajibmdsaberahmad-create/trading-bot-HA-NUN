@@ -4,9 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "g",
-    "j",
-    "p",
     "C",
     "O",
     "N",
@@ -103,10 +100,13 @@
     "Commander: Root cause: Council timeout prevent alignment of signals.",
     "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': '1', 'reason': 'Altered to a maximum of 500 positions.'}",
     "{'param': 'AI_MAX_LOCKED_TARGETS', 'value': '200', 'reason': 'Lowered to prevent unnecessary locks in the pipeline.'}",
-    "Commander: Root cause: Council timeout prevents aligned signals in the pipeline."
+    "Commander: Root cause: Council timeout prevents aligned signals in the pipeline.",
+    "A",
+    "g",
+    "Commander: The algo cannot open new positions due to IB's closing system."
   ],
-  "last_thought": "```json\n{\n    \"gut_feel\": 0.75,\n    \"intuition\": 0.75,\n    \"analysis\": {\n        \"volume_and_pricing_pattern\": true,\n        \"momentum_analysis\": false,\n        \"scanner_analysis\": true,\n        \"multi_timeframe_analyses\": false\n    },\n    \"predicted_profit_loss_ratio\": 1.83,\n    \"trade_advice\": null\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 0.8,\n  \"analysis\": {\n    \"volume\": 1014738,\n    \"momentum\": \"HOT_BY_VOLUME#0\",\n    \"price_range\": [0.0, 0.0],\n    \"scan_results\": [\n      {\"ticker\": \"KUST\", \"price\": 0.0, \"score\": 96.0, \"reason\": \"scanner:Hot by Volume #0\"},\n      {\"ticker\": \"MIMI\", \"price\": 0.0, \"score\": 93.8, \"reason\": \"scanner:Hot by Volume #1\"},\n      {\"ticker\": \"WAVE\", \"price\": 0.0, \"score\": 91.6, \"reason\": \"scanner:Hot by Volume #2\"},\n      {\"ticker\": \"IQST\", \"pri\"}\n    ]\n  },\n  ",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T12:43:16.946035"
+  "updated": "2026-06-25T12:44:46.263210"
 }
