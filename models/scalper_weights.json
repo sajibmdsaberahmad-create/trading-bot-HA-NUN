@@ -10,8 +10,8 @@
   "rsi_filter": 0.5,
   "volatility_gate": 0.5,
   "_meta": {
-    "train_timestamp": "2026-06-25T19:39:36.960727",
-    "buffer_total": 4875,
+    "train_timestamp": "2026-06-25T19:40:23.693440",
+    "buffer_total": 4877,
     "buffer_win_rate": 0.269,
     "sources": {
       "backtest": 1247,
@@ -29,8 +29,8 @@
       "ib_failure": 11,
       "market_data_failure": 34,
       "profit_hunt": 177,
-      "ppo_led": 226,
-      "ppo_entry": 123,
+      "ppo_led": 227,
+      "ppo_entry": 124,
       "deferred_council": 284,
       "ppo_entry_eval": 142,
       "shadow_trade": 2

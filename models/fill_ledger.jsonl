@@ -228,3 +228,4 @@
 {"event":"entry_fill","ticker":"COIN","entry_fill":142.31,"limit_px":null,"entry_slippage_pct":0.0,"shares":182,"stop":141.7408,"target":143.4485,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:36:25.720193+00:00"}
 {"event":"entry_fill","ticker":"QS","entry_fill":7.0,"limit_px":null,"entry_slippage_pct":0.0,"shares":3703,"stop":6.972,"target":7.056,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:37:08.062070+00:00"}
 {"event":"entry_fill","ticker":"LCID","entry_fill":5.18,"limit_px":null,"entry_slippage_pct":0.0,"shares":1716,"stop":5.1593,"target":5.2214,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:39:36.867272+00:00"}
+{"event":"entry_fill","ticker":"RIOT","entry_fill":27.5,"limit_px":null,"entry_slippage_pct":0.0,"shares":876,"stop":27.39,"target":27.72,"entry_mode":"paper_market","regime":"unknown","timestamp":"2026-06-25T19:40:23.647418+00:00"}
