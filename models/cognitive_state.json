@@ -1,12 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 15% \u00b7 $-295.70. Preserving capital over action.",
+  "mood_message": "Win rate 10% \u00b7 $-238.08. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: stop_breach",
-    "a",
-    "y",
     "p",
     "k",
     "Commander: High scanner score indicates a missed profit hunt, which prevents opportunistic exits.",
@@ -103,10 +100,13 @@
     "Spike-top hunt on RKLB: spike_top_exit: +0.64% vol=3.5x",
     "Commander: The main goal is to increase opportunistic extraction within guardrails. The event suggests a rejection due to an IB order rejected, indicating that the system may be malfunctioning or causing issues with live IB bars.",
     "Review ib_failure on SOFI",
-    "Profit hunt worked on RKLB: spike_top_exit: +0.64% vol=3.5x \u2014 reinforce opportunistic exits."
+    "Profit hunt worked on RKLB: spike_top_exit: +0.64% vol=3.5x \u2014 reinforce opportunistic exits.",
+    "Review ib_failure on RIVN",
+    "Review ib_failure on RKLB",
+    "Commander: spike_top_exit: +0.64% vol=3.5x"
   ],
   "last_thought": "```json\n{\n    \"prompt\": \"Write a trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"RIVN\\\", \\\"entry\\\": 14.85, \\\"exit\\\": 14.85, \\\"entry_fill\\\": 14.85, \\\"exit_fill\\\": 14.85, \\\"quote_entry\\\": 17.29, \\\"quote_exit\\\": 14.85, \\\"shares\\\": 2977.0, \\\"pnl_usd\\\": 0.0, \\\"pnl_pct\\\": 0.0, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"bracket_exit\\\", \\\"entry_slippage_pct\\\": -0.141122, \\\"exit_slippage_pct\\\": 0.0, \\\"limit_px\\\": null, \\\"entry_mode\\\": \\\"paper_market\\\", \\\"regime\\\": \\\"unknown\\\", \\\"hold_sec\\\": 204.5, \\\"",
   "market_belief": {},
-  "trades_observed": 73,
-  "updated": "2026-06-25T20:03:11.076630"
+  "trades_observed": 76,
+  "updated": "2026-06-25T20:04:00.101993"
 }

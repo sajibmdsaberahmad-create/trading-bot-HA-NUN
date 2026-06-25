@@ -376,3 +376,6 @@
 {"timestamp":"2026-06-25T20:02:57.659707+00:00","event":"ib_failure","ticker":"MARA","reason":"IB order rejected (201)","spike_ratio":1.6820940707574341,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:02:58.427982+00:00","event":"ib_failure","ticker":"SOFI","reason":"IB order rejected (201)","spike_ratio":1.6820940707574341,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:02:58.930065+00:00","event":"ib_failure","ticker":"RIVN","reason":"IB order rejected (201)","spike_ratio":1.6820940707574341,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:03:23.857541+00:00","event":"trade_closed","ticker":"RKLB","reason":"spike_top_exit: +0.64% vol=3.5x","pnl_usd":-3.58,"pnl_pct":-0.01,"won":false,"exit_type":"loss_exit","hold_sec":0.0,"regime":"unknown","entry_fill":80.445,"exit_fill":80.44,"entry_slippage_pct":0.0,"exit_slippage_pct":-0.008138,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:03:23.858425+00:00","event":"loss_streak","ticker":"RKLB","reason":"spike_top_exit: +0.64% vol=3.5x","pnl_usd":-3.58,"consecutive_losses":1,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:03:29.771772+00:00","event":"ib_failure","ticker":"RKLB","reason":"IB order rejected (201)","spike_ratio":1.8930668147065928,"market_state":"after_hours"}

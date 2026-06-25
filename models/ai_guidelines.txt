@@ -7332,3 +7332,19 @@ The main goal is to increase opportunistic extraction within guardrails. The eve
 Observed ib_failure — recorded for learning.
 IB order rejected (201)
 
+🧭 COMMANDER LEARNING | 2026-06-25T20:03:23.128807+00:00
+Observed ib_failure — recorded for learning.
+IB order rejected (201)
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:03:41.846054+00:00
+Observed ib_failure — recorded for learning.
+IB order rejected (201)
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:03:49.285288+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +0.64% vol=3.5x
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:03:49.285537+00:00
+Observed loss_streak — recorded for learning.
+spike_top_exit: +0.64% vol=3.5x
+
