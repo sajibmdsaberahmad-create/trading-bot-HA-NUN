@@ -2257,3 +2257,7 @@ council_exit: Ollama exit 85% (PPO hold)
 Observed trade_closed — recorded for learning.
 spike_top_intrabar: +1.52% vol=240460.0x
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:30:06.797182+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+

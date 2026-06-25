@@ -3597,5 +3597,14 @@
     "lessons": [
       "Review trade_closed on GDC"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:30:06.797423+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on BITO"
+    ]
   }
 ]
