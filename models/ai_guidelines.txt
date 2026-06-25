@@ -5477,3 +5477,240 @@ The event is a loss streak triggered by a council exit at an Ollama price of 95%
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.6 (Increased confidence in profit hunting to avoid missed exits.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:45:44.064450+00:00
+Loss streak event occurred.
+The loss streak was caused by a bracket exit in the RIOT bracket.
+• T
+• u
+• n
+• e
+•  
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+• ,
+•  
+• E
+• N
+• T
+• R
+• Y
+• _
+• Q
+• U
+• A
+• L
+• I
+• T
+• Y
+• _
+• B
+• L
+• E
+• N
+• D
+• _
+• W
+• E
+• I
+• G
+• H
+• T
+• ,
+•  
+• a
+• n
+• d
+•  
+• C
+• O
+• U
+• N
+• C
+• I
+• L
+• _
+• T
+• I
+• M
+• E
+• O
+• U
+• T
+• _
+• M
+• I
+• N
+• _
+• S
+• C
+• A
+• N
+• _
+• S
+• C
+• O
+• R
+• E
+•  
+• f
+• o
+• r
+•  
+• b
+• e
+• t
+• t
+• e
+• r
+•  
+• p
+• e
+• r
+• f
+• o
+• r
+• m
+• a
+• n
+• c
+• e
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence to improve efficiency.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:46:04.535815+00:00
+loss streak detected in MARA, triggered by bracket_exit
+The loss streak is due to the bracket_exit event.
+• I
+• m
+• p
+• l
+• e
+• m
+• e
+• n
+• t
+•  
+• m
+• o
+• r
+• e
+•  
+• a
+• g
+• g
+• r
+• e
+• s
+• s
+• i
+• v
+• e
+•  
+• e
+• x
+• i
+• t
+•  
+• s
+• t
+• r
+• a
+• t
+• e
+• g
+• i
+• e
+• s
+•  
+• a
+• n
+• d
+•  
+• i
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• C
+• I
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+• s
+•  
+• t
+• o
+•  
+• p
+• r
+• e
+• v
+• e
+• n
+• t
+•  
+• f
+• r
+• e
+• q
+• u
+• e
+• n
+• t
+•  
+• l
+• o
+• s
+• s
+•  
+• s
+• t
+• r
+• e
+• a
+• k
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold for profitable exits to reduce the likelihood of frequent loss streaks.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:46:08.133073+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:46:13.149777+00:00
+Observed council_timeout — recorded for learning.
+High scanner score after timeout: score=90 vol=1.1x | ATR R:R 2.0
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
+
