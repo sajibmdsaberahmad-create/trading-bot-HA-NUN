@@ -137,6 +137,9 @@ from core.fill_tracker import (
     append_fill_ledger, build_round_trip_record, resolve_entry_fill,
     resolve_exit_fill,
 )
+from core.fill_reconciler import (
+    PendingClose, build_close_record, snapshot_slot,
+)
 from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
 from core.account_evaluator import AccountEvaluator
 from core.ai_session_limits import (
@@ -296,6 +299,7 @@ class ScalperRunner:
         self._last_daily_push_date: Optional[str] = None
         self._last_market_state: Optional[str] = None
         self._last_market_closed_log: float = 0.0
+        self._pending_closes: Dict[str, PendingClose] = {}
         self._last_off_hours_train: float = 0.0
         self._last_learning_push: float = 0.0
         self._weights_file = "models/scalper_weights.json"
@@ -1422,6 +1426,8 @@ class ScalperRunner:
             flatten_trade=flatten_trade,
             quote_px=quote_exit_px,
             since_ts=opened_at,
+            max_wait=0.0,
+            entry_fill=entry_fill,
         )
         return build_round_trip_record(
             ticker=ticker,

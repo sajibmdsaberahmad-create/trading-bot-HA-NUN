@@ -77,6 +77,26 @@ def poll_trade_fill(
     return last_px, last_qty
 
 
+def read_order_fill_instant(trade, fallback_px: float = 0.0) -> Tuple[float, float]:
+    """Read fill from orderStatus without sleeping — safe on hot path."""
+    if trade is None:
+        return float(fallback_px or 0), 0.0
+    try:
+        status = getattr(trade, "orderStatus", None)
+        if status is None:
+            return float(fallback_px or 0), 0.0
+        filled = float(getattr(status, "filled", 0) or 0)
+        avg = float(getattr(status, "avgFillPrice", 0) or 0)
+        st = str(getattr(status, "status", "") or "")
+        if avg > 0 and filled > 0:
+            return avg, filled
+        if st == "Filled" and avg > 0:
+            return avg, filled
+    except Exception:
+        pass
+    return float(fallback_px or 0), 0.0
+
+
 def bracket_exit_fill(
     handle: Optional["BracketHandle"],
     fallback_px: float,
@@ -104,15 +124,17 @@ def recent_execution_fill(
     *,
     since_ts: float = 0.0,
     min_shares: float = 1.0,
+    max_wait: float = 0.25,
 ) -> Tuple[float, float]:
-    """Latest IB execution for symbol/side after since_ts."""
+    """Latest IB execution for symbol/side after since_ts. max_wait=0 skips reqExecutions."""
     sym = (symbol or "").upper()
     if not sym:
         return 0.0, 0.0
     side_u = side.upper()
     try:
-        ib.reqExecutions()
-        ib.sleep(0.25)
+        if max_wait > 0:
+            ib.reqExecutions()
+            ib.sleep(min(max_wait, 0.35))
         best_ts = since_ts
         best_px = 0.0
         best_qty = 0.0
@@ -169,18 +191,27 @@ def resolve_entry_fill(
     symbol: str,
     parent_trade=None,
     quote_px: float,
+    max_wait: float = 0.5,
 ) -> float:
     """Best available entry fill price."""
-    px, qty = poll_trade_fill(ib, parent_trade, quote_px, max_wait=0.5)
+    px, qty = poll_trade_fill(ib, parent_trade, quote_px, max_wait=max_wait)
     if px > 0 and qty > 0:
         return px
-    avg = position_avg_cost(ib, symbol)
-    if avg > 0:
+    sym = (symbol or "").upper()
+    avg = position_avg_cost(ib, sym)
+    if avg > 0 and _sane_fill_ratio(avg, quote_px):
         return avg
-    px, _ = recent_execution_fill(ib, symbol, "BOT", since_ts=time.time() - 120.0)
+    px, _ = recent_execution_fill(ib, sym, "BOT", since_ts=time.time() - 120.0, max_wait=0.0)
     if px > 0:
         return px
     return float(quote_px or 0)
+
+
+def _sane_fill_ratio(fill_px: float, ref_px: float) -> bool:
+    if fill_px <= 0 or ref_px <= 0:
+        return fill_px > 0
+    ratio = fill_px / ref_px
+    return 0.02 <= ratio <= 50.0
 
 
 def resolve_exit_fill(
@@ -191,16 +222,21 @@ def resolve_exit_fill(
     flatten_trade=None,
     quote_px: float,
     since_ts: float = 0.0,
+    max_wait: float = 2.0,
+    entry_fill: float = 0.0,
 ) -> float:
     """Best available exit fill price."""
-    px, qty = poll_trade_fill(ib, flatten_trade, quote_px, max_wait=2.0)
-    if px > 0 and qty > 0:
+    sym = (symbol or "").upper()
+    px, qty = poll_trade_fill(ib, flatten_trade, quote_px, max_wait=max_wait)
+    if px > 0 and qty > 0 and _sane_fill_ratio(px, entry_fill or quote_px):
         return px
     px, qty = bracket_exit_fill(bracket, quote_px)
-    if px > 0 and qty > 0:
+    if px > 0 and qty > 0 and _sane_fill_ratio(px, entry_fill or quote_px):
         return px
-    px, _ = recent_execution_fill(ib, symbol, "SLD", since_ts=since_ts or (time.time() - 300.0))
-    if px > 0:
+    px, _ = recent_execution_fill(
+        ib, sym, "SLD", since_ts=since_ts or (time.time() - 300.0), max_wait=0.0 if max_wait <= 0 else 0.25,
+    )
+    if px > 0 and _sane_fill_ratio(px, entry_fill or quote_px):
         return px
     return float(quote_px or 0)
 

@@ -55,6 +55,7 @@ class IBConnector:
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
         self.ib.errorEvent += self._on_error
+        self.fill_cache = None
 
     # ── Public API ─────────────────────────────────────────────────────────
 
@@ -84,6 +85,13 @@ class IBConnector:
 
             self._last_event_ts = time.time()
             self._last_reconnect_ts = time.time()
+            if self.fill_cache is None:
+                try:
+                    from core.fill_reconciler import FillExecutionCache
+                    self.fill_cache = FillExecutionCache(self.ib)
+                    self.fill_cache.seed_from_ib_fills()
+                except Exception:
+                    pass
             return True
 
         except Exception as exc:
@@ -246,6 +254,13 @@ class IBConnector:
 
     def _on_connected(self):
         self.touch()
+        self._last_event_ts = time.time()
+        try:
+            from core.fill_reconciler import FillExecutionCache
+            self.fill_cache = FillExecutionCache(self.ib)
+            self.fill_cache.seed_from_ib_fills()
+        except Exception as exc:
+            log.debug(f"Fill cache init: {exc}")
 
     def _on_disconnected(self):
         log.warning("IB connection dropped (disconnectedEvent fired).")
