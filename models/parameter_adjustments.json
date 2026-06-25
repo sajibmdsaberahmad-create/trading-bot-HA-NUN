@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "The confidence threshold was set to 0.5, which seems reasonable given the current market conditions.",
+    "reason": "Increase the confidence threshold from 0.35 to 0.58.",
     "ok": true,
     "msg": "applied"
   }
