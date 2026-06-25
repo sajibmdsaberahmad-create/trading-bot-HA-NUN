@@ -1570,6 +1570,21 @@ class ScalperRunner:
                             push_learning_checkpoint_async("periodic")
                         except Exception:
                             pass
+
+                cleanup_iv = float(getattr(self.cfg, "PERIODIC_CLEANUP_SEC", 1800))
+                _now = time.time()
+                if _now - getattr(self, "_last_periodic_cleanup", 0) >= cleanup_iv:
+                    self._last_periodic_cleanup = _now
+                    try:
+                        from core.memory_guard import is_memory_pressured
+                        if is_memory_pressured(
+                            int(getattr(self.cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024))
+                        ):
+                            run_periodic_cleanup(self.cfg, force=True)
+                        elif not can_trade:
+                            run_periodic_cleanup(self.cfg, force=False)
+                    except Exception as exc:
+                        log.debug(f"Periodic cleanup: {exc}")
                 
         except KeyboardInterrupt:
             log.info("Shutting down...")
@@ -4469,24 +4484,29 @@ class ScalperRunner:
             self._daily_self_train()
             
             # Launch heavy training (Transformer + PPO + LSTM) in isolated subprocess
-            # This returns immediately - training continues in background
-            try:
-                session_id = launch_training([
-                    sys.executable, "-m", "core.advanced_training",
-                    "--mode", "full",
-                    "--ticker", self.cfg.TICKER,
-                    "--ppo-timesteps", "100000",  # Reduced for off-hours
-                    "--epochs", "20",
-                    "--save-model", "models/transformer_model.pth",
-                ], timeout_minutes=30)
-                
-                if session_id:
-                    log.info(f"🏋️ Training subprocess launched: {session_id}")
-                    self.notifier.info(f"🏋️ OFF-HOURS TRAINING\nIsolated subprocess launched.\nSession: {session_id}")
-                else:
-                    log.warning("Training subprocess failed to launch")
-            except Exception as exc:
-                log.debug(f"Subprocess training launch failed: {exc}")
+            if getattr(self.cfg, "OFF_HOURS_HEAVY_TRAINING", True):
+                try:
+                    from core.memory_guard import is_low_ram_machine
+                    light = is_low_ram_machine()
+                    timesteps = "40000" if light else "100000"
+                    session_id = launch_training([
+                        sys.executable, "-m", "core.advanced_training",
+                        "--mode", "full",
+                        "--ticker", self.cfg.TICKER,
+                        "--ppo-timesteps", timesteps,
+                        "--epochs", "12" if timesteps == "40000" else "20",
+                        "--save-model", "models/transformer_model.pth",
+                    ], timeout_minutes=30)
+
+                    if session_id:
+                        log.info(f"🏋️ Training subprocess launched: {session_id}")
+                        self.notifier.info(f"🏋️ OFF-HOURS TRAINING\nIsolated subprocess launched.\nSession: {session_id}")
+                    else:
+                        log.warning("Training subprocess failed to launch")
+                except Exception as exc:
+                    log.debug(f"Subprocess training launch failed: {exc}")
+            else:
+                log.info("🏋️ Off-hours heavy training skipped (OFF_HOURS_HEAVY_TRAINING=false — 8GB mode)")
             
             # Consciousness reflection (lightweight, stays in-process)
             try:
