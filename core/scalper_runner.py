@@ -82,6 +82,7 @@ from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
 from core.account_evaluator import AccountEvaluator
 from core.telegram_listener import TelegramCommandListener
 from core.commander_learning import load_commander_guidance, run_commander_learning_cycle
+from core.ai_runtime_observer import get_runtime_observer
 from core.ollama_vision import ensure_vision_model
 
 
@@ -272,6 +273,8 @@ class ScalperRunner:
             pilot=self.pilot,
         )
         self.account_evaluator = AccountEvaluator(self.cfg)
+        self.runtime_observer = get_runtime_observer(self.cfg)
+        self.runtime_observer.attach(self)
         self._telegram_listener: Optional[TelegramCommandListener] = None
         self._init_telegram_listener()
     
@@ -813,7 +816,17 @@ class ScalperRunner:
             observe_trade_everywhere(
                 trade_rec, self.autopilot, self.consciousness, self.pilot, cfg=self.cfg,
             )
-            hold_sec = time.time() - getattr(self, "_position_opened_at", 0.0)
+            self._observe_runtime(
+                "trade_closed",
+                ticker=trade_rec.get("ticker", ""),
+                reason=result,
+                pnl_usd=pnl,
+                pnl_pct=pnl_pct,
+                won=(result == "win"),
+                exit_type=exit_type if 'exit_type' in dir() else result,
+                hold_sec=hold_sec if 'hold_sec' in dir() else 0,
+                market_state=get_market_state(self.cfg),
+            )
             regime = getattr(self, "_last_entry_regime", "")
             entry_slip = float(self._last_entry_telemetry.get("slippage_pct", 0))
             entry_px = self._entry_price
@@ -857,6 +870,18 @@ class ScalperRunner:
                 regime=regime,
                 hold_sec=hold_sec,
                 entry_slippage_pct=entry_slip,
+            )
+            self._observe_runtime(
+                "trade_closed",
+                ticker=trade_rec.get("ticker", ""),
+                reason=result,
+                pnl_usd=pnl,
+                pnl_pct=pnl_pct,
+                won=(result == "win"),
+                exit_type=exit_type,
+                hold_sec=hold_sec,
+                regime=regime,
+                market_state=get_market_state(self.cfg),
             )
             try:
                 self.shadow_circuit.on_live_trade_closed(pnl, self.account_equity)
@@ -1050,7 +1075,20 @@ class ScalperRunner:
                 })
             except Exception:
                 pass
+        self._observe_runtime(
+            "ib_failure",
+            ticker=ticker,
+            reason=reason,
+            spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0)),
+            market_state=get_market_state(self.cfg),
+        )
         return "learn_skip" if learn_dont_block(self.cfg) else "permanent_skip"
+
+    def _observe_runtime(self, event: str, **context: Any) -> None:
+        try:
+            self.runtime_observer.observe(event, **context)
+        except Exception as exc:
+            log.debug(f"Runtime observe {event}: {exc}")
 
     def _exit_position(self, current_px: float, reason: str, ticker: Optional[str] = None):
         """Manually exit position (early exit, AI exit, etc.)."""
@@ -3523,6 +3561,14 @@ class ScalperRunner:
                 log.info(f"  🔄 IB2161 retry: {retry_sh} sh limit @ ${entry_px or fill_px:.4f}")
                 return
             log.warning(f"Entry order rejected by IB ({parent_status}) — not opening position")
+            self._observe_runtime(
+                "order_canceled",
+                ticker=ticker,
+                reason=str((ierr or {}).get("message", parent_status)),
+                ib_code=(ierr or {}).get("code"),
+                parent_status=parent_status,
+                market_state=get_market_state(self.cfg),
+            )
             self.bracket_handle = None
             self._entry_poll_state = None
             self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
@@ -3562,6 +3608,14 @@ class ScalperRunner:
                 self.ib.sleep(0.1)
             elif parent_status in ("Submitted", "PreSubmitted", "PendingSubmit"):
                 log.info(f"Entry order timed out for {ticker} ({parent_status})")
+                self._observe_runtime(
+                    "order_timeout",
+                    ticker=ticker,
+                    reason=parent_status,
+                    ib_code=(st.get("last_ib_error") or {}).get("code"),
+                    parent_status=parent_status,
+                    market_state=get_market_state(self.cfg),
+                )
             else:
                 log.info(f"Entry not filled for {ticker} (status={parent_status})")
             self.broker.cancel_open_orders_for_symbol(ticker)
@@ -3978,6 +4032,13 @@ class ScalperRunner:
                 })
             except Exception:
                 pass
+            self._observe_runtime(
+                "bracket_reject",
+                ticker=ticker,
+                reason=err[:200],
+                spike_ratio=spike,
+                market_state=get_market_state(self.cfg),
+            )
             self._clear_pending_entry(ticker, cooldown_sec=30.0)
             return "waiting"
         ai_dec = gate_dec
