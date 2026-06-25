@@ -192,12 +192,17 @@ def resolve_entry_fill(
     parent_trade=None,
     quote_px: float,
     max_wait: float = 0.5,
+    cache=None,
 ) -> float:
     """Best available entry fill price."""
     px, qty = poll_trade_fill(ib, parent_trade, quote_px, max_wait=max_wait)
-    if px > 0 and qty > 0:
+    if px > 0 and qty > 0 and _sane_fill_ratio(px, quote_px):
         return px
     sym = (symbol or "").upper()
+    if cache is not None:
+        hit = cache.latest(sym, "BOT", since_ts=time.time() - 600)
+        if hit and _sane_fill_ratio(hit.price, quote_px):
+            return hit.price
     avg = position_avg_cost(ib, sym)
     if avg > 0 and _sane_fill_ratio(avg, quote_px):
         return avg

@@ -1465,6 +1465,15 @@ class ScalperRunner:
             )
 
         self._apply_trade_close_learning(trade_rec, ticker)
+        if pending.event == "early_exit" and is_mechanical_profit_exit(pending.reason):
+            record_profit_hunt_learning(
+                self.cfg,
+                event=pending.reason.split(":")[0],
+                ticker=ticker,
+                context={"reason": pending.reason, **getattr(self, "_profit_hunt_spike_ctx", {})},
+                pnl_usd=pnl,
+                won=pnl > 0,
+            )
         self.risk.record_trade_result(pnl)
         if self.risk.needs_learning_session:
             self._service_loss_streak_learning()
@@ -1708,91 +1717,41 @@ class ScalperRunner:
         self._apply_trade_close_learning(trade_rec, ticker)
 
     def _exit_position(self, current_px: float, reason: str, ticker: Optional[str] = None):
-        """Manually exit position (early exit, AI exit, etc.)."""
-        ticker = ticker or self.current_ticker
+        """Manually exit position — submit flatten, reconcile IB fill async."""
+        ticker = (ticker or self.current_ticker or "").upper()
         if ticker and ticker in self._position_slots:
             self._load_position_context(ticker)
         if self.shares <= 0:
             return
         quantity = int(self.shares)
-        entry_price = self._entry_price
         handle = self._bracket_by_ticker.get(ticker) or self.bracket_handle
+        slot_snap = snapshot_slot(self._position_slots.get(ticker, {}))
         flatten_trade = None
         try:
             flatten_trade = self.broker.flatten_position(
                 quantity, handle=handle, urgent=True, symbol=ticker,
             )
-            trade_rec = self._build_trade_close_record(
-                ticker, current_px, reason, flatten_trade=flatten_trade, bracket=handle,
-            )
-            exit_fill = float(trade_rec.get("exit_fill") or current_px)
-            pnl = float(trade_rec.get("pnl_usd", 0))
             log.info(
-                f"⚡ EARLY EXIT: {ticker} fill ${exit_fill:.4f} "
-                f"(quote ${current_px:.4f}) | Reason: {reason} | P&L: ${pnl:+.2f}"
+                f"⚡ EXIT submitted: SELL {quantity} {ticker} @ market "
+                f"(quote ${current_px:.4f}) | {reason[:80]}"
             )
-            if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
-                send_dynamic_notification(
-                    self.notifier, self.autopilot, "early_exit",
-                    self._notify_context({
-                        "ticker": ticker, "price": exit_fill, "pnl_usd": round(pnl, 2),
-                        "reason": reason, "entry": entry_price,
-                    }),
-                    f"⚡ EARLY EXIT\n{ticker} @ ${exit_fill:.4f}\nReason: {reason}\nP&L: ${pnl:+.2f}",
-                    ai_commander=self.ai_commander,
-                    consciousness=self.consciousness,
-                    pilot=self.pilot,
-                )
-            else:
-                self.notifier.info(
-                    f"⚡ EARLY EXIT\n{ticker} @ ${exit_fill:.4f}\nReason: {reason}\nP&L: ${pnl:+.2f}"
-                )
-            self._credit_exit_proceeds(quantity, exit_fill)
+            self._enqueue_pending_close(
+                ticker, reason, current_px,
+                event="early_exit",
+                flatten_trade=flatten_trade,
+                bracket=handle,
+                slot=slot_snap,
+                shares=float(quantity),
+            )
             self.shares = 0.0
             self._prev_shares = 0.0
             self.bracket_handle = None
-            self._position_slots.pop(ticker, None)
-            self._bracket_by_ticker.pop(ticker, None)
-            self._risk_plans.pop(ticker, None)
-            self._position_stop = 0.0
-            self._position_target = 0.0
-            self._position_peak = 0.0
-            self._hard_stop_floor = 0.0
             if self.risk.plan:
-                self.risk.record_trade_result(pnl)
                 self.risk.close_position()
-            self._record_early_exit_learning(
-                ticker, entry_price, exit_fill, float(quantity), pnl, reason,
-                flatten_trade=flatten_trade, trade_rec=trade_rec,
-            )
-            if is_mechanical_profit_exit(reason):
-                record_profit_hunt_learning(
-                    self.cfg,
-                    event=reason.split(":")[0],
-                    ticker=ticker,
-                    context={"reason": reason, **getattr(self, "_profit_hunt_spike_ctx", {})},
-                    pnl_usd=pnl,
-                    won=pnl > 0,
-                )
             self._reset_profit_hunt_state()
-            if self.risk.needs_learning_session:
-                self._service_loss_streak_learning()
-            if hasattr(self, '_active_positions'):
-                self._active_positions = [p for p in self._active_positions if p["ticker"] != ticker]
-            self._position_opened_at = 0.0
+            self._clear_closed_position_state(ticker)
             self._clear_pending_entry(ticker, cooldown_sec=30.0)
             self._clear_ai_councils(ticker)
-            self._refresh_aggregate_position_state()
-            if self._active_stream_ticker == ticker:
-                self._stop_target_stream(self._active_stream_ticker)
-                self._active_stream_ticker = None
-            if getattr(self, "_next_best_pick", None) and self._next_best_score >= 25:
-                self.top_pick = self._next_best_pick
-            try:
-                self._schedule_self_train()
-            except Exception:
-                pass
-            self._attempt_hot_swap_entry()
         except Exception as exc:
             log.error(f"Early exit failed: {exc}")
 
@@ -2177,6 +2136,7 @@ class ScalperRunner:
                 
                 # Detect exits (bracket orders hitting stop/target)
                 self._detect_all_exits()
+                self._service_pending_closes()
 
                 market_state = get_market_state(self.cfg)
                 if self._last_market_state != market_state:
@@ -4538,6 +4498,7 @@ class ScalperRunner:
             parent_trade = self.bracket_handle.parent_trade
         entry_fill = resolve_entry_fill(
             self.ib, symbol=ticker, parent_trade=parent_trade, quote_px=fill_px,
+            max_wait=0.0, cache=self._fill_cache(),
         )
         if entry_fill > 0:
             fill_px = entry_fill
