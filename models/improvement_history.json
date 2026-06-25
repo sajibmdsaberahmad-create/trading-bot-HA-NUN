@@ -2288,5 +2288,42 @@
     "lessons": [
       "Review council_timeout on MARA"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:44:54.272796+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The system was designed to optimize profit by tracking entry fill rates. Since the trader was exiting at a high success rate, this parameter value might be appropriate for better performance.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trader closed a trade on RKLB with a negative pnl and exit at 80.32, exiting 95% of Ollama exits (PPO hold). The system was designed to optimize profit by tracking entry fill rates.",
+    "lessons": [
+      "Optimize entry fill rates for better performance.",
+      "Tune parameters like CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc.",
+      "Adapt for more active trading strategies.",
+      "Experience is key in learning from outcomes."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:44:56.713937+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.6,
+        "reason": "Increased confidence in profit hunting to avoid missed exits.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Loss streak occurred due to missed profit hunt.",
+    "lessons": [
+      "Take advantage of opportunistically exiting from the highest selling price"
+    ]
   }
 ]

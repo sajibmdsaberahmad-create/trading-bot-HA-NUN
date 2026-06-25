@@ -4,13 +4,6 @@
   "confidence": 0.39,
   "mode": "autonomous",
   "learned_lessons": [
-    "Profit hunt worked on GDC: spike_top_intrabar: +0.76% vol=126309.0x \u2014 reinforce opportunistic exits.",
-    "e",
-    "f",
-    "v",
-    "Commander: The event is triggered by a spike_top intrabar that gained +0.76% on the day in 'GDC'. This indicates an opportunity for profitable trades and an ongoing trend of such spikes.",
-    "M",
-    "k",
     "t",
     "r",
     ",",
@@ -103,10 +96,17 @@
     "Tune entry limits to avoid overtrading.",
     "Commander: The trade closed with a profit of $32.77.",
     "Review council_timeout on MARA",
-    "Commander: High scanner score after timeout: score=88 vol=0.1x | ATR R:R 2.0"
+    "Commander: High scanner score after timeout: score=88 vol=0.1x | ATR R:R 2.0",
+    "Optimize entry fill rates for better performance.",
+    "Tune parameters like CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc.",
+    "Adapt for more active trading strategies.",
+    "Experience is key in learning from outcomes.",
+    "Commander: - Why did this happen? Council exit: 95% of Ollama exit (PPO hold).\n- When does it tend to occur? Routine sessions with a high success rate.\n- How should the algo change? Adjust parameters, logic hints, and experience.",
+    "Take advantage of opportunistically exiting from the highest selling price",
+    "Commander: The event is a loss streak triggered by a council exit at an Ollama price of 95% (PPO hold)."
   ],
   "last_thought": "```json\n{\n  \"entry\": 5.1676,\n  \"exit\": 5.18,\n  \"shares\": 2635.0,\n  \"pnl_usd\": 32.77,\n  \"pnl_pct\": 0.24,\n  \"result\": \"win\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": -0.000964,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 186.8,\n  \"peak\": 27.51,\n  \"stop\": 27.5055,\n  \"target\": 27.72,\n  \"fill_confirmed\": true\n}\n```",
   "market_belief": {},
-  "trades_observed": 9,
-  "updated": "2026-06-25T19:44:30.114879"
+  "trades_observed": 10,
+  "updated": "2026-06-25T19:44:56.665047"
 }

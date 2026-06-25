@@ -179,3 +179,4 @@
 {"timestamp":"2026-06-25T19:42:07.403295+00:00","event":"council_exit","ticker":"RIVN","pnl_usd":-132.9,"source":"buffer","reason":"council_exit: Ollama exit 100% (PPO hold)"}
 {"timestamp":"2026-06-25T19:43:26.512497+00:00","event":"wave_end_spike_fade","ticker":"LCID","pnl_usd":45.94,"pnl_pct":0.0034,"primary_goal":true,"reason":"wave_end_spike_fade: peak +432.36% now +0.34% vol=0.3x fading","price":5.185}
 {"timestamp":"2026-06-25T19:43:50.042811+00:00","event":"wave_end_spike_fade","ticker":"LCID","pnl_usd":32.77,"source":"buffer","reason":"wave_end_spike_fade: peak +432.36% now +0.34% vol=0.3x fading"}
+{"timestamp":"2026-06-25T19:44:46.409410+00:00","event":"council_exit","ticker":"RKLB","pnl_usd":-37.9,"source":"buffer","reason":"council_exit: Ollama exit 95% (PPO hold)"}
