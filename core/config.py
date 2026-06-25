@@ -377,6 +377,14 @@ class BotConfig:
         ).lower() in ("1", "true", "yes")
     )
     LIVE_CHART_VISION_MIN_FREE_RAM_MB: int = int(os.getenv("LIVE_CHART_VISION_MIN_FREE_RAM_MB", "1300"))
+    CHART_VISION_ENTRY_ONLY: bool = os.getenv("CHART_VISION_ENTRY_ONLY", "true").lower() in ("1", "true", "yes")
+    CHART_VISION_OPPORTUNISTIC_COOLDOWN_SEC: float = float(
+        os.getenv("CHART_VISION_OPPORTUNISTIC_COOLDOWN_SEC", "120")
+    )
+    CHART_VISION_MAX_PARALLEL: int = int(os.getenv("CHART_VISION_MAX_PARALLEL", "1"))
+    SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC: float = float(
+        os.getenv("SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC", "20")
+    )
     OLLAMA_VISION_UNLOAD_AFTER_CALL: bool = field(
         default_factory=lambda: os.getenv(
             "OLLAMA_VISION_UNLOAD_AFTER_CALL", "true" if _LOW_RAM else "false",
