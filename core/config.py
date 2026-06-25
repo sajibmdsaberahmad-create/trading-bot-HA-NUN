@@ -465,18 +465,38 @@ class BotConfig:
     DEFER_LOCK_AI_REVIEW: bool = os.getenv("DEFER_LOCK_AI_REVIEW", "true").lower() not in (
         "0", "false", "no",
     )
-    ENTRY_QUALITY_GATE: bool = os.getenv("ENTRY_QUALITY_GATE", "true").lower() not in (
+    # Entry quality — AI-tunable signals; code veto only when hardness/block enabled
+    ENTRY_QUALITY_GATE: bool = os.getenv("ENTRY_QUALITY_GATE", "false").lower() not in (
         "0", "false", "no",
     )
+    ENTRY_QUALITY_HARD_BLOCK: bool = os.getenv(
+        "ENTRY_QUALITY_HARD_BLOCK", "false",
+    ).lower() in ("1", "true", "yes")
+    ENTRY_QUALITY_HARDNESS: float = float(os.getenv("ENTRY_QUALITY_HARDNESS", "0.0"))
+    ENTRY_QUALITY_BLEND_WEIGHT: float = float(os.getenv("ENTRY_QUALITY_BLEND_WEIGHT", "0.35"))
     MIN_PROFIT_PROBABILITY: float = float(os.getenv("MIN_PROFIT_PROBABILITY", "0.42"))
     MIN_FAKEOUT_FADE_PROB: float = float(os.getenv("MIN_FAKEOUT_FADE_PROB", "0.50"))
     MAX_FAKEOUT_RISK_ENTER: float = float(os.getenv("MAX_FAKEOUT_RISK_ENTER", "0.62"))
+    LIKELY_FAKEOUT_BLOCK_LEVEL: float = float(os.getenv("LIKELY_FAKEOUT_BLOCK_LEVEL", "0.0"))
     ALLOW_FAKEOUT_ENTRIES: bool = os.getenv("ALLOW_FAKEOUT_ENTRIES", "true").lower() not in (
         "0", "false", "no",
     )
     SPIKE_FAST_REQUIRES_QUALITY: bool = os.getenv(
-        "SPIKE_FAST_REQUIRES_QUALITY", "true",
+        "SPIKE_FAST_REQUIRES_QUALITY", "false",
     ).lower() not in ("0", "false", "no")
+    EQ_WEIGHT_PROFIT_RUN: float = float(os.getenv("EQ_WEIGHT_PROFIT_RUN", "0.22"))
+    EQ_WEIGHT_SPIKE_LIK: float = float(os.getenv("EQ_WEIGHT_SPIKE_LIK", "0.18"))
+    EQ_WEIGHT_SCAN: float = float(os.getenv("EQ_WEIGHT_SCAN", "0.16"))
+    EQ_WEIGHT_PPO: float = float(os.getenv("EQ_WEIGHT_PPO", "0.14"))
+    EQ_WEIGHT_VOL_SPIKE: float = float(os.getenv("EQ_WEIGHT_VOL_SPIKE", "0.12"))
+    EQ_WEIGHT_MOM: float = float(os.getenv("EQ_WEIGHT_MOM", "0.10"))
+    EQ_PENALTY_FADE: float = float(os.getenv("EQ_PENALTY_FADE", "0.28"))
+    EQ_PENALTY_LOSS: float = float(os.getenv("EQ_PENALTY_LOSS", "0.22"))
+    FAKEOUT_FADE_MIN_FADE: float = float(os.getenv("FAKEOUT_FADE_MIN_FADE", "0.40"))
+    FAKEOUT_FADE_MIN_SL: float = float(os.getenv("FAKEOUT_FADE_MIN_SL", "0.35"))
+    COUNCIL_TIMEOUT_MIN_SCAN_SCORE: float = float(
+        os.getenv("COUNCIL_TIMEOUT_MIN_SCAN_SCORE", "40"),
+    )
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30
     FAST_SCAN_ENABLED: bool = True
