@@ -160,6 +160,8 @@ def generate_runtime_event_plan(
         "  WHAT prevents recurrence? (concrete mutations)\n\n"
         "If event is missed_profit_hunt: lower SPIKE_TOP_MIN_GAIN_PCT or "
         "SPIKE_TOP_MIN_VOL_RATIO within bounds; prioritize opportunistic exits.\n"
+        "If event is council_timeout or bad entry: tune MIN_PROFIT_PROBABILITY, "
+        "ENTRY_QUALITY_BLEND_WEIGHT, or COUNCIL_TIMEOUT_MIN_SCAN_SCORE — not hardcoded skips.\n"
         "If event is market_data_failure: add ticker to mental skip list — "
         "no profit hunting without live IB bars (162/420 errors).\n\n"
         f"EVENT: {event}\n"
