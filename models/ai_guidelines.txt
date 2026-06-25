@@ -556,3 +556,16 @@ When the council_timeout event occurs, it is often a sign of a new trading algor
 The council_timeout event occurred during the pre-market session.
 Root cause: A scanner spike was detected after timeout.
 
+🧭 COMMANDER LEARNING | 2026-06-25T12:39:46.069764+00:00
+IB closing-only cannot open new positions, causing the algorithm to fail.
+The event suggests that the program is encountering an issue with IB closing transactions and is unable to perform new trades. The current state is pre-market, but the system may be experiencing this issue further in real-time.
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been increased from 35% to 58%, indicating a higher level of tolerance in the event that IB transactions fail.'}
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold has been increased from 35% to 58%, indicating a higher level of tolerance in the event that IB transactions fail.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T12:40:20.128621+00:00
+Event: council_timeout - Council timeout, no aligned signal
+Root cause: The algorithm is experiencing a high level of volatility and conflicts.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The algorithm is experiencing a high level of volatility, and the current risk management strategy is not effective. Adjusting the confidence threshold to reflect this higher risk can help maintain a more stable portfolio.)
+
