@@ -42,11 +42,20 @@ def get_live_scan_universe(
     cfg: BotConfig,
     *,
     startup: bool = False,
+    skip_ib_scanner: bool = False,
 ) -> List[str]:
-    """Live IB scanner with optional emergency fallback so startup never blocks."""
+    """Live IB scanner with instant emergency fallback so startup never blocks."""
     if not getattr(cfg, "USE_LIVE_IB_SCANNER", True):
         log.warning("USE_LIVE_IB_SCANNER is off — universe empty (static fallback disabled)")
         return []
+
+    defer = skip_ib_scanner or (
+        startup and getattr(cfg, "SCAN_DEFER_IB_ON_STARTUP", True)
+    )
+    if defer:
+        log.info("⚡ Instant startup universe — IB live scanner deferred")
+        from core.scanner import emergency_scan_universe
+        return emergency_scan_universe(connector, cfg)
 
     tickers: List[str] = []
     retries = int(

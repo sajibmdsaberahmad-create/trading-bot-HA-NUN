@@ -438,6 +438,10 @@ class BotConfig:
     SCAN_EMERGENCY_FALLBACK: bool = os.getenv("SCAN_EMERGENCY_FALLBACK", "true").lower() not in (
         "0", "false", "no",
     )
+    SCAN_DEFER_IB_ON_STARTUP: bool = os.getenv("SCAN_DEFER_IB_ON_STARTUP", "true").lower() not in (
+        "0", "false", "no",
+    )
+    IB_SCANNER_WARMUP_SEC: float = float(os.getenv("IB_SCANNER_WARMUP_SEC", "3"))
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30
     FAST_SCAN_ENABLED: bool = True

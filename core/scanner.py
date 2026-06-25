@@ -69,12 +69,22 @@ def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
         return []
 
 
-def _warm_scanner(ib) -> None:
-    """One-shot scanner warm-up — helps paper/live gateways return first scan."""
+def _warm_scanner(ib, timeout_sec: float = 3.0) -> bool:
+    """Optional scanner warm-up — never blocks longer than timeout_sec."""
+    import asyncio
+
+    async def _run():
+        return await asyncio.wait_for(ib.reqScannerParametersAsync(), timeout=timeout_sec)
+
     try:
-        ib.run(ib.reqScannerParametersAsync())
-    except Exception:
-        pass
+        ib.run(_run())
+        return True
+    except asyncio.TimeoutError:
+        log.debug(f"Scanner warm-up timed out after {timeout_sec:.0f}s — continuing")
+        return False
+    except Exception as exc:
+        log.debug(f"Scanner warm-up skipped: {exc}")
+        return False
 
 
 def emergency_scan_universe(connector, cfg: BotConfig) -> List[str]:
@@ -252,9 +262,10 @@ class StockScanner:
                 from core.universe_filter import PROFIT_HUNT_SCAN_CODES, passes_profit_hunt_universe
                 ib = ib_connector.ib
                 if not self._scanner_warmed:
-                    _warm_scanner(ib)
+                    _warm_scanner(ib, timeout_sec=float(
+                        getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 3.0)
+                    ))
                     self._scanner_warmed = True
-                    ib.sleep(0.3)
 
                 priority_codes = ("MOST_ACTIVE", "TOP_PERC_GAIN", "HOT_BY_VOLUME")
                 scan_codes = [c for c in priority_codes if c in PROFIT_HUNT_SCAN_CODES]

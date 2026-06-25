@@ -2433,11 +2433,12 @@ class ScalperRunner:
                 refined.append(r)
         return refined
     
-    def _scan_and_rank(self, startup: bool = False):
+    def _scan_and_rank(self, startup: bool = False, skip_ib_scanner: bool = False):
         t0 = time.perf_counter()
         log.info("🔍 HANOON scan: fetching live IB universe…")
         screen_list = get_live_scan_universe(
-            self.scanner, self.conn, self.cfg, startup=startup,
+            self.scanner, self.conn, self.cfg,
+            startup=startup, skip_ib_scanner=skip_ib_scanner,
         )
         if not screen_list:
             log.warning("⏸ Scan skipped — no tickers in universe")
