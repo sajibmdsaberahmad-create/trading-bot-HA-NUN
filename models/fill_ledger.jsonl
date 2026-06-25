@@ -1,1 +1,2 @@
 {"event":"entry_fill","ticker":"KUST","entry_fill":1.62,"limit_px":1.63,"entry_slippage_pct":-0.006135,"shares":12,"stop":1.6055,"target":1.6789,"entry_mode":"limit_smart","regime":"unknown|late_chase_risk","timestamp":"2026-06-25T15:36:35.640214+00:00"}
+{"event":"entry_fill","ticker":"KUST","entry_fill":1.63,"limit_px":1.63,"entry_slippage_pct":0.0,"shares":1832,"stop":1.6055,"target":1.6789,"entry_mode":"limit_smart","regime":"unknown","timestamp":"2026-06-25T16:07:04.225730+00:00"}
