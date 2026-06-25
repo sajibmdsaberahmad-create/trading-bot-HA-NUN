@@ -1147,5 +1147,33 @@
     "lessons": [
       "Review ib_failure on MIMI"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T13:01:13.330355+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Adjusted from 0.35 to 0.58",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council_timeout event occurred during the pre-market session.",
+    "lessons": [
+      "Adjusting threshold parameters may help mitigate the risk associated with frequent scanner timeouts.",
+      "Monitor scanner performance and adjust thresholds accordingly"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T13:01:37.404343+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {},
+    "guidelines_summary": "IB closing-only - cannot open new positions",
+    "lessons": [
+      "Inhibit the algorithm's ability to execute trades in an open position system.",
+      "Ensure the algorithm can handle conditions where it cannot enter or exit positions at any given time, such as IB closing-only."
+    ]
   }
 ]

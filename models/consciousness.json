@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 89,
   "training_sessions": 27,
-  "trades_observed": 28,
+  "trades_observed": 29,
   "scans_performed": 27,
-  "improvements_applied": 133,
+  "improvements_applied": 135,
   "reports_generated": 26,
   "event_log": [
     {
@@ -7786,6 +7786,51 @@
           "Review ib_failure on MIMI"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T13:01:13.293284",
+      "age": "4d 1h 58m 24s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #134",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "The council_timeout event occurred during the pre-market session.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusted from 0.35 to 0.58",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Adjusting threshold parameters may help mitigate the risk associated with frequent scanner timeouts.",
+          "Monitor scanner performance and adjust thresholds accordingly"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T13:01:35.257351",
+      "age": "4d 1h 58m 46s",
+      "type": "TRADE",
+      "message": "Observed trade: FMFC LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T13:01:37.370006",
+      "age": "4d 1h 58m 48s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #135",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "IB closing-only - cannot open new positions",
+        "applied": [],
+        "lessons": [
+          "Inhibit the algorithm's ability to execute trades in an open position system.",
+          "Ensure the algorithm can handle conditions where it cannot enter or exit positions at any given time, such as IB closing-only."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T12:31:01.138131",
@@ -9071,7 +9116,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "anxious",
+  "mood": "determined",
   "total_pnl": -17680.03,
   "win_history": [
     0.0,
@@ -9101,24 +9146,25 @@
     14.2,
     0,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 4,
   "worst_streak": 10,
-  "veteran_xp": 275,
+  "veteran_xp": 285,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 21,
+    "exit_timing": 22,
     "risk_management": 2,
     "entry_timing": 4
   },
-  "flights_completed": 23,
-  "hours_flown": 2.3000000000000007,
+  "flights_completed": 24,
+  "hours_flown": 2.400000000000001,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
-    "FMF": 6,
+    "FMF": 7,
     "CCX": 2,
     "TAG": 1,
     "SCA": 1,
@@ -9132,5 +9178,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I feel a mix of excitement about my recent wins and fear over the upcoming losses."
+  "mood_message": "I have made significant progress in the recent session with 9 trades and a win rate of 11.1%."
 }

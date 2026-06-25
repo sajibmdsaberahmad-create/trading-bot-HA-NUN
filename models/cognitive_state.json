@@ -4,12 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Using advanced algorithms like PPO for robust optimization",
-    "Commander: The algorithm is learning from the recent trade outcomes, but it's experiencing a sudden spike in scanner momentum that requires adjustment. The strategy should focus on maintaining a wide range of parameters and using advanced algorithms l",
-    "Review loss_streak on PBK",
-    "Commander: council_exit: Ollama exit 100% (PPO hold)",
-    "Review trade_closed on PBK",
-    "Review council_timeout on PBK",
     "Commander: Scanner+spike after timeout: score=83 vol=1.9x | ATR R:R 2.0",
     "1",
     ":",
@@ -103,10 +97,16 @@
     "Review council_timeout on MIMI",
     "Commander: Scanner+spike after timeout: score=94 vol=3.6x | ATR R:R 2.0",
     "Review ib_failure on MIMI",
-    "Commander: IB closing-only \u2014 cannot open new positions"
+    "Commander: IB closing-only \u2014 cannot open new positions",
+    "Adjusting threshold parameters may help mitigate the risk associated with frequent scanner timeouts.",
+    "Monitor scanner performance and adjust thresholds accordingly",
+    "Commander: The council_timeout event indicates that the scanner timeout occurred after a timeout, and this might be due to the recent spike in scanner scores. The algorithm needs to adjust its threshold for scanning.",
+    "Inhibit the algorithm's ability to execute trades in an open position system.",
+    "Ensure the algorithm can handle conditions where it cannot enter or exit positions at any given time, such as IB closing-only.",
+    "Commander: The event indicates that the trading algorithm is encountering a technical issue with IB closing only, which prevents it from opening new positions."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": {\n    \"market_conditions\": \"The algorithm is not aligning signals with the current market conditions.\",\n    \"technical_indicators\": {\n      \"ATR_R\": 2.0\n    }\n  },\n  \"analysis\": {\n    \"live_account_state\": {\n      \"account_equity\": 1014738.15,\n      \"available_cash\": 1014738.15,\n      \"position_value\": 0.0,\n      \"nav\": 1000.0,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": \"NONE\",\n      \"position\": \"NONE\",\n      \"win_rate\": 0.0,\n      \"trades_toda",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 0.8,\n  \"mode\": \"HANOON\",\n  \"account_equity\": 1014738.13,\n  \"available_cash\": 1014738.13,\n  \"position_value\": 0,\n  \"nav\": 1000,\n  \"deployed_pct\": 0,\n  \"current_ticker\": \"NONE\",\n  \"position\": \"NONE\",\n  \"win_rate\": 0,\n  \"trades_today\": 0,\n  \"top_pick\": \"FMFC\",\n  \"top_score\": 52.0,\n  \"next_best\": null,\n  \"next_best_score\": 0.0,\n  \"scan_results\": [\n    { \"ticker\": \"KUST\", \"price\": 0, \"score\": 96.0, \"reason\": \"scanner:HOT_BY_VOLUME#0\" },\n    { \"ticker\": \"MIM",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T12:58:33.588136"
+  "updated": "2026-06-25T13:01:37.369053"
 }

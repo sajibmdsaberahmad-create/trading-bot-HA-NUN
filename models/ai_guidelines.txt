@@ -976,3 +976,13 @@ Scanner+spike after timeout: score=94 vol=3.6x | ATR R:R 2.0
 Observed ib_failure — recorded for learning.
 IB closing-only — cannot open new positions
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:01:13.329072+00:00
+The council_timeout event occurred during the pre-market session.
+The council_timeout event indicates that the scanner timeout occurred after a timeout, and this might be due to the recent spike in scanner scores. The algorithm needs to adjust its threshold for scanning.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusted from 0.35 to 0.58)
+
+🧭 COMMANDER LEARNING | 2026-06-25T13:01:37.403848+00:00
+IB closing-only - cannot open new positions
+The event indicates that the trading algorithm is encountering a technical issue with IB closing only, which prevents it from opening new positions.
+
