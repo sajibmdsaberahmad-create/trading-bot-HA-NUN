@@ -1022,6 +1022,8 @@ class ScalperRunner:
     def _clamp_entry_shares(self, shares: int, price: float) -> int:
         max_shares = effective_max_shares_per_trade(self.cfg)
         shares = min(int(shares), max_shares)
+        if getattr(self.cfg, "PAPER_TRADING", False):
+            shares = min(shares, int(getattr(self.cfg, "PAPER_MAX_ENTRY_SHARES", 5000)))
         if price <= 0:
             return 0
         if not getattr(self.cfg, "USE_FIXED_DEPLOY_CAP", False):
@@ -1034,6 +1036,22 @@ class ScalperRunner:
             float(getattr(self.cfg, "MAX_TRADE_SIZE_USD", 1000.0)),
         )
         return max(1, min(shares, int(deploy_usd / price)))
+
+    def _entry_price_mode(
+        self,
+        current_px: float,
+        bid: float,
+        ask: float,
+        shares: int,
+        avg_volume: float,
+    ) -> Tuple[Optional[float], str]:
+        """Paper uses MARKET entries by default — limits often sit in PendingSubmit."""
+        if (
+            getattr(self.cfg, "PAPER_TRADING", False)
+            and getattr(self.cfg, "PAPER_MARKET_ENTRIES", True)
+        ):
+            return None, "paper_market"
+        return self.broker.decide_smart_entry(current_px, bid, ask, shares, avg_volume)
 
     def _sync_position_from_ib(self):
         """Keep local shares in sync with IB (detect bracket fills/exits)."""
@@ -2117,9 +2135,21 @@ class ScalperRunner:
                     have_targets=have_targets,
                     in_profit=in_profit,
                 )
+                if self._entry_poll_state:
+                    loop_sec = min(
+                        loop_sec,
+                        float(getattr(self.cfg, "ENTRY_PENDING_LOOP_SEC", 0.05)),
+                    )
                 self.ib.sleep(loop_sec)
 
                 self._service_stream_repairs()
+
+                if getattr(self, "_bootstrap_entry_due", False):
+                    self._bootstrap_entry_due = False
+                    try:
+                        self._attempt_scan_bootstrap_entry()
+                    except Exception as exc:
+                        log.debug(f"Bootstrap entry: {exc}")
 
                 if getattr(self, "_deferred_ib_scan", False) and self.conn.is_connected():
                     self._deferred_ib_scan = False
@@ -4878,6 +4908,46 @@ class ScalperRunner:
         if filled_shares >= shares * min_fill_ratio or parent_status == "Filled":
             self._open_position_from_fill(ticker, int(filled_shares), fill_px, plan)
             return
+        if parent_status == "PendingSubmit":
+            since = st.get("pending_submit_since")
+            if since is None:
+                st["pending_submit_since"] = time.time()
+            max_ps = float(getattr(self.cfg, "PENDING_SUBMIT_MAX_SEC", 4.0))
+            if (
+                since is not None
+                and (time.time() - since) >= max_ps
+                and not st.get("market_retry_done")
+            ):
+                st["market_retry_done"] = True
+                log.warning(
+                    f"  ⚡ {ticker} stuck PendingSubmit >{max_ps:.0f}s — cancel + MARKET retry"
+                )
+                self.broker.cancel_open_orders_for_symbol(ticker)
+                self.ib.sleep(0.3)
+                retry_sh = int(shares)
+                if getattr(self.cfg, "PAPER_TRADING", False):
+                    retry_sh = min(
+                        retry_sh,
+                        int(getattr(self.cfg, "PAPER_MAX_ENTRY_SHARES", 5000)),
+                    )
+                try:
+                    self.bracket_handle = self.broker.place_bracket_buy(
+                        quantity=retry_sh,
+                        limit_or_market_price=None,
+                        stop_price=plan.initial_stop_price,
+                        target_price=plan.take_profit_price,
+                    )
+                    self._pending_bracket_handle = self.bracket_handle
+                    st["shares"] = retry_sh
+                    st["polls"] = 0
+                    st["pending_submit_since"] = None
+                    st["limit_px"] = None
+                except Exception as exc:
+                    log.warning(f"  Market retry failed for {ticker}: {exc}")
+                    self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
+                return
+        else:
+            st["pending_submit_since"] = None
         st["polls"] = int(st.get("polls", 0)) + 1
         polls = st["polls"]
         max_polls = int(st["max_polls"])
@@ -5594,7 +5664,7 @@ class ScalperRunner:
             risk_usd=float(ai_dec.get("risk_usd", 50.0)),
             atr_at_entry=compute_atr(df_fast, period=5),
         )
-        entry_parent_px, entry_mode = self.broker.decide_smart_entry(
+        entry_parent_px, entry_mode = self._entry_price_mode(
             current_px, bid, ask, shares, avg_volume,
         )
         plan, ai_dec = self._reanchor_bracket_to_limit(
@@ -5641,7 +5711,7 @@ class ScalperRunner:
                 )
                 log.info(f"  🔄 IB2161 retry: {shares} sh limit @ ${entry_parent_px:.4f}")
             else:
-                entry_parent_px, entry_mode = self.broker.decide_smart_entry(
+                entry_parent_px, entry_mode = self._entry_price_mode(
                     current_px, bid, ask, shares, avg_volume,
                 )
                 plan, ai_dec = self._reanchor_bracket_to_limit(

@@ -349,6 +349,21 @@ class BrokerExecutor:
             if cancelled:
                 self.ib.sleep(0.5)
                 log.info(f"🧹 Cancelled {cancelled} stale open order(s) from prior session")
+            # Clear stuck PendingSubmit orders (block new brackets on paper)
+            pending = 0
+            for trade in list(self.ib.openTrades()):
+                try:
+                    st = trade.orderStatus.status if trade.orderStatus else ""
+                    if st == "PendingSubmit":
+                        oid = int(getattr(trade.order, "orderId", 0) or 0)
+                        if oid > 0:
+                            self.ib.cancelOrder(trade.order)
+                            pending += 1
+                except Exception:
+                    pass
+            if pending:
+                self.ib.sleep(0.3)
+                log.info(f"🧹 Cancelled {pending} stuck PendingSubmit order(s)")
         except Exception as exc:
             log.debug(f"Stale order cleanup: {exc}")
         return cancelled
