@@ -4033,6 +4033,15 @@ class ScalperRunner:
         Attempt entry on self.top_pick.
         Returns: 'entered', 'permanent_skip', or 'waiting'
         """
+        market_state = get_market_state(self.cfg)
+        can_trade = (
+            market_state == "open" or
+            (market_state == "pre_market" and self.cfg.ALLOW_PRE_MARKET_TRADING) or
+            (market_state == "after_hours" and self.cfg.ALLOW_AFTER_HOURS_TRADING)
+        )
+        if not can_trade:
+            return "waiting"
+
         if not self.top_pick:
             return 'waiting'
         ticker = self.top_pick.ticker

@@ -154,10 +154,15 @@ class BackgroundWorker:
                 if push_result.returncode == 0:
                     self._stats["git_pushes"] += 1
                     try:
-                        from core.git_sync import cfg_bot
-                        from core.telegram_broadcast import notify_git_push
+                        from core.git_sync import cfg_bot, record_git_push_event
                         if cfg_bot is not None:
-                            notify_git_push(cfg_bot, task.message[:200], category="background", ok=True)
+                            record_git_push_event(
+                                task.message[:200], "background", ok=True, repo="background"
+                            )
+                            from core.git_sync import _git_notify_mode
+                            if _git_notify_mode(cfg_bot) == "all":
+                                from core.telegram_broadcast import notify_git_push
+                                notify_git_push(cfg_bot, task.message[:200], category="background", ok=True)
                     except Exception:
                         pass
                 else:

@@ -748,6 +748,10 @@ def run_standalone_daemon(cfg: Optional[BotConfig] = None) -> None:
             push_change("daemon shutdown: final flush", files=dirty, category="shutdown")
     except Exception:
         pass
+    try:
+        flush_git_telegram_summary(c)
+    except Exception:
+        pass
     log.info("Git sync daemon stopped")
 
 
@@ -1540,7 +1544,8 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
     import glob as glob_mod
     log_paths = []
     for f in ["HANOON.log", "logs/HANOON.log", "training_journal.json",
-              "models/ai_decision_log.jsonl", "models/thought_journal.jsonl", "audit_trail.jsonl"]:
+              "models/ai_decision_log.jsonl", "models/thought_journal.jsonl", "audit_trail.jsonl",
+              "logs/git_sync_journal.jsonl", "logs/git_session_summary.txt"]:
         if os.path.exists(os.path.join(REPO_DIR, f)):
             log_paths.append(f)
     log_paths.extend(glob_mod.glob(os.path.join(REPO_DIR, "models/daily_reports/*.json")))

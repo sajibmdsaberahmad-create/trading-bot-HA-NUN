@@ -251,6 +251,9 @@ class IBConnector:
         # Pure informational error codes from IB that aren't real problems
         BENIGN = {2104, 2106, 2107, 2108, 2119, 2158}
         self.touch()
+        # Order lifecycle codes — stored on reqId, not worth WARNING spam
+        QUIET_ORDER = {201, 202, 399}
+        self.touch()
         if errorCode in (2161, 399, 201, 202):
             from core.broker import parse_ib_regulatory_cap
             info: Dict[str, Any] = {"code": errorCode, "message": errorString}
@@ -259,6 +262,6 @@ class IBConnector:
                 if cap:
                     info["price_cap"] = cap
             self._order_errors[int(reqId)] = info
-        if errorCode in BENIGN:
+        if errorCode in BENIGN or errorCode in QUIET_ORDER:
             return
         log.warning(f"IB error {errorCode}: {errorString} (reqId={reqId})")

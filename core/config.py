@@ -670,7 +670,9 @@ class BotConfig:
     TELEGRAM_COMMANDER_GUIDANCE: str = "models/commander_guidance.jsonl"
     TELEGRAM_DAILY_REPORT_MAX_CHARS: int = int(os.getenv("TRADING_BOT_TELEGRAM_REPORT_CHARS", "3800"))
     TELEGRAM_BROADCAST_OPS: bool = os.getenv("TRADING_BOT_TELEGRAM_BROADCAST_OPS", "true").lower() in ("1", "true", "yes")
-    TELEGRAM_BROADCAST_GIT: bool = os.getenv("TRADING_BOT_TELEGRAM_BROADCAST_GIT", "true").lower() in ("1", "true", "yes")
+    TELEGRAM_BROADCAST_GIT: bool = os.getenv("TRADING_BOT_TELEGRAM_BROADCAST_GIT", "false").lower() in ("1", "true", "yes")
+    GIT_NOTIFY_MODE: str = os.getenv("GIT_NOTIFY_MODE", "log")  # log | session | failures | all | off
+    OFF_HOURS_TRAIN_INTERVAL_SEC: float = float(os.getenv("OFF_HOURS_TRAIN_INTERVAL_SEC", "3600"))
 
     # Commander chat → self-improvement loop
     COMMANDER_LEARNING_ENABLED: bool = os.getenv(
