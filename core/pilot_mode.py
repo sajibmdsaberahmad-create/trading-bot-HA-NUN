@@ -248,21 +248,30 @@ def get_ai_deploy_budget(
     per_slot = deployable / slots_left
 
     full_cap = ai_full_capital_access(cfg)
-    if not full_cap:
-        limits = getattr(cfg, "_ai_session_limits", None) or {}
-        deploy_pct_slot = limits.get("deploy_pct_per_slot")
-        if deploy_pct_slot and account_equity > 0:
-            per_slot = min(per_slot, account_equity * float(deploy_pct_slot))
+    if full_cap:
+        # Flat account → full deployable cash on next entry (no 1/N training-wheel split)
+        if open_positions < 1:
+            per_slot = deployable
+        elif slots_left <= 1:
+            per_slot = deployable
+        else:
+            per_slot = deployable / slots_left
+        return max(0.0, per_slot)
 
-        max_pct = float(getattr(cfg, "AI_MAX_DEPLOY_PCT", 0.0))
-        if max_pct > 0 and account_equity > 0:
-            per_slot = min(per_slot, account_equity * max_pct)
+    limits = getattr(cfg, "_ai_session_limits", None) or {}
+    deploy_pct_slot = limits.get("deploy_pct_per_slot")
+    if deploy_pct_slot and account_equity > 0:
+        per_slot = min(per_slot, account_equity * float(deploy_pct_slot))
 
-        max_trade = float(getattr(cfg, "MAX_TRADE_SIZE_USD", 0))
-        if max_trade > 0:
-            per_slot = min(per_slot, max_trade)
-        elif is_paper_free_learning(cfg) and account_equity > 0:
-            per_slot = min(per_slot, account_equity * 0.95)
+    max_pct = float(getattr(cfg, "AI_MAX_DEPLOY_PCT", 0.0))
+    if max_pct > 0 and account_equity > 0:
+        per_slot = min(per_slot, account_equity * max_pct)
+
+    max_trade = float(getattr(cfg, "MAX_TRADE_SIZE_USD", 0))
+    if max_trade > 0:
+        per_slot = min(per_slot, max_trade)
+    elif is_paper_free_learning(cfg) and account_equity > 0:
+        per_slot = min(per_slot, account_equity * 0.95)
 
     return max(0.0, per_slot)
 
