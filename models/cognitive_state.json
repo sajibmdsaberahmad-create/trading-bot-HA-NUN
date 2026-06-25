@@ -4,8 +4,6 @@
   "confidence": 0.5700000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Understanding the spike ratio can help in tailoring trade execution policies for more effective risk management.",
-    "Commander: When a council timeout occurs, it means that the scan timeout has been reached for the council (scanner) algorithm. The scanner is designed to detect and prevent potential scanner spikes by scanning the high-frequency trades. It uses a spik",
     "Commander: Scanner+spike after timeout: score=52 vol=6.7x | ATR R:R 2.0",
     "1",
     "k",
@@ -103,10 +101,12 @@
     "Commander: Order Canceled - reason:We cannot accept an order at a limit price at or more aggressive than 1.4594788. Please submit your order <br>using a limit price that is closer to the current market price of",
     "Commander: Order Canceled - reason:We cannot accept an order at a limit price at or more aggressive than 1.447758. Please submit your order using<br> a limit price that is closer to the current market price of 1",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm missed that the limit price is closer to the current market price and thus decided it was too aggressive.'}",
-    "Commander: The user noticed that the limit price for orders they accept at a limit price of more than 1.445366 was closer to the current market price instead of being more aggressive like before."
+    "Commander: The user noticed that the limit price for orders they accept at a limit price of more than 1.445366 was closer to the current market price instead of being more aggressive like before.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': '0.58', 'reason': 'This parameter controls how confident the trader is about their decision-making process, and it should be increased to make the trade more reliable.'}",
+    "Commander: I learned that the trader is holding onto the Ollama position as they are in pain. The reason for this could be due to FOMO or fear."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.9,\n  \"intuition\": \"The live account state provides valuable insights into the trading environment and market conditions.\",\n  \"reason\": \"The provided data includes information about current trades, positions, and scalping strategies that can be analyzed to gain a better understanding of the market dynamics.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 10,
-  "updated": "2026-06-25T11:42:38.918388"
+  "updated": "2026-06-25T11:42:45.616071"
 }

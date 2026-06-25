@@ -383,3 +383,8 @@ The user noticed that the limit price for orders they accept at a limit price of
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Updated confidence threshold from 0.9 to 0.58)
 
+🧭 COMMANDER LEARNING | 2026-06-25T11:42:45.642406+00:00
+The trade closed with a win: council_exit: Ollama exit 98% (PPO hold).
+I learned that the trader is holding onto the Ollama position as they are in pain. The reason for this could be due to FOMO or fear.
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': '0.58', 'reason': 'Increased confidence will allow the trader to make a stronger decision, which could lead to better outcomes.'}
+

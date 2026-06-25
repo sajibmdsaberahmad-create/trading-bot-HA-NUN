@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 97,
+  "improvements_applied": 98,
   "reports_generated": 26,
   "event_log": [
     {
@@ -6231,6 +6231,20 @@
         ],
         "lessons": [
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm missed that the limit price is closer to the current market price and thus decided it was too aggressive.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T11:42:45.617127",
+      "age": "4d 0h 39m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #98",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade closed with a win: council_exit: Ollama exit 98% (PPO hold).",
+        "applied": [],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': '0.58', 'reason': 'This parameter controls how confident the trader is about their decision-making process, and it should be increased to make the trade more reliable.'}"
         ]
       }
     }

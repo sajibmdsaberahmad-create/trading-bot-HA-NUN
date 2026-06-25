@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-06-24T20:40:49.796333",
-    "win_rate": 0.30448454529212077,
-    "buffer_win_rate": 0.40207253886010363,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:40:49.795843\nCombined win rate: 30.4% (buffer=40.2%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
-  },
-  {
     "timestamp": "2026-06-24T20:40:49.845249",
     "win_rate": 0.30448454529212077,
     "buffer_win_rate": 0.40207253886010363,
@@ -2341,6 +2333,15 @@
     "guidelines_summary": "The order_canceled event occurred due to an aggressive limit price of 1.445366, which is more than the current market price of 1.2085.",
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithm missed that the limit price is closer to the current market price and thus decided it was too aggressive.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T11:42:45.643287+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "The trade closed with a win: council_exit: Ollama exit 98% (PPO hold).",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': '0.58', 'reason': 'This parameter controls how confident the trader is about their decision-making process, and it should be increased to make the trade more reliable.'}"
     ]
   }
 ]
