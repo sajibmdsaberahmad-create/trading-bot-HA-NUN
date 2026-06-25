@@ -3443,3 +3443,16 @@ trailing_profit
 Observed trade_closed — recorded for learning.
 trailing_profit
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:12:38.908748+00:00
+Loss streak with consecutive losses of 2 and a negative pnl.
+The event occurred due to trailing profit, which was not aligned with the algorithmic strategy. The trader should focus on identifying potential risks and taking appropriate measures.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The value is too high (should be between 0.35 and 0.9).)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:12:43.137779+00:00
+The trade closed with a trailing profit of -848.25, but the algorithm did not execute.
+The trade was triggered by a trailing profit and ended without being executed.
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data failure occurred, with a confidence threshold of 0.58. This means the algorithm did not execute due to insufficient data or other factors.'}
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market data failure occurred, with a confidence threshold of 0.58. This means the algorithm did not execute due to insufficient data or other factors.)
+

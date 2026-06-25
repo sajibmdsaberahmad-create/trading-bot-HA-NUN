@@ -1,18 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 0% \u00b7 $-8351.27. Preserving capital over action.",
+  "mood_message": "Win rate 5% \u00b7 $-9187.69. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "e",
-    "(",
-    "C",
-    "O",
-    "N",
-    "F",
-    "I",
-    "D",
-    "E",
     "_",
     "H",
     "R",
@@ -103,10 +94,19 @@
     "Always consider executing a stop hit when possible and avoid unnecessary exits.",
     "Be cautious with profitable trades as they can be missed by inexperienced scalpers.",
     "Commander: The reason for the negative outcome is that the trader chose not to execute a stop hit, which occurred at a high exit point. The trader should have executed the stop hit.",
-    "Review loss_streak on GDC"
+    "Review loss_streak on GDC",
+    "k",
+    "e",
+    ",",
+    "v",
+    "f",
+    "Commander: The event occurred due to trailing profit, which was not aligned with the algorithmic strategy. The trader should focus on identifying potential risks and taking appropriate measures.",
+    "Commander: The trade was triggered by a trailing profit and ended without being executed.",
+    "Spike-top hunt on NEXR: spike_top_intrabar: +2.28% vol=2.7x",
+    "Profit hunt worked on NEXR: spike_top_intrabar: +2.28% vol=2.7x \u2014 reinforce opportunistic exits."
   ],
-  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"entry\": 0.8852,\n    \"exit\": 0.1783,\n    \"shares\": 1200.0,\n    \"pnl_usd\": -848.25,\n    \"pnl_pct\": -79.86,\n    \"result\": \"loss\",\n    \"entry_slippage_pct\": 3.93132,\n    \"exit_slippage_pct\": -0.000561,\n    \"limit_px\": 0.1795,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 14.5,\n    \"peak\": 0.8852,\n    \"stop\": 0.1777,\n    \"target\": 0.1798\n  },\n  \"reasoning\": {\n    \"lesson_learned\": \"The trader chose to execute the stop hit at a high exit ",
+  "last_thought": "```json\n{\n  \"trade_entry\": {\n    \"entry\": 0.8949,\n    \"exit\": 0.9099,\n    \"quote_entry\": 0.8949,\n    \"quote_exit\": 0.915,\n    \"shares\": 789.0,\n    \"pnl_usd\": 11.83,\n    \"pnl_pct\": 1.68,\n    \"result\": \"win\",\n    \"exit_reason\": \"spike_top_intrabar: +2.28% vol=2.7x\",\n    \"entry_slippage_pct\": 0.005848,\n    \"exit_slippage_pct\": -0.005574,\n    \"limit_px\": 0.8897,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 909.1,\n    \"peak\": 0.8949,\n    \"stop\": 0.8815,\n    \"target\": 0.92",
   "market_belief": {},
-  "trades_observed": 70,
-  "updated": "2026-06-25T17:12:32.318747"
+  "trades_observed": 72,
+  "updated": "2026-06-25T17:13:32.874108"
 }
