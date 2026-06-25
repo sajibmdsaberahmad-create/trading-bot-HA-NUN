@@ -1514,3 +1514,13 @@ The loss streak occurred due to a stop-loss breach, which can be corrected by ad
 Observed trade_closed — recorded for learning.
 loss:stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-25T14:38:32.699653+00:00
+Observed loss_streak — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-25T14:38:34.845966+00:00
+Trade closed with loss:stop_breach
+Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be cautious around this.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold of 0.58 is too high for this specific stop-loss trigger.)
+

@@ -4,10 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "w",
-    "Commander: Root cause: Council timeout indicates that there is no aligned signal or alignment within the trading context.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has increased, indicating that the algorithm should be more cautious in future executions.'}",
-    "Commander: The council is experiencing a temporary pause and the algo should adapt by tightening risk based on recent wins and losses.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithmic parameters have been reset to reduce risk.'}",
     "Commander: The council timeout indicates that there is a problem with the alignment of signals in the pipeline, which may prevent the algo from executing correctly.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been decreased, indicating potential systemic issues.'}",
@@ -103,10 +99,14 @@
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 indicates that the loss rate is moderately high, suggesting a need to adjust the stop-loss position.'}",
     "Commander: The loss streak occurred due to a stop-loss breach, which can be corrected by adjusting the stop-loss position or using a more aggressive stop-loss strategy.",
     "Review trade_closed on NEXR",
-    "Commander: loss:stop_breach"
+    "Commander: loss:stop_breach",
+    "Review loss_streak on IQST",
+    "T",
+    "w",
+    "Commander: Loss:stop_breach indicates a stop-loss trigger on IQST. The algorithm should be cautious around this."
   ],
   "last_thought": "```json\n{\n  \"trade_action\": \"sell\",\n  \"entry_price\": 1.3099,\n  \"exit_price\": 1.33,\n  \"shares\": 10.0,\n  \"pnl_usd\": -0.2,\n  \"pnl_pct\": -1.51,\n  \"result\": \"loss\",\n  \"entry_reason\": \"stop_breach\"\n}\n```",
   "market_belief": {},
   "trades_observed": 4,
-  "updated": "2026-06-25T14:38:28.730599"
+  "updated": "2026-06-25T14:38:34.814572"
 }

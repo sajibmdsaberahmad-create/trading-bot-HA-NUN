@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 31,
   "scans_performed": 27,
-  "improvements_applied": 161,
+  "improvements_applied": 163,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8806,6 +8806,111 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on NEXR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:38:32.679756",
+      "age": "4d 3h 35m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #162",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on IQST"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:38:34.815788",
+      "age": "4d 3h 35m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #163",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed with loss:stop_breach",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold of 0.58 is too high for this specific stop-loss trigger.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "o",
+          "p",
+          "r",
+          "e",
+          "v",
+          "e",
+          "n",
+          "t",
+          "r",
+          "e",
+          "c",
+          "u",
+          "r",
+          "r",
+          "e",
+          "n",
+          "c",
+          "e",
+          ",",
+          "t",
+          "h",
+          "e",
+          "t",
+          "r",
+          "a",
+          "d",
+          "e",
+          "s",
+          "h",
+          "o",
+          "u",
+          "l",
+          "d",
+          "n",
+          "o",
+          "t",
+          "e",
+          "x",
+          "i",
+          "t",
+          "w",
+          "i",
+          "t",
+          "h",
+          "o",
+          "u",
+          "t",
+          "c",
+          "o",
+          "n",
+          "s",
+          "i",
+          "d",
+          "e",
+          "r",
+          "i",
+          "n",
+          "g",
+          "o",
+          "t",
+          "h",
+          "e",
+          "r",
+          "e",
+          "x",
+          "i",
+          "t",
+          "s",
+          "."
         ]
       }
     }
