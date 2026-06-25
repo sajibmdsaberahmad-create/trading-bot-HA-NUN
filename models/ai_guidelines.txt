@@ -5041,3 +5041,84 @@ The trade closed due to a trailing profit, which indicates that the algorithm ha
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (This mutation indicates that the confidence threshold value is now set to 58%.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:05:51.926021+00:00
+A trade closed with a trailing profit of -$0.37 per share.
+The trader missed the opportunity to take advantage of a gap and close the trade at a higher price, resulting in a profit.
+• T
+• o
+•  
+• p
+• r
+• e
+• v
+• e
+• n
+• t
+•  
+• t
+• h
+• i
+• s
+•  
+• f
+• r
+• o
+• m
+•  
+• h
+• a
+• p
+• p
+• e
+• n
+• i
+• n
+• g
+•  
+• a
+• g
+• a
+• i
+• n
+• ,
+•  
+• t
+• h
+• e
+•  
+• f
+• o
+• l
+• l
+• o
+• w
+• i
+• n
+• g
+•  
+• c
+• h
+• a
+• n
+• g
+• e
+• s
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• b
+• e
+•  
+• m
+• a
+• d
+• e
+• :
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The trader failed to accurately assess the market's volatility and momentum at the time of closing, leading to a missed profit opportunity.)
+

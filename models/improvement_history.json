@@ -1814,5 +1814,58 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The value of CONFIDENCE_THRESHOLD was found to be too high, as it might lead to missed profit hunts.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:05:51.926568+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The trader failed to accurately assess the market's volatility and momentum at the time of closing, leading to a missed profit opportunity.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "A trade closed with a trailing profit of -$0.37 per share.",
+    "lessons": [
+      "T",
+      "h",
+      "e",
+      "k",
+      "e",
+      "y",
+      "l",
+      "e",
+      "s",
+      "s",
+      "o",
+      "n",
+      "s",
+      "l",
+      "e",
+      "a",
+      "r",
+      "n",
+      "e",
+      "d",
+      "f",
+      "r",
+      "o",
+      "m",
+      "t",
+      "h",
+      "i",
+      "s",
+      "e",
+      "v",
+      "e",
+      "n",
+      "t",
+      "a",
+      "r",
+      "e",
+      ":"
+    ]
   }
 ]

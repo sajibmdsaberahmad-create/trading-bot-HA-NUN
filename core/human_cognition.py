@@ -88,6 +88,13 @@ def enrich_prompt(
     except Exception:
         pass
 
+    directives_line = ""
+    try:
+        from core.trader_directives import directives_prompt_block
+        directives_line = directives_prompt_block(8)
+    except Exception:
+        pass
+
     profit_hunt_line = ""
     try:
         from core.profit_hunting import profit_hunt_prompt_block, is_profit_hunt_primary
@@ -107,6 +114,7 @@ def enrich_prompt(
     return (
         f"TASK: {task}\n"
         f"Mental state: mood={mood} | self-confidence={confidence:.0%}\n"
+        f"{directives_line}"
         f"{lesson_line}"
         f"{commander_line}"
         f"{profit_hunt_line}"

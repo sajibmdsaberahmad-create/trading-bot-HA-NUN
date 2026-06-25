@@ -339,10 +339,35 @@ class AICommander:
         max_pos = int(account.get("max_positions", effective_max_concurrent_positions(self.cfg)))
         held = account.get("held_tickers") or []
         deployed = float(account.get("deployed_usd", 0))
+        micro = (account or {}).get("micro_forecast") or {}
+        quality_line = ""
+        if micro:
+            try:
+                from core.entry_quality import assess_entry_quality
+                q = assess_entry_quality(
+                    self.cfg, micro,
+                    spike_ratio=spike_ratio,
+                    scan_score=scan_score,
+                    ppo_action=ppo_action,
+                    ppo_conf=ppo_conf,
+                    live_px=current_px,
+                )
+                quality_line = (
+                    f"Quality: profit_prob={q.get('profit_probability', 0):.0%} "
+                    f"fakeout_risk={q.get('fakeout_risk', 0):.0%} "
+                    f"setup={q.get('setup_type', '?')} | {q.get('reason', '')[:80]}\n"
+                    f"Micro: spike={micro.get('spike_likelihood', 0):.0%} "
+                    f"fade={micro.get('fade_risk', 0):.0%} "
+                    f"profit_run={micro.get('profit_run', 0):.0%} "
+                    f"pred_1bar=${micro.get('pred_1bar', current_px):.4f}\n"
+                )
+            except Exception:
+                pass
         return (
             f"DECIDE ENTRY for {ticker} @ ${current_px:.4f}\n"
             f"Volume spike {spike_ratio:.2f}x | Scan score {scan_score:.0f}\n"
             f"PPO entry signal: action={ppo_action} conf={ppo_conf:.2f} reason={ppo_reason[:80]}\n"
+            f"{quality_line}"
             f"Account: equity ${account.get('equity', 0):,.0f} | cash ${account.get('cash', 0):,.0f} | "
             f"NAV ${account.get('nav', 0):,.0f}\n"
             f"Open: {open_n}/{max_pos} | Held: {', '.join(held) if held else 'none'} | "
@@ -356,8 +381,12 @@ class AICommander:
                 if is_penny else ""
             )
             + "You are the STRATEGIST pilot — judgment only. Do NOT output stop, target, or share prices.\n"
+            "Estimate profit_probability and fakeout risk BEFORE enter=true. "
+            "Skip blind spike chases; fakeout fade plays OK when bounce odds are clear.\n"
             "Math engine sets brackets from ATR after you decide enter/skip.\n"
-            'JSON: {"enter":true/false,"confidence":0-1,"gut_feel":0-1,"intuition":"gut read",'
+            'JSON: {"enter":true/false,"confidence":0-1,"profit_probability":0-1,'
+            '"fakeout_risk":0-1,"setup_type":"momentum_breakout|fakeout_fade|skip",'
+            '"gut_feel":0-1,"intuition":"gut read",'
             '"reason":"why","journal":"first-person pilot log"}'
         )
 

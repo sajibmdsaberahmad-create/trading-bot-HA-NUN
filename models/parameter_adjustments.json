@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "This mutation indicates that the confidence threshold value is now set to 58%.",
+    "reason": "The trader failed to accurately assess the market's volatility and momentum at the time of closing, leading to a missed profit opportunity.",
     "ok": true,
     "msg": "applied"
   }

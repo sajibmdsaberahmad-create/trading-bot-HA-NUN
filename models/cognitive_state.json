@@ -1,13 +1,9 @@
 {
-  "mood": "determined",
-  "mood_message": "Keep up the momentum and analyze each trade with conviction.",
+  "mood": "disconnected",
+  "mood_message": "I'm not feeling particularly strong today.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "?",
-    "A",
-    "y",
-    "z",
     "W",
     "Y",
     "E",
@@ -103,10 +99,14 @@
     "Review trade_closed on QS",
     "optimizing for the most profitable trades",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The value of CONFIDENCE_THRESHOLD was found to be too high, as it might lead to missed profit hunts.'}",
-    "Commander: The trade closed due to a trailing profit, which indicates that the algorithm has not seen enough gains in the past few days. The trader is now tracking this information for future opportunities."
+    "Commander: The trade closed due to a trailing profit, which indicates that the algorithm has not seen enough gains in the past few days. The trader is now tracking this information for future opportunities.",
+    "T",
+    "d",
+    ":",
+    "Commander: The trader missed the opportunity to take advantage of a gap and close the trade at a higher price, resulting in a profit."
   ],
   "last_thought": "```json\n{\n  \"raw_prompt\": \"Write a pilot trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"RIOT\\\", \\\"entry\\\": 66.38, \\\"exit\\\": 66.38, \\\"entry_fill\\\": 66.38, \\\"exit_fill\\\": 66.38, \\\"quote_entry\\\": 66.38, \\\"quote_exit\\\": 27.3535, \\\"shares\\\": 1543.0, \\\"pnl_usd\\\": 0.0, \\\"pnl_pct\\\": 0.0, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"trailing_profit\\\", \\\"entry_slippage_pct\\\": 0.0, \\\"exit_slippage_pct\\\": 1.426746, \\\"limit_px\\\": null, \\\"entry_mode\\\": \\\"paper_market\\\", \\\"regime\\\": \\\"unknown\\\", \\\"hold_sec\\",
   "market_belief": {},
-  "trades_observed": 13,
-  "updated": "2026-06-25T19:05:33.172097"
+  "trades_observed": 14,
+  "updated": "2026-06-25T19:05:51.891575"
 }

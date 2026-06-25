@@ -52,6 +52,8 @@ LIVE_PARAM_BOUNDS: Dict[str, Tuple[Union[int, float], Union[int, float]]] = {
     "AI_MAX_CONCURRENT_POSITIONS": (1, 50),
     "AI_MAX_LOCKED_TARGETS": (3, 40),
     "CONFIDENCE_THRESHOLD": (0.35, 0.90),
+    "MIN_PROFIT_PROBABILITY": (0.30, 0.75),
+    "MIN_FAKEOUT_FADE_PROB": (0.40, 0.70),
     "VOLUME_SPIKE_MIN_RATIO": (1.1, 3.5),
     "LOCKED_SPIKE_MIN_RATIO": (1.05, 2.5),
     "SCALP_MIN_RR": (1.2, 4.0),

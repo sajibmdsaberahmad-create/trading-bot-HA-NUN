@@ -465,9 +465,18 @@ class BotConfig:
     DEFER_LOCK_AI_REVIEW: bool = os.getenv("DEFER_LOCK_AI_REVIEW", "true").lower() not in (
         "0", "false", "no",
     )
-    SCAN_BOOTSTRAP_ENTRY: bool = os.getenv("SCAN_BOOTSTRAP_ENTRY", "true").lower() not in (
+    ENTRY_QUALITY_GATE: bool = os.getenv("ENTRY_QUALITY_GATE", "true").lower() not in (
         "0", "false", "no",
     )
+    MIN_PROFIT_PROBABILITY: float = float(os.getenv("MIN_PROFIT_PROBABILITY", "0.42"))
+    MIN_FAKEOUT_FADE_PROB: float = float(os.getenv("MIN_FAKEOUT_FADE_PROB", "0.50"))
+    MAX_FAKEOUT_RISK_ENTER: float = float(os.getenv("MAX_FAKEOUT_RISK_ENTER", "0.62"))
+    ALLOW_FAKEOUT_ENTRIES: bool = os.getenv("ALLOW_FAKEOUT_ENTRIES", "true").lower() not in (
+        "0", "false", "no",
+    )
+    SPIKE_FAST_REQUIRES_QUALITY: bool = os.getenv(
+        "SPIKE_FAST_REQUIRES_QUALITY", "true",
+    ).lower() not in ("0", "false", "no")
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30
     FAST_SCAN_ENABLED: bool = True

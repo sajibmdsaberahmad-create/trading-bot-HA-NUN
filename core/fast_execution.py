@@ -85,10 +85,22 @@ def should_spike_fast_entry(
     min_score = float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15.0))
     min_conf = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55)) * 0.75
     if spike_ratio >= min_spike and scan_score >= min_score:
+        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
+            return _passes_entry_quality_gate(
+                cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+            )
         return True
     if spike_ratio >= min_spike * 1.1 and ppo_action == 1 and ppo_conf >= min_conf:
+        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
+            return _passes_entry_quality_gate(
+                cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+            )
         return True
     if spike_ratio >= 1.3:
+        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
+            return _passes_entry_quality_gate(
+                cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+            )
         return True
     return False
 
@@ -230,22 +242,57 @@ def should_micro_fast_entry(
     spike_ratio: float,
     scan_score: float,
     micro: Optional[dict] = None,
+    ppo_action: int = 1,
+    ppo_conf: float = 0.58,
 ) -> bool:
-    """Enter without Ollama wait — strong scanner score + micro momentum."""
+    """Enter without Ollama wait — strong scanner score + micro momentum + profit odds."""
     if not ai_fast_execution(cfg):
         return False
     micro = micro or {}
     sl = float(micro.get("spike_likelihood", 0))
     va = float(micro.get("vol_accel", 1.0))
+    raw = False
     if scan_score >= 75 and sl >= 0.40:
+        raw = True
+    elif scan_score >= 70 and sl >= 0.45 and va >= 0.95:
+        raw = True
+    elif scan_score >= 55 and sl >= 0.52 and (spike_ratio >= 1.05 or va >= 1.15):
+        raw = True
+    elif spike_ratio >= 1.15 and scan_score >= float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15.0)):
+        raw = True
+    if not raw:
+        return False
+    return _passes_entry_quality_gate(
+        cfg, micro, spike_ratio, scan_score, ppo_action, ppo_conf,
+    )
+
+
+def _passes_entry_quality_gate(
+    cfg: BotConfig,
+    micro: Optional[dict],
+    spike_ratio: float,
+    scan_score: float,
+    ppo_action: int,
+    ppo_conf: float,
+) -> bool:
+    if not getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True):
         return True
-    if scan_score >= 70 and sl >= 0.45 and va >= 0.95:
-        return True
-    if scan_score >= 55 and sl >= 0.52 and (spike_ratio >= 1.05 or va >= 1.15):
-        return True
-    if spike_ratio >= 1.15 and scan_score >= float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15.0)):
-        return True
-    return False
+    from core.entry_quality import assess_entry_quality
+    q = assess_entry_quality(
+        cfg, micro,
+        spike_ratio=spike_ratio,
+        scan_score=scan_score,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        live_px=float((micro or {}).get("pred_1bar", 0) or 0),
+    )
+    micro.update({
+        "profit_probability": q.get("profit_probability"),
+        "fakeout_risk": q.get("fakeout_risk"),
+        "setup_type": q.get("setup_type"),
+        "quality_reason": q.get("reason"),
+    })
+    return bool(q.get("enter_ok"))
 
 
 def micro_confirms_spike(
