@@ -102,7 +102,7 @@ def prioritize_locked_targets(
     if not targets:
         return []
     ranked = sorted(targets, key=lambda t: float(t.rank_score), reverse=True)
-    if not focus:
+    if ai_fast_execution(cfg) or not focus:
         return ranked
     focus_u = focus.upper()
     head = [t for t in ranked if t.ticker.upper() == focus_u]
@@ -116,12 +116,9 @@ def stream_ticker_list(
     focus: Optional[str] = None,
 ) -> List[str]:
     """Tickers that get live streams — top N only when fast execution on."""
-    ordered = prioritize_locked_targets(targets, cfg, focus)
+    ordered = prioritize_locked_targets(targets, cfg, focus if not ai_fast_execution(cfg) else None)
     n = stream_priority_count(cfg)
-    names = [t.ticker for t in ordered[:n]]
-    if focus and focus.upper() not in {x.upper() for x in names}:
-        names = [focus] + names[: max(0, n - 1)]
-    return names
+    return [t.ticker for t in ordered[:n]]
 
 
 def warm_ticker_list(
@@ -129,7 +126,7 @@ def warm_ticker_list(
     cfg: BotConfig,
     focus: Optional[str] = None,
 ) -> List[str]:
-    ordered = prioritize_locked_targets(targets, cfg, focus)
+    ordered = prioritize_locked_targets(targets, cfg, focus if not ai_fast_execution(cfg) else None)
     n = warm_priority_count(cfg)
     return [t.ticker for t in ordered[:n]]
 
@@ -174,9 +171,10 @@ def monitor_ticker_list(
     cfg: BotConfig,
     focus: Optional[str] = None,
 ) -> List[str]:
-    """Union of stream + warm priority — scanned every fast-monitor tick."""
-    stream = stream_ticker_list(targets, cfg, focus)
-    warm = warm_ticker_list(targets, cfg, focus)
+    """Union of stream + warm priority — all monitored simultaneously."""
+    f = None if ai_fast_execution(cfg) else focus
+    stream = stream_ticker_list(targets, cfg, f)
+    warm = warm_ticker_list(targets, cfg, f)
     seen: set[str] = set()
     out: List[str] = []
     for name in stream + warm:

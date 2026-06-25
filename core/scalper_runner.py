@@ -74,6 +74,7 @@ from core.fast_execution import (
     max_spike_attempts_per_cycle,
     monitor_ticker_list,
     is_priority_ticker,
+    focus_rotation_enabled,
 )
 from core.connector import IBConnector
 from core.data import DataManager
@@ -2193,6 +2194,13 @@ class ScalperRunner:
             f"stale release {getattr(self.cfg, 'LOCK_STALE_RELEASE_SEC', 600):.0f}s"
         )
         if ai_fast_execution(self.cfg):
+            priority = self._priority_tickers()
+            log.info(
+                f"⚡ AI FAST EXEC: simultaneous focus on {len(priority)} tickers "
+                f"[{','.join(priority[:12])}{'...' if len(priority) > 12 else ''}] | "
+                f"monitor {fast_monitor_interval(self.cfg):.2f}s | spike-fast ON"
+            )
+        elif ai_fast_execution(self.cfg):
             log.info(
                 f"⚡ AI FAST EXEC: warm top {warm_priority_count(self.cfg)} | "
                 f"stream top {stream_priority_count(self.cfg)} | "
@@ -2254,9 +2262,21 @@ class ScalperRunner:
         if self._bar_prefetch_queue:
             log.debug(f"Bar prefetch queued: {self._bar_prefetch_queue[:12]}")
 
+    def _priority_tickers(self) -> List[str]:
+        """All top-priority names monitored simultaneously (not a single rotating focus)."""
+        if not self._locked_targets:
+            return []
+        return monitor_ticker_list(self._locked_targets, self.cfg)
+
+    def _priority_ticker_set(self) -> set:
+        return {t.upper() for t in self._priority_tickers()}
+
     def _min_bars_for(self, ticker: str) -> int:
-        focus = self._focused_ticker() or (self.top_pick.ticker if self.top_pick else None)
-        return min_bars_for_ticker(self.cfg, ticker, focus)
+        return min_bars_for_ticker(
+            self.cfg,
+            ticker,
+            priority_names=self._priority_tickers() if self._locked_targets else None,
+        )
 
     def _prefetch_one_ticker_bars(self, ticker: str, quiet: bool = True) -> Optional[pd.DataFrame]:
         """Fetch short 1-min history for one ticker on the main IB thread."""

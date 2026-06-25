@@ -601,7 +601,7 @@ class BotConfig:
     MIN_LOCK_CANDIDATES: int = 2          # Need at least N quality names before locking
     LOCK_BAR_REFRESH_SEC: float = 180.0   # Refresh locked bars every 3 min (not 60s)
     LOCK_STALE_RELEASE_SEC: float = float(os.getenv("LOCK_STALE_RELEASE_SEC", "600"))
-    LOCK_FOCUS_ROTATE_SEC: float = float(os.getenv("LOCK_FOCUS_ROTATE_SEC", "60"))
+    LOCK_FOCUS_ROTATE_SEC: float = float(os.getenv("LOCK_FOCUS_ROTATE_SEC", "0"))
     LOCK_BAR_WARM_BUDGET_SEC: float = float(os.getenv("LOCK_BAR_WARM_BUDGET_SEC", "28"))
     ENTRY_PENDING_BLOCK_SEC: float = float(os.getenv("ENTRY_PENDING_BLOCK_SEC", "45"))
     WATCH_ALL_LOCKED_STREAMS: bool = os.getenv(
