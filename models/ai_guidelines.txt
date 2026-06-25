@@ -827,3 +827,142 @@ Council timeout — no aligned signal
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-25T12:53:41.787588+00:00
+Council timeout occurred, no aligned signal detected.
+The council timeout indicates that the algorithm is not aligning signals with the market. This is a common issue in trading systems when signals do not match the current market conditions.
+• W
+• a
+• t
+• c
+• h
+•  
+• f
+• o
+• r
+•  
+• s
+• i
+• g
+• n
+• s
+•  
+• t
+• h
+• a
+• t
+•  
+• t
+• h
+• e
+•  
+• s
+• i
+• g
+• n
+• a
+• l
+• s
+•  
+• a
+• r
+• e
+•  
+• n
+• o
+• t
+•  
+• a
+• l
+• i
+• g
+• n
+• e
+• d
+•  
+• w
+• i
+• t
+• h
+•  
+• t
+• h
+• e
+•  
+• c
+• u
+• r
+• r
+• e
+• n
+• t
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+•  
+• c
+• o
+• n
+• d
+• i
+• t
+• i
+• o
+• n
+• s
+• ,
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• a
+• c
+• c
+• o
+• r
+• d
+• i
+• n
+• g
+• l
+• y
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold to allow more signal alignment.)
+

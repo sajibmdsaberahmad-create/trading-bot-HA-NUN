@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 27,
   "scans_performed": 27,
-  "improvements_applied": 130,
+  "improvements_applied": 131,
   "reports_generated": 26,
   "event_log": [
     {
@@ -7660,6 +7660,87 @@
         ],
         "lessons": [
           "Review council_timeout on WYY"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:53:41.760562",
+      "age": "4d 1h 50m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #131",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred, no aligned signal detected.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increase the confidence threshold to allow more signal alignment.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "T",
+          "o",
+          "p",
+          "r",
+          "e",
+          "v",
+          "e",
+          "n",
+          "t",
+          "t",
+          "h",
+          "i",
+          "s",
+          "f",
+          "r",
+          "o",
+          "m",
+          "h",
+          "a",
+          "p",
+          "p",
+          "e",
+          "n",
+          "i",
+          "n",
+          "g",
+          "a",
+          "g",
+          "a",
+          "i",
+          "n",
+          ",",
+          "c",
+          "o",
+          "n",
+          "s",
+          "i",
+          "d",
+          "e",
+          "r",
+          "t",
+          "h",
+          "e",
+          "f",
+          "o",
+          "l",
+          "l",
+          "o",
+          "w",
+          "i",
+          "n",
+          "g",
+          "c",
+          "h",
+          "a",
+          "n",
+          "g",
+          "e",
+          "s",
+          ":"
         ]
       }
     }

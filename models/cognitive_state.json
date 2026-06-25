@@ -4,8 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: win:council_exit: Ollama exit 100% (PPO hold)",
-    "f",
     "x",
     "k",
     "Commander: Root cause: The scanner spike triggered by a timeout event.",
@@ -103,10 +101,12 @@
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithmic parameters have been reset to reduce risk.'}",
     "Commander: The council timeout indicates that there is a problem with the alignment of signals in the pipeline, which may prevent the algo from executing correctly.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been decreased, indicating potential systemic issues.'}",
-    "Commander: The algorithmic trade system is experiencing an alignment issue due to the council timeout."
+    "Commander: The algorithmic trade system is experiencing an alignment issue due to the council timeout.",
+    ",",
+    "Commander: The council timeout indicates that the algorithm is not aligning signals with the market. This is a common issue in trading systems when signals do not match the current market conditions."
   ],
-  "last_thought": "```json\n{\n    \"gut_feel\": 0.75,\n    \"intuition\": \"The live account state includes a mix of high and low values for various assets, indicating potential volatility and alignment issues.\",\n    \"mode\": \"HANOON\",\n    \"account_equity\": 1014737.95,\n    \"available_cash\": 1014737.95,\n    \"position_value\": 0.0,\n    \"nav\": 1000.0,\n    \"deployed_pct\": 0.0,\n    \"current_ticker\": \"NONE\",\n    \"position\": null,\n    \"win_rate\": 0.0,\n    \"trades_today\": 0,\n    \"top_pick\": null,\n    \"top_score\": 78.4,\n    \"next_b",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": \"The algorithmic trade system is experiencing an alignment issue due to the council timeout.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T12:51:26.590125"
+  "updated": "2026-06-25T12:53:41.759242"
 }
