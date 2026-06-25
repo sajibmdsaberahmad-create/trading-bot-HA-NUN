@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 30,
   "scans_performed": 27,
-  "improvements_applied": 151,
+  "improvements_applied": 153,
   "reports_generated": 26,
   "event_log": [
     {
@@ -8398,6 +8398,108 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #97",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T14:20:10.807416",
+      "age": "4d 3h 17m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #152",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Market data failure occurred with ticker FNMAI",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The value of 0.58 indicates that we should be cautious and take additional actions if the confidence threshold is too low.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "-",
+          "K",
+          "e",
+          "e",
+          "p",
+          "a",
+          "n",
+          "e",
+          "y",
+          "e",
+          "o",
+          "n",
+          "t",
+          "h",
+          "e",
+          "l",
+          "a",
+          "t",
+          "e",
+          "s",
+          "t",
+          "r",
+          "e",
+          "a",
+          "l",
+          "-",
+          "t",
+          "i",
+          "m",
+          "e",
+          "d",
+          "a",
+          "t",
+          "a",
+          "t",
+          "o",
+          "a",
+          "v",
+          "o",
+          "i",
+          "d",
+          "m",
+          "i",
+          "s",
+          "s",
+          "e",
+          "d",
+          "p",
+          "r",
+          "o",
+          "f",
+          "i",
+          "t",
+          "h",
+          "u",
+          "n",
+          "t",
+          "s",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T14:20:49.029027",
+      "age": "4d 3h 18m 0s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #153",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WAVE"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T14:17:06.695869",

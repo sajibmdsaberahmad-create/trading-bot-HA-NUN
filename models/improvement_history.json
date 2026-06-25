@@ -1599,5 +1599,97 @@
     "lessons": [
       "Review council_timeout on WAVE"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T14:20:10.838050+00:00",
+    "source": "runtime_market_data_failure",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The value of 0.58 indicates that we should be cautious and take additional actions if the confidence threshold is too low.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Market data failure occurred with ticker FNMAI",
+    "lessons": [
+      "-",
+      "K",
+      "e",
+      "e",
+      "p",
+      "a",
+      "n",
+      "e",
+      "y",
+      "e",
+      "o",
+      "n",
+      "t",
+      "h",
+      "e",
+      "l",
+      "a",
+      "t",
+      "e",
+      "s",
+      "t",
+      "r",
+      "e",
+      "a",
+      "l",
+      "-",
+      "t",
+      "i",
+      "m",
+      "e",
+      "d",
+      "a",
+      "t",
+      "a",
+      "t",
+      "o",
+      "a",
+      "v",
+      "o",
+      "i",
+      "d",
+      "m",
+      "i",
+      "s",
+      "s",
+      "e",
+      "d",
+      "p",
+      "r",
+      "o",
+      "f",
+      "i",
+      "t",
+      "h",
+      "u",
+      "n",
+      "t",
+      "s",
+      "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T14:20:49.042256+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WAVE"
+    ]
   }
 ]
