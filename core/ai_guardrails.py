@@ -378,12 +378,34 @@ def validate_config(cfg) -> Tuple[bool, List[str]]:
     """
     errors = []
     
+    paper_free = False
+    try:
+        from core.paper_mode import is_paper_free_learning, account_equity
+        paper_free = is_paper_free_learning(cfg)
+        equity = account_equity(cfg)
+    except Exception:
+        paper_free = bool(getattr(cfg, "PAPER_TRADING", False)) and bool(
+            getattr(cfg, "AI_PAPER_FREE_LEARNING", True)
+        )
+        equity = float(getattr(cfg, "PAPER_EQUITY_HINT", 1_000_000))
+
+    # Paper free-learning: allow equity-scaled risk ceiling (~25% of equity, min $100k cap)
+    if paper_free:
+        max_risk_usd_cap = max(100_000.0, equity * 0.30, float(getattr(cfg, "MAX_RISK_PER_TRADE_USD", 250_000)))
+    elif getattr(cfg, "PAPER_TRADING", False):
+        max_risk_usd_cap = 500_000.0
+    else:
+        max_risk_usd_cap = 100_000.0
+
     # Check 1: Risk per trade must be reasonable
     if cfg.RISK_PER_TRADE_PCT <= 0 or cfg.RISK_PER_TRADE_PCT > 0.5:
         errors.append(f"RISK_PER_TRADE_PCT ({cfg.RISK_PER_TRADE_PCT}) out of safe range (0, 0.5]")
     
-    if cfg.MAX_RISK_PER_TRADE_USD <= 0 or cfg.MAX_RISK_PER_TRADE_USD > 100_000:
-        errors.append(f"MAX_RISK_PER_TRADE_USD ({cfg.MAX_RISK_PER_TRADE_USD}) out of safe range (0, 100000]")
+    if cfg.MAX_RISK_PER_TRADE_USD <= 0 or cfg.MAX_RISK_PER_TRADE_USD > max_risk_usd_cap:
+        errors.append(
+            f"MAX_RISK_PER_TRADE_USD ({cfg.MAX_RISK_PER_TRADE_USD}) out of safe range "
+            f"(0, {max_risk_usd_cap:.0f}]"
+        )
     
     # Check 2: Daily/weekly loss limits
     if cfg.MAX_DAILY_LOSS_PCT <= 0 or cfg.MAX_DAILY_LOSS_PCT > 0.5:

@@ -87,9 +87,43 @@ class TelegramCommandListener:
                 "inbound commands will reject all chats until configured"
             )
         self._stop.clear()
+        self._ensure_polling_mode()
+        self._verify_bot_token()
         self._thread = threading.Thread(target=self._poll_loop, name="telegram-listener", daemon=True)
         self._thread.start()
-        log.info("Telegram listener: any account can verify with /verify SECRET — multi-commander mode")
+        secret = (getattr(self.cfg, "TELEGRAM_VERIFY_SECRET", "") or "").strip()
+        log.info(
+            "Telegram listener: active — message bot then /verify <secret> "
+            f"(secret {'configured' if secret else 'MISSING'})"
+        )
+
+    def _ensure_polling_mode(self) -> None:
+        """Remove webhook so getUpdates polling receives messages."""
+        try:
+            self._api("deleteWebhook", {"drop_pending_updates": False}, timeout=15)
+        except Exception as exc:
+            log.debug(f"Telegram deleteWebhook: {exc}")
+
+    def _verify_bot_token(self) -> None:
+        try:
+            resp = self._api("getMe", timeout=15)
+            if resp.get("ok"):
+                user = resp.get("result", {})
+                log.info(f"Telegram bot connected: @{user.get('username', '?')} (id {user.get('id', '?')})")
+            else:
+                log.warning(f"Telegram getMe failed: {resp}")
+        except Exception as exc:
+            log.warning(f"Telegram token check failed — inbound chat disabled: {exc}")
+
+    def send_instant(
+        self,
+        chat_id: int | str,
+        text: str,
+        *,
+        reply_to: Optional[int] = None,
+    ) -> None:
+        """Immediate reply — auth, errors, progress (no Ollama wait)."""
+        self.send(chat_id, text, reply_to=reply_to)
 
     def stop(self) -> None:
         self._stop.set()
