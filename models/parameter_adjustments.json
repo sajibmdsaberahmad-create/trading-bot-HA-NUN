@@ -1,8 +1,8 @@
 {
-  "ENTRY_LIMIT_BUFFER_PCT": {
-    "param": "ENTRY_LIMIT_BUFFER_PCT",
-    "value": "0.012",
-    "reason": "The entry limit buffer was set to 0.012, which may be too small.",
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "The confidence threshold was set too low, which may indicate poor alignment of signals.",
     "ok": true,
     "msg": "applied"
   }

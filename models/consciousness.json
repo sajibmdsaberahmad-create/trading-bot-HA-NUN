@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 33,
   "scans_performed": 27,
-  "improvements_applied": 184,
+  "improvements_applied": 185,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10148,6 +10148,28 @@
         ],
         "lessons": [
           "{'param': 'market_state', 'value': 'open', 'reason': 'Market state is open. This indicates the system may have experienced a market change that prevented it from executing trades.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:17:26.208109",
+      "age": "4d 4h 14m 37s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #185",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout - no aligned signal",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold was set too low, which may indicate poor alignment of signals.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "A no-aligned signal can be caused by poor alignment of signals or inaccurate execution"
         ]
       }
     }

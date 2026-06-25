@@ -161,3 +161,4 @@
 {"timestamp":"2026-06-25T15:13:59.566896+00:00","event":"trade_closed","ticker":"NEXR","reason":"loss:stop_breach","pnl_usd":-9.279600000000018,"pnl_pct":-2.352212937171161,"won":false,"exit_type":"stop_hit","hold_sec":177.82687211036682,"regime":"unknown","market_state":"open"}
 {"timestamp":"2026-06-25T15:13:59.568791+00:00","event":"loss_streak","ticker":"NEXR","reason":"stop_breach","pnl_usd":-9.279600000000018,"consecutive_losses":1,"market_state":"open"}
 {"timestamp":"2026-06-25T15:14:31.988327+00:00","event":"ib_failure","ticker":"TPTS","reason":"IB trading permission denied","spike_ratio":6.666666666,"market_state":"open"}
+{"timestamp":"2026-06-25T15:17:16.558955+00:00","event":"council_timeout","ticker":"MIMI","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 no aligned signal","spike_ratio":0.7128312260745298,"scan_score":91.6,"confidence":0.45126256719231606,"market_state":"open"}

@@ -3151,5 +3151,22 @@
     "lessons": [
       "{'param': 'market_state', 'value': 'open', 'reason': 'Market state is open. This indicates the system may have experienced a market change that prevented it from executing trades.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T15:17:26.230441+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold was set too low, which may indicate poor alignment of signals.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout - no aligned signal",
+    "lessons": [
+      "A no-aligned signal can be caused by poor alignment of signals or inaccurate execution"
+    ]
   }
 ]
