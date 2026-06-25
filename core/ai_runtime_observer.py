@@ -61,7 +61,6 @@ class AIRuntimeObserver:
             self._last_ts[key] = now
             self._stats["events"] += 1
 
-        ticker = str(context.get("ticker", "") or "")
         detail = str(context.get("reason", "") or context.get("pipeline", ""))[:80]
         log.info(f"👁 RUNTIME observe {event}" + (f" {ticker}" if ticker else "") + f": {detail}")
 
