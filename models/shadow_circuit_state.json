@@ -3,7 +3,26 @@
   "consecutive_losses": 1,
   "daily_start_equity": 876338.78,
   "daily_pnl_usd": -58131.45,
-  "shadow_open": {},
+  "shadow_open": {
+    "PLTR": {
+      "ticker": "PLTR",
+      "entry": 108.17,
+      "stop": 107.7373,
+      "target": 109.0354,
+      "shares": 385,
+      "opened_at": 1782412878.594433,
+      "regime": "unknown"
+    },
+    "LCID": {
+      "ticker": "LCID",
+      "entry": 5.105,
+      "stop": 5.0846,
+      "target": 5.1458,
+      "shares": 3172,
+      "opened_at": 1782412879.88474,
+      "regime": "unknown"
+    }
+  },
   "shadow_closed": [],
-  "updated_at": 1782412847.409451
+  "updated_at": 1782412879.884935
 }
