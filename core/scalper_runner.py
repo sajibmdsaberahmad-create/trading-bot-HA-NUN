@@ -1702,6 +1702,12 @@ class ScalperRunner:
             )
         self._refresh_account_balance()
         bootstrap_ai_session_limits(self)
+        if ai_full_capital_access(self.cfg):
+            log.info(
+                f"💰 FULL CAPITAL ACCESS: IB equity ${self.account_equity:,.0f} | "
+                f"deployable cash ${self._deployable_cash():,.0f} "
+                f"(no $1k cap — AI sizes from live account)"
+            )
         if not should_ai_define_limits(self.cfg):
             log.info(
                 f"Max per trade: {'$' + format(self.cfg.MAX_TRADE_SIZE_USD, ',.0f') if getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False) else 'AI-sized'} "

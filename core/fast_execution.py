@@ -143,8 +143,8 @@ def prefetch_per_loop(cfg: BotConfig) -> int:
 
 def warm_budget_sec(cfg: BotConfig) -> float:
     if ai_fast_execution(cfg):
-        return float(getattr(cfg, "LOCK_BAR_WARM_BUDGET_SEC", 28.0))
-    return float(getattr(cfg, "LOCK_BAR_WARM_BUDGET_SEC", 12.0))
+        return float(getattr(cfg, "LOCK_BAR_WARM_BUDGET_SEC", 5.0))
+    return float(getattr(cfg, "LOCK_BAR_WARM_BUDGET_SEC", 8.0))
 
 
 def fast_monitor_interval(cfg: BotConfig) -> float:

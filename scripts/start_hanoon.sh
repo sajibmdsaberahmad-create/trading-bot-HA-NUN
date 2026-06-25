@@ -77,7 +77,14 @@ export OLLAMA_HOST
 export OLLAMA_ENABLED="${OLLAMA_ENABLED:-true}"
 export FAST_SCANNER_LOCK="${FAST_SCANNER_LOCK:-true}"
 export SCAN_MTF_DURING_RTH="${SCAN_MTF_DURING_RTH:-false}"
-export SCAN_PREFETCH_LOCK_N="${SCAN_PREFETCH_LOCK_N:-30}"
+export SCAN_PREFETCH_LOCK_N="${SCAN_PREFETCH_LOCK_N:-8}"
+export LOCK_BAR_WARM_BUDGET_SEC="${LOCK_BAR_WARM_BUDGET_SEC:-5}"
+export DEFER_BAR_WARM_ON_LOCK="${DEFER_BAR_WARM_ON_LOCK:-true}"
+export DEFER_FEATURE_VALIDATION="${DEFER_FEATURE_VALIDATION:-true}"
+export AI_FULL_CAPITAL_ACCESS="${AI_FULL_CAPITAL_ACCESS:-true}"
+export AI_ACCOUNT_EVAL_ON_STARTUP="${AI_ACCOUNT_EVAL_ON_STARTUP:-false}"
+export ENTRY_OLLAMA_WAIT_SEC="${ENTRY_OLLAMA_WAIT_SEC:-2}"
+export AI_WARM_PRIORITY_COUNT="${AI_WARM_PRIORITY_COUNT:-4}"
 export LOCK_STALE_RELEASE_SEC="${LOCK_STALE_RELEASE_SEC:-600}"
 export LOCK_FOCUS_ROTATE_SEC="${LOCK_FOCUS_ROTATE_SEC:-0}"
 export AI_FAST_EXECUTION="${AI_FAST_EXECUTION:-true}"
@@ -253,18 +260,21 @@ if command -v nc >/dev/null 2>&1; then
 fi
 
 # ── 6. Pre-flight validation ────────────────────────────────────────────────
-echo "🚦 Feature + model validation..."
+echo "🚦 Quick pre-flight..."
 python3 -c "
 from core.config import BotConfig
-from core.feature_drift import validate_features_at_startup
-from core.features_enhanced import FeatureEngineerEnhanced
 import os
 cfg = BotConfig()
-fe = FeatureEngineerEnhanced()
-ok = validate_features_at_startup(lambda df, window_size=30: fe.compute(df))
 model = cfg.MODEL_PATH
 print(f'   Model: {model} ({\"found\" if os.path.exists(model) else \"MISSING\"})')
-print(f'   Features: {\"PASS\" if ok else \"WARN\"}')
+if os.getenv('SKIP_PREFLIGHT_FEATURE_VALIDATE', 'true').lower() not in ('0', 'false', 'no'):
+    print('   Features: deferred (DEFER_FEATURE_VALIDATION=true)')
+else:
+    from core.feature_drift import validate_features_at_startup
+    from core.features_enhanced import FeatureEngineerEnhanced
+    fe = FeatureEngineerEnhanced()
+    ok = validate_features_at_startup(lambda df, window_size=30: fe.compute(df))
+    print(f'   Features: {\"PASS\" if ok else \"WARN\"}')
 print(f'   Pilot mode: {getattr(cfg, \"PILOT_MODE_ENABLED\", True)}')
 print(f'   Live IB scanner: {getattr(cfg, \"USE_LIVE_IB_SCANNER\", True)} (no static fallback)')
 print(f'   Fast scanner lock: {getattr(cfg, \"FAST_SCANNER_LOCK\", True)} (bars prefetch after lock)')
@@ -272,10 +282,11 @@ print(f'   AI full control: {getattr(cfg, \"AI_FULL_CONTROL\", True)} | Ollama f
 print(f'   AI council all decisions: {getattr(cfg, \"AI_COUNCIL_ALL_DECISIONS\", True)}')
 from core.ai_session_limits import should_ai_define_limits, heuristic_session_limits, apply_session_limits, format_limits_log
 if should_ai_define_limits(cfg):
-    eq = float(getattr(cfg, \"INITIAL_CASH\", 1000))
+    eq = float(os.getenv('PAPER_EQUITY_HINT', '0') or 0) or float(getattr(cfg, 'INITIAL_CASH', 1000))
     lim = heuristic_session_limits(cfg, eq)
     apply_session_limits(cfg, lim)
     print(f'   {format_limits_log(cfg, eq)}')
+    print(f'   Full capital access: {getattr(cfg, \"AI_FULL_CAPITAL_ACCESS\", True)} | defer bar warm: {getattr(cfg, \"DEFER_BAR_WARM_ON_LOCK\", True)}')
 else:
     print(f'   AI unlimited: {getattr(cfg, \"AI_UNLIMITED_MODE\", False)} | Watch pool: {getattr(cfg, \"MAX_LOCKED_TARGETS\", 5)} | Max positions: {getattr(cfg, \"MAX_CONCURRENT_POSITIONS\", 5)}')
     print(f'   Fixed deploy cap: {getattr(cfg, \"USE_FIXED_DEPLOY_CAP\", False)} | Fixed risk cap: {getattr(cfg, \"USE_FIXED_RISK_CAP\", False)} | Account halt: {getattr(cfg, \"USE_ACCOUNT_LOSS_HALT\", False)}')

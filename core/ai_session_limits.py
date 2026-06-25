@@ -126,9 +126,10 @@ def format_limits_log(cfg: BotConfig, equity: float = 0.0) -> str:
     eq = float(lim.get("equity_basis") or equity or getattr(cfg, "INITIAL_CASH", 1000))
     risk = get_ai_risk_usd(cfg, eq) or cfg.risk_amount_usd(eq)
     deploy_slot = round(eq * float(lim.get("deploy_pct_per_slot", 0.9)), 0)
+    cap_note = "full IB cash/slot" if lim.get("deploy_pct_per_slot", 0) >= 0.9 else f"{lim.get('deploy_pct_per_slot', 0):.0%} of ${eq:,.0f}"
     return (
         f"🧠 AI SESSION LIMITS ({lim.get('source', 'ai')}): "
-        f"deploy≈${deploy_slot:,.0f}/slot ({lim.get('deploy_pct_per_slot', 0):.0%} of ${eq:,.0f}) | "
+        f"deploy≈${deploy_slot:,.0f}/slot ({cap_note}) | "
         f"risk=${risk:,.2f}/trade ({lim.get('risk_per_trade_pct', 0):.1%}) | "
         f"positions={lim.get('max_positions')} | watch={lim.get('watch_pool')} | "
         f"cash_reserve={lim.get('min_cash_reserve_pct', 0):.0%} | "
