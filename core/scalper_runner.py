@@ -2196,6 +2196,7 @@ class ScalperRunner:
             log.info(
                 f"⚡ AI FAST EXEC: warm top {warm_priority_count(self.cfg)} | "
                 f"stream top {stream_priority_count(self.cfg)} | "
+                f"tick ALL priority | monitor {fast_monitor_interval(self.cfg):.2f}s | "
                 f"spike-fast entry ON"
             )
         self._generative_review_locks(penny_results)
@@ -2784,9 +2785,13 @@ class ScalperRunner:
             spike_fast_ok = should_spike_fast_entry(
                 self.cfg, 1.0, float(target.rank_score),
             )
-            if not _only_uptrend(work_df, live_px, min_bars=min_bars):
-                if not (ai_fast_execution(self.cfg) and ticker.upper() in priority_names):
-                    continue
+            uptrend_ok = _only_uptrend(work_df, live_px, min_bars=min_bars)
+            if not uptrend_ok and not (
+                ai_fast_execution(self.cfg)
+                and ticker.upper() in priority_names
+                and spike_fast_ok
+            ):
+                continue
 
             is_spike, spike_ratio = self._detect_volume_spike(work_df, min_period=min(20, max(6, min_bars)))
             min_spike = float(getattr(self.cfg, "LOCKED_SPIKE_MIN_RATIO", 1.15))
@@ -4871,7 +4876,10 @@ class ScalperRunner:
             }
 
             if not is_ai_unlimited(self.cfg):
-                if not _only_uptrend(df_fast, current_px):
+                uptrend_ok = _only_uptrend(df_fast, current_px, min_bars=min_bars)
+                if not uptrend_ok and not should_spike_fast_entry(
+                    self.cfg, spike_ratio, scan_score,
+                ):
                     log.debug(f"Entry skip {ticker}: not uptrend")
                     return 'waiting'
 
