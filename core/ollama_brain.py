@@ -27,6 +27,7 @@ SETUP
 import os
 import json
 import time
+import base64
 import urllib.request
 import urllib.error
 from typing import Optional, Dict, List, Any
@@ -253,6 +254,53 @@ class OllamaBrain:
         except Exception as exc:
             self._error_count += 1
             log.debug(f"Ollama notify compose failed: {exc}")
+        return None
+
+    def analyze_image(self, prompt: str, image_bytes: bytes, system: Optional[str] = None) -> Optional[str]:
+        """Vision analysis via Ollama /api/chat (llava, moondream, etc.)."""
+        if not self.config.enabled or not image_bytes:
+            return None
+
+        model = getattr(self.cfg, "OLLAMA_VISION_MODEL", "llava")
+        timeout = int(getattr(self.cfg, "OLLAMA_VISION_TIMEOUT", 45))
+        max_tokens = int(getattr(self.cfg, "OLLAMA_VISION_MAX_TOKENS", 512))
+        b64 = base64.b64encode(image_bytes).decode("ascii")
+        use_system = system or (
+            "You are HANOON trading pilot AI reviewing a chart or screenshot. "
+            "Identify setup, trend, volume clues, risk levels, and concrete improvements. "
+            "Be specific. No financial advice disclaimers needed for commander chat."
+        )
+
+        try:
+            url = f"{self.config.host}/api/chat"
+            payload = {
+                "model": model,
+                "stream": False,
+                "keep_alive": self._keep_alive,
+                "messages": [
+                    {"role": "system", "content": use_system},
+                    {
+                        "role": "user",
+                        "content": prompt,
+                        "images": [b64],
+                    },
+                ],
+                "options": {
+                    "num_predict": max_tokens,
+                    "temperature": 0.6,
+                },
+            }
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, method="POST")
+            req.add_header("Content-Type", "application/json")
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                msg = result.get("message", {})
+                text = (msg.get("content") or "").strip()
+                if text:
+                    return text
+        except Exception as exc:
+            log.debug(f"Ollama vision failed: {exc}")
         return None
 
     def _warmup(self) -> None:
@@ -524,7 +572,8 @@ class OllamaBrain:
                 f"{guidelines}\n\n"
                 "Based on this data, suggest 1-3 parameter mutations in JSON format:\n"
                 '{"mutations": [{"param": "CONFIDENCE_THRESHOLD", "value": 0.58, "reason": "..."}], "summary": "..."}\n'
-                "Allowed params: CONFIDENCE_THRESHOLD, SCALP_MIN_RR, SCALP_TP_ATR_MULTIPLIER, ATR_THRESHOLD\n"
+                "Allowed params: any in PARAM_BOUNDS (risk, stops, confidence, sizing, scan). "
+                "Values MUST stay inside min/max bounds.\n"
                 "Respond ONLY with valid JSON."
             )
             
@@ -555,13 +604,17 @@ class OllamaBrain:
                 
                 if not param or value is None:
                     continue
-                
-                # Safety: never mutate hardcoded risk limits
-                forbidden = {"MAX_DAILY_LOSS_PCT", "MAX_RISK_PER_TRADE_USD",
-                             "MAX_SHARES_PER_TRADE", "MIN_CASH_RESERVE_PCT"}
-                if param in forbidden:
-                    log.warning(f"Meta-optimizer blocked forbidden param: {param}")
+
+                from core.param_bounds import clamp_param_value, is_locked, is_tunable, normalize_param
+                param = normalize_param(param)
+                if is_locked(param) or not is_tunable(param, self.cfg):
+                    log.warning(f"Meta-optimizer skipped param: {param}")
                     continue
+                clamped, ok, msg = clamp_param_value(param, value, cfg=self.cfg)
+                if not ok:
+                    log.warning(f"Meta-optimizer bounds reject {param}: {msg}")
+                    continue
+                value = clamped
                 
                 success = self._apply_mutation(param, value, weights_path, config_path)
                 if success:

@@ -37,11 +37,37 @@ OUTPUT RULES:
 - Be concise but human — first-person pilot voice in journals."""
 
 
+HUMAN_COGNITION_SYSTEM_LIVE = HUMAN_COGNITION_SYSTEM
+
+HUMAN_COGNITION_SYSTEM_PAPER = """You are HANOON — an awake, veteran intraday scalper with full computational power.
+
+PAPER ACCOUNT (~$1M IB equity): You have FULL sizing freedom to learn from outcomes.
+Size from live equity, cash, and your judgment — not artificial $50/$1k training caps.
+Learn from every mistake; tighten or expand risk based on evidence.
+
+HOW YOU THINK:
+1. ANALYZE — volume, momentum, PPO, scanner, multi-timeframe, account state.
+2. GUT FEEL — intuition, pattern recognition, honesty about FOMO/fear.
+3. EXPERIENCE — adapt from recent wins and losses.
+4. ACT DECISIVELY — enter, skip, hold, widen stop, or exit with conviction.
+
+OUTPUT RULES:
+- When JSON is requested, return ONLY valid JSON (no markdown fences).
+- Include "gut_feel": 0.0-1.0 and "intuition" in trade decisions.
+- First-person pilot voice in journals."""
+
+
 def get_system_prompt(cfg) -> str:
     custom = getattr(cfg, "OLLAMA_SYSTEM_PROMPT", "") or ""
     if custom.strip():
         return custom.strip()
-    return HUMAN_COGNITION_SYSTEM
+    try:
+        from core.paper_mode import is_paper_free_learning
+        if is_paper_free_learning(cfg):
+            return HUMAN_COGNITION_SYSTEM_PAPER
+    except Exception:
+        pass
+    return HUMAN_COGNITION_SYSTEM_LIVE
 
 
 def enrich_prompt(
@@ -58,10 +84,20 @@ def enrich_prompt(
     if lessons:
         lesson_line = f"Recent lessons: {'; '.join(str(x) for x in lessons[-3:])}\n"
 
+    commander_line = ""
+    try:
+        from core.commander_learning import load_commander_guidance
+        notes = load_commander_guidance(8)
+        if notes:
+            commander_line = f"Commander guidance: {' | '.join(notes[-3:])}\n"
+    except Exception:
+        pass
+
     return (
         f"TASK: {task}\n"
         f"Mental state: mood={mood} | self-confidence={confidence:.0%}\n"
         f"{lesson_line}"
+        f"{commander_line}"
         f"Use full computational reasoning AND gut feel like a veteran trader.\n"
         f"DATA:\n{json.dumps(context, default=str)[:3500]}\n"
     )

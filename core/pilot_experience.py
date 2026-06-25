@@ -34,7 +34,7 @@ from dataclasses import dataclass, field, asdict
 import numpy as np
 
 from core.config import BotConfig
-from core.git_sync import push_learning_checkpoint
+from core.git_sync import push_learning_checkpoint_async
 
 logger = logging.getLogger("PILOT")
 
@@ -351,6 +351,6 @@ class PilotExperienceSystem:
 def pilot_experience_to_git(pilot: PilotExperienceSystem):
     """Push pilot experience to GitHub."""
     status = pilot.get_veteran_status()
-    push_learning_checkpoint(
+    push_learning_checkpoint_async(
         f"pilot {status['level']} {status['total_xp']}XP WR={status.get('win_rate', 0):.0%}"
     )

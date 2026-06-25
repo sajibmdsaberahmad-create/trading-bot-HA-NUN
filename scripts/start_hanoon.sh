@@ -4,10 +4,11 @@
 #
 # Orchestrates:
 #   1. venv + dependencies
-#   2. Ollama (serve + model pull) for generative AI
-#   3. Pre-flight checks (features, model, IB port)
-#   4. Stale process cleanup
-#   5. HANOON scalper (live IB scanner, pilot mode, cognitive autopilot)
+#   2. Encrypted .env vault (cross-device secrets)
+#   3. Git sync daemon (auto-push on any file change — any IDE)
+#   4. Ollama (serve + model pull) for generative AI
+#   5. Pre-flight checks (features, model, IB port)
+#   6. HANOON scalper (live IB scanner, pilot mode, cognitive autopilot)
 #
 # Usage:
 #   ./scripts/start_hanoon.sh
@@ -59,6 +60,11 @@ export OLLAMA_DECISION_MIN_FREE_RAM_MB="${OLLAMA_DECISION_MIN_FREE_RAM_MB:-768}"
 export OLLAMA_MIN_FREE_RAM_MB="${OLLAMA_MIN_FREE_RAM_MB:-1024}"
 export OLLAMA_NUM_CTX="${OLLAMA_NUM_CTX:-2048}"
 export OLLAMA_MAX_TOKENS="${OLLAMA_MAX_TOKENS:-256}"
+export OLLAMA_VISION_MODEL="${OLLAMA_VISION_MODEL:-llava}"
+export TRADING_BOT_TELEGRAM_LISTEN="${TRADING_BOT_TELEGRAM_LISTEN:-true}"
+export TRADING_BOT_TELEGRAM_VERIFY_SECRET="${TRADING_BOT_TELEGRAM_VERIFY_SECRET:-hall of fame}"
+export AI_PAPER_FREE_LEARNING="${AI_PAPER_FREE_LEARNING:-true}"
+export PAPER_EQUITY_HINT="${PAPER_EQUITY_HINT:-1000000}"
 LOG_DIR="${LOG_DIR:-$ROOT/logs}"
 MAIN_LOG="$LOG_DIR/HANOON.log"
 OLLAMA_LOG="$LOG_DIR/ollama.log"
@@ -69,6 +75,27 @@ mkdir -p "$LOG_DIR" "$ROOT/models/daily_reports" "$ROOT/runtime"
 export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/mpl}"
 export OLLAMA_HOST
 export OLLAMA_ENABLED="${OLLAMA_ENABLED:-true}"
+export FAST_SCANNER_LOCK="${FAST_SCANNER_LOCK:-true}"
+export SCAN_MTF_DURING_RTH="${SCAN_MTF_DURING_RTH:-false}"
+export SCAN_PREFETCH_LOCK_N="${SCAN_PREFETCH_LOCK_N:-30}"
+export LOCK_STALE_RELEASE_SEC="${LOCK_STALE_RELEASE_SEC:-600}"
+export LOCK_FOCUS_ROTATE_SEC="${LOCK_FOCUS_ROTATE_SEC:-60}"
+export USE_FIXED_DEPLOY_CAP="${USE_FIXED_DEPLOY_CAP:-false}"
+export USE_FIXED_RISK_CAP="${USE_FIXED_RISK_CAP:-false}"
+export USE_ACCOUNT_LOSS_HALT="${USE_ACCOUNT_LOSS_HALT:-false}"
+export USE_MULTI_POSITION="${USE_MULTI_POSITION:-true}"
+export AI_UNLIMITED_MODE="${AI_UNLIMITED_MODE:-true}"
+export AI_COUNCIL_ALL_DECISIONS="${AI_COUNCIL_ALL_DECISIONS:-true}"
+export AI_MAX_LOCKED_TARGETS="${AI_MAX_LOCKED_TARGETS:-30}"
+export AI_MAX_CONCURRENT_POSITIONS="${AI_MAX_CONCURRENT_POSITIONS:-50}"
+export AI_SCAN_UNIVERSE_MAX="${AI_SCAN_UNIVERSE_MAX:-80}"
+export MAX_CONCURRENT_POSITIONS="${MAX_CONCURRENT_POSITIONS:-50}"
+export PARALLEL_ENTRY_EXIT="${PARALLEL_ENTRY_EXIT:-true}"
+export HOT_SWAP_ON_EXIT="${HOT_SWAP_ON_EXIT:-true}"
+export FOCUS_PIN_TOP_PICK="${FOCUS_PIN_TOP_PICK:-false}"
+export HYBRID_DISTILL_AUTO_FAST_PATH="${HYBRID_DISTILL_AUTO_FAST_PATH:-false}"
+export LIVE_AI_PIPELINE_ENABLED="${LIVE_AI_PIPELINE_ENABLED:-true}"
+export OLLAMA_DECISION_BYPASS_RATE_LIMIT="${OLLAMA_DECISION_BYPASS_RATE_LIMIT:-true}"
 export OLLAMA_MAX_LOADED_MODELS="${OLLAMA_MAX_LOADED_MODELS:-1}"
 export OLLAMA_NUM_PARALLEL="${OLLAMA_NUM_PARALLEL:-1}"
 export PYTHONUNBUFFERED=1
@@ -91,15 +118,23 @@ if [ -f "requirements.txt" ]; then
   pip install -q -r requirements.txt 2>/dev/null || pip install -r requirements.txt
 fi
 
-# ── 2. Environment file ─────────────────────────────────────────────────────
+# ── 2. Environment + encrypted vault (cross-device) ─────────────────────
+python3 -c "
+from core.env_secrets import bootstrap_env
+ok, msg = bootstrap_env('$ROOT')
+print('✅' if ok else '⚠️ ', msg)
+" 2>/dev/null || true
+
 if [ -f ".env" ]; then
   set -a
   # shellcheck disable=SC1091
   source .env
   set +a
   echo "✅ Loaded .env"
+elif [ -f "secrets/hanoon.env.enc" ]; then
+  echo "⚠️  Run: pip install cryptography && restart (vault needs decrypt)"
 elif [ -f ".env.example" ]; then
-  echo "⚠️  No .env — copy .env.example to .env and add your keys"
+  echo "⚠️  No .env — git pull or copy .env.example"
 fi
 
 # ── 2b. GitHub CLI (releases + artifact sync) ───────────────────────────────
@@ -164,6 +199,12 @@ start_ollama() {
       echo "📥 Pulling $OLLAMA_MODEL in background (bot starts now)..."
       nohup ollama pull "$OLLAMA_MODEL" >>"$OLLAMA_LOG" 2>&1 &
     fi
+    if ollama list 2>/dev/null | grep -qE "^${OLLAMA_VISION_MODEL%%:*}([[:space:]:]|$)"; then
+      echo "✅ Ollama vision model ready: $OLLAMA_VISION_MODEL"
+    else
+      echo "📥 Pulling $OLLAMA_VISION_MODEL for Telegram chart review (background)..."
+      nohup ollama pull "$OLLAMA_VISION_MODEL" >>"$OLLAMA_LOG" 2>&1 &
+    fi
     export OLLAMA_ENABLED=true
   else
     echo "⚠️  Ollama unreachable — continuing without generative AI"
@@ -204,11 +245,33 @@ print(f'   Model: {model} ({\"found\" if os.path.exists(model) else \"MISSING\"}
 print(f'   Features: {\"PASS\" if ok else \"WARN\"}')
 print(f'   Pilot mode: {getattr(cfg, \"PILOT_MODE_ENABLED\", True)}')
 print(f'   Live IB scanner: {getattr(cfg, \"USE_LIVE_IB_SCANNER\", True)} (no static fallback)')
+print(f'   Fast scanner lock: {getattr(cfg, \"FAST_SCANNER_LOCK\", True)} (bars prefetch after lock)')
+print(f'   AI full control: {getattr(cfg, \"AI_FULL_CONTROL\", True)} | Ollama fast-path bypass: {getattr(cfg, \"HYBRID_DISTILL_AUTO_FAST_PATH\", True)}')
+print(f'   AI council all decisions: {getattr(cfg, \"AI_COUNCIL_ALL_DECISIONS\", True)}')
+print(f'   AI unlimited: {getattr(cfg, \"AI_UNLIMITED_MODE\", False)} | Watch pool: {getattr(cfg, \"AI_MAX_LOCKED_TARGETS\", 30)} | Max positions: {getattr(cfg, \"AI_MAX_CONCURRENT_POSITIONS\", 50)}')
+print(f'   Multi-position: {getattr(cfg, \"MAX_CONCURRENT_POSITIONS\", 5)} | Fixed deploy cap: {getattr(cfg, \"USE_FIXED_DEPLOY_CAP\", False)} | Fixed risk cap: {getattr(cfg, \"USE_FIXED_RISK_CAP\", False)} | Account halt: {getattr(cfg, \"USE_ACCOUNT_LOSS_HALT\", False)}')
 print(f'   Ollama: {getattr(cfg, \"OLLAMA_ENABLED\", False)}')
+from core.ollama_vision import is_vision_model_present, vision_model_name
+vm = vision_model_name(cfg)
+print(f'   Vision ({vm}): {\"ready\" if is_vision_model_present(cfg) else \"pulling/missing\"}')
+print(f'   Telegram listen: {getattr(cfg, \"TELEGRAM_LISTEN_ENABLED\", True)} | verify secret: {\"set\" if getattr(cfg, \"TELEGRAM_VERIFY_SECRET\", \"\") else \"MISSING\"}')
 from core.git_sync import ensure_github_cli
 gh_ok = ensure_github_cli(cfg)
 print(f'   GitHub CLI: {\"ready\" if gh_ok else \"WARN\"}')
 " 2>&1 || echo "   Pre-flight warnings (non-fatal)"
+
+# ── 6b. Standalone git sync (auto-push any IDE save — separate process) ───
+if [ "${START_GIT_SYNC_WITH_HANOON:-true}" = "true" ]; then
+  echo ""
+  echo "📤 Starting git sync daemon (auto-pushes all file changes)..."
+  "$ROOT/scripts/start_git_sync.sh" || echo "   Git sync start skipped (see logs/git_sync.log)"
+fi
+
+echo ""
+echo "📋 IDE / editor: save any file → git sync pushes within ~${GIT_AUTO_PUSH_INTERVAL_SEC:-12}s"
+echo "   (works in Cursor, VS Code, PyCharm — no plugin needed)"
+echo "   Secrets: .env stays local; encrypted vault syncs via secrets/hanoon.env.enc"
+echo ""
 
 # ── 7. Launch HANOON scalper ────────────────────────────────────────────────
 echo ""

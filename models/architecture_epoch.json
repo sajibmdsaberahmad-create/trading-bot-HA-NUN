@@ -1,0 +1,8 @@
+{
+  "version": "hybrid_atr_v1",
+  "epoch_ts": 1782329694.7026792,
+  "epoch_iso": "2026-06-24T19:34:54.702680+00:00",
+  "note": "Mood/metrics use only trades after this timestamp. Legacy pre-hybrid pipeline scars archived.",
+  "previous_version": null,
+  "updated_at": "2026-06-24T19:34:54.702697+00:00"
+}

@@ -408,8 +408,8 @@ def maybe_run_hybrid_distillation(cfg: BotConfig) -> Dict[str, Any]:
     result = train_teacher_proxy(cfg)
     if result.get("ok"):
         try:
-            from core.git_sync import push_learning_checkpoint
-            push_learning_checkpoint("hybrid_distill_proxy")
+            from core.git_sync import push_learning_checkpoint_async
+            push_learning_checkpoint_async("hybrid_distill_proxy")
         except Exception:
             pass
     return result

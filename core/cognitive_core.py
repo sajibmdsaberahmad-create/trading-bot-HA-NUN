@@ -47,6 +47,8 @@ import numpy as np
 import pandas as pd
 
 from core.config import BotConfig
+from core.paper_mode import account_equity, is_paper_free_learning
+from core.param_bounds import effective_param_bounds, clamp_param_value, normalize_param
 from core.notify import log, Notifier
 from core.ai_guardrails import GuardrailController
 from core.cognitive_guardrails import CognitiveGuardrails, HardLimits
@@ -54,7 +56,7 @@ from core.device_optimizer import DeviceOptimizer
 from core.self_evaluator import SelfEvaluator
 from core.ollama_brain import OllamaBrain
 from core.human_cognition import get_system_prompt, enrich_prompt, apply_gut_override
-from core.git_sync import init as git_sync_init, push_learning_checkpoint
+from core.git_sync import init as git_sync_init, push_learning_checkpoint_async
 
 logger = logging.getLogger("COGNITIVE_CORE")
 
@@ -65,6 +67,7 @@ COGNITIVE_STATE_PATH = Path("models/cognitive_state.json")
 class CognitiveState:
     """The AI's current mental state."""
     mood: str = "awake"
+    mood_message: str = ""
     confidence: float = 0.5
     mode: str = "autonomous"  # autonomous, assisted, conservative
     last_thought: str = ""
@@ -118,20 +121,8 @@ class CognitiveCore:
         # Initialize git sync with ollama for AI commit messages
         git_sync_init(cfg, ollama_brain=self.ollama)
 
-        # Configuration that AI CAN modify (within limits)
-        self._mutable_params = {
-            "STOP_ATR_MULTIPLIER": (0.3, 5.0),
-            "TAKE_PROFIT_ATR_MULTIPLIER": (0.5, 10.0),
-            "SCALP_MIN_RR": (1.0, 5.0),
-            "CONFIDENCE_THRESHOLD": (0.40, 0.95),
-            "PPO_ENT_COEF": (0.0001, 0.1),
-            "PPO_LR": (1e-5, 0.01),
-            "SCALP_TP_ATR_MULTIPLIER": (0.5, 8.0),
-            "SCALP_TRAILING_ATR_MULTIPLIER": (0.2, 3.0),
-            "SCALP_PROFIT_GIVEBACK_PCT": (0.05, 0.80),
-            "VOLUME_SPIKE_MIN_RATIO": (1.1, 5.0),
-            "SCAN_INTERVAL_SECONDS": (5, 120),
-        }
+        # Configuration that AI CAN modify (within learning bounds)
+        self._mutable_params = dict(effective_param_bounds(cfg))
 
         # Knowledge base
         self._market_patterns = {}
@@ -155,6 +146,7 @@ class CognitiveCore:
         try:
             data = json.loads(COGNITIVE_STATE_PATH.read_text())
             self.state.mood = data.get("mood", self.state.mood)
+            self.state.mood_message = data.get("mood_message", self.state.mood_message)
             self.state.confidence = float(data.get("confidence", self.state.confidence))
             self.state.mode = data.get("mode", self.state.mode)
             self.state.learned_lessons = list(data.get("learned_lessons", []))[-100:]
@@ -173,6 +165,7 @@ class CognitiveCore:
             COGNITIVE_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
             payload = {
                 "mood": self.state.mood,
+                "mood_message": getattr(self.state, "mood_message", ""),
                 "confidence": self.state.confidence,
                 "mode": self.state.mode,
                 "learned_lessons": self.state.learned_lessons[-100:],
@@ -186,7 +179,7 @@ class CognitiveCore:
             if push_git and now - self._last_persist_ts > 60:
                 self._last_persist_ts = now
                 try:
-                    push_learning_checkpoint("cognitive_state")
+                    push_learning_checkpoint_async("cognitive_state")
                 except Exception:
                     pass
         except Exception as exc:
@@ -301,7 +294,12 @@ class CognitiveCore:
         return sizing
 
     def _get_recent_win_rate(self, n: int = 20) -> float:
-        recent = list(self._trade_outcomes)[-n:]
+        from core.architecture_epoch import epoch_active, is_post_epoch_trade, load_epoch
+        outcomes = list(self._trade_outcomes)
+        if epoch_active(self.evaluator.cfg):
+            ep = load_epoch()
+            outcomes = [t for t in outcomes if is_post_epoch_trade(t, ep)]
+        recent = outcomes[-n:]
         if not recent:
             return 0.5
         wins = sum(1 for t in recent if t.get("pnl_usd", 0) > 0)
@@ -391,27 +389,33 @@ class CognitiveCore:
         return gaps
 
     def propose_param_adjustment(self, param: str, new_value: Any, reason: str) -> Tuple[bool, str]:
-        """AI proposes a parameter change — guardrails enforce limits."""
-        ok, msg = self.cognitive_guardrails.can_mutate_param(param)
+        """AI proposes a parameter change — guardrails enforce learning bounds."""
+        param = normalize_param(param)
+        ok, msg = self.cognitive_guardrails.can_mutate_param(param, new_value)
         if not ok:
             return False, f"Guardrail: {msg}"
+
+        current = getattr(self.cfg, param, None) if hasattr(self.cfg, param) else None
+        clamped, ok, msg = clamp_param_value(param, new_value, current=current, cfg=self.cfg)
+        if not ok:
+            return False, msg
 
         if param in self._mutable_params:
             min_v, max_v = self._mutable_params[param]
             try:
-                v = float(new_value)
-                if not (min_v <= v <= max_v):
-                    return False, f"Value {v} outside safe range [{min_v}, {max_v}]"
+                v = float(clamped)
+                if not (float(min_v) <= v <= float(max_v)):
+                    return False, f"Value {v} outside learning range [{min_v}, {max_v}]"
             except (ValueError, TypeError):
                 pass
 
         self._audit_decision("param_proposal", {
             "param": param,
-            "value": str(new_value),
+            "value": str(clamped),
             "reason": reason,
-            "approved": ok,
+            "approved": True,
         })
-        return ok, "Approved by guardrails" if ok else msg
+        return True, "Approved within learning bounds"
 
     # ── Meta-Cognition ────────────────────────────────────────────────────
 
@@ -495,24 +499,46 @@ class CognitiveCore:
         self._persist_state(push_git=True)
 
     def _update_mood(self, trade: Dict):
-        pnl = trade.get("pnl_usd", 0)
-        wr = self._get_recent_win_rate()
-        recent_losses = [1 for t in list(self._trade_outcomes)[-5:] if t.get("pnl_usd", 0) < 0]
+        recent_pnls = [float(t.get("pnl_usd", 0) or 0) for t in list(self._trade_outcomes)[-20:]]
+        streak_w = streak_l = 0
+        for p in reversed(recent_pnls):
+            if p > 0:
+                if streak_l:
+                    break
+                streak_w += 1
+            elif p < 0:
+                if streak_w:
+                    break
+                streak_l += 1
+            else:
+                break
 
-        if wr >= 0.7 and len(recent_losses) <= 1:
-            self.state.mood = "confident"
+        think_fn = None
+        if self.ollama and getattr(self.ollama, "config", None) and self.ollama.config.enabled:
+            think_fn = self.ollama._call_ollama
+
+        from core.generative_mood import assess_mood
+        mood, message = assess_mood(
+            self.cfg,
+            recent_pnls=recent_pnls,
+            consecutive_wins=streak_w,
+            consecutive_losses=streak_l,
+            total_pnl=sum(recent_pnls),
+            trades_observed=len(self._trade_outcomes),
+            think_fn=think_fn,
+            extra={"last_trade": trade.get("ticker")},
+            cache_key="cognitive_core",
+        )
+        self.state.mood = mood
+        self.state.mood_message = message
+
+        wr = self._get_recent_win_rate()
+        if wr >= 0.7:
             self.state.confidence = min(0.95, self.state.confidence + 0.02)
-        elif wr >= 0.8:
-            self.state.mood = "euphoric"
-            self.state.confidence = min(0.98, self.state.confidence + 0.01)
         elif wr < 0.35:
-            self.state.mood = "anxious"
             self.state.confidence = max(0.35, self.state.confidence - 0.03)
         elif wr < 0.45:
-            self.state.mood = "cautious"
             self.state.confidence = max(0.40, self.state.confidence - 0.01)
-        else:
-            self.state.mood = "stable"
 
     def _extract_lessons(self, trade: Dict):
         pnl = trade.get("pnl_usd", 0)

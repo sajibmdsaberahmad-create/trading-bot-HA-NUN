@@ -153,13 +153,18 @@ class DataManager:
 
     # ── Live tick stream ─────────────────────────────────────────────────────
 
-    def start_tick_stream(self):
+    def start_tick_stream(self, realtime_only: bool = False):
         """
-        Subscribe to tick-by-tick last-trade prints. This is the fastest
-        granular data IB Gateway offers — every trade print, as it happens.
-        Falls back to 5-second real-time bars automatically if the
-        subscription is rejected (common on lower-tier data plans).
+        Subscribe to live market data for a locked watch target.
+        realtime_only=True uses 5-second bars (lighter — run one per locked ticker).
+        Default tries tick-by-tick first, then falls back to 5-second bars.
         """
+        if realtime_only:
+            try:
+                self._start_realtime_bars_fallback()
+            except Exception as exc:
+                log.warning(f"Real-time bar stream failed: {exc}")
+            return
         try:
             if self.cfg.USE_TICK_STREAM:
                 try:

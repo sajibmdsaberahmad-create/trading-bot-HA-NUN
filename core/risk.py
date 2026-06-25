@@ -66,6 +66,7 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.notify import log
+from core.pilot_mode import effective_max_concurrent_positions
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -470,7 +471,11 @@ class RiskManager:
         # Only trigger when the AI+regime logic flags a degrading setup.
         # The AI does not choose size; it only asks for an earlier exit.
         early_exit = False
-        if getattr(self.cfg, "EARLY_LOSS_EXIT_ENABLED", False) and getattr(self, "_early_loss_threshold_pct", None) is not None:
+        if (
+            getattr(self.cfg, "USE_FIXED_RISK_CAP", False)
+            and getattr(self.cfg, "EARLY_LOSS_EXIT_ENABLED", False)
+            and getattr(self, "_early_loss_threshold_pct", None) is not None
+        ):
             loss_per_share = price - plan.entry_price
             unrealised_loss_usd = loss_per_share * plan.shares
             if unrealised_loss_usd < 0:
@@ -539,7 +544,7 @@ class RiskManager:
         faster than once per decision bar.
         """
         daily_dd = (self.start_of_day_equity - equity) / (self.start_of_day_equity + 1e-9)
-        if daily_dd > self.cfg.MAX_DAILY_LOSS_PCT:
+        if getattr(self.cfg, "USE_ACCOUNT_LOSS_HALT", False) and daily_dd > self.cfg.MAX_DAILY_LOSS_PCT:
             reason = f"Daily drawdown {daily_dd:.1%} exceeds limit {self.cfg.MAX_DAILY_LOSS_PCT:.1%}"
             if not self._halted:
                 log.warning(f"RISK HALT: {reason}")
@@ -550,7 +555,7 @@ class RiskManager:
             return 2 if shares > 0 else 0
 
         weekly_dd = (self.start_of_week_equity - equity) / (self.start_of_week_equity + 1e-9)
-        if weekly_dd > self.cfg.MAX_WEEKLY_LOSS_PCT:
+        if getattr(self.cfg, "USE_ACCOUNT_LOSS_HALT", False) and weekly_dd > self.cfg.MAX_WEEKLY_LOSS_PCT:
             reason = f"Weekly drawdown {weekly_dd:.1%} exceeds limit {self.cfg.MAX_WEEKLY_LOSS_PCT:.1%}"
             if not self._halted:
                 log.warning(f"RISK HALT: {reason}")
@@ -569,6 +574,8 @@ class RiskManager:
                 log.debug("RISK: Cash below reserve — blocking BUY -> HOLD")
                 return 0
             if shares > 0:
-                return 0  # already in a position; MAX_CONCURRENT_POSITIONS=1
+                max_conc = effective_max_concurrent_positions(self.cfg)
+                if max_conc <= 1:
+                    return 0  # single-position mode
 
         return action

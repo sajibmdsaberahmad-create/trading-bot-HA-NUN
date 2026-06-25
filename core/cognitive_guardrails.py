@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-core/cognitive_guardrails.py — Hard limits that even the most powerful AI cannot override.
+core/cognitive_guardrails.py — Hard limits + bounded learning for AI self-tuning.
 
-Guardrails are ENFORCED at the code level, not prompted. The AI can suggest,
-reason, and decide within these bounds, but physical limits are non-negotiable.
+Runtime physical caps (daily loss USD, max positions) are non-negotiable.
+Parameter mutation is allowed within core.param_bounds learning ranges.
+Secrets and credentials remain locked.
 """
 
 import os
@@ -24,6 +25,15 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.notify import log
+from core.param_bounds import (
+    ABSOLUTE_LOCK_PARAMS,
+    clamp_param_value,
+    is_locked,
+    is_tunable,
+    normalize_param,
+    validate_mutation,
+)
+from core.paper_mode import account_equity, is_paper_free_learning
 
 logger = logging.getLogger("COGNITIVE_GUARDRAILS")
 
@@ -54,18 +64,7 @@ class HardLimits:
         "core/device_optimizer.py",
         "core/cognitive_autopilot.py",
     ])
-    FORBIDDEN_PARAMS: List[str] = field(default_factory=lambda: [
-        "MAX_DAILY_LOSS_PCT",
-        "MAX_RISK_PER_TRADE_USD",
-        "MAX_SHARES_PER_TRADE",
-        "MIN_CASH_RESERVE_PCT",
-        "PAPER_TRADING",
-        "TELEGRAM_BOT_TOKEN",
-        "TELEGRAM_CHAT_ID",
-        "GITHUB_TOKEN",
-        "HARD_STOP_USD",
-        "MAX_CONCURRENT_POSITIONS",
-    ])
+    FORBIDDEN_PARAMS: List[str] = field(default_factory=lambda: list(ABSOLUTE_LOCK_PARAMS))
 
 
 class EnforcedLimits:
@@ -149,10 +148,17 @@ class EnforcedLimits:
                 return False, f"Access denied: {forbidden} is protected"
         return True, ""
 
-    def enforce_param_change(self, param: str) -> Tuple[bool, str]:
-        """Prevent AI from modifying forbidden parameters."""
-        if param in HardLimits.FORBIDDEN_PARAMS:
-            return False, f"Parameter locked: {param} cannot be modified by AI"
+    def enforce_param_change(self, param: str, value: Any = None, cfg: Optional[BotConfig] = None) -> Tuple[bool, str]:
+        """Prevent AI from modifying locked params; validate learning bounds when value given."""
+        p = normalize_param(param)
+        if is_locked(p):
+            return False, f"Parameter locked: {p} cannot be modified by AI"
+        if value is not None:
+            if not is_tunable(p, cfg):
+                return False, f"Parameter not in learning bounds: {p}"
+            ok, msg = validate_mutation(p, value, cfg=cfg)
+            if not ok:
+                return False, msg
         return True, ""
 
     @property
@@ -209,36 +215,51 @@ class CognitiveGuardrails:
         self._last_health_check = time.time()
         self._health_status = "healthy"
 
+    def _runtime_trade_limits(self) -> Dict[str, float]:
+        if is_paper_free_learning(self.cfg):
+            eq = max(account_equity(self.cfg), 10_000.0)
+            return {
+                "max_trade_usd": eq * 0.95,
+                "max_risk_usd": eq * 0.25,
+                "max_positions": float(getattr(self.cfg, "AI_MAX_CONCURRENT_POSITIONS", 200)),
+                "max_daily_loss_usd": eq * 0.50,
+                "max_position_pct": 0.98,
+            }
+        return {
+            "max_trade_usd": HardLimits.MAX_TRADE_SIZE_USD,
+            "max_risk_usd": HardLimits.MAX_RISK_PER_TRADE_USD,
+            "max_positions": float(HardLimits.MAX_POSITIONS),
+            "max_daily_loss_usd": HardLimits.MAX_DAILY_LOSS_USD,
+            "max_position_pct": HardLimits.MAX_POSITION_PCT,
+        }
+
     def check_trade(self, action: str, ticker: str, qty: float, price: float,
                     risk_usd: float, current_positions: int) -> Tuple[bool, str]:
         """Comprehensive pre-trade validation."""
         if not self._active:
             return False, "Guardrails suspended"
 
-        # Position count
-        if current_positions >= HardLimits.MAX_POSITIONS and action in ("BUY", "LONG"):
-            return False, f"Max positions ({HardLimits.MAX_POSITIONS}) reached"
+        lim = self._runtime_trade_limits()
 
-        # Daily loss
-        if self.limits.daily_loss_usd >= HardLimits.MAX_DAILY_LOSS_USD:
+        if current_positions >= lim["max_positions"] and action in ("BUY", "LONG"):
+            return False, f"Max positions ({int(lim['max_positions'])}) reached"
+
+        if self.limits.daily_loss_usd >= lim["max_daily_loss_usd"]:
             return False, f"Daily loss limit hit: ${self.limits.daily_loss_usd:,.0f}"
 
-        # Trade size
         trade_value = abs(qty * price)
-        if trade_value > HardLimits.MAX_TRADE_SIZE_USD:
-            return False, f"Trade size ${trade_value:,.0f} exceeds ${HardLimits.MAX_TRADE_SIZE_USD:,.0f}"
+        if trade_value > lim["max_trade_usd"]:
+            return False, f"Trade size ${trade_value:,.0f} exceeds ${lim['max_trade_usd']:,.0f}"
 
-        # Risk per trade
-        if risk_usd > HardLimits.MAX_RISK_PER_TRADE_USD:
-            return False, f"Risk ${risk_usd:,.0f} exceeds ${HardLimits.MAX_RISK_PER_TRADE_USD:,.0f}"
+        if risk_usd > lim["max_risk_usd"]:
+            return False, f"Risk ${risk_usd:,.0f} exceeds ${lim['max_risk_usd']:,.0f}"
 
-        # Cash reserve
         if hasattr(self.cfg, '_latest_account_balance'):
             account = self.cfg._latest_account_balance
             if account > 0:
                 trade_pct = trade_value / account
-                if trade_pct > HardLimits.MAX_POSITION_PCT:
-                    return False, f"Position {trade_pct:.0%} exceeds {HardLimits.MAX_POSITION_PCT:.0%}"
+                if trade_pct > lim["max_position_pct"]:
+                    return False, f"Position {trade_pct:.0%} exceeds {lim['max_position_pct']:.0%}"
 
         # Track
         ok, msg = self.limits.record_trade()
@@ -267,15 +288,15 @@ class CognitiveGuardrails:
         self._audit("code_modify", filepath)
         return True, ""
 
-    def can_mutate_param(self, param: str) -> Tuple[bool, str]:
-        ok, msg = self.limits.enforce_param_change(param)
+    def can_mutate_param(self, param: str, value: Any = None) -> Tuple[bool, str]:
+        ok, msg = self.limits.enforce_param_change(param, value, cfg=self.cfg)
         if not ok:
             self._violation_count += 1
             return False, msg
         ok, msg = self.limits.record_param_mutation()
         if not ok:
             return False, msg
-        self._audit("param_mutate", param)
+        self._audit("param_mutate", f"{param}={value}")
         return True, ""
 
     def health_check(self) -> Dict:

@@ -8,6 +8,7 @@ scipy>=1.10.0
 scikit-learn>=1.2.0
 tqdm>=4.64.0
 python-dotenv>=1.0.0
+cryptography>=41.0.0      # Encrypted .env vault (cross-device, no plaintext in git)
 
 # Enhanced AI dependencies
 matplotlib>=3.5.0         # For visualization of regime analysis

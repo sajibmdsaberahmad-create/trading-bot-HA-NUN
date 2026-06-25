@@ -67,6 +67,23 @@ def parse_ib_regulatory_cap(error_string: str) -> Optional[float]:
     return None
 
 
+def parse_ib_order_block(error: Optional[Dict[str, Any]]) -> Optional[str]:
+    """Return permanent block reason when IB will not allow new entries."""
+    if not error:
+        return None
+    code = int(error.get("code") or 0)
+    msg = (error.get("message") or "").lower()
+    if code != 201:
+        return None
+    if "closing-only" in msg or "closing only" in msg:
+        return "IB closing-only — cannot open new positions"
+    if "no trading permission" in msg or "ineligible" in msg or "customer ineligible" in msg:
+        return "IB trading permission denied"
+    if "not available for trading" in msg:
+        return "IB symbol not available for trading"
+    return "IB order rejected (201)"
+
+
 @dataclass
 class BracketHandle:
     """References to the live IB orders for an open position, so we can modify/cancel them."""

@@ -542,5 +542,614 @@
     "new_records": 17,
     "ppo_trained": true,
     "steps": 4096
+  },
+  {
+    "timestamp": "2026-06-24T19:25:32.908359",
+    "mode": "incremental",
+    "new_records": 306,
+    "ppo_trained": true,
+    "steps": 4096
+  },
+  {
+    "timestamp": "2026-06-24T19:54:15.789499",
+    "mode": "incremental",
+    "new_records": 95,
+    "ppo_trained": true,
+    "steps": 4096
+  },
+  {
+    "timestamp": "2026-06-24T20:01:10.868724",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 2.9012878204793617,
+      "volume": 21.759658653595213,
+      "institutional": 29.012878204793616,
+      "vwap_slope": 7.253219551198404,
+      "atr_bonus": 7.253219551198404,
+      "mean_reversion": 7.253219551198404,
+      "trend_filter": 14.506439102396808,
+      "price_rising": 11.605151281917447,
+      "rsi_filter": 4.351931730719044,
+      "volatility_gate": 5.8025756409587235,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:00:28.624172",
+        "buffer_total": 1526,
+        "buffer_win_rate": 0.362,
+        "sources": {
+          "backtest": 609,
+          "market_context": 2,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 55,
+          "scan_complete": 1,
+          "ai_council": 310,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:01:10.832525\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:05:47.723846",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 2.2934888554327975,
+      "volume": 17.201166415745977,
+      "institutional": 22.934888554327973,
+      "vwap_slope": 5.733722138581993,
+      "atr_bonus": 5.733722138581993,
+      "mean_reversion": 5.733722138581993,
+      "trend_filter": 11.467444277163986,
+      "price_rising": 9.17395542173119,
+      "rsi_filter": 3.4402332831491966,
+      "volatility_gate": 4.586977710865595,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:05:30.096797",
+        "buffer_total": 1580,
+        "buffer_win_rate": 0.367,
+        "sources": {
+          "backtest": 638,
+          "market_context": 3,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 75,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:05:47.720423\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:10:47.839465",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 1.8218179641134553,
+      "volume": 13.663634730850912,
+      "institutional": 18.21817964113455,
+      "vwap_slope": 4.554544910283638,
+      "atr_bonus": 4.554544910283638,
+      "mean_reversion": 4.554544910283638,
+      "trend_filter": 9.109089820567275,
+      "price_rising": 7.287271856453821,
+      "rsi_filter": 2.7327269461701835,
+      "volatility_gate": 3.6436359282269106,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:10:30.161199",
+        "buffer_total": 1630,
+        "buffer_win_rate": 0.373,
+        "sources": {
+          "backtest": 667,
+          "market_context": 4,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 95,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:10:47.834283\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:16:09.191677",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 1.4542988514728208,
+      "volume": 10.907241386046154,
+      "institutional": 14.542988514728208,
+      "vwap_slope": 3.635747128682052,
+      "atr_bonus": 3.635747128682052,
+      "mean_reversion": 3.635747128682052,
+      "trend_filter": 7.271494257364104,
+      "price_rising": 5.817195405891283,
+      "rsi_filter": 2.1814482772092316,
+      "volatility_gate": 2.9085977029456416,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:15:30.654429",
+        "buffer_total": 1680,
+        "buffer_win_rate": 0.379,
+        "sources": {
+          "backtest": 696,
+          "market_context": 5,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 115,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:16:09.182184\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:20:46.917103",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 1.166308733281908,
+      "volume": 8.74731549961431,
+      "institutional": 11.66308733281908,
+      "vwap_slope": 2.91577183320477,
+      "atr_bonus": 2.91577183320477,
+      "mean_reversion": 2.91577183320477,
+      "trend_filter": 5.83154366640954,
+      "price_rising": 4.665234933127632,
+      "rsi_filter": 1.7494630999228622,
+      "volatility_gate": 2.332617466563816,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:20:30.162511",
+        "buffer_total": 1730,
+        "buffer_win_rate": 0.384,
+        "sources": {
+          "backtest": 725,
+          "market_context": 6,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 135,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:20:46.913803\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:25:47.141828",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.9394350952907334,
+      "volume": 7.0457632146805,
+      "institutional": 9.394350952907333,
+      "vwap_slope": 2.348587738226833,
+      "atr_bonus": 2.348587738226833,
+      "mean_reversion": 2.348587738226833,
+      "trend_filter": 4.697175476453666,
+      "price_rising": 3.7577403811629337,
+      "rsi_filter": 1.4091526429361003,
+      "volatility_gate": 1.8788701905814669,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:25:30.477968",
+        "buffer_total": 1780,
+        "buffer_win_rate": 0.389,
+        "sources": {
+          "backtest": 754,
+          "market_context": 7,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 155,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:25:47.139601\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:30:47.528101",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.7598111779702448,
+      "volume": 5.698583834776835,
+      "institutional": 7.598111779702446,
+      "vwap_slope": 1.8995279449256115,
+      "atr_bonus": 1.8995279449256115,
+      "mean_reversion": 1.8995279449256115,
+      "trend_filter": 3.799055889851223,
+      "price_rising": 3.039244711880979,
+      "rsi_filter": 1.1397167669553674,
+      "volatility_gate": 1.5196223559404896,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:30:30.742271",
+        "buffer_total": 1830,
+        "buffer_win_rate": 0.393,
+        "sources": {
+          "backtest": 783,
+          "market_context": 8,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 175,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:30:47.525046\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:35:47.480014",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.6169236570595467,
+      "volume": 4.626927427946599,
+      "institutional": 6.169236570595465,
+      "vwap_slope": 1.5423091426488662,
+      "atr_bonus": 1.5423091426488662,
+      "mean_reversion": 1.5423091426488662,
+      "trend_filter": 3.0846182852977324,
+      "price_rising": 2.4676946282381866,
+      "rsi_filter": 0.9253854855893202,
+      "volatility_gate": 1.2338473141190933,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:35:30.834127",
+        "buffer_total": 1880,
+        "buffer_win_rate": 0.398,
+        "sources": {
+          "backtest": 812,
+          "market_context": 9,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 195,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:35:47.477572\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval"
+  },
+  {
+    "timestamp": "2026-06-24T20:40:49.455157",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5027512997398232,
+      "volume": 3.770634748048674,
+      "institutional": 5.027512997398231,
+      "vwap_slope": 1.2568782493495578,
+      "atr_bonus": 1.2568782493495578,
+      "mean_reversion": 1.2568782493495578,
+      "trend_filter": 2.5137564986991157,
+      "price_rising": 2.011005198959293,
+      "rsi_filter": 0.754126949609735,
+      "volatility_gate": 1.0055025994796465,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:40:30.954495",
+        "buffer_total": 1930,
+        "buffer_win_rate": 0.402,
+        "sources": {
+          "backtest": 841,
+          "market_context": 10,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 215,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:40:49.449877\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T20:45:48.747584",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 3.0835330086203947,
+      "institutional": 4.1113773448271935,
+      "vwap_slope": 1.0278443362067984,
+      "atr_bonus": 1.0278443362067984,
+      "mean_reversion": 1.0278443362067984,
+      "trend_filter": 2.0556886724135968,
+      "price_rising": 1.6445509379308774,
+      "rsi_filter": 0.6167066017240791,
+      "volatility_gate": 0.8222754689654387,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:45:31.099258",
+        "buffer_total": 1980,
+        "buffer_win_rate": 0.406,
+        "sources": {
+          "backtest": 870,
+          "market_context": 11,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 235,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:45:48.741470\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T20:50:48.738592",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 2.529984364925941,
+      "institutional": 3.373312486567921,
+      "vwap_slope": 0.8433281216419802,
+      "atr_bonus": 0.8433281216419802,
+      "mean_reversion": 0.8433281216419802,
+      "trend_filter": 1.6866562432839605,
+      "price_rising": 1.3493249946271686,
+      "rsi_filter": 0.5059968729851883,
+      "volatility_gate": 0.6746624973135843,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:50:31.055758",
+        "buffer_total": 2030,
+        "buffer_win_rate": 0.41,
+        "sources": {
+          "backtest": 899,
+          "market_context": 12,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 255,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:50:48.732608\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T20:55:48.776259",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 2.0823354186612786,
+      "institutional": 2.7764472248817045,
+      "vwap_slope": 0.6941118062204261,
+      "atr_bonus": 0.6941118062204261,
+      "mean_reversion": 0.6941118062204261,
+      "trend_filter": 1.3882236124408522,
+      "price_rising": 1.110578889952682,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.555289444976341,
+      "_meta": {
+        "train_timestamp": "2026-06-24T20:55:31.138098",
+        "buffer_total": 2080,
+        "buffer_win_rate": 0.413,
+        "sources": {
+          "backtest": 928,
+          "market_context": 13,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 275,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T20:55:48.771170\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T21:00:48.943198",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 1.7190197853342444,
+      "institutional": 2.292026380445659,
+      "vwap_slope": 0.5730065951114147,
+      "atr_bonus": 0.5730065951114147,
+      "mean_reversion": 0.5730065951114147,
+      "trend_filter": 1.1460131902228294,
+      "price_rising": 0.9168105521782638,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.5,
+      "_meta": {
+        "train_timestamp": "2026-06-24T21:00:31.355184",
+        "buffer_total": 2130,
+        "buffer_win_rate": 0.417,
+        "sources": {
+          "backtest": 957,
+          "market_context": 14,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 295,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T21:00:48.939155\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T21:05:48.935921",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 1.4231374566202417,
+      "institutional": 1.897516608826989,
+      "vwap_slope": 0.5,
+      "atr_bonus": 0.5,
+      "mean_reversion": 0.5,
+      "trend_filter": 0.9487583044134945,
+      "price_rising": 0.7590066435307957,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.5,
+      "_meta": {
+        "train_timestamp": "2026-06-24T21:05:31.333896",
+        "buffer_total": 2180,
+        "buffer_win_rate": 0.42,
+        "sources": {
+          "backtest": 986,
+          "market_context": 15,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 315,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T21:05:48.933642\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T21:10:49.072531",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 1.181384675446508,
+      "institutional": 1.5751795672620108,
+      "vwap_slope": 0.5,
+      "atr_bonus": 0.5,
+      "mean_reversion": 0.5,
+      "trend_filter": 0.7875897836310054,
+      "price_rising": 0.6300718269048043,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.5,
+      "_meta": {
+        "train_timestamp": "2026-06-24T21:10:31.493643",
+        "buffer_total": 2230,
+        "buffer_win_rate": 0.423,
+        "sources": {
+          "backtest": 1015,
+          "market_context": 16,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 335,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T21:10:49.071147\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T21:15:49.272055",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 0.983243181785119,
+      "institutional": 1.3109909090468255,
+      "vwap_slope": 0.5,
+      "atr_bonus": 0.5,
+      "mean_reversion": 0.5,
+      "trend_filter": 0.6554954545234127,
+      "price_rising": 0.5243963636187302,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.5,
+      "_meta": {
+        "train_timestamp": "2026-06-24T21:15:31.713506",
+        "buffer_total": 2280,
+        "buffer_win_rate": 0.426,
+        "sources": {
+          "backtest": 1044,
+          "market_context": 17,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 355,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T21:15:49.271503\n\u2022 Win rate stable: maintain current risk parameters"
+  },
+  {
+    "timestamp": "2026-06-24T21:20:49.223381",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 0.8203625857345236,
+      "institutional": 1.0938167809793649,
+      "vwap_slope": 0.5,
+      "atr_bonus": 0.5,
+      "mean_reversion": 0.5,
+      "trend_filter": 0.5469083904896824,
+      "price_rising": 0.5,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.5,
+      "_meta": {
+        "train_timestamp": "2026-06-24T21:20:31.939089",
+        "buffer_total": 2330,
+        "buffer_win_rate": 0.429,
+        "sources": {
+          "backtest": 1073,
+          "market_context": 18,
+          "scan_pick": 58,
+          "ai_scan": 320,
+          "live_entry": 147,
+          "consciousness": 15,
+          "live_trade": 375,
+          "scan_complete": 1,
+          "ai_council": 314,
+          "fill_slippage_abort": 9
+        }
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-24T21:20:49.219092\n\u2022 Win rate stable: maintain current risk parameters"
   }
 ]

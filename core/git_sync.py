@@ -31,10 +31,11 @@ import time
 import hashlib
 import json
 import shutil
+import threading
 from typing import List, Optional, Set, Dict, Any
 from pathlib import Path
 from datetime import datetime
-from threading import Lock
+from threading import Lock, Timer
 
 from core.config import BotConfig
 from core.notify import log
@@ -58,6 +59,24 @@ _ollama_brain: Optional[Any] = None  # Optional LLM for AI-generated commit mess
 _gh_cli_cached: Optional[bool] = None
 _gh_missing_logged: bool = False
 _gh_auth_verified: bool = False
+_git_init_done: bool = False
+_learning_restore_done: bool = False
+_checkpoint_lock = Lock()
+_checkpoint_pending: Set[str] = set()
+_last_checkpoint_ts: float = 0.0
+_CHECKPOINT_MIN_INTERVAL_SEC: float = 45.0
+
+# Auto-push watcher (standalone daemon only)
+_standalone_mode: bool = False
+_watcher_stop = threading.Event()
+_watcher_thread: Optional[threading.Thread] = None
+_last_dirty_fingerprint: str = ""
+_flush_timer: Optional[Timer] = None
+
+_NEVER_PUSH_FILES: Set[str] = {
+    ".env", ".env.local", ".env.production", ".env.backup",
+    "credentials.json", "secrets.json",
+}
 
 
 def _resolve_github_token(cfg: Optional[BotConfig] = None) -> str:
@@ -214,6 +233,18 @@ CODE_TRACKED: Set[str] = {
     "core/market_hours.py",
     "core/account_evaluator.py",
     "core/risk.py",
+    "core/telegram_auth.py",
+    "core/telegram_listener.py",
+    "core/telegram_broadcast.py",
+    "core/ai_telegram.py",
+    "core/position_intel.py",
+    "core/system_status.py",
+    "core/commander_learning.py",
+    "core/daily_activity_report.py",
+    "core/generative_mood.py",
+    "core/ollama_vision.py",
+    "core/param_bounds.py",
+    "core/paper_mode.py",
     "core/hmrs.py",
     "core/features_enhanced.py",
     "core/transformer_model.py",
@@ -229,6 +260,10 @@ CODE_TRACKED: Set[str] = {
     "models/feature_manifest.json",
     "models/model_manifest.json",
     "scripts/start_hanoon.sh",
+    "scripts/start_git_sync.sh",
+    "scripts/git_auto_push.py",
+    "secrets/hanoon.env.enc",
+    "secrets/sync.key",
     "scripts/stop_hanoon.sh",
 }
 
@@ -317,14 +352,17 @@ def init(cfg: BotConfig, ollama_brain: Optional[Any] = None):
     Initialize from BotConfig env vars.
     
     Sets up HANOON repo (primary), Grandmaster (models), and Logs repos.
+    Idempotent: restore and repo verification run at most once per process.
 
     Args:
         cfg: Bot configuration.
         ollama_brain: Optional LLM brain used to generate AI commit messages.
     """
-    global _repo, _token, _enabled, _ollama_brain
+    global _repo, _token, _enabled, _ollama_brain, _git_init_done, _learning_restore_done
     if ollama_brain is not None:
         _ollama_brain = ollama_brain
+    if _git_init_done:
+        return
     _repo = (
         getattr(cfg, "GITHUB_HANOON_REPO", None) or os.getenv("GITHUB_HANOON_REPO", "")
         or os.getenv("GITHUB_HA_NUN_REPO", "")
@@ -347,13 +385,18 @@ def init(cfg: BotConfig, ollama_brain: Optional[Any] = None):
             _enabled = False
         set_global_config(cfg)
         verify_all_repos(cfg)
-        if getattr(cfg, "LEARNING_RESTORE_ON_STARTUP", True):
+        if getattr(cfg, "LEARNING_RESTORE_ON_STARTUP", True) and not _learning_restore_done:
             try:
                 restore_all_learning(cfg)
             except Exception as exc:
                 log.debug(f"Learning restore at init: {exc}")
+            finally:
+                _learning_restore_done = True
     else:
         log.info("GitHub sync disabled (no token/repo configured)")
+    _git_init_done = True
+    # Git auto-watch runs only via scripts/start_git_sync.sh (standalone daemon).
+    # HANOON session never starts the watcher — zero impact on trading loop.
 
 
 def push_change(message: str, files: Optional[List[str]] = None, 
@@ -371,6 +414,9 @@ def push_change(message: str, files: Optional[List[str]] = None,
     Returns:
         True if push succeeded, False otherwise
     """
+    if _should_defer_git_push(category):
+        log.debug(f"Git push deferred until shutdown: {message[:70]}")
+        return True
     if not _enabled:
         return False
     
@@ -403,6 +449,174 @@ def push_all(message: str = "checkpoint: all current state") -> bool:
     return push_change(message, files=None, category="checkpoint")
 
 
+def push_change_async(
+    message: str,
+    files: Optional[List[str]] = None,
+    category: str = "general",
+) -> None:
+    """Non-blocking push — safe from trading loop and file watcher."""
+    if _should_defer_git_push(category):
+        log.debug(f"Git push deferred until shutdown: {message[:70]}")
+        return
+    if not _enabled:
+        return
+
+    def _run():
+        try:
+            push_change(message, files, category)
+        except Exception as exc:
+            log.debug(f"Background git push ({category}): {exc}")
+
+    try:
+        from core.async_utils import get_background_worker
+        get_background_worker()._executor.submit(_run)
+    except Exception:
+        threading.Thread(target=_run, name=f"git-push-{category}", daemon=True).start()
+
+
+def set_standalone_mode(enabled: bool = True) -> None:
+    """Mark this process as the standalone git-sync daemon (not HANOON)."""
+    global _standalone_mode
+    _standalone_mode = enabled
+
+
+def is_standalone_mode() -> bool:
+    return _standalone_mode or os.getenv("GIT_SYNC_STANDALONE", "").lower() in (
+        "1", "true", "yes",
+    )
+
+
+def preflight_check(cfg: Optional[BotConfig] = None) -> tuple:
+    """
+    Startup checklist for standalone git-sync daemon.
+    Returns (all_ok, lines).
+    """
+    c = cfg or cfg_bot
+    lines: List[str] = []
+    ok = True
+
+    def mark(name: str, passed: bool, detail: str = "") -> None:
+        nonlocal ok
+        if not passed:
+            ok = False
+        suffix = f" — {detail}" if detail else ""
+        lines.append(f"{'✓' if passed else '✗'} {name}{suffix}")
+
+    token = ""
+    repo = ""
+    if c is not None:
+        token = (
+            getattr(c, "GITHUB_TOKEN", "")
+            or getattr(c, "GITHUB_PAT", "")
+            or os.getenv("GITHUB_TOKEN", "")
+            or os.getenv("GITHUB_PAT", "")
+        ).strip()
+        repo = (
+            getattr(c, "GITHUB_HANOON_REPO", "")
+            or getattr(c, "GITHUB_REPO", "")
+            or os.getenv("GITHUB_HANOON_REPO", "")
+            or os.getenv("GITHUB_REPO", "")
+            or os.getenv("GITHUB_HA_NUN_REPO", "")
+        ).strip()
+    else:
+        token = (os.getenv("GITHUB_TOKEN", "") or os.getenv("GITHUB_PAT", "")).strip()
+        repo = (
+            os.getenv("GITHUB_HANOON_REPO", "")
+            or os.getenv("GITHUB_REPO", "")
+            or os.getenv("GITHUB_HA_NUN_REPO", "")
+        ).strip()
+
+    mark("GITHUB_TOKEN in .env", bool(token), "required for push")
+    mark("GITHUB_HANOON_REPO (or GITHUB_REPO)", bool(repo), "owner/repo slug")
+    mark("git binary", bool(shutil.which("git")))
+    mark("repo root", os.path.isdir(REPO_DIR), REPO_DIR)
+    mark("git_sync enabled", _enabled, "token + repo verified at init")
+
+    if c is not None:
+        interval = getattr(c, "GIT_AUTO_PUSH_INTERVAL_SEC", 12)
+        push_all = getattr(c, "GIT_PUSH_ALL_CHANGES", True)
+        lines.append(f"  interval: {interval}s | push_all_changes: {push_all}")
+        lines.append("  mode: standalone (HANOON not required)")
+        enc = os.path.join(REPO_DIR, "secrets", "hanoon.env.enc")
+        lines.append(
+            f"  env vault: {'present' if os.path.exists(enc) else 'missing'} "
+            "(encrypted .env for other devices)"
+        )
+
+    return ok, lines
+
+
+def run_standalone_daemon(cfg: Optional[BotConfig] = None) -> None:
+    """
+    Blocking auto-push loop for the standalone git-sync process.
+    Safe to run 24/7 alongside or without HANOON.
+    """
+    import signal
+
+    c = cfg or cfg_bot
+    if not _enabled:
+        log.error("Git sync daemon: disabled — fix preflight checklist and restart")
+        return
+
+    set_standalone_mode(True)
+    _watcher_stop.clear()
+
+    def _stop(*_args):
+        _watcher_stop.set()
+
+    signal.signal(signal.SIGTERM, _stop)
+    signal.signal(signal.SIGINT, _stop)
+
+    interval = float(getattr(c, "GIT_AUTO_PUSH_INTERVAL_SEC", 12)) if c else 12.0
+    log.info(f"Git sync daemon active — polling every {interval:.0f}s (independent of HANOON)")
+
+    global _last_dirty_fingerprint
+    while not _watcher_stop.is_set():
+        try:
+            try:
+                from core.env_secrets import encrypt_env_to_vault, vault_paths_for_git
+                encrypt_env_to_vault()
+            except Exception as exc:
+                log.debug(f"Env vault sync: {exc}")
+            dirty = _collect_dirty_files(REPO_DIR)
+            for vp in vault_paths_for_git():
+                if vp not in dirty and os.path.exists(os.path.join(REPO_DIR, vp)):
+                    dirty.append(vp)
+            if dirty:
+                fp = hashlib.sha256("|".join(sorted(dirty)).encode()).hexdigest()[:20]
+                if fp != _last_dirty_fingerprint:
+                    _last_dirty_fingerprint = fp
+                    preview = ", ".join(os.path.basename(f) for f in dirty[:5])
+                    push_change(
+                        f"auto: {len(dirty)} change(s) — {preview}",
+                        files=dirty,
+                        category="auto",
+                    )
+        except Exception as exc:
+            log.debug(f"Git sync daemon cycle: {exc}")
+        _watcher_stop.wait(interval)
+
+    try:
+        dirty = _collect_dirty_files(REPO_DIR)
+        if dirty:
+            push_change("daemon shutdown: final flush", files=dirty, category="shutdown")
+    except Exception:
+        pass
+    log.info("Git sync daemon stopped")
+
+
+def start_auto_push_watcher(cfg: Optional[BotConfig] = None) -> None:
+    """Deprecated in HANOON — use scripts/start_git_sync.sh instead."""
+    if is_standalone_mode():
+        run_standalone_daemon(cfg)
+        return
+    log.debug("Git auto-watch skipped inside HANOON — run ./scripts/start_git_sync.sh")
+
+
+def stop_auto_push_watcher() -> None:
+    _watcher_stop.set()
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # INTERNALS
 # ═════════════════════════════════════════════════════════════════════════════
@@ -411,8 +625,77 @@ _pending_pushes: List[dict] = []
 _pending_lock = Lock()
 
 
+def _is_pushable_path(path: str) -> bool:
+    """Never auto-push plaintext secrets; encrypted vault is OK."""
+    norm = path.replace("\\", "/").strip()
+    base = os.path.basename(norm)
+    if base == ".env" or base.startswith(".env."):
+        return False
+    if norm in ("secrets/hanoon.env.enc", "secrets/sync.key"):
+        return True
+    if base in _NEVER_PUSH_FILES:
+        return False
+    low = norm.lower()
+    if any(x in low for x in ("secret", "credential", "private_key", ".pem")):
+        return False
+    if norm.startswith(".git/"):
+        return False
+    return True
+
+
+def _git_porcelain_files(repo_root: str) -> List[str]:
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain", "-u"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        if result.returncode != 0:
+            return []
+        files: List[str] = []
+        for line in result.stdout.strip().splitlines():
+            if len(line) < 4:
+                continue
+            path = line[3:].strip()
+            if " -> " in path:
+                path = path.split(" -> ", 1)[1].strip()
+            if path and _is_pushable_path(path):
+                files.append(path)
+        return files
+    except Exception:
+        return []
+
+
+def _collect_dirty_files(repo_root: str) -> List[str]:
+    """All pushable dirty files in the working tree."""
+    cfg = cfg_bot
+    push_all_changes = cfg is None or getattr(cfg, "GIT_PUSH_ALL_CHANGES", True)
+    max_files = int(getattr(cfg, "GIT_AUTO_PUSH_MAX_FILES", 80)) if cfg else 80
+
+    porcelain = _git_porcelain_files(repo_root)
+    if not porcelain:
+        return []
+
+    if push_all_changes:
+        return porcelain[:max_files]
+
+    tracked: List[str] = []
+    for f in porcelain:
+        if f in TRACKED_FILES:
+            tracked.append(f)
+        elif f.startswith("core/") and f.endswith(".py"):
+            tracked.append(f)
+        elif f.startswith("scripts/") or f.startswith("models/"):
+            tracked.append(f)
+    return tracked[:max_files]
+
+
 def _queue_push(message: str, files: Optional[List[str]], category: str) -> bool:
-    """Queue a push for the next batch window."""
+    """Queue a push for the next batch window (non-blocking)."""
+    global _flush_timer
     with _pending_lock:
         _pending_pushes.append({
             "message": message,
@@ -420,12 +703,15 @@ def _queue_push(message: str, files: Optional[List[str]], category: str) -> bool
             "category": category,
             "queued_at": time.time(),
         })
-    
-    # If this is the first queued item, set a timer to flush
-    if len(_pending_pushes) == 1:
-        time.sleep(BATCH_WINDOW_SEC)
-        _flush_pending()
-    
+        if len(_pending_pushes) == 1:
+            if _flush_timer is not None:
+                try:
+                    _flush_timer.cancel()
+                except Exception:
+                    pass
+            _flush_timer = Timer(BATCH_WINDOW_SEC, _flush_pending)
+            _flush_timer.daemon = True
+            _flush_timer.start()
     return True
 
 
@@ -526,6 +812,17 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
                     _push_count += 1
                     _last_push_ts = time.time()
                     log.debug(f"GitHub: pushed #{_push_count} to {repo_url or 'default'} — {category}: {message[:60]}")
+                    try:
+                        from core.telegram_broadcast import notify_git_push
+                        if cfg_bot is not None:
+                            notify_git_push(
+                                cfg_bot,
+                                message[:200],
+                                category=category,
+                                ok=True,
+                            )
+                    except Exception:
+                        pass
             else:
                 _failed_pushes += 1
             
@@ -565,49 +862,22 @@ def _apply_bloat_guard(files: List[str], repo_root: str) -> List[str]:
 
 
 def _detect_changed_files(repo_root: str) -> List[str]:
-    """Detect which tracked files have changed since last push."""
+    """Detect which files should be committed."""
+    dirty = _collect_dirty_files(repo_root)
+    if dirty:
+        return dirty
     try:
-        # Get list of modified files
         result = subprocess.run(
             ["git", "diff", "--name-only", "HEAD"],
-            cwd=repo_root, capture_output=True, text=True, timeout=10
+            cwd=repo_root, capture_output=True, text=True, timeout=10,
         )
-        if result.returncode != 0:
-            # Fallback: use git status
-            result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                cwd=repo_root, capture_output=True, text=True, timeout=10
-            )
-            if result.returncode != 0:
-                return list(TRACKED_FILES)  # Push everything if we can't tell
-            files = []
-            for line in result.stdout.strip().splitlines():
-                if line:
-                    # Format: "XY filename"
-                    parts = line.split(None, 1)
-                    if len(parts) == 2:
-                        files.append(parts[1])
-        else:
-            files = result.stdout.strip().splitlines()
-        
-        # Filter to only tracked / routable files
-        tracked = []
-        for f in files:
-            if f in TRACKED_FILES or any(f.endswith(p) or p in f for p in TRACKED_FILES):
-                tracked.append(f)
-            elif f.startswith("core/") and f.endswith(".py"):
-                tracked.append(f)
-            elif f.startswith("scripts/"):
-                tracked.append(f)
-        
-        # Add all tracked files if we're unsure
-        if not tracked:
-            tracked = [f for f in TRACKED_FILES if os.path.exists(os.path.join(repo_root, f))]
-        
-        return tracked[:20]  # Limit batch size
-        
+        if result.returncode == 0 and result.stdout.strip():
+            files = [f for f in result.stdout.strip().splitlines() if _is_pushable_path(f)]
+            if files:
+                return files[:80]
     except Exception:
-        return list(TRACKED_FILES)
+        pass
+    return [f for f in TRACKED_FILES if os.path.exists(os.path.join(repo_root, f))][:40]
 
 
 def _normalize_github_slug(repo: str) -> str:
@@ -904,6 +1174,12 @@ def push_to_secondary_repo(repo_key: str, files: List[str], message: str, catego
         subprocess.run(["git", "commit", "-m", commit_msg, "--allow-empty"], cwd=tmpdir, capture_output=True)
         push_cmd = ["git", "push", "-u", auth_url, "HEAD:main"] if auth_url else ["git", "push", "-u", "origin", "main"]
         result = subprocess.run(push_cmd, cwd=tmpdir, capture_output=True, text=True, timeout=90)
+        if result.returncode != 0 and "rejected" in (result.stderr or result.stdout or "").lower():
+            subprocess.run(
+                ["git", "pull", "--rebase", auth_url or "origin", "main"],
+                cwd=tmpdir, capture_output=True, text=True, timeout=90,
+            )
+            result = subprocess.run(push_cmd, cwd=tmpdir, capture_output=True, text=True, timeout=90)
         
         shutil.rmtree(tmpdir, ignore_errors=True)
         
@@ -927,6 +1203,17 @@ def set_global_config(cfg: Any):
     """Set global config reference for repo routing."""
     global cfg_bot
     cfg_bot = cfg
+
+
+def _should_defer_git_push(category: str = "general") -> bool:
+    """HANOON defers session pushes; standalone daemon never defers."""
+    if is_standalone_mode():
+        return False
+    if category in ("shutdown", "manual_sync"):
+        return False
+    if cfg_bot is not None and not getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
+        return True
+    return False
 
 def push_trade(ticker: str, action: str, price: float, qty: float):
     """Push after a trade event."""
@@ -1120,6 +1407,9 @@ def push_model_release(version: str, model_path: str = "ppo_trader.zip", notes: 
     Create a git tag/release after training completion.
     Tags every model version so we can roll back and track progress.
     """
+    if _should_defer_git_push("release"):
+        log.debug(f"Model release deferred until shutdown: v{version}")
+        return True
     try:
         now = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         tag_name = f"v{version}_{now}"
@@ -1158,6 +1448,12 @@ def push_model_release(version: str, model_path: str = "ppo_trader.zip", notes: 
             push_large_file_to_release(model_path, tag_name, notes)
 
         log.info(f"🏷 Git release tagged: {tag_name}")
+        try:
+            from core.telegram_broadcast import notify_model_release
+            if cfg_bot is not None:
+                notify_model_release(cfg_bot, str(version), tag_name, notes)
+        except Exception:
+            pass
         return True
     except Exception as exc:
         log.warning(f"Git release failed: {exc}")
@@ -1204,6 +1500,9 @@ def sync_all_learning_artifacts(release_tag: str = None) -> bool:
     Large files (model weights) go to releases, small files go to git.
     Everything is linked and version-tracked.
     """
+    if _should_defer_git_push("training"):
+        log.debug(f"Full learning sync deferred until shutdown: {release_tag or 'auto'}")
+        return True
     if not release_tag:
         release_tag = f"training_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
 
@@ -1319,12 +1618,75 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
     ],
 }
 
+# Required on disk before skipping remote HANOON fetch (optional artifacts may be created at runtime)
+LEARNING_REQUIRED_CODE: List[str] = [
+    "models/consciousness.json",
+    "models/pilot_experience.json",
+    "models/scalper_weights.json",
+]
+
 
 def _learning_files_flat() -> List[str]:
     out: List[str] = []
     for files in LEARNING_ARTIFACTS.values():
         out.extend(files)
     return list(dict.fromkeys(out))
+
+
+def _force_learning_restore() -> bool:
+    return os.getenv("LEARNING_FORCE_RESTORE", "").lower() in ("1", "true", "yes")
+
+
+def _local_learning_file_ok(rel_path: str, min_bytes: int = 20) -> bool:
+    local = os.path.join(REPO_DIR, rel_path)
+    return os.path.exists(local) and os.path.getsize(local) >= min_bytes
+
+
+def _hanoon_learning_needs_fetch() -> bool:
+    if _force_learning_restore():
+        return True
+    for rel in LEARNING_REQUIRED_CODE:
+        if not _local_learning_file_ok(rel):
+            return True
+    return False
+
+
+def _repo_patterns_need_pull(repo_key: str) -> bool:
+    if _force_learning_restore():
+        return True
+    patterns = LEARNING_ARTIFACTS.get(repo_key, [])
+    if not patterns:
+        return False
+    if repo_key == "logs":
+        # Logs are append-only — one local file means this device already synced
+        return not any(_local_learning_file_ok(p) for p in patterns)
+    if repo_key == "grandmaster":
+        return not (
+            _local_learning_file_ok("ppo_trader.zip", min_bytes=100_000)
+            or _local_learning_file_ok("models/ppo_trader.zip", min_bytes=100_000)
+        )
+    return any(not _local_learning_file_ok(p) for p in patterns)
+
+
+def _model_needs_release_download() -> bool:
+    if _force_learning_restore():
+        return True
+    for rel in ("ppo_trader.zip", "models/ppo_trader.zip"):
+        if _local_learning_file_ok(rel, min_bytes=100_000):
+            return False
+    return True
+
+
+def is_learning_current() -> bool:
+    """True when local artifacts are present — no remote fetch/clone needed."""
+    if not _enabled and not _repo:
+        return True
+    return (
+        not _hanoon_learning_needs_fetch()
+        and not _repo_patterns_need_pull("logs")
+        and not _repo_patterns_need_pull("grandmaster")
+        and not _model_needs_release_download()
+    )
 
 
 def _should_restore_file(local_path: str, remote_path: str) -> bool:
@@ -1348,6 +1710,9 @@ def pull_from_secondary_repo(repo_key: str, file_patterns: Optional[List[str]] =
 
     patterns = file_patterns or LEARNING_ARTIFACTS.get(repo_key, [])
     if not patterns:
+        return []
+
+    if not _repo_patterns_need_pull(repo_key):
         return []
 
     restored: List[str] = []
@@ -1386,6 +1751,8 @@ def restore_hanoon_learning() -> List[str]:
     """Fetch tracked learning files from origin/main (missing locals only)."""
     if not _enabled:
         return []
+    if not _hanoon_learning_needs_fetch():
+        return []
     restored: List[str] = []
     try:
         subprocess.run(
@@ -1414,9 +1781,9 @@ def restore_model_from_release() -> bool:
     """Download ppo_trader.zip from latest GitHub release if missing locally."""
     if not _gh_cli_available() or not _repo:
         return False
-    target = os.path.join(REPO_DIR, "ppo_trader.zip")
-    if os.path.exists(target) and os.path.getsize(target) > 100_000:
+    if not _model_needs_release_download():
         return False
+    target = os.path.join(REPO_DIR, "ppo_trader.zip")
     try:
         if _run_gh(
             ["release", "download", "--repo", _repo, "latest", "--pattern", "ppo_trader.zip", "--dir", REPO_DIR],
@@ -1437,6 +1804,13 @@ def restore_all_learning(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         log.info("Learning restore skipped (GitHub token/repo not configured)")
         return {"skipped": True, "reason": "git_disabled"}
 
+    if is_learning_current():
+        log.info("✅ Learning restore — local experience already current")
+        return {
+            "hanoon": [], "logs": [], "grandmaster": [],
+            "model_release": False, "total": 0, "skipped": True, "reason": "current",
+        }
+
     log.info("📥 Restoring AI learning artifacts from GitHub...")
     hanoon = restore_hanoon_learning()
     logs = pull_from_secondary_repo("logs")
@@ -1451,38 +1825,85 @@ def restore_all_learning(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     return {"hanoon": hanoon, "logs": logs, "grandmaster": gm, "model_release": model_ok, "total": total}
 
 
-def push_learning_checkpoint(reason: str = "checkpoint") -> bool:
-    """Push all learning artifacts to HANOON + Logs + Grandmaster repos."""
+def push_learning_checkpoint(reason: str = "checkpoint", full_sync: bool = False) -> bool:
+    """Push learning artifacts to HANOON + Logs + Grandmaster (never blocks trading loop if called via async)."""
+    if not full_sync and _should_defer_git_push("training"):
+        log.debug(f"Learning checkpoint deferred until shutdown: {reason}")
+        return True
     if not _enabled:
         return False
 
-    global _last_push_ts
-    _last_push_ts = 0
+    global _last_push_ts, _last_checkpoint_ts
+    now = time.time()
+    with _checkpoint_lock:
+        if now - _last_checkpoint_ts < _CHECKPOINT_MIN_INTERVAL_SEC and not full_sync:
+            log.debug(f"Learning checkpoint skipped (throttled): {reason}")
+            return False
+        _last_checkpoint_ts = now
+        _last_push_ts = 0
 
-    tag = f"learn_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
-    existing = [f for f in _learning_files_flat() if os.path.exists(os.path.join(REPO_DIR, f))]
+        tag = f"learn_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        existing = [f for f in _learning_files_flat() if os.path.exists(os.path.join(REPO_DIR, f))]
 
-    hanoon_files = [f for f in existing if f in LEARNING_ARTIFACTS.get("code", [])]
-    logs_files = [f for f in existing if f in LEARNING_ARTIFACTS.get("logs", [])]
-    gm_files = [f for f in existing if f in LEARNING_ARTIFACTS.get("grandmaster", [])]
+        hanoon_files = [f for f in existing if f in LEARNING_ARTIFACTS.get("code", [])]
+        logs_files = [f for f in existing if f in LEARNING_ARTIFACTS.get("logs", [])]
+        gm_files = [f for f in existing if f in LEARNING_ARTIFACTS.get("grandmaster", [])]
 
-    ok = False
-    if hanoon_files:
-        ok = push_change(f"learn: {reason} | {tag}", files=hanoon_files, category="training") or ok
-    if logs_files and _get_repo_url("logs"):
-        ok = push_to_secondary_repo("logs", logs_files, f"learn: {reason}", "training") or ok
-    if gm_files and _get_repo_url("grandmaster"):
-        ok = push_weights_to_repo(
-            gm_files, repo_url=_get_repo_url("grandmaster"),
-            message=f"learn: {reason} | {tag}",
-        ) or ok
+        ok = False
+        if hanoon_files:
+            ok = push_change(f"learn: {reason} | {tag}", files=hanoon_files, category="training") or ok
+        if logs_files and _get_repo_url("logs"):
+            ok = push_to_secondary_repo("logs", logs_files, f"learn: {reason}", "training") or ok
+        if gm_files and _get_repo_url("grandmaster"):
+            ok = push_weights_to_repo(
+                gm_files, repo_url=_get_repo_url("grandmaster"),
+                message=f"learn: {reason} | {tag}",
+            ) or ok
+
+        if full_sync:
+            try:
+                sync_all_learning_artifacts(release_tag=tag)
+            except Exception as exc:
+                log.debug(f"Full learning sync: {exc}")
+
+        if ok:
+            try:
+                from core.telegram_broadcast import notify_learning_checkpoint
+                if cfg_bot is not None:
+                    notify_learning_checkpoint(cfg_bot, f"{reason} | {tag}", ok=True)
+            except Exception:
+                pass
+
+        return ok
+
+
+def push_learning_checkpoint_async(reason: str = "checkpoint", full_sync: bool = False) -> None:
+    """Non-blocking learning checkpoint — safe during startup / trading loop."""
+    if not _enabled:
+        return
+
+    with _checkpoint_lock:
+        if reason in _checkpoint_pending:
+            return
+        _checkpoint_pending.add(reason)
+
+    def _run():
+        try:
+            push_learning_checkpoint(reason, full_sync=full_sync)
+        except Exception as exc:
+            log.debug(f"Background learning push ({reason}): {exc}")
+        finally:
+            with _checkpoint_lock:
+                _checkpoint_pending.discard(reason)
 
     try:
-        sync_all_learning_artifacts(release_tag=tag)
+        from core.async_utils import get_background_worker
+        get_background_worker()._executor.submit(_run)
     except Exception:
-        pass
-
-    return ok
+        try:
+            push_learning_checkpoint(reason, full_sync=full_sync)
+        except Exception as exc:
+            log.debug(f"Learning push fallback ({reason}): {exc}")
 
 
 def verify_all_repos(cfg: Optional[BotConfig] = None) -> Dict[str, bool]:
@@ -1524,5 +1945,5 @@ def sync_all_repos(reason: str = "manual_sync") -> Dict[str, bool]:
     if not _enabled:
         return {}
     out: Dict[str, bool] = {}
-    out["learning"] = push_learning_checkpoint(reason)
+    out["learning"] = push_learning_checkpoint(reason, full_sync=True)
     return out

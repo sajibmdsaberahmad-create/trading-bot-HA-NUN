@@ -1,0 +1,8 @@
+🧭 HANOON SELF-IMPROVEMENT GUIDELINES
+________________________________________
+• URGENT: Win rate below 40%. Tighten stop-loss (reduce SCALP_STOP_ATR_MULTIPLIER from 0.7 to 0.5).
+• Reduce trade frequency: increase SCAN_INTERVAL_SECONDS from 300 to 600.
+• Institutional weight is very high — ensure institutional detector is accurate (check for false signals).
+• Strong market conditions. Increase SCALP_MAX_TP_PCT from 3% to 5% to capture more upside.
+• Always use limit orders in fast markets (USE_LIMIT_ORDERS_IN_FAST_MARKETS = True).
+• Monitor slippage: if fills consistently >0.4%, reduce order size.

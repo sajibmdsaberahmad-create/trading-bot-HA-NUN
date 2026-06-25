@@ -94,6 +94,11 @@ class BotConfig:
     IB_PORT:       int  = 4002     # 4002/4001 = IB Gateway, 7497 = TWS paper, 7496 = TWS live
     IB_CLIENT_ID:  int  = 1       # IB API client ID (use 1–10; must be unique per connection)
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
+    # Paper $1M+ account: AI sizes from IB equity, learns without small-account caps
+    AI_PAPER_FREE_LEARNING: bool = os.getenv(
+        "AI_PAPER_FREE_LEARNING", "true"
+    ).lower() in ("1", "true", "yes")
+    PAPER_EQUITY_HINT: float = float(os.getenv("PAPER_EQUITY_HINT", "1000000"))
 
     # Reconnection behaviour (handles VPS network blips / ISP drops)
     RECONNECT_MAX_ATTEMPTS:   int = 10
@@ -110,7 +115,7 @@ class BotConfig:
     # connection exists yet (e.g. warmup mode).
     INITIAL_CASH: float = 1_000.0
 
-    MAX_TRADE_SIZE_USD: float = 1_000.0
+    MAX_TRADE_SIZE_USD: float = 0.0   # 0 = no cap (paper uses equity); set >0 to hard-cap deploy
 
     TRANSACTION_COST_PCT: float = 0.001   # 0.1% per trade, both sides
 
@@ -120,7 +125,7 @@ class BotConfig:
     SIZING_MODE: str = "risk_based"
 
     RISK_PER_TRADE_PCT: float = 0.05      # 5% of equity = $50 on a $1,000 account
-    MAX_RISK_PER_TRADE_USD: float = 75.0
+    MAX_RISK_PER_TRADE_USD: float = 250_000.0  # ceiling; paper uses equity % when AI_PAPER_FREE_LEARNING
 
     STOP_ATR_MULTIPLIER:     float = 1.5
     MIN_STOP_DISTANCE_PCT:   float = 0.003
@@ -136,6 +141,7 @@ class BotConfig:
 
     TAKE_PROFIT_ATR_MULTIPLIER: float = 2.5
     MIN_REWARD_RISK_RATIO:      float = 2.0
+    MIN_REWARD_RISK_TOLERANCE:  float = float(os.getenv("MIN_REWARD_RISK_TOLERANCE", "0.02"))
 
     MAX_ACCEPTABLE_SLIPPAGE_PCT: float = 0.004
     USE_LIMIT_ORDERS_IN_FAST_MARKETS: bool = True
@@ -149,7 +155,7 @@ class BotConfig:
     DEFAULT_MAX_POSITION_PCT: float = 0.90
     MAX_SHARES_PER_TRADE:  int   = 2_000
     MIN_CASH_RESERVE_PCT:  float = 0.05
-    MAX_CONCURRENT_POSITIONS: int = 1
+    MAX_CONCURRENT_POSITIONS: int = int(os.getenv("MAX_CONCURRENT_POSITIONS", "5"))
 
     # ════════════════════════════════════════════════════════════════════
     # MARKET DATA / TICK STREAM
@@ -256,12 +262,35 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     TRADING_MODE: str = "scalper"
     
-    # USER RULE: Deploy exactly $1,000 per stock (veterans scale via pilot_mode)
+    # USER RULE: Deploy exactly $1,000 per stock when USE_FIXED_DEPLOY_CAP=true
     DEPLOY_PER_STOCK_USD: float = 1000.0
     PILOT_MAX_DEPLOY_USD: float = 2000.0
+    USE_FIXED_DEPLOY_CAP: bool = os.getenv("USE_FIXED_DEPLOY_CAP", "false").lower() in (
+        "1", "true", "yes"
+    )
+    USE_MULTI_POSITION: bool = os.getenv("USE_MULTI_POSITION", "true").lower() in (
+        "1", "true", "yes"
+    )
+    AI_MAX_DEPLOY_PCT: float = float(os.getenv("AI_MAX_DEPLOY_PCT", "0"))
+    # AI_UNLIMITED_MODE — lift watch/position/score caps; AI decides lock pool & entries
+    AI_UNLIMITED_MODE: bool = os.getenv("AI_UNLIMITED_MODE", "true").lower() in (
+        "1", "true", "yes"
+    )
+    AI_MAX_LOCKED_TARGETS: int = int(os.getenv("AI_MAX_LOCKED_TARGETS", "30"))
+    AI_MAX_CONCURRENT_POSITIONS: int = int(os.getenv("AI_MAX_CONCURRENT_POSITIONS", "50"))
+    AI_SCAN_UNIVERSE_MAX: int = int(os.getenv("AI_SCAN_UNIVERSE_MAX", "80"))
+    AI_MIN_LOCK_SCORE: float = float(os.getenv("AI_MIN_LOCK_SCORE", "0"))
+    AI_MIN_CASH_RESERVE_PCT: float = float(os.getenv("AI_MIN_CASH_RESERVE_PCT", "0"))
+    AI_MAX_SHARES_PER_TRADE: int = int(os.getenv("AI_MAX_SHARES_PER_TRADE", "100000"))
 
-    # USER RULE: Hard stop $50 per trade (cannot be overridden)
+    # USER RULE: Hard stop $50 per trade when USE_FIXED_RISK_CAP=true
     HARD_STOP_USD: float = 50.0
+    USE_FIXED_RISK_CAP: bool = os.getenv("USE_FIXED_RISK_CAP", "false").lower() in (
+        "1", "true", "yes"
+    )
+    USE_ACCOUNT_LOSS_HALT: bool = os.getenv("USE_ACCOUNT_LOSS_HALT", "false").lower() in (
+        "1", "true", "yes"
+    )
 
     # Trade any liquid US stock under this price (not penny-only)
     PENNY_STOCK_MAX_PRICE: float = 500.0
@@ -277,6 +306,11 @@ class BotConfig:
     USE_MULTI_TIMEFRAME_SCAN: bool = True
     SCAN_UNIVERSE_MAX: int = 30
     FAST_SCAN_ENABLED: bool = True
+    FAST_SCANNER_LOCK: bool = os.getenv("FAST_SCANNER_LOCK", "true").lower() not in ("0", "false", "no")
+    FAST_SCANNER_LOCK_FALLBACK: bool = os.getenv("FAST_SCANNER_LOCK_FALLBACK", "false").lower() in ("1", "true", "yes")
+    SCAN_MTF_DURING_RTH: bool = os.getenv("SCAN_MTF_DURING_RTH", "false").lower() in ("1", "true", "yes")
+    SCAN_PREFETCH_LOCK_N: int = int(os.getenv("SCAN_PREFETCH_LOCK_N", "5"))
+    SCAN_BAR_PREFETCH_PER_LOOP: int = int(os.getenv("SCAN_BAR_PREFETCH_PER_LOOP", "2"))
     SCAN_BAR_DURATION: str = "1800 S"       # 30min bars for fast scan (not full day)
     SCAN_REFINE_TOP_N: int = 12             # MTF/AI refine only top N after fast pass
     SCAN_EARLY_EXIT_QUALIFIED: int = 18     # Stop scanning once this many qualify
@@ -295,7 +329,9 @@ class BotConfig:
     HYBRID_DISTILL_MIN_SAMPLES: int = 30    # Paired decision+feature rows to train proxy
     HYBRID_DISTILL_MIN_ACCURACY: float = 0.62
     HYBRID_DISTILL_ENTER_THRESHOLD: float = 0.45
-    HYBRID_DISTILL_AUTO_FAST_PATH: bool = True   # Enable fast path when proxy + trade count ready
+    HYBRID_DISTILL_AUTO_FAST_PATH: bool = os.getenv(
+        "HYBRID_DISTILL_AUTO_FAST_PATH", "true"
+    ).lower() in ("1", "true", "yes")
     HYBRID_DISTILL_FAST_PATH: bool = False       # Manual override — skip Ollama on entry
     HYBRID_DISTILL_CHECK_EVERY_N_TRADES: int = 5
     HYBRID_DISTILL_RETRAIN_HOURS: float = 24.0
@@ -305,15 +341,67 @@ class BotConfig:
     LIVE_AI_MIN_RING_SEC: float = 0.8      # Min gap between identical fingerprint rings
     LIVE_AI_PREFETCH_TOP_N: int = 3        # Keep hotline open on top locked tickers
     LIVE_AI_PREFETCH_SEC: float = 1.0      # How often to prefetch watchlist
-    POSITION_PULSE_SEC: float = 5.0          # Live P&L log interval
+    ENTRY_OLLAMA_WAIT_SEC: float = float(os.getenv("ENTRY_OLLAMA_WAIT_SEC", "10"))
+    AI_COUNCIL_MAX_WAIT_SEC: float = float(os.getenv("AI_COUNCIL_MAX_WAIT_SEC", "15"))
+    AI_COUNCIL_ALL_DECISIONS: bool = os.getenv(
+        "AI_COUNCIL_ALL_DECISIONS", "true"
+    ).lower() in ("1", "true", "yes")
+    # Ollama does judgment only — Python computes all stop/TP/shares (prevents inverted stops)
+    OLLAMA_NUMERIC_BRACKETS: bool = os.getenv(
+        "OLLAMA_NUMERIC_BRACKETS", "false"
+    ).lower() in ("1", "true", "yes")
+    MAX_REWARD_RISK_RATIO: float = float(os.getenv("MAX_REWARD_RISK_RATIO", "10.0"))
+
+    # Post-mortem / shadow circuit breaker / RL risk shaping
+    SHADOW_CIRCUIT_ENABLED: bool = os.getenv(
+        "SHADOW_CIRCUIT_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    SHADOW_CONSECUTIVE_LOSS_TRIGGER: int = int(os.getenv("SHADOW_CONSECUTIVE_LOSS_TRIGGER", "4"))
+    SHADOW_DAILY_DD_PCT: float = float(os.getenv("SHADOW_DAILY_DD_PCT", "0.02"))
+    SHADOW_REENTRY_MIN_TRADES: int = int(os.getenv("SHADOW_REENTRY_MIN_TRADES", "20"))
+    SHADOW_REENTRY_MIN_WIN_RATE: float = float(os.getenv("SHADOW_REENTRY_MIN_WIN_RATE", "0.45"))
+    SHADOW_REENTRY_MIN_EXPECTANCY: float = float(os.getenv("SHADOW_REENTRY_MIN_EXPECTANCY", "0.0"))
+    RL_BRACKET_REJECT_PENALTY: float = float(os.getenv("RL_BRACKET_REJECT_PENALTY", "-1.0"))
+    RL_LATE_SPIKE_PENALTY: float = float(os.getenv("RL_LATE_SPIKE_PENALTY", "-0.5"))
+    RL_LATE_SPIKE_VOL_THRESHOLD: float = float(os.getenv("RL_LATE_SPIKE_VOL_THRESHOLD", "3.0"))
+
+    # Architecture epoch — mood/metrics ignore pre-hybrid legacy scars
+    ARCHITECTURE_VERSION: str = os.getenv("ARCHITECTURE_VERSION", "hybrid_atr_v1")
+    ARCHITECTURE_EPOCH_MOOD_FILTER: bool = os.getenv(
+        "ARCHITECTURE_EPOCH_MOOD_FILTER", "true"
+    ).lower() in ("1", "true", "yes")
+    ARCHITECTURE_EPOCH_RESET: bool = os.getenv(
+        "ARCHITECTURE_EPOCH_RESET", "false"
+    ).lower() in ("1", "true", "yes")
+    ARCHITECTURE_EPOCH_MIN_TRADES: int = int(os.getenv("ARCHITECTURE_EPOCH_MIN_TRADES", "5"))
+    REGIME_ATR_NOISE_STOP_SEC: float = float(os.getenv("REGIME_ATR_NOISE_STOP_SEC", "120.0"))
+
+    MAX_ENTRY_FILL_SLIPPAGE_PCT: float = float(os.getenv("MAX_ENTRY_FILL_SLIPPAGE_PCT", "0.012"))
+    MAX_ENTRY_FILL_SLIPPAGE_ATR: float = float(os.getenv("MAX_ENTRY_FILL_SLIPPAGE_ATR", "0.5"))
+    POST_FILL_REANCHOR_ENABLED: bool = os.getenv(
+        "POST_FILL_REANCHOR_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+
+    POSITION_PULSE_SEC: float = 5.0          # Live P&L log interval (when price/P&L changes)
+    POSITION_PULSE_UNCHANGED_SEC: float = 30.0  # Slower heartbeat when flat (reduces spam)
+    STAGNATION_EXIT_ENABLED: bool = True
+    STAGNATION_EXIT_SEC: float = 90.0      # Cut dead trades after N sec with no progress
+    STAGNATION_FLAT_BAND_PCT: float = 0.008  # |P&L| within ±0.8% = no progress
+    STAGNATION_MAX_PEAK_PCT: float = 0.003   # Never reached +0.3% from entry
+    STAGNATION_LOSS_CUT_PCT: float = -0.005  # Exit flat losers worse than -0.5%
+    AI_STAGNATION_CHECK_SEC: float = 30.0  # Ollama+PPO review after N sec flat
+    STALE_PRICE_REFRESH_PULSES: int = 4    # Force IB snapshot after N identical pulses
+    STALE_PRICE_REFRESH_SEC: float = 20.0  # Or force snapshot if price frozen this long
     VOLATILITY_STOP_WIDEN_MAX_PCT: float = 0.025  # Unrealized noise cushion (not below $50 risk)
     INCREMENTAL_TRAINING_ENABLED: bool = True
     INCREMENTAL_TRAIN_EVERY_N_TRADES: int = 3
     INCREMENTAL_TRAIN_MIN_NEW_RECORDS: int = 2
     DYNAMIC_AI_NOTIFICATIONS: bool = True
     AI_TELEGRAM_NOTIFICATIONS: bool = True   # Ollama crafts Telegram text
+    AI_TELEGRAM_ALL_OUTBOUND: bool = os.getenv("TRADING_BOT_AI_TELEGRAM_ALL", "true").lower() in ("1", "true", "yes")
     AI_TELEGRAM_MIN_INTERVAL_SEC: float = 6.0  # Throttle duplicate event types
     AI_TELEGRAM_MAX_CHARS: int = 450
+    AI_TELEGRAM_COMMANDER_MAX_CHARS: int = int(os.getenv("TRADING_BOT_TELEGRAM_AI_CHARS", "3800"))
     AI_TELEGRAM_OLLAMA_MAX_TOKENS: int = 120   # Short pilot briefings
     AI_TELEGRAM_OLLAMA_TIMEOUT: int = 12       # Seconds — notifications must not stall loop
     OLLAMA_NOTIFY_MIN_FREE_RAM_MB: int = 512   # Lighter gate for Telegram compose (model often warm)
@@ -322,15 +410,28 @@ class BotConfig:
     AI_ACCOUNT_EVAL_MIN_SEC: float = 300.0     # Min gap between same event type
     LEARNING_RESTORE_ON_STARTUP: bool = True   # Pull experience from GitHub on boot
     LEARNING_SYNC_INTERVAL_SEC: float = 1800.0 # Push all learning artifacts every 30 min
-    LEARNING_PUSH_ON_TRADE: bool = True        # Push experience after each trade close
+    LEARNING_PUSH_ON_TRADE: bool = False       # Defer git sync to session shutdown
+    # HANOON session: defer git pushes (shutdown hook still syncs). Standalone daemon handles live pushes.
+    GIT_PUSH_DURING_SESSION: bool = os.getenv(
+        "GIT_PUSH_DURING_SESSION", "false"
+    ).lower() in ("1", "true", "yes")
+    GIT_AUTO_WATCH_IN_BOT: bool = False        # Never watch from HANOON — use start_git_sync.sh
+    GIT_AUTO_WATCH_ENABLED: bool = os.getenv(
+        "GIT_AUTO_WATCH", "true"
+    ).lower() in ("1", "true", "yes")
+    GIT_AUTO_PUSH_INTERVAL_SEC: float = float(os.getenv("GIT_AUTO_PUSH_INTERVAL_SEC", "8"))
+    GIT_PUSH_ALL_CHANGES: bool = os.getenv(
+        "GIT_PUSH_ALL_CHANGES", "true"
+    ).lower() in ("1", "true", "yes")
+    GIT_AUTO_PUSH_MAX_FILES: int = int(os.getenv("GIT_AUTO_PUSH_MAX_FILES", "80"))
+    ENV_SYNC_ENABLED: bool = os.getenv("ENV_SYNC_ENABLED", "true").lower() in ("1", "true", "yes")
+    ENV_SYNC_PUSH_KEY: bool = os.getenv("ENV_SYNC_PUSH_KEY", "true").lower() in ("1", "true", "yes")
+    TELEGRAM_ASYNC_DURING_SESSION: bool = True # Ollama Telegram off hot path
     GENERATIVE_THINKING_ENABLED: bool = True
     AI_FULL_CONTROL: bool = True          # AI owns all decisions, logs, journals, notifications
     AI_STATIC_FALLBACK: bool = False      # No rule-based bypass when full control
     AI_HUMAN_COGNITION: bool = True       # Human-like reasoning + gut feel on all decisions
     AI_USE_COMPUTATIONAL_REASONING: bool = True  # Synthesize PPO, scanner, MTF, volume in every call
-    
-    # USER RULE: Max 5 concurrent positions
-    MAX_CONCURRENT_POSITIONS: int = 5
     
     # USER RULE: Volume spike threshold (1.5x = 50% above average)
     VOLUME_SPIKE_MIN_RATIO: float = 1.25
@@ -342,7 +443,20 @@ class BotConfig:
     MIN_LOCK_SCORE: float = 30.0          # Min MTF+AI score to earn a lock slot
     MIN_LOCK_CANDIDATES: int = 2          # Need at least N quality names before locking
     LOCK_BAR_REFRESH_SEC: float = 180.0   # Refresh locked bars every 3 min (not 60s)
-    FOCUS_PIN_TOP_PICK: bool = True       # No tick-stream rotation — stay on #1 pick
+    LOCK_STALE_RELEASE_SEC: float = float(os.getenv("LOCK_STALE_RELEASE_SEC", "600"))
+    LOCK_FOCUS_ROTATE_SEC: float = float(os.getenv("LOCK_FOCUS_ROTATE_SEC", "60"))
+    LOCK_BAR_WARM_BUDGET_SEC: float = float(os.getenv("LOCK_BAR_WARM_BUDGET_SEC", "12"))
+    ENTRY_PENDING_BLOCK_SEC: float = float(os.getenv("ENTRY_PENDING_BLOCK_SEC", "45"))
+    WATCH_ALL_LOCKED_STREAMS: bool = os.getenv(
+        "WATCH_ALL_LOCKED_STREAMS", "true"
+    ).lower() in ("1", "true", "yes")
+    PARALLEL_ENTRY_EXIT: bool = os.getenv("PARALLEL_ENTRY_EXIT", "true").lower() in (
+        "1", "true", "yes"
+    )
+    HOT_SWAP_ON_EXIT: bool = os.getenv("HOT_SWAP_ON_EXIT", "true").lower() in (
+        "1", "true", "yes"
+    )
+    FOCUS_PIN_TOP_PICK: bool = os.getenv("FOCUS_PIN_TOP_PICK", "false").lower() in ("1", "true", "yes")
     
     SCALP_STOP_ATR_MULTIPLIER: float = 0.9
     SCALP_MIN_STOP_PCT: float = 0.004
@@ -470,7 +584,43 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     TELEGRAM_ENABLED:  bool = True
     TELEGRAM_BOT_TOKEN: str = os.getenv("TRADING_BOT_TELEGRAM_TOKEN", "")
+    # Optional legacy default chat — outbound uses verified chats by default
     TELEGRAM_CHAT_ID:   str = os.getenv("TRADING_BOT_TELEGRAM_CHAT_ID", "")
+    TELEGRAM_VERIFIED_ONLY_OUTBOUND: bool = os.getenv(
+        "TRADING_BOT_TELEGRAM_VERIFIED_ONLY", "true"
+    ).lower() in ("1", "true", "yes")
+
+    # Inbound Telegram copilot (two-way chat, verify-any-account)
+    TELEGRAM_LISTEN_ENABLED: bool = os.getenv(
+        "TRADING_BOT_TELEGRAM_LISTEN", "true"
+    ).lower() in ("1", "true", "yes")
+    TELEGRAM_VERIFY_SECRET: str = os.getenv("TRADING_BOT_TELEGRAM_VERIFY_SECRET", "hall of fame")
+    TELEGRAM_POLL_INTERVAL_SEC: float = float(os.getenv("TRADING_BOT_TELEGRAM_POLL_SEC", "1.5"))
+    TELEGRAM_VERIFIED_STORE: str = "models/telegram_verified.json"
+    TELEGRAM_COMMANDER_GUIDANCE: str = "models/commander_guidance.jsonl"
+    TELEGRAM_DAILY_REPORT_MAX_CHARS: int = int(os.getenv("TRADING_BOT_TELEGRAM_REPORT_CHARS", "3800"))
+    TELEGRAM_BROADCAST_OPS: bool = os.getenv("TRADING_BOT_TELEGRAM_BROADCAST_OPS", "true").lower() in ("1", "true", "yes")
+    TELEGRAM_BROADCAST_GIT: bool = os.getenv("TRADING_BOT_TELEGRAM_BROADCAST_GIT", "true").lower() in ("1", "true", "yes")
+
+    # Commander chat → self-improvement loop
+    COMMANDER_LEARNING_ENABLED: bool = os.getenv(
+        "COMMANDER_LEARNING_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    COMMANDER_AUTO_APPLY_FROM_CHAT: bool = os.getenv(
+        "COMMANDER_AUTO_APPLY_FROM_CHAT", "true"
+    ).lower() in ("1", "true", "yes")
+    COMMANDER_AUTO_APPLY_MIN_SEC: float = float(os.getenv("COMMANDER_AUTO_APPLY_MIN_SEC", "90"))
+
+    # Generative mood (free-form, not fixed labels)
+    GENERATIVE_MOOD_ENABLED: bool = os.getenv(
+        "GENERATIVE_MOOD_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    GENERATIVE_MOOD_MIN_SEC: float = float(os.getenv("GENERATIVE_MOOD_MIN_SEC", "45"))
+
+    # Vision model for chart review via Telegram
+    OLLAMA_VISION_MODEL: str = os.getenv("OLLAMA_VISION_MODEL", "llava")
+    OLLAMA_VISION_TIMEOUT: int = int(os.getenv("OLLAMA_VISION_TIMEOUT", "45"))
+    OLLAMA_VISION_MAX_TOKENS: int = int(os.getenv("OLLAMA_VISION_MAX_TOKENS", "512"))
 
     EMAIL_ENABLED: bool = False
     EMAIL_SMTP_HOST: str = os.getenv("TRADING_BOT_SMTP_HOST", "")
@@ -499,6 +649,9 @@ class BotConfig:
 
     def risk_amount_usd(self, account_equity: float) -> float:
         pct_based = account_equity * self.RISK_PER_TRADE_PCT
+        if getattr(self, "PAPER_TRADING", False) and getattr(self, "AI_PAPER_FREE_LEARNING", True):
+            cap = float(getattr(self, "MAX_RISK_PER_TRADE_USD", 250_000))
+            return min(pct_based, cap) if cap > 0 else pct_based
         return min(pct_based, self.MAX_RISK_PER_TRADE_USD)
 
     # ════════════════════════════════════════════════════════════════════

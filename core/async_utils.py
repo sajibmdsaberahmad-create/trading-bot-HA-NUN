@@ -153,6 +153,13 @@ class BackgroundWorker:
                 )
                 if push_result.returncode == 0:
                     self._stats["git_pushes"] += 1
+                    try:
+                        from core.git_sync import cfg_bot
+                        from core.telegram_broadcast import notify_git_push
+                        if cfg_bot is not None:
+                            notify_git_push(cfg_bot, task.message[:200], category="background", ok=True)
+                    except Exception:
+                        pass
                 else:
                     log.debug(f"Background push issue: {push_result.stderr[:100]}")
                     
@@ -277,6 +284,15 @@ class FileWatcher:
         self._last_mtime: float = 0.0
         self._running = False
         self._thread: Optional[threading.Thread] = None
+        self._suppress_until: float = 0.0
+
+    def suppress_for(self, seconds: float = 20.0):
+        """Ignore self-triggered writes (e.g. bot saving weights) for N seconds."""
+        self._suppress_until = time.time() + seconds
+        try:
+            self._last_mtime = self._get_mtime()
+        except Exception:
+            pass
     
     def start(self):
         """Start watching in background thread."""
@@ -303,7 +319,9 @@ class FileWatcher:
                 current_mtime = self._get_mtime()
                 if current_mtime > self._last_mtime and current_mtime > 0:
                     self._last_mtime = current_mtime
-                    log.info(f"FileWatcher: {self.filepath} changed — triggering reload")
+                    if time.time() < self._suppress_until:
+                        continue
+                    log.debug(f"FileWatcher: {self.filepath} changed — triggering reload")
                     try:
                         self.callback(self.filepath)
                     except Exception as exc:

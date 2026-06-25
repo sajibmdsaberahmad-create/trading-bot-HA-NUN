@@ -19,6 +19,7 @@ import numpy as np
 
 from core.config import BotConfig
 from core.notify import log
+from core.paper_mode import account_equity as resolve_account_equity, is_paper_free_learning
 
 if TYPE_CHECKING:
     from core.pilot_experience import PilotExperienceSystem
@@ -83,7 +84,73 @@ def get_live_scan_universe(
             "🔴 Live IB scanner returned 0 tickers — no static fallback. "
             "Check IB Gateway login, market hours, and scanner subscription."
         )
-    return out[: getattr(cfg, "SCAN_UNIVERSE_MAX", 80)]
+    return out[: effective_scan_universe_max(cfg)]
+
+
+def is_ai_unlimited(cfg: BotConfig) -> bool:
+    return bool(getattr(cfg, "AI_UNLIMITED_MODE", False))
+
+
+def is_ai_council_mode(cfg: BotConfig) -> bool:
+    """All trading decisions flow through non-blocking Ollama+PPO council."""
+    return bool(
+        getattr(cfg, "AI_COUNCIL_ALL_DECISIONS", True)
+        and getattr(cfg, "AI_FULL_CONTROL", True)
+        and getattr(cfg, "LIVE_AI_PIPELINE_ENABLED", True)
+    )
+
+
+def effective_max_locked_targets(cfg: BotConfig) -> int:
+    if is_ai_unlimited(cfg):
+        return int(getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30))
+    return int(getattr(cfg, "MAX_LOCKED_TARGETS", 5))
+
+
+def effective_max_concurrent_positions(cfg: BotConfig) -> int:
+    if is_ai_unlimited(cfg):
+        return int(getattr(cfg, "AI_MAX_CONCURRENT_POSITIONS", 50))
+    return int(getattr(cfg, "MAX_CONCURRENT_POSITIONS", 5))
+
+
+def effective_min_lock_score(cfg: BotConfig) -> float:
+    if is_ai_unlimited(cfg):
+        return float(getattr(cfg, "AI_MIN_LOCK_SCORE", 0.0))
+    return float(getattr(cfg, "MIN_LOCK_SCORE", 30.0))
+
+
+def effective_min_lock_candidates(cfg: BotConfig) -> int:
+    return 1 if is_ai_unlimited(cfg) else int(getattr(cfg, "MIN_LOCK_CANDIDATES", 2))
+
+
+def effective_scan_universe_max(cfg: BotConfig) -> int:
+    if is_ai_unlimited(cfg):
+        return int(getattr(cfg, "AI_SCAN_UNIVERSE_MAX", 80))
+    return int(getattr(cfg, "SCAN_UNIVERSE_MAX", 30))
+
+
+def effective_min_cash_reserve_pct(cfg: BotConfig) -> float:
+    if is_ai_unlimited(cfg):
+        return float(getattr(cfg, "AI_MIN_CASH_RESERVE_PCT", 0.0))
+    return float(getattr(cfg, "MIN_CASH_RESERVE_PCT", 0.05))
+
+
+def effective_max_shares_per_trade(cfg: BotConfig) -> int:
+    if is_ai_unlimited(cfg):
+        return int(getattr(cfg, "AI_MAX_SHARES_PER_TRADE", 100_000))
+    return int(getattr(cfg, "MAX_SHARES_PER_TRADE", 2000))
+
+
+def effective_prefetch_top_n(cfg: BotConfig) -> int:
+    if is_ai_unlimited(cfg):
+        # Prefetch fewer names so Ollama has capacity for sync entry calls on spikes
+        return min(8, effective_max_locked_targets(cfg))
+    return int(getattr(cfg, "LIVE_AI_PREFETCH_TOP_N", 3))
+
+
+def effective_min_position_hold_sec(cfg: BotConfig) -> float:
+    if is_ai_unlimited(cfg):
+        return 0.0
+    return float(getattr(cfg, "MIN_POSITION_HOLD_SEC", 45.0))
 
 
 def get_effective_confidence_threshold(
@@ -100,13 +167,60 @@ def get_effective_confidence_threshold(
 
 
 def get_deploy_usd(cfg: BotConfig, pilot: Optional["PilotExperienceSystem"] = None) -> float:
-    """$1000 base deploy; veterans may scale up within guardrail cap."""
+    """Deploy per stock — paper free uses equity hint; veterans scale within equity."""
+    if is_paper_free_learning(cfg):
+        return resolve_account_equity(cfg) * 0.10
     base = float(getattr(cfg, "DEPLOY_PER_STOCK_USD", 1000.0))
     if not getattr(cfg, "PILOT_MODE_ENABLED", True) or pilot is None:
         return base
     mult = pilot.get_max_position_size()
     cap = float(getattr(cfg, "PILOT_MAX_DEPLOY_USD", 2000.0))
     return min(base * mult, cap)
+
+
+def get_ai_deploy_budget(
+    cfg: BotConfig,
+    pilot: Optional["PilotExperienceSystem"] = None,
+    account_equity: float = 0.0,
+    available_cash: float = 0.0,
+    open_positions: int = 0,
+) -> float:
+    """Max USD deployable for one new position — fixed cap or equity-based slots."""
+    if getattr(cfg, "USE_FIXED_DEPLOY_CAP", False):
+        budget = get_deploy_usd(cfg, pilot)
+        max_trade = float(getattr(cfg, "MAX_TRADE_SIZE_USD", 1000.0))
+        if max_trade > 0:
+            budget = min(budget, max_trade)
+        return max(0.0, budget)
+
+    max_conc = effective_max_concurrent_positions(cfg)
+    slots_left = max(1, max_conc - open_positions)
+    reserve_pct = effective_min_cash_reserve_pct(cfg)
+    deployable = max(0.0, available_cash * (1.0 - reserve_pct))
+    per_slot = deployable / slots_left
+
+    max_pct = float(getattr(cfg, "AI_MAX_DEPLOY_PCT", 0.0))
+    if max_pct > 0 and account_equity > 0:
+        per_slot = min(per_slot, account_equity * max_pct)
+
+    max_trade = float(getattr(cfg, "MAX_TRADE_SIZE_USD", 0))
+    if max_trade > 0:
+        per_slot = min(per_slot, max_trade)
+    elif is_paper_free_learning(cfg) and account_equity > 0:
+        per_slot = min(per_slot, account_equity * 0.95)
+
+    return max(0.0, per_slot)
+
+
+def get_trade_risk_usd(cfg: BotConfig, account_equity: float = 0.0) -> float:
+    """Per-trade risk budget — paper free uses full equity %; live uses capped risk."""
+    if getattr(cfg, "USE_FIXED_RISK_CAP", False):
+        return float(getattr(cfg, "HARD_STOP_USD", 50.0))
+    if account_equity > 0:
+        return cfg.risk_amount_usd(account_equity)
+    if is_paper_free_learning(cfg):
+        return cfg.risk_amount_usd(resolve_account_equity(cfg))
+    return float(getattr(cfg, "MAX_RISK_PER_TRADE_USD", 75.0))
 
 
 def snapshot_features(feature_buffer, cfg: BotConfig) -> List[float]:
@@ -131,6 +245,42 @@ def send_dynamic_notification(
     pilot=None,
 ) -> None:
     """AI-crafted Telegram alert — Ollama pilot voice, structured fallback."""
+    cfg = getattr(notifier, "cfg", None)
+    if cfg is None:
+        from core.config import BotConfig
+        cfg = BotConfig()
+    sync_events = frozenset({"session_close", "session_shutdown", "market_close"})
+    if (
+        getattr(cfg, "TELEGRAM_ASYNC_DURING_SESSION", True)
+        and event_type not in sync_events
+    ):
+        try:
+            from core.async_utils import get_background_worker
+            get_background_worker()._executor.submit(
+                lambda: _send_dynamic_notification_impl(
+                    notifier, autopilot, event_type, context, fallback_msg,
+                    ai_commander, consciousness, pilot,
+                )
+            )
+            return
+        except Exception:
+            pass
+    _send_dynamic_notification_impl(
+        notifier, autopilot, event_type, context, fallback_msg,
+        ai_commander, consciousness, pilot,
+    )
+
+
+def _send_dynamic_notification_impl(
+    notifier,
+    autopilot,
+    event_type: str,
+    context: Dict[str, Any],
+    fallback_msg: str,
+    ai_commander=None,
+    consciousness=None,
+    pilot=None,
+) -> None:
     from core.ai_notifier import send_smart_telegram
     send_smart_telegram(
         notifier, event_type, context, fallback_msg,
@@ -146,8 +296,11 @@ def observe_trade_everywhere(
     autopilot: Optional["CognitiveAutopilot"] = None,
     consciousness: Optional["AIConsciousness"] = None,
     pilot: Optional["PilotExperienceSystem"] = None,
+    cfg: Optional[BotConfig] = None,
 ) -> None:
     """Single hook so all brains learn from the same flight."""
+    from core.architecture_epoch import stamp_trade
+    trade = stamp_trade(trade, cfg)
     if autopilot:
         try:
             autopilot.observe_trade(trade)

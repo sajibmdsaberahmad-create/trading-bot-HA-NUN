@@ -64,7 +64,13 @@ class AIConsciousness:
         self.cfg = cfg
         self.state = self._load_state()
         self.regime_detector = MarketRegimeDetector()
+        self._defer_git_push = True
+        self._pending_git_push = False
         self._awaken()
+        self._defer_git_push = False
+        if self._pending_git_push:
+            self._pending_git_push = False
+            self._schedule_git_push()
 
     def _awaken(self):
         """First boot or restart — establish consciousness."""
@@ -158,16 +164,26 @@ class AIConsciousness:
         try:
             with open(CONSCIOUSNESS_PATH, "w") as f:
                 json.dump(self.state, f, indent=2)
-            now = datetime.utcnow().timestamp()
-            if now - getattr(self, "_last_git_push", 0) > 120:
-                self._last_git_push = now
-                try:
-                    from core.git_sync import push_learning_checkpoint
-                    push_learning_checkpoint("consciousness")
-                except Exception:
-                    pass
+            self._maybe_push_to_git()
         except Exception as exc:
             logger.debug(f"Could not save consciousness state: {exc}")
+
+    def _maybe_push_to_git(self):
+        if getattr(self, "_defer_git_push", False):
+            self._pending_git_push = True
+            return
+        now = datetime.utcnow().timestamp()
+        if now - getattr(self, "_last_git_push", 0) <= 120:
+            return
+        self._last_git_push = now
+        self._schedule_git_push()
+
+    def _schedule_git_push(self):
+        try:
+            from core.git_sync import push_learning_checkpoint_async
+            push_learning_checkpoint_async("consciousness")
+        except Exception:
+            pass
 
     def _write_thought(self, thought_type: str, message: str, metadata: Optional[Dict] = None):
         """Write a thought to the AI's journal."""
@@ -253,32 +269,44 @@ class AIConsciousness:
             self._write_thought("LEVEL_UP", f"I have achieved rank {new_level} with {veteran_xp} XP!")
 
     def _update_mood(self):
-        """Recalculate mood based on recent performance."""
+        """Recalculate mood from telemetry — generative when enabled."""
+        from core.architecture_epoch import mood_pnls_from_history, epoch_active
+
         win_history = self.state.get("win_history", [])
         if not win_history:
-            self.state["mood"] = "learning"
+            self.state["mood"] = "gathering"
+            self.state["mood_message"] = "Early session — building baseline."
             return
 
-        recent = win_history[-20:] if len(win_history) > 20 else win_history
-        wins = sum(1 for w in recent if w > 0)
-        losses = sum(1 for w in recent if w < 0)
-        total = len(recent)
-        wr = wins / total if total > 0 else 0.5
-
-        consecutive_losses = self.state.get("consecutive_losses", 0)
-        consecutive_wins = self.state.get("consecutive_wins", 0)
-        total_pnl = self.state.get("total_pnl", 0)
-
-        if wr >= 0.8 and consecutive_wins >= 5 and total_pnl > 0:
-            self.state["mood"] = "euphoric"
-        elif wr >= 0.65 and total_pnl > 0:
-            self.state["mood"] = "confident"
-        elif wr >= 0.45:
-            self.state["mood"] = "stable"
-        elif wr >= 0.30:
-            self.state["mood"] = "cautious"
+        start_idx = int(self.state.get("mood_epoch_start_index", 0))
+        if epoch_active(self.cfg):
+            recent_pnls = mood_pnls_from_history(win_history, start_idx)
         else:
-            self.state["mood"] = "anxious"
+            recent_pnls = win_history[-20:] if len(win_history) > 20 else list(win_history)
+
+        think_fn = None
+        try:
+            from core.cognitive_autopilot import CognitiveAutopilot  # noqa: F401
+            from core.ollama_brain import OllamaBrain
+            brain = OllamaBrain(self.cfg)
+            if brain.config.enabled:
+                think_fn = brain._call_ollama
+        except Exception:
+            pass
+
+        from core.generative_mood import assess_mood
+        mood, message = assess_mood(
+            self.cfg,
+            recent_pnls=recent_pnls,
+            consecutive_wins=int(self.state.get("consecutive_wins", 0)),
+            consecutive_losses=int(self.state.get("consecutive_losses", 0)),
+            total_pnl=float(self.state.get("total_pnl", 0)),
+            trades_observed=int(self.state.get("trades_observed", 0)),
+            think_fn=think_fn,
+            cache_key="consciousness",
+        )
+        self.state["mood"] = mood
+        self.state["mood_message"] = message
 
     def observe_trade(self, trade_data: Dict[str, Any]):
         """Observe a trade outcome — updates mood and self-awareness."""
@@ -301,7 +329,7 @@ class AIConsciousness:
                 self.state["worst_streak"] = self.state["consecutive_losses"]
 
         self._update_mood()
-        mood_msg = self.MOODS.get(self.state.get("mood", "learning"), "📊 Operating")
+        mood_msg = self.state.get("mood_message") or self.state.get("mood", "operating")
         self._write_thought("TRADE", f"Trade #{self.state['trades_observed']}: {trade_data.get('action', '?')} {trade_data.get('ticker', '?')} P&L=${pnl:+.2f} — {mood_msg}", trade_data)
         self._log_event("TRADE", f"Observed trade: {trade_data.get('ticker', '?')} {trade_data.get('action', '?')} P&L=${pnl:+.2f}")
 
@@ -600,13 +628,13 @@ class AIConsciousness:
 
     def get_identity(self) -> Dict[str, Any]:
         """Return AI's full self-perceived identity."""
-        mood = self.state.get("mood", "learning")
+        mood = self.state.get("mood", "gathering")
         return {
             "name": "HA-NUN Consciousness",
             "birth": self.state.get("birth_time"),
             "age": self._age_string(),
             "mood": mood,
-            "mood_message": self.MOODS.get(mood, ""),
+            "mood_message": self.state.get("mood_message", ""),
             "awakenings": self.state.get("total_awakenings", 0),
             "training_sessions": self.state.get("training_sessions", 0),
             "trades_observed": self.state.get("trades_observed", 0),

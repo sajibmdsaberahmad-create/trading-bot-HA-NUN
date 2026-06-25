@@ -122,11 +122,15 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
     combined_wr = (buffer_wr + returns_wr) / 2.0
 
     # ----------------------------
-    # Parameter adjustment logic
+    # Parameter adjustment logic (bounds from paper vs live mode)
     # ----------------------------
+    from core.param_bounds import effective_param_bounds
+    bounds = effective_param_bounds(cfg)
     adjustments: Dict[str, Any] = {}
 
     def _adj(key: str, current: float, suggested: float, low: float, high: float, reason: str):
+        if key in bounds:
+            low, high = bounds[key]
         safe = max(low, min(high, suggested))
         if safe != current:
             adjustments[key] = {
@@ -149,9 +153,25 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
          cfg.SCAN_INTERVAL_SECONDS * (1.3 if combined_wr < 0.4 else 0.8 if combined_wr > 0.7 else 1.0),
          60, 900, "reduce frequency when WR low; increase when WR strong")
 
-    _adj("MAX_TRADE_SIZE_USD", cfg.MAX_TRADE_SIZE_USD,
-         cfg.MAX_TRADE_SIZE_USD * (0.7 if combined_wr < 0.4 else 1.1 if combined_wr > 0.7 else 1.0),
+    base_trade = float(getattr(cfg, "MAX_TRADE_SIZE_USD", 0) or 0)
+    if base_trade <= 0:
+        from core.paper_mode import account_equity as resolve_account_equity
+        base_trade = resolve_account_equity(cfg) * 0.05
+    _adj("MAX_TRADE_SIZE_USD", base_trade,
+         base_trade * (0.7 if combined_wr < 0.4 else 1.1 if combined_wr > 0.7 else 1.0),
          100, 5000, "reduce size when WR poor; increase when WR strong")
+
+    _adj("MAX_RISK_PER_TRADE_USD", cfg.MAX_RISK_PER_TRADE_USD,
+         cfg.MAX_RISK_PER_TRADE_USD * (0.75 if combined_wr < 0.4 else 1.1 if combined_wr > 0.65 else 1.0),
+         15, 100, "tighten per-trade risk when WR low; relax slightly when WR strong")
+
+    _adj("HARD_STOP_USD", cfg.HARD_STOP_USD,
+         cfg.HARD_STOP_USD * (0.9 if combined_wr < 0.4 else 1.0),
+         25, 100, "tighter hard stop when WR weak")
+
+    _adj("CONFIDENCE_THRESHOLD", cfg.CONFIDENCE_THRESHOLD,
+         cfg.CONFIDENCE_THRESHOLD + (0.05 if combined_wr < 0.4 else -0.03 if combined_wr > 0.7 else 0),
+         0.35, 0.90, "raise entry bar when WR low; lower when WR strong")
 
     # Adjust heuristic weights from market regime context
     if weights:
@@ -194,6 +214,16 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
 
     if buffer.get("avg_reward", 0) < 0:
         lines.append("• Average reward is negative — review exit logic and trailing-stop settings")
+
+    try:
+        from core.commander_learning import load_commander_guidance
+        notes = load_commander_guidance(6)
+        if notes:
+            lines.append("• Commander guidance (recent):")
+            for n in notes[-4:]:
+                lines.append(f"  - {n[:120]}")
+    except Exception:
+        pass
 
     if adjustments:
         lines.append("• Recommended parameter adjustments:")
@@ -240,24 +270,28 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
 
 
 def _apply_adjustments(cfg: BotConfig, adjustments: Dict[str, Any]):
-    """Apply safe numeric adjustments to config attributes in-memory."""
-    safe_params = {
-        "SCALP_STOP_ATR_MULTIPLIER",
-        "SCALP_TP_ATR_MULTIPLIER",
-        "SCAN_INTERVAL_SECONDS",
-        "MAX_TRADE_SIZE_USD",
-        "SCALP_MIN_STOP_PCT",
-        "SCALP_MAX_STOP_PCT",
-        "SCALP_MIN_RR",
-        "SCALP_MAX_TP_PCT",
-    }
+    """Apply numeric adjustments in-memory — clamped to learning bounds."""
+    from core.param_bounds import clamp_param_value, is_tunable, normalize_param
+
     for key, meta in adjustments.items():
-        if key in safe_params and hasattr(cfg, key):
-            old = getattr(cfg, key)
-            new = meta["new"]
-            if isinstance(old, (int, float)) and isinstance(new, (int, float)):
-                setattr(cfg, key, new)
-                log.info(f"⚙️ Self-improvement: {key} {old} -> {new}")
+        param = normalize_param(key)
+        if not is_tunable(param, cfg) or not hasattr(cfg, param):
+            continue
+        old = getattr(cfg, param)
+        raw_new = meta.get("new") if isinstance(meta, dict) else meta
+        clamped, ok, _ = clamp_param_value(param, raw_new, current=old, cfg=cfg)
+        if not ok:
+            continue
+        try:
+            if isinstance(old, int) and not isinstance(old, bool):
+                new = int(round(float(clamped)))
+            else:
+                new = float(clamped)
+        except (TypeError, ValueError):
+            continue
+        if new != old:
+            setattr(cfg, param, new)
+            log.info(f"⚙️ Self-improvement: {param} {old} -> {new}")
 
 
 def generate_guidelines_text() -> str:

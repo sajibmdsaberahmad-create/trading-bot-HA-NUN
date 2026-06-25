@@ -16,12 +16,11 @@ Mac or on a headless Linux VPS. No SMTP server, no app passwords.
 SETUP (see docs/LAUNCH_GUIDE.md for the full walkthrough):
   1. Message @BotFather on Telegram, send /newbot, follow prompts.
   2. Copy the bot token it gives you.
-  3. Message your new bot once (anything), then visit:
-     https://api.telegram.org/bot<TOKEN>/getUpdates
-     to find your numeric chat_id in the response JSON.
-  4. Export both as environment variables before launching the bot:
-       export TRADING_BOT_TELEGRAM_TOKEN="123456:ABC-..."
-       export TRADING_BOT_TELEGRAM_CHAT_ID="987654321"
+  3. Export TRADING_BOT_TELEGRAM_TOKEN before launching the bot.
+  4. Message the bot from ANY Telegram account and verify:
+       /verify YOUR_SECRET_PHRASE
+     Verified chat IDs receive all alerts (no fixed chat_id required).
+  Optional legacy: TRADING_BOT_TELEGRAM_CHAT_ID + TELEGRAM_VERIFIED_ONLY_OUTBOUND=false
 """
 
 import logging
@@ -101,11 +100,11 @@ class Notifier:
         self.cfg = cfg
         self._ai_composer = None
 
+        from core.telegram_auth import outbound_chat_ids, telegram_bot_ready
+
         self.telegram_token = cfg.TELEGRAM_BOT_TOKEN
-        self.telegram_chat  = cfg.TELEGRAM_CHAT_ID
-        self.telegram_ready = bool(
-            cfg.TELEGRAM_ENABLED and self.telegram_token and self.telegram_chat
-        )
+        self.telegram_chat  = cfg.TELEGRAM_CHAT_ID  # legacy optional
+        self.telegram_ready = telegram_bot_ready(cfg)
 
         self.email_host = cfg.EMAIL_SMTP_HOST
         self.email_port = cfg.EMAIL_SMTP_PORT
@@ -117,11 +116,15 @@ class Notifier:
             and self.email_to and self.email_pass
         )
 
-        if cfg.TELEGRAM_ENABLED and not self.telegram_ready:
+        if cfg.TELEGRAM_ENABLED and not self.telegram_token:
             log.warning(
-                "Telegram notifications enabled in config but TOKEN/CHAT_ID "
-                "are not set in .env. Telegram alerts are OFF until set. "
-                "See docs/MOMENTUM_STRATEGY_GUIDE.md."
+                "Telegram notifications enabled but TRADING_BOT_TELEGRAM_TOKEN "
+                "is not set. Telegram alerts are OFF until configured."
+            )
+        elif cfg.TELEGRAM_ENABLED and self.telegram_ready and not outbound_chat_ids(cfg):
+            log.info(
+                "Telegram: no verified commanders yet — message the bot from any account "
+                "and send /verify YOUR_SECRET_PHRASE to receive alerts."
             )
         if cfg.EMAIL_ENABLED and not self.email_ready:
             log.warning(
@@ -247,11 +250,18 @@ class Notifier:
 
     def warning(self, text: str):
         """Warning notification (market closed, reconnect, etc)."""
-        log.warning(f"NOTIFY │ {text.splitlines()[0]}")
+        msg = text
+        if (
+            getattr(self, "_ai_composer", None)
+            and getattr(self.cfg, "AI_TELEGRAM_ALL_OUTBOUND", True)
+            and getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True)
+        ):
+            msg = self._ai_composer.compose_outbound("warning", {"message": text}, text)
+        log.warning(f"NOTIFY │ {msg.splitlines()[0]}")
         if self.telegram_ready:
-            self._send_telegram(text)
+            self._send_telegram(msg)
         if self.email_ready:
-            self._send_email(text)
+            self._send_email(msg)
 
     # ── Internal fan-out ─────────────────────────────────────────────────────
 
@@ -263,19 +273,9 @@ class Notifier:
             self._send_email(message)
 
     def _send_telegram(self, message: str):
-        try:
-            url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
-            data = urllib.parse.urlencode({
-                "chat_id": self.telegram_chat,
-                "text": message,
-            }).encode("utf-8")
-            req = urllib.request.Request(url, data=data, method="POST")
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                resp.read()
-        except urllib.error.URLError as exc:
-            log.warning(f"Telegram send failed (network): {exc}")
-        except Exception as exc:
-            log.warning(f"Telegram send failed: {exc}")
+        from core.telegram_auth import fanout_telegram
+        if fanout_telegram(self.cfg, message, token=self.telegram_token) == 0:
+            log.debug("Telegram: no verified recipients — message logged only")
 
     def _send_email(self, message: str):
         try:

@@ -24,6 +24,46 @@ if TYPE_CHECKING:
     from core.pilot_experience import PilotExperienceSystem
 
 
+_EVENT_GUIDANCE: Dict[str, str] = {
+    "help": "Welcome your commander and list commands in a clean organized layout.",
+    "verify_locked": "Explain access is locked; host must set verify secret.",
+    "verify_success": "Celebrate verification; invite them to try /help /daily /positions.",
+    "verify_failed": "Verification failed — tell them to use /verify SECRET (keep instruction clear).",
+    "verify_prompt": "Explain HANOON commander access requires /verify SECRET_PHRASE.",
+    "verify_required": "Not verified yet — prompt for /verify SECRET_PHRASE.",
+    "status": "Live account pulse: equity, NAV, trades, open positions summary.",
+    "positions": "Each open position: ticker, size, entry, price, P&L, stops, your read.",
+    "risk": "Risk dashboard: daily/weekly P&L, deployment %, halt status, loss streak.",
+    "system": "Full ops: git sync, model file, pilot rank, mood, artifacts.",
+    "mood": "Your current mental state as pilot + session context.",
+    "daily_report": "Full-day trading activity like a TWS statement in pilot voice.",
+    "daily_brief": "End-of-day AI briefing: headline P&L, narrative, lessons.",
+    "daily_progress": "Short ack that you're building their report.",
+    "commander_chat": "Reply to commander message with analysis and direction.",
+    "vision_analysis": "Chart analysis from uploaded image.",
+    "guide_stored": "Acknowledge guidance stored for next session.",
+    "improve_progress": "Short ack you're building improvement plan.",
+    "improve_result": "Summarize improvement plan applied from learning cycle.",
+    "analyze_positions": "Review each position: HOLD, lock profit, trail, or cut loss.",
+    "exit_progress": "Short ack you're executing the exit.",
+    "exit_result": "Confirm exit with price and P&L.",
+    "exitall_result": "Bulk exit results per ticker.",
+    "git_push": "Announce code/learning pushed to GitHub — pilot ops update.",
+    "model_release": "New model version tagged and released.",
+    "learning_checkpoint": "Learning artifacts synced to git.",
+    "commander_exit": "Position closed on commander order.",
+    "warning": "Important warning — explain clearly, stay calm pilot tone.",
+    "error": "Explain what failed clearly; stay calm pilot tone.",
+    "unknown_command": "Unknown command — suggest /help.",
+    "usage": "Show correct command usage.",
+    "flat_positions": "No open positions right now.",
+    "vision_wait": "Vision model downloading — ask to resend chart soon.",
+    "vision_unavailable": "Vision not wired — explain briefly.",
+    "image_download_fail": "Could not download their image.",
+    "runner_unavailable": "Trading runner not attached to copilot.",
+}
+
+
 class TelegramAIComposer:
     """Compose Telegram messages via Ollama with rate limits and rich context."""
 
@@ -65,23 +105,57 @@ class TelegramAIComposer:
         self._session_pnl += float(pnl_usd or 0)
 
     def compose(self, event_type: str, context: Dict[str, Any], fallback: str) -> str:
-        if not getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True):
-            return self._structured_fallback(event_type, context, fallback)
+        return self.compose_outbound(event_type, context, fallback, copilot=False)
 
-        min_gap = float(getattr(self.cfg, "AI_TELEGRAM_MIN_INTERVAL_SEC", 6.0))
-        now = time.time()
-        if now - self._last_sent.get(event_type, 0) < min_gap and event_type in (
-            "watch_pulse", "system_status", "info",
-        ):
-            return self._structured_fallback(event_type, context, fallback)
+    def compose_outbound(
+        self,
+        event_type: str,
+        context: Dict[str, Any],
+        fallback: str,
+        *,
+        copilot: bool = False,
+        max_chars: Optional[int] = None,
+    ) -> str:
+        """AI-driven Telegram text — trading alerts, copilot replies, broadcasts."""
+        all_ai = getattr(self.cfg, "AI_TELEGRAM_ALL_OUTBOUND", True)
+        notify_on = getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True)
+        if not notify_on and not copilot:
+            return fallback or self._structured_fallback(event_type, context, fallback)
+
+        max_c = max_chars if max_chars is not None else (
+            int(getattr(self.cfg, "AI_TELEGRAM_COMMANDER_MAX_CHARS", 3800))
+            if copilot
+            else int(getattr(self.cfg, "AI_TELEGRAM_MAX_CHARS", 450))
+        )
+
+        if not copilot:
+            min_gap = float(getattr(self.cfg, "AI_TELEGRAM_MIN_INTERVAL_SEC", 6.0))
+            now = time.time()
+            if now - self._last_sent.get(event_type, 0) < min_gap and event_type in (
+                "watch_pulse", "system_status", "info",
+            ):
+                if all_ai:
+                    beautified = self._ollama_beautify(fallback, event_type, context, max_c, copilot=False)
+                    if beautified:
+                        return beautified
+                return self._structured_fallback(event_type, context, fallback)
 
         enriched = self._enrich_context(event_type, context)
-        ai_text = self._ollama_compose(event_type, enriched, fallback)
+        if fallback and not enriched.get("raw_briefing"):
+            enriched["raw_briefing"] = fallback[:2500]
+
+        ai_text = self._ollama_compose(event_type, enriched, fallback, max_chars=max_c, copilot=copilot)
         if ai_text:
-            self._last_sent[event_type] = now
+            self._last_sent[event_type] = time.time()
             return ai_text
 
-        return self._structured_fallback(event_type, context, fallback)
+        if all_ai or copilot:
+            beautified = self._ollama_beautify(fallback, event_type, enriched, max_c, copilot=copilot)
+            if beautified:
+                self._last_sent[event_type] = time.time()
+                return beautified
+
+        return fallback or self._structured_fallback(event_type, context, fallback)
 
     def _enrich_context(self, event_type: str, context: Dict[str, Any]) -> Dict[str, Any]:
         out = dict(context)
@@ -133,32 +207,89 @@ class TelegramAIComposer:
 
         return out
 
-    def _ollama_compose(self, event_type: str, context: Dict[str, Any], fallback: str) -> str:
-        max_chars = int(getattr(self.cfg, "AI_TELEGRAM_MAX_CHARS", 450))
+    @staticmethod
+    def _event_guidance(event_type: str) -> str:
+        return _EVENT_GUIDANCE.get(
+            event_type,
+            "Brief your commander clearly — organized sections, exact numbers, pilot voice.",
+        )
+
+    def _ollama_compose(
+        self,
+        event_type: str,
+        context: Dict[str, Any],
+        fallback: str,
+        *,
+        max_chars: int = 450,
+        copilot: bool = False,
+    ) -> str:
         mood = context.get("mood", "awake")
         pilot = context.get("pilot_level", "Cadet")
+        data_limit = 2800 if copilot else 900
+        max_lines = 30 if copilot else 5
+        guidance = self._event_guidance(event_type)
 
         prompt = (
-            "You are HANOON — an autonomous trading pilot AI briefing your commander on Telegram.\n"
-            "Write ONE message that sounds alive, analytical, and organized — NOT a canned template.\n\n"
-            f"EVENT: {event_type}\n"
+            "You are HANOON — an autonomous trading pilot AI writing to your commander on Telegram.\n"
+            "Write ONE message that sounds alive, analytical, and beautifully organized — "
+            "NOT a canned template. Transform the DATA into clear sections with emoji headers.\n\n"
+            f"MESSAGE TYPE: {event_type}\n"
+            f"TASK: {guidance}\n"
             f"US MARKET: {context.get('market_state', '?').upper()} | {context.get('time_et', '')}\n"
             f"MOOD: {mood} | RANK: {pilot} | SESSION P&L: ${context.get('session_pnl', 0):+.2f}\n\n"
             f"DATA (use these numbers exactly — do not invent):\n"
-            f"{json.dumps(context, default=str)[:900]}\n\n"
+            f"{json.dumps(context, default=str)[:data_limit]}\n\n"
+        )
+        if fallback:
+            prompt += f"RAW BRIEFING (reorganize & beautify, keep all facts):\n{fallback[:1800]}\n\n"
+        prompt += (
             "STYLE:\n"
-            "• Line 1: emoji + sharp headline (what happened)\n"
-            "• Lines 2-4: key numbers — price, size, stop/target, risk $, R:R, deploy %\n"
-            "• Last line: your read — confidence, gut, what you're watching next\n"
-            "• First-person pilot voice ('I entered…', 'I'm holding…')\n"
+            "• First-person pilot voice ('I'm holding…', 'I pushed…')\n"
+            "• Organized sections — emoji + short headers, then details\n"
+            "• Exact numbers from DATA only\n"
             f"• Max {max_chars} characters total\n"
-            "• Plain text only — no JSON, no markdown fences, no bullet dashes\n"
+            "• Plain text only — no JSON, no markdown fences\n"
         )
 
-        raw = ""
+        raw = self._call_ollama(prompt)
+        text = (raw or "").strip()
+        if len(text) < 8:
+            return ""
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        return "\n".join(lines[:max_lines])[:max_chars]
+
+    def _ollama_beautify(
+        self,
+        raw_text: str,
+        event_type: str,
+        context: Dict[str, Any],
+        max_chars: int,
+        *,
+        copilot: bool = False,
+    ) -> str:
+        if not (raw_text or "").strip():
+            return ""
+        guidance = self._event_guidance(event_type)
+        prompt = (
+            "You are HANOON on Telegram. Rewrite this briefing to be beautiful, organized, and alive.\n"
+            f"MESSAGE TYPE: {event_type}\nTASK: {guidance}\n"
+            "Keep ALL facts and numbers exactly. First-person pilot voice.\n\n"
+            f"RAW:\n{raw_text[:2200]}\n\n"
+            f"CONTEXT: mood={context.get('mood', '?')} market={context.get('market_state', '?')}\n"
+            f"Max {max_chars} chars. Plain text, emoji section headers OK."
+        )
+        raw = self._call_ollama(prompt)
+        text = (raw or "").strip()
+        if len(text) < 8:
+            return ""
+        max_lines = 30 if copilot else 8
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        return "\n".join(lines[:max_lines])[:max_chars]
+
+    def _call_ollama(self, prompt: str) -> str:
         if self.ai_commander:
             try:
-                raw = self.ai_commander.compose_telegram(prompt)
+                return (self.ai_commander.compose_telegram(prompt) or "").strip()
             except Exception as exc:
                 log.debug(f"AI telegram compose: {exc}")
         elif self.autopilot:
@@ -166,25 +297,17 @@ class TelegramAIComposer:
             ollama = getattr(core, "ollama", None) if core else None
             if ollama and hasattr(ollama, "compose_notification"):
                 try:
-                    raw = ollama.compose_notification(prompt) or ""
+                    return (ollama.compose_notification(prompt) or "").strip()
                 except Exception:
                     pass
-            if not raw:
-                try:
-                    raw = self.autopilot.generate_notification(event_type, context)
-                except Exception:
-                    pass
-
-        text = (raw or "").strip()
-        if len(text) < 12:
-            return ""
-        # Single message — drop extra lines if model rambled
-        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-        text = "\n".join(lines[:5])[:max_chars]
-        return text
+            try:
+                return (self.autopilot.generate_notification("telegram", {"prompt": prompt[:500]}) or "").strip()
+            except Exception:
+                pass
+        return ""
 
     def _structured_fallback(self, event_type: str, context: Dict[str, Any], fallback: str) -> str:
-        """Organized numeric briefing when Ollama is unavailable."""
+        """Last-resort when Ollama is unavailable — still organized numerics."""
         ctx = self._enrich_context(event_type, context)
         et = ctx.get("time_et", "")
         mood = ctx.get("mood", "—")

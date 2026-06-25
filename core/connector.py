@@ -116,7 +116,7 @@ class IBConnector:
                     "  - IB Gateway not fully logged in yet (wait 30 sec after login)"
                 )
             self._contract = qualified[0]
-            log.info(f"Contract qualified: {self._contract}")
+            log.debug(f"Contract qualified: {self._contract}")
         return self._contract
 
     def is_connected(self) -> bool:

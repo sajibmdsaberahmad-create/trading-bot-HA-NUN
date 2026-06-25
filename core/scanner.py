@@ -26,6 +26,15 @@ from core.risk import safe_vwap
 
 
 @dataclass
+class ScannerHit:
+    """Lightweight IB scanner row — no historical bars required."""
+    ticker: str
+    rank: int = 0
+    scan_code: str = ""
+    distance: str = ""
+
+
+@dataclass
 class ScanResult:
     """One stock that passed the scan criteria."""
     ticker: str
@@ -65,8 +74,51 @@ class StockScanner:
         
         # Dynamic universe from IB scanner only (no static list)
         self._dynamic_universe: List[str] = []
+        self._scanner_hits: Dict[str, ScannerHit] = {}
         self._last_dynamic_fetch: float = 0.0
         self._dynamic_fetch_interval: int = 20  # Faster refresh  # Refresh every 30 seconds
+
+    def get_scanner_hits(self) -> Dict[str, ScannerHit]:
+        """Last IB scanner metadata keyed by ticker (rank, scan code, distance)."""
+        return dict(self._scanner_hits)
+
+    @staticmethod
+    def score_scanner_hit(hit: ScannerHit, list_index: int = 0) -> Dict:
+        """
+        Rank a ticker from IB scanner metadata only — no reqHistoricalData.
+        Used for sub-10s lock; bars are prefetched after lock.
+        """
+        rank_bonus = max(15.0, 88.0 - hit.rank * 2.2)
+        code_bonus = {
+            "TOP_PERC_GAIN": 12.0,
+            "HOT_BY_PRICE": 10.0,
+            "HOT_BY_VOLUME": 8.0,
+            "MOST_ACTIVE": 6.0,
+            "TOP_VOLUME": 6.0,
+        }.get(hit.scan_code, 4.0)
+        dist_bonus = 0.0
+        if hit.distance:
+            try:
+                raw = str(hit.distance).replace("%", "").strip()
+                dist_bonus = min(abs(float(raw)) * 2.0, 15.0)
+            except (TypeError, ValueError):
+                pass
+        if list_index > 0 and hit.rank == 0:
+            rank_bonus = max(15.0, 88.0 - list_index * 2.2)
+        total = round(rank_bonus + code_bonus + dist_bonus, 1)
+        reason = f"scanner:{hit.scan_code or 'live'}#{hit.rank}"
+        if hit.distance:
+            reason += f" dist={hit.distance}"
+        return {
+            "ticker": hit.ticker,
+            "price": 0.0,
+            "volume": 0,
+            "avg_volume": 0,
+            "rel_vol": 1.5,
+            "total_score": total,
+            "reasons": reason,
+            "scanner_fast": True,
+        }
     
     def get_dynamic_universe(self, ib_connector=None, force: bool = False) -> List[str]:
         """
@@ -81,8 +133,10 @@ class StockScanner:
         if force:
             self._last_dynamic_fetch = 0.0
             self._dynamic_universe = []
+            self._scanner_hits = {}
 
         tickers = []
+        hits: Dict[str, ScannerHit] = {}
         if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
             try:
                 from ib_insync import ScannerSubscription
@@ -114,16 +168,28 @@ class StockScanner:
                             ib.cancelScannerSubscription(scan)
                         except Exception:
                             pass
-                    for result in scan_results:
+                    for idx, result in enumerate(scan_results):
                         if result.contractDetails and result.contractDetails.contract:
                             symbol = result.contractDetails.contract.symbol
-                            if symbol and len(symbol) <= 5 and symbol not in tickers:
+                            if not symbol or len(symbol) > 5:
+                                continue
+                            dist = getattr(result, "distance", "") or ""
+                            prev = hits.get(symbol)
+                            if prev is None or idx < prev.rank:
+                                hits[symbol] = ScannerHit(
+                                    ticker=symbol,
+                                    rank=idx,
+                                    scan_code=scan_code,
+                                    distance=str(dist) if dist else "",
+                                )
+                            if symbol not in tickers:
                                 tickers.append(symbol)
                     if len(tickers) >= 40:
                         break
 
                 if tickers:
                     self._dynamic_universe = tickers[:100]
+                    self._scanner_hits = hits
                     self._last_dynamic_fetch = now
                     log.info(f"Dynamic universe: {len(tickers)} live tickers from IB scanner")
                 else:
