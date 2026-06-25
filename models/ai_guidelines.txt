@@ -2271,3 +2271,11 @@ The trader is using a simple trailing profit strategy with no specific parameter
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Decreasing the confidence threshold to 58% could help in avoiding future missed profit hunts.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:40:11.085757+00:00
+Trade closed with trailing_profit, profit hunting failed.
+The trade closed with trailing_profit, which indicates the trader is losing money on the current order. The profit hunting algorithm should not have been triggered due to a missed opportunity.
+• Always ensure that the trader's position remains open for future trades.
+• Trade closes with trailing_profit indicate a failure in profit hunting.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was set to 0.58, which is lower than the actual market data accuracy or technical analysis criteria. This indicates a missed opportunity.)
+

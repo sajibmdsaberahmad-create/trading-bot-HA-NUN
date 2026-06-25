@@ -27,3 +27,4 @@
 {"timestamp":"2026-06-25T16:38:49.853616+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":-22389.57,"pnl_pct":-0.5478,"primary_goal":true,"reason":"trailing_profit","price":3.64}
 {"timestamp":"2026-06-25T16:39:07.566496+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T16:39:31.289379+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":-55447.7,"pnl_pct":-0.5193,"primary_goal":true,"reason":"trailing_profit","price":3.87}
+{"timestamp":"2026-06-25T16:40:07.476322+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
