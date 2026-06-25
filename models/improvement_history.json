@@ -2779,5 +2779,90 @@
     "lessons": [
       "Review loss_streak on SOFI"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:49:31.314858+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on RIOT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:49:54.544865+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The algorithm is adjusting the confidence threshold to better align with the current market state.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The event occurred due to a trailing stop at the MARA ticker, which triggered profit hunting.",
+    "lessons": [
+      "Tailoring trades based on market conditions",
+      "Understanding trading algorithms for optimal results"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:49:56.926967+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Adjusting from 0.58 to a value closer to the minimum allowed (0.35) helps mitigate potential risks.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Loss streak triggered due to trailing stop.",
+    "lessons": [
+      "-",
+      "T",
+      "u",
+      "n",
+      "e",
+      "C",
+      "O",
+      "N",
+      "F",
+      "I",
+      "D",
+      "E",
+      "N",
+      "C",
+      "E",
+      "_",
+      "T",
+      "H",
+      "R",
+      "E",
+      "S",
+      "H",
+      "O",
+      "L",
+      "D",
+      "b",
+      "e",
+      "t",
+      "w",
+      "e",
+      "e",
+      "n",
+      "[",
+      "0",
+      ".",
+      "3",
+      "5",
+      ",",
+      "0",
+      ".",
+      "9",
+      "]"
+    ]
   }
 ]

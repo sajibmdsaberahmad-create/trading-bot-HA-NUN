@@ -6073,3 +6073,101 @@ The event occurred within the context of a live trading environment and follows 
 Observed loss_streak — recorded for learning.
 council_exit: Ollama exit 100% (PPO hold)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:49:31.314389+00:00
+Observed trade_closed — recorded for learning.
+trailing_stop
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:49:54.544104+00:00
+The event occurred due to a trailing stop at the MARA ticker, which triggered profit hunting.
+Real-time monitoring of the trade data and analysis of outcomes.
+• Tailoring trades based on market conditions and historical performance data.
+• Understanding trading algorithms for optimal results.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The algorithm is adjusting the confidence threshold to better align with the current market state.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:49:56.926612+00:00
+Loss streak triggered due to trailing stop.
+The loss streak occurred due to the trailing stop parameter.
+• T
+• u
+• n
+• e
+•  
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+•  
+• b
+• e
+• t
+• w
+• e
+• e
+• n
+•  
+• [
+• 0
+• .
+• 3
+• 5
+• ,
+•  
+• 0
+• .
+• 9
+• ]
+•  
+• t
+• o
+•  
+• b
+• e
+• t
+• t
+• e
+• r
+•  
+• b
+• a
+• l
+• a
+• n
+• c
+• e
+•  
+• r
+• i
+• s
+• k
+•  
+• a
+• n
+• d
+•  
+• r
+• e
+• w
+• a
+• r
+• d
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Adjusting from 0.58 to a value closer to the minimum allowed (0.35) helps mitigate potential risks.)
+

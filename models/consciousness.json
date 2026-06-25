@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 124,
   "training_sessions": 27,
-  "trades_observed": 150,
+  "trades_observed": 152,
   "scans_performed": 27,
-  "improvements_applied": 338,
+  "improvements_applied": 341,
   "reports_generated": 26,
   "event_log": [
     {
@@ -17211,6 +17211,120 @@
           "Review loss_streak on SOFI"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:49:27.168062",
+      "age": "4d 8h 46m 38s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:49:31.263550",
+      "age": "4d 8h 46m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #339",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:49:51.225000",
+      "age": "4d 8h 47m 2s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$-33.91",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:49:54.495876",
+      "age": "4d 8h 47m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #340",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The event occurred due to a trailing stop at the MARA ticker, which triggered profit hunting.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The algorithm is adjusting the confidence threshold to better align with the current market state.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Tailoring trades based on market conditions",
+          "Understanding trading algorithms for optimal results"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:49:56.874251",
+      "age": "4d 8h 47m 8s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #341",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Loss streak triggered due to trailing stop.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Adjusting from 0.58 to a value closer to the minimum allowed (0.35) helps mitigate potential risks.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "-",
+          "T",
+          "u",
+          "n",
+          "e",
+          "C",
+          "O",
+          "N",
+          "F",
+          "I",
+          "D",
+          "E",
+          "N",
+          "C",
+          "E",
+          "_",
+          "T",
+          "H",
+          "R",
+          "E",
+          "S",
+          "H",
+          "O",
+          "L",
+          "D",
+          "b",
+          "e",
+          "t",
+          "w",
+          "e",
+          "e",
+          "n",
+          "[",
+          "0",
+          ".",
+          "3",
+          "5",
+          ",",
+          "0",
+          ".",
+          "9",
+          "]"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:38:52.921929",
@@ -18496,8 +18610,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "focused",
-  "total_pnl": 124460.65000000005,
+  "mood": "calm",
+  "total_pnl": 124426.74000000005,
   "win_history": [
     0.0,
     0.0,
@@ -18648,20 +18762,22 @@
     200.85,
     -127.79,
     -10.64,
-    -76.68
+    -76.68,
+    0.0,
+    -33.91
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 5,
   "worst_streak": 18,
-  "veteran_xp": 2170,
+  "veteran_xp": 2185,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 46,
     "entry_timing": 62
   },
-  "flights_completed": 145,
-  "hours_flown": 14.499999999999964,
+  "flights_completed": 147,
+  "hours_flown": 14.699999999999964,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -18684,9 +18800,9 @@
     "GPU": 19,
     "PLT": 2,
     "LCI": 6,
-    "RIO": 7,
+    "RIO": 8,
     "QS": 3,
-    "MAR": 5,
+    "MAR": 6,
     "COI": 1,
     "RIV": 1,
     "RKL": 1,
@@ -18697,5 +18813,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "You are focusing on your recent trades and performance to stay motivated."
+  "mood_message": "I'm ready to execute my strategy and make informed decisions."
 }
