@@ -1366,6 +1366,7 @@ class ScalperRunner:
                 self._active_positions = [p for p in self._active_positions if p["ticker"] != ticker]
             self._position_opened_at = 0.0
             self._clear_pending_entry(ticker, cooldown_sec=30.0)
+            self._clear_ai_councils(ticker)
             self._refresh_aggregate_position_state()
             if self._active_stream_ticker == ticker:
                 self._stop_target_stream(self._active_stream_ticker)
@@ -1783,7 +1784,7 @@ class ScalperRunner:
                                         if self._bar_df_buffer else None
                                     )
                                     ai_dec = self.ai_commander.decide_exit(
-                                        exit_ctx, obs=obs, bar_df=bar_df,
+                                        exit_ctx, obs=self._build_ppo_obs(px), bar_df=bar_df,
                                     )
                                     if ai_dec.get("pending"):
                                         self._set_ai_council(ticker, "exit_decision", {
@@ -3390,6 +3391,8 @@ class ScalperRunner:
         if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander:
             if self._has_ai_council(ticker, "position_manage"):
                 return
+            if self._has_ai_council(ticker, "exit_decision"):
+                return
             decision = self.ai_commander.decide_position_manage(
                 pos_ctx, ppo_exit, ppo_conf, ppo_reason, mech_stop, mech_target,
             )
@@ -3579,7 +3582,9 @@ class ScalperRunner:
                     "stop": self._position_stop,
                     "target": self._position_target,
                 }
-                ai_dec = self.ai_commander.decide_exit(exit_ctx)
+                ai_dec = self.ai_commander.decide_exit(
+                    exit_ctx, obs=self._build_ppo_obs(current_px),
+                )
                 if ai_dec.get("pending"):
                     self._set_ai_council(ticker, "exit_decision", {
                         "fingerprint": ai_dec["fingerprint"],
@@ -4235,11 +4240,53 @@ class ScalperRunner:
     def _council_key(self, ticker: str, task: str) -> str:
         return f"{ticker}:{task}"
 
+    def _clear_ai_councils(self, ticker: str, tasks: Optional[List[str]] = None) -> None:
+        """Drop pending Ollama deliberation for a ticker (e.g. after exit)."""
+        if not ticker:
+            return
+        if tasks:
+            for task in tasks:
+                self._ai_councils.pop(self._council_key(ticker, task), None)
+            return
+        prefix = f"{ticker}:"
+        for key in list(self._ai_councils.keys()):
+            if key.startswith(prefix):
+                self._ai_councils.pop(key, None)
+
     def _set_ai_council(self, ticker: str, task: str, state: Dict[str, Any]) -> None:
+        # One Ollama slot per ticker — exit beats manage; avoid dual in_flight deadlock
+        if task == "position_manage" and self._has_ai_council(ticker, "exit_decision"):
+            return
+        if task == "entry_decision" and (
+            self._has_ai_council(ticker, "exit_decision")
+            or self._has_ai_council(ticker, "position_manage")
+        ):
+            return
+        if task == "exit_decision":
+            self._clear_ai_councils(ticker, ["position_manage", "entry_decision"])
         state["ticker"] = ticker
         state["task"] = task
         state.setdefault("started_at", time.time())
         self._ai_councils[self._council_key(ticker, task)] = state
+
+    def _service_stale_councils(self) -> None:
+        """Clear councils that exceeded max wait — mechanical rules resume."""
+        max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
+        now = time.time()
+        for key in list(self._ai_councils.keys()):
+            st = self._ai_councils.get(key)
+            if not st:
+                continue
+            age = now - float(st.get("started_at", now))
+            if age <= max_wait:
+                continue
+            ticker = str(st.get("ticker", "?"))
+            task = str(st.get("task", "?"))
+            log.info(
+                f"  ⏱️ COUNCIL timeout {ticker}/{task} ({age:.0f}s) — "
+                f"clearing, mechanical rules resume"
+            )
+            self._ai_councils.pop(key, None)
 
     def _has_ai_council(self, ticker: str, task: str) -> bool:
         return self._council_key(ticker, task) in self._ai_councils
@@ -4288,7 +4335,9 @@ class ScalperRunner:
             "target": self._position_target,
             **(extra_ctx or {}),
         }
-        ai_dec = self.ai_commander.decide_exit(exit_ctx)
+        ai_dec = self.ai_commander.decide_exit(
+            exit_ctx, obs=self._build_ppo_obs(current_px),
+        )
         if ai_dec.get("pending"):
             self._set_ai_council(ticker, "exit_decision", {
                 "fingerprint": ai_dec["fingerprint"],
@@ -4383,6 +4432,7 @@ class ScalperRunner:
         """Poll all Ollama+PPO councils without blocking the main loop."""
         if not self.ai_commander or not self._ai_councils:
             return
+        self._service_stale_councils()
         for key in list(self._ai_councils.keys()):
             st = self._ai_councils.get(key)
             if not st:
@@ -4496,6 +4546,9 @@ class ScalperRunner:
         st["current_px"] = px
         ai_dec = self.ai_commander.poll_position_council(st, df=self._scan_data_cache.get(ticker))
         if ai_dec.get("pending"):
+            max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
+            if time.time() - float(st.get("started_at", time.time())) > max_wait:
+                self._ai_councils.pop(key, None)
             return
         self._ai_councils.pop(key, None)
         pipeline = str(ai_dec.get("pipeline", ""))
