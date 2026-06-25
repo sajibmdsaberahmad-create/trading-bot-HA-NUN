@@ -275,3 +275,7 @@ Scanner+spike after timeout: score=48 vol=6.7x | ATR R:R 2.0
 Observed council_timeout — recorded for learning.
 Scanner+spike after timeout: score=48 vol=6.7x | ATR R:R 2.0
 
+🧭 COMMANDER LEARNING | 2026-06-25T10:12:41.750963+00:00
+Observed council_timeout — recorded for learning.
+Scanner+spike after timeout: score=45 vol=6.7x | ATR R:R 2.0
+
