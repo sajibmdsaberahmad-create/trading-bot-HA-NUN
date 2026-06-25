@@ -6,23 +6,41 @@
   "shadow_open": {
     "PLTR": {
       "ticker": "PLTR",
-      "entry": 108.17,
-      "stop": 107.7373,
-      "target": 109.0354,
-      "shares": 385,
-      "opened_at": 1782412878.594433,
+      "entry": 108.02,
+      "stop": 107.5879,
+      "target": 108.8842,
+      "shares": 392,
+      "opened_at": 1782412941.438575,
       "regime": "unknown"
     },
     "LCID": {
       "ticker": "LCID",
-      "entry": 5.105,
-      "stop": 5.0846,
-      "target": 5.1458,
-      "shares": 3172,
-      "opened_at": 1782412879.88474,
+      "entry": 5.1,
+      "stop": 5.0796,
+      "target": 5.1408,
+      "shares": 2993,
+      "opened_at": 1782412942.9920819,
+      "regime": "unknown"
+    },
+    "MARA": {
+      "ticker": "MARA",
+      "entry": 13.72,
+      "stop": 13.6651,
+      "target": 13.8298,
+      "shares": 2749,
+      "opened_at": 1782412940.6417768,
+      "regime": "unknown"
+    },
+    "RIVN": {
+      "ticker": "RIVN",
+      "entry": 14.43,
+      "stop": 14.3723,
+      "target": 14.5454,
+      "shares": 2936,
+      "opened_at": 1782412911.075594,
       "regime": "unknown"
     }
   },
   "shadow_closed": [],
-  "updated_at": 1782412879.884935
+  "updated_at": 1782412942.992405
 }
