@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 89,
   "training_sessions": 27,
-  "trades_observed": 27,
+  "trades_observed": 28,
   "scans_performed": 27,
-  "improvements_applied": 131,
+  "improvements_applied": 133,
   "reports_generated": 26,
   "event_log": [
     {
@@ -7743,6 +7743,49 @@
           ":"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T12:57:53.413445",
+      "age": "4d 1h 55m 4s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #132",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on MIMI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:58:29.877465",
+      "age": "4d 1h 55m 41s",
+      "type": "TRADE",
+      "message": "Observed trade: MIMI LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T12:58:33.589245",
+      "age": "4d 1h 55m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #133",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on MIMI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T12:31:01.138131",
@@ -9028,7 +9071,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "confident",
+  "mood": "anxious",
   "total_pnl": -17680.03,
   "win_history": [
     0.0,
@@ -9057,20 +9100,21 @@
     0,
     14.2,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 3,
   "worst_streak": 10,
-  "veteran_xp": 265,
+  "veteran_xp": 275,
   "veteran_level": "Rookie",
   "skill_points": {
-    "exit_timing": 20,
+    "exit_timing": 21,
     "risk_management": 2,
     "entry_timing": 4
   },
-  "flights_completed": 22,
-  "hours_flown": 2.2000000000000006,
+  "flights_completed": 23,
+  "hours_flown": 2.3000000000000007,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -9080,12 +9124,13 @@
     "SCA": 1,
     "XOC": 2,
     "EVG": 1,
-    "NEX": 1
+    "NEX": 1,
+    "MIM": 1
   },
   "best_streak": 2,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "After 7 recent trades, I'm confident in my ability to execute with just 14% success rate."
+  "mood_message": "I feel a mix of excitement about my recent wins and fear over the upcoming losses."
 }

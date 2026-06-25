@@ -4,10 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "x",
-    "k",
-    "Commander: Root cause: The scanner spike triggered by a timeout event.",
-    "Maintaining a wide range of parameters",
     "Using advanced algorithms like PPO for robust optimization",
     "Commander: The algorithm is learning from the recent trade outcomes, but it's experiencing a sudden spike in scanner momentum that requires adjustment. The strategy should focus on maintaining a wide range of parameters and using advanced algorithms l",
     "Review loss_streak on PBK",
@@ -103,10 +99,14 @@
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been decreased, indicating potential systemic issues.'}",
     "Commander: The algorithmic trade system is experiencing an alignment issue due to the council timeout.",
     ",",
-    "Commander: The council timeout indicates that the algorithm is not aligning signals with the market. This is a common issue in trading systems when signals do not match the current market conditions."
+    "Commander: The council timeout indicates that the algorithm is not aligning signals with the market. This is a common issue in trading systems when signals do not match the current market conditions.",
+    "Review council_timeout on MIMI",
+    "Commander: Scanner+spike after timeout: score=94 vol=3.6x | ATR R:R 2.0",
+    "Review ib_failure on MIMI",
+    "Commander: IB closing-only \u2014 cannot open new positions"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": \"The algorithmic trade system is experiencing an alignment issue due to the council timeout.\"\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": {\n    \"market_conditions\": \"The algorithm is not aligning signals with the current market conditions.\",\n    \"technical_indicators\": {\n      \"ATR_R\": 2.0\n    }\n  },\n  \"analysis\": {\n    \"live_account_state\": {\n      \"account_equity\": 1014738.15,\n      \"available_cash\": 1014738.15,\n      \"position_value\": 0.0,\n      \"nav\": 1000.0,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": \"NONE\",\n      \"position\": \"NONE\",\n      \"win_rate\": 0.0,\n      \"trades_toda",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T12:53:41.759242"
+  "updated": "2026-06-25T12:58:33.588136"
 }

@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "Increase the confidence threshold to allow more signal alignment.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}

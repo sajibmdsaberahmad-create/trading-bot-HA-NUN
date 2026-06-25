@@ -157,3 +157,4 @@
 {"timestamp":"2026-06-25T12:39:36.452540+00:00","event":"ib_failure","ticker":"FMFC","reason":"IB closing-only \u2014 cannot open new positions","learn_mode":true,"pipeline":"entry_reject"}
 {"timestamp":"2026-06-25T12:43:37.974774+00:00","event":"ib_failure","ticker":"FMFC","reason":"IB closing-only \u2014 cannot open new positions","learn_mode":true,"pipeline":"entry_reject"}
 {"event":"post_fill_abort","ticker":"SAGT","planned_entry":1.4,"fill_px":1.6443,"slippage_pct":0.174466,"old_stop":1.3893,"old_target":1.4214,"new_stop":1.3893,"new_target":1.4214,"shares":22,"old_rr":2.0,"new_rr":null,"reason":"fill slippage 17.45% > max 1.20% (planned $1.4000 fill $1.6443)","timestamp":"2026-06-25T12:46:35.987745+00:00"}
+{"timestamp":"2026-06-25T12:58:24.612540+00:00","event":"ib_failure","ticker":"MIMI","reason":"IB closing-only \u2014 cannot open new positions","learn_mode":true,"pipeline":"entry_reject"}
