@@ -4,7 +4,7 @@ core/data.py — Market data: historical fetch + live tick stream + bar aggregat
 
 THREE LAYERS OF DATA, EACH WITH A DIFFERENT JOB
 ┌──────────────────┬───────────────────────────────────────────────────────┐
-│ Tick stream       │ reqTickByTickData("Last") — every individual trade   │
+│ Tick stream       │ reqTickByTickData("AllLast") — every trade print    │
 │ (fastest)         │ print from the exchange, arrives whenever a trade    │
 │                   │ happens (no fixed interval — that's how real         │
 │                   │ exchanges work; there is no "millisecond bar").      │
@@ -38,7 +38,7 @@ try:
 except ImportError:
     raise SystemExit("ERROR: ib_insync not installed. Fix: pip install ib_insync")
 
-from core.config import BotConfig
+from core.config import BotConfig, tick_by_tick_type
 from core.connector import IBConnector
 from core.notify import log
 
@@ -177,10 +177,13 @@ class DataManager:
             if self.cfg.USE_TICK_STREAM:
                 try:
                     contract = self._get_contract()
-                    ticker = self.ib.reqTickByTickData(contract, "Last", 0, False)
+                    tbt = tick_by_tick_type(self.cfg)
+                    ticker = self.ib.reqTickByTickData(contract, tbt, 0, False)
                     ticker.updateEvent += self._on_tick
                     self._tick_handle = ticker
-                    log.debug("Tick-by-tick stream started (every trade print, sub-second).")
+                    log.debug(
+                        f"Tick-by-tick stream started ({tbt}, every trade print, sub-second)."
+                    )
                     return
                 except Exception as exc:
                     log.warning(
@@ -204,7 +207,9 @@ class DataManager:
     def stop_tick_stream(self):
         try:
             if self._tick_handle is not None and self._contract is not None:
-                self.ib.cancelTickByTickData(self._contract, "Last")
+                self.ib.cancelTickByTickData(
+                    self._contract, tick_by_tick_type(self.cfg),
+                )
             if self._realtime_handle is not None:
                 self.ib.cancelRealTimeBars(self._realtime_handle)
         except Exception:

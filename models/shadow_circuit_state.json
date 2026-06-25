@@ -37,7 +37,7 @@
       "stop": 14.3723,
       "target": 14.5454,
       "shares": 3969,
-      "opened_at": 1782413171.6683688,
+      "opened_at": 1782413234.527636,
       "regime": "unknown"
     },
     "SOFI": {
@@ -45,8 +45,8 @@
       "entry": 17.3,
       "stop": 17.2308,
       "target": 17.4384,
-      "shares": 848,
-      "opened_at": 1782412975.40599,
+      "shares": 5000,
+      "opened_at": 1782413212.573885,
       "regime": "unknown"
     },
     "COIN": {
@@ -60,12 +60,12 @@
     },
     "RIOT": {
       "ticker": "RIOT",
-      "entry": 27.445,
-      "stop": 27.3352,
-      "target": 27.6646,
-      "shares": 2243,
-      "opened_at": 1782413170.853684,
-      "regime": "unknown|late_chase_risk"
+      "entry": 27.335,
+      "stop": 27.2257,
+      "target": 27.5537,
+      "shares": 2330,
+      "opened_at": 1782413228.014807,
+      "regime": "unknown"
     }
   },
   "shadow_closed": [
@@ -82,5 +82,5 @@
       "closed_at": 1782413174.662103
     }
   ],
-  "updated_at": 1782413174.662414
+  "updated_at": 1782413234.528018
 }

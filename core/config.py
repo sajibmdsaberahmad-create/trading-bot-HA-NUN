@@ -224,7 +224,10 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     # MARKET DATA / TICK STREAM
     # ════════════════════════════════════════════════════════════════════
-    USE_TICK_STREAM:        bool = True
+    USE_TICK_STREAM:        bool = os.getenv("USE_TICK_STREAM", "true").lower() not in (
+        "0", "false", "no",
+    )
+    TICK_BY_TICK_TYPE:      str  = os.getenv("TICK_BY_TICK_TYPE", "AllLast")
     TICK_BUFFER_MAXLEN:     int  = 5_000
     FAST_BAR_SECONDS:       int  = 5
     DECISION_BAR:           str  = "1 min"
@@ -446,8 +449,8 @@ class BotConfig:
         "1", "true", "yes",
     )
     IB_SCANNER_WARMUP_SEC: float = float(os.getenv("IB_SCANNER_WARMUP_SEC", "3"))
-    PAPER_REALTIME_BARS_ONLY: bool = os.getenv("PAPER_REALTIME_BARS_ONLY", "true").lower() not in (
-        "0", "false", "no",
+    PAPER_REALTIME_BARS_ONLY: bool = os.getenv("PAPER_REALTIME_BARS_ONLY", "false").lower() in (
+        "1", "true", "yes",
     )
     PAPER_USE_HISTORICAL_BARS: bool = os.getenv("PAPER_USE_HISTORICAL_BARS", "true").lower() not in (
         "0", "false", "no",
@@ -988,5 +991,5 @@ class BotConfig:
     def __post_init__(self) -> None:
         from core.ram_tier import apply_ram_tier_to_config
         apply_ram_tier_to_config(self)
-        if self.PAPER_TRADING and os.getenv("USE_TICK_STREAM") is None:
+        if self.PAPER_REALTIME_BARS_ONLY:
             self.USE_TICK_STREAM = False
