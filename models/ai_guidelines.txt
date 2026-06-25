@@ -2130,3 +2130,12 @@ spike_top_intrabar: +0.61% vol=5853.0x
 Observed trade_closed — recorded for learning.
 spike_top_intrabar: +0.49% vol=14619.0x
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:25:14.560572+00:00
+The trade closed with a council_exit and Ollama exit of 100% (PPO hold) at $TZA.
+The event occurred due to an Ollama exit, which might be indicative of a misalignment or a missed opportunity. The trader is currently focused on the execution of the Ollama trade and will continue to monitor this action closely.
+• .
+• .
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold is set at 58%, which seems to be too high for this specific trade. The trader should reduce the threshold or consider a more conservative approach.)
+
