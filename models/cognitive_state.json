@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": \"The account is currently in a high-risk, low-reward state with a scanner that shows the highest volume for all three indicators (HOT_BY_VOLUME#0, HOT_BY_VOLUME#1, HOT_BY_VOLUME#2). The current top score is 78.4, and the next best trade is from KUST with a price of 0.0, which scored 96.0.\"\n}\n```",
   "market_belief": {},
-  "trades_observed": 14,
-  "updated": "2026-06-25T12:05:33.937821"
+  "trades_observed": 0,
+  "updated": "2026-06-25T12:19:42.219383"
 }
