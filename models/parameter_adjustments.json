@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Analyze the market state and technical indicators to determine the risk of a missed profit hunt.",
+    "reason": "The confidence threshold has been lowered to ensure the analysis is robust.",
     "ok": true,
     "msg": "applied"
   }

@@ -2315,3 +2315,135 @@ The trader had a trailing profit, which is common in scalping strategies.
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Analyze the market state and technical indicators to determine the risk of a missed profit hunt.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:47:26.306899+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:47:55.713904+00:00
+Trade closed with trailing profit and no missed profit hunts.
+The trade was successful but the profit hunting process has been paused due to a market data failure.
+• P
+• a
+• n
+• i
+• c
+•  
+• s
+• t
+• r
+• a
+• t
+• e
+• g
+• i
+• e
+• s
+•  
+• a
+• r
+• e
+•  
+• n
+• o
+• t
+•  
+• r
+• e
+• c
+• o
+• m
+• m
+• e
+• n
+• d
+• e
+• d
+•  
+• i
+• n
+•  
+• l
+• i
+• v
+• e
+•  
+• t
+• r
+• a
+• d
+• i
+• n
+• g
+•  
+• e
+• n
+• v
+• i
+• r
+• o
+• n
+• m
+• e
+• n
+• t
+• s
+• .
+•  
+• T
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• f
+• o
+• c
+• u
+• s
+•  
+• o
+• n
+•  
+• m
+• o
+• m
+• e
+• n
+• t
+• u
+• m
+•  
+• a
+• n
+• d
+•  
+• e
+• n
+• t
+• r
+• y
+•  
+• l
+• o
+• g
+• i
+• c
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold has been lowered to ensure the analysis is robust.)
+

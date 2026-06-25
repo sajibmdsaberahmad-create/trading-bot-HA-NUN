@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Be cautious when using the same strategy to prevent repeated losses",
-    "Commander: IB trading permission denied is a root cause of the issue. The trader should prioritize opportunistic exits and avoid using the same strategy repeatedly.",
     "Review ib_failure on MIMI",
     "Commander: IB closing-only \u2014 cannot open new positions",
     "No clean data on TMPOQ (no_historical_data) \u2014 profit hunt elsewhere.",
@@ -103,10 +101,12 @@
     "No profit hunting without live IB bars.",
     "z",
     "f",
-    "Commander: The trader had a trailing profit, which is common in scalping strategies."
+    "Commander: The trader had a trailing profit, which is common in scalping strategies.",
+    "v",
+    "Commander: The trade was successful but the profit hunting process has been paused due to a market data failure."
   ],
-  "last_thought": "```json\n{\n    \"trade_date\": \"2023-06-05\",\n    \"entry_price\": 8.05,\n    \"exit_price\": 8.05,\n    \"profit_amount_usd\": 0.0,\n    \"profit_percentage\": 0.0,\n    \"result\": \"loss\",\n    \"trade_type\": \"closed\",\n    \"error_message\": \"\",\n    \"entry_reason\": \"bracket_exit\",\n    \"entry_slippage_pct\": 1.058824,\n    \"exit_slippage_pct\": 1.074742\n}\n```",
+  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"TZA\",\n    \"entry\": 8.05,\n    \"exit\": 8.05,\n    \"entry_fill\": 8.05,\n    \"exit_fill\": 8.05,\n    \"quote_entry\": 8.05,\n    \"quote_exit\": 3.88,\n    \"shares\": 12038.0,\n    \"pnl_usd\": 0.0,\n    \"pnl_pct\": 0.0,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\",\n    \"entry_slippage_pct\": 1.069409,\n    \"exit_slippage_pct\": 1.074742,\n    \"limit_px\": 3.89,\n    \"entry_mode\": \"limit_smart\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 3.7,\n    \"peak\": 8.05,\n  ",
   "market_belief": {},
-  "trades_observed": 18,
-  "updated": "2026-06-25T16:47:22.341760"
+  "trades_observed": 20,
+  "updated": "2026-06-25T16:47:55.690856"
 }

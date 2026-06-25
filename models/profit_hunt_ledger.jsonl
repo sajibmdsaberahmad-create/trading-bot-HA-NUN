@@ -38,3 +38,5 @@
 {"timestamp":"2026-06-25T16:45:39.665112+00:00","event":"trailing_profit","ticker":"NEXR","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T16:46:43.178588+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":-66359.25,"pnl_pct":-0.5404,"primary_goal":true,"reason":"trailing_profit","price":3.7}
 {"timestamp":"2026-06-25T16:47:05.702267+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T16:47:27.605563+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":-50198.46,"pnl_pct":-0.518,"primary_goal":true,"reason":"trailing_profit","price":3.88}
+{"timestamp":"2026-06-25T16:47:52.872768+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
