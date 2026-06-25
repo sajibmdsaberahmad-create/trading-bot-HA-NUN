@@ -207,6 +207,8 @@ class ScalperRunner:
         self._current_day: Optional[str] = None
         self._last_daily_push_date: Optional[str] = None
         self._last_market_state: Optional[str] = None
+        self._last_market_closed_log: float = 0.0
+        self._last_off_hours_train: float = 0.0
         self._last_learning_push: float = 0.0
         self._weights_file = "models/scalper_weights.json"
         self._weights_mtime = 0.0
@@ -960,6 +962,27 @@ class ScalperRunner:
         self._pending_entry_until = 0.0
         self._entry_poll_state = None
 
+    def _halt_trading_for_closed_market(self, market_state: str) -> None:
+        """Cancel in-flight entry orders when session is not tradable."""
+        if not (
+            self._pending_entry_ticker
+            or self._entry_poll_state
+            or self._pending_bracket_handle
+        ):
+            return
+        ticker = (
+            self._pending_entry_ticker
+            or (self._entry_poll_state or {}).get("ticker")
+        )
+        if ticker:
+            try:
+                self.broker.cancel_open_orders_for_symbol(ticker)
+            except Exception:
+                pass
+        self.bracket_handle = None
+        self._clear_pending_entry(ticker, cooldown_sec=120.0)
+        log.info(f"⏸ Pending entry halted — market {market_state}")
+
     def _ai_skip_ticker_permanent(self, ticker: str, reason: str) -> str:
         """IB blocked entry — blacklist, drop from lock, AI-pick next focus."""
         self._contract_blacklist.add(ticker)
@@ -1396,9 +1419,28 @@ class ScalperRunner:
                 # Detect exits (bracket orders hitting stop/target)
                 self._detect_all_exits()
 
+                market_state = get_market_state(self.cfg)
+                if self._last_market_state != market_state:
+                    try:
+                        self.account_evaluator.on_market_transition(
+                            self, self._last_market_state or market_state, market_state,
+                            self.notifier, self.ai_commander, self.autopilot,
+                            self.consciousness, self.pilot,
+                        )
+                    except Exception as exc:
+                        log.debug(f"Market transition eval: {exc}")
+                    self._last_market_state = market_state
+                can_trade = (
+                    market_state == "open" or
+                    (market_state == "pre_market" and self.cfg.ALLOW_PRE_MARKET_TRADING) or
+                    (market_state == "after_hours" and self.cfg.ALLOW_AFTER_HOURS_TRADING)
+                )
+                if not can_trade:
+                    self._halt_trading_for_closed_market(market_state)
+
                 self._service_pending_ai_councils()
                 self._service_shadow_positions()
-                if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
+                if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True) and can_trade:
                     self._service_pending_entry()
 
                 # AI-driven early exit check (when in position, non-blocking)
@@ -1476,24 +1518,6 @@ class ScalperRunner:
                                 pass
                         self._refresh_aggregate_position_state()
                 
-                # Check market state
-                market_state = get_market_state(self.cfg)
-                if self._last_market_state != market_state:
-                    try:
-                        self.account_evaluator.on_market_transition(
-                            self, self._last_market_state or market_state, market_state,
-                            self.notifier, self.ai_commander, self.autopilot,
-                            self.consciousness, self.pilot,
-                        )
-                    except Exception as exc:
-                        log.debug(f"Market transition eval: {exc}")
-                    self._last_market_state = market_state
-                can_trade = (
-                    market_state == "open" or
-                    (market_state == "pre_market" and self.cfg.ALLOW_PRE_MARKET_TRADING) or
-                    (market_state == "after_hours" and self.cfg.ALLOW_AFTER_HOURS_TRADING)
-                )
-                
                 if can_trade:
                     if self.conn.is_connected():
                         now = time.time()
@@ -1570,10 +1594,12 @@ class ScalperRunner:
                         if in_position:
                             self._monitor_all_open_positions()
                 else:
-                    if int(time.time()) % 60 == 0:
+                    if now - getattr(self, "_last_market_closed_log", 0) >= 60.0:
+                        self._last_market_closed_log = now
                         log.info(f"⏸ MARKET CLOSED ({market_state}) — training instead")
-                    if time.time() - self._last_scan_time > 300:
-                        self._last_scan_time = time.time()
+                    train_iv = float(getattr(self.cfg, "OFF_HOURS_TRAIN_INTERVAL_SEC", 3600))
+                    if now - getattr(self, "_last_off_hours_train", 0) >= train_iv:
+                        self._last_off_hours_train = now
                         self._train_off_hours()
                 
                 self._refresh_account_balance()

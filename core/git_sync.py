@@ -72,6 +72,14 @@ _watcher_stop = threading.Event()
 _watcher_thread: Optional[threading.Thread] = None
 _last_dirty_fingerprint: str = ""
 _flush_timer: Optional[Timer] = None
+_git_journal_lock = Lock()
+_git_session_stats: Dict[str, Any] = {
+    "ok": 0,
+    "fail": 0,
+    "by_category": {},
+    "last_ok_at": "",
+    "last_message": "",
+}
 
 _NEVER_PUSH_FILES: Set[str] = {
     ".env", ".env.local", ".env.production", ".env.backup",
@@ -339,6 +347,144 @@ MAX_RAW_DATA_DAYS: int = 30
 
 # Debounce: minimum seconds between pushes
 MIN_PUSH_INTERVAL_SEC: float = 5.0
+_GIT_JOURNAL_PATH = os.path.join(REPO_DIR, "logs", "git_sync_journal.jsonl")
+_GIT_SESSION_SUMMARY_PATH = os.path.join(REPO_DIR, "logs", "git_session_summary.txt")
+
+
+def _git_notify_mode(cfg: Optional[BotConfig] = None) -> str:
+    """log=journal only | session=journal + one Telegram at shutdown | failures | all | off"""
+    c = cfg or cfg_bot
+    if c is not None and getattr(c, "TELEGRAM_BROADCAST_GIT", False):
+        return "all"
+    if c is not None:
+        mode = (getattr(c, "GIT_NOTIFY_MODE", "") or os.getenv("GIT_NOTIFY_MODE", "log")).strip().lower()
+    else:
+        mode = os.getenv("GIT_NOTIFY_MODE", "log").strip().lower()
+    if mode in ("log", "session", "failures", "all", "off"):
+        return mode
+    return "log"
+
+
+def record_git_push_event(
+    message: str,
+    category: str,
+    *,
+    ok: bool,
+    repo: str = "code",
+) -> None:
+    """Append every push to logs/git_sync_journal.jsonl (no Telegram spam)."""
+    global _git_session_stats
+    os.makedirs(os.path.dirname(_GIT_JOURNAL_PATH), exist_ok=True)
+    ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    entry = {
+        "timestamp": ts,
+        "ok": ok,
+        "category": category,
+        "repo": repo,
+        "message": (message or "")[:500],
+    }
+    with _git_journal_lock:
+        if ok:
+            _git_session_stats["ok"] = int(_git_session_stats.get("ok", 0)) + 1
+            _git_session_stats["last_ok_at"] = ts
+            _git_session_stats["last_message"] = entry["message"]
+        else:
+            _git_session_stats["fail"] = int(_git_session_stats.get("fail", 0)) + 1
+        by_cat = _git_session_stats.setdefault("by_category", {})
+        by_cat[category] = int(by_cat.get(category, 0)) + 1
+        try:
+            with open(_GIT_JOURNAL_PATH, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        except Exception as exc:
+            log.debug(f"Git journal write failed: {exc}")
+
+
+def write_git_session_summary() -> str:
+    """Write end-of-session summary file from journal stats."""
+    os.makedirs(os.path.dirname(_GIT_SESSION_SUMMARY_PATH), exist_ok=True)
+    with _git_journal_lock:
+        stats = dict(_git_session_stats)
+    lines = [
+        f"Git sync session summary — {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}",
+        f"Pushes OK: {stats.get('ok', 0)} | Failed: {stats.get('fail', 0)}",
+        f"Last OK: {stats.get('last_ok_at', '—')}",
+        f"Last message: {stats.get('last_message', '—')}",
+        "By category:",
+    ]
+    for cat, n in sorted((stats.get("by_category") or {}).items()):
+        lines.append(f"  {cat}: {n}")
+    lines.append(f"Full journal: logs/git_sync_journal.jsonl")
+    text = "\n".join(lines)
+    try:
+        with open(_GIT_SESSION_SUMMARY_PATH, "w", encoding="utf-8") as fh:
+            fh.write(text + "\n")
+    except Exception as exc:
+        log.debug(f"Git session summary write failed: {exc}")
+    return text
+
+
+def flush_git_telegram_summary(cfg: Optional[BotConfig] = None) -> None:
+    """One Telegram digest at session end (mode=session) or on failures (mode=failures)."""
+    c = cfg or cfg_bot
+    mode = _git_notify_mode(c)
+    summary = write_git_session_summary()
+    if mode == "off" or mode == "log":
+        log.info(f"📋 Git session logged → {_GIT_SESSION_SUMMARY_PATH}")
+        return
+    if mode != "session" and mode != "all":
+        return
+    if c is None:
+        return
+    ok_count = int(_git_session_stats.get("ok", 0))
+    fail_count = int(_git_session_stats.get("fail", 0))
+    if ok_count == 0 and fail_count == 0:
+        return
+    try:
+        from core.telegram_broadcast import broadcast_ops
+
+        fallback = (
+            f"GIT SESSION SUMMARY\n"
+            f"OK: {ok_count} | Failed: {fail_count}\n"
+            f"{_git_session_stats.get('last_message', '')[:200]}\n"
+            f"Details: logs/git_session_summary.txt"
+        )
+        broadcast_ops(
+            c,
+            "git_session_summary",
+            {
+                "ok": ok_count,
+                "fail": fail_count,
+                "summary_path": "logs/git_session_summary.txt",
+                "journal_path": "logs/git_sync_journal.jsonl",
+            },
+            fallback,
+        )
+    except Exception as exc:
+        log.debug(f"Git session telegram: {exc}")
+
+
+def _notify_git_push_result(
+    cfg: Optional[BotConfig],
+    message: str,
+    category: str,
+    *,
+    ok: bool,
+    repo: str = "code",
+) -> None:
+    record_git_push_event(message, category, ok=ok, repo=repo)
+    mode = _git_notify_mode(cfg)
+    if mode == "off" or mode == "log" or mode == "session":
+        return
+    if mode == "failures" and ok:
+        return
+    if cfg is None:
+        return
+    try:
+        from core.telegram_broadcast import notify_git_push
+
+        notify_git_push(cfg, message[:200], category=category, ok=ok)
+    except Exception:
+        pass
 # Batch multiple changes within this window into one commit
 BATCH_WINDOW_SEC: float = 10.0
 
@@ -859,19 +1005,14 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
                     _push_count += 1
                     _last_push_ts = time.time()
                     log.debug(f"GitHub: pushed #{_push_count} to {repo_url or 'default'} — {category}: {message[:60]}")
-                    try:
-                        from core.telegram_broadcast import notify_git_push
-                        if cfg_bot is not None:
-                            notify_git_push(
-                                cfg_bot,
-                                message[:200],
-                                category=category,
-                                ok=True,
-                            )
-                    except Exception:
-                        pass
+                    _notify_git_push_result(
+                        cfg_bot, message, category, ok=True, repo=repo_url or "code"
+                    )
             else:
                 _failed_pushes += 1
+                _notify_git_push_result(
+                    cfg_bot, message, category, ok=False, repo=repo_url or "code"
+                )
             
             return all_success
             
@@ -1432,6 +1573,10 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
         log.debug(f"Learning artifact sync: {exc}")
 
     log.info(f"📤 Shutdown sync: HANOON={'✓' if ok_ha else '✗'} Logs={'✓' if ok_logs else '✗'} Grandmaster={'✓' if ok_gm else '✗'}")
+    try:
+        flush_git_telegram_summary(cfg_bot)
+    except Exception:
+        pass
     return ok_ha or ok_logs or ok_gm
 
 
