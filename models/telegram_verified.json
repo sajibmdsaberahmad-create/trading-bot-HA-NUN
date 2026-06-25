@@ -1,0 +1,10 @@
+{
+  "verified": {
+    "7516014148": {
+      "verified_at": "2026-06-25T05:21:50.354686+00:00",
+      "username": "primary",
+      "first_name": "env_chat_id",
+      "source": "TELEGRAM_CHAT_ID"
+    }
+  }
+}
