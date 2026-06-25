@@ -334,5 +334,19 @@
     "first_seen": "2026-06-25T13:50:14.623803+00:00",
     "last_seen": "2026-06-25T13:50:14.687720+00:00",
     "source": "fetch:1 min"
+  },
+  "FNMAI": {
+    "ticker": "FNMAI",
+    "failures": 1,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:HMDS query returned no data: FNMAI@SMART Trades",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "PINK",
+    "skip_until": 1782397507.069786,
+    "skip_until_iso": "2026-06-25T14:25:07.069786+00:00",
+    "first_seen": "2026-06-25T14:20:07.070654+00:00",
+    "last_seen": "2026-06-25T14:20:07.070662+00:00",
+    "source": "ib_error"
   }
 }
