@@ -945,5 +945,31 @@
       "t",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:37:32.562628+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "An unexpected loss streak occurred in the GPUS ticker.",
+    "lessons": [
+      "Always monitor and analyze live trading data for real-time insights.",
+      "Adapt your trading strategy based on current market conditions and live data updates.",
+      "Prioritize opportunistic exits when dealing with unexpected events like this."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:38:04.722574+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The value of CONFIDENCE_THRESHOLD is increased from 0.35 to 0.58, indicating a higher confidence level in the event.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade closed with a council exit of Ollama at 100% (PPO hold). The trader's exit type is stop hit.",
+    "lessons": []
   }
 ]

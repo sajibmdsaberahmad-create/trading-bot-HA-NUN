@@ -4282,3 +4282,13 @@ The trade was made on a trending market with low volatility (open). The key para
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increase the confidence threshold from 0.35 to 0.58.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:37:32.562458+00:00
+An unexpected loss streak occurred in the GPUS ticker.
+The event 'loss_streak' triggered a trade hunt, which was interrupted by a market data failure. This indicates that the algorithm's performance has been compromised due to an error in live trading data.
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:38:04.721872+00:00
+The trade closed with a council exit of Ollama at 100% (PPO hold). The trader's exit type is stop hit.
+The event occurred because the trader's position in TZA was halted by an Ollama exit. Profit hunting should be performed to close the position early.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The value of CONFIDENCE_THRESHOLD is increased from 0.35 to 0.58, indicating a higher confidence level in the event.)
+

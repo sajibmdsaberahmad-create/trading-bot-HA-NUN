@@ -132,3 +132,4 @@
 {"timestamp":"2026-06-25T17:36:48.241007+00:00","event":"council_exit","ticker":"BITO","pnl_usd":0.0,"source":"buffer","reason":"council_exit: Ollama exit 100% (PPO hold)"}
 {"timestamp":"2026-06-25T17:37:05.641153+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-4427.16,"pnl_pct":-0.9533,"primary_goal":true,"reason":"trailing_profit","price":0.1807}
 {"timestamp":"2026-06-25T17:37:27.592416+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-4427.04,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:38:01.773011+00:00","event":"council_exit","ticker":"TZA","pnl_usd":0.0,"source":"buffer","reason":"council_exit: Ollama exit 100% (PPO hold)"}
