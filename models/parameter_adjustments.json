@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.6,
+    "reason": "To prevent the algorithm exiting at high risk positions.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

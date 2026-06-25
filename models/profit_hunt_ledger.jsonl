@@ -49,3 +49,5 @@
 {"timestamp":"2026-06-25T16:54:01.341027+00:00","event":"wave_end_spike_fade","ticker":"BITO","pnl_usd":1515.64,"pnl_pct":287.806,"primary_goal":true,"reason":"wave_end_spike_fade: peak +59900.00% now +28780.60% vol=0.8x fading","price":3.87}
 {"timestamp":"2026-06-25T16:54:17.338321+00:00","event":"wave_end_spike_fade","ticker":"BITO","pnl_usd":3150.52,"source":"buffer","reason":"wave_end_spike_fade: peak +59900.00% now +28780.60% vol=0.8x fading"}
 {"timestamp":"2026-06-25T16:54:17.378765+00:00","event":"trailing_stop","ticker":"NEXR","pnl_usd":340.69,"pnl_pct":64.694,"primary_goal":true,"reason":"trailing_stop","price":0.8803}
+{"timestamp":"2026-06-25T16:55:07.907665+00:00","event":"council_exit","ticker":"TZA","pnl_usd":4981.35,"source":"buffer","reason":"council_exit: Ollama exit 97% (PPO hold)"}
+{"timestamp":"2026-06-25T16:55:31.938792+00:00","event":"trailing_stop","ticker":"NEXR","pnl_usd":3.03,"pnl_pct":0.0029,"primary_goal":true,"reason":"trailing_stop","price":0.8756}
