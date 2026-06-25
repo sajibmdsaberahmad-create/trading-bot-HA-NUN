@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 69,
+  "improvements_applied": 70,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5474,6 +5474,20 @@
       "type": "TRADE",
       "message": "Observed trade: NEXR ? P&L=$+14.20",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T09:24:48.045839",
+      "age": "3d 22h 21m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #70",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on NEXR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T08:56:11.420390",

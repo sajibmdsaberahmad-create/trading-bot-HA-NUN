@@ -1,28 +1,5 @@
 [
   {
-    "ticker": "COIN",
-    "trades": 110,
-    "wins": 44,
-    "losses": 66,
-    "win_rate": 0.4,
-    "pnl_usd": -49.84,
-    "return_pct": -20.37,
-    "max_dd": 20.51,
-    "weights_active": {
-      "momentum": 1.9709688999322417,
-      "volume": 14.782266749491814,
-      "institutional": 19.709688999322417,
-      "vwap_slope": 4.927422249830604,
-      "atr_bonus": 4.927422249830604,
-      "mean_reversion": 4.927422249830604,
-      "trend_filter": 9.854844499661208,
-      "price_rising": 7.883875599728967,
-      "rsi_filter": 2.956453349898363,
-      "volatility_gate": 3.9419377998644833
-    },
-    "timestamp": "2026-06-21T09:50:21.960342"
-  },
-  {
     "ticker": "IONQ",
     "trades": 91,
     "wins": 38,
@@ -2238,6 +2215,15 @@
     "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
     "lessons": [
       "Review council_timeout on NEXR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:24:48.077007+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on NEXR"
     ]
   }
 ]
