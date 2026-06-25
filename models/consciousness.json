@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 27,
   "scans_performed": 27,
-  "improvements_applied": 125,
+  "improvements_applied": 126,
   "reports_generated": 26,
   "event_log": [
     {
@@ -7543,6 +7543,28 @@
           "s",
           "s",
           "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T12:48:00.209686",
+      "age": "4d 1h 45m 11s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #126",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WYY"
         ]
       }
     }
