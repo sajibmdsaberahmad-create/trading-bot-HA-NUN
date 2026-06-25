@@ -212,11 +212,49 @@ def spike_entry_cooldown_sec(cfg: BotConfig) -> float:
     return base
 
 
-def entry_pending_block_sec(cfg: BotConfig) -> float:
-    base = float(getattr(cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
+def stream_watch_cap(cfg: BotConfig) -> int:
+    """Max locked names to monitor — match IB stream budget, not full scanner."""
     if ai_fast_execution(cfg):
-        return min(base, float(getattr(cfg, "ENTRY_PENDING_BLOCK_FAST_SEC", 12.0)))
-    return base
+        return int(getattr(cfg, "AI_STREAM_WATCH_CAP", 12))
+    return int(getattr(cfg, "AI_MAX_LOCKED_TARGETS", 30))
+
+
+def should_micro_fast_entry(
+    cfg: BotConfig,
+    spike_ratio: float,
+    scan_score: float,
+    micro: Optional[dict] = None,
+) -> bool:
+    """Enter without Ollama wait — strong scanner score + micro momentum."""
+    if not ai_fast_execution(cfg):
+        return False
+    micro = micro or {}
+    sl = float(micro.get("spike_likelihood", 0))
+    va = float(micro.get("vol_accel", 1.0))
+    if scan_score >= 70 and sl >= 0.40 and va >= 1.0:
+        return True
+    if scan_score >= 55 and sl >= 0.52 and (spike_ratio >= 1.05 or va >= 1.15):
+        return True
+    if spike_ratio >= 1.15 and scan_score >= float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15.0)):
+        return True
+    return False
+
+
+def micro_confirms_spike(
+    spike_ratio: float,
+    micro: Optional[dict],
+    *,
+    min_likelihood: float = 0.55,
+    min_vol_accel: float = 1.12,
+) -> bool:
+    """Micro forecast alone is not a spike — need volume confirmation."""
+    if not micro:
+        return False
+    sl = float(micro.get("spike_likelihood", 0))
+    va = float(micro.get("vol_accel", 1.0))
+    if sl < min_likelihood:
+        return False
+    return spike_ratio >= 1.08 or va >= min_vol_accel
 
 
 def tick_stream_count(cfg: BotConfig) -> int:
