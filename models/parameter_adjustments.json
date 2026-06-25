@@ -1,38 +1,16 @@
 {
-  "SCALP_STOP_ATR_MULTIPLIER": {
-    "old": 0.4608000000000001,
-    "new": 0.4,
-    "reason": "tighten stops when WR low; widen when WR strong",
-    "confidence": 0.038
-  },
-  "SCALP_TP_ATR_MULTIPLIER": {
-    "old": 1.0935000000000001,
-    "new": 0.9841500000000002,
-    "reason": "increase targets when WR strong; reduce when WR weak",
-    "confidence": 0.031
-  },
-  "SCAN_INTERVAL_SECONDS": {
-    "old": 66,
-    "new": 85.8,
-    "reason": "reduce frequency when WR low; increase when WR strong",
-    "confidence": 0.113
-  },
-  "MAX_TRADE_SIZE_USD": {
-    "old": 17538.836461999996,
-    "new": 12277.185523399996,
-    "reason": "reduce size when WR poor; increase when WR strong",
-    "confidence": 0.005
-  },
-  "MAX_RISK_PER_TRADE_USD": {
-    "old": 105468.75,
-    "new": 79101.5625,
-    "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
-    "confidence": 0.103
-  },
   "CONFIDENCE_THRESHOLD": {
-    "old": 0.6700000000000002,
-    "new": 0.7200000000000002,
-    "reason": "raise entry bar when WR low; lower when WR strong",
-    "confidence": 0.091
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.65,
+    "reason": "Increase the confidence threshold to more closely match reality.",
+    "ok": true,
+    "msg": "applied"
+  },
+  "MAX_CONCURRENT_POSITIONS": {
+    "param": "MAX_CONCURRENT_POSITIONS",
+    "value": 1,
+    "reason": "Tighten or expand risk based on evidence, and reduce concurrent positions.",
+    "ok": true,
+    "msg": "applied"
   }
 }

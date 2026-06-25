@@ -1348,5 +1348,29 @@
       }
     },
     "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-25T06:29:06.813859\nCombined win rate: 32.5% (buffer=44.3%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
+  },
+  {
+    "timestamp": "2026-06-25T07:56:44.022709+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.65,
+        "reason": "Increase the confidence threshold to more closely match reality.",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MAX_CONCURRENT_POSITIONS": {
+        "param": "MAX_CONCURRENT_POSITIONS",
+        "value": 1,
+        "reason": "Tighten or expand risk based on evidence, and reduce concurrent positions.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council timeout occurred, and the algorithm needs to adjust its parameters accordingly.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold will help in balancing the risk premium and reward.'}"
+    ]
   }
 ]

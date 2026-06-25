@@ -16,3 +16,10 @@ Combined win rate: 32.5% (buffer=44.3%, returns=20.7%)
   - MAX_TRADE_SIZE_USD: 17538.836461999996 -> 12277.185523399996 (reason: reduce size when WR poor; increase when WR strong)
   - MAX_RISK_PER_TRADE_USD: 105468.75 -> 79101.5625 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
   - CONFIDENCE_THRESHOLD: 0.6700000000000002 -> 0.7200000000000002 (reason: raise entry bar when WR low; lower when WR strong)
+🧭 COMMANDER LEARNING | 2026-06-25T07:56:44.021869+00:00
+The council timeout occurred, and the algorithm needs to adjust its parameters accordingly.
+The root cause is that the scanner spike during the scan timeout caused a large deviation in the score. This led to an excessive risk premium for the algorithm. The high confidence level of 0.58 indicates the need to tighten or expand risk based on evidence.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.65 (Increase the confidence threshold to more closely match reality.)
+  - MAX_CONCURRENT_POSITIONS → 1 (Tighten or expand risk based on evidence, and reduce concurrent positions.)
+

@@ -7,10 +7,12 @@
     "Hi",
     "Commander: off_hours_review",
     "ping - are you there ?",
-    "Commander: Hi"
+    "Commander: Hi",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Adjusting the confidence threshold will help in balancing the risk premium and reward.'}",
+    "Commander: The root cause is that the scanner spike during the scan timeout caused a large deviation in the score. This led to an excessive risk premium for the algorithm. The high confidence level of 0.58 indicates the need to tighten or expand risk "
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": \"The live account state appears to be in a stable and balanced position, with a high equity level and no significant trading activity.\",\n  \"trade_decisions\": [\n    {\n      \"action\": \"hold\",\n      \"reason\": \"Current balance is stable; no major trades affecting the account.\"\n    },\n    {\n      \"action\": \"skip\",\n      \"reason\": \"Continuing to monitor live results may not be optimal given current trends.\"\n    }\n  ]\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T06:24:45.315210"
+  "updated": "2026-06-25T07:56:43.999109"
 }
