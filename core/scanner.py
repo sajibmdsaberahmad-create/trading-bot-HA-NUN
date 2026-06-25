@@ -15,7 +15,7 @@ The scanner runs pre-market to build a watchlist, then continuously
 during market hours to identify new setups as they emerge.
 """
 
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field
@@ -23,6 +23,52 @@ from dataclasses import dataclass, field
 from core.config import BotConfig
 from core.notify import log
 from core.risk import safe_vwap
+
+
+def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
+    """
+    Fetch scanner rows with a hard timeout.
+
+    ``ib.reqScannerData`` blocks until IB sends scannerDataEnd and can hang
+    indefinitely — this uses a subscription + chunked ``ib.sleep`` instead.
+    """
+    import time
+
+    timeout_sec = max(4.0, float(timeout_sec))
+    deadline = time.time() + timeout_sec
+    data_list = ib.reqScannerSubscription(scan)
+    last_count = 0
+    stable_since = time.time()
+    last_log = time.time()
+    try:
+        while time.time() < deadline:
+            ib.sleep(0.2)
+            n = len(data_list)
+            now = time.time()
+            if n != last_count:
+                last_count = n
+                stable_since = now
+            elif n >= 8 and (now - stable_since) >= 1.0:
+                break
+            if n >= 50:
+                break
+            if now - last_log >= 3.0:
+                log.info(
+                    f"  scanner {scan.scanCode}@{scan.locationCode}: "
+                    f"{n} rows (waiting on IB…)"
+                )
+                last_log = now
+        else:
+            log.warning(
+                f"  scanner {scan.scanCode}@{scan.locationCode}: "
+                f"timed out after {timeout_sec:.0f}s ({len(data_list)} rows)"
+            )
+    finally:
+        try:
+            ib.cancelScannerSubscription(data_list)
+        except Exception:
+            pass
+    return list(data_list)
 
 
 @dataclass
