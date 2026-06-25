@@ -1,6 +1,6 @@
 {
-  "mood": "gathering",
-  "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
+  "mood": "defensive",
+  "mood_message": "Win rate 0% \u00b7 $+0.00. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
@@ -105,8 +105,8 @@
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': \"The trader's confidence level was lower than expected, leading to a missed profit hunt.\"}",
     "Commander: The trader is using a simple trailing profit strategy with no specific parameters or logic in place. The event likely occurred due to market conditions that prevent the algorithm from repeating this pattern."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": \"Profit hunting is the main goal for HANOON (Full Freedom).\",\n  \"reason\": \"To extract profit from every opportunity, prioritize spikes and momentum trades based on live IB data.\"\n}\n```",
+  "last_thought": "```json\n{\n  \"trade\": {\n    \"event_type\": \"profit_exit\",\n    \"exit_mode\": \"trailing_profit\",\n    \"entry_fill\": null,\n    \"exit_fill\": null,\n    \"pnl_usd\": 0,\n    \"pnl_pct\": 0,\n    \"result\": \"profit\",\n    \"exit_reason\": \"trailing_profit\"\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-25T16:39:11.094434"
+  "trades_observed": 3,
+  "updated": "2026-06-25T16:39:54.301895"
 }
