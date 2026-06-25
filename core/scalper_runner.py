@@ -2151,6 +2151,15 @@ class ScalperRunner:
                     except Exception as exc:
                         log.debug(f"Bootstrap entry: {exc}")
 
+                if getattr(self, "_lock_review_due", False) and self._lock_review_picks:
+                    self._lock_review_due = False
+                    picks = self._lock_review_picks
+                    self._lock_review_picks = []
+                    try:
+                        self._generative_review_locks(picks)
+                    except Exception as exc:
+                        log.debug(f"Lock review: {exc}")
+
                 if getattr(self, "_deferred_ib_scan", False) and self.conn.is_connected():
                     self._deferred_ib_scan = False
                     can_defer, _ms = can_trade_now(self.cfg)
@@ -2679,41 +2688,36 @@ class ScalperRunner:
                 f"{max_realtime_bar_streams(self.cfg)} 5s-bars | "
                 f"monitor {fast_monitor_interval(self.cfg):.2f}s"
             )
-        self._generative_review_locks(penny_results)
-        if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
-            send_dynamic_notification(
-                self.notifier, self.autopilot, "targets_locked",
-                self._notify_context({
-                    "targets": names,
-                    "top_score": self.top_pick.rank_score if self.top_pick else 0,
-                    "scan_ms": elapsed_ms,
-                }),
-                f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\nTop score: {self.top_pick.rank_score:.0f}",
-                ai_commander=self.ai_commander,
-                consciousness=self.consciousness,
-                pilot=self.pilot,
-            )
-        else:
-            self.notifier.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\nTop score: {self.top_pick.rank_score:.0f}")
 
         log.info("📡 Streams-first fast lock — bar warm on main loop")
-        self._ensure_locked_streams()
-        prefetch_tickers = [p.ticker for p in self._locked_targets]
-        self._schedule_bar_prefetch(prefetch_tickers)
-        if getattr(self.cfg, "PAPER_TRADING", False) and getattr(
-            self.cfg, "PAPER_USE_HISTORICAL_BARS", True,
-        ):
-            warmed = 0
-            for ticker in self._priority_tickers()[:6]:
-                if self._prefetch_one_ticker_bars(ticker, quiet=True) is not None:
-                    warmed += 1
-            if warmed:
-                log.info(f"📊 Paper warm: {warmed} tickers loaded from IB historical bars")
-        if getattr(self.cfg, "DEFER_BAR_WARM_ON_LOCK", True):
-            self._bar_warm_due = True
-            self._bar_warm_idx = 0
+        self._ensure_locked_streams(quiet=True)
+        self._schedule_bar_prefetch([p.ticker for p in self._locked_targets])
+        self._bar_warm_due = True
+        self._bar_warm_idx = 0
+
+        if getattr(self.cfg, "DEFER_LOCK_AI_REVIEW", True):
+            self._lock_review_due = True
+            self._lock_review_picks = list(penny_results)
         else:
-            self._warm_locked_bar_cache()
+            self._generative_review_locks(penny_results)
+            if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
+                send_dynamic_notification(
+                    self.notifier, self.autopilot, "targets_locked",
+                    self._notify_context({
+                        "targets": names,
+                        "top_score": self.top_pick.rank_score if self.top_pick else 0,
+                        "scan_ms": elapsed_ms,
+                    }),
+                    f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\nTop score: {self.top_pick.rank_score:.0f}",
+                    ai_commander=self.ai_commander,
+                    consciousness=self.consciousness,
+                    pilot=self.pilot,
+                )
+            elif not getattr(self.cfg, "DEFER_LOCK_AI_REVIEW", True):
+                self.notifier.info(
+                    f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names}\n"
+                    f"Top score: {self.top_pick.rank_score:.0f}"
+                )
 
         if getattr(self.cfg, "SCAN_BOOTSTRAP_ENTRY", True):
             self._bootstrap_entry_due = True
@@ -2876,12 +2880,14 @@ class ScalperRunner:
         )
 
     def _tick_bar_warm_on_main(self) -> None:
-        """One IB bar fetch per main-loop tick — IB is not thread-safe."""
+        """Prefetch IB bars on main loop — multiple tickers per tick when configured."""
         if not self._bar_warm_due or not self._locked_targets:
             return
         priority = self._priority_tickers()
         idx = self._bar_warm_idx
-        while idx < len(priority):
+        per_loop = int(getattr(self.cfg, "BAR_WARM_PER_LOOP", 4))
+        warmed = 0
+        while idx < len(priority) and warmed < per_loop:
             ticker = priority[idx]
             need = self._min_bars_for(ticker)
             cached = self._scan_data_cache.get(ticker)
@@ -2889,9 +2895,10 @@ class ScalperRunner:
                 idx += 1
                 continue
             self._prefetch_one_ticker_bars(ticker, quiet=True)
-            self._bar_warm_idx = idx + 1
-            return
-        self._bar_warm_due = False
+            idx += 1
+            warmed += 1
+        self._bar_warm_idx = idx
+        if idx >= len(priority):
         self._bar_warm_idx = 0
         priority_ready = sum(
             1 for t in priority
