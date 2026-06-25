@@ -1,11 +1,11 @@
 {
-  "total_xp": 1150,
+  "total_xp": 1190,
   "level": "Aviator",
-  "flights_completed": 25,
-  "flights_flown": 106,
-  "takeoffs": 106,
-  "landings": 25,
-  "hours_flown": 2.500000000000001,
+  "flights_completed": 26,
+  "flights_flown": 140,
+  "takeoffs": 140,
+  "landings": 26,
+  "hours_flown": 2.600000000000001,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -23,17 +23,18 @@
     "AZI": 1,
     "MIM": 1,
     "GPU": 1,
-    "SOX": 1
+    "SOX": 1,
+    "GDC": 1
   },
   "aircraft_type": "PPO-Transformer-LSTM",
   "license_class": "Basic",
   "certifications": {},
   "skill_points": {
     "entry_timing": 4,
-    "exit_timing": 21,
+    "exit_timing": 22,
     "risk_management": 4,
     "regime_recognition": 0,
-    "pattern_recognition": 30,
+    "pattern_recognition": 31,
     "confidence_judgment": 0
   }
 }

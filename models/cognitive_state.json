@@ -1,13 +1,9 @@
 {
   "mood": "defensive",
-  "mood_message": "Win rate 10% \u00b7 $+44607.86. Preserving capital over action.",
+  "mood_message": "Win rate 0% \u00b7 $-7306.58. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The trade was executed with the exit strategy of Ollama at 90% PPO hold. The algorithm is now correcting this risk and adjusting its parameters to make it less likely to happen again.",
-    "Commander: The trade closed with an exit for BitO at 100% profit and a hold period of 47.5 days.",
-    "Spike-top hunt on GDC: spike_top_intrabar: +0.75% vol=56025.0x",
-    "Profit hunt worked on GDC: spike_top_intrabar: +0.75% vol=56025.0x \u2014 reinforce opportunistic exits.",
     "e",
     "(",
     "C",
@@ -103,10 +99,14 @@
     "Commander: The event is indicating that the trader has experienced a stop-loss trigger and decided to exit early due to a significant drop in losses.",
     "Review trade_closed on GDC",
     "Commander: stop_breach",
-    "Review loss_streak on GPUS"
+    "Review loss_streak on GPUS",
+    "Always consider executing a stop hit when possible and avoid unnecessary exits.",
+    "Be cautious with profitable trades as they can be missed by inexperienced scalpers.",
+    "Commander: The reason for the negative outcome is that the trader chose not to execute a stop hit, which occurred at a high exit point. The trader should have executed the stop hit.",
+    "Review loss_streak on GDC"
   ],
-  "last_thought": "```json\n{\n  \"trade_entry\": {\n    \"ticker\": \"GPUS\",\n    \"entry\": 0.8852,\n    \"exit\": 0.1775,\n    \"entry_fill\": 0.8852,\n    \"exit_fill\": 0.1775,\n    \"quote_entry\": 0.8852,\n    \"quote_exit\": 0.1776,\n    \"shares\": 1145.0,\n    \"pnl_usd\": -810.28,\n    \"pnl_pct\": -79.95,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\",\n    \"entry_slippage_pct\": 3.953397,\n    \"exit_slippage_pct\": -0.000563,\n    \"limit_px\": 0.1787,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 14.4,",
+  "last_thought": "```json\n{\n  \"entry\": 0.8852,\n  \"exit\": 0.013,\n  \"entry_fill\": 0.8852,\n  \"exit_fill\": 0.013,\n  \"quote_entry\": 0.8852,\n  \"quote_exit\": 0.0131,\n  \"shares\": 1200.0,\n  \"pnl_usd\": -1046.61,\n  \"pnl_pct\": -98.53,\n  \"result\": \"loss\",\n  \"exit_reason\": \"trailing_profit\",\n  \"entry_slippage_pct\": 66.570382,\n  \"exit_slippage_pct\": -0.007634,\n  \"limit_px\": 0.0131,\n  \"entry_mode\": \"limit_penny\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 9.9,\n  \"peak\": 0.8852,\n  \"stop\": 0.013,\n  \"target\": 0.0133\n}\n```",
   "market_belief": {},
-  "trades_observed": 65,
-  "updated": "2026-06-25T17:10:53.432657"
+  "trades_observed": 68,
+  "updated": "2026-06-25T17:12:09.343805"
 }

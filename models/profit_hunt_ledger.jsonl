@@ -71,3 +71,6 @@
 {"timestamp":"2026-06-25T17:09:16.600598+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T17:10:27.466807+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.13,"pnl_pct":-0.7985,"primary_goal":true,"reason":"trailing_profit","price":0.1784}
 {"timestamp":"2026-06-25T17:10:51.496794+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.25,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:11:12.263877+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":-1046.49,"pnl_pct":-0.9852,"primary_goal":true,"reason":"trailing_profit","price":0.0131}
+{"timestamp":"2026-06-25T17:11:45.075140+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":-1046.61,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:12:05.592898+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.13,"pnl_pct":-0.7985,"primary_goal":true,"reason":"trailing_profit","price":0.1784}

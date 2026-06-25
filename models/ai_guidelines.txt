@@ -3420,3 +3420,26 @@ trailing_profit
 Observed trade_closed — recorded for learning.
 trailing_profit
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:11:03.056541+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:11:15.791739+00:00
+Observed loss_streak — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:11:16.797372+00:00
+The trade was executed with a negative outcome, likely due to a missed profit hunt.
+The reason for the negative outcome is that the trader chose not to execute a stop hit, which occurred at a high exit point. The trader should have executed the stop hit.
+• ...
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (...)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:11:55.143268+00:00
+Observed loss_streak — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:12:09.383673+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+
