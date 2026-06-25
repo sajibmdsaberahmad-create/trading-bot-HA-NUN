@@ -187,7 +187,6 @@ class BotConfig:
         "AI_FAST_EXECUTION", "true"
     ).lower() in ("1", "true", "yes")
     AI_STREAM_PRIORITY_COUNT: int = int(os.getenv("AI_STREAM_PRIORITY_COUNT", "8"))
-    AI_TICK_STREAM_MAX: int = int(os.getenv("AI_TICK_STREAM_MAX", "5"))
     AI_WARM_PRIORITY_COUNT: int = int(os.getenv("AI_WARM_PRIORITY_COUNT", "10"))
     AI_MIN_BARS_FOCUS: int = int(os.getenv("AI_MIN_BARS_FOCUS", "6"))
     AI_MIN_BARS_SCAN: int = int(os.getenv("AI_MIN_BARS_SCAN", "10"))
@@ -196,8 +195,10 @@ class BotConfig:
     ).lower() in ("1", "true", "yes")
     AI_SPIKE_FAST_MIN_RATIO: float = float(os.getenv("AI_SPIKE_FAST_MIN_RATIO", "1.15"))
     AI_SPIKE_FAST_MIN_SCORE: float = float(os.getenv("AI_SPIKE_FAST_MIN_SCORE", "15"))
+    AI_TICK_STREAM_COUNT: int = int(os.getenv("AI_TICK_STREAM_COUNT", "4"))
+    IB_MAX_REALTIME_BAR_STREAMS: int = int(os.getenv("IB_MAX_REALTIME_BAR_STREAMS", "4"))
     AI_PRIORITY_TICK_STREAMS: bool = os.getenv(
-        "AI_PRIORITY_TICK_STREAMS", "true"
+        "AI_PRIORITY_TICK_STREAMS", "false"
     ).lower() in ("1", "true", "yes")
     AI_SPIKE_ATTEMPTS_PER_CYCLE: int = int(os.getenv("AI_SPIKE_ATTEMPTS_PER_CYCLE", "3"))
     FAST_MONITOR_SEC: float = float(os.getenv("FAST_MONITOR_SEC", "0.25"))

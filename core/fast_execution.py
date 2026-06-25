@@ -27,20 +27,6 @@ def stream_priority_count(cfg: BotConfig) -> int:
     return int(getattr(cfg, "AI_STREAM_PRIORITY_COUNT", 8))
 
 
-def tick_stream_max_count(cfg: BotConfig) -> int:
-    """IB caps concurrent tick-by-tick subscriptions (error 10190 above limit)."""
-    return int(getattr(cfg, "AI_TICK_STREAM_MAX", 5))
-
-
-def stream_mode_for_rank(cfg: BotConfig, rank_index: int, in_position: bool = False) -> str:
-    """Top ranks get tick-by-tick; rest get 5s realtime bars (same pool, no IB 10190)."""
-    if in_position:
-        return "tick"
-    if rank_index < tick_stream_max_count(cfg):
-        return "tick"
-    return "realtime"
-
-
 def warm_priority_count(cfg: BotConfig) -> int:
     return int(getattr(cfg, "AI_WARM_PRIORITY_COUNT", 10))
 
@@ -167,11 +153,59 @@ def fast_monitor_interval(cfg: BotConfig) -> float:
     return float(getattr(cfg, "FAST_MONITOR_SEC", 1.0))
 
 
+def tick_stream_count(cfg: BotConfig) -> int:
+    """IB allows ~5 tick-by-tick subs — reserve headroom for open positions."""
+    return int(getattr(cfg, "AI_TICK_STREAM_COUNT", 4))
+
+
+def max_realtime_bar_streams(cfg: BotConfig) -> int:
+    """IB allows ~5 concurrent 5-second real-time bar streams."""
+    return int(getattr(cfg, "IB_MAX_REALTIME_BAR_STREAMS", 4))
+
+
+def assign_stream_modes(
+    wanted: List[str],
+    cfg: BotConfig,
+    held: Optional[set] = None,
+    tick_denied: Optional[set] = None,
+) -> dict:
+    """
+    Split priority list across IB limits: top names get tick, rest get 5s bars.
+    Returns {ticker: 'tick'|'realtime'|'skip'}.
+    """
+    held_u = {str(t).upper() for t in (held or set())}
+    denied = {str(t).upper() for t in (tick_denied or set())}
+    tick_budget = tick_stream_count(cfg)
+    rt_budget = max_realtime_bar_streams(cfg)
+    modes: dict = {}
+    tick_used = 0
+    rt_used = 0
+    for ticker in wanted:
+        tu = ticker.upper()
+        if tu in held_u:
+            if tick_used < tick_budget and tu not in denied:
+                modes[ticker] = "tick"
+                tick_used += 1
+            elif rt_used < rt_budget:
+                modes[ticker] = "realtime"
+                rt_used += 1
+            else:
+                modes[ticker] = "skip"
+            continue
+        if tick_used < tick_budget and tu not in denied:
+            modes[ticker] = "tick"
+            tick_used += 1
+        elif rt_used < rt_budget:
+            modes[ticker] = "realtime"
+            rt_used += 1
+        else:
+            modes[ticker] = "skip"
+    return modes
+
+
 def priority_tick_streams(cfg: BotConfig) -> bool:
-    """All priority stream names get tick-by-tick — not just one focus."""
-    if not ai_fast_execution(cfg):
-        return False
-    return bool(getattr(cfg, "AI_PRIORITY_TICK_STREAMS", True))
+    """Deprecated alias — IB tick cap prevents all-tick; use assign_stream_modes."""
+    return False
 
 
 def max_spike_attempts_per_cycle(cfg: BotConfig) -> int:

@@ -50,6 +50,7 @@ class IBConnector:
         self._reconnect_count: int = 0  # total reconnects in this session
         self._order_errors: Dict[int, Dict[str, Any]] = {}
         self._md_error_handlers: list = []
+        self._tick_limit_handlers: list = []
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -252,6 +253,10 @@ class IBConnector:
         """Runner callback: stop streams / rotate focus on MD failures."""
         self._md_error_handlers.append(handler)
 
+    def register_tick_limit_handler(self, handler) -> None:
+        """Runner callback: downgrade ticker from tick-by-tick to 5s bars (IB 10190)."""
+        self._tick_limit_handlers.append(handler)
+
     def _on_error(self, reqId, errorCode, errorString, contract):
         # Pure informational error codes from IB that aren't real problems
         BENIGN = {2104, 2106, 2107, 2108, 2109, 2119, 2158}
@@ -268,6 +273,23 @@ class IBConnector:
                     info["price_cap"] = cap
             self._order_errors[int(reqId)] = info
         if errorCode in BENIGN or errorCode in QUIET_ORDER:
+            return
+
+        # IB tick-by-tick subscription cap (typically 5) — downgrade to 5s bars
+        if errorCode == 10190:
+            try:
+                from core.market_data_learning import extract_ticker_from_error
+                ticker = extract_ticker_from_error(contract, errorString)
+                for handler in self._tick_limit_handlers:
+                    try:
+                        handler(ticker, int(errorCode), str(errorString))
+                    except Exception:
+                        pass
+                log.info(
+                    f"IB tick-by-tick cap on {ticker or '?'} — using 5s bars instead"
+                )
+            except Exception:
+                log.info(f"IB tick-by-tick cap (10190) — using 5s bars instead")
             return
 
         # Market-data failures → learn + avoid (162 no HMDS, 420 no permissions, …)
