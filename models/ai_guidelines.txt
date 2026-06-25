@@ -1120,3 +1120,11 @@ The spike was triggered by a scanner failure, and we need to analyze this event 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (An unexpected spike in the AZI ticker occurred after a timeout, resulting in missed profit hunts.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:53:42.232982+00:00
+Observed trade_closed — recorded for learning.
+win
+
+🧭 COMMANDER LEARNING | 2026-06-25T13:53:45.758203+00:00
+Observed council_timeout — recorded for learning.
+Council timeout — no aligned signal
+

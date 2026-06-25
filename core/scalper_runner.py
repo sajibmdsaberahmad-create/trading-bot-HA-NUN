@@ -67,6 +67,8 @@ from core.fast_execution import (
     prefetch_per_loop,
     warm_budget_sec,
     prioritize_locked_targets,
+    stream_priority_count,
+    warm_priority_count,
 )
 from core.connector import IBConnector
 from core.data import DataManager

@@ -31,6 +31,7 @@ from core.bracket_validator import (
 from core.trade_telemetry import log_bracket_reject
 from core.risk import compute_atr, compute_momentum_score
 from core.human_cognition import enrich_prompt, apply_gut_override
+from core.fast_execution import should_spike_fast_entry
 from core.live_ai_pipeline import (
     LiveAILine,
     entry_fingerprint,
@@ -694,7 +695,15 @@ class AICommander:
                     confidence = max(confidence, ppo_conf)
                     out["reason"] = f"PPO+AI ensemble: {ppo_reason}"
 
-        # Momentum / PPO overrides — disabled when AI council owns all decisions
+        # Momentum / PPO overrides — AI fast execution always hunts spikes
+        if not enter and getattr(self.cfg, "AI_FAST_EXECUTION", True):
+            if should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf):
+                enter = True
+                confidence = max(confidence, 0.58)
+                out["reason"] = (
+                    f"⚡ Fast spike hunt: vol={spike_ratio:.1f}x score={scan_score:.0f}"
+                )[:200]
+                out["pipeline"] = "ai:spike_fast_fallback"
         if not enter and not is_ai_unlimited(self.cfg) and not self.council_mode:
             if spike_ratio >= 1.5 and scan_score >= 35:
                 enter = True

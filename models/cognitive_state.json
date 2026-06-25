@@ -1,13 +1,9 @@
 {
   "mood": "gathering",
   "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
-  "confidence": 0.6700000000000002,
+  "confidence": 0.6900000000000002,
   "mode": "autonomous",
   "learned_lessons": [
-    "t",
-    "c",
-    "u",
-    "h",
     "i",
     "s",
     "a",
@@ -103,10 +99,14 @@
     "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TVBCY@SMART Trades",
     "An unexpected spike in the AZI ticker occurred after a timeout.",
     "We need to investigate the root cause of the spike and take appropriate actions to prevent similar events from happening again",
-    "Commander: The spike was triggered by a scanner failure, and we need to analyze this event with the aim of understanding its potential causes."
+    "Commander: The spike was triggered by a scanner failure, and we need to analyze this event with the aim of understanding its potential causes.",
+    "Review trade_closed on AZI",
+    "Commander: win",
+    "Review council_timeout on GNOM",
+    "Commander: Council timeout \u2014 no aligned signal"
   ],
   "last_thought": "```json\n{\n  \"trade_info\": {\n    \"ticker\": \"AZI\",\n    \"entry_price\": 1.91,\n    \"exit_price\": 1.952,\n    \"shares\": 10.0,\n    \"pnl_usd\": 0.42,\n    \"pnl_pct\": 2.2,\n    \"result\": \"win\"\n  },\n  \"learning_logs\": {\n    \"gut_feel\": 0.65,\n    \"intuition\": 0.80\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 1,
-  "updated": "2026-06-25T13:53:24.014092"
+  "trades_observed": 2,
+  "updated": "2026-06-25T13:53:45.714842"
 }
