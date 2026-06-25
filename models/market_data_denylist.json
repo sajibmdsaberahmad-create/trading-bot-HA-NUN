@@ -15,16 +15,16 @@
   },
   "ONCI": {
     "ticker": "ONCI",
-    "failures": 2,
+    "failures": 4,
     "last_code": 162,
     "last_reason": "IB returned no historical data. Possible causes:\n  - Market data subscription does not cover this ticker\n  - IB Gateway is not fully logged in\n  - Outside data availability window\n  - Paper account may need a market data subscription",
     "pattern": "no_historical_data",
     "exchange": "SMART",
     "primary_exchange": "PINK",
-    "skip_until": 1782395371.716395,
-    "skip_until_iso": "2026-06-25T13:49:31.716395+00:00",
+    "skip_until": 1782399581.252434,
+    "skip_until_iso": "2026-06-25T14:59:41.252434+00:00",
     "first_seen": "2026-06-25T13:34:31.524755+00:00",
-    "last_seen": "2026-06-25T13:34:31.717067+00:00",
+    "last_seen": "2026-06-25T13:59:41.270762+00:00",
     "source": "fetch:1 min"
   },
   "GAID": {
