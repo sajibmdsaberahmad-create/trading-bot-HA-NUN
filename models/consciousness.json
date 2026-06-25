@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 105,
   "training_sessions": 27,
-  "trades_observed": 93,
+  "trades_observed": 95,
   "scans_performed": 27,
-  "improvements_applied": 260,
+  "improvements_applied": 263,
   "reports_generated": 26,
   "event_log": [
     {
@@ -13597,6 +13597,62 @@
       "type": "TRADE",
       "message": "Observed trade: SOXS ? P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:20:35.134942",
+      "age": "4d 6h 17m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #261",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:20:38.105773",
+      "age": "4d 6h 17m 49s",
+      "type": "TRADE",
+      "message": "Observed trade: BITO ? P&L=$+98688.34",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:21:00.741628",
+      "age": "4d 6h 18m 12s",
+      "type": "TRADE",
+      "message": "Observed trade: TZA ? P&L=$+17300.06",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:21:02.317401",
+      "age": "4d 6h 18m 13s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #262",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on BITO"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:21:10.997167",
+      "age": "4d 6h 18m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #263",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TZA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T16:37:32.647905",
@@ -14882,8 +14938,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "defensive",
-  "total_pnl": 16943.63,
+  "mood": "anxious",
+  "total_pnl": 132932.03,
   "win_history": [
     0.0,
     0.0,
@@ -14977,20 +15033,22 @@
     16.77,
     0.0,
     29.69,
-    0.0
+    0.0,
+    98688.34,
+    17300.06
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_wins": 2,
+  "consecutive_losses": 0,
   "worst_streak": 12,
-  "veteran_xp": 1280,
+  "veteran_xp": 1340,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 71,
     "risk_management": 26,
-    "entry_timing": 34
+    "entry_timing": 38
   },
-  "flights_completed": 88,
-  "hours_flown": 8.799999999999985,
+  "flights_completed": 90,
+  "hours_flown": 8.999999999999984,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15006,10 +15064,10 @@
     "TPT": 3,
     "KUS": 2,
     "XCH": 1,
-    "TZA": 9,
+    "TZA": 10,
     "GDC": 9,
     "SOX": 7,
-    "BIT": 7,
+    "BIT": 8,
     "GPU": 12
   },
   "best_streak": 4,
@@ -15017,5 +15075,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 15% \u00b7 $-7140.15. Preserving capital over action."
+  "mood_message": "I feel a sense of urgency and readiness to act on my trades."
 }

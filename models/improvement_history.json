@@ -103,5 +103,32 @@
     "lessons": [
       "Review trade_closed on NEXR"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:20:35.169053+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOXS"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:21:02.360570+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on BITO"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:21:11.047876+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TZA"
+    ]
   }
 ]

@@ -3708,3 +3708,15 @@ Market data failed, no live IB bars available for analysis. The trade was proces
 Observed trade_closed — recorded for learning.
 spike_top_exit: +4.58% vol=1.8x
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:20:35.168469+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:21:02.360018+00:00
+Observed trade_closed — recorded for learning.
+trailing_stop
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:21:11.047487+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +0.52% vol=1.6x
+

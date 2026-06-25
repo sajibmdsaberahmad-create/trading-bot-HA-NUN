@@ -1,15 +1,9 @@
 {
-  "mood": "troubled",
-  "mood_message": "I've been experiencing high levels of anxiety and missed opportunities before.",
-  "confidence": 0.35,
+  "mood": "steady",
+  "mood_message": "Mixed session \u00b7 $+210448.05. Watching for cleaner setups.",
+  "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "Spike-top hunt on BITO: wave_end_spike_fade: peak +59900.00% now +28780.60% vol=0.8x fading",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence level (58%) indicates that we should be cautious with this stop-loss event. We need to analyze further and ensure the system is robust.'}",
-    "Commander: The trade was stopped due to a breach in the barrier, resulting in profit loss.",
-    "Profit hunt worked on BITO: wave_end_spike_fade: peak +59900.00% now +28780.60% vol=0.8x fading \u2014 reinforce opportunistic exits.",
-    "Always pay attention to price movements",
-    "Adjust your stop-loss and take-profit strategies accordingly",
     "Commander: The trade closed with a positive pips and profit hunting initiated based on an increasing price at the peak of the spike. The 'wave_end_spike_fade' event indicates that the highest value of the current spike has shifted to its maximum, sugg",
     "Review trade_closed on NEXR",
     "Commander: trailing_stop",
@@ -103,10 +97,16 @@
     "Commander: Market data failed, no live IB bars available for analysis. The trade was processed and exited with a stop-hit strategy.",
     "Spike-top hunt on NEXR: spike_top_exit: +4.58% vol=1.8x",
     "Profit hunt worked on NEXR: spike_top_exit: +4.58% vol=1.8x \u2014 reinforce opportunistic exits.",
-    "Commander: spike_top_exit: +4.58% vol=1.8x"
+    "Commander: spike_top_exit: +4.58% vol=1.8x",
+    "Review trade_closed on SOXS",
+    "Commander: bracket_exit",
+    "Spike-top hunt on TZA: spike_top_exit: +0.52% vol=1.6x",
+    "Profit hunt worked on TZA: spike_top_exit: +0.52% vol=1.6x \u2014 reinforce opportunistic exits.",
+    "Review trade_closed on BITO",
+    "Commander: spike_top_exit: +0.52% vol=1.6x"
   ],
   "last_thought": "```json\n{\n  \"event\": \"trade\",\n  \"ticker\": \"SOXS\",\n  \"entry\": 0.8852,\n  \"exit\": 0.8852,\n  \"entry_fill\": 0.8852,\n  \"exit_fill\": 0.8852,\n  \"quote_entry\": 0.8852,\n  \"quote_exit\": 3.6,\n  \"shares\": 13630.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"loss\",\n  \"exit_reason\": \"bracket_exit\",\n  \"entry_slippage_pct\": -0.756821,\n  \"exit_slippage_pct\": -0.754119,\n  \"limit_px\": 3.64,\n  \"entry_mode\": \"limit_smart\",\n  \"regime\": \"unknown\",\n  \"hold_sec\": 62.9,\n  \"peak\": 3.61,\n  \"stop\": 3.573,\n  \"target\": 4.",
   "market_belief": {},
-  "trades_observed": 86,
-  "updated": "2026-06-25T17:20:02.274247"
+  "trades_observed": 90,
+  "updated": "2026-06-25T17:21:10.995728"
 }
