@@ -2451,3 +2451,334 @@ The trade was successful but the profit hunting process has been paused due to a
 Observed trade_closed — recorded for learning.
 stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:50:19.170526+00:00
+Loss streak with high PPO exit rate 90% (Ollama exit)
+Why: The loss streak occurred due to a high PPO exit rate of 90%. This suggests that the system is not executing at optimal levels, and it may be missing opportunities or being influenced by external factors. When PPO exits quickly, the algorithm should focus on taking profits into momentum while waiting for other signals.
+• Ensure the system is running smoothly without any anomalies or errors.
+• Continuously analyze execution metrics and adjust strategies accordingly.
+• Monitor live events for market data failures and update the algorithmic fixes in real-time.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (...)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:50:22.410654+00:00
+Trade closed with a council exit of Ollama at 90% PPO hold.
+The trade was executed with the exit strategy of Ollama at 90% PPO hold. The algorithm is now correcting this risk and adjusting its parameters to make it less likely to happen again.
+• W
+• h
+• e
+• n
+•  
+• t
+• h
+• e
+•  
+• m
+• a
+• r
+• k
+• e
+• t
+•  
+• s
+• t
+• a
+• t
+• e
+• s
+•  
+• a
+• r
+• e
+•  
+• o
+• p
+• e
+• n
+• ,
+•  
+• i
+• t
+• '
+• s
+•  
+• c
+• r
+• u
+• c
+• i
+• a
+• l
+•  
+• t
+• o
+•  
+• k
+• e
+• e
+• p
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• w
+• i
+• t
+• h
+• i
+• n
+•  
+• a
+• n
+•  
+• o
+• p
+• t
+• i
+• m
+• a
+• l
+•  
+• r
+• a
+• n
+• g
+• e
+• .
+•  
+• T
+• h
+• e
+•  
+• c
+• h
+• a
+• n
+• g
+• e
+•  
+• i
+• n
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+•  
+• v
+• a
+• l
+• u
+• e
+• s
+•  
+• (
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+• )
+•  
+• r
+• e
+• f
+• l
+• e
+• c
+• t
+• s
+•  
+• t
+• h
+• a
+• t
+•  
+• t
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+•  
+• n
+• o
+• w
+•  
+• a
+• i
+• m
+• s
+•  
+• f
+• o
+• r
+•  
+• a
+•  
+• m
+• o
+• r
+• e
+•  
+• c
+• o
+• n
+• s
+• e
+• r
+• v
+• a
+• t
+• i
+• v
+• e
+•  
+• r
+• i
+• s
+• k
+•  
+• a
+• s
+• s
+• e
+• s
+• s
+• m
+• e
+• n
+• t
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The algorithm has adjusted its parameters from a high value of 0.9 to a low value of 0.58.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:50:48.389589+00:00
+Trade closed with Ollama exit on BITO (PPO hold).
+The trade closed with an exit for BitO at 100% profit and a hold period of 47.5 days.
+• T
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+•  
+• s
+• h
+• o
+• u
+• l
+• d
+•  
+• c
+• o
+• n
+• s
+• i
+• d
+• e
+• r
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• l
+• e
+• v
+• e
+• l
+•  
+• w
+• h
+• e
+• n
+•  
+• p
+• r
+• i
+• o
+• r
+• i
+• t
+• i
+• z
+• i
+• n
+• g
+•  
+• e
+• x
+• i
+• t
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.6 (When an exit is triggered, it's crucial to increase the confidence level of the trade.)
+

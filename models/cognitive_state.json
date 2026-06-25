@@ -4,16 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: IB closing-only \u2014 cannot open new positions",
-    "No clean data on TMPOQ (no_historical_data) \u2014 profit hunt elsewhere.",
-    "Review market_data_failure on TMPOQ",
-    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:HMDS query returned no data: TMPOQ@SMART Trades",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 is too low, which means that if it happens again, we would not be willing to take the profit.'}",
-    "Commander: We are analyzing the event to understand the root cause and how we can improve the algorithmic trading strategy.",
-    "Adjust confidence threshold for profit hunting",
-    "Monitor live IB bars for better real-time execution",
-    "Commander: Trade closed due to bracket_exit event, which triggered profit hunting.",
-    "P",
     "e",
     "a",
     ";",
@@ -103,10 +93,20 @@
     "Commander: The trader had a trailing profit, which is common in scalping strategies.",
     "v",
     "Commander: The trade was successful but the profit hunting process has been paused due to a market data failure.",
-    "Commander: stop_breach"
+    "Commander: stop_breach",
+    "Focus on executing orders promptly and carefully to maximize profit margins",
+    "Adjust strategy based on market conditions and execution efficiency",
+    "Monitor internal system performance to identify potential issues",
+    "Commander: Why: The loss streak occurred due to a high PPO exit rate of 90%. This suggests that the system is not executing at optimal levels, and it may be missing opportunities or being influenced by external factors. When PPO exits quickly, the alg",
+    "w",
+    ",",
+    "'",
+    "k",
+    "Commander: The trade was executed with the exit strategy of Ollama at 90% PPO hold. The algorithm is now correcting this risk and adjusting its parameters to make it less likely to happen again.",
+    "Commander: The trade closed with an exit for BitO at 100% profit and a hold period of 47.5 days."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"output\": {\n    \"prompt\": \"The live account state summary:\",\n    \"data\": [\n      {\"mode\": \"HANOON\", \"account_equity\": 1015275.98, \"available_cash\": 1015275.98, \"position_value\": 0.0, \"nav\": 947987.99, \"deployed_pct\": 0.0, \"current_ticker\": \"NONE\", \"position\": \"NONE\", \"win_rate\": 0.0, \"trades_today\": 11, \"top_pick\": \"GDC\", \"top_score\": 102.0, \"next_best\": null, \"next_best_score\": 0.0, \"scan_results\": [\n        { \"ticker\": \"GDC\", \"price\": 0.0, \"sc",
+  "last_thought": "```json\n{\n  \"journal_entry\": {\n    \"ticker\": \"BITO\",\n    \"entry\": 0.177,\n    \"exit\": 8.04,\n    \"entry_fill\": 0.177,\n    \"exit_fill\": 8.04,\n    \"quote_entry\": 0.177,\n    \"quote_exit\": 8.04,\n    \"shares\": 6644.0,\n    \"pnl_usd\": 52241.77,\n    \"pnl_pct\": 4442.37,\n    \"result\": \"win\",\n    \"exit_reason\": \"council_exit: Ollama exit 100% (PPO hold)\",\n    \"entry_slippage_pct\": -0.978067,\n    \"exit_slippage_pct\": 0.0,\n    \"limit_px\": 8.07,\n    \"entry_mode\": \"limit_smart\",\n    \"regime\": \"unknown\",\n    \"hol",
   "market_belief": {},
-  "trades_observed": 23,
-  "updated": "2026-06-25T16:50:01.547865"
+  "trades_observed": 26,
+  "updated": "2026-06-25T16:50:48.365192"
 }
