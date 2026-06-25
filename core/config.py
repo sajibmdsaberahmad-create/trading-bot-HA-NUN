@@ -341,6 +341,13 @@ class BotConfig:
     LIVE_AI_MIN_RING_SEC: float = 0.8      # Min gap between identical fingerprint rings
     LIVE_AI_PREFETCH_TOP_N: int = 3        # Keep hotline open on top locked tickers
     LIVE_AI_PREFETCH_SEC: float = 1.0      # How often to prefetch watchlist
+    # Live chart vision (llava) — prefetch on watchlist, feed entry council + training
+    LIVE_CHART_VISION_ENABLED: bool = os.getenv(
+        "LIVE_CHART_VISION_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    LIVE_CHART_VISION_MIN_SCORE: float = float(os.getenv("LIVE_CHART_VISION_MIN_SCORE", "65"))
+    LIVE_CHART_VISION_MAX_AGE_SEC: float = float(os.getenv("LIVE_CHART_VISION_MAX_AGE_SEC", "12"))
+    LIVE_CHART_VISION_MIN_RING_SEC: float = float(os.getenv("LIVE_CHART_VISION_MIN_RING_SEC", "2.5"))
     ENTRY_OLLAMA_WAIT_SEC: float = float(os.getenv("ENTRY_OLLAMA_WAIT_SEC", "10"))
     AI_COUNCIL_MAX_WAIT_SEC: float = float(os.getenv("AI_COUNCIL_MAX_WAIT_SEC", "15"))
     AI_COUNCIL_ALL_DECISIONS: bool = os.getenv(

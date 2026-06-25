@@ -643,6 +643,50 @@ def _is_pushable_path(path: str) -> bool:
     return True
 
 
+# Large / local-only artifacts — never `git add` from training hooks (.gitignore)
+_GITIGNORED_ARTIFACTS: Set[str] = {
+    "models/experience_buffer.jsonl",
+    "models/trained_record_hashes.jsonl",
+    "models/thought_journal.jsonl",
+    "models/ai_decision_log.jsonl",
+    "models/flight_log.jsonl",
+    "models/account_snapshots.jsonl",
+    "models/account_evaluation_log.jsonl",
+    "audit_trail.jsonl",
+    "live_metrics.json",
+    "bot_state.json",
+}
+
+
+def filter_git_addable(files: Optional[List[str]], repo_root: str) -> List[str]:
+    """Drop missing paths, secrets, and .gitignore entries before staging."""
+    if not files:
+        return []
+    out: List[str] = []
+    for raw in files:
+        norm = raw.replace("\\", "/").strip()
+        if not norm or not _is_pushable_path(norm):
+            continue
+        if norm in _GITIGNORED_ARTIFACTS:
+            continue
+        full = os.path.join(repo_root, norm)
+        if not os.path.exists(full):
+            continue
+        try:
+            chk = subprocess.run(
+                ["git", "check-ignore", "-q", "--", norm],
+                cwd=repo_root,
+                capture_output=True,
+                timeout=10,
+            )
+            if chk.returncode == 0:
+                continue
+        except Exception:
+            pass
+        out.append(norm)
+    return out
+
+
 def _git_porcelain_files(repo_root: str) -> List[str]:
     try:
         result = subprocess.run(
@@ -771,13 +815,16 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
             if not files:
                 _last_push_ts = time.time()
                 return True
+
+            files = filter_git_addable(files, repo_root)
+            if not files:
+                _last_push_ts = time.time()
+                return True
             
             # Stage files
             stage_cmds = []
             for f in files:
-                full = os.path.join(repo_root, f)
-                if os.path.exists(full):
-                    stage_cmds.append(["git", "add", f])
+                stage_cmds.append(["git", "add", f])
             
             if not stage_cmds:
                 _last_push_ts = time.time()

@@ -263,16 +263,25 @@ def run_unified_training(cfg: BotConfig, ppo_steps: int = 20_000):
     log.info(f"  Weights: {json.dumps(weights, indent=2)[:500]}")
     log.info("=" * 70)
 
-    # 6) Push artifacts to git
+    # 6) Push trackable artifacts (experience_buffer is local-only / .gitignore)
     try:
-        subprocess.run(["git", "add", str(WEIGHTS_PATH), str(GUIDELINES_PATH), str(HISTORY_PATH), "models/experience_buffer.jsonl"], check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", f"train: unified | ppo={trained} | steps={ppo_steps:,} | win_rate={weights.get('_meta', {}).get('buffer_win_rate', 0)*100:.0f}%"],
-            check=True, capture_output=True
+        from core.git_sync import push_change
+
+        wr = weights.get("_meta", {}).get("buffer_win_rate", 0) * 100
+        pushed = push_change(
+            f"train: unified | ppo={trained} | steps={ppo_steps:,} | win_rate={wr:.0f}%",
+            files=[
+                str(WEIGHTS_PATH),
+                str(GUIDELINES_PATH),
+                str(HISTORY_PATH),
+            ],
+            category="training",
         )
-        subprocess.run(["git", "push"], check=True, capture_output=True)
-        log.info("✅ Git: committed and pushed unified training artifacts")
-    except subprocess.CalledProcessError as exc:
+        if pushed:
+            log.info("✅ Git: committed and pushed unified training artifacts")
+        else:
+            log.debug("Git: unified training push deferred or no trackable changes")
+    except Exception as exc:
         log.warning(f"Git push failed: {exc}")
 
     return weights, trained
@@ -328,8 +337,11 @@ def run_incremental_training(cfg: BotConfig, fresh_records: list = None, ppo_ste
         version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         push_change(
             f"train: incremental pilot | new={len(fresh_records)} ppo={trained}",
-            files=["models/scalper_weights.json", "models/training_history.json",
-                   "models/experience_buffer.jsonl", "models/trained_record_hashes.jsonl"],
+            files=[
+                "models/scalper_weights.json",
+                "models/training_history.json",
+                "models/ai_guidelines.txt",
+            ],
             category="training",
         )
         if trained:

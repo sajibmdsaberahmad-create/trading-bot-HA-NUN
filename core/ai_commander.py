@@ -51,6 +51,7 @@ from core.live_ai_pipeline import (
     risk_signal_fingerprint,
     scan_fingerprint,
 )
+from core.chart_vision import ChartVisionLine, chart_fingerprint
 
 if TYPE_CHECKING:
     from core.cognitive_autopilot import CognitiveAutopilot
@@ -113,6 +114,7 @@ class AICommander:
         self._cache: Dict[str, Tuple[float, Any]] = {}
         self._trade_journal: List[Dict] = []
         self._live_line = LiveAILine(cfg, self._ollama_decide_raw)
+        self._chart_line = ChartVisionLine(cfg)
         DECISION_LOG.parent.mkdir(parents=True, exist_ok=True)
         self._load_journal()
 
@@ -127,6 +129,60 @@ class AICommander:
     def ollama_audit_snapshot(self, ticker: str, task: str = "entry_decision") -> Dict[str, Any]:
         """Raw + parsed Ollama output for post-mortem (hallucination audit)."""
         return self._live_line.peek(ticker, task)
+
+    def _vision_analyze(self, prompt: str, image_bytes: bytes) -> str:
+        ollama = None
+        if self.autopilot and getattr(self.autopilot, "core", None):
+            ollama = getattr(self.autopilot.core, "ollama", None)
+        if ollama and hasattr(ollama, "analyze_image"):
+            return (ollama.analyze_image(prompt, image_bytes) or "").strip()
+        from core.ollama_brain import OllamaBrain
+
+        brain = OllamaBrain(self.cfg)
+        return (brain.analyze_image(prompt, image_bytes) or "").strip()
+
+    def prefetch_chart_vision(
+        self,
+        ticker: str,
+        df: pd.DataFrame,
+        current_px: float,
+        spike_ratio: float,
+        scan_score: float,
+    ) -> None:
+        """Non-blocking llava read on locked watchlist — feeds entry council."""
+        if df is None or len(df) < 20:
+            return
+        self._chart_line.ring(
+            ticker, df, current_px, spike_ratio, scan_score, self._vision_analyze,
+        )
+
+    def chart_read_for(
+        self,
+        ticker: str,
+        current_px: float,
+        spike_ratio: float,
+        scan_score: float,
+    ) -> str:
+        fp = chart_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        return self._chart_line.peek_read(ticker, fp)
+
+    def _chart_context_line(
+        self,
+        ticker: str,
+        current_px: float,
+        spike_ratio: float,
+        scan_score: float,
+    ) -> str:
+        if not getattr(self.cfg, "LIVE_CHART_VISION_ENABLED", True):
+            return ""
+        fp = chart_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        live = self._chart_line.consume(ticker, fp)
+        if live.get("status") != "fresh":
+            return ""
+        read = (live.get("read") or "").strip()
+        if not read:
+            return ""
+        return f"CHART VISION (llava): {read[:700]}\n"
 
     def _build_entry_bracket(
         self,
@@ -514,6 +570,10 @@ class AICommander:
             )
         )
 
+        fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
+        pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
+
         prompt = (
             f"DECIDE ENTRY for {ticker} @ ${current_px:.4f}\n"
             f"Volume spike {spike_ratio:.2f}x | Scan score {scan_score:.0f}\n"
@@ -524,6 +584,7 @@ class AICommander:
             f"Deployed ${deployed:,.0f}\n"
             f"{cap_line}"
             f"Bid ${bid or 0:.4f} Ask ${ask or 0:.4f} Spread {spread:.2%} | Avg vol {avg_vol:,.0f}\n"
+            + (chart_line if chart_line else "")
             + (
                 "PENNY STOCK: IB rejects large MARKET orders (error 2161). "
                 "Use smaller size — max deploy $350, max ~1200 shares. Limit entry only.\n"
@@ -534,9 +595,6 @@ class AICommander:
             'JSON: {"enter":true/false,"confidence":0-1,"gut_feel":0-1,"intuition":"gut read",'
             '"reason":"why","journal":"first-person pilot log"}'
         )
-        fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
-        pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
-
         if pipeline_on:
             mood, conf_m, lessons = self._mood_context()
             full = enrich_prompt(
