@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 105,
   "training_sessions": 27,
-  "trades_observed": 75,
+  "trades_observed": 82,
   "scans_performed": 27,
-  "improvements_applied": 235,
+  "improvements_applied": 244,
   "reports_generated": 26,
   "event_log": [
     {
@@ -12609,6 +12609,307 @@
       "type": "TRADE",
       "message": "Observed trade: GDC ? P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:01:11.511798",
+      "age": "4d 5h 58m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #236",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade closed with a trailing profit, but the event is not reflective of a missed profit hunt.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The value of 0.58 suggests a confidence level of around 93%, which indicates that the analysis might have overlooked key factors such as market momentum, trends, or other potential triggers.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "I",
+          "n",
+          "a",
+          "c",
+          "c",
+          "u",
+          "r",
+          "a",
+          "t",
+          "e",
+          "a",
+          "n",
+          "a",
+          "l",
+          "y",
+          "s",
+          "i",
+          "s",
+          "c",
+          "a",
+          "n",
+          "l",
+          "e",
+          "a",
+          "d",
+          "t",
+          "o",
+          "m",
+          "i",
+          "s",
+          "s",
+          "e",
+          "d",
+          "p",
+          "r",
+          "o",
+          "f",
+          "i",
+          "t",
+          "s",
+          ",",
+          "a",
+          "n",
+          "d",
+          "t",
+          "h",
+          "e",
+          "c",
+          "o",
+          "r",
+          "r",
+          "e",
+          "c",
+          "t",
+          "f",
+          "i",
+          "x",
+          "i",
+          "s",
+          "n",
+          "e",
+          "c",
+          "e",
+          "s",
+          "s",
+          "a",
+          "r",
+          "y",
+          "t",
+          "o",
+          "p",
+          "r",
+          "e",
+          "v",
+          "e",
+          "n",
+          "t",
+          "f",
+          "u",
+          "t",
+          "u",
+          "r",
+          "e",
+          "r",
+          "e",
+          "p",
+          "e",
+          "a",
+          "t",
+          "o",
+          "c",
+          "c",
+          "u",
+          "r",
+          "r",
+          "e",
+          "n",
+          "c",
+          "e",
+          "s",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:01:42.216367",
+      "age": "4d 5h 58m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:01:47.672989",
+      "age": "4d 5h 58m 58s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #237",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade closed with a trailing profit of $0. This is the second consecutive day of profit hunting.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold of 0.58 indicates that we should be cautious and avoid taking profits when the market is close to a breakout.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold of 0.58 indicates that we should be cautious and avoid taking profits when the market is close to a breakout.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:03:32.509190",
+      "age": "4d 6h 0m 43s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:03:40.834630",
+      "age": "4d 6h 0m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #238",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GPUS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:05:21.107695",
+      "age": "4d 6h 2m 32s",
+      "type": "TRADE",
+      "message": "Observed trade: GDC ? P&L=$-1046.37",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:05:32.170132",
+      "age": "4d 6h 2m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #239",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Loss streak detected, stop breach triggered by stop loss.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increase the confidence threshold for early exits to improve risk management.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Analyze the cause of the stop-loss triggering to determine if it's related to specific trading strategies or market conditions.",
+          "Adjust the trade logic based on the specific circumstances to prevent similar situations in the future.",
+          "Implement more robust stop-loss thresholds and use real-time monitoring to catch potential stop loss triggers before they occur."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:05:45.462226",
+      "age": "4d 6h 2m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #240",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GDC"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:06:17.294049",
+      "age": "4d 6h 3m 28s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:06:41.494038",
+      "age": "4d 6h 3m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #241",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GPUS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:07:53.133417",
+      "age": "4d 6h 5m 4s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$-810.28",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:08:05.410040",
+      "age": "4d 6h 5m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #242",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on GPUS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:08:17.516474",
+      "age": "4d 6h 5m 28s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #243",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GPUS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:09:16.569623",
+      "age": "4d 6h 6m 27s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:09:24.946492",
+      "age": "4d 6h 6m 36s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #244",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on GPUS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:10:51.455238",
+      "age": "4d 6h 8m 2s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$-848.25",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T16:37:32.647905",
@@ -13894,8 +14195,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "calm",
-  "total_pnl": 23233.61,
+  "mood": "Euphoric",
+  "total_pnl": 20528.710000000003,
   "win_history": [
     0.0,
     0.0,
@@ -13971,20 +14272,27 @@
     -66.29,
     25468.02,
     -850.17,
-    0.0
+    0.0,
+    0.0,
+    0.0,
+    -1046.37,
+    0.0,
+    -810.28,
+    0.0,
+    -848.25
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 9,
   "worst_streak": 12,
-  "veteran_xp": 1005,
+  "veteran_xp": 1090,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 56,
-    "risk_management": 12,
+    "exit_timing": 63,
+    "risk_management": 18,
     "entry_timing": 28
   },
-  "flights_completed": 70,
-  "hours_flown": 6.999999999999991,
+  "flights_completed": 77,
+  "hours_flown": 7.699999999999989,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14001,15 +14309,15 @@
     "KUS": 2,
     "XCH": 1,
     "TZA": 9,
-    "GDC": 5,
+    "GDC": 6,
     "SOX": 5,
     "BIT": 7,
-    "GPU": 5
+    "GPU": 11
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "I'm in a good mood as I am able to make informed trades and track my progress."
+  "mood_message": "After a successful day's trading, the pilot feels highly energized and motivated."
 }

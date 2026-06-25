@@ -59,3 +59,15 @@
 {"timestamp":"2026-06-25T17:00:25.922747+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-850.17,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T17:00:43.711264+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":-1046.37,"pnl_pct":-0.9851,"primary_goal":true,"reason":"trailing_profit","price":0.0132}
 {"timestamp":"2026-06-25T17:01:00.193037+00:00","event":"trailing_profit","ticker":"GDC","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:01:24.478369+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-849.93,"pnl_pct":-0.8002,"primary_goal":true,"reason":"trailing_profit","price":0.1769}
+{"timestamp":"2026-06-25T17:01:42.241913+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:02:48.422797+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.85,"pnl_pct":-0.7991,"primary_goal":true,"reason":"trailing_profit","price":0.1778}
+{"timestamp":"2026-06-25T17:03:32.537044+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:05:39.916852+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.73,"pnl_pct":-0.799,"primary_goal":true,"reason":"trailing_profit","price":0.1779}
+{"timestamp":"2026-06-25T17:06:17.321069+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:07:19.781211+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-810.17,"pnl_pct":-0.7994,"primary_goal":true,"reason":"trailing_profit","price":0.1776}
+{"timestamp":"2026-06-25T17:07:53.179953+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-810.28,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:08:53.257604+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.61,"pnl_pct":-0.7989,"primary_goal":true,"reason":"trailing_profit","price":0.178}
+{"timestamp":"2026-06-25T17:09:16.600598+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T17:10:27.466807+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.13,"pnl_pct":-0.7985,"primary_goal":true,"reason":"trailing_profit","price":0.1784}
+{"timestamp":"2026-06-25T17:10:51.496794+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-848.25,"source":"buffer","reason":"trailing_profit"}
