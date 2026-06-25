@@ -1796,5 +1796,22 @@
     "lessons": [
       "Review council_timeout on WAVE"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T08:52:05.612882+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.45,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on EHGO"
+    ]
   }
 ]

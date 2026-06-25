@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 24,
   "scans_performed": 27,
-  "improvements_applied": 45,
+  "improvements_applied": 46,
   "reports_generated": 26,
   "event_log": [
     {
@@ -4759,6 +4759,28 @@
         ],
         "lessons": [
           "Review council_timeout on WAVE"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:52:05.583412",
+      "age": "3d 21h 49m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #46",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.45,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on EHGO"
         ]
       }
     }
