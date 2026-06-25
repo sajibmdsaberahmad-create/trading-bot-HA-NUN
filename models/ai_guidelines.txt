@@ -293,3 +293,7 @@ Council timeout — no aligned signal
 Observed council_timeout — recorded for learning.
 Council timeout — no aligned signal
 
+🧭 COMMANDER LEARNING | 2026-06-25T10:49:03.869522+00:00
+Observed council_timeout — recorded for learning.
+Council timeout — no aligned signal
+

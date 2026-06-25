@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 80,
+  "improvements_applied": 81,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5670,6 +5670,20 @@
       "age": "3d 23h 41m 46s",
       "type": "IMPROVE",
       "message": "Applied improvement #80",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T10:49:03.845938",
+      "age": "3d 23h 46m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #81",
       "metadata": {
         "source": "runtime_council_timeout",
         "summary": "Observed council_timeout \u2014 recorded for learning.",

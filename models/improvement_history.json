@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-06-22T09:05:55.495930",
-    "win_rate": 0.550323275862069,
-    "buffer_win_rate": 0.89375,
-    "returns_win_rate": 0.20689655172413793,
-    "adjustments": {},
-    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:05:55.495735\nCombined win rate: 55.0% (buffer=89.4%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects"
-  },
-  {
     "timestamp": "2026-06-24T20:01:11.248715",
     "win_rate": 0.2843132824151489,
     "buffer_win_rate": 0.3617300131061599,
@@ -2231,6 +2223,15 @@
   },
   {
     "timestamp": "2026-06-25T10:44:34.827630+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on QCMD"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T10:49:03.870185+00:00",
     "source": "runtime_council_timeout",
     "adjustments": {},
     "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",

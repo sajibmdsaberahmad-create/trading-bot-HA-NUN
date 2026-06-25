@@ -4,7 +4,6 @@
   "confidence": 0.42999999999999994,
   "mode": "autonomous",
   "learned_lessons": [
-    "n",
     "a",
     "l",
     "y",
@@ -103,10 +102,11 @@
     "Keep track of market conditions and real-time events.",
     "Regularly monitor trading algo performance.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'To avoid such events in the future.'}",
-    "Commander: The council_timeout event indicates that the scanner + spike occurred after a timeout, and it should be fixed to prevent it from happening again."
+    "Commander: The council_timeout event indicates that the scanner + spike occurred after a timeout, and it should be fixed to prevent it from happening again.",
+    "{'param': 'confidence_threshold', 'value': 0.58, 'reason': \"The algorithm needs to adjust its confidence threshold so it doesn't trigger a timeout event again.\"}"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"intuition\": true,\n    \"pattern_recognition\": false,\n    \"adaptation\": true,\n    \"error_correction\": true,\n    \"loss_reconstruction\": true,\n    \"honesty\": true\n  },\n  \"trade_decisions\": [\n    {\n      \"move_type\": \"hold\",\n      \"reasoning\": \"The live account's equity is at $1M, which is a good position but not a high-risk one. The scanner and spikes indicate that the market is likely to move in a positive direction, so we should consider buying.\",\n      \"action\": \"ho",
+  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"intuition\": false,\n    \"pattern_recognition\": true,\n    \"adaptation\": true,\n    \"honesty\": true,\n    \"exposure\": true,\n    \"risk_management\": true\n  },\n  \"trade_decisions\": [\n    {\n      \"position_value\": 0.0,\n      \"nav\": 1013.47,\n      \"deployed_pct\": 0.0,\n      \"scan_results\": []\n    }\n  ]\n}\n```",
   "market_belief": {},
   "trades_observed": 3,
-  "updated": "2026-06-25T10:44:34.801097"
+  "updated": "2026-06-25T10:49:03.843892"
 }
