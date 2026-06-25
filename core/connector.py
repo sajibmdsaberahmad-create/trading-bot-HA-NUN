@@ -65,6 +65,8 @@ class IBConnector:
             try:
                 import ib_insync as ibi
                 ibi.util.log.level = 30  # WARNING
+                # Allow tick/stream subscriptions from the synchronous main loop.
+                ibi.util.patchAsyncio()
             except Exception:
                 pass
             self.ib.connect(
@@ -104,14 +106,17 @@ class IBConnector:
         except Exception:
             pass
 
-    def get_contract(self):
-        """Qualify and cache the contract for cfg.TICKER. Invalidate cache if ticker changes."""
-        if self._contract is None or getattr(self._contract, 'symbol', None) != self.cfg.TICKER:
-            raw = Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
+    def get_contract(self, symbol: Optional[str] = None):
+        """Qualify and cache the contract for symbol (default: cfg.TICKER)."""
+        sym = (symbol or self.cfg.TICKER or "").upper()
+        if not sym:
+            raise RuntimeError("No ticker symbol for contract qualification")
+        if self._contract is None or getattr(self._contract, "symbol", None) != sym:
+            raw = Stock(sym, self.cfg.EXCHANGE, self.cfg.CURRENCY)
             qualified = self.ib.qualifyContracts(raw)
             if not qualified:
                 raise RuntimeError(
-                    f"Could not qualify contract for '{self.cfg.TICKER}'.\n"
+                    f"Could not qualify contract for '{sym}'.\n"
                     "Possible causes:\n"
                     "  - Ticker symbol is wrong\n"
                     "  - Your market data subscription does not cover this stock\n"

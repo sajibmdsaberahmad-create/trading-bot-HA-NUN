@@ -94,7 +94,7 @@ from core.fast_execution import (
     skip_historical_prefetch,
 )
 from core.connector import IBConnector
-from core.data import DataManager
+from core.data import DataManager, coalesce_bars
 from core.features_enhanced import FeatureEngineerEnhanced
 from core.institutional import InstitutionalDetector, InstitutionalSignal
 from core.scanner import StockScanner, ScanResult, ScannerHit, PENNY_STOCK_UNIVERSE, CONTRACT_BLACKLIST
@@ -980,12 +980,15 @@ class ScalperRunner:
 
     def _monitor_all_open_positions(self):
         for ticker in list(self._position_slots.keys()):
-            if not self._load_position_context(ticker):
-                continue
-            px = self._live_price_for(ticker, self._entry_price)
-            if px > 0:
-                self._live_position_monitor(px)
-            self._save_position_context(ticker)
+            try:
+                if not self._load_position_context(ticker):
+                    continue
+                px = self._live_price_for(ticker, self._entry_price)
+                if px > 0:
+                    self._live_position_monitor(px)
+                self._save_position_context(ticker)
+            except Exception as exc:
+                log.error(f"Position monitor failed for {ticker}: {exc}")
         self._refresh_aggregate_position_state()
 
     def _detect_all_exits(self):
@@ -3484,11 +3487,13 @@ class ScalperRunner:
 
         fast_df, live_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=6)
         if fast_df is None:
-            dm = self._dm_for_ticker(ticker)
-            if dm is not None:
-                fast_df = dm.get_live_decision_bars(min_bars=6) or dm.get_bar_dataframe(min_bars=10)
-            if fast_df is None:
-                fast_df = self._scan_data_cache.get(ticker)
+            dm = dm or self._dm_for_ticker(ticker)
+            fast_df = coalesce_bars(
+                dm.get_live_decision_bars(min_bars=6) if dm else None,
+                dm.get_bar_dataframe(min_bars=10) if dm else None,
+                self._scan_data_cache.get(ticker),
+                min_len=3,
+            )
         if live_px <= 0:
             live_px = current_px
 
@@ -5085,7 +5090,11 @@ class ScalperRunner:
                 float(st.get("spike_ratio", 0) or 0),
                 float(st.get("scan_score", 0) or 0),
             ):
-                df_fast = dm.get_fast_bar_dataframe(n=24) or dm.get_bar_dataframe()
+                df_fast = coalesce_bars(
+                    dm.get_fast_bar_dataframe(n=24) if dm else None,
+                    dm.get_bar_dataframe() if dm else None,
+                    min_len=3,
+                )
             if df_fast is None or len(df_fast) < max(3, min_bars // 2):
                 return
         current_px = self._live_price_for(ticker, float(df_fast["close"].iloc[-1]))

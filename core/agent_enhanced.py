@@ -1043,7 +1043,19 @@ def compute_thinking_confidence(model: PPO, obs: np.ndarray) -> Tuple[int, float
     Returns: (action, value_estimate, action_probabilities)
     """
     import torch
-    
+
+    obs = np.asarray(obs, dtype=np.float32).flatten()
+    obs_space = int(model.observation_space.shape[0])
+    if obs.shape[0] != obs_space:
+        if obs.shape[0] == obs_space - 2:
+            obs = np.concatenate([obs, np.array([0.5, 0.5], dtype=np.float32)])
+        elif obs.shape[0] > obs_space:
+            obs = obs[:obs_space]
+        else:
+            padded = np.zeros(obs_space, dtype=np.float32)
+            padded[: obs.shape[0]] = obs
+            obs = padded
+
     # Convert observation to tensor
     if not isinstance(obs, torch.Tensor):
         obs_tensor = torch.as_tensor(obs, dtype=torch.float32, device=model.device)

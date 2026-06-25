@@ -394,8 +394,8 @@ class BrokerExecutor:
         a market order. `urgent=True` is used for stop/circuit-breaker
         exits, where guaranteed execution matters more than price.
         """
-        contract = self.conn.get_contract()
-        sym = (symbol or getattr(contract, "symbol", "") or "").upper()
+        sym = (symbol or self.cfg.TICKER or "").upper()
+        contract = self.conn.get_contract(sym or None)
         if sym:
             n = self.cancel_open_orders_for_symbol(sym)
             if n:
