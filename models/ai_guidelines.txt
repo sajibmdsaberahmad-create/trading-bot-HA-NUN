@@ -1090,3 +1090,9 @@ The market data failure occurred due to an invalid real-time query (MD 420) and 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (This mutation represents an increase in the confidence threshold from 0.35 to 0.58.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:34:37.200499+00:00
+Market data failure occurred due to an error in historical market data service.
+The event indicates that the Historical Market Data Service returned no historical data, causing issues with live IB bars. This likely affects the analysis and execution of trades.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Historical data error caused a failure with historical market data service, affecting live IB bars.)
+

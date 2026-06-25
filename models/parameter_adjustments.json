@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "This mutation represents an increase in the confidence threshold from 0.35 to 0.58.",
+    "reason": "Historical data error caused a failure with historical market data service, affecting live IB bars.",
     "ok": true,
     "msg": "applied"
   }
