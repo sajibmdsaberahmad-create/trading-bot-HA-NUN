@@ -4,6 +4,13 @@ set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 CLEAN="$DIR/mac-clean.sh"
 
+confirm_yes() {
+  local answer
+  read -r -p "  Continue? [y/N]: " answer
+  answer="$(echo "$answer" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+  [[ "$answer" == "y" || "$answer" == "yes" ]]
+}
+
 run_scan() {
   "$CLEAN"
 }
@@ -13,8 +20,7 @@ run_clean_safe() {
   echo "  This removes caches, logs, trash, temp, pip/npm, IDE caches."
   echo "  Documents, Desktop, and Photos are NEVER touched."
   echo ""
-  read -r -p "  Type YES to clean: " confirm
-  if [[ "$confirm" == "YES" ]]; then
+  if confirm_yes; then
     "$CLEAN" --clean --yes
   else
     echo "  Cancelled."
