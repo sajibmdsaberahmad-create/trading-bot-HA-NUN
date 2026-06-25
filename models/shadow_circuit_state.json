@@ -36,8 +36,8 @@
       "entry": 14.43,
       "stop": 14.3723,
       "target": 14.5454,
-      "shares": 2936,
-      "opened_at": 1782412911.075594,
+      "shares": 3969,
+      "opened_at": 1782413171.6683688,
       "regime": "unknown"
     },
     "SOFI": {
@@ -60,23 +60,27 @@
     },
     "RIOT": {
       "ticker": "RIOT",
-      "entry": 27.44,
-      "stop": 27.3302,
-      "target": 27.6595,
-      "shares": 1902,
-      "opened_at": 1782413118.126693,
+      "entry": 27.445,
+      "stop": 27.3352,
+      "target": 27.6646,
+      "shares": 2243,
+      "opened_at": 1782413170.853684,
       "regime": "unknown|late_chase_risk"
-    },
-    "QS": {
-      "ticker": "QS",
-      "entry": 7.06,
-      "stop": 7.0318,
-      "target": 7.1165,
-      "shares": 2030,
-      "opened_at": 1782413088.525952,
-      "regime": "unknown"
     }
   },
-  "shadow_closed": [],
-  "updated_at": 1782413118.1271858
+  "shadow_closed": [
+    {
+      "ticker": "QS",
+      "entry": 7.06,
+      "exit": 7.0318,
+      "shares": 2030,
+      "pnl_usd": -57.25,
+      "result": "loss",
+      "reason": "shadow_stop",
+      "regime": "unknown",
+      "hold_sec": 86.13612985610962,
+      "closed_at": 1782413174.662103
+    }
+  ],
+  "updated_at": 1782413174.662414
 }
