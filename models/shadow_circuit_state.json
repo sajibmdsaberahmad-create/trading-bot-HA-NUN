@@ -60,12 +60,12 @@
     },
     "RIOT": {
       "ticker": "RIOT",
-      "entry": 27.52,
-      "stop": 27.4099,
-      "target": 27.7402,
-      "shares": 1511,
-      "opened_at": 1782413101.4054139,
-      "regime": "unknown"
+      "entry": 27.44,
+      "stop": 27.3302,
+      "target": 27.6595,
+      "shares": 1902,
+      "opened_at": 1782413118.126693,
+      "regime": "unknown|late_chase_risk"
     },
     "QS": {
       "ticker": "QS",
@@ -78,5 +78,5 @@
     }
   },
   "shadow_closed": [],
-  "updated_at": 1782413101.4060009
+  "updated_at": 1782413118.1271858
 }
