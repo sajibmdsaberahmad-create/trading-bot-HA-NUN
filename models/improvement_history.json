@@ -1648,5 +1648,153 @@
       "e",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T08:15:09.014925+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on AAPG"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:15:50.128058+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred in the trading environment.",
+    "lessons": [
+      "Adopting robust monitoring strategies is crucial for detecting anomalies such as scanner spikes.",
+      "Understanding the specific root cause of the council timeout can inform the subsequent implementation of corrective actions to prevent similar events from occurring in the future"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:17:21.564051+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5399999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WAVE"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:18:25.831647+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5199999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WAVE"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:19:33.433313+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.4999999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WAVE"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:20:24.754539+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.47999999999999987,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Heuristic learning for council_timeout on WAVE",
+    "lessons": [
+      "{'param': 'market_state', 'value': 'pre_market', 'reason': 'Scanner+spike after timeout: score=96 vol=1.7x | ATR R:R 2.0', 'mutations': [{'param': 'confidence', 'value': 0.58, 'reason': 'scanner + spike detected, confidence threshold set to 0.58'}]}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:21:55.461252+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.45999999999999985,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred during live execution of the WAVE trade.",
+    "lessons": [
+      "Understand the limitations and boundaries of your trading algo.",
+      "Adapt based on recent wins and losses to improve performance.",
+      "Refactor code and optimize algorithms to reduce complexity."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:23:19.381366+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.45,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WAVE"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:24:36.172488+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.45,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WAVE"
+    ]
   }
 ]

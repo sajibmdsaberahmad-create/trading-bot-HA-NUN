@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 24,
   "scans_performed": 27,
-  "improvements_applied": 36,
+  "improvements_applied": 45,
   "reports_generated": 26,
   "event_log": [
     {
@@ -4559,6 +4559,206 @@
           "m",
           "e",
           "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:15:08.991791",
+      "age": "3d 21h 12m 20s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #37",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review council_timeout on AAPG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:15:50.107032",
+      "age": "3d 21h 13m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #38",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred in the trading environment.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold has been increased to 58%, which is a reasonable approach given the current situation.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Adopting robust monitoring strategies is crucial for detecting anomalies such as scanner spikes.",
+          "Understanding the specific root cause of the council timeout can inform the subsequent implementation of corrective actions to prevent similar events from occurring in the future"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:17:21.540269",
+      "age": "3d 21h 14m 32s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #39",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5399999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WAVE"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:18:25.807339",
+      "age": "3d 21h 15m 37s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #40",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5199999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WAVE"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:19:33.411633",
+      "age": "3d 21h 16m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #41",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.4999999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WAVE"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:20:24.731416",
+      "age": "3d 21h 17m 36s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #42",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Heuristic learning for council_timeout on WAVE",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.47999999999999987,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'market_state', 'value': 'pre_market', 'reason': 'Scanner+spike after timeout: score=96 vol=1.7x | ATR R:R 2.0', 'mutations': [{'param': 'confidence', 'value': 0.58, 'reason': 'scanner + spike detected, confidence threshold set to 0.58'}]}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:21:55.436805",
+      "age": "3d 21h 19m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #43",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred during live execution of the WAVE trade.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.45999999999999985,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Understand the limitations and boundaries of your trading algo.",
+          "Adapt based on recent wins and losses to improve performance.",
+          "Refactor code and optimize algorithms to reduce complexity."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:23:19.358075",
+      "age": "3d 21h 20m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #44",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.45,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WAVE"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T08:24:36.153144",
+      "age": "3d 21h 21m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #45",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.45,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on WAVE"
         ]
       }
     }

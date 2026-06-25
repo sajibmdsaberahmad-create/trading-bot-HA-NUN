@@ -45,10 +45,22 @@
     "f",
     "j",
     "-",
-    "Commander: Event details indicate a Council timeout, which may prevent the algorithm from aligning signals correctly."
+    "Commander: Event details indicate a Council timeout, which may prevent the algorithm from aligning signals correctly.",
+    "Review council_timeout on AAPG",
+    "Adopting robust monitoring strategies is crucial for detecting anomalies such as scanner spikes.",
+    "Understanding the specific root cause of the council timeout can inform the subsequent implementation of corrective actions to prevent similar events from occurring in the future",
+    "Commander: The council_timeout event indicates a scanner spike after a timeout, which suggests an algorithmic fix that addresses this issue. The event occurs during real-time execution and has no session or regime boundaries.",
+    "Review council_timeout on WAVE",
+    "Commander: Scanner+spike after timeout: score=96 vol=1.7x | ATR R:R 2.0",
+    "{'param': 'market_state', 'value': 'pre_market', 'reason': 'Scanner+spike after timeout: score=96 vol=1.7x | ATR R:R 2.0', 'mutations': [{'param': 'confidence', 'value': 0.58, 'reason': 'scanner + spike detected, confidence threshold set to 0.58'}]}",
+    "Commander: The council timeout event occurred during a live session.",
+    "Understand the limitations and boundaries of your trading algo.",
+    "Adapt based on recent wins and losses to improve performance.",
+    "Refactor code and optimize algorithms to reduce complexity.",
+    "Commander: The council timeout happened after the scanner spike, which suggests that the algorithm's execution was too complex for the system to handle. This could indicate issues with the current model or the data pipeline."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 1,\n  \"analysis\": {\n    \"live_account\": {\n      \"account_equity\": 1022672.59,\n      \"available_cash\": 1022672.59,\n      \"position_value\": 0.0,\n      \"nav\": 1000.0,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": \"NONE\",\n      \"position\": null,\n      \"win_rate\": 0.0,\n      \"trades_today\": 0,\n      \"top_pick\": \"XPEG\",\n      \"top_score\": 82.8,\n      \"next_best\": null,\n      \"next_best_score\": 0.0,\n      \"scan_results\": [\n        { \"ticker\": \"WAVE\", \"price",
+  "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": \"The live account state appears to be in a neutral position, with the most recent trades indicating a positive or stable market while the scanner results suggest some volatility and possible technical analysis.\"\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T08:14:20.429863"
+  "updated": "2026-06-25T08:24:36.151627"
 }
