@@ -316,6 +316,7 @@ class ScalperRunner:
         self._lock_review_due = False
         self._lock_review_picks: List[Dict] = []
         self._shutdown_requested_flag = False
+        self._last_council_backlog_log: float = 0.0
         self.pilot = PilotExperienceSystem(cfg)
         self.patterns = PatternMemoryBank(cfg)
         
@@ -2329,6 +2330,8 @@ class ScalperRunner:
                                 px = self._live_price_for(ticker, self._entry_price)
                                 if self._has_ai_council(ticker, "exit_decision"):
                                     continue
+                                if self._has_ai_council(ticker, "position_manage"):
+                                    continue
                                 ppo_exit, ppo_conf, ppo_reason = self._ai_gate_exit(px)
                                 if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander:
                                     pnl_pct = (
@@ -4133,6 +4136,8 @@ class ScalperRunner:
                 return
             if self._has_ai_council(ticker, "exit_decision"):
                 return
+            if ppo_exit:
+                return
             decision = self.ai_commander.decide_position_manage(
                 pos_ctx, ppo_exit, ppo_conf, ppo_reason, mech_stop, mech_target,
             )
@@ -5145,7 +5150,7 @@ class ScalperRunner:
         self._ai_councils[self._council_key(ticker, task)] = state
 
     def _service_stale_councils(self) -> None:
-        """Clear councils that exceeded max wait — mechanical rules resume."""
+        """Last-resort clear — resolve runs first so timeout paths can enter/exit."""
         max_wait = council_max_wait_sec(self.cfg)
         now = time.time()
         for key in list(self._ai_councils.keys()):
@@ -5153,14 +5158,16 @@ class ScalperRunner:
             if not st:
                 continue
             age = now - float(st.get("started_at", now))
-            if age <= max_wait:
+            if age <= max_wait * 1.5:
                 continue
             ticker = str(st.get("ticker", "?"))
             task = str(st.get("task", "?"))
             log.info(
-                f"  ⏱️ COUNCIL timeout {ticker}/{task} ({age:.0f}s) — "
-                f"clearing, mechanical rules resume"
+                f"  ⏱️ COUNCIL force-clear {ticker}/{task} ({age:.0f}s) — "
+                f"mechanical rules resume"
             )
+            if task == "entry_decision":
+                self._spike_attempt_until[ticker] = 0.0
             self._ai_councils.pop(key, None)
 
     def _has_ai_council(self, ticker: str, task: str) -> bool:
@@ -5312,7 +5319,6 @@ class ScalperRunner:
                 log.debug(f"Deferred council learning: {exc}")
         if not self.ai_commander or not self._ai_councils:
             return
-        self._service_stale_councils()
         for key in list(self._ai_councils.keys()):
             st = self._ai_councils.get(key)
             if not st:
@@ -5332,6 +5338,20 @@ class ScalperRunner:
                     self._resolve_risk_exit_council(key, st)
             except Exception as exc:
                 log.debug(f"Council poll {key}: {exc}")
+        self._service_stale_councils()
+        if self._ai_councils:
+            now = time.time()
+            if now - getattr(self, "_last_council_backlog_log", 0) >= 15.0:
+                self._last_council_backlog_log = now
+                pending = [
+                    f"{st.get('ticker', '?')}/{st.get('task', '?')}"
+                    for st in self._ai_councils.values()
+                ]
+                log.info(
+                    f"  ⏳ Council backlog ({len(pending)}): {', '.join(pending[:6])}"
+                    + (" …" if len(pending) > 6 else "")
+                    + " — mechanical stops still active"
+                )
 
     def _resolve_entry_council(self, key: str, st: Dict[str, Any]):
         ticker = str(st["ticker"])
@@ -5401,6 +5421,8 @@ class ScalperRunner:
             log.info(
                 f"  🧠 COUNCIL skip {ticker}: {(ai_dec.get('reason') or '')[:80]} | {pipeline}"
             )
+            if "timeout" in pipeline:
+                self._spike_attempt_until[ticker] = 0.0
             return
         log.info(
             f"  🧠 COUNCIL enter {ticker}: {(ai_dec.get('reason') or '')[:80]} | "
