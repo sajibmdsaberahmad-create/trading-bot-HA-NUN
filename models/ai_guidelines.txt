@@ -243,3 +243,9 @@ Scanner+spike after timeout: score=87 vol=5.2x | ATR R:R 2.0
 Observed trade_closed — recorded for learning.
 win
 
+🧭 COMMANDER LEARNING | 2026-06-25T09:34:40.976619+00:00
+The council_timeout event occurred during the live trading session. The scanner spike is triggering a timeout.
+The council_timeout event indicates that there was a scanner spike after a timeout in the live trading session.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The value of 0.58 suggests a moderate confidence threshold for the scanner spike.)
+

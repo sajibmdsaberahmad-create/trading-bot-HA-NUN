@@ -95,10 +95,16 @@
     "Review council_timeout on NEXR",
     "Commander: Scanner+spike after timeout: score=87 vol=5.2x | ATR R:R 2.0",
     "Review trade_closed on NEXR",
-    "Commander: win"
+    "Commander: win",
+    "sensitivity of the scanner should be reduced to prevent sudden spikes in volume",
+    "Integrate advanced scanning techniques to improve system response time and reduce timeouts.",
+    "Adaptively adjust your trade signals based on recent losses and confirmations.",
+    "Consider implementing multi-timeframe algorithms for better risk management.",
+    "Enhance your understanding of the market's dynamics and use it to make more informed decisions.",
+    "Commander: The council_timeout event indicates that there was a scanner spike after a timeout in the live trading session."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": 0.78,\n  \"trade_decisions\": [\n    {\n      \"order_type\": \"BUY\",\n      \"side\": \"SELL\",\n      \"quantity\": 1,\n      \"price\": 0.0\n    },\n    {\n      \"order_type\": \"HOLD\",\n      \"status\": \"WINS\"\n    }\n  ]\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"intuition\": true,\n    \"pattern recognition\": false,\n    \"adaptability\": true,\n    \"wisdom\": true,\n    \"focus_on_errors\": true\n  },\n  \"trade_decision\": {\n    \"entry_points\": [\n      {\n        \"strategy\": \"HOLD\",\n        \"reasoning\": \"scanner: HOT_BY_VOLUME#0, scanner: HOT_BY_VOLUME#1, scanner: HOT_BY_VOLUME#2\",\n        \"volume\": 5,\n        \"strategy_type\": \"BUY\"\n      },\n      {\n        \"strategy\": \"SPLIT\",\n        \"entry_points\": [\n          {\n            \"ticker\":",
   "market_belief": {},
   "trades_observed": 3,
-  "updated": "2026-06-25T09:24:48.044142"
+  "updated": "2026-06-25T09:34:40.957356"
 }
