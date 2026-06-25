@@ -412,7 +412,18 @@ class BotConfig:
     SCAN_REFINE_TOP_N: int = 12             # MTF/AI refine only top N after fast pass
     SCAN_EARLY_EXIT_QUALIFIED: int = 18     # Stop scanning once this many qualify
     POSITION_LOOP_SEC: float = 0.25           # 250ms loop when in position
+    POSITION_LOOP_IN_PROFIT_SEC: float = float(os.getenv("POSITION_LOOP_IN_PROFIT_SEC", "0.1"))
     FLAT_LOOP_SEC: float = 0.25               # Same speed when flat — don't sleep 1s between spike checks
+    FLAT_LOOP_LOCKED_SEC: float = float(os.getenv("FLAT_LOOP_LOCKED_SEC", "0.1"))
+    FAST_MONITOR_SEC: float = float(os.getenv("FAST_MONITOR_SEC", "0.15"))
+    TICK_SPIKE_MONITOR: bool = os.getenv("TICK_SPIKE_MONITOR", "true").lower() in (
+        "1", "true", "yes"
+    )
+    TICK_SPIKE_DEBOUNCE_SEC: float = float(os.getenv("TICK_SPIKE_DEBOUNCE_SEC", "0.08"))
+    AI_EXIT_CHECK_IN_PROFIT_SEC: float = float(os.getenv("AI_EXIT_CHECK_IN_PROFIT_SEC", "1.0"))
+    AI_SPIKE_COOLDOWN_FAST_SEC: float = float(os.getenv("AI_SPIKE_COOLDOWN_FAST_SEC", "6"))
+    ENTRY_PENDING_BLOCK_FAST_SEC: float = float(os.getenv("ENTRY_PENDING_BLOCK_FAST_SEC", "12"))
+    BACKGROUND_WATCH_SEC: float = float(os.getenv("BACKGROUND_WATCH_SEC", "15"))
     FLAT_PULSE_SEC: float = 15.0              # WATCHING heartbeat log interval (not the monitor rate)
     AI_POSITION_MANAGE_SEC: float = 10.0    # Ollama position decisions — frequent, priority path
     AI_POSITION_MANAGE_IN_PROFIT_SEC: float = float(
@@ -492,7 +503,7 @@ class BotConfig:
         "ENTRY_OLLAMA_WAIT_SEC", "2" if _LOW_RAM else "3"
     ))
     AI_COUNCIL_MAX_WAIT_SEC: float = float(os.getenv(
-        "AI_COUNCIL_MAX_WAIT_SEC", "6" if _LOW_RAM else "15"
+        "AI_COUNCIL_MAX_WAIT_SEC", "4" if _LOW_RAM else "4"
     ))
     # Strong scanner + spike → decide without waiting for slow Ollama
     COUNCIL_SCANNER_FAST_SEC: float = float(os.getenv(

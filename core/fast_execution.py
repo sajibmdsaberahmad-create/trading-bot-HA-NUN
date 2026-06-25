@@ -149,8 +149,74 @@ def warm_budget_sec(cfg: BotConfig) -> float:
 
 def fast_monitor_interval(cfg: BotConfig) -> float:
     if ai_fast_execution(cfg):
-        return float(getattr(cfg, "FAST_MONITOR_SEC", 0.25))
+        return float(getattr(cfg, "FAST_MONITOR_SEC", 0.15))
     return float(getattr(cfg, "FAST_MONITOR_SEC", 1.0))
+
+
+def main_loop_sec(
+    cfg: BotConfig,
+    *,
+    in_position: bool = False,
+    have_targets: bool = False,
+    in_profit: bool = False,
+) -> float:
+    """IB sleep between loop iterations — faster when locked or in profit."""
+    if in_position:
+        if in_profit and ai_fast_execution(cfg):
+            return float(getattr(cfg, "POSITION_LOOP_IN_PROFIT_SEC", 0.1))
+        return float(getattr(cfg, "POSITION_LOOP_SEC", 0.25))
+    if have_targets and ai_fast_execution(cfg):
+        return float(getattr(cfg, "FLAT_LOOP_LOCKED_SEC", 0.1))
+    return float(getattr(cfg, "FLAT_LOOP_SEC", 0.25))
+
+
+def council_max_wait_sec(cfg: BotConfig) -> float:
+    if ai_fast_execution(cfg):
+        return float(getattr(cfg, "AI_COUNCIL_MAX_WAIT_SEC", 4.0))
+    return float(getattr(cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
+
+
+def entry_fill_poll_sec(cfg: BotConfig) -> float:
+    if ai_fast_execution(cfg):
+        return float(getattr(cfg, "ENTRY_FILL_WAIT_SEC", 0.25))
+    return float(getattr(cfg, "ENTRY_FILL_WAIT_SEC", 1.0))
+
+
+def ai_exit_check_sec(cfg: BotConfig, in_profit: bool = False) -> float:
+    if in_profit and ai_fast_execution(cfg):
+        return float(getattr(cfg, "AI_EXIT_CHECK_IN_PROFIT_SEC", 1.0))
+    return float(getattr(cfg, "AI_EXIT_CHECK_SEC", 5.0))
+
+
+def tick_spike_debounce_sec(cfg: BotConfig) -> float:
+    return float(getattr(cfg, "TICK_SPIKE_DEBOUNCE_SEC", 0.08))
+
+
+def tick_spike_monitor_enabled(cfg: BotConfig) -> bool:
+    return bool(
+        ai_fast_execution(cfg)
+        and getattr(cfg, "TICK_SPIKE_MONITOR", True)
+    )
+
+
+def background_watch_sec(cfg: BotConfig) -> float:
+    if ai_fast_execution(cfg):
+        return float(getattr(cfg, "BACKGROUND_WATCH_SEC", 15.0))
+    return float(getattr(cfg, "BACKGROUND_WATCH_SEC", 45.0))
+
+
+def spike_entry_cooldown_sec(cfg: BotConfig) -> float:
+    base = float(getattr(cfg, "SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC", 20.0))
+    if ai_fast_execution(cfg):
+        return min(base, float(getattr(cfg, "AI_SPIKE_COOLDOWN_FAST_SEC", 6.0)))
+    return base
+
+
+def entry_pending_block_sec(cfg: BotConfig) -> float:
+    base = float(getattr(cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
+    if ai_fast_execution(cfg):
+        return min(base, float(getattr(cfg, "ENTRY_PENDING_BLOCK_FAST_SEC", 12.0)))
+    return base
 
 
 def tick_stream_count(cfg: BotConfig) -> int:
