@@ -1,10 +1,9 @@
 {
   "mood": "gathering",
   "mood_message": "Still calibrating \u2014 not enough post-session data for a firm read yet.",
-  "confidence": 0.39,
+  "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The trader lost control and took profit, possibly due to the market conditions.",
     "Commander: The trade was close with a profit of $0.0, but it occurred at the end of an open session.",
     "Market data failures prevent continuous execution of trades without live IB bars.",
     "Always monitor real-time market data and use live IB bars to avoid missing opportunities.",
@@ -103,10 +102,11 @@
     "c",
     "?",
     "w",
-    "Commander: High scanner score after timeout: score=83 vol=1.0x | ATR R:R 2.0"
+    "Commander: High scanner score after timeout: score=83 vol=1.0x | ATR R:R 2.0",
+    "Commander: tick_micro_loss"
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.7,\n  \"profit_probability\": 0.6,\n  \"direction\": \"into the move\"\n}\n```",
+  "last_thought": "```json\n{\n    \"journals\": {\n        \"profit_hunting\": [\n            {\n                \"ticker\": \"QS\",\n                \"entry\": 7,\n                \"exit\": 6.97,\n                \"entry_fill\": 7,\n                \"exit_fill\": 6.97,\n                \"quote_entry\": 7,\n                \"quote_exit\": 6.975,\n                \"shares\": 563,\n                \"pnl_usd\": -0.05,\n                \"pnl_pct\": -5.0,\n                \"result\": \"loss\",\n                \"exit_reason\": \"tick_micro_loss\",\n                \"en",
   "market_belief": {},
-  "trades_observed": 0,
-  "updated": "2026-06-25T19:30:27.347535"
+  "trades_observed": 2,
+  "updated": "2026-06-25T19:31:36.781328"
 }

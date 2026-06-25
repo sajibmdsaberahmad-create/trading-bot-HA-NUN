@@ -5223,3 +5223,7 @@ High scanner score after timeout: score=83 vol=1.0x | ATR R:R 2.0
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold of 0.58 is too low, indicating a possible algorithmic error.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:31:36.827329+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+

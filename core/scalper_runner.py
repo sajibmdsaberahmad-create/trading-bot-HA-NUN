@@ -3594,10 +3594,6 @@ class ScalperRunner:
             return
         if self._open_position_count() >= self._max_concurrent() and not scout_only:
             return
-        pending_ticker: Optional[str] = None
-        if self._pending_entry_ticker and time.time() < self._pending_entry_until:
-            pending_ticker = self._pending_entry_ticker
-
         now = time.time()
         refresh_sec = float(getattr(self.cfg, "LOCK_BAR_REFRESH_SEC", 180.0))
         if now - getattr(self, '_last_bar_refresh', 0) > refresh_sec:
@@ -6384,7 +6380,13 @@ class ScalperRunner:
                         "attempt": attempt,
                         "last_ib_error": last_ib_error,
                         "bracket": bracket,
+                        "started_at": time.time(),
+                        "last_heartbeat": 0.0,
                     }
+                    log.info(
+                        f"  ⏳ Awaiting IB fill {ticker}: {shares} sh "
+                        f"parent#{bracket.parent_order_id} ({mode_label})"
+                    )
                     return "waiting"
 
                 filled_shares = 0.0

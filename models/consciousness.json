@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 122,
   "training_sessions": 27,
-  "trades_observed": 136,
+  "trades_observed": 137,
   "scans_performed": 27,
-  "improvements_applied": 311,
+  "improvements_applied": 312,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16203,6 +16203,27 @@
           "."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T19:31:32.963653",
+      "age": "4d 8h 28m 44s",
+      "type": "TRADE",
+      "message": "Observed trade: QS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T19:31:36.782866",
+      "age": "4d 8h 28m 48s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #312",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on QS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T19:28:38.033071",
@@ -17626,20 +17647,21 @@
     0.0,
     -2592.81,
     0.0,
-    31.22
+    31.22,
+    0.0
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 18,
-  "veteran_xp": 1920,
+  "veteran_xp": 1930,
   "veteran_level": "Aviator",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 38,
     "entry_timing": 52
   },
-  "flights_completed": 131,
-  "hours_flown": 13.09999999999997,
+  "flights_completed": 132,
+  "hours_flown": 13.199999999999969,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -17663,7 +17685,7 @@
     "PLT": 1,
     "LCI": 4,
     "RIO": 4,
-    "QS": 2,
+    "QS": 3,
     "MAR": 3
   },
   "best_streak": 4,
@@ -17671,5 +17693,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "After observing 136 trades in the last 5 sessions, I remain focused and confident."
+  "mood_message": "I am ready to execute the trade regardless of outcome."
 }
