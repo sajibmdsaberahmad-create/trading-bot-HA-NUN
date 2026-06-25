@@ -4261,3 +4261,18 @@ The trader lost control and took profit, possibly due to the market conditions.
   - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence without the market conditions were a cause of the hard_take_profit event.)
   - CONFIDENCE_THRESHOLD → 0.95 (The trader had enough confidence in holding positions to avoid taking profit prematurely.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:36:25.986380+00:00
+Trade closed due to trailing profit.
+The trade was close with a profit of $0.0, but it occurred at the end of an open session.
+• ...
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The event is a trailing profit close due to incorrect usage of the CONFIDENCE_THRESHOLD parameter.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T17:36:52.861855+00:00
+Market_data failure occurred due to missing IB bars.
+The event shows a council_exit with Ollama exit at 100% (PPO hold). This is typical for such exits in open positions.
+• Always monitor real-time market data and use live IB bars to avoid missing opportunities.
+• Adjust the parameters based on the current market state.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold (0.58) is too low, indicating a failed market_data_failure event.)
+

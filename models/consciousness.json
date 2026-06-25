@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 106,
   "training_sessions": 27,
-  "trades_observed": 109,
+  "trades_observed": 111,
   "scans_performed": 27,
-  "improvements_applied": 278,
+  "improvements_applied": 280,
   "reports_generated": 26,
   "event_log": [
     {
@@ -14454,6 +14454,81 @@
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader was likely confident in holding positions but missed opportunities.'}"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T17:36:23.267968",
+      "age": "4d 6h 33m 34s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:36:25.949615",
+      "age": "4d 6h 33m 37s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #279",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed due to trailing profit.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The event is a trailing profit close due to incorrect usage of the CONFIDENCE_THRESHOLD parameter.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "W",
+          "h",
+          "y",
+          "d",
+          "i",
+          "d",
+          "t",
+          "h",
+          "i",
+          "s",
+          "h",
+          "a",
+          "p",
+          "p",
+          "e",
+          "n",
+          "?"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T17:36:48.198525",
+      "age": "4d 6h 33m 59s",
+      "type": "TRADE",
+      "message": "Observed trade: BITO ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T17:36:52.845688",
+      "age": "4d 6h 34m 4s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #280",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Market_data failure occurred due to missing IB bars.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The confidence threshold (0.58) is too low, indicating a failed market_data_failure event.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Market data failures prevent continuous execution of trades without live IB bars.",
+          "Always monitor real-time market data and use live IB bars to avoid missing opportunities."
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-25T17:27:08.460533",
@@ -15739,7 +15814,7 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "\u51b7\u9759\u4e13\u6ce8",
+  "mood": "calm",
   "total_pnl": 192392.46,
   "win_history": [
     0.0,
@@ -15850,20 +15925,22 @@
     324.9,
     0.0,
     0.0,
+    0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 5,
   "worst_streak": 12,
-  "veteran_xp": 1580,
+  "veteran_xp": 1600,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 80,
+    "exit_timing": 82,
     "risk_management": 26,
     "entry_timing": 48
   },
-  "flights_completed": 104,
-  "hours_flown": 10.399999999999979,
+  "flights_completed": 106,
+  "hours_flown": 10.599999999999978,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15882,13 +15959,13 @@
     "TZA": 11,
     "GDC": 13,
     "SOX": 11,
-    "BIT": 9,
-    "GPU": 14
+    "BIT": 10,
+    "GPU": 15
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "\u5f53\u524d\u60c5\u7eea\u7a33\u5b9a\uff0c\u4e13\u6ce8\u4e8e\u4ea4\u6613\u51b3\u7b56\u3002"
+  "mood_message": "Thank you for providing real-time telemetry! It helps me understand my performance better."
 }

@@ -1,13 +1,9 @@
 {
-  "mood": "steady",
-  "mood_message": "Mixed session \u00b7 $+118809.74. Watching for cleaner setups.",
-  "confidence": 0.4,
+  "mood": "defensive",
+  "mood_message": "Win rate 25% \u00b7 $+47498.24. Preserving capital over action.",
+  "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review trade_closed on GPUS",
-    "Commander: trailing_profit",
-    "Large loss detected: GDC. Review stop placement.",
-    "Analyze the cause of the stop-loss triggering to determine if it's related to specific trading strategies or market conditions.",
     "Adjust the trade logic based on the specific circumstances to prevent similar situations in the future.",
     "Implement more robust stop-loss thresholds and use real-time monitoring to catch potential stop loss triggers before they occur.",
     "Commander: The event is indicating that the trader has experienced a stop-loss trigger and decided to exit early due to a significant drop in losses.",
@@ -103,10 +99,14 @@
     "-",
     "Commander: Stop breaches are common and should be avoided if possible. The stop-hunt strategy is based on minimizing losses by making trades before reaching the stop loss level.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader was likely confident in holding positions but missed opportunities.'}",
-    "Commander: The trader lost control and took profit, possibly due to the market conditions."
+    "Commander: The trader lost control and took profit, possibly due to the market conditions.",
+    "Commander: The trade was close with a profit of $0.0, but it occurred at the end of an open session.",
+    "Market data failures prevent continuous execution of trades without live IB bars.",
+    "Always monitor real-time market data and use live IB bars to avoid missing opportunities.",
+    "Commander: The event shows a council_exit with Ollama exit at 100% (PPO hold). This is typical for such exits in open positions."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.65,\n  \"intuition\": 0.8,\n  \"journal_entry\": {\n    \"entry\": {\n      \"ticker\": \"GPUS\",\n      \"quote_entry\": 8.08,\n      \"quote_exit\": 0.18,\n      \"shares\": 1200.0,\n      \"pnl_usd\": 0.0,\n      \"pnl_pct\": 0.0,\n      \"result\": \"loss\",\n      \"exit_reason\": \"trailing_profit\"\n    },\n    \"trade_date\": \"2023-06-0\",\n    \"entry_fill\": 8.08,\n    \"exit_fill\": 8.08,\n    \"limit_px\": 0.1811,\n    \"entry_mode\": \"limit_penny\",\n    \"regime\": \"unknown\",\n    \"hold_sec\": 7.5,\n    \"peak\": 8.08,\n",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.5,\n  \"trade_decisions\": [\n    {\n      \"action\": \"take profit into momentum\",\n      \"reason\": \"The trader believes the market is likely to move in a bullish trend.\"\n    },\n    {\n      \"action\": \"sell INTO moves\",\n      \"reason\": \"The trader wants to sell the move that will bring profits.\"\n    }\n  ]\n}\n```",
   "market_belief": {},
-  "trades_observed": 25,
-  "updated": "2026-06-25T17:36:10.596974"
+  "trades_observed": 28,
+  "updated": "2026-06-25T17:36:52.845425"
 }

@@ -744,5 +744,56 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The trader was likely confident in holding positions but missed opportunities.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:36:25.986667+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The event is a trailing profit close due to incorrect usage of the CONFIDENCE_THRESHOLD parameter.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed due to trailing profit.",
+    "lessons": [
+      "W",
+      "h",
+      "y",
+      "d",
+      "i",
+      "d",
+      "t",
+      "h",
+      "i",
+      "s",
+      "h",
+      "a",
+      "p",
+      "p",
+      "e",
+      "n",
+      "?"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T17:36:52.862055+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold (0.58) is too low, indicating a failed market_data_failure event.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Market_data failure occurred due to missing IB bars.",
+    "lessons": [
+      "Market data failures prevent continuous execution of trades without live IB bars.",
+      "Always monitor real-time market data and use live IB bars to avoid missing opportunities."
+    ]
   }
 ]

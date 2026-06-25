@@ -1,8 +1,8 @@
 {
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.95,
-    "reason": "The trader had enough confidence in holding positions to avoid taking profit prematurely.",
+    "value": 0.58,
+    "reason": "The confidence threshold (0.58) is too low, indicating a failed market_data_failure event.",
     "ok": true,
     "msg": "applied"
   }
