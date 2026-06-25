@@ -1,5 +1,5 @@
 {
-  "total_xp": 2800,
+  "total_xp": 2830,
   "level": "Ace",
   "flights_completed": 57,
   "flights_flown": 257,
@@ -46,7 +46,7 @@
     "exit_timing": 49,
     "risk_management": 9,
     "regime_recognition": 0,
-    "pattern_recognition": 77,
+    "pattern_recognition": 78,
     "confidence_judgment": 0
   }
 }

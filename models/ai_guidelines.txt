@@ -6552,3 +6552,93 @@ The trader is using an aggressive take-profit strategy to maximize profits at th
 Heuristic learning for loss_streak on SOFI
 The loss streak occurred due to a hard_take_profit trade strategy.
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:53:04.286413+00:00
+The loss streak occurred due to the council risk with hard stop and missed profit hunts.
+We need to analyze the specific parameters and events leading up to this event
+• K
+• e
+• e
+• p
+•  
+• t
+• h
+• e
+•  
+• a
+• l
+• g
+• o
+• r
+• i
+• t
+• h
+• m
+• i
+• c
+•  
+• f
+• i
+• x
+• e
+• s
+•  
+• i
+• n
+•  
+• p
+• l
+• a
+• c
+• e
+•  
+• a
+• n
+• d
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+•  
+• b
+• a
+• s
+• e
+• d
+•  
+• o
+• n
+•  
+• t
+• h
+• e
+•  
+• s
+• p
+• e
+• c
+• i
+• f
+• i
+• c
+•  
+• c
+• o
+• n
+• d
+• i
+• t
+• i
+• o
+• n
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (High confidence threshold of 0.58 is necessary to prevent the council risk.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:53:07.835887+00:00
+Observed trade_closed — recorded for learning.
+council_risk: hard_stop
+
