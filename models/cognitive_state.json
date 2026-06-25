@@ -105,8 +105,8 @@
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The value of CONFIDENCE_THRESHOLD was found to be too high, as it might lead to missed profit hunts.'}",
     "Commander: The trade closed due to a trailing profit, which indicates that the algorithm has not seen enough gains in the past few days. The trader is now tracking this information for future opportunities."
   ],
-  "last_thought": "```json\n{\n  \"trade_id\": \"closed\",\n  \"entry_price\": 66.38,\n  \"exit_price\": 5.115,\n  \"profit_loss\": -0.48,\n  \"margin_status\": \"\",\n  \"volume\": 3905,\n  \"earnings_per_share\": null,\n  \"commission_paid\": null,\n  \"trade_mode\": \"paper_market\",\n  \"profit_hunting_min_pnl_pct\": 0.300,\n  \"entry_volume\": 1000,\n  \"hold_time\": 27,\n  \"margin_fees\": 0\n}\n```",
+  "last_thought": "```json\n{\n  \"raw_prompt\": \"Write a pilot trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"RIOT\\\", \\\"entry\\\": 66.38, \\\"exit\\\": 66.38, \\\"entry_fill\\\": 66.38, \\\"exit_fill\\\": 66.38, \\\"quote_entry\\\": 66.38, \\\"quote_exit\\\": 27.3535, \\\"shares\\\": 1543.0, \\\"pnl_usd\\\": 0.0, \\\"pnl_pct\\\": 0.0, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"trailing_profit\\\", \\\"entry_slippage_pct\\\": 0.0, \\\"exit_slippage_pct\\\": 1.426746, \\\"limit_px\\\": null, \\\"entry_mode\\\": \\\"paper_market\\\", \\\"regime\\\": \\\"unknown\\\", \\\"hold_sec\\",
   "market_belief": {},
-  "trades_observed": 12,
-  "updated": "2026-06-25T19:04:58.935028"
+  "trades_observed": 13,
+  "updated": "2026-06-25T19:05:33.172097"
 }
