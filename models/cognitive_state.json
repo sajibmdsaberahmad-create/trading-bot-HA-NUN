@@ -4,13 +4,6 @@
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "F",
-    "D",
-    "_",
-    "R",
-    "Commander: The event indicates that the trader is hitting a trailing profit, which can lead to a loss in subsequent trades. The key parameters include market state ('open'), win rate ('50%'), and daily loss ('-58131.45')",
-    "Review trade_closed on LCID",
-    "Spike-top hunt on RIOT: spike_top_exit: +0.59% vol=1.9x",
     "Profit hunt worked on RIOT: spike_top_exit: +0.59% vol=1.9x \u2014 reinforce opportunistic exits.",
     "Review trade_closed on RIOT",
     "Commander: spike_top_exit: +0.59% vol=1.9x",
@@ -103,10 +96,17 @@
     "l",
     "Commander: The loss streak is due to the bracket_exit event.",
     "Review council_timeout on PLTR",
-    "Commander: High scanner score after timeout: score=90 vol=1.1x | ATR R:R 2.0"
+    "Commander: High scanner score after timeout: score=90 vol=1.1x | ATR R:R 2.0",
+    "Commander: The algorithm is designed to make opportunistic exits based on market conditions and risk limits.",
+    "Analyze in real-time to avoid missed opportunities.",
+    "Learn from each trade's outcomes to refine strategies.",
+    "Adjust parameters according to market dynamics",
+    "Commander: The algorithm adjusts for market conditions, takes profit into momentum, and learns from every outcome.",
+    "Review loss_streak on PLTR",
+    "Commander: council_exit: Ollama exit 58% (PPO hold)"
   ],
-  "last_thought": "```json\n{\n    \"trade\": {\n        \"ticker\": \"SOFI\",\n        \"entry\": 17.29,\n        \"exit\": 17.32,\n        \"entry_fill\": 17.29,\n        \"exit_fill\": 17.32,\n        \"quote_entry\": 17.29,\n        \"quote_exit\": 17.33,\n        \"shares\": 6695.0,\n        \"pnl_usd\": 200.85,\n        \"pnl_pct\": 0.17,\n        \"result\": \"win\",\n        \"exit_reason\": \"council_exit: Ollama exit 58% (PPO hold)\",\n        \"entry_slippage_pct\": 0.0,\n        \"exit_slippage_pct\": -0.000577,\n        \"limit_px\": null,\n        \"entry_",
+  "last_thought": "```json\n{\n  \"ticker\": \"LCID\",\n  \"entry\": 5.1905,\n  \"exit\": 5.18,\n  \"entry_fill\": 5.1905,\n  \"exit_fill\": 5.18,\n  \"quote_entry\": 5.1905,\n  \"quote_exit\": 5.185,\n  \"shares\": 1009.0,\n  \"pnl_usd\": -10.64,\n  \"pnl_pct\": -0.2,\n  \"result\": \"loss\",\n  \"exit_reason\": \"stop_breach\",\n  \"entry_slippage_pct\": 0.0,\n  \"exit_slippage_pct\": -0.000964,\n  \"limit_px\": null,\n  \"entry_mode\": \"paper_market\",\n  \"regime\": \"unknown|late_chase_risk\",\n  \"hold_sec\": 127.7,\n  \"peak\": 17.32,\n  \"stop\": 17.3065,\n  \"target\": 17.4384",
   "market_belief": {},
-  "trades_observed": 16,
-  "updated": "2026-06-25T19:47:03.778829"
+  "trades_observed": 19,
+  "updated": "2026-06-25T19:47:32.478707"
 }

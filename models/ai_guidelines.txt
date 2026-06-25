@@ -5714,3 +5714,98 @@ High scanner score after timeout: score=90 vol=1.1x | ATR R:R 2.0
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.5599999999999999 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:47:07.476214+00:00
+Investing for profit is your primary goal, but there are no strict rules to follow.
+The algorithm is designed to make opportunistic exits based on market conditions and risk limits.
+• A
+• d
+• j
+• u
+• s
+• t
+•  
+• t
+• h
+• e
+•  
+• c
+• o
+• n
+• f
+• i
+• d
+• e
+• n
+• c
+• e
+•  
+• t
+• h
+• r
+• e
+• s
+• h
+• o
+• l
+• d
+•  
+• w
+• i
+• t
+• h
+• i
+• n
+•  
+• b
+• o
+• u
+• n
+• d
+• s
+•  
+• t
+• o
+•  
+• a
+• v
+• o
+• i
+• d
+•  
+• b
+• e
+• i
+• n
+• g
+•  
+• c
+• a
+• u
+• g
+• h
+• t
+•  
+• i
+• n
+•  
+• t
+• r
+• a
+• p
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market state: open, event: trade_closed: council_exit: Ollama exit 58% (PPO hold).)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:47:26.033176+00:00
+Profit hunting is the primary goal; analyze and execute with conviction.
+The algorithm adjusts for market conditions, takes profit into momentum, and learns from every outcome.
+• Tune CONFIDENCE_THRESHOLD based on market data.
+• Adjust parameters for better performance.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market conditions can change, and the algorithm needs to be adaptive.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T19:47:29.504244+00:00
+Observed loss_streak — recorded for learning.
+council_exit: Ollama exit 58% (PPO hold)
+

@@ -2523,5 +2523,113 @@
     "lessons": [
       "Review council_timeout on PLTR"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:47:07.476535+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Market state: open, event: trade_closed: council_exit: Ollama exit 58% (PPO hold).",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Investing for profit is your primary goal, but there are no strict rules to follow.",
+    "lessons": [
+      "T",
+      "u",
+      "n",
+      "e",
+      "t",
+      "h",
+      "e",
+      "c",
+      "o",
+      "n",
+      "f",
+      "i",
+      "d",
+      "e",
+      "n",
+      "c",
+      "e",
+      "t",
+      "h",
+      "r",
+      "e",
+      "s",
+      "h",
+      "o",
+      "l",
+      "d",
+      "w",
+      "i",
+      "t",
+      "h",
+      "i",
+      "n",
+      "b",
+      "o",
+      "u",
+      "n",
+      "d",
+      "s",
+      "t",
+      "o",
+      "a",
+      "v",
+      "o",
+      "i",
+      "d",
+      "b",
+      "e",
+      "i",
+      "n",
+      "g",
+      "c",
+      "a",
+      "u",
+      "g",
+      "h",
+      "t",
+      "i",
+      "n",
+      "t",
+      "r",
+      "a",
+      "p",
+      "s",
+      "."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:47:26.033558+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Market conditions can change, and the algorithm needs to be adaptive.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Profit hunting is the primary goal; analyze and execute with conviction.",
+    "lessons": [
+      "Analyze in real-time to avoid missed opportunities.",
+      "Learn from each trade's outcomes to refine strategies.",
+      "Adjust parameters according to market dynamics"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T19:47:29.504604+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on PLTR"
+    ]
   }
 ]
