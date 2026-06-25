@@ -201,7 +201,7 @@ class BotConfig:
         "AI_PRIORITY_TICK_STREAMS", "false"
     ).lower() in ("1", "true", "yes")
     AI_SPIKE_ATTEMPTS_PER_CYCLE: int = int(os.getenv("AI_SPIKE_ATTEMPTS_PER_CYCLE", "3"))
-    FAST_MONITOR_SEC: float = float(os.getenv("FAST_MONITOR_SEC", "0.25"))
+    FAST_MONITOR_SEC: float = float(os.getenv("FAST_MONITOR_SEC", "0.15"))
 
     TAKE_PROFIT_ATR_MULTIPLIER: float = 2.5
     MIN_REWARD_RISK_RATIO:      float = 2.0
@@ -415,7 +415,6 @@ class BotConfig:
     POSITION_LOOP_IN_PROFIT_SEC: float = float(os.getenv("POSITION_LOOP_IN_PROFIT_SEC", "0.1"))
     FLAT_LOOP_SEC: float = 0.25               # Same speed when flat — don't sleep 1s between spike checks
     FLAT_LOOP_LOCKED_SEC: float = float(os.getenv("FLAT_LOOP_LOCKED_SEC", "0.1"))
-    FAST_MONITOR_SEC: float = float(os.getenv("FAST_MONITOR_SEC", "0.15"))
     TICK_SPIKE_MONITOR: bool = os.getenv("TICK_SPIKE_MONITOR", "true").lower() in (
         "1", "true", "yes"
     )
@@ -685,7 +684,7 @@ class BotConfig:
     LIQUIDITY_MAX_VOL_PCT: float = 0.08   # Max order as fraction of recent bar volume
     ENTRY_RETRY_ON_IB2161: bool = True
     ENTRY_LIMIT_BUFFER_PCT: float = 0.003 # Marketable limit buffer above live price (non-penny)
-    BACKGROUND_WATCH_SEC: float = 45.0    # Silent opportunity scan while holding a position
+    # Silent opportunity scan while holding a position (see BACKGROUND_WATCH_SEC above)
 
     # ════════════════════════════════════════════════════════════════════
     # OLLAMA LOCAL LLM — 2.5GB reserved budget on 8GB Mac (warm, frequent calls)

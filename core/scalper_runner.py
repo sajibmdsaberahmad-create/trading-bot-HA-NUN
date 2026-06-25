@@ -1946,6 +1946,13 @@ class ScalperRunner:
                 "⚡ Parallel entry+exit ON — scout all locks while holding | "
                 "non-blocking fills | hot-swap on exit"
             )
+        if tick_spike_monitor_enabled(self.cfg):
+            log.info(
+                f"⚡ TICK SPIKE MONITOR: on-tick entry/exit | "
+                f"loop flat={getattr(self.cfg, 'FLAT_LOOP_LOCKED_SEC', 0.1)}s "
+                f"in-profit={getattr(self.cfg, 'POSITION_LOOP_IN_PROFIT_SEC', 0.1)}s | "
+                f"monitor={fast_monitor_interval(self.cfg):.2f}s"
+            )
         if getattr(self.cfg, "SHADOW_CIRCUIT_ENABLED", True) and self.shadow_circuit.in_shadow:
             st = self.shadow_circuit.shadow_stats()
             log.warning(
