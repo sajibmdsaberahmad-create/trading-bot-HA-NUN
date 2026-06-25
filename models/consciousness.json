@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 137,
   "scans_performed": 27,
-  "improvements_applied": 312,
+  "improvements_applied": 313,
   "reports_generated": 26,
   "event_log": [
     {
@@ -16222,6 +16222,28 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on QS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T19:32:29.466926",
+      "age": "4d 8h 29m 40s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #313",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.5599999999999999,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RIOT"
         ]
       }
     }

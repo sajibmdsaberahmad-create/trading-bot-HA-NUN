@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The trade was close with a profit of $0.0, but it occurred at the end of an open session.",
     "Market data failures prevent continuous execution of trades without live IB bars.",
     "Always monitor real-time market data and use live IB bars to avoid missing opportunities.",
     "Commander: The event shows a council_exit with Ollama exit at 100% (PPO hold). This is typical for such exits in open positions.",
@@ -103,10 +102,11 @@
     "?",
     "w",
     "Commander: High scanner score after timeout: score=83 vol=1.0x | ATR R:R 2.0",
-    "Commander: tick_micro_loss"
+    "Commander: tick_micro_loss",
+    "Commander: High scanner score after timeout: score=85 vol=0.9x | ATR R:R 2.0"
   ],
   "last_thought": "```json\n{\n    \"journals\": {\n        \"profit_hunting\": [\n            {\n                \"ticker\": \"QS\",\n                \"entry\": 7,\n                \"exit\": 6.97,\n                \"entry_fill\": 7,\n                \"exit_fill\": 6.97,\n                \"quote_entry\": 7,\n                \"quote_exit\": 6.975,\n                \"shares\": 563,\n                \"pnl_usd\": -0.05,\n                \"pnl_pct\": -5.0,\n                \"result\": \"loss\",\n                \"exit_reason\": \"tick_micro_loss\",\n                \"en",
   "market_belief": {},
   "trades_observed": 2,
-  "updated": "2026-06-25T19:31:36.781328"
+  "updated": "2026-06-25T19:32:29.465218"
 }
