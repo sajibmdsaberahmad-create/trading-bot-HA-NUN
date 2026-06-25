@@ -5,12 +5,8 @@ Mac Storage Cleaner — standalone utility (not part of HANOON).
 Scan, clean, and unload common macOS cruft: caches, logs, temp, trash,
 pip/npm caches, Homebrew, Xcode DerivedData, Ollama RAM, etc.
 
-Examples:
-  python3 tools/mac_cleaner/clean.py              # scan only (safe default)
-  python3 tools/mac_cleaner/clean.py --unload     # unload Ollama models from RAM
-  python3 tools/mac_cleaner/clean.py --clean --yes
-  python3 tools/mac_cleaner/clean.py --clean caches logs trash pip --yes
-  python3 tools/mac_cleaner/clean.py --clean all --older-than 14 --yes
+Double-click: Start Mac Cleaner.command
+CLI: ./mac-clean.sh
 """
 
 from __future__ import annotations
@@ -24,13 +20,12 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple
 
 HOME = Path.home()
 
-# Never delete these (even inside broader sweeps)
 PROTECTED_PREFIXES: Tuple[Path, ...] = tuple(
     Path(p).expanduser().resolve()
     for p in (
@@ -295,11 +290,11 @@ def _clean_pip(*, dry_run: bool, _older: int) -> int:
     if dry_run:
         cache = _pip_cache()
         return _dir_size(cache) if cache else 0
-    code, out = _run_cmd([sys.executable, "-m", "pip", "cache", "purge"], dry_run=False)
+    code, _out = _run_cmd([sys.executable, "-m", "pip", "cache", "purge"], dry_run=False)
     if code != 0:
         cache = _pip_cache()
         return _rm_path(cache, dry_run=False) if cache else 0
-    return _dir_size(_pip_cache() or Path("/dev/null"))  # report after
+    return 0
 
 
 def _clean_npm(*, dry_run: bool, _older: int) -> int:
@@ -312,23 +307,15 @@ def _clean_npm(*, dry_run: bool, _older: int) -> int:
     return max(0, before - after)
 
 
-def _clean_homebrew(*, dry_run: bool, _older: int) -> int:
-    brew = shutil.which("brew")
-    if not brew:
-        return 0
-    if dry_run:
-        code, out = _run_cmd([brew, "cleanup", "-n", "-s"], dry_run=False)
-        # brew -n prints what would be removed; size estimate is rough
-        return 0 if code != 0 else len(out) * 1024  # placeholder — run real cleanup for size
-    code, _ = _run_cmd([brew, "cleanup", "-s", "--prune=all"], dry_run=False)
-    return 0 if code != 0 else 0  # brew doesn't report bytes; user sees brew output
-
-
 def _clean_homebrew_with_estimate(*, dry_run: bool, _older: int) -> int:
     brew = shutil.which("brew")
     if not brew:
         return 0
-    cellar = Path("/opt/homebrew/Cellar") if (Path("/opt/homebrew")).exists() else Path("/usr/local/Cellar")
+    cellar = (
+        Path("/opt/homebrew/Cellar")
+        if Path("/opt/homebrew").exists()
+        else Path("/usr/local/Cellar")
+    )
     before = _dir_size(cellar)
     if dry_run:
         _run_cmd([brew, "cleanup", "-n", "-s"], dry_run=False)
@@ -350,7 +337,6 @@ def _clean_docker(*, dry_run: bool, _older: int) -> int:
 
 
 def _unload_ollama(*, dry_run: bool) -> None:
-    """Unload all models from Ollama RAM (disk blobs stay)."""
     base = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
     try:
         with urllib.request.urlopen(f"{base}/api/ps", timeout=5) as resp:
@@ -382,7 +368,6 @@ def _unload_ollama(*, dry_run: bool) -> None:
 
 
 def _purge_memory_hint(*, dry_run: bool) -> None:
-    """macOS memory purge requires sudo — show hint only."""
     if dry_run:
         print("  [dry-run] sudo purge — frees inactive RAM (requires password)")
         return
@@ -499,6 +484,12 @@ def build_categories() -> Dict[str, Category]:
     }
 
 
+DEFAULT_CATEGORIES = [
+    "caches", "logs", "trash", "temp", "pip", "npm", "yarn",
+    "homebrew", "xcode", "cursor", "vscode", "ds_store",
+]
+
+
 def _clean_ds_store(*, dry_run: bool) -> int:
     roots = [
         HOME / "Downloads",
@@ -506,7 +497,7 @@ def _clean_ds_store(*, dry_run: bool) -> int:
         HOME / "Developer",
         HOME / "Projects",
         HOME / "Code",
-        Path.cwd(),
+        Path(__file__).resolve().parent,
     ]
     freed = 0
     for root in roots:
@@ -562,7 +553,7 @@ def _print_scan(categories: Dict[str, Category], selected: List[str]) -> int:
         mark = _fmt_bytes(size).rjust(10)
         print(f"  {name.ljust(width)}  {mark}  {desc}")
     print(f"\n  Estimated reclaimable (scan): ~{_fmt_bytes(total)}")
-    print("  Run with --clean --yes to delete. Add --unload to free Ollama RAM.\n")
+    print("  Run Clean Safe.command or menu option 2 to delete.\n")
     return total
 
 
@@ -578,39 +569,23 @@ def main(argv: Optional[List[str]] = None) -> int:
             "Default is scan-only. Use --clean --yes to actually delete."
         ),
     )
-    parser.add_argument(
-        "--clean", action="store_true",
-        help="Clean selected categories (requires --yes)",
-    )
-    parser.add_argument(
-        "--yes", "-y", action="store_true",
-        help="Confirm destructive clean",
-    )
-    parser.add_argument(
-        "--unload", action="store_true",
-        help="Unload Ollama models from RAM + memory tips",
-    )
-    parser.add_argument(
-        "--purge", action="store_true",
-        help="Try sudo purge for inactive RAM (hint if not root)",
-    )
+    parser.add_argument("--clean", action="store_true", help="Clean selected categories")
+    parser.add_argument("--yes", "-y", action="store_true", help="Confirm destructive clean")
+    parser.add_argument("--unload", action="store_true", help="Unload Ollama models from RAM")
+    parser.add_argument("--purge", action="store_true", help="RAM purge hint / sudo purge")
     parser.add_argument(
         "--older-than", type=int, default=0, metavar="DAYS",
-        help="Only remove files older than N days (logs/temp/downloads/caches)",
+        help="Only remove files older than N days",
     )
     parser.add_argument(
         "categories", nargs="*", default=["all"],
-        help=f"Categories to scan/clean, or 'all' (default: all)",
+        help="Categories to scan/clean, or 'all'",
     )
     args = parser.parse_args(argv)
 
     selected = args.categories
     if not selected or selected == ["all"]:
-        # Safe default set — excludes docker, downloads, ollama_disk unless user asks
-        selected = [
-            "caches", "logs", "trash", "temp", "pip", "npm", "yarn",
-            "homebrew", "xcode", "cursor", "vscode", "ds_store",
-        ]
+        selected = list(DEFAULT_CATEGORIES)
 
     unknown = [c for c in selected if c not in categories]
     if unknown:
