@@ -4,12 +4,6 @@
   "confidence": 0.42999999999999994,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: The root cause is that the scanner spike during the scan timeout caused a large deviation in the score. This led to an excessive risk premium for the algorithm. The high confidence level of 0.58 indicates the need to tighten or expand risk ",
-    "{'param': 'MAX_RISK_PER_TRADE_USD', 'value': 255668.1425, 'reason': 'Increase risk per trade to accommodate market volatility.'}",
-    "The algo should be adjusted for the given parameters.",
-    "Monitor the trade performance closely during these times to prevent similar issues in the future.",
-    "Commander: During an overnight session, there was a scanner spike after the timeout. The scanner threshold and spike ratio are set to 6.6666666653333335. The ATR R:R of the scan is 2.0, which suggests a moderate risk level.",
-    "A",
     "n",
     "a",
     "l",
@@ -103,10 +97,16 @@
     "{'param': 'MAX_CONCURRENT_POSITIONS', 'value': 1, 'reason': 'Tighter max concurrent positions for better control over execution speed.'}",
     "Commander: The algorithm is stuck due to scanner spike after timeout, which causes poor performance.",
     "Commander: Scanner+spike after timeout: score=48 vol=6.7x | ATR R:R 2.0",
-    "Commander: Scanner+spike after timeout: score=45 vol=6.7x | ATR R:R 2.0"
+    "Commander: Scanner+spike after timeout: score=45 vol=6.7x | ATR R:R 2.0",
+    "Analyze and learn from recent trades.",
+    "Adapt strategies based on recent successes and failures.",
+    "Keep track of market conditions and real-time events.",
+    "Regularly monitor trading algo performance.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'To avoid such events in the future.'}",
+    "Commander: The council_timeout event indicates that the scanner + spike occurred after a timeout, and it should be fixed to prevent it from happening again."
   ],
-  "last_thought": "```json\n{\n    \"gut_feel\": 1,\n    \"intuition\": 1,\n    \"mode\": \"HANOON\",\n    \"account_equity\": 1022385.29,\n    \"available_cash\": 1022385.29,\n    \"position_value\": 0.0,\n    \"nav\": 1013.47,\n    \"deployed_pct\": 0.0,\n    \"current_ticker\": \"NONE\",\n    \"position\": \"NONE\",\n    \"win_rate\": 0.0,\n    \"trades_today\": 2,\n    \"top_pick\": \"QCMD\",\n    \"top_score\": 45.4,\n    \"next_best\": \"QCMD\",\n    \"next_best_score\": 346.7,\n    \"scan_results\": [\n        { \"ticker\": \"WAVE\", \"price\": 0.0, \"score\": 96.0, \"reason\": ",
+  "last_thought": "```json\n{\n  \"gut_feel\": {\n    \"intuition\": \"The live account state is stable with a high equity value and no recent trades or losses.\",\n    \"confidence\": 0.95\n  },\n  \"experiences\": [\n    {\n      \"trade_decision\": \"Adapt strategies based on recent successes and failures.\",\n      \"description\": \"In this specific dashboard, the trader has been trading HANOON with a high equity value. The account balance is stable, and no recent trades or losses have been observed.\"\n    },\n    {\n      \"trade_decisio",
   "market_belief": {},
   "trades_observed": 3,
-  "updated": "2026-06-25T10:12:41.729800"
+  "updated": "2026-06-25T10:26:19.308139"
 }

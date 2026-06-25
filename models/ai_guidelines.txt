@@ -279,3 +279,9 @@ Scanner+spike after timeout: score=48 vol=6.7x | ATR R:R 2.0
 Observed council_timeout — recorded for learning.
 Scanner+spike after timeout: score=45 vol=6.7x | ATR R:R 2.0
 
+🧭 COMMANDER LEARNING | 2026-06-25T10:26:19.334670+00:00
+PAPER FREE LEARNING — apply fixes aggressively within bounds.
+The council_timeout event indicates that the scanner + spike occurred after a timeout, and it should be fixed to prevent it from happening again.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Tighten or expand risk based on evidence.)
+

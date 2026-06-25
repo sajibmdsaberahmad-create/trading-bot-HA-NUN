@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 25,
   "scans_performed": 27,
-  "improvements_applied": 77,
+  "improvements_applied": 78,
   "reports_generated": 26,
   "event_log": [
     {
@@ -5626,6 +5626,28 @@
         "applied": [],
         "lessons": [
           "Review council_timeout on QCMD"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T10:26:19.309712",
+      "age": "3d 23h 23m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #78",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "PAPER FREE LEARNING \u2014 apply fixes aggressively within bounds.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Tighten or expand risk based on evidence.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'To avoid such events in the future.'}"
         ]
       }
     }
