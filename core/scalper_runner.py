@@ -5177,8 +5177,6 @@ class ScalperRunner:
             else:
                 log.info(f"Entry not filled for {ticker} (status={parent_status})")
             self.broker.cancel_open_orders_for_symbol(ticker)
-            self.bracket_handle = None
-            self._entry_poll_state = None
             self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
 
     def _council_key(self, ticker: str, task: str) -> str:
@@ -5935,15 +5933,18 @@ class ScalperRunner:
                 "regime": regime_label,
                 "atr": float(plan.atr_at_entry or 0),
             }
-            self.bracket_handle = self.broker.place_bracket_buy(
+            bracket = self.broker.place_bracket_buy(
                 quantity=shares, limit_or_market_price=entry_parent_px,
                 stop_price=plan.initial_stop_price, target_price=plan.take_profit_price,
+                symbol=ticker,
             )
-            self._pending_bracket_handle = self.bracket_handle
+            self._pending_brackets_by_ticker[ticker] = bracket
+            if not self._position_slots:
+                self.bracket_handle = bracket
             mode_label = "MARKET" if entry_parent_px is None else f"LIMIT@${entry_parent_px:.4f}"
             log.info(f"  📥 Entry mode: {entry_mode} ({mode_label}) | {shares} sh @ ~${current_px:.4f}")
             if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
-                self._entry_poll_state = {
+                self._entry_poll_states[ticker] = {
                     "ticker": ticker,
                     "shares": shares,
                     "plan": plan,
@@ -5955,6 +5956,7 @@ class ScalperRunner:
                     "fail_cd": fail_cd,
                     "attempt": attempt,
                     "last_ib_error": last_ib_error,
+                    "bracket": bracket,
                 }
                 return "waiting"
         return "waiting"
@@ -6262,16 +6264,19 @@ class ScalperRunner:
                         current_px, bid, ask, shares, avg_volume,
                     )
 
-                self.bracket_handle = self.broker.place_bracket_buy(
+                bracket = self.broker.place_bracket_buy(
                     quantity=shares, limit_or_market_price=entry_parent_px,
                     stop_price=plan.initial_stop_price, target_price=plan.take_profit_price,
+                    symbol=ticker,
                 )
-                self._pending_bracket_handle = self.bracket_handle
+                self._pending_brackets_by_ticker[ticker] = bracket
+                if not self._position_slots:
+                    self.bracket_handle = bracket
                 mode_label = "MARKET" if entry_parent_px is None else f"LIMIT@${entry_parent_px:.4f}"
                 log.info(f"  📥 Entry mode: {entry_mode} ({mode_label}) | {shares} sh @ ~${current_px:.4f}")
 
                 if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
-                    self._entry_poll_state = {
+                    self._entry_poll_states[ticker] = {
                         "ticker": ticker,
                         "shares": shares,
                         "plan": plan,
@@ -6283,16 +6288,17 @@ class ScalperRunner:
                         "fail_cd": fail_cd,
                         "attempt": attempt,
                         "last_ib_error": last_ib_error,
+                        "bracket": bracket,
                     }
                     return "waiting"
 
                 filled_shares = 0.0
-                parent_trade = getattr(self.bracket_handle, "parent_trade", None)
-                parent_id = self.bracket_handle.parent_order_id
+                parent_trade = getattr(bracket, "parent_trade", None)
+                parent_id = bracket.parent_order_id
                 cancelled = False
                 for _ in range(fill_polls):
                     self.ib.sleep(fill_wait)
-                    parent_trade = getattr(self.bracket_handle, "parent_trade", None)
+                    parent_trade = getattr(bracket, "parent_trade", None)
                     parent_status = (
                         parent_trade.orderStatus.status
                         if parent_trade and parent_trade.orderStatus else "Unknown"
@@ -6318,7 +6324,7 @@ class ScalperRunner:
                             self.broker.cancel_open_orders_for_symbol(ticker)
                             break
                         log.warning(f"Entry order rejected by IB ({parent_status}) — not opening position")
-                        self.bracket_handle = None
+                        self._pending_brackets_by_ticker.pop(ticker, None)
                         self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
                         return 'waiting'
                     filled = float(parent_trade.orderStatus.filled) if parent_trade and parent_trade.orderStatus else 0.0
@@ -6345,7 +6351,7 @@ class ScalperRunner:
                     break
                 if cancelled and attempt == 0 and getattr(self.cfg, "ENTRY_RETRY_ON_IB2161", True):
                     self.broker.cancel_open_orders_for_symbol(ticker)
-                    self.bracket_handle = None
+                    self._pending_brackets_by_ticker.pop(ticker, None)
                     continue
                 break
 
@@ -6363,7 +6369,7 @@ class ScalperRunner:
                         f"{min_fill_ratio:.0%} — flattening and skipping entry"
                     )
                     self.broker.flatten_position(
-                        int(filled_shares), handle=self.bracket_handle,
+                        int(filled_shares), handle=bracket,
                         urgent=True, symbol=ticker,
                     )
                     self.ib.sleep(0.5)
@@ -6372,8 +6378,7 @@ class ScalperRunner:
                 else:
                     log.info(f"Entry not filled for {ticker} (status={parent_status})")
                 self.broker.cancel_open_orders_for_symbol(ticker)
-                self.bracket_handle = None
-                self._pending_bracket_handle = None
+                self._pending_brackets_by_ticker.pop(ticker, None)
                 self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
                 return 'waiting'
 

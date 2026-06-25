@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "x",
-    "Commander: The closing trades were made based on real-time events and live IB bars.",
     "'",
     "b",
     "Commander: The reason for the profit is not provided in this event detail.",
@@ -103,10 +101,12 @@
     "Increase margin of profit",
     "Optimize profit hunting logic",
     "Commander: The trader experienced a loss streak, which can be attributed to the missed profit hunt. The margin of profit was lower than expected and it is necessary to increase this margin.",
-    "Review trade_closed on MARA"
+    "Review trade_closed on MARA",
+    "Review council_timeout on RIOT",
+    "Commander: High scanner score after timeout: score=85 vol=1.1x | ATR R:R 2.0"
   ],
   "last_thought": "```json\n{\n  \"trade_id\": \"closed_trade\",\n  \"journal_entry\": {\n    \"ticker\": \"MARA\",\n    \"entry\": 14.61,\n    \"exit\": 13.64,\n    \"quote_entry\": 14.61,\n    \"quote_exit\": 13.65,\n    \"shares\": 2673.0,\n    \"pnl_usd\": -2592.81,\n    \"pnl_pct\": -6.64,\n    \"result\": \"loss\",\n    \"exit_reason\": \"trailing_profit\"\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 2,
-  "updated": "2026-06-25T19:21:27.272059"
+  "updated": "2026-06-25T19:22:33.154105"
 }
