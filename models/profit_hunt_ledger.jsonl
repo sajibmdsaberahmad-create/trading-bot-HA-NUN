@@ -120,3 +120,5 @@
 {"timestamp":"2026-06-25T17:30:26.844348+00:00","event":"hard_take_profit","ticker":"TZA","pnl_usd":35648.4,"pnl_pct":292.1818,"primary_goal":true,"reason":"hard_take_profit","price":3.87}
 {"timestamp":"2026-06-25T17:30:51.777853+00:00","event":"hard_take_profit","ticker":"TZA","pnl_usd":35555.97,"source":"buffer","reason":"hard_take_profit"}
 {"timestamp":"2026-06-25T17:31:35.800435+00:00","event":"trailing_stop","ticker":"GPUS","pnl_usd":199.56,"pnl_pct":12.5985,"primary_goal":true,"reason":"trailing_stop","price":0.1795}
+{"timestamp":"2026-06-25T17:31:56.039675+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":24043.25,"pnl_pct":270.9697,"primary_goal":true,"reason":"trailing_profit","price":3.59}
+{"timestamp":"2026-06-25T17:32:12.932722+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}

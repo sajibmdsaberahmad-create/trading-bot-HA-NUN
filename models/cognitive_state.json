@@ -4,7 +4,6 @@
   "confidence": 0.4,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: - Trailing stop is a common strategy for closing trades when price is near the previous close. - Low volume trading often correlates with profit opportunities.",
     "Market data failures prevent profit hunting without live IB bars.",
     "Live IB bars and market data updates are critical for real-time adjustments in equity trading.",
     "Commander: Root cause: Market data failure and live IB bars issues.",
@@ -103,10 +102,11 @@
     "Commander: council_exit: Ollama exit 98% (PPO hold)",
     "Market data failure is another crucial factor that needs to be considered.",
     "We need to learn from this mistake and ensure our trading strategy remains robust in the face of such deviations.",
-    "Commander: The market data failure occurred, and we need to analyze why it happened so that the algo can learn from this event and prevent recurrence."
+    "Commander: The market data failure occurred, and we need to analyze why it happened so that the algo can learn from this event and prevent recurrence.",
+    "Commander: trailing_stop"
   ],
   "last_thought": "```json\n{\n  \"entry\": 0.0132,\n  \"exit\": 0.0132,\n  \"quote_entry\": 0.0132,\n  \"quote_exit\": 3.58,\n  \"shares\": 3308.0,\n  \"pnl_usd\": 0.0,\n  \"pnl_pct\": 0.0,\n  \"result\": \"profit\",\n  \"exit_reason\": \"sell into the move\",\n  \"entry_slippage_pct\": -0.996333,\n  \"exit_slippage_pct\": -0.996313,\n  \"limit_px\": 3.6,\n  \"entry_mode\": \"limit_smart\",\n  \"regime\": \"unknown|late_chase_risk\",\n  \"hold_sec\": 21.1,\n  \"peak\": 3.58,\n  \"stop\": 3.5856,\n  \"target\": 4.8284\n}\n```",
   "market_belief": {},
-  "trades_observed": 7,
-  "updated": "2026-06-25T17:31:39.353292"
+  "trades_observed": 10,
+  "updated": "2026-06-25T17:32:12.896416"
 }

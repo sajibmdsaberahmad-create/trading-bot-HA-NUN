@@ -1,9 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.58,
-    "reason": "Market data failure with a sharp drop in TZA price caused by a large volume movement, which indicates that our algorithm needs to account for the impact of market volatility on profit hunting.",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}

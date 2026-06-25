@@ -3862,3 +3862,7 @@ The market data failure occurred, and we need to analyze why it happened so that
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Market data failure with a sharp drop in TZA price caused by a large volume movement, which indicates that our algorithm needs to account for the impact of market volatility on profit hunting.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T17:32:04.792027+00:00
+Observed trade_closed — recorded for learning.
+trailing_stop
+

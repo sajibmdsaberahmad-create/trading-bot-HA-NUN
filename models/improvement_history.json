@@ -302,5 +302,14 @@
       "Market data failure is another crucial factor that needs to be considered.",
       "We need to learn from this mistake and ensure our trading strategy remains robust in the face of such deviations."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T17:32:04.792384+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on GPUS"
+    ]
   }
 ]
