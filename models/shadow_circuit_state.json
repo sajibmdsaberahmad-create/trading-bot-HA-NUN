@@ -6,11 +6,11 @@
   "shadow_open": {
     "PLTR": {
       "ticker": "PLTR",
-      "entry": 108.04,
-      "stop": 107.6078,
-      "target": 108.9043,
-      "shares": 392,
-      "opened_at": 1782412998.080003,
+      "entry": 107.91,
+      "stop": 107.4784,
+      "target": 108.7733,
+      "shares": 532,
+      "opened_at": 1782413664.891903,
       "regime": "unknown"
     },
     "LCID": {
@@ -20,15 +20,6 @@
       "target": 5.1559,
       "shares": 4274,
       "opened_at": 1782413457.5445042,
-      "regime": "unknown"
-    },
-    "MARA": {
-      "ticker": "MARA",
-      "entry": 13.79,
-      "stop": 13.7348,
-      "target": 13.9003,
-      "shares": 3486,
-      "opened_at": 1782413550.635602,
       "regime": "unknown"
     },
     "RIVN": {
@@ -42,29 +33,47 @@
     },
     "SOFI": {
       "ticker": "SOFI",
-      "entry": 17.3,
-      "stop": 17.2308,
-      "target": 17.4384,
-      "shares": 5000,
-      "opened_at": 1782413306.563562,
+      "entry": 17.31,
+      "stop": 17.2408,
+      "target": 17.4485,
+      "shares": 1151,
+      "opened_at": 1782413662.265085,
       "regime": "unknown"
     },
     "COIN": {
       "ticker": "COIN",
-      "entry": 143.25,
-      "stop": 142.677,
-      "target": 144.396,
-      "shares": 295,
-      "opened_at": 1782413022.678127,
+      "entry": 143.49,
+      "stop": 142.916,
+      "target": 144.6379,
+      "shares": 39,
+      "opened_at": 1782413679.884023,
       "regime": "unknown"
     },
     "RIOT": {
       "ticker": "RIOT",
-      "entry": 27.325,
-      "stop": 27.2157,
-      "target": 27.5436,
-      "shares": 2330,
-      "opened_at": 1782413272.5028899,
+      "entry": 27.35,
+      "stop": 27.3192,
+      "target": 27.6483,
+      "shares": 258,
+      "opened_at": 1782413666.542727,
+      "regime": "unknown"
+    },
+    "RKLB": {
+      "ticker": "RKLB",
+      "entry": 81.1,
+      "stop": 80.7756,
+      "target": 81.7488,
+      "shares": 159,
+      "opened_at": 1782413601.65043,
+      "regime": "unknown"
+    },
+    "MARA": {
+      "ticker": "MARA",
+      "entry": 13.78,
+      "stop": 13.7249,
+      "target": 13.8902,
+      "shares": 416,
+      "opened_at": 1782413665.719244,
       "regime": "unknown"
     }
   },
@@ -80,7 +89,19 @@
       "regime": "unknown",
       "hold_sec": 86.13612985610962,
       "closed_at": 1782413174.662103
+    },
+    {
+      "ticker": "MARA",
+      "entry": 13.82,
+      "exit": 13.7747,
+      "shares": 3486,
+      "pnl_usd": -157.92,
+      "result": "loss",
+      "reason": "shadow_stop",
+      "regime": "unknown",
+      "hold_sec": 5.0521559715271,
+      "closed_at": 1782413576.5514581
     }
   ],
-  "updated_at": 1782413550.635946
+  "updated_at": 1782413679.8846521
 }

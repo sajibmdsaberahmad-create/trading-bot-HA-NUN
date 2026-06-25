@@ -597,6 +597,13 @@ class BotConfig:
     SHADOW_CIRCUIT_ENABLED: bool = os.getenv(
         "SHADOW_CIRCUIT_ENABLED", "true"
     ).lower() in ("1", "true", "yes")
+    # Paper accounts should send real orders to IB Gateway — shadow simulates only in logs
+    SHADOW_ON_PAPER: bool = os.getenv("SHADOW_ON_PAPER", "false").lower() in (
+        "1", "true", "yes",
+    )
+    SHADOW_RESUME_ON_START: bool = os.getenv("SHADOW_RESUME_ON_START", "true").lower() not in (
+        "0", "false", "no",
+    )
     SHADOW_CONSECUTIVE_LOSS_TRIGGER: int = int(os.getenv("SHADOW_CONSECUTIVE_LOSS_TRIGGER", "4"))
     SHADOW_DAILY_DD_PCT: float = float(os.getenv("SHADOW_DAILY_DD_PCT", "0.02"))
     SHADOW_REENTRY_MIN_TRADES: int = int(os.getenv("SHADOW_REENTRY_MIN_TRADES", "20"))

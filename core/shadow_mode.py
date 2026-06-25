@@ -79,6 +79,10 @@ class ShadowCircuitBreaker:
     def block_broker(self) -> bool:
         if not getattr(self.cfg, "SHADOW_CIRCUIT_ENABLED", True):
             return False
+        if getattr(self.cfg, "PAPER_TRADING", False) and not getattr(
+            self.cfg, "SHADOW_ON_PAPER", False,
+        ):
+            return False
         return self.in_shadow
 
     def on_live_trade_closed(self, pnl_usd: float, equity: float) -> None:
