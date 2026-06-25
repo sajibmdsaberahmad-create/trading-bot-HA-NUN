@@ -5035,3 +5035,9 @@ The algorithm is tracking market data and taking profit into momentum, but it ex
 Observed trade_closed — recorded for learning.
 trailing_profit
 
+🧭 COMMANDER LEARNING | 2026-06-25T19:04:58.975612+00:00
+Trade closed with trailing profit and no profit hunting.
+The trade closed due to a trailing profit, which indicates that the algorithm has not seen enough gains in the past few days. The trader is now tracking this information for future opportunities.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (This mutation indicates that the confidence threshold value is now set to 58%.)
+

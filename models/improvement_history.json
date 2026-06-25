@@ -1797,5 +1797,22 @@
     "lessons": [
       "Review trade_closed on QS"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T19:04:58.976024+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "This mutation indicates that the confidence threshold value is now set to 58%.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with trailing profit and no profit hunting.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The value of CONFIDENCE_THRESHOLD was found to be too high, as it might lead to missed profit hunts.'}"
+    ]
   }
 ]
