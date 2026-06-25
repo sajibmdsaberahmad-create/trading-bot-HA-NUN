@@ -19,16 +19,16 @@
       "stop": 5.0945,
       "target": 5.1559,
       "shares": 4274,
-      "opened_at": 1782413391.002213,
+      "opened_at": 1782413457.5445042,
       "regime": "unknown"
     },
     "MARA": {
       "ticker": "MARA",
-      "entry": 13.73,
-      "stop": 13.6751,
-      "target": 13.8398,
-      "shares": 3264,
-      "opened_at": 1782413392.598397,
+      "entry": 13.72,
+      "stop": 13.6651,
+      "target": 13.8298,
+      "shares": 3272,
+      "opened_at": 1782413460.618537,
       "regime": "unknown"
     },
     "RIVN": {
@@ -37,7 +37,7 @@
       "stop": 14.3922,
       "target": 14.5656,
       "shares": 5000,
-      "opened_at": 1782413391.801536,
+      "opened_at": 1782413459.8111281,
       "regime": "unknown"
     },
     "SOFI": {
@@ -82,5 +82,5 @@
       "closed_at": 1782413174.662103
     }
   ],
-  "updated_at": 1782413392.5987358
+  "updated_at": 1782413460.618828
 }
