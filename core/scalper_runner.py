@@ -79,6 +79,15 @@ from core.fast_execution import (
     tick_stream_count,
     max_realtime_bar_streams,
     assign_stream_modes,
+    main_loop_sec,
+    council_max_wait_sec,
+    entry_fill_poll_sec,
+    ai_exit_check_sec,
+    tick_spike_debounce_sec,
+    tick_spike_monitor_enabled,
+    background_watch_sec,
+    spike_entry_cooldown_sec,
+    entry_pending_block_sec,
 )
 from core.connector import IBConnector
 from core.data import DataManager
@@ -266,6 +275,9 @@ class ScalperRunner:
         self._loss_learning_in_flight: bool = False
         self._scan_data_cache: Dict[str, pd.DataFrame] = {}  # Cache scanned data
         self._bar_prefetch_queue: List[str] = []
+        self._tick_spike_pending: Dict[str, Dict[str, Any]] = {}
+        self._tick_spike_last_at: Dict[str, float] = {}
+        self._tick_exit_last_at: Dict[str, float] = {}
         
         # Live stream monitors for locked targets (heartbeat in milliseconds)
         self._target_monitors: Dict[str, DataManager] = {}      # ticker -> DataManager
@@ -541,6 +553,150 @@ class ScalperRunner:
 
         return df, live_px, dm, forecast
 
+    def _on_locked_stream_tick(self, ticker: str, price: float, _ts: Any) -> None:
+        """Tick callback — queue spike entry or fast profit/loss exit (debounced)."""
+        if price <= 0 or not tick_spike_monitor_enabled(self.cfg):
+            return
+        now = time.time()
+        debounce = tick_spike_debounce_sec(self.cfg)
+        if now - self._tick_spike_last_at.get(ticker, 0) < debounce:
+            return
+        self._tick_spike_last_at[ticker] = now
+
+        if ticker in self._held_tickers():
+            if now - self._tick_exit_last_at.get(ticker, 0) < debounce:
+                return
+            self._tick_exit_last_at[ticker] = now
+            self._service_tick_position_exit(ticker, float(price))
+            return
+
+        if ticker == self._pending_entry_ticker:
+            return
+        if not any(t.ticker == ticker for t in self._locked_targets):
+            return
+        if self._open_position_count() >= self._max_concurrent():
+            return
+        if now < self._spike_attempt_until.get(ticker, 0):
+            return
+
+        min_bars = self._min_bars_for(ticker)
+        df, live_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=min_bars)
+        if df is None or len(df) < max(3, min_bars // 2):
+            return
+
+        is_spike, ratio = self._detect_volume_spike(df, min_period=min(20, max(6, min_bars)))
+        if forecast.get("spike_likelihood", 0) >= 0.48:
+            is_spike, ratio = True, max(ratio, float(forecast.get("vol_accel", 1.0)))
+        if not is_spike and dm:
+            burst, br = self._detect_tick_volume_burst(dm, df)
+            if burst:
+                is_spike, ratio = True, br
+        if not is_spike:
+            return
+
+        target = next((t for t in self._locked_targets if t.ticker == ticker), None)
+        if target is None:
+            return
+        self._tick_spike_pending[ticker] = {
+            "target": target,
+            "ratio": ratio,
+            "px": float(price or live_px),
+            "forecast": forecast,
+            "at": now,
+        }
+
+    def _service_tick_spike_queue(self) -> None:
+        """Drain tick-triggered spike entries (runs on main loop thread)."""
+        if not self._tick_spike_pending or self.risk.is_halted():
+            return
+        now = time.time()
+        for ticker, pkt in sorted(
+            self._tick_spike_pending.items(),
+            key=lambda x: float(x[1].get("ratio", 0)),
+            reverse=True,
+        ):
+            if now - float(pkt.get("at", 0)) > 3.0:
+                self._tick_spike_pending.pop(ticker, None)
+                continue
+            if ticker in self._held_tickers():
+                self._tick_spike_pending.pop(ticker, None)
+                continue
+            if self._pending_entry_ticker and self._pending_entry_ticker != ticker:
+                continue
+            if now < self._spike_attempt_until.get(ticker, 0):
+                self._tick_spike_pending.pop(ticker, None)
+                continue
+
+            target = pkt["target"]
+            ratio = float(pkt.get("ratio", 1.0))
+            px = float(pkt.get("px", 0))
+            fc = pkt.get("forecast") or {}
+            self._tick_spike_pending.pop(ticker, None)
+            self.top_pick = target
+            self._last_entry_attempt_at = now
+            self._spike_attempt_until[ticker] = now + spike_entry_cooldown_sec(self.cfg)
+            log.info(
+                f"⚡ TICK SPIKE: {ticker} @ ${px:.2f} | vol={ratio:.1f}x | "
+                f"micro={fc.get('spike_likelihood', 0):.0%} pred→${fc.get('pred_1bar', px):.2f}"
+            )
+            result = self._attempt_entry()
+            if result in ("entered", "waiting") or ticker in self._held_tickers():
+                return
+            break
+
+    def _service_tick_position_exit(self, ticker: str, price: float) -> None:
+        """Sub-second micro profit/loss exit on tick (mechanical, no council wait)."""
+        if not getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
+            return
+        if not self._load_position_context(ticker):
+            return
+        if price > self._position_peak:
+            self._position_peak = price
+            if self.risk.plan:
+                self.risk.plan.peak_price = max(self.risk.plan.peak_price, price)
+
+        entry_px = self._entry_price
+        if entry_px <= 0 or self.shares <= 0:
+            return
+        pnl_pct = (price / entry_px) - 1.0
+        min_hold = effective_min_hold_for_exit(self.cfg, pnl_pct)
+        opened = getattr(self, "_position_opened_at", 0.0)
+        if min_hold > 0 and opened and (time.time() - opened) < min_hold:
+            return
+
+        _, _, _, forecast = self._resolve_live_bars(ticker, min_bars=6)
+        fade_thr = float(getattr(self.cfg, "MICRO_FADE_EXIT", 0.55))
+        loss_thr = float(getattr(self.cfg, "MICRO_LOSS_EXIT", 0.58))
+
+        if (
+            pnl_pct > float(getattr(self.cfg, "IN_PROFIT_MANAGE_PNL_PCT", 0.003))
+            and forecast.get("fade_risk", 0) >= fade_thr
+            and forecast.get("dir", 0) <= 0
+        ):
+            if self._execute_mechanical_profit_exit(
+                price, f"tick_micro_fade:{forecast.get('fade_risk', 0):.2f}",
+            ):
+                self._save_position_context(ticker)
+                return
+
+        if pnl_pct < -0.002 and forecast.get("loss_pressure", 0) >= loss_thr and forecast.get("dir", 0) < 0:
+            log.info(
+                f"  ⚡ TICK LOSS EXIT {ticker}: ${price:.4f} | "
+                f"pressure={forecast.get('loss_pressure', 0):.2f}"
+            )
+            self._exit_position(price, "tick_micro_loss", ticker=ticker)
+            self._save_position_context(ticker)
+
+    def _any_position_in_profit(self, threshold_pct: float = 0.003) -> bool:
+        for t, slot in self._position_slots.items():
+            entry = float(slot.get("entry_price", 0) or 0)
+            if entry <= 0:
+                continue
+            px = self._live_price_for(t, entry)
+            if px > entry * (1.0 + threshold_pct):
+                return True
+        return False
+
     def _run_account_eval(self, event: str, force: bool = False):
         """AI account snapshot, compare, log, and Telegram brief."""
         try:
@@ -617,7 +773,7 @@ class ScalperRunner:
             contract = self.conn.get_contract()
             self.cfg.TICKER = saved
             ticks = self.ib.reqMktData(contract, "", False, False)
-            self.ib.sleep(0.35)
+            self.ib.sleep(0.12)
             for attr in ("last", "close", "marketPrice"):
                 raw = getattr(ticks, attr, None)
                 if raw and float(raw) > 0:
@@ -1854,8 +2010,13 @@ class ScalperRunner:
         try:
             while True:
                 in_position = self._in_any_position()
-                loop_sec = float(getattr(self.cfg, "POSITION_LOOP_SEC", 0.25)) if in_position else float(
-                    getattr(self.cfg, "FLAT_LOOP_SEC", 0.25)
+                have_targets = bool(self._locked_targets)
+                in_profit = self._any_position_in_profit() if in_position else False
+                loop_sec = main_loop_sec(
+                    self.cfg,
+                    in_position=in_position,
+                    have_targets=have_targets,
+                    in_profit=in_profit,
                 )
                 self.ib.sleep(loop_sec)
                 if in_position:
@@ -1902,9 +2063,12 @@ class ScalperRunner:
                 if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True) and can_trade:
                     self._service_pending_entry()
 
+                if can_trade:
+                    self._service_tick_spike_queue()
+
                 # AI-driven early exit check (when in position, non-blocking)
                 if in_position and self.model is not None:
-                    ai_exit_interval = float(getattr(self.cfg, "AI_EXIT_CHECK_SEC", 5.0))
+                    ai_exit_interval = ai_exit_check_sec(self.cfg, self._any_position_in_profit())
                     if now - getattr(self, "_last_ai_exit_check", 0) >= ai_exit_interval:
                         self._last_ai_exit_check = now
                         for ticker in list(self._position_slots.keys()):
@@ -2017,9 +2181,7 @@ class ScalperRunner:
                         
                         # Silent background watch on other locked targets while in position
                         if in_position and self._locked_targets:
-                            if now - getattr(self, "_last_bg_watch", 0) >= float(
-                                getattr(self.cfg, "BACKGROUND_WATCH_SEC", 45.0)
-                            ):
+                            if now - getattr(self, "_last_bg_watch", 0) >= background_watch_sec(self.cfg):
                                 self._last_bg_watch = now
                                 self._silent_background_watch()
 
@@ -2747,6 +2909,9 @@ class ScalperRunner:
             if cached is not None and n_cached > 0:
                 dm.seed_buffer_from_dataframe(cached, n_bars=60)
             dm.start_tick_stream(realtime_only=(stream_mode == "realtime"))
+            if tick_spike_monitor_enabled(self.cfg):
+                sym = ticker
+                dm.on_tick(lambda px, ts, t=sym: self._on_locked_stream_tick(t, px, ts))
             self._target_monitors[ticker] = dm
             self._stream_modes[ticker] = stream_mode
             self._target_last_bar_count[ticker] = n_cached
@@ -3119,10 +3284,7 @@ class ScalperRunner:
             self._scan_data_cache[ticker] = work_df
             self.top_pick = target
             self._last_entry_attempt_at = time.time()
-            spike_cd = float(getattr(self.cfg, "SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC", 20.0))
-            if ai_fast_execution(self.cfg):
-                spike_cd = min(spike_cd, 8.0)
-            self._spike_attempt_until[ticker] = time.time() + spike_cd
+            self._spike_attempt_until[ticker] = time.time() + spike_entry_cooldown_sec(self.cfg)
             fc = self._last_micro_forecast.get(ticker, {})
             log.info(
                 f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | "
@@ -4540,7 +4702,7 @@ class ScalperRunner:
 
     def _service_stale_councils(self) -> None:
         """Clear councils that exceeded max wait — mechanical rules resume."""
-        max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
+        max_wait = council_max_wait_sec(self.cfg)
         now = time.time()
         for key in list(self._ai_councils.keys()):
             st = self._ai_councils.get(key)
@@ -4815,7 +4977,7 @@ class ScalperRunner:
         st["current_px"] = px
         ai_dec = self.ai_commander.poll_position_council(st, df=self._scan_data_cache.get(ticker))
         if ai_dec.get("pending"):
-            max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
+            max_wait = council_max_wait_sec(self.cfg)
             if time.time() - float(st.get("started_at", time.time())) > max_wait:
                 self._ai_councils.pop(key, None)
             return
@@ -4837,7 +4999,7 @@ class ScalperRunner:
         st["current_px"] = px
         ai_dec = self.ai_commander.poll_exit_council(st)
         if ai_dec.get("pending"):
-            max_wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))
+            max_wait = council_max_wait_sec(self.cfg)
             age = time.time() - float(st.get("started_at", time.time()))
             if age > max_wait:
                 self._ai_councils.pop(key, None)
@@ -5103,14 +5265,14 @@ class ScalperRunner:
             return "waiting"
         now = time.time()
         fail_cd = float(getattr(self.cfg, "ENTRY_FAILURE_COOLDOWN_SEC", 30.0))
-        fill_wait = float(getattr(self.cfg, "ENTRY_FILL_WAIT_SEC", 1.0))
+        fill_wait = entry_fill_poll_sec(self.cfg)
         max_wait = float(getattr(self.cfg, "ENTRY_FILL_MAX_WAIT_SEC", 30.0))
         fill_polls = max(5, int(max_wait / fill_wait))
         n_cancelled = self.broker.cancel_open_orders_for_symbol(ticker)
         if n_cancelled:
             log.info(f"  🧹 Cleared {n_cancelled} stale {ticker} order(s) before entry")
         self._pending_entry_ticker = ticker
-        block_sec = float(getattr(self.cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
+        block_sec = entry_pending_block_sec(self.cfg)
         if ai_fast_execution(self.cfg):
             block_sec = min(block_sec, 20.0)
         self._pending_entry_until = now + block_sec
@@ -5432,7 +5594,7 @@ class ScalperRunner:
                 return 'waiting'
 
             fail_cd = float(getattr(self.cfg, "ENTRY_FAILURE_COOLDOWN_SEC", 30.0))
-            fill_wait = float(getattr(self.cfg, "ENTRY_FILL_WAIT_SEC", 1.0))
+            fill_wait = entry_fill_poll_sec(self.cfg)
             max_wait = float(getattr(self.cfg, "ENTRY_FILL_MAX_WAIT_SEC", 30.0))
             fill_polls = max(5, int(max_wait / fill_wait))
 
@@ -5441,7 +5603,7 @@ class ScalperRunner:
             if n_cancelled:
                 log.info(f"  🧹 Cleared {n_cancelled} stale {ticker} order(s) before entry")
             self._pending_entry_ticker = ticker
-            block_sec = float(getattr(self.cfg, "ENTRY_PENDING_BLOCK_SEC", 45.0))
+            block_sec = entry_pending_block_sec(self.cfg)
             if ai_fast_execution(self.cfg):
                 block_sec = min(block_sec, 20.0)
             self._pending_entry_until = now + block_sec

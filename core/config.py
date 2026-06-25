@@ -407,7 +407,7 @@ class BotConfig:
     FAST_SCANNER_LOCK_FALLBACK: bool = os.getenv("FAST_SCANNER_LOCK_FALLBACK", "false").lower() in ("1", "true", "yes")
     SCAN_MTF_DURING_RTH: bool = os.getenv("SCAN_MTF_DURING_RTH", "false").lower() in ("1", "true", "yes")
     SCAN_PREFETCH_LOCK_N: int = int(os.getenv("SCAN_PREFETCH_LOCK_N", "5"))
-    SCAN_BAR_PREFETCH_PER_LOOP: int = int(os.getenv("SCAN_BAR_PREFETCH_PER_LOOP", "8"))
+    SCAN_BAR_PREFETCH_PER_LOOP: int = int(os.getenv("SCAN_BAR_PREFETCH_PER_LOOP", "12"))
     SCAN_BAR_DURATION: str = "1800 S"       # 30min bars for fast scan (not full day)
     SCAN_REFINE_TOP_N: int = 12             # MTF/AI refine only top N after fast pass
     SCAN_EARLY_EXIT_QUALIFIED: int = 18     # Stop scanning once this many qualify
@@ -670,8 +670,8 @@ class BotConfig:
     SCALP_PROFIT_GIVEBACK_PCT: float = 0.30
     MIN_POSITION_HOLD_SEC: float = 45.0   # Block early-exit rules for first N seconds
     MIN_ENTRY_FILL_RATIO: float = 0.85    # Reject partial fills below 85% of order size
-    ENTRY_FILL_WAIT_SEC: float = 1.0      # Seconds per fill poll iteration
-    ENTRY_FILL_MAX_WAIT_SEC: float = 30.0 # Max wait for IB parent fill
+    ENTRY_FILL_WAIT_SEC: float = float(os.getenv("ENTRY_FILL_WAIT_SEC", "0.25"))
+    ENTRY_FILL_MAX_WAIT_SEC: float = float(os.getenv("ENTRY_FILL_MAX_WAIT_SEC", "20"))
     ENTRY_FAILURE_COOLDOWN_SEC: float = 30.0
     SPIKE_SKIP_SEC: float = 30.0
     PENNY_PRICE_THRESHOLD: float = 1.0    # Sub-$1 = penny liquidity rules
