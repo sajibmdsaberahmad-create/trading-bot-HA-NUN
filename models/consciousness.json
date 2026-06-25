@@ -5,7 +5,7 @@
   "training_sessions": 27,
   "trades_observed": 32,
   "scans_performed": 27,
-  "improvements_applied": 176,
+  "improvements_applied": 177,
   "reports_generated": 26,
   "event_log": [
     {
@@ -9665,6 +9665,28 @@
           "s",
           "k",
           "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T15:07:40.744393",
+      "age": "4d 4h 4m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #177",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Council timeout occurred, no aligned signal.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Updated the confidence threshold to 0.58 for further analysis.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This value indicates an imbalance in confidence levels, suggesting potential issues with signal alignment.'}"
         ]
       }
     }

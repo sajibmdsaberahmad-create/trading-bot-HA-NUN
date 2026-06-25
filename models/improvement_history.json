@@ -2715,5 +2715,22 @@
       "k",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T15:07:40.761381+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Updated the confidence threshold to 0.58 for further analysis.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred, no aligned signal.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This value indicates an imbalance in confidence levels, suggesting potential issues with signal alignment.'}"
+    ]
   }
 ]

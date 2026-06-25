@@ -4,8 +4,6 @@
   "confidence": 0.53,
   "mode": "autonomous",
   "learned_lessons": [
-    "No clean data on ONCI (no_historical_data) \u2014 profit hunt elsewhere.",
-    "v",
     "Commander: The event indicates that the Historical Market Data Service returned no historical data, causing issues with live IB bars. This likely affects the analysis and execution of trades.",
     "No clean data on LSANF (no_md_permission) \u2014 profit hunt elsewhere.",
     "No clean data on KIROY (no_md_permission) \u2014 profit hunt elsewhere.",
@@ -103,10 +101,12 @@
     "Commander: The council timeout event occurs during live IB bars and the no-aligned signal issue is an alignment problem.",
     "z",
     "k",
-    "Commander: The event occurred when the IB trading permission was denied, which is not a cause for concern."
+    "Commander: The event occurred when the IB trading permission was denied, which is not a cause for concern.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'This value indicates an imbalance in confidence levels, suggesting potential issues with signal alignment.'}",
+    "Commander: The council timeout event indicates that there is a problem with the current alignment of signals within the system."
   ],
   "last_thought": "```json\n{\n    \"gut_feel\": 53,\n    \"intuition\": 87,\n    \"analysis\": {\n        \"live_account_state\": {\n            \"account_equity\": 993931.11,\n            \"available_cash\": 993931.1,\n            \"position_value\": 0.0,\n            \"nav\": 1000.0,\n            \"deployed_pct\": 0.0,\n            \"current_ticker\": \"NONE\",\n            \"position\": \"NONE\",\n            \"win_rate\": 0.0,\n            \"trades_today\": 0,\n            \"top_pick\": \"TPTS\",\n            \"top_score\": 78.4,\n            \"next_best\": null,",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T15:07:19.162193"
+  "updated": "2026-06-25T15:07:40.742985"
 }

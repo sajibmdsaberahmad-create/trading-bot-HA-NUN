@@ -153,3 +153,4 @@
 {"timestamp":"2026-06-25T15:05:33.481854+00:00","event":"council_timeout","ticker":"MIMI","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 no aligned signal","spike_ratio":1.0043834664143438,"scan_score":89.4,"confidence":0.5,"market_state":"open"}
 {"timestamp":"2026-06-25T15:06:20.937134+00:00","event":"council_timeout","ticker":"MIMI","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 no aligned signal","spike_ratio":1.0043834664143438,"scan_score":89.4,"confidence":0.5,"market_state":"open"}
 {"timestamp":"2026-06-25T15:07:16.940058+00:00","event":"ib_failure","ticker":"TPTS","reason":"IB trading permission denied","spike_ratio":6.666666666,"market_state":"open"}
+{"timestamp":"2026-06-25T15:07:34.652329+00:00","event":"council_timeout","ticker":"XCH","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 no aligned signal","spike_ratio":0.728776406096026,"scan_score":85.0,"confidence":0.5,"market_state":"open"}

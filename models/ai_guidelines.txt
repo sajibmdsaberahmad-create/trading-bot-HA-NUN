@@ -1926,3 +1926,9 @@ The council timeout event occurs during live IB bars and the no-aligned signal i
 IB trading permission denied
 The event occurred when the IB trading permission was denied, which is not a cause for concern.
 
+🧭 COMMANDER LEARNING | 2026-06-25T15:07:40.758423+00:00
+Council timeout occurred, no aligned signal.
+The council timeout event indicates that there is a problem with the current alignment of signals within the system.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Updated the confidence threshold to 0.58 for further analysis.)
+
