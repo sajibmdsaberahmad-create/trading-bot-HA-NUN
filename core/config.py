@@ -22,6 +22,7 @@ def _total_ram_mb() -> int:
 
 
 _LOW_RAM = _total_ram_mb() <= 10_240
+_8GB_RAM = _total_ram_mb() <= 8192
 
 @dataclass
 class BotConfig:
@@ -337,19 +338,47 @@ class BotConfig:
     HYBRID_DISTILL_RETRAIN_HOURS: float = 24.0
     # Live AI hotline — Ollama always on, never blocks IB loop, no stale cache
     LIVE_AI_PIPELINE_ENABLED: bool = True
-    LIVE_AI_MAX_AGE_SEC: float = 4.0       # Discard Ollama answers older than this
-    LIVE_AI_MIN_RING_SEC: float = 0.8      # Min gap between identical fingerprint rings
-    LIVE_AI_PREFETCH_TOP_N: int = 3        # Keep hotline open on top locked tickers
-    LIVE_AI_PREFETCH_SEC: float = 1.0      # How often to prefetch watchlist
-    # Live chart vision (llava) — prefetch on watchlist, feed entry council + training
-    LIVE_CHART_VISION_ENABLED: bool = os.getenv(
-        "LIVE_CHART_VISION_ENABLED", "true"
-    ).lower() in ("1", "true", "yes")
-    LIVE_CHART_VISION_MIN_SCORE: float = float(os.getenv("LIVE_CHART_VISION_MIN_SCORE", "65"))
+    LIVE_AI_MAX_AGE_SEC: float = float(os.getenv(
+        "LIVE_AI_MAX_AGE_SEC", "6" if _LOW_RAM else "4"
+    ))
+    LIVE_AI_MIN_RING_SEC: float = float(os.getenv(
+        "LIVE_AI_MIN_RING_SEC", "1.2" if _LOW_RAM else "0.8"
+    ))
+    LIVE_AI_PREFETCH_TOP_N: int = int(os.getenv(
+        "LIVE_AI_PREFETCH_TOP_N", "2" if _LOW_RAM else "3"
+    ))
+    LIVE_AI_PREFETCH_SEC: float = float(os.getenv(
+        "LIVE_AI_PREFETCH_SEC", "1.5" if _LOW_RAM else "1.0"
+    ))
+    # Live chart vision (llava) — off on 8GB; Telegram upload still works
+    LIVE_CHART_VISION_ENABLED: bool = field(
+        default_factory=lambda: os.getenv(
+            "LIVE_CHART_VISION_ENABLED", "false" if _LOW_RAM else "true",
+        ).lower() in ("1", "true", "yes")
+    )
+    LIVE_CHART_VISION_MIN_SCORE: float = float(os.getenv(
+        "LIVE_CHART_VISION_MIN_SCORE", "80" if _LOW_RAM else "65"
+    ))
     LIVE_CHART_VISION_MAX_AGE_SEC: float = float(os.getenv("LIVE_CHART_VISION_MAX_AGE_SEC", "12"))
     LIVE_CHART_VISION_MIN_RING_SEC: float = float(os.getenv("LIVE_CHART_VISION_MIN_RING_SEC", "2.5"))
-    ENTRY_OLLAMA_WAIT_SEC: float = float(os.getenv("ENTRY_OLLAMA_WAIT_SEC", "10"))
-    AI_COUNCIL_MAX_WAIT_SEC: float = float(os.getenv("AI_COUNCIL_MAX_WAIT_SEC", "15"))
+    ENTRY_OLLAMA_WAIT_SEC: float = float(os.getenv(
+        "ENTRY_OLLAMA_WAIT_SEC", "5" if _LOW_RAM else "10"
+    ))
+    AI_COUNCIL_MAX_WAIT_SEC: float = float(os.getenv(
+        "AI_COUNCIL_MAX_WAIT_SEC", "6" if _LOW_RAM else "15"
+    ))
+    # Strong scanner + spike → decide without waiting for slow Ollama
+    COUNCIL_SCANNER_FAST_SEC: float = float(os.getenv(
+        "COUNCIL_SCANNER_FAST_SEC", "4" if _LOW_RAM else "8"
+    ))
+    COUNCIL_SCANNER_FAST_MIN_SCORE: float = float(os.getenv("COUNCIL_SCANNER_FAST_MIN_SCORE", "78"))
+    COUNCIL_SCANNER_FAST_MIN_SPIKE: float = float(os.getenv("COUNCIL_SCANNER_FAST_MIN_SPIKE", "1.25"))
+    OFF_HOURS_HEAVY_TRAINING: bool = field(
+        default_factory=lambda: os.getenv(
+            "OFF_HOURS_HEAVY_TRAINING", "false" if _LOW_RAM else "true",
+        ).lower() in ("1", "true", "yes")
+    )
+    PERIODIC_CLEANUP_SEC: float = float(os.getenv("PERIODIC_CLEANUP_SEC", "1800"))
     AI_COUNCIL_ALL_DECISIONS: bool = os.getenv(
         "AI_COUNCIL_ALL_DECISIONS", "true"
     ).lower() in ("1", "true", "yes")
