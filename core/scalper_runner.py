@@ -124,6 +124,7 @@ from core.account_evaluator import AccountEvaluator
 from core.telegram_listener import TelegramCommandListener
 from core.commander_learning import load_commander_guidance, run_commander_learning_cycle
 from core.ai_guardrails import build_ppo_observation
+from core.ai_runtime_observer import get_runtime_observer
 from core.ollama_vision import ensure_vision_model
 
 
