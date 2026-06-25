@@ -148,3 +148,4 @@
 {"timestamp":"2026-06-25T14:50:34.708186+00:00","event":"loss_streak","ticker":"WAVE","reason":"stop_breach","pnl_usd":-0.36999999999999744,"consecutive_losses":2,"market_state":"open"}
 {"timestamp":"2026-06-25T14:56:56.916639+00:00","event":"trade_closed","ticker":"AZI","reason":"loss:ai_stagnation: Stagnation timeout 123s","pnl_usd":-0.3248839999999946,"pnl_pct":-0.6068822529176288,"won":false,"exit_type":"loss_exit","hold_sec":381.0806097984314,"regime":"unknown","market_state":"open"}
 {"timestamp":"2026-06-25T14:56:56.917617+00:00","event":"loss_streak","ticker":"AZI","reason":"ai_stagnation: Stagnation timeout 123s","pnl_usd":-0.3248839999999946,"consecutive_losses":3,"market_state":"open"}
+{"timestamp":"2026-06-25T15:04:29.747193+00:00","event":"council_timeout","ticker":"XCH","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 no aligned signal","spike_ratio":0.6915621880167313,"scan_score":85.0,"confidence":0.5,"market_state":"open"}
