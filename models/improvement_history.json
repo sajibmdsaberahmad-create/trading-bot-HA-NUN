@@ -970,5 +970,80 @@
     "lessons": [
       "Review council_timeout on WYY"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T12:49:10.043031+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold was updated to 0.58, which is now at a higher level of risk tolerance.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred, no aligned signal.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has increased, indicating that the algorithm should be more cautious in future executions.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:49:57.677920+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The confidence threshold has been increased to prevent the algo from executing if no aligned signal is found.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred due to no aligned signal in the pipeline.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithmic parameters have been reset to reduce risk.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:50:34.705792+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Decreased from 0.5 to 0.58",
+        "ok": true,
+        "msg": "applied"
+      },
+      "ENTRY_FILL_MAX_WAIT_SEC": {
+        "param": "ENTRY_FILL_MAX_WAIT_SEC",
+        "value": 45.0,
+        "reason": "Increased from 10.0 to 45.0",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The council_timeout event occurred during the trading session. The main issue was a no-aligned signal.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been decreased, indicating potential systemic issues.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T12:51:26.619535+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on WYY"
+    ]
   }
 ]

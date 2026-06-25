@@ -4,12 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': '0.58', 'reason': 'This parameter controls how confident the trader is about their decision-making process, and it should be increased to make the trade more reliable.'}",
-    "Commander: I learned that the trader is holding onto the Ollama position as they are in pain. The reason for this could be due to FOMO or fear.",
-    "Tighten risk management by increasing the confidence threshold and adjusting the scan score accordingly.",
-    "Adaptively adjust the algo's parameters based on recent performance trends and market conditions.",
-    "Commander: The algorithm is learning from the recent scanner spike, which suggests it may need to tighten its risk management strategy or adapt based on subsequent events.",
-    "Review trade_closed on KUST",
     "Commander: win:council_exit: Ollama exit 100% (PPO hold)",
     "f",
     "x",
@@ -103,10 +97,16 @@
     "Commander: The council_timeout is related to the scanner timeout, which in turn is triggered by a spike on the ATR ratio. The spike_ratio indicates that the ATR of the next trade should be more than R2 or R4.",
     "b",
     "w",
-    "Commander: Root cause: Council timeout indicates that there is no aligned signal or alignment within the trading context."
+    "Commander: Root cause: Council timeout indicates that there is no aligned signal or alignment within the trading context.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has increased, indicating that the algorithm should be more cautious in future executions.'}",
+    "Commander: The council is experiencing a temporary pause and the algo should adapt by tightening risk based on recent wins and losses.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The algorithmic parameters have been reset to reduce risk.'}",
+    "Commander: The council timeout indicates that there is a problem with the alignment of signals in the pipeline, which may prevent the algo from executing correctly.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold has been decreased, indicating potential systemic issues.'}",
+    "Commander: The algorithmic trade system is experiencing an alignment issue due to the council timeout."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": \"The live account state shows that the trading context is complex and fluctuating, indicating potential risks and opportunities within the system.\",\n  \"decision\": {\n    \"entry_point\": \"hold\",\n    \"reasoning\": \"The current state suggests a combination of strong momentum indicators (scanner:HOT_BY_VOLUME#1), weak alignment signals (Holding #2), and limited trading experience. Given this, holding the account is likely to yield lower returns but avoids po",
+  "last_thought": "```json\n{\n    \"gut_feel\": 0.75,\n    \"intuition\": \"The live account state includes a mix of high and low values for various assets, indicating potential volatility and alignment issues.\",\n    \"mode\": \"HANOON\",\n    \"account_equity\": 1014737.95,\n    \"available_cash\": 1014737.95,\n    \"position_value\": 0.0,\n    \"nav\": 1000.0,\n    \"deployed_pct\": 0.0,\n    \"current_ticker\": \"NONE\",\n    \"position\": null,\n    \"win_rate\": 0.0,\n    \"trades_today\": 0,\n    \"top_pick\": null,\n    \"top_score\": 78.4,\n    \"next_b",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T12:48:00.208749"
+  "updated": "2026-06-25T12:51:26.590125"
 }
