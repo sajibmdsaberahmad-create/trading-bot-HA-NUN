@@ -34,10 +34,21 @@
     ".",
     "Commander: During this session, the algorithm has not aligned signals and the pipeline is 'council:timeout_pass'. We need to increase the confidence level from 0.9 to 1.0.",
     "Review council_timeout on XPEG",
-    "Commander: Council timeout \u2014 no aligned signal"
+    "Commander: Council timeout \u2014 no aligned signal",
+    "T",
+    "v",
+    "g",
+    "p",
+    "w",
+    "C",
+    "'",
+    "f",
+    "j",
+    "-",
+    "Commander: Event details indicate a Council timeout, which may prevent the algorithm from aligning signals correctly."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": 1,\n  \"analysis\": {\n    \"live_account\": {\n      \"account_equity\": 1022672.59,\n      \"available_cash\": 1022672.59,\n      \"position_value\": 0.0,\n      \"nav\": 1000.0,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": \"NONE\",\n      \"position\": null,\n      \"win_rate\": 0.0,\n      \"trades_today\": 0,\n      \"top_pick\": \"XPEG\",\n      \"top_score\": 82.8,\n      \"next_best\": null,\n      \"next_best_score\": 0.0,\n      \"scan_results\": [\n        { \"ticker\": \"WAVE\", \"price",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T07:59:54.248977"
+  "updated": "2026-06-25T08:14:20.429863"
 }
