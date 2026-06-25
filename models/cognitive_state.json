@@ -1,7 +1,7 @@
 {
-  "mood": "focused",
-  "mood_message": "Win rate 86% on recent trades \u00b7 $+55.15. Executing the plan.",
-  "confidence": 0.51,
+  "mood": "steady",
+  "mood_message": "Mixed session \u00b7 $-12.85. Watching for cleaner setups.",
+  "confidence": 0.53,
   "mode": "autonomous",
   "learned_lessons": [
     "j",
@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 1.0,\n  \"intuition\": 1.0,\n  \"analysis\": {\n    \"live_account_state\": {\n      \"account_equity\": 1019897.68,\n      \"available_cash\": 1019897.68,\n      \"position_value\": 0.0,\n      \"nav\": 1033.74,\n      \"deployed_pct\": 0.0,\n      \"current_ticker\": null,\n      \"position\": null,\n      \"win_rate\": 0.0,\n      \"trades_today\": 6,\n      \"top_pick\": \"WYY\",\n      \"top_score\": 89.4,\n      \"next_best\": \"WYY\",\n      \"next_best_score\": 363.5,\n      \"scan_results\": [\n        { \"ticker\": \"WA",
   "market_belief": {},
-  "trades_observed": 7,
-  "updated": "2026-06-25T11:08:03.886423"
+  "trades_observed": 8,
+  "updated": "2026-06-25T11:14:02.895201"
 }
