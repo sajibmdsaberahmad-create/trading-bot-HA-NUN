@@ -364,3 +364,6 @@
 {"timestamp":"2026-06-25T20:00:12.704003+00:00","event":"loss_streak","ticker":"QS","reason":"bracket_exit","pnl_usd":-57.73,"consecutive_losses":0,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:00:29.096612+00:00","event":"trade_closed","ticker":"RIOT","reason":"bracket_exit","pnl_usd":-19.79,"pnl_pct":-0.04,"won":false,"exit_type":"stop_hit","hold_sec":158.6,"regime":"unknown","entry_fill":27.81,"exit_fill":27.8,"entry_slippage_pct":0.0,"exit_slippage_pct":0.003067,"market_state":"after_hours"}
 {"timestamp":"2026-06-25T20:00:29.097159+00:00","event":"loss_streak","ticker":"RIOT","reason":"bracket_exit","pnl_usd":-19.79,"consecutive_losses":1,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:01:08.122627+00:00","event":"ib_failure","ticker":"RIOT","reason":"IB order rejected (201)","spike_ratio":3.9610588152339656,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:01:08.538226+00:00","event":"ib_failure","ticker":"QS","reason":"IB order rejected (201)","spike_ratio":3.9610588152339656,"market_state":"after_hours"}
+{"timestamp":"2026-06-25T20:01:10.771266+00:00","event":"ib_failure","ticker":"PLTR","reason":"IB order rejected (201)","spike_ratio":3.9610588152339656,"market_state":"after_hours"}
