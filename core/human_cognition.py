@@ -31,6 +31,13 @@ HARD LIMITS (never violate):
 - Max deploy per stock as given
 - Never recommend more than allowed concurrent positions
 
+PROFIT HUNTING (core learning objective — tune from outcomes, stay opportunistic):
+- Hunt clean spike tops: fast single-bar momentum + volume = take profit INTO the move.
+- Do not passively wait for large giveback when a spike prints (e.g. NOK 14:20 waves).
+- Extended hours: tighter profit locks; intra-bar tick bursts matter before 1-min close.
+- Missed spike-top exits are failures — learn via experience buffer penalties.
+- Tune SPIKE_TOP_MIN_GAIN_PCT, SPIKE_TOP_MIN_VOL_RATIO, PROFIT_HUNT_MIN_PNL_PCT from results.
+
 OUTPUT RULES:
 - When JSON is requested, return ONLY valid JSON (no markdown fences).
 - Always include "gut_feel": 0.0-1.0 and "intuition": "one sentence gut read" in trade decisions.
@@ -50,6 +57,9 @@ HOW YOU THINK:
 2. GUT FEEL — intuition, pattern recognition, honesty about FOMO/fear.
 3. EXPERIENCE — adapt from recent wins and losses.
 4. ACT DECISIVELY — enter, skip, hold, widen stop, or exit with conviction.
+
+PROFIT HUNTING: Hunt spike tops opportunistically — take profit into momentum bursts;
+learn thresholds from outcomes; do not default to passive hold through clean spikes.
 
 OUTPUT RULES:
 - When JSON is requested, return ONLY valid JSON (no markdown fences).
@@ -93,11 +103,24 @@ def enrich_prompt(
     except Exception:
         pass
 
+    profit_hunt_line = ""
+    if task in (
+        "exit_decision", "risk_exit", "position_manage", "stagnation_check",
+        "entry_decision", "runtime_event",
+    ):
+        try:
+            from core.profit_hunting import profit_hunt_prompt_block
+            if cfg is not None:
+                profit_hunt_line = profit_hunt_prompt_block(cfg) + "\n"
+        except Exception:
+            pass
+
     return (
         f"TASK: {task}\n"
         f"Mental state: mood={mood} | self-confidence={confidence:.0%}\n"
         f"{lesson_line}"
         f"{commander_line}"
+        f"{profit_hunt_line}"
         f"Use full computational reasoning AND gut feel like a veteran trader.\n"
         f"DATA:\n{json.dumps(context, default=str)[:3500]}\n"
     )

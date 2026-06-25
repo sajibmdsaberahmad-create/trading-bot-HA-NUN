@@ -986,3 +986,7 @@ The council_timeout event indicates that the scanner timeout occurred after a ti
 IB closing-only - cannot open new positions
 The event indicates that the trading algorithm is encountering a technical issue with IB closing only, which prevents it from opening new positions.
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:12:12.747379+00:00
+Observed council_timeout — recorded for learning.
+Scanner+spike after timeout: score=54 vol=2.3x | ATR R:R 2.0
+

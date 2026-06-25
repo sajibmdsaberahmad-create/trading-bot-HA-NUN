@@ -568,8 +568,11 @@ class RiskManager:
             return True, reason
 
         # ── Hard take-profit ─────────────────────────────────────────────────
-        if price >= plan.take_profit_price and not self.cfg.TRAILING_PROFIT_ENABLED:
-            return True, "hard_take_profit"
+        if price >= plan.take_profit_price:
+            if not self.cfg.TRAILING_PROFIT_ENABLED:
+                return True, "hard_take_profit"
+            if getattr(self.cfg, "HARD_TP_OVERRIDE_TRAILING", True):
+                return True, "hard_take_profit"
 
         # ── Trailing profit-taker ────────────────────────────────────────────
         if self.cfg.TRAILING_PROFIT_ENABLED:
@@ -578,6 +581,13 @@ class RiskManager:
                 "_dynamic_profit_giveback_pct",
                 getattr(self.cfg, "TRAILING_PROFIT_GIVEBACK_PCT", 0.40),
             )
+            try:
+                from core.market_hours import get_market_state, is_extended_session
+                from core.profit_hunting import effective_extended_giveback
+                if is_extended_session(get_market_state(self.cfg)):
+                    giveback = min(giveback, effective_extended_giveback(self.cfg))
+            except Exception:
+                pass
             gain_pct = (plan.peak_price - plan.entry_price) / plan.entry_price
             if not plan.trailing_profit_armed and gain_pct >= self.cfg.TRAILING_PROFIT_ACTIVATE_PCT:
                 plan.trailing_profit_armed = True

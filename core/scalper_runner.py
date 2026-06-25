@@ -39,6 +39,15 @@ from core.ai_learning_policy import (
     should_permanent_blacklist,
     record_failure_for_learning,
 )
+from core.profit_hunting import (
+    evaluate_spike_top_exit,
+    evaluate_wave_end_on_spike_fade,
+    check_missed_profit_hunt,
+    record_profit_hunt_learning,
+    teach_profit_hunt_lesson,
+    is_mechanical_profit_exit,
+    mechanical_bypass_council,
+)
 from core.connector import IBConnector
 from core.data import DataManager
 from core.features_enhanced import FeatureEngineerEnhanced
@@ -191,6 +200,10 @@ class ScalperRunner:
         self._next_best_score: float = 0.0
         self._spike_skip_until: Dict[str, float] = {}
         self._spike_attempt_until: Dict[str, float] = {}
+        self._profit_hunt_spike_peak: float = 0.0
+        self._profit_hunt_spike_at: float = 0.0
+        self._profit_hunt_spike_ctx: Dict[str, Any] = {}
+        self._profit_hunt_missed_logged: bool = False
         self._last_flat_pulse: float = 0.0
         self.top_pick: Optional[ScanResult] = None
         self._locked_targets: List[ScanResult] = []
@@ -2732,6 +2745,125 @@ class ScalperRunner:
         total_slippage = min(1.0, divergence + vol_slippage + thin_penalty)
         return total_slippage
     
+    def _evaluate_profit_hunt_exit(self, current_px: float) -> Tuple[bool, str]:
+        """Spike-top + spike-fade opportunistic exits while in profit."""
+        if self.shares <= 0 or self._entry_price <= 0:
+            return False, ""
+        min_hold = effective_min_position_hold_sec(self.cfg)
+        opened = getattr(self, "_position_opened_at", 0.0)
+        if opened and (time.time() - opened) < min_hold:
+            return False, ""
+
+        ticker = self.current_ticker or ""
+        entry_px = self._entry_price
+        pnl_pct = (current_px / entry_px) - 1
+        extended = is_extended_session(get_market_state(self.cfg))
+
+        fast_df = None
+        dm = None
+        if self._active_stream_ticker and self._active_stream_ticker in self._target_monitors:
+            dm = self._target_monitors[self._active_stream_ticker]
+            fast_df = dm.get_bar_dataframe()
+        if fast_df is None:
+            fast_df = self._scan_data_cache.get(ticker)
+        if fast_df is None and hasattr(self.data, "get_bar_dataframe"):
+            fast_df = self.data.get_bar_dataframe()
+
+        should_exit, reason, ctx = evaluate_spike_top_exit(
+            self.cfg, fast_df, dm, current_px, entry_px,
+            pnl_pct, self._position_peak, extended=extended,
+        )
+        if ctx.get("spike_detected"):
+            self._profit_hunt_spike_ctx = ctx
+            self._profit_hunt_spike_peak = max(self._profit_hunt_spike_peak, current_px)
+            self._profit_hunt_spike_at = time.time()
+
+        if should_exit:
+            return True, reason
+
+        fade_exit, fade_reason = evaluate_wave_end_on_spike_fade(
+            self.cfg, fast_df, current_px, entry_px, self._position_peak, pnl_pct,
+        )
+        if fade_exit:
+            return True, fade_reason
+
+        missed = check_missed_profit_hunt(
+            self.cfg,
+            {
+                "spike_peak": self._profit_hunt_spike_peak,
+                "spike_seen_at": self._profit_hunt_spike_at,
+                "spike_ctx": self._profit_hunt_spike_ctx,
+                "shares": self.shares,
+            },
+            current_px,
+            entry_px,
+            ticker,
+        )
+        if missed and not self._profit_hunt_missed_logged:
+            self._profit_hunt_missed_logged = True
+            missed["reason"] = (
+                f"Missed spike-top exit on {ticker}: peak ${missed['spike_peak']:.2f} "
+                f"left ~${missed['left_on_table_usd']:.0f} on table"
+            )
+            record_profit_hunt_learning(
+                self.cfg, event="missed_profit_hunt", ticker=ticker,
+                context=missed, pnl_usd=0.0, won=False,
+            )
+            teach_profit_hunt_lesson(
+                self.autopilot, self.consciousness,
+                missed["reason"],
+            )
+            self._observe_runtime(
+                "missed_profit_hunt",
+                ticker=ticker,
+                reason=missed["reason"],
+                pnl_usd=-float(missed.get("left_on_table_usd", 0)),
+                market_state=get_market_state(self.cfg),
+                **{k: v for k, v in missed.items() if k != "reason"},
+            )
+            log.warning(f"  📚 {missed['reason']}")
+
+        return False, ""
+
+    def _execute_mechanical_profit_exit(self, current_px: float, reason: str) -> bool:
+        """Instant exit for spike-top / mechanical profit hunts (optional council bypass)."""
+        if not reason:
+            return False
+        if mechanical_bypass_council(self.cfg) and is_mechanical_profit_exit(reason):
+            log.info(f"  🎯 PROFIT HUNT: {reason}")
+            ticker = self.current_ticker or ""
+            pnl = (current_px - self._entry_price) * self.shares if self._entry_price else 0
+            record_profit_hunt_learning(
+                self.cfg,
+                event=reason.split(":")[0],
+                ticker=ticker,
+                context={**self._profit_hunt_spike_ctx, "reason": reason},
+                pnl_usd=pnl,
+                won=pnl > 0,
+            )
+            teach_profit_hunt_lesson(
+                self.autopilot, self.consciousness,
+                f"Spike-top hunt on {ticker}: {reason}",
+            )
+            self._exit_position(current_px, reason)
+            return True
+        ticker = self.current_ticker or ""
+        if is_ai_council_mode(self.cfg) and self.ai_commander:
+            if self._deliberate_exit_council(
+                ticker, current_px, True, 0.65, reason,
+                {"signal": "profit_hunt", "mechanical": True},
+            ):
+                return True
+            return False
+        self._exit_position(current_px, reason)
+        return True
+
+    def _reset_profit_hunt_state(self):
+        self._profit_hunt_spike_peak = 0.0
+        self._profit_hunt_spike_at = 0.0
+        self._profit_hunt_spike_ctx = {}
+        self._profit_hunt_missed_logged = False
+
     def _live_position_monitor(self, current_px: float):
         """Continuous post-entry tracking: pulse log, AI manage, trail, exit."""
         if self.shares <= 0 or self._entry_price <= 0:
@@ -2826,6 +2958,13 @@ class ScalperRunner:
 
         self._update_trailing_stops(current_px)
 
+        # Opportunistic spike-top profit hunt (mechanical — bypass council when configured)
+        hunt_exit, hunt_reason = self._evaluate_profit_hunt_exit(current_px)
+        if hunt_exit:
+            if self._execute_mechanical_profit_exit(current_px, hunt_reason):
+                self._active_stream_ticker = None
+                return
+
         # Risk engine tick exits (early loss, trailing profit/stop) — was missing in scalper path
         if self.risk.plan:
             prev_stop = self.risk.plan.current_stop_price
@@ -2837,6 +2976,14 @@ class ScalperRunner:
                 )
             if should_risk_exit and risk_reason:
                 ticker = self.current_ticker or ""
+                if (
+                    mechanical_bypass_council(self.cfg)
+                    and is_mechanical_profit_exit(risk_reason)
+                ):
+                    log.info(f"  ⚡ MECHANICAL RISK EXIT: {risk_reason}")
+                    self._exit_position(current_px, risk_reason)
+                    self._active_stream_ticker = None
+                    return
                 if is_ai_council_mode(self.cfg) and self.ai_commander:
                     if self._deliberate_risk_exit(ticker, current_px, risk_reason):
                         self._active_stream_ticker = None
@@ -3166,6 +3313,20 @@ class ScalperRunner:
                     else:
                         return True, reason
                 is_spike, _ = self._detect_volume_spike(fast_df)
+                fade_exit, fade_reason = evaluate_wave_end_on_spike_fade(
+                    self.cfg, fast_df, current_px, entry_px, self._position_peak, pnl_pct,
+                )
+                if fade_exit:
+                    reason = fade_reason
+                    if is_ai_council_mode(self.cfg) and self.ai_commander:
+                        if mechanical_bypass_council(self.cfg):
+                            return True, reason
+                        if self._deliberate_exit_council(
+                            ticker, current_px, True, 0.55, reason, {"signal": "wave_end_spike_fade"},
+                        ):
+                            return False, "council_deliberating"
+                    else:
+                        return True, reason
                 if not is_spike and pnl_pct > 0.012:
                     reason = f"wave_end: profit {pnl_pct:.2%} volume fading"
                     if is_ai_council_mode(self.cfg) and self.ai_commander:

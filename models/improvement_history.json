@@ -1175,5 +1175,14 @@
       "Inhibit the algorithm's ability to execute trades in an open position system.",
       "Ensure the algorithm can handle conditions where it cannot enter or exit positions at any given time, such as IB closing-only."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T13:12:12.748190+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on TECH"
+    ]
   }
 ]
