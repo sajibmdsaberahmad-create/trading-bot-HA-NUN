@@ -3606,5 +3606,16 @@
     "lessons": [
       "Review trade_closed on BITO"
     ]
+  },
+  {
+    "timestamp": "2026-06-25T16:31:08.094279+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Trade closed with a profit exit and high volume.",
+    "lessons": [
+      "Analyze trading patterns to identify high-risk intrabars.",
+      "Use live IB bars to track volatility and adjust strategies accordingly.",
+      "Implement momentum trades based on market data."
+    ]
   }
 ]

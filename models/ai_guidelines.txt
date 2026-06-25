@@ -2261,3 +2261,7 @@ spike_top_intrabar: +1.52% vol=240460.0x
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:31:08.093800+00:00
+Trade closed with a profit exit and high volume.
+The trade was executed with a profit exit (exit_type: 'profit_exit') and had a significant positive pnl ($80,016.3). The reason for the event is that it ended at an intrabar spike and volatility.
+
