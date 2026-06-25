@@ -24,11 +24,11 @@
     },
     "MARA": {
       "ticker": "MARA",
-      "entry": 13.72,
-      "stop": 13.6651,
-      "target": 13.8298,
-      "shares": 3272,
-      "opened_at": 1782413460.618537,
+      "entry": 13.79,
+      "stop": 13.7348,
+      "target": 13.9003,
+      "shares": 3486,
+      "opened_at": 1782413550.635602,
       "regime": "unknown"
     },
     "RIVN": {
@@ -82,5 +82,5 @@
       "closed_at": 1782413174.662103
     }
   ],
-  "updated_at": 1782413460.618828
+  "updated_at": 1782413550.635946
 }
