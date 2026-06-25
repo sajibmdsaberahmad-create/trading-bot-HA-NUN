@@ -992,15 +992,30 @@ class ScalperRunner:
         log.info(f"⏸ Pending entry halted — market {market_state}")
 
     def _ai_skip_ticker_permanent(self, ticker: str, reason: str) -> str:
-        """IB blocked entry — blacklist, drop from lock, AI-pick next focus."""
-        self._contract_blacklist.add(ticker)
+        """IB / venue failure — learn + rotate focus (no permanent block in learn mode)."""
+        cd = failure_cooldown_sec(self.cfg)
+        spike = float(getattr(self, "_last_spike_ratio", 1.0))
+        record_failure_for_learning(
+            self.cfg,
+            ticker=ticker,
+            reason=reason,
+            event="ib_failure",
+            spike_ratio=spike,
+            extra={"pipeline": "entry_reject"},
+        )
+        if should_permanent_blacklist(self.cfg, reason):
+            self._contract_blacklist.add(ticker)
         self._stop_target_stream(ticker)
         self.broker.cancel_open_orders_for_symbol(ticker)
         self.bracket_handle = None
-        self._clear_pending_entry(ticker, cooldown_sec=3600.0)
-        self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
-        remaining = [t for t in self._locked_targets if t.ticker not in self._contract_blacklist]
-        self._locked_targets = remaining
+        self._clear_pending_entry(ticker, cooldown_sec=cd)
+        if learn_dont_block(self.cfg):
+            self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
+        else:
+            self._locked_targets = [t for t in self._locked_targets if t.ticker != ticker]
+            remaining = [t for t in self._locked_targets if t.ticker not in self._contract_blacklist]
+            self._locked_targets = remaining
+        remaining = list(self._locked_targets)
         next_pick = None
         if remaining and getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander:
             try:
@@ -1017,20 +1032,26 @@ class ScalperRunner:
             next_pick = max(remaining, key=lambda t: t.rank_score)
         self.top_pick = next_pick
         if next_pick:
-            log.info(f"  🧠 AI focus → {next_pick.ticker} (skipped {ticker}: {reason})")
+            log.info(
+                f"  🧠 AI learned from {ticker} ({reason[:60]}) → focus {next_pick.ticker}"
+            )
             self._ensure_focus_stream(quiet=True)
         else:
             self.top_pick = None
-            self._last_scan_time = 0
-            log.info(f"  🚫 {ticker} blocked ({reason}) — no tradeable locks left, rescanning")
+            if learn_dont_block(self.cfg):
+                self._last_scan_time = 0
+                log.info(f"  📚 {ticker}: {reason[:80]} — recorded for learning, rescanning")
+            else:
+                self._last_scan_time = 0
+                log.info(f"  🚫 {ticker} blocked ({reason}) — no tradeable locks left, rescanning")
         if hasattr(self, "consciousness") and self.consciousness:
             try:
                 self.consciousness.observe_trade({
-                    "ticker": ticker, "action": "BLOCKED", "reason": reason, "pnl": 0.0,
+                    "ticker": ticker, "action": "LEARN_FAILURE", "reason": reason, "pnl": 0.0,
                 })
             except Exception:
                 pass
-        return "permanent_skip"
+        return "learn_skip" if learn_dont_block(self.cfg) else "permanent_skip"
 
     def _exit_position(self, current_px: float, reason: str, ticker: Optional[str] = None):
         """Manually exit position (early exit, AI exit, etc.)."""
@@ -4052,7 +4073,7 @@ class ScalperRunner:
         ticker = self.top_pick.ticker
 
         if ticker in self._contract_blacklist:
-            return self._ai_skip_ticker_permanent(ticker, "IB blocklist")
+            return "waiting"
 
         if self._has_ai_council(ticker, "entry_decision"):
             return "waiting"
