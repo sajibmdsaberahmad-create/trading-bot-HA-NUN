@@ -267,10 +267,13 @@ start_ollama
 
 # ── 4. Stop stale bot instances ─────────────────────────────────────────────
 if pgrep -f "main.py --mode scalper" >/dev/null 2>&1; then
-  echo "🛑 Stopping previous scalper instance..."
-  pkill -f "main.py --mode scalper" 2>/dev/null || true
+  echo "🛑 Stopping previous scalper instance (graceful)..."
+  "$ROOT/scripts/stop_hanoon.sh" || true
   sleep 2
 fi
+
+mkdir -p "$ROOT/runtime"
+rm -f "$ROOT/runtime/shutdown.request"
 
 # ── 5. IB Gateway port check ────────────────────────────────────────────────
 if command -v nc >/dev/null 2>&1; then
@@ -342,9 +345,10 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  🚀 HANOON SCALPER — FULL PILOT MODE"
 echo "  Log: $MAIN_LOG"
-echo "  Press Ctrl+C to stop"
+echo "  Graceful stop: ./stop.sh  (or double-click STOP.command)"
+echo "  Avoid Ctrl+C — it skips git sync and IB cleanup"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
 echo $$ >"$PID_FILE"
-exec python3 main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" 2>&1 | tee -a "$MAIN_LOG"
+python3 main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" 2>&1 | tee -a "$MAIN_LOG"

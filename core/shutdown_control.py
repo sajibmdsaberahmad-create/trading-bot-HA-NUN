@@ -14,12 +14,12 @@ DEFAULT_SHUTDOWN_FILE = ROOT / "runtime" / "shutdown.request"
 
 
 def pid_file() -> Path:
-    raw = os.getenv("HANON_PID_FILE") or os.getenv("PID_FILE") or str(DEFAULT_PID_FILE)
+    raw = os.getenv("HANOON_PID_FILE") or os.getenv("PID_FILE") or str(DEFAULT_PID_FILE)
     return Path(raw)
 
 
 def shutdown_file() -> Path:
-    raw = os.getenv("HANON_SHUTDOWN_FILE") or str(DEFAULT_SHUTDOWN_FILE)
+    raw = os.getenv("HANOON_SHUTDOWN_FILE") or str(DEFAULT_SHUTDOWN_FILE)
     return Path(raw)
 
 

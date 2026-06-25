@@ -315,6 +315,7 @@ class ScalperRunner:
         self._bootstrap_entry_due = False
         self._lock_review_due = False
         self._lock_review_picks: List[Dict] = []
+        self._shutdown_requested_flag = False
         self.pilot = PilotExperienceSystem(cfg)
         self.patterns = PatternMemoryBank(cfg)
         
@@ -1969,6 +1970,14 @@ class ScalperRunner:
 
     def run(self):
         self._register_shutdown_signals()
+        from core.shutdown_control import (
+            clear_shutdown_request,
+            remove_pid_file,
+            shutdown_requested,
+            write_pid,
+        )
+        clear_shutdown_request()
+        write_pid()
         from core.architecture_epoch import apply_full_epoch_reset
         apply_full_epoch_reset(
             self.cfg,
@@ -2139,6 +2148,11 @@ class ScalperRunner:
         
         try:
             while True:
+                if self._shutdown_requested_flag or shutdown_requested():
+                    if shutdown_requested():
+                        log.info("🛑 Shutdown requested — closing session gracefully...")
+                    break
+
                 if getattr(self, "_needs_initial_scan", False):
                     self._needs_initial_scan = False
                     self.ib.sleep(0.2)  # drain IB event queue before scan
@@ -2455,15 +2469,17 @@ class ScalperRunner:
                         log.debug(f"Periodic cleanup: {exc}")
                 
         except KeyboardInterrupt:
-            log.info("Shutting down...")
+            log.info("KeyboardInterrupt — graceful shutdown...")
         finally:
             self._shutdown()
 
     def _register_shutdown_signals(self):
         import signal
+
         def _handler(signum, _frame):
             log.info(f"Signal {signum} received — graceful shutdown...")
-            raise KeyboardInterrupt
+            self._shutdown_requested_flag = True
+
         signal.signal(signal.SIGTERM, _handler)
         signal.signal(signal.SIGINT, _handler)
     
@@ -6853,6 +6869,12 @@ class ScalperRunner:
             except Exception:
                 pass
         self.conn.disconnect()
+        try:
+            from core.shutdown_control import clear_shutdown_request, remove_pid_file
+            clear_shutdown_request()
+            remove_pid_file()
+        except Exception:
+            pass
         log.info("HANOON stopped.")
 
 
