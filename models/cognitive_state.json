@@ -1,7 +1,7 @@
 {
   "mood": "focused",
-  "mood_message": "Win rate 80% on recent trades \u00b7 $+13.52. Executing the plan.",
-  "confidence": 0.5700000000000001,
+  "mood_message": "Win rate 82% on recent trades \u00b7 $+125.10. Executing the plan.",
+  "confidence": 0.5900000000000001,
   "mode": "autonomous",
   "learned_lessons": [
     "Commander: The algorithm is using a scanner to monitor the system's current state and taking action based on detected spikes. The timeout occurs due to a spike in scores.",
@@ -105,8 +105,8 @@
     "Adaptively adjust the algo's parameters based on recent performance trends and market conditions.",
     "Commander: The algorithm is learning from the recent scanner spike, which suggests it may need to tighten its risk management strategy or adapt based on subsequent events."
   ],
-  "last_thought": "```json\n{\n  \"gut_feel\": 1,\n  \"intuition\": \"The recent live account state provides valuable insights into the user's trading strategy. The scanner parameters indicate that the trades are more aggressive than usual due to FOMO or fear, which suggests a need for a tighter risk management approach.\"\n}\n```",
+  "last_thought": "```json\n{\n  \"entry_time\": \"recent trade entry\",\n  \"trade_type\": \"pilot trade\",\n  \"risk_management_adjustment\": \"tighten risk management strategy or adapt based on subsequent events.\",\n  \"intuition\": \"adjust the scan score accordingly to reflect recent scanner spike.\"\n}\n```",
   "market_belief": {},
-  "trades_observed": 10,
-  "updated": "2026-06-25T11:45:28.717854"
+  "trades_observed": 11,
+  "updated": "2026-06-25T11:47:06.403958"
 }
