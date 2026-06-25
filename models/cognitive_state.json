@@ -4,10 +4,6 @@
   "confidence": 0.6500000000000001,
   "mode": "autonomous",
   "learned_lessons": [
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold indicates that if a scan fails, it can cause significant volatility.'}",
-    "Commander: Scanning and spikes are common issues in the trading environment.",
-    "The algorithm should be more aware of alignment and consider using multi-timeframe indicators to improve its ability to identify potential market moves.",
-    "It is important to monitor the market closely and avoid blind trading if there are no clear signals for a move.",
     "Adding advanced indicators such as multiple timeframes, PPO, or multi-timeframe indicators can help the algorithm make better decisions in uncertain markets.",
     "The trade decision should be based on evidence rather than relying solely on FOMO/fear.",
     "Continuously learning from past trades and incorporating new insights is key to improving the algorithm's performance over time.",
@@ -103,10 +99,14 @@
     "z",
     "f",
     "k",
-    "Commander: The council timeout indicates that the scan or scanner was not successful during a specified period of time. It suggests a potential issue with data processing or scanning methods."
+    "Commander: The council timeout indicates that the scan or scanner was not successful during a specified period of time. It suggests a potential issue with data processing or scanning methods.",
+    "No clean data on MINBY (no_md_permission) \u2014 profit hunt elsewhere.",
+    "Always check platform terms and conditions before executing trades",
+    "Handle edge cases like this carefully by adding a mental skip list",
+    "Commander: The market data failure occurred due to an invalid real-time query (MD 420) and no market data permissions for the ARCAEDGE stock."
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.8,\n  \"intuition\": 0.7,\n  \"trade_decisions\": [\n    {\n      \"event\": \"scan_results\",\n      \"action\": \"single_bar\",\n      \"type\": \"take_profit_into\"\n    },\n    {\n      \"event\": \"scan_results\",\n      \"action\": \"extended_hours\",\n      \"type\": \"sell_into\"\n    }\n  ]\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-25T13:24:55.460314"
+  "updated": "2026-06-25T13:31:55.063352"
 }

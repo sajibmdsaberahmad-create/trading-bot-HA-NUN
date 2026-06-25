@@ -1084,3 +1084,9 @@ The council timeout indicates that the scan or scanner was not successful during
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence threshold can help mitigate unexpected scanner timeouts.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T13:31:55.092327+00:00
+Market data failure: Market data permissions issue.
+The market data failure occurred due to an invalid real-time query (MD 420) and no market data permissions for the ARCAEDGE stock.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (This mutation represents an increase in the confidence threshold from 0.35 to 0.58.)
+
