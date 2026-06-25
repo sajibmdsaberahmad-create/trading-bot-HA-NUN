@@ -167,3 +167,4 @@
 {"timestamp":"2026-06-25T19:04:55.591932+00:00","event":"trailing_profit","ticker":"QS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T19:05:23.224970+00:00","event":"trailing_profit","ticker":"RIOT","pnl_usd":-60217.89,"pnl_pct":-0.5879,"primary_goal":true,"reason":"trailing_profit","price":27.3535}
 {"timestamp":"2026-06-25T19:05:46.858924+00:00","event":"trailing_profit","ticker":"RIOT","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T19:07:08.875605+00:00","event":"hard_take_profit","ticker":"RIOT","pnl_usd":-359.56,"pnl_pct":-0.002,"primary_goal":true,"reason":"hard_take_profit","price":66.2501}

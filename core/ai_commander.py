@@ -838,6 +838,27 @@ class AICommander:
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         micro = (account or {}).get("micro_forecast") or {}
+        from core.entry_quality import assess_entry_quality, quality_blocks_entry
+        quality = assess_entry_quality(
+            self.cfg, micro,
+            spike_ratio=spike_ratio,
+            scan_score=scan_score,
+            ppo_action=ppo_action,
+            ppo_conf=ppo_conf,
+            live_px=current_px,
+        )
+        account = dict(account or {})
+        account["entry_quality"] = quality
+        if quality_blocks_entry(self.cfg, quality):
+            return {
+                "enter": False,
+                "pending": False,
+                "confidence": ppo_conf,
+                "reason": quality.get("reason", "quality gate"),
+                "pipeline": f"quality:{quality.get('setup_type', 'skip')}",
+                "profit_probability": quality.get("profit_probability"),
+                "fakeout_risk": quality.get("fakeout_risk"),
+            }
         from core.fast_execution import (
             should_spike_fast_entry,
             should_micro_fast_entry,
@@ -845,7 +866,7 @@ class AICommander:
             council_fast_min_score,
             council_fast_min_spike,
         )
-        if should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro):
+        if should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro, ppo_action, ppo_conf):
             fp = self._ring_entry_council_for_learning(
                 ticker, current_px, spike_ratio, scan_score,
                 ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,

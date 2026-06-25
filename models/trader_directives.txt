@@ -1,0 +1,8 @@
+# Trader directives — edit here or use Telegram /direct
+# These instructions are injected into every Ollama + PPO council prompt.
+# AI may mutate related params within guardrails (MIN_PROFIT_PROBABILITY, etc.)
+
+• Do not blindly enter every volume spike. Estimate profit_probability before entry.
+• Identify fakeouts fast — skip chase entries when fade_risk is high.
+• Fakeout fade plays are OK when micro predicts a bounce with tight stop.
+• Prefer small consistent wins; quality over quantity.

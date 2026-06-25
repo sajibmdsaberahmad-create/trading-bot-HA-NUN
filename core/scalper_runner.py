@@ -2003,6 +2003,11 @@ class ScalperRunner:
         )
         clear_shutdown_request()
         write_pid()
+        try:
+            from core.trader_directives import seed_default_directives_if_empty
+            seed_default_directives_if_empty()
+        except Exception:
+            pass
         from core.architecture_epoch import apply_full_epoch_reset
         apply_full_epoch_reset(
             self.cfg,
@@ -3639,11 +3644,33 @@ class ScalperRunner:
             self._last_entry_attempt_at = time.time()
             self._spike_attempt_until[ticker] = time.time() + spike_entry_cooldown_sec(self.cfg)
             fc = self._last_micro_forecast.get(ticker, {})
+            q_prob = fc.get("profit_probability", "")
+            q_setup = fc.get("setup_type", "")
+            q_extra = ""
+            if q_prob != "":
+                q_extra = f" | profit_prob={float(q_prob):.0%} setup={q_setup}"
             log.info(
                 f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | "
                 f"score={target.rank_score:.0f} | micro={fc.get('spike_likelihood', 0):.0%} "
-                f"pred→${fc.get('pred_1bar', live_px):.2f} | attempting entry..."
+                f"pred→${fc.get('pred_1bar', live_px):.2f}{q_extra} | attempting entry..."
             )
+            from core.entry_quality import assess_entry_quality, quality_blocks_entry
+            quality = assess_entry_quality(
+                self.cfg, fc,
+                spike_ratio=spike_ratio,
+                scan_score=float(target.rank_score),
+                live_px=live_px,
+            )
+            fc.update(quality)
+            self._last_micro_forecast[ticker] = fc
+            if quality_blocks_entry(self.cfg, quality):
+                log.info(
+                    f"  ⏭ QUALITY skip {ticker}: {quality.get('reason', '')[:100]}"
+                )
+                self._spike_skip_until[ticker] = time.time() + float(
+                    getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                )
+                continue
             result = self._attempt_entry()
             attempted += 1
             if ticker in self._held_tickers():

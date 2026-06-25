@@ -1,6 +1,6 @@
 {
-  "mood": "disconnected",
-  "mood_message": "I'm not feeling particularly strong today.",
+  "mood": "defensive",
+  "mood_message": "Win rate 0% \u00b7 $+0.00. Preserving capital over action.",
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
@@ -107,6 +107,6 @@
   ],
   "last_thought": "```json\n{\n  \"raw_prompt\": \"Write a pilot trade journal entry for closed trade:\\n{\\\"ticker\\\": \\\"RIOT\\\", \\\"entry\\\": 66.38, \\\"exit\\\": 66.38, \\\"entry_fill\\\": 66.38, \\\"exit_fill\\\": 66.38, \\\"quote_entry\\\": 66.38, \\\"quote_exit\\\": 27.3535, \\\"shares\\\": 1543.0, \\\"pnl_usd\\\": 0.0, \\\"pnl_pct\\\": 0.0, \\\"result\\\": \\\"loss\\\", \\\"exit_reason\\\": \\\"trailing_profit\\\", \\\"entry_slippage_pct\\\": 0.0, \\\"exit_slippage_pct\\\": 1.426746, \\\"limit_px\\\": null, \\\"entry_mode\\\": \\\"paper_market\\\", \\\"regime\\\": \\\"unknown\\\", \\\"hold_sec\\",
   "market_belief": {},
-  "trades_observed": 14,
-  "updated": "2026-06-25T19:05:51.891575"
+  "trades_observed": 15,
+  "updated": "2026-06-25T19:07:10.678267"
 }

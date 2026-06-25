@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from core.ai_commander import AICommander
     from core.scalper_runner import ScalperRunner
 
+from core.trader_directives import append_directive, maybe_apply_directive_mutations
 from core.commander_learning import (
     GUIDANCE_PATH,
     format_apply_report,
@@ -365,8 +366,8 @@ class TelegramCommandListener:
             help_fallback = (
                 "HANOON Commander Copilot commands:\n"
                 "/daily /brief /mood /status /positions /risk /system /analyze\n"
-                "/exit TICKER /exitall profit|loss|all /guide /improve\n"
-                "Send chart photos or free-text e.g. exit AAPL lock profit"
+                "/exit TICKER /exitall profit|loss|all /guide /direct /improve\n"
+                "Send chart photos or free-text trading ideas (fed to AI + learning)"
             )
             self.send_ai(chat_id, "help", {"command": cmd}, help_fallback, reply_to=reply_id)
             return
@@ -383,14 +384,21 @@ class TelegramCommandListener:
         if cmd == "/status":
             self._cmd_status(chat_id, reply_id)
             return
-        if cmd == "/guide":
+        if cmd == "/guide" or cmd == "/direct":
             if not arg:
-                self.send_ai(chat_id, "usage", {"command": "/guide"}, "Usage: /guide tighten stops on penny names", reply_to=reply_id)
+                usage = "Usage: /direct Don't chase spikes — need profit_prob > 45% and low fakeout risk"
+                self.send_ai(chat_id, "usage", {"command": cmd}, usage, reply_to=reply_id)
                 return
             self._store_guidance(chat_id, arg)
-            self.send_ai(chat_id, "guide_stored", {"guidance": arg[:500]}, f"Guidance stored: {arg[:500]}", reply_to=reply_id)
+            append_directive(arg, source="telegram", chat_id=str(chat_id))
+            self.send_ai(
+                chat_id, "guide_stored", {"guidance": arg[:500]},
+                f"📋 Directive stored — all councils will see this.\n"
+                f"Guardrailed learning running in background…\n{arg[:400]}",
+                reply_to=reply_id,
+            )
             threading.Thread(
-                target=self._learning_worker,
+                target=self._directive_learning_worker,
                 args=(chat_id, arg, reply_id),
                 daemon=True,
             ).start()
@@ -434,6 +442,7 @@ class TelegramCommandListener:
             self._cmd_exit(chat_id, f"{ticker} {reason}".strip(), reply_id)
             return
         self._store_guidance(chat_id, text)
+        append_directive(text, source="telegram_chat", chat_id=str(chat_id))
         self.send_instant(chat_id, "🧠 On it — pulling live state…", reply_to=reply_id)
         threading.Thread(
             target=self._ai_reply,
@@ -488,11 +497,19 @@ class TelegramCommandListener:
             return
         if caption:
             self._store_guidance(chat_id, f"[chart] {caption}")
+            append_directive(f"[chart] {caption}", source="telegram_chart", chat_id=str(chat_id))
         threading.Thread(
             target=self._vision_reply,
             args=(chat_id, caption or "Review this chart for trading setup and improvements.", raw, reply_id),
             daemon=True,
         ).start()
+
+    def _directive_learning_worker(self, chat_id: int, text: str, reply_id: Optional[int]) -> None:
+        try:
+            maybe_apply_directive_mutations(self.cfg, text, think_fn=self._think)
+            self._learning_worker(chat_id, text, reply_id)
+        except Exception as exc:
+            log.debug(f"Directive learning: {exc}")
 
     def _store_guidance(self, chat_id: int, text: str) -> None:
         GUIDANCE_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -832,6 +849,7 @@ class TelegramCommandListener:
         )
         note = f"[vision] {caption[:200]} → {analysis[:300]}"
         self._store_guidance(chat_id, note)
+        append_directive(note, source="telegram_vision", chat_id=str(chat_id))
         threading.Thread(
             target=self._learning_worker,
             args=(chat_id, note, None),
