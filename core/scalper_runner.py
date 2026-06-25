@@ -1081,119 +1081,25 @@ class ScalperRunner:
         self.bot_nav = self.bot_cash
 
     def _detect_exit(self, current_px: float):
-        """Detect if position was closed (by bracket or manually) and notify."""
+        """Detect if position was closed (by bracket or manually) — reconcile IB fill async."""
         if self._prev_shares > 0 and self.shares == 0:
             opened_at = getattr(self, "_position_opened_at", 0.0)
             if opened_at and (time.time() - opened_at) < 60.0:
                 return
-            closed_ticker = self.current_ticker or ""
+            closed_ticker = (self.current_ticker or "").upper()
+            if not closed_ticker:
+                self._prev_shares = self.shares
+                return
             bracket = self._bracket_by_ticker.get(closed_ticker) or self.bracket_handle
-            trade_rec = self._build_trade_close_record(
-                closed_ticker, current_px, "bracket_exit", bracket=bracket,
+            self._enqueue_pending_close(
+                closed_ticker,
+                "bracket_exit",
+                current_px,
+                event="trade_closed",
+                bracket=bracket,
+                shares=self._prev_shares,
             )
-            exit_fill = float(trade_rec.get("exit_fill") or current_px)
-            pnl = float(trade_rec.get("pnl_usd", 0))
-            pnl_pct = float(trade_rec.get("pnl_pct", 0))
-            result = trade_rec.get("result", "loss")
-            self._credit_exit_proceeds(self._prev_shares, exit_fill)
-            log.info(
-                f"📕 EXIT: {closed_ticker} fill ${exit_fill:.4f} "
-                f"(quote ${current_px:.4f}) | P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%) | {result.upper()}"
-            )
-            exit_ctx = {
-                "ticker": closed_ticker,
-                "pnl_usd": round(pnl, 2),
-                "pnl_pct": round(pnl_pct, 2),
-                "result": result,
-                "pilot_level": self.pilot.state.level if hasattr(self, "pilot") else "Cadet",
-            }
-            if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
-                send_dynamic_notification(
-                    self.notifier, self.autopilot, "trade_closed",
-                    self._notify_context(exit_ctx),
-                    f"📕 EXIT {closed_ticker} | P&L ${pnl:+.2f} ({pnl_pct:+.1f}%) | {result.upper()}",
-                    ai_commander=self.ai_commander,
-                    consciousness=self.consciousness,
-                    pilot=self.pilot,
-                )
-            else:
-                self.notifier.info(
-                    f"📕 HANOON EXIT\n"
-                    f"Ticker: {closed_ticker}\n"
-                    f"Exit fill: ${exit_fill:.4f}\n"
-                    f"Entry fill: ${trade_rec.get('entry_fill', self._entry_price):.4f}\n"
-                    f"P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%)\n"
-                    f"Result: {result.upper()}"
-                )
-            self._apply_trade_close_learning(trade_rec, closed_ticker)
-            self.risk.record_trade_result(pnl)
-            if self.risk.needs_learning_session:
-                self._service_loss_streak_learning()
-            try:
-                self.shadow_circuit.on_live_trade_closed(pnl, self.account_equity)
-            except Exception:
-                pass
-
-            if hasattr(self, '_active_positions'):
-                self._active_positions = [
-                    p for p in self._active_positions if p["ticker"] != closed_ticker
-                ]
-            if closed_ticker:
-                self._position_slots.pop(closed_ticker, None)
-                self._bracket_by_ticker.pop(closed_ticker, None)
-                self._risk_plans.pop(closed_ticker, None)
-
-            self.current_ticker = None
-            self.bracket_handle = None
-            self._position_opened_at = 0.0
-            if getattr(self, "_next_best_pick", None) and self._next_best_score >= 25:
-                self.top_pick = self._next_best_pick
-            self._position_stop = 0.0
-            self._position_target = 0.0
-            self._position_peak = 0.0
-            self._hard_stop_floor = 0.0
-            if self._active_stream_ticker:
-                self._stop_target_stream(self._active_stream_ticker)
-                self._active_stream_ticker = None
-
-            try:
-                self._schedule_self_train()
-            except Exception:
-                pass
-            try:
-                from core.hybrid_distiller import maybe_run_hybrid_distillation
-                maybe_run_hybrid_distillation(self.cfg)
-            except Exception as exc:
-                log.debug(f"Hybrid distill check: {exc}")
-
-            # Update pilot experience
-            try:
-                pnl_usd = round(pnl, 2)
-                pnl_pct = round(pnl_pct, 2) / 100
-                self.pilot.complete_flight(current_px, pnl_usd, pnl_pct, "exit")
-                if pnl > 0:
-                    self.pilot.record_pattern_match("win", True, pnl_usd)
-                else:
-                    self.pilot.record_pattern_match("loss", False, pnl_usd)
-            except Exception:
-                pass
-
-            # Sync learning artifacts
-            try:
-                pilot_experience_to_git(self.pilot)
-                if getattr(self.cfg, "LEARNING_PUSH_ON_TRADE", True):
-                    push_learning_checkpoint_async(f"trade_exit_{self.current_ticker}")
-            except Exception:
-                pass
-
-            try:
-                maybe_incremental_train(
-                    self.cfg, self.trades_today, self.consciousness, self.autopilot,
-                )
-            except Exception:
-                pass
-            self._attempt_hot_swap_entry()
-            self._refresh_aggregate_position_state()
+            self._clear_closed_position_state(closed_ticker)
         self._prev_shares = self.shares
 
     def _ensure_position_stream(self, ticker: str):
@@ -1445,6 +1351,185 @@ class ScalperRunner:
             stop_px=float(slot.get("stop") or self._position_stop or 0),
             target_px=float(slot.get("target") or self._position_target or 0),
         )
+
+    def _fill_cache(self):
+        return getattr(self.conn, "fill_cache", None)
+
+    def _enqueue_pending_close(
+        self,
+        ticker: str,
+        reason: str,
+        quote_exit_px: float,
+        *,
+        event: str = "trade_closed",
+        flatten_trade=None,
+        bracket=None,
+        slot: Optional[Dict] = None,
+        shares: Optional[float] = None,
+    ) -> None:
+        """Queue IB fill reconciliation — notifications fire after confirmed fill."""
+        ticker = (ticker or "").upper()
+        if not ticker:
+            return
+        key = f"{ticker}:{time.time():.3f}"
+        snap = snapshot_slot(slot or self._position_slots.get(ticker, {}))
+        if not snap.get("entry_fill_px") and self._entry_price > 0 and self.current_ticker == ticker:
+            snap.setdefault("entry_fill_px", self._entry_price)
+            snap.setdefault("entry_price", self._entry_price)
+        qty = float(shares if shares is not None else snap.get("shares") or self._prev_shares or self.shares or 0)
+        opened = float(snap.get("opened_at") or getattr(self, "_position_opened_at", 0))
+        self._pending_closes[key] = PendingClose(
+            ticker=ticker,
+            reason=reason,
+            quote_exit_px=quote_exit_px,
+            slot=snap,
+            shares=qty,
+            opened_at=opened,
+            event=event,
+            flatten_trade=flatten_trade,
+            bracket=bracket,
+        )
+
+    def _service_pending_closes(self) -> None:
+        """Resolve IB fills on main loop without blocking — then notify + learn."""
+        if not self._pending_closes:
+            return
+        cache = self._fill_cache()
+        max_age = float(getattr(self.cfg, "FILL_RECONCILE_MAX_SEC", 8.0))
+        min_gap = float(getattr(self.cfg, "FILL_RECONCILE_MIN_GAP_SEC", 0.2))
+        now = time.time()
+
+        for key, pending in list(self._pending_closes.items()):
+            if now - pending.last_try_at < min_gap:
+                continue
+            pending.last_try_at = now
+            force = (now - pending.started_at) >= max_age
+            trade_rec = build_close_record(pending, self.ib, cache, force=force)
+            if trade_rec is None:
+                continue
+            self._pending_closes.pop(key, None)
+            self._finalize_closed_trade(trade_rec, pending)
+
+    def _finalize_closed_trade(self, trade_rec: Dict[str, Any], pending: PendingClose) -> None:
+        """Notify and learn using IB-confirmed fills."""
+        ticker = pending.ticker
+        exit_fill = float(trade_rec.get("exit_fill") or trade_rec.get("exit", 0))
+        pnl = float(trade_rec.get("pnl_usd", 0))
+        pnl_pct = float(trade_rec.get("pnl_pct", 0))
+        result = trade_rec.get("result", "loss")
+        confirmed = bool(trade_rec.get("fill_confirmed"))
+        qty = float(trade_rec.get("shares") or pending.shares or 0)
+
+        if not pending.credited and qty > 0 and exit_fill > 0:
+            self._credit_exit_proceeds(qty, exit_fill)
+            pending.credited = True
+
+        tag = "IB fill" if confirmed else "est. fill"
+        log.info(
+            f"📕 EXIT {ticker} ({tag}): ${exit_fill:.4f} "
+            f"(quote ${pending.quote_exit_px:.4f}) | P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%) | "
+            f"{result.upper()} | {pending.reason[:60]}"
+        )
+
+        exit_ctx = {
+            "ticker": ticker,
+            "pnl_usd": round(pnl, 2),
+            "pnl_pct": round(pnl_pct, 2),
+            "result": result,
+            "entry_fill": trade_rec.get("entry_fill"),
+            "exit_fill": exit_fill,
+            "fill_confirmed": confirmed,
+            "pilot_level": self.pilot.state.level if hasattr(self, "pilot") else "Cadet",
+        }
+        notify_event = "early_exit" if pending.event == "early_exit" else "trade_closed"
+        fallback = (
+            f"📕 EXIT {ticker} | P&L ${pnl:+.2f} ({pnl_pct:+.1f}%) | {result.upper()}\n"
+            f"Entry ${trade_rec.get('entry_fill', 0):.4f} → Exit ${exit_fill:.4f} ({tag})"
+        )
+        if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
+            send_dynamic_notification(
+                self.notifier, self.autopilot, notify_event,
+                self._notify_context(exit_ctx),
+                fallback,
+                ai_commander=self.ai_commander,
+                consciousness=self.consciousness,
+                pilot=self.pilot,
+            )
+        else:
+            self.notifier.info(
+                f"📕 HANOON EXIT\nTicker: {ticker}\n"
+                f"Exit fill: ${exit_fill:.4f}\n"
+                f"Entry fill: ${trade_rec.get('entry_fill', 0):.4f}\n"
+                f"P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%)\n"
+                f"Result: {result.upper()}"
+            )
+
+        self._apply_trade_close_learning(trade_rec, ticker)
+        self.risk.record_trade_result(pnl)
+        if self.risk.needs_learning_session:
+            self._service_loss_streak_learning()
+        try:
+            self.shadow_circuit.on_live_trade_closed(pnl, self.account_equity)
+        except Exception:
+            pass
+
+        try:
+            pnl_usd = round(pnl, 2)
+            self.pilot.complete_flight(exit_fill, pnl_usd, round(pnl_pct, 2) / 100, pending.reason[:80])
+            if pnl > 0:
+                self.pilot.record_pattern_match("win", True, pnl_usd)
+            else:
+                self.pilot.record_pattern_match("loss", False, pnl_usd)
+        except Exception:
+            pass
+
+        try:
+            pilot_experience_to_git(self.pilot)
+            if getattr(self.cfg, "LEARNING_PUSH_ON_TRADE", True):
+                push_learning_checkpoint_async(f"trade_exit_{ticker}")
+        except Exception:
+            pass
+        try:
+            maybe_incremental_train(
+                self.cfg, self.trades_today, self.consciousness, self.autopilot,
+            )
+        except Exception:
+            pass
+        try:
+            from core.hybrid_distiller import maybe_run_hybrid_distillation
+            maybe_run_hybrid_distillation(self.cfg)
+        except Exception:
+            pass
+        try:
+            self._schedule_self_train()
+        except Exception:
+            pass
+        self._attempt_hot_swap_entry()
+
+    def _clear_closed_position_state(self, ticker: str) -> None:
+        """Drop local position tracking after exit (IB brackets may still rest)."""
+        if hasattr(self, "_active_positions"):
+            self._active_positions = [
+                p for p in self._active_positions if p.get("ticker") != ticker
+            ]
+        if ticker:
+            self._position_slots.pop(ticker, None)
+            self._bracket_by_ticker.pop(ticker, None)
+            self._risk_plans.pop(ticker, None)
+        if self.current_ticker == ticker:
+            self.current_ticker = None
+        self.bracket_handle = None
+        self._position_opened_at = 0.0
+        self._position_stop = 0.0
+        self._position_target = 0.0
+        self._position_peak = 0.0
+        self._hard_stop_floor = 0.0
+        if self._active_stream_ticker == ticker:
+            self._stop_target_stream(self._active_stream_ticker)
+            self._active_stream_ticker = None
+        if getattr(self, "_next_best_pick", None) and self._next_best_score >= 25:
+            self.top_pick = self._next_best_pick
+        self._refresh_aggregate_position_state()
 
     def _apply_trade_close_learning(self, trade_rec: Dict[str, Any], ticker: str) -> None:
         """Feed round-trip fills into every learning / telemetry hook."""
