@@ -2044,5 +2044,171 @@
       "s",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-25T08:59:06.282527+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.45999999999999996,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred due to no aligned signal.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Since the council is temporarily suspended due to no aligned signal, we need to adjust our confidence threshold for better alignment between signals and trades.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T08:59:55.337634+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.45,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:01:03.772489+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "The council timeout event occurred on the PASG ticker, and it happened in the pre-market session.",
+    "lessons": [
+      "Real-time event analysis is crucial for identifying root causes and potential triggers.",
+      "Maintaining a balance between risk and reward is essential in financial trading."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:01:06.998241+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.45,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:02:01.363817+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on PASG"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:03:00.504181+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on PASG"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:04:18.834852+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5599999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Council timeout occurred, no aligned signal.",
+    "lessons": [
+      "The algorithm should be more aligned with the current market conditions.",
+      "Increase the confidence threshold to reduce unnecessary trades."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:04:44.702839+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5399999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Event: council_timeout - Council timeout no aligned signal.",
+    "lessons": [
+      "Implementing mechanisms to align signals within the Council meeting context can prevent such occurrences.",
+      "Consider optimizing signal alignment based on real-time market dynamics and technical indicators."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:05:47.734709+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.5199999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:06:38.069334+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.4999999999999999,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T09:07:22.720488+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.47999999999999987,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on INLF"
+    ]
   }
 ]
