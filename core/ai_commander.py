@@ -32,6 +32,7 @@ from core.trade_telemetry import log_bracket_reject
 from core.risk import compute_atr, compute_momentum_score
 from core.human_cognition import enrich_prompt, apply_gut_override
 from core.fast_execution import should_spike_fast_entry
+from core.deferred_council_learning import DeferredCouncilLearner, deferred_learning_enabled
 from core.live_ai_pipeline import (
     LiveAILine,
     entry_fingerprint,
@@ -115,6 +116,7 @@ class AICommander:
         self._trade_journal: List[Dict] = []
         self._live_line = LiveAILine(cfg, self._ollama_decide_raw)
         self._chart_line = ChartVisionLine(cfg)
+        self._deferred = DeferredCouncilLearner(cfg, self._live_line)
         DECISION_LOG.parent.mkdir(parents=True, exist_ok=True)
         self._load_journal()
 
@@ -299,6 +301,157 @@ class AICommander:
 
     def live_status(self, ticker: str, task: str) -> Dict[str, Any]:
         return self._live_line.status(ticker, task)
+
+    def service_deferred_learning(self) -> int:
+        """Log late Ollama answers after PPO-led execute — non-blocking."""
+        return self._deferred.service()
+
+    def _entry_council_prompt(
+        self,
+        ticker: str,
+        current_px: float,
+        spike_ratio: float,
+        scan_score: float,
+        *,
+        ppo_action: int,
+        ppo_conf: float,
+        ppo_reason: str,
+        account: Dict[str, Any],
+        market_ctx: Optional[Dict[str, Any]] = None,
+        is_penny: bool = False,
+        chart_line: str = "",
+    ) -> str:
+        mctx = market_ctx or {}
+        bid = mctx.get("bid")
+        ask = mctx.get("ask")
+        spread = mctx.get("spread_pct", 0)
+        avg_vol = mctx.get("avg_volume", 0)
+        open_n = int(account.get("open_positions", 0))
+        max_pos = int(account.get("max_positions", effective_max_concurrent_positions(self.cfg)))
+        held = account.get("held_tickers") or []
+        deployed = float(account.get("deployed_usd", 0))
+        return (
+            f"DECIDE ENTRY for {ticker} @ ${current_px:.4f}\n"
+            f"Volume spike {spike_ratio:.2f}x | Scan score {scan_score:.0f}\n"
+            f"PPO entry signal: action={ppo_action} conf={ppo_conf:.2f} reason={ppo_reason[:80]}\n"
+            f"Account: equity ${account.get('equity', 0):,.0f} | cash ${account.get('cash', 0):,.0f} | "
+            f"NAV ${account.get('nav', 0):,.0f}\n"
+            f"Open: {open_n}/{max_pos} | Held: {', '.join(held) if held else 'none'} | "
+            f"Deployed ${deployed:,.0f}\n"
+            f"Bid ${bid or 0:.4f} Ask ${ask or 0:.4f} Spread {spread:.2%} | Avg vol {avg_vol:,.0f}\n"
+            + (chart_line if chart_line else "")
+            + (
+                "PENNY STOCK: IB rejects large MARKET orders (error 2161). "
+                "Use smaller size — max deploy $350, max ~1200 shares. Limit entry only.\n"
+                if is_penny else ""
+            )
+            + "You are the STRATEGIST pilot — judgment only. Do NOT output stop, target, or share prices.\n"
+            "Math engine sets brackets from ATR after you decide enter/skip.\n"
+            'JSON: {"enter":true/false,"confidence":0-1,"gut_feel":0-1,"intuition":"gut read",'
+            '"reason":"why","journal":"first-person pilot log"}'
+        )
+
+    def _ring_entry_council_for_learning(
+        self,
+        ticker: str,
+        current_px: float,
+        spike_ratio: float,
+        scan_score: float,
+        *,
+        ppo_action: int,
+        ppo_conf: float,
+        ppo_reason: str,
+        account: Dict[str, Any],
+        market_ctx: Optional[Dict[str, Any]] = None,
+        is_penny: bool = False,
+        df: Optional[pd.DataFrame] = None,
+    ) -> str:
+        """Fire Ollama async — never blocks execution."""
+        if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
+            return ""
+        chart_line = ""
+        if df is not None and len(df) >= 20:
+            chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
+        fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        prompt = self._entry_council_prompt(
+            ticker, current_px, spike_ratio, scan_score,
+            ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            account=account, market_ctx=market_ctx, is_penny=is_penny, chart_line=chart_line,
+        )
+        mood, conf_m, lessons = self._mood_context()
+        full = enrich_prompt(
+            "entry_decision", {"request": prompt[:2500]}, self.cfg, mood, conf_m, lessons,
+        )
+        self._live_line.ring(ticker, "entry_decision", full, fp)
+        return fp
+
+    def _schedule_deferred_entry(
+        self,
+        *,
+        ticker: str,
+        fingerprint: str,
+        decision: Dict[str, Any],
+        ppo_action: int,
+        ppo_conf: float,
+        ppo_reason: str,
+        market_ctx: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        if not decision.get("enter") or not deferred_learning_enabled(self.cfg):
+            return
+        self._deferred.schedule(
+            ticker=ticker,
+            task="entry_decision",
+            fingerprint=fingerprint,
+            executed=decision,
+            ppo_signal=ppo_action,
+            ppo_conf=ppo_conf,
+            ppo_reason=ppo_reason,
+            market_ctx=market_ctx,
+        )
+
+    def ring_exit_for_deferred_learning(
+        self,
+        ctx: Dict[str, Any],
+        *,
+        ppo_exit: bool,
+        ppo_conf: float,
+        ppo_reason: str,
+        executed_exit: bool,
+        pipeline: str,
+    ) -> None:
+        """Ring exit council after mechanical/PPO profit lock — log when Ollama answers."""
+        if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
+            return
+        ticker = str(ctx.get("ticker", "?"))
+        price = float(ctx.get("price", ctx.get("current_px", 0)) or 0)
+        pnl_pct = float(ctx.get("pnl_pct", 0) or 0)
+        fp = exit_fingerprint(ticker, price, pnl_pct)
+        prompt = (
+            f"Should we EXIT position {ticker} now?\n"
+            f"{json.dumps(ctx, default=str)[:700]}\n"
+            f"PPO exit signal: {ppo_exit} conf={ppo_conf:.2f} {ppo_reason[:60]}\n"
+            'JSON: {"exit":true/false,"confidence":0-1,"gut_feel":0-1,'
+            '"reason":"why","journal":"exit log"}'
+        )
+        mood, conf, lessons = self._mood_context()
+        full = enrich_prompt(
+            "exit_decision", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons,
+        )
+        self._live_line.ring(ticker, "exit_decision", full, fp)
+        self._deferred.schedule(
+            ticker=ticker,
+            task="exit_decision",
+            fingerprint=fp,
+            executed={
+                "exit": executed_exit,
+                "pipeline": pipeline,
+                "reason": ctx.get("reason", pipeline),
+            },
+            ppo_signal=ppo_exit,
+            ppo_conf=ppo_conf,
+            ppo_reason=ppo_reason,
+            market_ctx=ctx,
+        )
 
     def prefetch_entry_decision(
         self,
@@ -588,18 +741,23 @@ class AICommander:
             council_fast_min_spike,
         )
         if should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro):
+            fp = self._ring_entry_council_for_learning(
+                ticker, current_px, spike_ratio, scan_score,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                account=account, market_ctx=mctx, is_penny=is_penny, df=df,
+            )
             fast_out = {
                 "enter": True,
                 "confidence": max(ppo_conf, 0.58, min(scan_score / 80.0, 0.85)),
                 "reason": (
-                    f"⚡ Micro-fast: score={scan_score:.0f} micro={float(micro.get('spike_likelihood', 0)):.0%} "
-                    f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%}"
+                    f"⚡ PPO-led micro-fast: score={scan_score:.0f} micro={float(micro.get('spike_likelihood', 0)):.0%} "
+                    f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%} (Ollama logging async)"
                 )[:200],
-                "journal": f"Micro momentum fast path — {ticker}",
-                "pipeline": "ai:micro_fast",
+                "journal": f"PPO profit hunt — {ticker}",
+                "pipeline": "ppo:micro_fast",
                 "pending": False,
             }
-            return self._finalize_entry_decision(
+            decision = self._finalize_entry_decision(
                 fast_out, ticker=ticker, current_px=current_px,
                 spike_ratio=spike_ratio, scan_score=scan_score,
                 ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
@@ -607,19 +765,31 @@ class AICommander:
                 use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
                 df=df, equity=equity, cash=float(account.get("cash", 0)),
             )
+            if fp:
+                self._schedule_deferred_entry(
+                    ticker=ticker, fingerprint=fp, decision=decision,
+                    ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                    market_ctx=mctx,
+                )
+            return decision
         if should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf):
+            fp = self._ring_entry_council_for_learning(
+                ticker, current_px, spike_ratio, scan_score,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                account=account, market_ctx=mctx, is_penny=is_penny, df=df,
+            )
             fast_out = {
                 "enter": True,
                 "confidence": max(ppo_conf, 0.58, min(scan_score / 80.0, 0.85)),
                 "reason": (
-                    f"⚡ AI spike-fast: vol={spike_ratio:.1f}x score={scan_score:.0f} "
-                    f"| PPO {ppo_conf:.0%}"
+                    f"⚡ PPO-led spike-fast: vol={spike_ratio:.1f}x score={scan_score:.0f} "
+                    f"| PPO {ppo_conf:.0%} (Ollama logging async)"
                 )[:200],
-                "journal": f"Fast execution — hunting spike on {ticker}",
-                "pipeline": "ai:spike_fast",
+                "journal": f"PPO fast execution — hunting spike on {ticker}",
+                "pipeline": "ppo:spike_fast",
                 "pending": False,
             }
-            return self._finalize_entry_decision(
+            decision = self._finalize_entry_decision(
                 fast_out, ticker=ticker, current_px=current_px,
                 spike_ratio=spike_ratio, scan_score=scan_score,
                 ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
@@ -627,6 +797,13 @@ class AICommander:
                 use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
                 df=df, equity=equity, cash=float(account.get("cash", 0)),
             )
+            if fp:
+                self._schedule_deferred_entry(
+                    ticker=ticker, fingerprint=fp, decision=decision,
+                    ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                    market_ctx=mctx,
+                )
+            return decision
 
         if (
             df is not None
