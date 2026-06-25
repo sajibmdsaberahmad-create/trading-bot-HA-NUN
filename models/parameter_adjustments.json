@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "When event is missed_profit_hunt, reduce confidence threshold from 0.9 to 0.58.",
+    "reason": "The confidence threshold is set to 58%, indicating that a stop-loss hit (bracket_exit) should not happen with a high confidence.",
     "ok": true,
     "msg": "applied"
   }

@@ -6907,3 +6907,201 @@ The event shows a bracket exit in the open market, which occurred on day 201. Th
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (When event is missed_profit_hunt, reduce confidence threshold from 0.9 to 0.58.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T20:00:19.264357+00:00
+loss streak triggered by bracket_exit event
+Loss streak analysis: bracket_exit occurs after a loss streak of consecutive losses (consecutive_losses). The strategy should focus on opportunistic exits to reduce risk.
+• U
+• t
+• i
+• l
+• i
+• z
+• e
+•  
+• t
+• h
+• e
+•  
+• a
+• d
+• j
+• u
+• s
+• t
+• a
+• b
+• l
+• e
+•  
+• p
+• a
+• r
+• a
+• m
+• e
+• t
+• e
+• r
+• s
+•  
+• (
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+• ,
+•  
+• E
+• N
+• T
+• R
+• Y
+• _
+• Q
+• U
+• A
+• L
+• I
+• T
+• Y
+• _
+• B
+• L
+• E
+• N
+• D
+• _
+• W
+• E
+• I
+• G
+• H
+• T
+• ,
+•  
+• C
+• O
+• U
+• N
+• C
+• I
+• L
+• _
+• T
+• I
+• M
+• E
+• O
+• U
+• T
+• _
+• M
+• I
+• N
+• _
+• S
+• C
+• A
+• N
+• _
+• S
+• C
+• O
+• R
+• E
+• )
+•  
+• t
+• o
+•  
+• b
+• e
+• t
+• t
+• e
+• r
+•  
+• f
+• i
+• t
+•  
+• t
+• h
+• e
+•  
+• c
+• u
+• r
+• r
+• e
+• n
+• t
+•  
+• c
+• o
+• n
+• t
+• e
+• x
+• t
+•  
+• a
+• n
+• d
+•  
+• o
+• p
+• t
+• i
+• m
+• i
+• z
+• e
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+•  
+• r
+• a
+• t
+• e
+• s
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increase confidence in the exit probability to reduce risk.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:00:22.583215+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:00:32.105831+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-25T20:00:35.259254+00:00
+The event trade_closed occurred, and the reason is bracket_exit.
+Bracket_exit occurs when a stop-loss hit is triggered after taking profit into momentum, preventing opportunistic exits. We need to analyze the entry strategy to understand why this might happen.
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The 58% confidence threshold is set, meaning if the entry enters without hitting the stop-loss, it should not trigger a bracket exit.'}
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold is set to 58%, indicating that a stop-loss hit (bracket_exit) should not happen with a high confidence.)
+
