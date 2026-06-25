@@ -2279,3 +2279,39 @@ The trade closed with trailing_profit, which indicates the trader is losing mone
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The confidence threshold was set to 0.58, which is lower than the actual market data accuracy or technical analysis criteria. This indicates a missed opportunity.)
 
+🧭 COMMANDER LEARNING | 2026-06-25T16:42:21.302942+00:00
+Trade closed with trailing profit, exit target hit.
+Reason: This event is triggered by the trailing profit trade due to an incorrect entry point.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Confidence threshold of 58% is too low for this specific event.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:43:01.737951+00:00
+The trade closed with a profit of $0.0, indicating no successful trades.
+The event occurred after the market data failed and was triggered by stop-loss breaches.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The event occurred after a stop-loss breach, indicating that the market data failed and no profit hunting was triggered.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:44:57.838142+00:00
+Observed loss_streak — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:45:00.615586+00:00
+Observed trade_closed — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:45:23.456869+00:00
+Observed loss_streak — recorded for learning.
+trailing_profit
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:45:25.566811+00:00
+The trade was not triggered due to a trailing profit.
+Why: The trade was set up for trailing profits, which would typically trigger a profit hunt.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The current CONFIDENCE_THRESHOLD is too low (0.35), which may prevent the trader from triggering a profit hunt.)
+
+🧭 COMMANDER LEARNING | 2026-06-25T16:47:08.198267+00:00
+TRADE closed with trailing profit and exit type target hit.
+The trader had a trailing profit, which is common in scalping strategies.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Analyze the market state and technical indicators to determine the risk of a missed profit hunt.)
+

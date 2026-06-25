@@ -28,3 +28,13 @@
 {"timestamp":"2026-06-25T16:39:07.566496+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
 {"timestamp":"2026-06-25T16:39:31.289379+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":-55447.7,"pnl_pct":-0.5193,"primary_goal":true,"reason":"trailing_profit","price":3.87}
 {"timestamp":"2026-06-25T16:40:07.476322+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T16:41:53.576920+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":-2842.33,"pnl_pct":-0.9781,"primary_goal":true,"reason":"trailing_profit","price":0.1765}
+{"timestamp":"2026-06-25T16:42:18.499127+00:00","event":"trailing_profit","ticker":"GPUS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T16:44:35.183878+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":-18931.8,"pnl_pct":-0.518,"primary_goal":true,"reason":"trailing_profit","price":3.88}
+{"timestamp":"2026-06-25T16:44:55.346947+00:00","event":"trailing_profit","ticker":"TZA","pnl_usd":-18931.8,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T16:45:02.376976+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":-61707.08,"pnl_pct":-0.5416,"primary_goal":true,"reason":"trailing_profit","price":3.69}
+{"timestamp":"2026-06-25T16:45:19.409371+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":-61707.08,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T16:45:23.222080+00:00","event":"trailing_profit","ticker":"NEXR","pnl_usd":-2829.86,"pnl_pct":-0.89,"primary_goal":true,"reason":"trailing_profit","price":0.8858}
+{"timestamp":"2026-06-25T16:45:39.665112+00:00","event":"trailing_profit","ticker":"NEXR","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}
+{"timestamp":"2026-06-25T16:46:43.178588+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":-66359.25,"pnl_pct":-0.5404,"primary_goal":true,"reason":"trailing_profit","price":3.7}
+{"timestamp":"2026-06-25T16:47:05.702267+00:00","event":"trailing_profit","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"trailing_profit"}

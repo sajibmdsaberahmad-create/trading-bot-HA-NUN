@@ -1,315 +1,5 @@
 [
   {
-    "timestamp": "2026-06-25T12:04:34.843576+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "A trade closed with a loss: council_risk: hard_stop, resulting in -25.909064999999973, PNL_USD: -25.909064999999973, PNL_PCT: -3.6945731727389353, win_rate: 36.7%",
-    "lessons": [
-      "1",
-      ".",
-      "T",
-      "h",
-      "e",
-      "t",
-      "r",
-      "a",
-      "d",
-      "e",
-      "r",
-      "e",
-      "x",
-      "p",
-      "e",
-      "r",
-      "i",
-      "e",
-      "n",
-      "c",
-      "e",
-      "d",
-      "a",
-      "l",
-      "o",
-      "s",
-      "s",
-      ":",
-      "c",
-      "o",
-      "u",
-      "n",
-      "c",
-      "i",
-      "l",
-      "_",
-      "r",
-      "i",
-      "s",
-      "k",
-      ":",
-      "h",
-      "a",
-      "r",
-      "d",
-      "_",
-      "s",
-      "t",
-      "o",
-      "p",
-      ".",
-      "2",
-      ".",
-      "T",
-      "h",
-      "i",
-      "s",
-      "e",
-      "v",
-      "e",
-      "n",
-      "t",
-      "i",
-      "s",
-      "l",
-      "i",
-      "k",
-      "e",
-      "l",
-      "y",
-      "t",
-      "o",
-      "o",
-      "c",
-      "c",
-      "u",
-      "r",
-      "i",
-      "n",
-      "t",
-      "h",
-      "e",
-      "f",
-      "o",
-      "l",
-      "l",
-      "o",
-      "w",
-      "i",
-      "n",
-      "g",
-      "s",
-      "c",
-      "e",
-      "n",
-      "a",
-      "r",
-      "i",
-      "o",
-      "s",
-      ":",
-      "-",
-      "M",
-      "a",
-      "r",
-      "k",
-      "e",
-      "t",
-      "v",
-      "o",
-      "l",
-      "a",
-      "t",
-      "i",
-      "l",
-      "i",
-      "t",
-      "y",
-      "i",
-      "n",
-      "c",
-      "r",
-      "e",
-      "a",
-      "s",
-      "e",
-      "s",
-      ".",
-      "-",
-      "T",
-      "h",
-      "e",
-      "t",
-      "r",
-      "a",
-      "d",
-      "e",
-      "r",
-      "m",
-      "a",
-      "y",
-      "h",
-      "a",
-      "v",
-      "e",
-      "m",
-      "i",
-      "s",
-      "s",
-      "e",
-      "d",
-      "o",
-      "p",
-      "p",
-      "o",
-      "r",
-      "t",
-      "u",
-      "n",
-      "i",
-      "t",
-      "i",
-      "e",
-      "s",
-      "o",
-      "r",
-      "m",
-      "i",
-      "s",
-      "j",
-      "u",
-      "d",
-      "g",
-      "e",
-      "d",
-      "t",
-      "h",
-      "e",
-      "m",
-      "a",
-      "r",
-      "k",
-      "e",
-      "t",
-      "p",
-      "o",
-      "s",
-      "i",
-      "t",
-      "i",
-      "o",
-      "n",
-      "."
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T12:04:38.193696+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on PBK"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T12:05:33.967393+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "MAX_CONCURRENT_POSITIONS": {
-        "param": "MAX_CONCURRENT_POSITIONS",
-        "value": 1,
-        "reason": "This limit helps manage concurrent positions without becoming overly sensitive to single trades.",
-        "ok": true,
-        "msg": "applied"
-      },
-      "LOCKED_SPIKE_MIN_RATIO": {
-        "param": "LOCKED_SPIKE_MIN_RATIO",
-        "value": 1.05,
-        "reason": "The minimum ratio for the locked spike is too conservative, as it can lead to unnecessary risk-taking if not controlled properly.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "The council timeout occurred, which triggered a scanner spike after an expected timeout.",
-    "lessons": [
-      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold indicates that if a scan fails, it can cause significant volatility.'}"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T12:33:42.248211+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.5,
-        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Council timeout occurred due to no aligned signal.",
-    "lessons": [
-      "The algorithm should be more aware of alignment and consider using multi-timeframe indicators to improve its ability to identify potential market moves.",
-      "It is important to monitor the market closely and avoid blind trading if there are no clear signals for a move.",
-      "Adding advanced indicators such as multiple timeframes, PPO, or multi-timeframe indicators can help the algorithm make better decisions in uncertain markets.",
-      "The trade decision should be based on evidence rather than relying solely on FOMO/fear.",
-      "Continuously learning from past trades and incorporating new insights is key to improving the algorithm's performance over time.",
-      "Adapting the trading strategy based on recent wins and losses can lead to more consistent performance in future events.",
-      "Adjusting parameters such as CONFIDENCE_THRESHOLD, ENTRY_FILL_MAX_WAIT_SEC, etc., may be necessary depending on the specific market conditions."
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T12:34:35.416810+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "Updating the confidence threshold from 1.2406854740316666 to 0.58 improved signal alignment during council timeouts.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "The council timeout occurred after the previous trade of WYY, indicating a potential issue with signal alignment.",
-    "lessons": [
-      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The confidence threshold should not be set to 1, as it may lead to overconfidence and missed opportunities.'}"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T12:35:04.636811+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.5599999999999999,
-        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review council_timeout on WYY"
-    ]
-  },
-  {
-    "timestamp": "2026-06-25T12:36:38.767242+00:00",
-    "source": "runtime_council_timeout",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.58,
-        "reason": "The new confidence threshold is lower than the historical average, which may indicate a need to increase it.",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "The council_timeout event occurred during the live trade in BRAG. The scanner spike after timeout caused an unexpected high score and volatility.",
-    "lessons": [
-      "Tighten your risk management strategies",
-      "Analyze for potential trends",
-      "Adjust your parameters"
-    ]
-  },
-  {
     "timestamp": "2026-06-25T12:39:27.177769+00:00",
     "source": "runtime_council_timeout",
     "adjustments": {},
@@ -3635,6 +3325,147 @@
       "Profit hunting should be performed only when conditions are met (e.g., spikes and high market data accuracy).",
       "Always ensure that the trader's position remains open for future trades.",
       "Trade closes with trailing_profit indicate a failure in profit hunting."
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:42:21.303323+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Confidence threshold of 58% is too low for this specific event.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Trade closed with trailing profit, exit target hit.",
+    "lessons": [
+      "{'param': 'market_state', 'value': 'open', 'reason': 'Market state was open, preventing a successful trade.'}"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:43:01.739444+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The event occurred after a stop-loss breach, indicating that the market data failed and no profit hunting was triggered.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade closed with a profit of $0.0, indicating no successful trades.",
+    "lessons": [
+      "Analyze market data closely to identify potential opportunities.",
+      "Implement robust margin management policies.",
+      "Adapt your trading strategy based on current conditions"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:44:57.838682+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on TZA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:45:00.615920+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TZA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:45:23.457374+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on SOXS"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:45:25.567222+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "The current CONFIDENCE_THRESHOLD is too low (0.35), which may prevent the trader from triggering a profit hunt.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade was not triggered due to a trailing profit.",
+    "lessons": [
+      "W",
+      "h",
+      "a",
+      "t",
+      ":"
+    ]
+  },
+  {
+    "timestamp": "2026-06-25T16:47:08.199645+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Analyze the market state and technical indicators to determine the risk of a missed profit hunt.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "TRADE closed with trailing profit and exit type target hit.",
+    "lessons": [
+      "1",
+      ".",
+      "A",
+      "n",
+      "a",
+      "l",
+      "y",
+      "z",
+      "e",
+      "t",
+      "h",
+      "e",
+      "t",
+      "r",
+      "a",
+      "d",
+      "e",
+      "d",
+      "e",
+      "t",
+      "a",
+      "i",
+      "l",
+      "s",
+      "f",
+      "o",
+      "r",
+      "p",
+      "r",
+      "o",
+      "f",
+      "i",
+      "t",
+      "h",
+      "u",
+      "n",
+      "t",
+      "i",
+      "n",
+      "g",
+      "."
     ]
   }
 ]

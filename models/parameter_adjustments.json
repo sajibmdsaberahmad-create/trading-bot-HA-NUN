@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "The confidence threshold was set to 0.58, which is lower than the actual market data accuracy or technical analysis criteria. This indicates a missed opportunity.",
+    "reason": "Analyze the market state and technical indicators to determine the risk of a missed profit hunt.",
     "ok": true,
     "msg": "applied"
   }

@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 105,
   "training_sessions": 27,
-  "trades_observed": 52,
+  "trades_observed": 59,
   "scans_performed": 27,
-  "improvements_applied": 206,
+  "improvements_applied": 213,
   "reports_generated": 26,
   "event_log": [
     {
@@ -10946,6 +10946,231 @@
           "Trade closes with trailing_profit indicate a failure in profit hunting."
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-25T16:42:18.462785",
+      "age": "4d 5h 39m 29s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:42:21.272864",
+      "age": "4d 5h 39m 32s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #207",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Trade closed with trailing profit, exit target hit.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Confidence threshold of 58% is too low for this specific event.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'market_state', 'value': 'open', 'reason': 'Market state was open, preventing a successful trade.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:42:58.977731",
+      "age": "4d 5h 40m 10s",
+      "type": "TRADE",
+      "message": "Observed trade: BITO ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:43:01.704902",
+      "age": "4d 5h 40m 13s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #208",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade closed with a profit of $0.0, indicating no successful trades.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The event occurred after a stop-loss breach, indicating that the market data failed and no profit hunting was triggered.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Analyze market data closely to identify potential opportunities.",
+          "Implement robust margin management policies.",
+          "Adapt your trading strategy based on current conditions"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:44:55.318152",
+      "age": "4d 5h 42m 6s",
+      "type": "TRADE",
+      "message": "Observed trade: TZA ? P&L=$-18931.80",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:44:57.805844",
+      "age": "4d 5h 42m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #209",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on TZA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:45:00.581150",
+      "age": "4d 5h 42m 11s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #210",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TZA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:45:19.375104",
+      "age": "4d 5h 42m 30s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$-61707.08",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:45:23.420340",
+      "age": "4d 5h 42m 34s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #211",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:45:25.535298",
+      "age": "4d 5h 42m 36s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #212",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "The trade was not triggered due to a trailing profit.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The current CONFIDENCE_THRESHOLD is too low (0.35), which may prevent the trader from triggering a profit hunt.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "W",
+          "h",
+          "a",
+          "t",
+          ":"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:45:39.641924",
+      "age": "4d 5h 42m 50s",
+      "type": "TRADE",
+      "message": "Observed trade: NEXR ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:47:05.661276",
+      "age": "4d 5h 44m 16s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-25T16:47:08.164643",
+      "age": "4d 5h 44m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #213",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "TRADE closed with trailing profit and exit type target hit.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Analyze the market state and technical indicators to determine the risk of a missed profit hunt.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "1",
+          ".",
+          "A",
+          "n",
+          "a",
+          "l",
+          "y",
+          "z",
+          "e",
+          "t",
+          "h",
+          "e",
+          "t",
+          "r",
+          "a",
+          "d",
+          "e",
+          "d",
+          "e",
+          "t",
+          "a",
+          "i",
+          "l",
+          "s",
+          "f",
+          "o",
+          "r",
+          "p",
+          "r",
+          "o",
+          "f",
+          "i",
+          "t",
+          "h",
+          "u",
+          "n",
+          "t",
+          "i",
+          "n",
+          "g",
+          "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-25T16:47:22.346638",
+      "age": "4d 5h 44m 33s",
+      "type": "TRADE",
+      "message": "Observed trade: TZA ? P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-25T16:37:32.647905",
@@ -12231,8 +12456,8 @@
     }
   ],
   "last_training": "2026-06-25T06:29:06.143062",
-  "mood": "adjusting for risk",
-  "total_pnl": 18542.16,
+  "mood": "focused",
+  "total_pnl": -62096.72,
   "win_history": [
     0.0,
     0.0,
@@ -12285,20 +12510,27 @@
     0.0,
     8001.63,
     0.0,
+    0.0,
+    0.0,
+    0.0,
+    -18931.8,
+    -61707.08,
+    0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 9,
   "worst_streak": 11,
-  "veteran_xp": 640,
+  "veteran_xp": 720,
   "veteran_level": "Aviator",
   "skill_points": {
-    "exit_timing": 39,
-    "risk_management": 4,
+    "exit_timing": 46,
+    "risk_management": 8,
     "entry_timing": 16
   },
-  "flights_completed": 47,
-  "hours_flown": 4.699999999999999,
+  "flights_completed": 54,
+  "hours_flown": 5.399999999999997,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -12308,22 +12540,22 @@
     "SCA": 1,
     "XOC": 2,
     "EVG": 1,
-    "NEX": 2,
+    "NEX": 3,
     "MIM": 5,
     "AZI": 1,
     "TPT": 3,
     "KUS": 2,
     "XCH": 1,
-    "TZA": 2,
+    "TZA": 4,
     "GDC": 2,
-    "SOX": 3,
-    "BIT": 3,
-    "GPU": 1
+    "SOX": 5,
+    "BIT": 4,
+    "GPU": 2
   },
   "best_streak": 3,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Thank you for the recent trade data and insights."
+  "mood_message": "I'm focused on my next trade hunt, ready for any outcome."
 }
