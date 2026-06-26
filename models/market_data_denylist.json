@@ -432,5 +432,33 @@
     "first_seen": "2026-06-26T13:30:21.823390+00:00",
     "last_seen": "2026-06-26T13:30:21.836006+00:00",
     "source": "ib_error"
+  },
+  "RIOT": {
+    "ticker": "RIOT",
+    "failures": 2,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52905",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "NASDAQ",
+    "skip_until": 1782481582.796658,
+    "skip_until_iso": "2026-06-26T13:46:22.796658+00:00",
+    "first_seen": "2026-06-26T13:31:22.774480+00:00",
+    "last_seen": "2026-06-26T13:31:22.797248+00:00",
+    "source": "ib_error"
+  },
+  "COIN": {
+    "ticker": "COIN",
+    "failures": 2,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52912",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "NASDAQ",
+    "skip_until": 1782481643.4554691,
+    "skip_until_iso": "2026-06-26T13:47:23.455469+00:00",
+    "first_seen": "2026-06-26T13:32:23.445792+00:00",
+    "last_seen": "2026-06-26T13:32:23.455612+00:00",
+    "source": "ib_error"
   }
 }

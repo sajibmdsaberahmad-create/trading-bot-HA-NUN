@@ -63,3 +63,14 @@ Market data failure occurred due to a historical market data service error.
 The event happened because the Market Data Service returned an error in historical market data.
 • ...
 
+🧭 COMMANDER LEARNING | 2026-06-26T13:31:26.551483+00:00
+Observed market_data_failure — recorded for learning.
+MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52905
+
+🧭 COMMANDER LEARNING | 2026-06-26T13:32:27.668722+00:00
+Market data failure occurred due to historical data service error.
+The root cause is a missing or incorrect historical data service.
+• {'param': 'DAILY_LOSS_PCT', 'value': 0.035, 'reason': 'Adjust the daily loss percentage for historical data service (DAILY_LOSS_PCT).'}
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Historical Market Data Service error message: API historical data query cancelled: 52912)
+
