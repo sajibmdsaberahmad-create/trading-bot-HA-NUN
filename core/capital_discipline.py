@@ -36,11 +36,37 @@ def treat_paper_as_live(cfg: Optional[BotConfig] = None) -> bool:
     return bool(getattr(cfg, "TREAT_PAPER_AS_LIVE", True))
 
 
+def is_strong_spike_setup(
+    cfg: Optional[BotConfig],
+    scan_score: float,
+    spike_ratio: float,
+) -> bool:
+    """High scanner rank + elevated bar volume — worth PPO-led entry without council wait."""
+    cfg = cfg or BotConfig()
+    min_sc = float(getattr(cfg, "CAPITAL_STRONG_SPIKE_SCORE", 78))
+    min_sp = float(getattr(cfg, "CAPITAL_STRONG_SPIKE_RATIO", 1.35))
+    return float(scan_score) >= min_sc and float(spike_ratio) >= min_sp
+
+
 def allows_spike_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
     if capital_discipline_enabled(cfg):
         return False
     cfg = cfg or BotConfig()
     return bool(getattr(cfg, "AI_SPIKE_FAST_ENTRY", True))
+
+
+def allows_disciplined_spike_fast(
+    cfg: Optional[BotConfig] = None,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> bool:
+    """PPO-led entry on elite spikes while capital discipline stays on."""
+    cfg = cfg or BotConfig()
+    if not capital_discipline_enabled(cfg):
+        return allows_spike_fast_entry(cfg)
+    if not bool(getattr(cfg, "CAPITAL_STRONG_SPIKE_FAST", True)):
+        return False
+    return is_strong_spike_setup(cfg, scan_score, spike_ratio)
 
 
 def allows_micro_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
@@ -50,19 +76,48 @@ def allows_micro_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
     return bool(getattr(cfg, "AI_FAST_EXECUTION", True))
 
 
-def allows_ppo_lead_while_pending(cfg: Optional[BotConfig] = None) -> bool:
-    if capital_discipline_enabled(cfg):
-        return False
+def allows_ppo_lead_while_pending(
+    cfg: Optional[BotConfig] = None,
+    *,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> bool:
     cfg = cfg or BotConfig()
-    return bool(getattr(cfg, "PPO_LEAD_WHILE_COUNCIL_PENDING", True))
+    if not capital_discipline_enabled(cfg):
+        return bool(getattr(cfg, "PPO_LEAD_WHILE_COUNCIL_PENDING", True))
+    if bool(getattr(cfg, "CAPITAL_PPO_LEAD_STRONG_SPIKE", True)) and is_strong_spike_setup(
+        cfg, scan_score, spike_ratio,
+    ):
+        return True
+    return False
 
 
-def allows_scanner_fast_bypass(cfg: Optional[BotConfig] = None) -> bool:
-    return not capital_discipline_enabled(cfg)
+def allows_scanner_fast_bypass(
+    cfg: Optional[BotConfig] = None,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> bool:
+    if not capital_discipline_enabled(cfg):
+        return True
+    if bool(getattr(cfg, "CAPITAL_SCANNER_FAST_STRONG", True)) and is_strong_spike_setup(
+        cfg, scan_score, spike_ratio,
+    ):
+        return True
+    return False
 
 
-def allows_timeout_fallback_entry(cfg: Optional[BotConfig] = None) -> bool:
-    return not capital_discipline_enabled(cfg)
+def allows_timeout_fallback_entry(
+    cfg: Optional[BotConfig] = None,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> bool:
+    if not capital_discipline_enabled(cfg):
+        return True
+    if bool(getattr(cfg, "CAPITAL_TIMEOUT_FALLBACK_STRONG", True)) and is_strong_spike_setup(
+        cfg, scan_score, spike_ratio,
+    ):
+        return True
+    return False
 
 
 def requires_council_alignment(cfg: Optional[BotConfig] = None) -> bool:
@@ -78,12 +133,19 @@ def effective_min_confidence(cfg: Optional[BotConfig] = None) -> float:
     return base
 
 
-def effective_min_profit_probability(cfg: Optional[BotConfig] = None) -> float:
+def effective_min_profit_probability(
+    cfg: Optional[BotConfig] = None,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> float:
     cfg = cfg or BotConfig()
     base = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42))
     if capital_discipline_enabled(cfg):
         floor = float(getattr(cfg, "CAPITAL_MIN_PROFIT_PROBABILITY", 0.62))
-        return max(base, floor)
+        base = max(base, floor)
+    if is_strong_spike_setup(cfg, scan_score, spike_ratio):
+        strong = float(getattr(cfg, "CAPITAL_STRONG_PROFIT_PROB_FLOOR", 0.48))
+        base = min(base, strong)
     return base
 
 
@@ -158,7 +220,7 @@ def passes_pre_entry_gate(
     fc = forecast or {}
     if float(fc.get("dir", 0)) < 0 and not fc.get("breakout"):
         sl = float(fc.get("spike_likelihood", 0))
-        if sl < 0.62:
+        if sl < 0.62 and not is_strong_spike_setup(cfg, scan_score, spike_ratio):
             return False, "quality gate: bearish micro — watch only"
     fade = float(fc.get("fade_risk", 0))
     if fade >= 0.52:
@@ -204,8 +266,13 @@ def discipline_prompt_block(cfg: Optional[BotConfig] = None) -> str:
 def startup_log_line(cfg: Optional[BotConfig] = None) -> str:
     if not capital_discipline_enabled(cfg):
         return ""
+    strong = ""
+    if bool(getattr(cfg or BotConfig(), "CAPITAL_STRONG_SPIKE_FAST", True)):
+        sc = float(getattr(cfg or BotConfig(), "CAPITAL_STRONG_SPIKE_SCORE", 78))
+        sp = float(getattr(cfg or BotConfig(), "CAPITAL_STRONG_SPIKE_RATIO", 1.35))
+        strong = f" | strong-spike PPO lead ≥{sc:.0f} score & ≥{sp:.2f}x vol"
     return (
-        f"💎 QUALITY ENTRIES: full AI council | score≥{min_entry_scan_score(cfg):.0f} "
-        f"spike≥{min_entry_spike_ratio(cfg):.2f}x | conf≥{effective_min_confidence(cfg):.0%} "
-        f"prob≥{effective_min_profit_probability(cfg):.0%} | no entry caps"
+        f"💎 QUALITY ENTRIES: council nanny + PPO on elite spikes{strong} | "
+        f"score≥{min_entry_scan_score(cfg):.0f} spike≥{min_entry_spike_ratio(cfg):.2f}x | "
+        f"conf≥{effective_min_confidence(cfg):.0%} prob≥{effective_min_profit_probability(cfg):.0%}"
     )
