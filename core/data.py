@@ -173,8 +173,7 @@ class DataManager:
     def start_tick_stream(self, realtime_only: bool = False):
         """
         Subscribe to live market data for a locked watch target.
-        realtime_only=True uses 5-second bars (lighter — run one per locked ticker).
-        Default tries tick-by-tick first, then falls back to 5-second bars.
+        Default: tick-by-tick (sub-second trade prints). realtime_only=True forces 5s bars.
         """
         if realtime_only:
             try:
@@ -184,21 +183,33 @@ class DataManager:
             return
         try:
             if self.cfg.USE_TICK_STREAM:
-                try:
-                    contract = self._get_contract()
-                    tbt = tick_by_tick_type(self.cfg)
-                    ticker = self.ib.reqTickByTickData(contract, tbt, 0, False)
-                    ticker.updateEvent += self._on_tick
-                    self._tick_handle = ticker
-                    self.conn.register_stream_manager(self.cfg.TICKER, self)
-                    log.info(
-                        f"Tick-by-tick stream started ({tbt}) — "
-                        f"live trade prints for {self.cfg.TICKER}, sub-second."
-                    )
-                    return
-                except Exception as exc:
+                contract = self._get_contract()
+                tbt = tick_by_tick_type(self.cfg)
+                types_to_try = [tbt]
+                if tbt == "AllLast" and getattr(self.cfg, "PAPER_TRADING", False):
+                    types_to_try.append("Last")
+                last_exc: Optional[Exception] = None
+                for tbt_try in types_to_try:
+                    try:
+                        ticker = self.ib.reqTickByTickData(contract, tbt_try, 0, False)
+                        ticker.updateEvent += self._on_tick
+                        self._tick_handle = ticker
+                        self.conn.register_stream_manager(self.cfg.TICKER, self)
+                        log.info(
+                            f"Tick-by-tick stream started ({tbt_try}) — "
+                            f"live trade prints for {self.cfg.TICKER}, sub-second."
+                        )
+                        return
+                    except Exception as exc:
+                        last_exc = exc
+                        if tbt_try != types_to_try[-1]:
+                            log.debug(
+                                f"Tick-by-tick {tbt_try} unavailable for {self.cfg.TICKER}: "
+                                f"{exc} — trying next type"
+                            )
+                if last_exc is not None:
                     log.warning(
-                        f"Tick-by-tick stream unavailable ({exc}). "
+                        f"Tick-by-tick stream unavailable ({last_exc}). "
                         "Falling back to 5-second real-time bars."
                     )
 
