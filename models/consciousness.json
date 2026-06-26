@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 152,
   "training_sessions": 28,
-  "trades_observed": 200,
+  "trades_observed": 201,
   "scans_performed": 28,
-  "improvements_applied": 443,
+  "improvements_applied": 445,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20864,6 +20864,49 @@
           "Review trade_closed on PLTR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:50:09.934628",
+      "age": "5d 7h 47m 21s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:50:10.214440",
+      "age": "5d 7h 47m 21s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #444",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:50:10.578808",
+      "age": "5d 7h 47m 21s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #445",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.63,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RKLB"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:48:56.370357",
@@ -22424,20 +22467,21 @@
     0.0,
     0.0,
     -10.83,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 9,
+  "consecutive_losses": 10,
   "worst_streak": 21,
-  "veteran_xp": 2750,
+  "veteran_xp": 2760,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 72
   },
-  "flights_completed": 195,
-  "hours_flown": 19.500000000000007,
+  "flights_completed": 196,
+  "hours_flown": 19.60000000000001,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22462,7 +22506,7 @@
     "LCI": 8,
     "RIO": 13,
     "QS": 5,
-    "MAR": 13,
+    "MAR": 14,
     "COI": 3,
     "RIV": 5,
     "RKL": 8,
