@@ -71,6 +71,10 @@ def assess_entry_quality(
         - w["penalty_fade"] * fade
         - w["penalty_loss"] * loss_p
     )
+    micro_weak = sl < 0.08 and profit_run < 0.08 and abs(mom) < 0.05
+    if micro_weak and scan_score >= 55 and spike_ratio >= 1.25:
+        cold_boost = min(0.30, score_norm * 0.24 + spike_norm * 0.20 + ppo_up * 0.08)
+        profit_probability += cold_boost
     profit_probability = float(max(0.0, min(1.0, profit_probability)))
 
     fakeout_risk = float(max(0.0, min(1.0, fade * 0.55 + sl * 0.25 + (0.2 if va > 1.8 and mom < 0.05 else 0.0))))
