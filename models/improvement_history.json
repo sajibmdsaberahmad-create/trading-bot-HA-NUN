@@ -308,5 +308,14 @@
     "lessons": [
       "Review loss_streak on RIOT"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:55:51.426674+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on MARA"
+    ]
   }
 ]
