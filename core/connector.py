@@ -51,7 +51,11 @@ class IBConnector:
         self._order_errors: Dict[int, Dict[str, Any]] = {}
         self._md_error_handlers: list = []
         self._tick_limit_handlers: list = []
+        self._session_reclaim_handlers: list = []
         self._stream_managers: Dict[str, Any] = {}
+        self._10197_count: int = 0
+        self._10197_window_start: float = 0.0
+        self._last_md_reclaim_ts: float = 0.0
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
