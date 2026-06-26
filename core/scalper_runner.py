@@ -5057,7 +5057,9 @@ class ScalperRunner:
             ticker = self.current_ticker or ""
             if ticker:
                 try:
-                    self.ai_commander.prefetch_position_manage({
+                    from core.council_nanny import prefetch_enabled
+                    if prefetch_enabled(self.cfg):
+                        self.ai_commander.prefetch_position_manage({
                         "ticker": ticker,
                         "price": current_px,
                         "pnl_pct": round(pnl_pct, 2),

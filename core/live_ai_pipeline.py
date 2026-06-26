@@ -897,7 +897,7 @@ def merge_scan_score_decision(
         base.update({
             "pending": True,
             "pipeline": f"council:{ollama_status}",
-            "reasons": f"rule {rule_score:.0f} — awaiting Ollama ({ollama_status})",
+            "reasons": f"rule {rule_score:.0f} — awaiting council ({ollama_status})",
         })
         return base
     if ollama_status == "timeout":

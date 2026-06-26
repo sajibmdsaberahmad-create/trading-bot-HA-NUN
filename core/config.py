@@ -727,6 +727,7 @@ class BotConfig:
     COUNCIL_NANNY_MIN_SCORE: float = float(os.getenv("COUNCIL_NANNY_MIN_SCORE", "55"))
     COUNCIL_NANNY_RESERVE_PCT: float = float(os.getenv("COUNCIL_NANNY_RESERVE_PCT", "0.25"))
     COUNCIL_NANNY_MIN_RING_SEC: float = float(os.getenv("COUNCIL_NANNY_MIN_RING_SEC", "3.0"))
+    COUNCIL_NANNY_HOT_RING_SEC: float = float(os.getenv("COUNCIL_NANNY_HOT_RING_SEC", "20.0"))
     COUNCIL_NANNY_LOW_TASKS: bool = os.getenv(
         "COUNCIL_NANNY_LOW_TASKS", "false"
     ).lower() in ("1", "true", "yes")
