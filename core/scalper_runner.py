@@ -755,7 +755,7 @@ class ScalperRunner:
             self._spike_attempt_until[ticker] = now + spike_entry_cooldown_sec(self.cfg)
             log.info(
                 f"⚡ TICK SPIKE: {ticker} @ ${px:.2f} | vol={ratio:.1f}x | "
-                f"micro={fc.get('spike_likelihood', 0):.0%} pred→${fc.get('pred_1bar', px):.2f}"
+                f"micro={fc.get('spike_likelihood', 0):.0%} pred→${(fc.get('pred_1bar') or px):.2f}"
             )
             result = self._attempt_entry()
             if result in ("entered", "waiting") or ticker in self._held_tickers():
@@ -2685,7 +2685,10 @@ class ScalperRunner:
                     self._service_pending_entry()
 
                 if can_trade:
-                    self._service_tick_spike_queue()
+                    try:
+                        self._service_tick_spike_queue()
+                    except Exception as exc:
+                        log.error(f"Tick spike monitor failed: {exc}")
 
                 # AI-driven early exit check (when in position, non-blocking)
                 if in_position and self.model is not None and can_trade:
@@ -2819,7 +2822,10 @@ class ScalperRunner:
                             monitor_iv = fast_monitor_interval(self.cfg)
                             if now - getattr(self, '_last_fast_monitor', 0) > monitor_iv:
                                 self._last_fast_monitor = now
-                                self._fast_monitor_locked(scout_only=at_max)
+                                try:
+                                    self._fast_monitor_locked(scout_only=at_max)
+                                except Exception as exc:
+                                    log.error(f"Fast monitor failed: {exc}")
                             self._drain_bar_prefetch_queue()
                             self._tick_bar_warm_on_main()
                             prefetch_iv = float(getattr(self.cfg, "LIVE_AI_PREFETCH_SEC", 1.0))
@@ -3737,7 +3743,7 @@ class ScalperRunner:
         self.top_pick = pick
         log.info(
             f"📊 SCAN MOMENTUM: {pick.ticker} score={pick.rank_score:.0f} vol={spike_ratio:.1f}x "
-            f"micro={forecast.get('spike_likelihood', 0):.0%} pred→${forecast.get('pred_1bar', live_px):.2f}"
+            f"micro={forecast.get('spike_likelihood', 0):.0%} pred→${(forecast.get('pred_1bar') or live_px):.2f}"
         )
         self._attempt_entry()
 
@@ -4038,7 +4044,7 @@ class ScalperRunner:
             log.info(
                 f"⚡ SPIKE: {ticker} @ ${live_px:.2f} | vol={spike_ratio:.1f}x | "
                 f"score={target.rank_score:.0f} | micro={fc.get('spike_likelihood', 0):.0%} "
-                f"pred→${fc.get('pred_1bar', live_px):.2f}{q_extra} | attempting entry..."
+                f"pred→${(fc.get('pred_1bar') or live_px):.2f}{q_extra} | attempting entry..."
             )
             from core.entry_quality import assess_entry_quality, quality_blocks_entry
             quality = assess_entry_quality(
@@ -4165,7 +4171,7 @@ class ScalperRunner:
         ):
             return True, (
                 f"micro_fade: risk={forecast['fade_risk']:.2f} "
-                f"pred↓${forecast.get('pred_1bar', live_px):.2f}"
+                f"pred↓${(forecast.get('pred_1bar') or live_px):.2f}"
             )
 
         should_exit, reason, ctx = evaluate_spike_top_exit(
@@ -4778,7 +4784,7 @@ class ScalperRunner:
             if pnl_pct < -0.002 and forecast.get("loss_pressure", 0) >= loss_thr and forecast.get("dir", 0) < 0:
                 return True, (
                     f"micro_loss: pressure={forecast['loss_pressure']:.2f} "
-                    f"pred↓${forecast.get('pred_1bar', current_px):.2f}"
+                    f"pred↓${(forecast.get('pred_1bar') or current_px):.2f}"
                 )
             fade_thr = float(getattr(self.cfg, "MICRO_FADE_EXIT", 0.55))
             if (

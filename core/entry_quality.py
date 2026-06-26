@@ -49,7 +49,7 @@ def assess_entry_quality(
     profit_run = float(micro.get("profit_run", 0))
     mom = float(micro.get("momentum", 0))
     va = float(micro.get("vol_accel", 1.0))
-    pred_1 = float(micro.get("pred_1bar", live_px or 0))
+    pred_1 = float(micro.get("pred_1bar") or live_px or 0)
     breakout = bool(micro.get("breakout", False))
 
     score_norm = min(max(scan_score / 100.0, 0.0), 1.0)
@@ -139,7 +139,7 @@ def assess_entry_quality(
 
     return _pack(
         profit_probability, fakeout_risk, setup_type, enter_ok, reason,
-        fakeout_fade_play, micro,
+        fakeout_fade_play, micro, live_px=live_px,
     )
 
 
@@ -151,7 +151,12 @@ def _pack(
     reason: str,
     fakeout_fade_play: bool,
     micro: Dict[str, Any],
+    *,
+    live_px: float = 0.0,
 ) -> Dict[str, Any]:
+    pred_1bar = micro.get("pred_1bar")
+    if pred_1bar is None and live_px > 0:
+        pred_1bar = live_px
     return {
         "profit_probability": round(profit_probability, 3),
         "fakeout_risk": round(fakeout_risk, 3),
@@ -162,7 +167,7 @@ def _pack(
         "spike_likelihood": micro.get("spike_likelihood", 0),
         "fade_risk": micro.get("fade_risk", 0),
         "profit_run": micro.get("profit_run", 0),
-        "pred_1bar": micro.get("pred_1bar"),
+        "pred_1bar": pred_1bar,
     }
 
 
