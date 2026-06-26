@@ -3,25 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 240,
+  "trades_observed": 241,
   "scans_performed": 28,
-  "improvements_applied": 510,
+  "improvements_applied": 511,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T13:53:06.847811",
-      "age": "3d 2h 50m 18s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #37",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T14:02:19.403791",
-      "age": "3d 2h 59m 30s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #38",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T14:04:01.877115",
       "age": "3d 3h 1m 13s",
@@ -21451,6 +21437,27 @@
           "Review trade_closed on COIN"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T19:04:42.055238",
+      "age": "5d 8h 1m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T19:04:42.328525",
+      "age": "5d 8h 1m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #511",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -23051,20 +23058,21 @@
     -7.26,
     -8.4,
     -113.34,
-    -29.24
+    -29.24,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 9,
+  "consecutive_losses": 10,
   "worst_streak": 21,
-  "veteran_xp": 3245,
+  "veteran_xp": 3255,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 82
   },
-  "flights_completed": 235,
-  "hours_flown": 23.500000000000064,
+  "flights_completed": 236,
+  "hours_flown": 23.600000000000065,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -23085,7 +23093,7 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 18,
+    "PLT": 19,
     "LCI": 8,
     "RIO": 20,
     "QS": 5,
