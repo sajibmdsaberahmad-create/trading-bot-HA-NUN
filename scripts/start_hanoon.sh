@@ -362,7 +362,5 @@ echo "  Live tail: tail -f $MAIN_LOG"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-python3 -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" >>"$MAIN_LOG" 2>&1 &
-BOT_PID=$!
-echo "$BOT_PID" >"$PID_FILE"
-wait "$BOT_PID"
+# Foreground + tee: live terminal output; bot writes logs/hanoon.pid via write_pid()
+python3 -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" 2>&1 | tee -a "$MAIN_LOG"
