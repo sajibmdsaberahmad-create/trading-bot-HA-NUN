@@ -1193,6 +1193,9 @@ class BotConfig:
     OFF_HOURS_SUSPEND_MARKET_DATA: bool = os.getenv(
         "OFF_HOURS_SUSPEND_MARKET_DATA", "true",
     ).lower() not in ("0", "false", "no")
+    STARTUP_LOG_COMPACT: bool = os.getenv("STARTUP_LOG_COMPACT", "true").lower() not in (
+        "0", "false", "no",
+    )
 
     # Commander chat → self-improvement loop
     COMMANDER_LEARNING_ENABLED: bool = os.getenv(

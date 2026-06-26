@@ -377,7 +377,8 @@ class ScalperRunner:
             from core.cognitive_autopilot import CognitiveAutopilot
             self.autopilot = CognitiveAutopilot(cfg)
             self.autopilot.start()
-            log.info("🤖 Cognitive Autopilot integrated into live trading loop")
+            from core.startup_log import sinfo
+            sinfo(self.cfg, "🤖 Cognitive Autopilot integrated into live trading loop")
         except Exception as exc:
             log.debug(f"Cognitive autopilot init skipped: {exc}")
 
@@ -507,7 +508,8 @@ class ScalperRunner:
             self.model = build_ppo_agent(dummy_env, self.cfg, self.cfg.MODEL_PATH)
             if self.cfg.MODEL_PATH and os.path.exists(self.cfg.MODEL_PATH):
                 self._model_fresh = False
-            log.info(f"🧠 PPO model ready: fresh={self._model_fresh}")
+            from core.startup_log import sinfo
+            sinfo(self.cfg, f"🧠 PPO model ready: fresh={self._model_fresh}")
         except Exception as exc:
             log.warning(f"PPO model init failed ({exc.__class__.__name__}: {exc}) — will use fresh model")
             try:
@@ -516,7 +518,7 @@ class ScalperRunner:
                 dummy_env = TradingEnv(dummy_f, dummy_px, self.cfg.INITIAL_CASH,
                                        self.cfg.TRANSACTION_COST_PCT, self.cfg.WINDOW_SIZE, self.cfg.DEFAULT_MAX_POSITION_PCT)
                 self.model = build_ppo_agent(dummy_env, self.cfg, None)
-                log.info("🧠 Fresh PPO model initialized (18-feature architecture)")
+                sinfo(self.cfg, "🧠 Fresh PPO model initialized (18-feature architecture)")
             except Exception as exc2:
                 log.error(f"Fresh PPO model also failed: {exc2}")
                 self.model = None
