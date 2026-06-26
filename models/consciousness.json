@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 238,
+  "trades_observed": 239,
   "scans_performed": 28,
-  "improvements_applied": 506,
+  "improvements_applied": 508,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T13:31:12.290334",
-      "age": "3d 2h 28m 23s",
-      "type": "TRADE",
-      "message": "Observed trade: VMAR ? P&L=$-1.75",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:32:22.764375",
-      "age": "3d 2h 29m 34s",
-      "type": "TRADE",
-      "message": "Observed trade: VMAR ? P&L=$-19.71",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:37:11.103214",
-      "age": "3d 2h 34m 22s",
-      "type": "TRADE",
-      "message": "Observed trade: None ? P&L=$-1659.43",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T13:41:27.306520",
       "age": "3d 2h 38m 38s",
@@ -21423,6 +21402,41 @@
           "Review loss_streak on RIOT"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T19:01:00.962900",
+      "age": "5d 7h 58m 12s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$-113.34",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T19:01:01.225344",
+      "age": "5d 7h 58m 12s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #507",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T19:01:01.535599",
+      "age": "5d 7h 58m 12s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #508",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22782,7 +22796,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "recalibrating",
-  "total_pnl": 123195.84000000007,
+  "total_pnl": 123082.50000000007,
   "win_history": [
     0.0,
     0.0,
@@ -23021,20 +23035,21 @@
     -1.0,
     -119.01,
     -7.26,
-    -8.4
+    -8.4,
+    -113.34
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 7,
+  "consecutive_losses": 8,
   "worst_streak": 21,
-  "veteran_xp": 3220,
+  "veteran_xp": 3235,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 54,
+    "risk_management": 56,
     "entry_timing": 82
   },
-  "flights_completed": 233,
-  "hours_flown": 23.30000000000006,
+  "flights_completed": 234,
+  "hours_flown": 23.400000000000063,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -23063,7 +23078,7 @@
     "COI": 6,
     "RIV": 5,
     "RKL": 11,
-    "SOF": 17,
+    "SOF": 18,
     "AST": 4
   },
   "best_streak": 4,

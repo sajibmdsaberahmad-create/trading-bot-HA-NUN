@@ -705,3 +705,11 @@ stop_breach
 Observed loss_streak — recorded for learning.
 stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-26T19:01:01.561579+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-26T19:01:01.573069+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
