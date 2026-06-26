@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 419,
+  "improvements_applied": 420,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20274,6 +20274,20 @@
           "i",
           "t",
           "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T15:34:18.885570",
+      "age": "5d 4h 31m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #420",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Market data failure: The service returned an error message indicating no historical data.",
+        "applied": [],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The current threshold value is too low (0.35). Adjusting it to a higher value might help increase opportunistic exits.'}"
         ]
       }
     }

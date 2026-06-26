@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: Why: Hard_take_profit occurs when the price goes above the entry point. The profit threshold of 10% is high and may not be sufficient.",
-    "T",
-    "d",
     "h",
     "x",
     "i",
@@ -103,10 +100,13 @@
     "b",
     "q",
     "u",
-    "Commander: The event is triggered when the market service returns an error message 'Historical Market Data Service error message: API historical data query cancelled: 52907' after the historical data has been queried."
+    "Commander: The event is triggered when the market service returns an error message 'Historical Market Data Service error message: API historical data query cancelled: 52907' after the historical data has been queried.",
+    "No clean data on PLUG (no_historical_data) \u2014 profit hunt elsewhere.",
+    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The current threshold value is too low (0.35). Adjusting it to a higher value might help increase opportunistic exits.'}",
+    "Commander: The market_data_failure event indicates that there is a problem with historical data availability, which might prevent the execution of trades or analyses. In this case, we need to identify the root cause and adjust the algorithmic trade st"
   ],
   "last_thought": "```json\n{\n    \"gut_feel\": {\n        \"profit_probability\": 63.5,\n        \"direction\": \"high\"\n    },\n    \"intuition\": {\n        \"false_positives\": 20,\n        \"fakeouts\": 15\n    }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:33:17.867791"
+  "updated": "2026-06-26T15:34:18.884112"
 }
