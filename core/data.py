@@ -47,7 +47,11 @@ _VALID_TICK_BY_TICK_TYPES = frozenset({"Last", "AllLast", "BidAsk", "MidPoint"})
 
 
 def tick_by_tick_type(cfg: BotConfig) -> str:
-    """IB tickType string — case-sensitive; AllLast includes odd-lot/off-exchange."""
+    """IB tickType — on paper use Last (AllLast returns IB 10189 for most US stocks)."""
+    if getattr(cfg, "PAPER_TRADING", False) and not getattr(
+        cfg, "PAPER_TICK_USE_ALLLAST", False,
+    ):
+        return "Last"
     raw = str(getattr(cfg, "TICK_BY_TICK_TYPE", "AllLast") or "AllLast")
     return raw if raw in _VALID_TICK_BY_TICK_TYPES else "AllLast"
 

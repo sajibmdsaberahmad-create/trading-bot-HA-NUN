@@ -56,8 +56,7 @@ class IBConnector:
         self._10197_count: int = 0
         self._10197_window_start: float = 0.0
         self._last_md_reclaim_ts: float = 0.0
-        self._pending_md_reclaim: bool = False
-        self._asyncio_patched: bool = False
+        
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
         self.ib.errorEvent += self._on_error
@@ -73,9 +72,8 @@ class IBConnector:
                 import ib_insync as ibi
                 ibi.util.log.level = 30  # WARNING
                 ibi.util.logToConsole(False)
-                if not self._asyncio_patched:
-                    ibi.util.patchAsyncio()
-                    self._asyncio_patched = True
+                # Allow tick/stream subscriptions from the synchronous main loop.
+                ibi.util.patchAsyncio()
             except Exception:
                 pass
             do_reclaim = (
@@ -260,22 +258,11 @@ class IBConnector:
         pause = float(getattr(self.cfg, "IB_SESSION_RECLAIM_PAUSE_SEC", 3.0))
         time.sleep(pause)
         self._contract = None
-        if not self.connect(reclaim=False):
+        if not self.connect():
             return False
         self._apply_market_data_type(force=True)
         log.info("IB live market data session reclaimed — streams can restart")
         return True
-
-    def service_pending_md_reclaim(self) -> bool:
-        """Run deferred 10197 reclaim on the main loop (never from IB error callback)."""
-        if not self._pending_md_reclaim:
-            return False
-        self._pending_md_reclaim = False
-        try:
-            return self.reclaim_live_market_data_session()
-        except Exception as exc:
-            log.warning(f"IB session reclaim failed: {exc}")
-            return False
 
     def disconnect(self):
         """Release all IB subscriptions and close the API socket."""
@@ -528,7 +515,7 @@ class IBConnector:
         if errorCode == 300 and "can't find eid" in (errorString or "").lower():
             return
 
-        # Competing live session — usually TWS/Gateway charts on same paper login
+        # Competing live session — reclaim MD slot after repeated failures
         if errorCode == 10197:
             self._apply_market_data_type(force=True)
             now = time.time()
@@ -538,25 +525,16 @@ class IBConnector:
             self._10197_count += 1
             threshold = int(getattr(self.cfg, "IB_10197_RECLAIM_THRESHOLD", 3))
             cooldown = float(getattr(self.cfg, "IB_10197_RECLAIM_COOLDOWN_SEC", 45.0))
-            paper_warn = bool(
-                getattr(self.cfg, "PAPER_TRADING", False)
-                and getattr(self.cfg, "IB_10197_PAPER_WARN_ONLY", True)
-            )
-            if paper_warn:
-                if self._10197_count == 1 or self._10197_count % 5 == 0:
-                    log.warning(
-                        "IB 10197 — TWS/Gateway charts compete for paper live MD. "
-                        "Close chart tabs in TWS or use IB Gateway only (bot keeps running)."
-                    )
-                return
             if (
-                getattr(self.cfg, "IB_10197_AUTO_RECLAIM", True)
-                and self._10197_count >= threshold
+                self._10197_count >= threshold
                 and now - self._last_md_reclaim_ts >= cooldown
             ):
                 self._10197_count = 0
                 self._last_md_reclaim_ts = now
-                self._pending_md_reclaim = True
+                try:
+                    self.reclaim_live_market_data_session()
+                except Exception as exc:
+                    log.warning(f"IB session reclaim failed: {exc}")
             else:
                 log.warning(
                     "IB 10197 competing session — forced LIVE "
@@ -582,8 +560,7 @@ class IBConnector:
                         pass
                 if errorCode == 10189:
                     log.info(
-                        f"IB tick-by-tick issue on {ticker or '?'} — using 5s bars "
-                        f"(if TWS charts are open on paper, close them — shared MD slot)"
+                        f"IB tick-by-tick unavailable on {ticker or '?'} — using 5s bars"
                     )
                 else:
                     log.info(

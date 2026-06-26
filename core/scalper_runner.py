@@ -2316,8 +2316,8 @@ class ScalperRunner:
         )
         if getattr(self.cfg, "PAPER_TRADING", False) and use_tick and not paper_rt_only:
             log.info(
-                "📡 Paper tick-by-tick: enabled — if TWS is open with charts on the "
-                "same paper login, close chart tabs (shared live MD slot causes 10197/10189)"
+                "📡 Paper tick-by-tick: enabled — log out of live TWS/Gateway "
+                "or IB may throttle paper streams (data mirroring rule)"
             )
 
     def run(self):
@@ -2590,7 +2590,6 @@ class ScalperRunner:
                                 break
 
                 self._service_stream_repairs()
-                self.conn.service_pending_md_reclaim()
 
                 if getattr(self, "_bootstrap_entry_due", False):
                     self._bootstrap_entry_due = False

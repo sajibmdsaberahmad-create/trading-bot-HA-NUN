@@ -138,9 +138,9 @@ export AI_FAST_EXECUTION="${AI_FAST_EXECUTION:-true}"
 export AI_TICK_STREAM_COUNT="${AI_TICK_STREAM_COUNT:-4}"
 export IB_MAX_REALTIME_BAR_STREAMS="${IB_MAX_REALTIME_BAR_STREAMS:-4}"
 export USE_TICK_STREAM="${USE_TICK_STREAM:-true}"
-export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-AllLast}"
+export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-Last}"
+export PAPER_TICK_USE_ALLLAST="${PAPER_TICK_USE_ALLLAST:-false}"
 export HMDS_FETCH_TIMEOUT_SEC="${HMDS_FETCH_TIMEOUT_SEC:-12}"
-export IB_10197_PAPER_WARN_ONLY="${IB_10197_PAPER_WARN_ONLY:-true}"
 export PAPER_REALTIME_BARS_ONLY="${PAPER_REALTIME_BARS_ONLY:-false}"
 export PAPER_USE_HISTORICAL_BARS="${PAPER_USE_HISTORICAL_BARS:-true}"
 export PAPER_REALTIME_BARS_USE_RTH="${PAPER_REALTIME_BARS_USE_RTH:-false}"
@@ -237,11 +237,12 @@ export LOSS_STREAK_RESUME_CONFIDENCE="${LOSS_STREAK_RESUME_CONFIDENCE:-0.52}"
 # Tick-by-tick (sub-second) is default — override stale .env that forced 5s-only paper mode
 export USE_TICK_STREAM=true
 export PAPER_REALTIME_BARS_ONLY=false
-export TICK_BY_TICK_TYPE=AllLast
+export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-Last}"
+export PAPER_TICK_USE_ALLLAST="${PAPER_TICK_USE_ALLLAST:-false}"
+export HMDS_FETCH_TIMEOUT_SEC="${HMDS_FETCH_TIMEOUT_SEC:-12}"
+export PAPER_TICK_USE_ALLLAST=false
 export HMDS_FETCH_TIMEOUT_SEC=12
-export IB_10197_PAPER_WARN_ONLY=true
-export MD_SOFT_FAIL_HMDS=true
-echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | tick-by-tick=AllLast"
+echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | tick-by-tick=on"
 
 # ── 2b. GitHub CLI (releases + artifact sync) ───────────────────────────────
 ensure_gh() {
