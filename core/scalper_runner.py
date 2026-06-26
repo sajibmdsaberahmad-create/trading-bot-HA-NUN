@@ -3671,12 +3671,23 @@ class ScalperRunner:
         locked = ",".join(t.ticker for t in self._locked_targets[: self._max_locked()])
         n_streams = len(self._target_monitors)
         nxt = self._next_best_pick.ticker if self._next_best_pick else "-"
+        priority = self._priority_tickers()
+        bars_ready = sum(
+            1 for t in priority
+            if t in self._scan_data_cache
+            and len(self._scan_data_cache[t]) >= self._min_bars_for(t)
+        )
+        priced = sum(1 for t in priority if self._stream_has_price(t))
+        warm_note = ""
+        if bars_ready < len(priority) and priced > 0:
+            warm_note = f" | bars {bars_ready}/{len(priority)} warming from live streams"
         quality = ""
         if capital_discipline_enabled(self.cfg):
             quality = " | full AI — no entry caps"
         log.info(
-            f"👁 WATCHING: {n_streams} streams | "
-            f"priority=[{priority}] | pool=[{locked}] | next_best={nxt}{quality}"
+            f"👁 WATCHING: {n_streams} streams | priced {priced}/{len(priority)} | "
+            f"priority=[{','.join(priority[:10]) or focus}] | pool=[{locked}] | "
+            f"next_best={nxt}{warm_note}{quality}"
         )
 
     def _detect_tick_volume_burst(self, dm: DataManager, df: pd.DataFrame) -> Tuple[bool, float]:
