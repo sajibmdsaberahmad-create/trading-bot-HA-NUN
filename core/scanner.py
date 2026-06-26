@@ -25,7 +25,14 @@ from core.notify import log
 from core.risk import safe_vwap
 
 
-def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
+def _req_scanner_with_timeout(
+    ib,
+    scan,
+    timeout_sec: float,
+    *,
+    filter_options=None,
+    empty_bail_sec: float = 0.0,
+) -> List[Any]:
     """
     Fetch scanner rows with a hard timeout via streaming subscription.
 
@@ -34,10 +41,13 @@ def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
     import time
 
     timeout_sec = max(6.0, float(timeout_sec))
+    empty_bail_sec = max(0.0, float(empty_bail_sec))
     scan_code = getattr(scan, "scanCode", "?")
     location = getattr(scan, "locationCode", "?")
-    data_list = ib.reqScannerSubscription(scan)
+    filters = list(filter_options or [])
+    data_list = ib.reqScannerSubscription(scan, [], filters)
     deadline = time.time() + timeout_sec
+    started = time.time()
     last_log = time.time()
     last_count = 0
     stable_since = time.time()
@@ -52,6 +62,12 @@ def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
             elif n >= 8 and (now - stable_since) >= 1.0:
                 break
             if n >= 50:
+                break
+            if n == 0 and empty_bail_sec > 0 and (now - started) >= empty_bail_sec:
+                log.debug(
+                    f"  scanner {scan_code}@{location}: 0 rows after {empty_bail_sec:.0f}s "
+                    f"— bailing (wrong session code?)"
+                )
                 break
             if now - last_log >= 3.0:
                 from core.startup_log import sinfo
@@ -286,31 +302,44 @@ class StockScanner:
         if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
             try:
                 from ib_insync import ScannerSubscription
-                from core.universe_filter import PROFIT_HUNT_SCAN_CODES, passes_profit_hunt_universe
+                from core.scanner_session import ib_scanner_profile, should_run_ib_scanner
+                from core.universe_filter import passes_profit_hunt_universe
                 ib = ib_connector.ib
+
+                run_ok, run_reason = should_run_ib_scanner(self.cfg)
+                if not run_ok:
+                    log.info(f"🔍 IB scanner skipped — {run_reason}")
+                    return []
+
+                profile = ib_scanner_profile(self.cfg)
+                scan_codes = list(profile.scan_codes)
+                filter_options = list(profile.filter_options)
+                if not scan_codes:
+                    log.info(f"🔍 IB scanner skipped — no codes for session {profile.session}")
+                    return []
+
                 if not self._scanner_warmed:
                     _warm_scanner(ib, timeout_sec=float(
                         getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 3.0)
                     ))
                     self._scanner_warmed = True
 
-                priority_codes = ("MOST_ACTIVE", "TOP_PERC_GAIN", "HOT_BY_VOLUME")
-                scan_codes = [c for c in priority_codes if c in PROFIT_HUNT_SCAN_CODES]
-                scan_codes += [c for c in PROFIT_HUNT_SCAN_CODES if c not in scan_codes]
                 max_codes = int(getattr(self.cfg, "IB_SCANNER_MAX_CODES_PER_RUN", 2))
                 disabled_codes: set = set()
                 skipped_universe = 0
-                # Paper gateways often respond on STK.US before STK.US.MAJOR
                 location_codes = ["STK.US", "STK.US.MAJOR"]
                 deadline = now + float(getattr(self.cfg, "IB_SCANNER_TIMEOUT_SEC", 25))
-                per_code_cap = float(getattr(self.cfg, "IB_SCANNER_PER_CODE_SEC", 18))
+                per_code_cap = profile.per_code_sec or float(
+                    getattr(self.cfg, "IB_SCANNER_PER_CODE_SEC", 18)
+                )
+                empty_bail = float(getattr(self.cfg, "IB_SCANNER_EMPTY_BAIL_SEC", 4))
                 codes_tried = 0
 
-                from core.startup_log import sinfo, startup_compact
-                sinfo(
-                    self.cfg,
-                    f"🔍 IB live scanner starting "
-                    f"(budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s)…",
+                from core.startup_log import sinfo
+                filt_note = f" | filters={len(filter_options)}" if filter_options else ""
+                log.info(
+                    f"🔍 IB scanner ({profile.label}) "
+                    f"budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s{filt_note}…"
                 )
 
                 for location_code in location_codes:
@@ -331,13 +360,18 @@ class StockScanner:
                         try:
                             remaining = max(6.0, deadline - time.time())
                             code_budget = min(per_code_cap, remaining)
-                            from core.startup_log import sinfo
                             sinfo(
                                 self.cfg,
                                 f"  scanner req {scan_code} @ {location_code} "
-                                f"(budget {code_budget:.0f}s)…",
+                                f"({profile.label}, budget {code_budget:.0f}s)…",
                             )
-                            scan_results = _req_scanner_with_timeout(ib, scan, code_budget)
+                            scan_results = _req_scanner_with_timeout(
+                                ib,
+                                scan,
+                                code_budget,
+                                filter_options=filter_options,
+                                empty_bail_sec=empty_bail if profile.use_extended_filters else 0.0,
+                            )
                             codes_tried += 1
                         except Exception as exc:
                             if '162' in str(exc) or 'disabled' in str(exc).lower():
@@ -394,12 +428,15 @@ class StockScanner:
                     from core.startup_log import sinfo
                     sinfo(
                         self.cfg,
-                        f"IB scanner: {len(tickers)} tickers "
+                        f"IB scanner: {len(tickers)} tickers ({profile.label}) "
                         f"(skipped {skipped_universe} OTC/distressed)",
                         force=True,
                     )
                 else:
-                    log.warning("No tickers returned from IB scanner — check market hours / subscription")
+                    log.warning(
+                        f"No tickers from IB scanner ({profile.label}) — "
+                        "check session (RTH vs after-hours) / subscription"
+                    )
             except Exception as exc:
                 log.warning(f"IB scanner error: {exc}")
 

@@ -58,6 +58,14 @@ def get_live_scan_universe(
         tickers = emergency_scan_universe(connector, cfg, reason="deferred")
         return tickers, "startup_curated"
 
+    from core.scanner_session import should_run_ib_scanner
+    run_ok, run_reason = should_run_ib_scanner(cfg)
+    if not run_ok:
+        log.info(f"📋 IB scanner off ({run_reason}) — curated universe")
+        from core.scanner import emergency_scan_universe
+        tickers = emergency_scan_universe(connector, cfg, reason="outside_session")
+        return tickers, "session_curated"
+
     tickers: List[str] = []
     warmup = float(getattr(cfg, "IB_SCANNER_WARMUP_SEC", 3.0))
     if warmup > 0 and (startup or not skip_ib_scanner):

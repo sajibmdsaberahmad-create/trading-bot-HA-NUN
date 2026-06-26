@@ -2378,7 +2378,8 @@ class ScalperRunner:
 
         defer = getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
         warmup = int(getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 5))
-        scan_mode = f"deferred curated" if defer else f"live IB ({warmup}s warmup)"
+        from core.scanner_session import scanner_session_log_line
+        scan_mode = f"deferred curated" if defer else scanner_session_log_line(self.cfg)
 
         council_on = getattr(self.cfg, "COUNCIL_ENABLED", False)
         council = (
@@ -3122,6 +3123,7 @@ class ScalperRunner:
         src_labels = {
             "ib_live": "IB live scanner",
             "startup_curated": "startup curated list",
+            "session_curated": "session curated list",
             "emergency_fallback": "emergency fallback",
         }
         src_label = src_labels.get(src, src)

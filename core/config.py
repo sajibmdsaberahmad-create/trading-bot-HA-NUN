@@ -590,6 +590,18 @@ class BotConfig:
     IB_SCANNER_PER_CODE_SEC: float = float(os.getenv("IB_SCANNER_PER_CODE_SEC", "18"))
     IB_SCANNER_RETRY_WAIT_SEC: float = float(os.getenv("IB_SCANNER_RETRY_WAIT_SEC", "1"))
     IB_SCANNER_MAX_CODES_PER_RUN: int = int(os.getenv("IB_SCANNER_MAX_CODES_PER_RUN", "2"))
+    # Run IB scanner pre-market / after-hours with extended filters (not the same as trading AH)
+    IB_SCANNER_OUTSIDE_RTH: bool = os.getenv("IB_SCANNER_OUTSIDE_RTH", "true").lower() not in (
+        "0", "false", "no",
+    )
+    IB_SCANNER_EXTENDED_FILTERS: bool = os.getenv(
+        "IB_SCANNER_EXTENDED_FILTERS", "true",
+    ).lower() not in ("0", "false", "no")
+    IB_SCANNER_EXTENDED_PER_CODE_SEC: float = float(
+        os.getenv("IB_SCANNER_EXTENDED_PER_CODE_SEC", "8"),
+    )
+    IB_SCANNER_MIN_VOLUME: int = int(os.getenv("IB_SCANNER_MIN_VOLUME", "50000"))
+    IB_SCANNER_EMPTY_BAIL_SEC: float = float(os.getenv("IB_SCANNER_EMPTY_BAIL_SEC", "4"))
     SCAN_EMERGENCY_FALLBACK: bool = os.getenv("SCAN_EMERGENCY_FALLBACK", "true").lower() not in (
         "0", "false", "no",
     )

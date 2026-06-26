@@ -185,10 +185,16 @@ def market_status_line(cfg: Optional[BotConfig] = None) -> str:
     state = get_market_state(cfg)
     allowed, _ = can_trade_now(cfg)
     sessions = allowed_trading_sessions_label(cfg)
+    try:
+        from core.scanner_session import should_run_ib_scanner
+        scan_ok, _ = should_run_ib_scanner(cfg)
+        scan_note = "scan=on" if scan_ok else "scan=curated"
+    except Exception:
+        scan_note = ""
     if allowed:
         mode = f"TRADABLE ({sessions})"
     elif state in ("after_hours", "overnight"):
-        mode = f"DAY FINISHED — {state.upper()} (enabled: {sessions})"
+        mode = f"DAY FINISHED — {state.upper()} (trade: {sessions}; {scan_note})"
     else:
         mode = f"NO SESSION — {state.upper()}"
     return (
