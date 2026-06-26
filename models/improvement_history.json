@@ -1,93 +1,11 @@
 [
   {
-    "timestamp": "2026-06-26T18:57:03.869378+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on RIOT"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:57:15.505545+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:57:22.263617+00:00",
+    "timestamp": "2026-06-26T18:59:11.497036+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
       "Review trade_closed on MARA"
     ]
-  },
-  {
-    "timestamp": "2026-06-26T18:57:22.283457+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:57:25.920213+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:57:25.946906+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:57:58.846444+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:58:13.298159+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:58:13.298233+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-26T18:58:15.866876+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on MARA"
-    ]
   }
-]}
 ]
