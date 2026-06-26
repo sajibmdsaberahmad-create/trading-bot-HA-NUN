@@ -2566,9 +2566,13 @@ class ScalperRunner:
                     self._last_scan_time = time.time()
                     if (
                         getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", True)
-                        and getattr(self.cfg, "SCAN_RUN_DEFERRED_IB", False)
+                        and getattr(self.cfg, "SCAN_RUN_DEFERRED_IB", True)
                     ):
                         self._deferred_ib_scan = True
+                        log.info(
+                            "🔍 Live IB scanner queued — runs after streams start "
+                            f"(warmup {getattr(self.cfg, 'IB_SCANNER_WARMUP_SEC', 3):.0f}s)"
+                        )
 
                 in_position = self._in_any_position()
                 have_targets = bool(self._locked_targets)
@@ -2643,6 +2647,12 @@ class ScalperRunner:
                     self._deferred_ib_scan = False
                     can_defer, _ms = can_trade_now(self.cfg)
                     if can_defer and not self._in_any_position():
+                        warmup = float(getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 3.0))
+                        if warmup > 0:
+                            log.info(
+                                f"🔍 Deferred IB live scanner — warmup {warmup:.0f}s…"
+                            )
+                            self.ib.sleep(warmup)
                         log.info("🔍 Running deferred IB live scanner…")
                         try:
                             self._scan_and_rank(startup=False)
@@ -3016,10 +3026,11 @@ class ScalperRunner:
     def _scan_and_rank(self, startup: bool = False, skip_ib_scanner: bool = False):
         t0 = time.perf_counter()
         log.info("🔍 HANOON scan: fetching live IB universe…")
-        screen_list = get_live_scan_universe(
+        screen_list, universe_source = get_live_scan_universe(
             self.scanner, self.conn, self.cfg,
             startup=startup, skip_ib_scanner=skip_ib_scanner,
         )
+        self._last_universe_source = universe_source
         if not screen_list:
             log.warning("⏸ Scan skipped — no tickers in universe")
             return
@@ -3092,9 +3103,16 @@ class ScalperRunner:
                 results.append(scored)
 
         elapsed_ms = (time.perf_counter() - t0) * 1000
+        src = getattr(self, "_last_universe_source", "ib_live")
+        src_labels = {
+            "ib_live": "IB live scanner",
+            "startup_curated": "startup curated list",
+            "emergency_fallback": "emergency fallback",
+        }
+        src_label = src_labels.get(src, src)
         log.info(
             f"⚡ SCAN FAST LOCK: {len(results)}/{len(screen_list)} ranked "
-            f"from IB scanner in {elapsed_ms:.0f}ms (no bar fetch)"
+            f"from {src_label} in {elapsed_ms:.0f}ms (no bar fetch)"
         )
 
         if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander and results:

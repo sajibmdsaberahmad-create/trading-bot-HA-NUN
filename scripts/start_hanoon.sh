@@ -132,7 +132,7 @@ export AI_TICK_STREAM_COUNT="${AI_TICK_STREAM_COUNT:-4}"
 export IB_MAX_REALTIME_BAR_STREAMS="${IB_MAX_REALTIME_BAR_STREAMS:-4}"
 export USE_TICK_STREAM="${USE_TICK_STREAM:-true}"
 export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-AllLast}"
-export PAPER_REALTIME_BARS_ONLY="${PAPER_REALTIME_BARS_ONLY:-false}"
+export PAPER_REALTIME_BARS_ONLY="${PAPER_REALTIME_BARS_ONLY:-true}"
 export PAPER_USE_HISTORICAL_BARS="${PAPER_USE_HISTORICAL_BARS:-true}"
 export PAPER_REALTIME_BARS_USE_RTH="${PAPER_REALTIME_BARS_USE_RTH:-false}"
 export IB_FORCE_LIVE_MARKET_DATA="${IB_FORCE_LIVE_MARKET_DATA:-true}"
@@ -226,12 +226,11 @@ export OFF_HOURS_HEAVY_TRAINING="${OFF_HOURS_HEAVY_TRAINING:-true}"
 export LOSS_STREAK_LEARNING_MIN_SEC="${LOSS_STREAK_LEARNING_MIN_SEC:-45}"
 export LOSS_STREAK_LEARNING_MAX_SEC="${LOSS_STREAK_LEARNING_MAX_SEC:-300}"
 export LOSS_STREAK_RESUME_CONFIDENCE="${LOSS_STREAK_RESUME_CONFIDENCE:-0.52}"
-# Tick-by-tick (sub-second) is default — override stale .env that forced 5s-only paper mode
-export USE_TICK_STREAM=true
-export PAPER_REALTIME_BARS_ONLY=false
+export SCAN_RUN_DEFERRED_IB="${SCAN_RUN_DEFERRED_IB:-true}"
+export USE_TICK_STREAM="${USE_TICK_STREAM:-true}"
 export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-AllLast}"
 export HMDS_FETCH_TIMEOUT_SEC="${HMDS_FETCH_TIMEOUT_SEC:-12}"
-echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | tick-by-tick=on"
+echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | paper_md=5s-bars | live_tick=${USE_TICK_STREAM}"
 
 # ── 2b. GitHub CLI (releases + artifact sync) ───────────────────────────────
 ensure_gh() {

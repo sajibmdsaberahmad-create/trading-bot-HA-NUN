@@ -174,9 +174,13 @@ class DataManager:
     def start_tick_stream(self, realtime_only: bool = False):
         """
         Subscribe to live market data for a locked watch target.
-        Default: tick-by-tick (sub-second trade prints). realtime_only=True forces 5s bars.
+        Default: tick-by-tick (sub-second). Paper often needs 5s bars only (10189).
         """
-        if realtime_only:
+        paper_bars = bool(
+            getattr(self.cfg, "PAPER_TRADING", False)
+            and getattr(self.cfg, "PAPER_REALTIME_BARS_ONLY", True)
+        )
+        if realtime_only or paper_bars:
             try:
                 self._start_realtime_bars_fallback()
             except Exception as exc:

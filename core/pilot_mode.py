@@ -59,6 +59,10 @@ def get_live_scan_universe(
         return tickers, "startup_curated"
 
     tickers: List[str] = []
+    warmup = float(getattr(cfg, "IB_SCANNER_WARMUP_SEC", 3.0))
+    if warmup > 0 and (startup or not skip_ib_scanner):
+        log.info(f"🔍 IB scanner warmup {warmup:.0f}s (Gateway sync)…")
+        time.sleep(warmup)
     retries = int(
         getattr(cfg, "IB_SCANNER_STARTUP_RETRIES", 1) if startup
         else getattr(cfg, "IB_SCANNER_RETRIES", 2)
@@ -99,6 +103,7 @@ def get_live_scan_universe(
             "🔴 Live IB scanner returned 0 tickers — no fallback. "
             "Check IB Gateway login, market hours, and scanner subscription."
         )
+        return [], "none"
     return out[: effective_scan_universe_max(cfg)], "ib_live"
 
 

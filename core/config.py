@@ -596,13 +596,13 @@ class BotConfig:
     SCAN_DEFER_IB_ON_STARTUP: bool = os.getenv("SCAN_DEFER_IB_ON_STARTUP", "true").lower() not in (
         "0", "false", "no",
     )
-    # Off by default — paper IB scanner usually returns 0 rows and blocks ~50s
-    SCAN_RUN_DEFERRED_IB: bool = os.getenv("SCAN_RUN_DEFERRED_IB", "false").lower() in (
-        "1", "true", "yes",
+    # Run live IB scanner in main loop after instant startup lock (paper-safe warmup)
+    SCAN_RUN_DEFERRED_IB: bool = os.getenv("SCAN_RUN_DEFERRED_IB", "true").lower() not in (
+        "0", "false", "no",
     )
     IB_SCANNER_WARMUP_SEC: float = float(os.getenv("IB_SCANNER_WARMUP_SEC", "3"))
-    PAPER_REALTIME_BARS_ONLY: bool = os.getenv("PAPER_REALTIME_BARS_ONLY", "false").lower() in (
-        "1", "true", "yes",
+    PAPER_REALTIME_BARS_ONLY: bool = os.getenv("PAPER_REALTIME_BARS_ONLY", "true").lower() not in (
+        "0", "false", "no",
     )
     PAPER_USE_HISTORICAL_BARS: bool = os.getenv("PAPER_USE_HISTORICAL_BARS", "false").lower() in (
         "1", "true", "yes",
