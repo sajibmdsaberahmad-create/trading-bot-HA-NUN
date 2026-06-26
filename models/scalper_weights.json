@@ -10,32 +10,32 @@
   "rsi_filter": 0.5,
   "volatility_gate": 0.5,
   "_meta": {
-    "train_timestamp": "2026-06-26T18:56:12.076466",
-    "buffer_total": 6181,
-    "buffer_win_rate": 0.235,
+    "train_timestamp": "2026-06-26T18:56:46.523687",
+    "buffer_total": 6209,
+    "buffer_win_rate": 0.234,
     "sources": {
       "backtest": 1276,
       "market_context": 25,
       "scan_pick": 162,
       "ai_scan": 320,
       "live_entry": 184,
-      "consciousness": 211,
-      "live_trade": 857,
+      "consciousness": 215,
+      "live_trade": 861,
       "scan_complete": 37,
-      "ai_council": 1101,
+      "ai_council": 1105,
       "fill_slippage_abort": 86,
-      "runtime_observer": 469,
+      "runtime_observer": 474,
       "early_exit": 22,
       "ib_failure": 20,
       "market_data_failure": 88,
-      "profit_hunt": 235,
-      "ppo_led": 304,
-      "ppo_entry": 203,
+      "profit_hunt": 240,
+      "ppo_led": 307,
+      "ppo_entry": 206,
       "deferred_council": 386,
       "ppo_entry_eval": 193,
       "shadow_trade": 2
     },
     "missed_profit_hunts": 0,
-    "profit_hunt_events": 235
+    "profit_hunt_events": 240
   }
 }

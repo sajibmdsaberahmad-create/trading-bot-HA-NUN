@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52905",
-    "No clean data on COIN (no_historical_data) \u2014 profit hunt elsewhere.",
-    "a",
     "F",
     "D",
     "H",
@@ -103,10 +100,13 @@
     "Review trade_closed on COIN",
     "Commander: Scanner+spike after timeout: score=81 vol=1589.0x prob=60% | ATR R:R 2.0",
     "Commander: hard_take_profit",
-    "Commander: green_profit_lock:ai_stall quick_scalp +30.16% (peak +30.16%)"
+    "Commander: green_profit_lock:ai_stall quick_scalp +30.16% (peak +30.16%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +421.71% (peak +0.00%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +0.42% (peak +0.42%)",
+    "Commander: Scanner+spike after timeout: score=81 vol=12288.0x prob=60% | ATR R:R 2.0"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 26,
-  "updated": "2026-06-26T18:56:13.025700"
+  "trades_observed": 32,
+  "updated": "2026-06-26T18:56:46.648809"
 }

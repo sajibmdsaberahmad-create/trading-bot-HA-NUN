@@ -3,112 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 220,
+  "trades_observed": 223,
   "scans_performed": 28,
-  "improvements_applied": 478,
+  "improvements_applied": 482,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-22T09:00:55.105723",
-      "age": "21h 58m 6s",
-      "type": "TRAIN_COMPLETE",
-      "message": "Unified training completed",
-      "metadata": {
-        "weights_updated": true,
-        "ppo_trained": false
-      }
-    },
-    {
-      "timestamp": "2026-06-22T09:00:55.111237",
-      "age": "21h 58m 6s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #3",
-      "metadata": {
-        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T09:00:55.110150\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects",
-        "adjustments": {},
-        "win_rate": 0.5501836710510725,
-        "timestamp": "2026-06-22T09:00:55.111160"
-      }
-    },
-    {
-      "timestamp": "2026-06-22T09:00:55.112329",
-      "age": "21h 58m 6s",
-      "type": "VERSION",
-      "message": "Created version v20260622_090055",
-      "metadata": {
-        "id": "v20260622_090055",
-        "timestamp": "2026-06-22T09:00:55.111949",
-        "age": "21h 58m 6s",
-        "session": 3,
-        "mood": "learning",
-        "total_awakenings": 5,
-        "trades_observed": 0,
-        "scans_performed": 3,
-        "improvements_applied": 3,
-        "total_pnl": 0,
-        "best_streak": 0,
-        "steps": {
-          "market_context": {
-            "spy_trend": "unknown",
-            "qqq_trend": "unknown",
-            "vix_level": null,
-            "vix_regime": "unknown",
-            "timestamp": "2026-06-22T09:00:52.042356"
-          },
-          "regime": {
-            "regime": "unknown",
-            "confidence": 0.0,
-            "recommendation": "Insufficient data"
-          },
-          "unified_training": {
-            "weights_updated": true,
-            "ppo_trained": false
-          },
-          "self_improvement": {
-            "win_rate": 0.5501836710510725,
-            "adjustments": {}
-          }
-        },
-        "parent_version": "v20260622_085553"
-      }
-    },
-    {
-      "timestamp": "2026-06-22T09:00:55.113874",
-      "age": "21h 58m 6s",
-      "type": "ERROR",
-      "message": "Training session failed: 'mood'",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-22T09:05:52.371782",
-      "age": "22h 3m 3s",
-      "type": "SCAN",
-      "message": "Market scan #4",
-      "metadata": {
-        "source": "off_hours",
-        "tickers": 72
-      }
-    },
-    {
-      "timestamp": "2026-06-22T09:05:52.373878",
-      "age": "22h 3m 3s",
-      "type": "TRAIN",
-      "message": "Training session #4",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-22T09:05:52.374530",
-      "age": "22h 3m 3s",
-      "type": "CONTEXT",
-      "message": "Fetched market context",
-      "metadata": {
-        "spy_trend": "unknown",
-        "qqq_trend": "unknown",
-        "vix_level": null,
-        "vix_regime": "unknown",
-        "timestamp": "2026-06-22T09:05:52.374520"
-      }
-    },
     {
       "timestamp": "2026-06-22T09:05:52.374979",
       "age": "22h 3m 3s",
@@ -21297,6 +21196,91 @@
           "Review trade_closed on PLTR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:21.044836",
+      "age": "5d 7h 53m 32s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:56:21.269913",
+      "age": "5d 7h 53m 32s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #479",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:26.509300",
+      "age": "5d 7h 53m 37s",
+      "type": "TRADE",
+      "message": "Observed trade: COIN ? P&L=$+2.06",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:56:26.716194",
+      "age": "5d 7h 53m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #480",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on COIN"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:40.398640",
+      "age": "5d 7h 53m 51s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:56:40.616526",
+      "age": "5d 7h 53m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #481",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:46.649073",
+      "age": "5d 7h 53m 57s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #482",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.62,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RKLB"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22655,8 +22639,8 @@
     }
   ],
   "last_training": "2026-06-25T20:07:35.278799",
-  "mood": "recalibrating",
-  "total_pnl": 123473.06000000006,
+  "mood": "defensive",
+  "total_pnl": 123475.12000000005,
   "win_history": [
     0.0,
     0.0,
@@ -22877,20 +22861,23 @@
     0.0,
     -6.47,
     14.3,
-    -29.25
+    -29.25,
+    0.0,
+    2.06,
+    0.0
   ],
   "consecutive_wins": 0,
   "consecutive_losses": 1,
   "worst_streak": 21,
-  "veteran_xp": 3005,
+  "veteran_xp": 3055,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
-    "entry_timing": 78
+    "entry_timing": 80
   },
-  "flights_completed": 215,
-  "hours_flown": 21.500000000000036,
+  "flights_completed": 218,
+  "hours_flown": 21.80000000000004,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22913,10 +22900,10 @@
     "GPU": 19,
     "PLT": 13,
     "LCI": 8,
-    "RIO": 16,
+    "RIO": 17,
     "QS": 5,
-    "MAR": 18,
-    "COI": 4,
+    "MAR": 19,
+    "COI": 5,
     "RIV": 5,
     "RKL": 11,
     "SOF": 14,
@@ -22927,5 +22914,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-57.43 recent). Tightening entries until edge returns."
+  "mood_message": "Win rate 15% \u00b7 $-68.02. Preserving capital over action."
 }
