@@ -399,3 +399,4 @@
 {"timestamp":"2026-06-26T13:40:39.670614+00:00","event":"rth_open","old_state":"startup","tier":"rth_opening","cleared_md":["CMGR","TVBCY","FNMAI","TMPOQ","SOFI","PLTR","MARA","RIOT","COIN","RKLB"]}
 {"timestamp":"2026-06-26T14:26:49.872620+00:00","event":"rth_open","old_state":"startup","tier":"rth","cleared_md":[]}
 {"timestamp":"2026-06-26T15:04:31.374782+00:00","event":"rth_open","old_state":"startup","tier":"rth","cleared_md":[]}
+{"timestamp":"2026-06-26T15:12:47.715349+00:00","event":"rth_open","old_state":"startup","tier":"rth","cleared_md":[]}
