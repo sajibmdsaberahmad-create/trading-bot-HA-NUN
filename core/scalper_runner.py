@@ -2547,8 +2547,8 @@ class ScalperRunner:
         
         try:
             while True:
-                if self._shutdown_requested_flag or shutdown_requested():
-                    if shutdown_requested():
+                if self._shutdown_abort():
+                    if not getattr(self, "_shutdown_requested_flag", False):
                         log.info("🛑 Shutdown requested — closing session gracefully...")
                     break
 
@@ -2910,9 +2910,26 @@ class ScalperRunner:
         def _handler(signum, _frame):
             log.info(f"Signal {signum} received — graceful shutdown...")
             self._shutdown_requested_flag = True
+            try:
+                self.ib.sleep(0)
+            except Exception:
+                pass
+            if getattr(self, "_shutdown_done", False):
+                import os
+                os._exit(0)
 
         signal.signal(signal.SIGTERM, _handler)
         signal.signal(signal.SIGINT, _handler)
+
+    def _shutdown_abort(self) -> bool:
+        """True when stop script or signal requested exit."""
+        if getattr(self, "_shutdown_requested_flag", False):
+            return True
+        try:
+            from core.shutdown_control import shutdown_requested
+            return shutdown_requested()
+        except Exception:
+            return False
     
     def _scan_one(self, ticker: str, fast: bool = False) -> Optional[Dict]:
         """
@@ -5495,6 +5512,21 @@ class ScalperRunner:
                 self._position_slots[ticker]["ppo_entry_id"] = entry_id
         except Exception as exc:
             log.debug(f"PPO entry learning: {exc}")
+        if self.ai_commander:
+            council = tel.get("council") or {}
+            try:
+                self.ai_commander.ring_post_fill_learning(
+                    ticker,
+                    fill_px,
+                    float(getattr(self, "_last_spike_ratio", 1.0)),
+                    float(getattr(self, "_last_scan_score", 0)),
+                    council,
+                    account=self._account_context_for_ai(),
+                    market_ctx=getattr(self, "_last_market_ctx", None),
+                    df=self._scan_data_cache.get(ticker),
+                )
+            except Exception as exc:
+                log.debug(f"Post-fill distill ring: {exc}")
         return "entered"
 
     def _service_shadow_positions(self) -> None:
@@ -7635,7 +7667,29 @@ class ScalperRunner:
             self.notifier.info(summary)
 
         try:
-            push_full_shutdown_sync(self.bot_nav, pnl_pct, report_path or "")
+            import threading
+
+            sync_done = threading.Event()
+            sync_err: list = []
+
+            def _run_sync():
+                try:
+                    push_full_shutdown_sync(self.bot_nav, pnl_pct, report_path or "")
+                except Exception as exc:
+                    sync_err.append(exc)
+                finally:
+                    sync_done.set()
+
+            timeout = float(getattr(self.cfg, "SHUTDOWN_SYNC_TIMEOUT_SEC", 45))
+            threading.Thread(target=_run_sync, daemon=True).start()
+            if not sync_done.wait(timeout=timeout):
+                log.warning(f"Shutdown git sync timed out after {timeout:.0f}s — continuing exit")
+            elif sync_err:
+                log.error(f"Shutdown git sync failed: {sync_err[0]}")
+                try:
+                    push_daily_summary(self.bot_nav, self.account_equity)
+                except Exception:
+                    pass
         except Exception as exc:
             log.error(f"Shutdown git sync failed: {exc}")
             try:

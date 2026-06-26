@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Graceful HANOON stop: shutdown file + SIGTERM → git sync + IB disconnect → Ollama unload
+# Graceful HANOON stop: shutdown file + SIGTERM → git sync + IB disconnect
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="${LOG_DIR:-$ROOT/logs}"
@@ -23,23 +23,44 @@ else
   touch "$SHUTDOWN_FILE"
 fi
 
-# ── 2. SIGTERM the Python process (runs _shutdown: report, git push, IB disconnect) ─
-HPID=""
+# ── 2. Collect all scalper PIDs (file + process search) ─────────────────────
+PIDS=()
 if [ -f "$PID_FILE" ]; then
   HPID=$(tr -d '[:space:]' <"$PID_FILE" 2>/dev/null || true)
+  if [ -n "$HPID" ] && kill -0 "$HPID" 2>/dev/null; then
+    PIDS+=("$HPID")
+  fi
+fi
+while IFS= read -r pid; do
+  [ -n "$pid" ] || continue
+  skip=0
+  for existing in "${PIDS[@]:-}"; do
+    [ "$existing" = "$pid" ] && skip=1 && break
+  done
+  [ "$skip" -eq 1 ] || PIDS+=("$pid")
+done < <(pgrep -f "main.py --mode scalper" 2>/dev/null || true)
+
+if [ ${#PIDS[@]} -eq 0 ]; then
+  echo "   No running HANOON scalper found"
+  rm -f "$PID_FILE" "$SHUTDOWN_FILE"
+  exit 0
 fi
 
-if [ -n "$HPID" ] && kill -0 "$HPID" 2>/dev/null; then
-  echo "   Sending SIGTERM to HANOON pid $HPID..."
-  kill -TERM "$HPID" 2>/dev/null || true
-else
-  echo "   PID file missing or stale — searching for scalper process..."
-  pkill -TERM -f "main.py --mode scalper" 2>/dev/null || true
-  HPID=$(pgrep -f "main.py --mode scalper" 2>/dev/null | head -1 || true)
-fi
+echo "   Sending SIGTERM to: ${PIDS[*]}"
+for pid in "${PIDS[@]}"; do
+  kill -TERM "$pid" 2>/dev/null || true
+done
 
 elapsed=0
-while [ -n "$HPID" ] && kill -0 "$HPID" 2>/dev/null && [ "$elapsed" -lt "$WAIT_SEC" ]; do
+while [ "$elapsed" -lt "$WAIT_SEC" ]; do
+  alive=0
+  for pid in "${PIDS[@]}"; do
+    if kill -0 "$pid" 2>/dev/null; then
+      alive=1
+      break
+    fi
+  done
+  [ "$alive" -eq 0 ] && break
   sleep 2
   elapsed=$((elapsed + 2))
   if [ $((elapsed % 10)) -eq 0 ]; then
@@ -47,9 +68,18 @@ while [ -n "$HPID" ] && kill -0 "$HPID" 2>/dev/null && [ "$elapsed" -lt "$WAIT_S
   fi
 done
 
-if [ -n "$HPID" ] && kill -0 "$HPID" 2>/dev/null; then
-  echo "⚠️  Bot still running after ${WAIT_SEC}s — sending SIGKILL"
-  kill -KILL "$HPID" 2>/dev/null || true
+still_alive=()
+for pid in "${PIDS[@]}"; do
+  if kill -0 "$pid" 2>/dev/null; then
+    still_alive+=("$pid")
+  fi
+done
+
+if [ ${#still_alive[@]} -gt 0 ]; then
+  echo "⚠️  Bot still running after ${WAIT_SEC}s — sending SIGKILL to ${still_alive[*]}"
+  for pid in "${still_alive[@]}"; do
+    kill -KILL "$pid" 2>/dev/null || true
+  done
   sleep 1
   pkill -KILL -f "main.py --mode scalper" 2>/dev/null || true
 fi
