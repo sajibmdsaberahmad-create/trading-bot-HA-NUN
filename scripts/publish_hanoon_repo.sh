@@ -32,7 +32,7 @@ cp .gitignore.hanoon "$WORKDIR/.gitignore"
 cp README.md "$WORKDIR/"
 
 # Scripts (trading only)
-for f in start_hanoon.sh stop_hanoon.sh start_git_sync.sh git_auto_push.sh bootstrap_from_release.sh publish_hanoon_repo.sh; do
+for f in start_hanoon.sh stop_hanoon.sh start_git_sync.sh git_auto_push.py bootstrap_from_release.sh publish_hanoon_repo.sh release_hanoon.sh; do
   [ -f "scripts/$f" ] && cp "scripts/$f" "$WORKDIR/scripts/"
 done
 chmod +x "$WORKDIR/scripts/"*.sh "$WORKDIR"/*.sh "$WORKDIR"/*.command 2>/dev/null || true
