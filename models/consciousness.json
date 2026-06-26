@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 152,
   "training_sessions": 28,
-  "trades_observed": 206,
+  "trades_observed": 207,
   "scans_performed": 28,
-  "improvements_applied": 451,
+  "improvements_applied": 453,
   "reports_generated": 27,
   "event_log": [
     {
@@ -21026,6 +21026,49 @@
           "Review trade_closed on MARA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:51:22.561575",
+      "age": "5d 7h 48m 33s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #452",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.61,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RKLB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:51:33.143229",
+      "age": "5d 7h 48m 44s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:51:33.457104",
+      "age": "5d 7h 48m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #453",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:48:56.370357",
@@ -22384,7 +22427,7 @@
     }
   ],
   "last_training": "2026-06-25T20:07:35.278799",
-  "mood": "recalibrating",
+  "mood": "defensive",
   "total_pnl": 123549.53000000004,
   "win_history": [
     0.0,
@@ -22592,20 +22635,21 @@
     0.0,
     -2.01,
     9.54,
-    0.92
+    0.92,
+    0.0
   ],
-  "consecutive_wins": 2,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 21,
-  "veteran_xp": 2850,
+  "veteran_xp": 2860,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 76
   },
-  "flights_completed": 201,
-  "hours_flown": 20.100000000000016,
+  "flights_completed": 202,
+  "hours_flown": 20.200000000000017,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22634,7 +22678,7 @@
     "COI": 3,
     "RIV": 5,
     "RKL": 9,
-    "SOF": 10,
+    "SOF": 11,
     "AST": 4
   },
   "best_streak": 4,
@@ -22642,5 +22686,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-212.36 recent). Tightening entries until edge returns."
+  "mood_message": "Win rate 15% \u00b7 $-172.36. Preserving capital over action."
 }
