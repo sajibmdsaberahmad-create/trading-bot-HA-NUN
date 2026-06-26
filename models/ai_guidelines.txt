@@ -630,3 +630,7 @@ green_profit_lock:ai_stall quick_scalp +732.71% (peak +732.71%)
 Observed loss_streak — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +732.71% (peak +732.71%)
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:58.843384+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
