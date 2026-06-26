@@ -92,3 +92,19 @@ Root cause: The event is missed profit hunts due to a high spike top (SPIKE_TOP_
 🧭 COMMANDER LEARNING | 2026-06-26T15:13:14.006450+00:00
 Observed rth_open — recorded for learning.
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:13:25.411484+00:00
+Observed market_data_failure — recorded for learning.
+MD 10197 ib_10197: No market data during competing live session
+
+🧭 COMMANDER LEARNING | 2026-06-26T15:13:25.412586+00:00
+Observed market_data_failure — recorded for learning.
+MD 10197 ib_10197: No market data during competing live session
+
+🧭 COMMANDER LEARNING | 2026-06-26T15:13:25.668998+00:00
+Observed market_data_failure — recorded for learning.
+MD 10197 ib_10197: No market data during competing live session
+
+🧭 COMMANDER LEARNING | 2026-06-26T15:13:25.723552+00:00
+Observed market_data_failure — recorded for learning.
+MD 10197 ib_10197: No market data during competing live session
+
