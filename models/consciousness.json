@@ -5,16 +5,9 @@
   "training_sessions": 32,
   "trades_observed": 243,
   "scans_performed": 32,
-  "improvements_applied": 519,
-  "reports_generated": 30,
+  "improvements_applied": 520,
+  "reports_generated": 31,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T19:20:03.536564",
-      "age": "3d 8h 17m 14s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #72",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T19:25:01.915704",
       "age": "3d 8h 22m 13s",
@@ -21998,6 +21991,22 @@
         },
         "parent_version": "v20260626_202340"
       }
+    },
+    {
+      "timestamp": "2026-06-26T20:30:54.308911",
+      "age": "5d 9h 28m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #520",
+      "metadata": {
+        "source": "commander_chat",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T20:29:52.755708",
@@ -23647,7 +23656,7 @@
       "parent_version": "v20260626_202340"
     }
   ],
-  "last_training": "2026-06-26T20:23:40.859193",
+  "last_training": "2026-06-26T20:30:48.996763",
   "mood": "recalibrating",
   "total_pnl": 123053.26000000007,
   "win_history": [
