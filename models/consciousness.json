@@ -5,16 +5,9 @@
   "training_sessions": 33,
   "trades_observed": 243,
   "scans_performed": 33,
-  "improvements_applied": 521,
+  "improvements_applied": 522,
   "reports_generated": 32,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T20:00:28.381970",
-      "age": "3d 8h 57m 39s",
-      "type": "TRAIN",
-      "message": "Training session #5",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T20:00:28.388443",
       "age": "3d 8h 57m 39s",
@@ -22129,6 +22122,22 @@
           }
         },
         "parent_version": "v20260626_203048"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:35:45.546699",
+      "age": "5d 9h 32m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #522",
+      "metadata": {
+        "source": "commander_chat",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
+        ]
       }
     }
   ],
