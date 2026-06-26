@@ -78,3 +78,10 @@ The root cause is a missing or incorrect historical data service.
 Observed market_data_failure — recorded for learning.
 MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52920
 
+🧭 COMMANDER LEARNING | 2026-06-26T13:40:48.328786+00:00
+The trade event occurred during the opening session, with a spike top and negative movement.
+The root cause was an overreliance on technical analysis for profit hunting. The spike top indicated potential upside but failed to capture the momentum.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in the algorithm can help attract more opportunistic exits.)
+  - MAX_FAKEOUT_RISK_ENTER → 0.35 (A higher risk limit for fakeouts is needed to prevent loss mitigation.)
+

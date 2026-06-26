@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 407,
+  "improvements_applied": 408,
   "reports_generated": 27,
   "event_log": [
     {
@@ -19896,6 +19896,35 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #128",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T13:40:48.283363",
+      "age": "5d 2h 37m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #408",
+      "metadata": {
+        "source": "runtime_rth_open",
+        "summary": "The trade event occurred during the opening session, with a spike top and negative movement.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Increased confidence in the algorithm can help attract more opportunistic exits.",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "MAX_FAKEOUT_RISK_ENTER",
+            "value": 0.35,
+            "reason": "A higher risk limit for fakeouts is needed to prevent loss mitigation.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'An increased confidence level is needed to make profitable trades.'}"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T13:40:36.762173",

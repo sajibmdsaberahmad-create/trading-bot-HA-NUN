@@ -358,5 +358,29 @@
     "lessons": [
       "Review market_data_failure on RKLB"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T13:40:48.329882+00:00",
+    "source": "runtime_rth_open",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Increased confidence in the algorithm can help attract more opportunistic exits.",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MAX_FAKEOUT_RISK_ENTER": {
+        "param": "MAX_FAKEOUT_RISK_ENTER",
+        "value": 0.35,
+        "reason": "A higher risk limit for fakeouts is needed to prevent loss mitigation.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "The trade event occurred during the opening session, with a spike top and negative movement.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'An increased confidence level is needed to make profitable trades.'}"
+    ]
   }
 ]

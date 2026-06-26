@@ -1,1 +1,16 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "Increased confidence in the algorithm can help attract more opportunistic exits.",
+    "ok": true,
+    "msg": "applied"
+  },
+  "MAX_FAKEOUT_RISK_ENTER": {
+    "param": "MAX_FAKEOUT_RISK_ENTER",
+    "value": 0.35,
+    "reason": "A higher risk limit for fakeouts is needed to prevent loss mitigation.",
+    "ok": true,
+    "msg": "applied"
+  }
+}
