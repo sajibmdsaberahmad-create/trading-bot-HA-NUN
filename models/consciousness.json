@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 152,
   "training_sessions": 28,
-  "trades_observed": 201,
+  "trades_observed": 203,
   "scans_performed": 28,
-  "improvements_applied": 445,
+  "improvements_applied": 446,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20907,6 +20907,34 @@
           "Review council_timeout on RKLB"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:50:30.726367",
+      "age": "5d 7h 47m 42s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:50:30.937124",
+      "age": "5d 7h 47m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #446",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:50:35.158330",
+      "age": "5d 7h 47m 46s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-26T18:48:56.370357",
@@ -22468,20 +22496,22 @@
     0.0,
     -10.83,
     0.0,
+    0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 10,
+  "consecutive_losses": 12,
   "worst_streak": 21,
-  "veteran_xp": 2760,
+  "veteran_xp": 2780,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 72
   },
-  "flights_completed": 196,
-  "hours_flown": 19.60000000000001,
+  "flights_completed": 198,
+  "hours_flown": 19.80000000000001,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22502,7 +22532,7 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 10,
+    "PLT": 11,
     "LCI": 8,
     "RIO": 13,
     "QS": 5,
@@ -22510,7 +22540,7 @@
     "COI": 3,
     "RIV": 5,
     "RKL": 8,
-    "SOF": 9,
+    "SOF": 10,
     "AST": 4
   },
   "best_streak": 4,
