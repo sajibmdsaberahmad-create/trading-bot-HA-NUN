@@ -171,6 +171,17 @@ def record_market_data_failure(
     prev = denylist.get(ticker, {})
     failures = int(prev.get("failures", 0)) + 1
     cd = cooldown_sec(cfg, failures)
+    state = ""
+    transient = False
+    try:
+        from core.market_hours import get_market_state
+        state = get_market_state(cfg)
+        from core.rth_session import is_transient_md_failure
+        transient = is_transient_md_failure(cfg, code=code, pattern=pattern, state=state)
+        if transient:
+            cd = min(cd, float(getattr(cfg, "MD_TRANSIENT_COOLDOWN_SEC", 90.0)))
+    except Exception:
+        pass
     skip_until = now + cd
 
     entry = {
@@ -186,6 +197,8 @@ def record_market_data_failure(
         "first_seen": prev.get("first_seen") or datetime.now(timezone.utc).isoformat(),
         "last_seen": datetime.now(timezone.utc).isoformat(),
         "source": source,
+        "market_state": state,
+        "transient": transient,
     }
     denylist[ticker] = entry
     _save_denylist(denylist)

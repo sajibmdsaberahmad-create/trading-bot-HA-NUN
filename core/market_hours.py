@@ -139,6 +139,11 @@ def is_regular_session(cfg: Optional[BotConfig] = None) -> bool:
     return get_market_state(cfg) == "open"
 
 
+def is_rth_open(cfg: Optional[BotConfig] = None) -> bool:
+    """True during regular trading hours 09:30–16:00 ET."""
+    return is_regular_session(cfg)
+
+
 def should_use_extended_hours_orders(cfg: Optional[BotConfig] = None) -> bool:
     """True when IB orders need outsideRth (pre, after, overnight)."""
     cfg = cfg or BotConfig()
