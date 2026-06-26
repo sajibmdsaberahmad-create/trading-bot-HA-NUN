@@ -126,13 +126,20 @@ class LiveAILine:
                 return False
             return True
 
-    def ring(self, ticker: str, task: str, full_prompt: str, fingerprint: str) -> bool:
+    def ring(
+        self,
+        ticker: str,
+        task: str,
+        full_prompt: str,
+        fingerprint: str,
+        **gate_kw,
+    ) -> bool:
         """Start async Ollama call — returns immediately."""
         if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
             return False
         try:
             from core.council_nanny import should_ring_council
-            ok, reason = should_ring_council(self.cfg, task)
+            ok, reason = should_ring_council(self.cfg, task, **gate_kw)
             if not ok:
                 log.debug(f"Council ring skipped {ticker}/{task}: {reason}")
                 return False
