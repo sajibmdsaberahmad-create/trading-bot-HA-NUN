@@ -2364,6 +2364,15 @@ class ScalperRunner:
                     log.warning(f"⚠️ {warn}")
             except Exception:
                 pass
+            if getattr(self.cfg, "COUNCIL_NANNY_MODE", True):
+                from core.council_nanny import prefetch_enabled, learning_ring_enabled
+                log.info(
+                    f"🛡️ Council NANNY: RPM preserved for profit path | "
+                    f"prefetch={'on' if prefetch_enabled(self.cfg) else 'off'} | "
+                    f"learning_ring={'on' if learning_ring_enabled(self.cfg) else 'off'} | "
+                    f"entry council when spike≥{getattr(self.cfg, 'COUNCIL_NANNY_MIN_SPIKE', 1.25)}x "
+                    f"score≥{getattr(self.cfg, 'COUNCIL_NANNY_MIN_SCORE', 55):.0f}"
+                )
         else:
             log.warning("🧠 Cloud council: OFF — set COUNCIL_ENABLED=true and GROQ_API_KEY in .env")
         if getattr(self.cfg, "AI_FULL_CONTROL", True):
