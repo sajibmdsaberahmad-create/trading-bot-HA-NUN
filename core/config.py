@@ -94,6 +94,11 @@ class BotConfig:
     IB_HOST:       str  = "127.0.0.1"
     IB_PORT:       int  = 4002     # 4002/4001 = IB Gateway, 7497 = TWS paper, 7496 = TWS live
     IB_CLIENT_ID:  int  = 1       # IB API client ID (use 1–10; must be unique per connection)
+    # IB reqMarketDataType: 1=Live, 2=Frozen, 3=Delayed, 4=Delayed frozen
+    IB_MARKET_DATA_TYPE: int = int(os.getenv("IB_MARKET_DATA_TYPE", "1"))
+    IB_FORCE_LIVE_MARKET_DATA: bool = os.getenv(
+        "IB_FORCE_LIVE_MARKET_DATA", "true",
+    ).lower() in ("1", "true", "yes")
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
     # Paper $1M+ account: AI sizes from IB equity, learns without small-account caps
     AI_PAPER_FREE_LEARNING: bool = os.getenv(

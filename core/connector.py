@@ -87,6 +87,7 @@ class IBConnector:
 
             self._last_event_ts = time.time()
             self._last_reconnect_ts = time.time()
+            self._apply_market_data_type()
             if self.fill_cache is None:
                 try:
                     from core.fill_reconciler import FillExecutionCache
