@@ -122,6 +122,29 @@ From the full **trading-bot-HA-NUN** workspace, push a fresh clean bundle to thi
 ./scripts/publish_hanoon_repo.sh
 ```
 
+### Automatic updates (enabled by default)
+
+While HANOON runs on your dev machine, the **clean algo repo auto-updates** when:
+
+| Event | What syncs |
+|-------|------------|
+| **Bot shutdown** | Full clean snapshot (code, PPO, learning, encrypted env) |
+| **Model release** | After PPO retrain / new `ppo_trader.zip` |
+| **Daily IB learning** | After end-of-day analyze + PPO train |
+| **Git sync daemon** | Dev workspace → `trading-bot-HA-NUN` (full history) |
+
+Config in `.env`:
+
+```bash
+GITHUB_CLEAN_ALGO_REPO=sajibmdsaberahmad-create/HANOON
+HANOON_CLEAN_REPO_AUTO_PUBLISH=true
+HANOON_CLEAN_PUBLISH_MIN_SEC=3600   # min 1h between auto publishes
+```
+
+Manual publish anytime: `./scripts/publish_hanoon_repo.sh`
+
+Other repos (Grandmaster, Logs) are unchanged.
+
 This copies only essential files + encrypts env. Other repos are untouched.
 
 ---
