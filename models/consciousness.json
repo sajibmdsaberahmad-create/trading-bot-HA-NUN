@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 399,
+  "improvements_applied": 401,
   "reports_generated": 27,
   "event_log": [
     {
@@ -19626,6 +19626,50 @@
           {
             "param": "CONFIDENCE_THRESHOLD",
             "value": 0.59,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T12:33:54.365833",
+      "age": "5d 1h 31m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #401",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.57,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T12:33:54.365938",
+      "age": "5d 1h 31m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #401",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.57,
             "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
             "ok": true,
             "msg": "applied"
