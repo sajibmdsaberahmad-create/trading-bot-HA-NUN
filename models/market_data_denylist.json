@@ -416,53 +416,5 @@
     "source": "fetch:1 min",
     "market_state": "open",
     "transient": false
-  },
-  "SOFI": {
-    "ticker": "SOFI",
-    "failures": 1,
-    "last_code": 162,
-    "last_reason": "IB returned no historical data. Possible causes:\n  - Market data subscription does not cover this ticker\n  - IB Gateway is not fully logged in\n  - Outside data availability window\n  - Paper account may need a market data subscription",
-    "pattern": "no_historical_data",
-    "exchange": "",
-    "primary_exchange": "",
-    "skip_until": 1782489154.9320939,
-    "skip_until_iso": "2026-06-26T15:52:34.932094+00:00",
-    "first_seen": "2026-06-26T15:47:34.934725+00:00",
-    "last_seen": "2026-06-26T15:47:34.934740+00:00",
-    "source": "fetch:1 min",
-    "market_state": "open",
-    "transient": false
-  },
-  "PLTR": {
-    "ticker": "PLTR",
-    "failures": 1,
-    "last_code": 162,
-    "last_reason": "IB returned no historical data. Possible causes:\n  - Market data subscription does not cover this ticker\n  - IB Gateway is not fully logged in\n  - Outside data availability window\n  - Paper account may need a market data subscription",
-    "pattern": "no_historical_data",
-    "exchange": "",
-    "primary_exchange": "",
-    "skip_until": 1782489215.4735758,
-    "skip_until_iso": "2026-06-26T15:53:35.473576+00:00",
-    "first_seen": "2026-06-26T15:48:35.476341+00:00",
-    "last_seen": "2026-06-26T15:48:35.476350+00:00",
-    "source": "fetch:1 min",
-    "market_state": "open",
-    "transient": false
-  },
-  "MARA": {
-    "ticker": "MARA",
-    "failures": 1,
-    "last_code": 162,
-    "last_reason": "IB returned no historical data. Possible causes:\n  - Market data subscription does not cover this ticker\n  - IB Gateway is not fully logged in\n  - Outside data availability window\n  - Paper account may need a market data subscription",
-    "pattern": "no_historical_data",
-    "exchange": "",
-    "primary_exchange": "",
-    "skip_until": 1782489276.0469189,
-    "skip_until_iso": "2026-06-26T15:54:36.046919+00:00",
-    "first_seen": "2026-06-26T15:49:36.055837+00:00",
-    "last_seen": "2026-06-26T15:49:36.055855+00:00",
-    "source": "fetch:1 min",
-    "market_state": "open",
-    "transient": false
   }
 }
