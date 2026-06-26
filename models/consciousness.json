@@ -2,40 +2,12 @@
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 160,
-  "training_sessions": 30,
+  "training_sessions": 31,
   "trades_observed": 243,
-  "scans_performed": 30,
+  "scans_performed": 31,
   "improvements_applied": 516,
   "reports_generated": 29,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T17:17:31.527356",
-      "age": "3d 6h 14m 42s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #60",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T17:28:13.946173",
-      "age": "3d 6h 25m 25s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #61",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T17:33:06.129132",
-      "age": "3d 6h 30m 17s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #62",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T17:41:50.836752",
-      "age": "3d 6h 39m 2s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #63",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T17:46:17.874275",
       "age": "3d 6h 43m 29s",
@@ -21736,6 +21708,43 @@
       "age": "5d 9h 19m 25s",
       "type": "AWAKEN",
       "message": "Consciousness awakened #160",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:23:19.860573",
+      "age": "5d 9h 20m 31s",
+      "type": "SCAN",
+      "message": "Market scan #31",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": "live_ib"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:23:19.887058",
+      "age": "5d 9h 20m 31s",
+      "type": "TRAIN",
+      "message": "Training session #31",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:23:19.899491",
+      "age": "5d 9h 20m 31s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": 0.0,
+        "vix_regime": "low",
+        "timestamp": "2026-06-26T20:23:19.899486"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:23:19.911730",
+      "age": "5d 9h 20m 31s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
       "metadata": {}
     }
   ],
