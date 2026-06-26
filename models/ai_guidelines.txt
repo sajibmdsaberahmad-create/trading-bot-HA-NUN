@@ -85,3 +85,7 @@ The root cause was an overreliance on technical analysis for profit hunting. The
   - CONFIDENCE_THRESHOLD → 0.58 (Increased confidence in the algorithm can help attract more opportunistic exits.)
   - MAX_FAKEOUT_RISK_ENTER → 0.35 (A higher risk limit for fakeouts is needed to prevent loss mitigation.)
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:04:36.224279+00:00
+The event 'rth_open' occurred with real-time data in the live IB bar.
+Root cause: The event is missed profit hunts due to a high spike top (SPIKE_TOP_MIN_GAIN_PCT) within the guardrails. A high gain percentage prevents profitable exits.
+
