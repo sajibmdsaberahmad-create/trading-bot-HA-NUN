@@ -43,5 +43,23 @@
     "lessons": [
       "Review loss_streak on RKLB"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:39:25.665662+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-26T18:39:34.230516+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on MARA"
+    ]
   }
 ]

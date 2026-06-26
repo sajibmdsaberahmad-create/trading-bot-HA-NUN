@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review loss_streak on COIN",
     "ping - are you there ?",
     "Hi",
     "Commander: off_hours_review",
@@ -103,11 +102,11 @@
     "Commander: stop_breach",
     "Review loss_streak on PLTR",
     "Review loss_streak on RKLB",
-    "Review trade_closed on RKLB"
+    "Review trade_closed on RKLB",
+    "Commander: green_profit_lock:ai_stall quick_scalp +733.90% (peak +733.90%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 16,
-  "updated": "2026-06-26T18:38:54.168257"
-}  "updated": "2026-06-26T18:38:54.168094"
+  "trades_observed": 20,
+  "updated": "2026-06-26T18:39:34.133103"
 }

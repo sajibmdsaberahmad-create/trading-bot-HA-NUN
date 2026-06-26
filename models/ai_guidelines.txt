@@ -409,3 +409,11 @@ stop_breach
 Observed loss_streak — recorded for learning.
 stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:39:25.663024+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +733.90% (peak +733.90%)
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:39:34.229407+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
