@@ -948,6 +948,8 @@ class BotConfig:
     )
     COUNCIL_BACKEND: str = os.getenv("COUNCIL_BACKEND", "groq")  # groq | gemini | auto
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_API_KEYS: str = os.getenv("GROQ_API_KEYS", "")  # comma-separated extra keys
+    GROQ_API_KEY_2: str = os.getenv("GROQ_API_KEY_2", "")
     GEMINI_API_KEY: str = os.getenv(
         "GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", "")
     )

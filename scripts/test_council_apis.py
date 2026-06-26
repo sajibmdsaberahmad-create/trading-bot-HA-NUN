@@ -25,7 +25,9 @@ from dotenv import load_dotenv
 
 load_dotenv(ROOT / ".env")
 
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+from core.config import BotConfig
+from core.groq_pool import parse_groq_keys
+
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 GROQ_MODELS = [
@@ -46,34 +48,29 @@ PROMPT = (
 
 
 def _test_groq(key: str, model: str) -> dict:
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": "HANOON council — JSON only."},
-            {"role": "user", "content": PROMPT},
-        ],
-        "temperature": 0.3,
-        "max_tokens": 80,
-    }
-    req = urllib.request.Request(
-        GROQ_URL,
-        data=json.dumps(payload).encode(),
-        method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {key}",
-        },
-    )
+    """Test Groq via official SDK (urllib gets Cloudflare 403 on some networks)."""
     t0 = time.time()
     try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            body = json.loads(resp.read().decode())
+        from groq import Groq
+
+        client = Groq(api_key=key)
+        completion = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "HANOON council — JSON only."},
+                {"role": "user", "content": PROMPT},
+            ],
+            temperature=0.3,
+            max_completion_tokens=80,
+            timeout=20.0,
+        )
         ms = (time.time() - t0) * 1000
-        text = (body.get("choices") or [{}])[0].get("message", {}).get("content", "")
-        return {"ok": bool(text), "ms": round(ms), "sample": text[:120], "error": ""}
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")[:200]
-        return {"ok": False, "ms": 0, "sample": "", "error": f"HTTP {exc.code}: {detail}"}
+        text = (completion.choices[0].message.content or "").strip()
+        if text:
+            return {"ok": True, "ms": round(ms), "sample": text[:120], "error": ""}
+        return {"ok": False, "ms": round(ms), "sample": "", "error": "empty_response"}
+    except ImportError:
+        return {"ok": False, "ms": 0, "sample": "", "error": "pip install groq"}
     except Exception as exc:
         return {"ok": False, "ms": 0, "sample": "", "error": str(exc)[:200]}
 
@@ -110,7 +107,7 @@ def main() -> int:
     parser.add_argument("--quick", action="store_true", help="Test default models only")
     args = parser.parse_args()
 
-    groq_key = (os.getenv("GROQ_API_KEY") or "").strip()
+    groq_keys = parse_groq_keys(BotConfig())
     gem_key = (os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or "").strip()
 
     print("=" * 60)
@@ -121,18 +118,21 @@ def main() -> int:
     gem_models = GEMINI_MODELS[:1] if args.quick else GEMINI_MODELS
 
     best_groq = None
-    if groq_key:
-        print("\nGroq:")
-        for model in groq_models:
-            r = _test_groq(groq_key, model)
-            status = "OK" if r["ok"] else "FAIL"
-            print(f"  [{status}] {model} — {r['ms']}ms")
-            if r["ok"]:
-                print(f"       {r['sample'][:80]}")
-                if best_groq is None:
-                    best_groq = (model, r["ms"])
-            else:
-                print(f"       {r['error']}")
+    if groq_keys:
+        print(f"\nGroq ({len(groq_keys)} key(s)):")
+        for i, groq_key in enumerate(groq_keys, 1):
+            suffix = groq_key[-4:] if len(groq_key) > 4 else "?"
+            print(f"  Key {i} [...{suffix}]:")
+            for model in groq_models:
+                r = _test_groq(groq_key, model)
+                status = "OK" if r["ok"] else "FAIL"
+                print(f"    [{status}] {model} — {r['ms']}ms")
+                if r["ok"]:
+                    print(f"         {r['sample'][:80]}")
+                    if best_groq is None:
+                        best_groq = (model, r["ms"])
+                else:
+                    print(f"         {r['error']}")
     else:
         print("\nGroq: SKIP (no GROQ_API_KEY)")
 

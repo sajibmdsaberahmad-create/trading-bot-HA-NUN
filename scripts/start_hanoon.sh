@@ -259,8 +259,11 @@ ensure_gh() {
 ensure_gh
 
 # ── 3. Cloud council keys ───────────────────────────────────────────────────
+GROQ_KEY_COUNT=0
 if [ -n "${GROQ_API_KEY:-}" ]; then
-  echo "✅ Groq API key loaded"
+  GROQ_KEY_COUNT=1
+  [ -n "${GROQ_API_KEY_2:-}" ] && GROQ_KEY_COUNT=$((GROQ_KEY_COUNT + 1))
+  echo "✅ Groq API key(s) loaded ($GROQ_KEY_COUNT account(s) — round-robin for higher limits)"
 else
   echo "⚠️  GROQ_API_KEY not set — council will use Gemini only (if configured)"
 fi

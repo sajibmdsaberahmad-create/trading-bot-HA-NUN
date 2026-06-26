@@ -87,14 +87,23 @@ def _generative_rth_enabled(cfg: BotConfig) -> bool:
     return bool(getattr(cfg, "COUNCIL_GENERATIVE_RTH_ENABLED", False))
 
 
+def _groq_capacity_multiplier(cfg: BotConfig) -> int:
+    try:
+        from core.groq_pool import groq_key_count
+        return max(1, groq_key_count(cfg))
+    except Exception:
+        return 1
+
+
 def _max_per_minute(cfg: BotConfig, purpose: str) -> int:
+    mult = _groq_capacity_multiplier(cfg)
     if purpose == PURPOSE_DECISION:
-        return int(getattr(cfg, "COUNCIL_DECISION_MAX_PER_MIN", 28))
+        return int(getattr(cfg, "COUNCIL_DECISION_MAX_PER_MIN", 28)) * mult
     if purpose in (PURPOSE_NOTIFY, PURPOSE_COPILOT):
-        return int(getattr(cfg, "COUNCIL_NOTIFY_MAX_PER_MIN", 6))
+        return int(getattr(cfg, "COUNCIL_NOTIFY_MAX_PER_MIN", 6)) * mult
     if purpose == PURPOSE_RUNTIME:
-        return int(getattr(cfg, "COUNCIL_RUNTIME_MAX_PER_MIN", 3))
-    return int(getattr(cfg, "COUNCIL_MISC_MAX_PER_MIN", 4))
+        return int(getattr(cfg, "COUNCIL_RUNTIME_MAX_PER_MIN", 3)) * mult
+    return int(getattr(cfg, "COUNCIL_MISC_MAX_PER_MIN", 4)) * mult
 
 
 def _min_gap_sec(cfg: BotConfig, purpose: str) -> float:

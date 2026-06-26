@@ -2,8 +2,7 @@
 """
 core/council_client.py — Cloud LLM council (Groq primary, Gemini fallback).
 
-Replaces local Ollama for live trading decisions, notifications, and chart vision.
-Uses stdlib HTTP only — no extra SDK required.
+Groq uses the official `groq` Python SDK (passes Cloudflare); Gemini uses stdlib HTTP.
 """
 
 from __future__ import annotations
@@ -45,7 +44,13 @@ class CouncilClient:
         return bool(self.groq_key() or self.gemini_key())
 
     def groq_key(self) -> str:
-        return (getattr(self.cfg, "GROQ_API_KEY", "") or "").strip()
+        from core.groq_pool import parse_groq_keys
+        keys = parse_groq_keys(self.cfg)
+        return keys[0] if keys else (getattr(self.cfg, "GROQ_API_KEY", "") or "").strip()
+
+    def groq_key_count(self) -> int:
+        from core.groq_pool import groq_key_count
+        return groq_key_count(self.cfg)
 
     def gemini_key(self) -> str:
         return (
@@ -229,7 +234,11 @@ class CouncilClient:
             }
         providers = []
         if self.groq_key():
-            providers.append(f"groq:{self._groq_model()}")
+            n = self.groq_key_count()
+            label = f"groq:{self._groq_model()}"
+            if n > 1:
+                label += f" x{n} keys"
+            providers.append(label)
         if self.gemini_key():
             providers.append(f"gemini:{self._gemini_model()}")
         return {
@@ -322,6 +331,67 @@ class CouncilClient:
         *,
         notify: bool = False,
     ) -> Tuple[Optional[str], str]:
+        from core.groq_pool import get_groq_pool
+
+        pool = get_groq_pool(self.cfg)
+        if pool is not None:
+            errors: List[str] = []
+            tries = max(pool.size, 1)
+            for _ in range(tries):
+                key = pool.next_key()
+                if not key:
+                    break
+                try:
+                    client = pool.client_for(key)
+                    start = time.time()
+                    completion = client.chat.completions.create(
+                        model=model,
+                        messages=[
+                            {"role": "system", "content": system},
+                            {"role": "user", "content": prompt},
+                        ],
+                        temperature=self._temperature(),
+                        max_completion_tokens=self._max_tokens(notify=notify),
+                        timeout=float(self._timeout(notify=notify)),
+                    )
+                    elapsed = (time.time() - start) * 1000
+                    text = str(
+                        (completion.choices[0].message.content or "")
+                    ).strip()
+                    if text:
+                        suffix = key[-4:] if len(key) > 4 else "?"
+                        log.debug(
+                            f"Groq {model} [...{suffix}]: {elapsed:.0f}ms | {len(text)} chars"
+                        )
+                        return text, ""
+                    errors.append("empty_response")
+                except ImportError:
+                    log.warning("groq package missing — pip install groq")
+                    break
+                except Exception as exc:
+                    self._error_count += 1
+                    err = str(exc)
+                    if "429" in err or "rate_limit" in err.lower():
+                        pool.mark_rate_limited(key)
+                        errors.append("429")
+                        continue
+                    if "413" in err or "too large" in err.lower():
+                        log.warning(
+                            f"Groq request too large for {model} — try llama-3.1-8b-instant"
+                        )
+                        return None, "413"
+                    errors.append(err[:40])
+            if pool.all_exhausted():
+                self._groq_429_until = time.time() + 30.0
+                log.warning("All Groq keys rate-limited — falling back to Gemini")
+                return None, "429"
+            if errors:
+                return None, errors[0]
+
+        primary = self.groq_key()
+        if not primary:
+            return None, "no_groq_key"
+
         payload = {
             "model": model,
             "messages": [
@@ -333,7 +403,7 @@ class CouncilClient:
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.groq_key()}",
+            "Authorization": f"Bearer {primary}",
         }
         try:
             start = time.time()
