@@ -123,3 +123,7 @@ Observed rth_open — recorded for learning.
 Observed market_data_failure — recorded for learning.
 MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52904
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:33:17.908304+00:00
+Market data failure occurred with a no historical data error message.
+The event is triggered when the market service returns an error message 'Historical Market Data Service error message: API historical data query cancelled: 52907' after the historical data has been queried.
+

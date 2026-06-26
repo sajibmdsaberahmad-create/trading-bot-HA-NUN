@@ -4,13 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: Bracket_exit occurs when a stop-loss hit is triggered after taking profit into momentum, preventing opportunistic exits. We need to analyze the entry strategy to understand why this might happen.",
-    "Review ib_failure on RIOT",
-    "Commander: IB order rejected (201)",
-    "Review ib_failure on QS",
-    "Review ib_failure on PLTR",
-    "5",
-    "%",
     "Commander: Why: Hard_take_profit occurs when the price goes above the entry point. The profit threshold of 10% is high and may not be sufficient.",
     "T",
     "d",
@@ -103,10 +96,17 @@
     "Commander: The event 'rth_open' occurred in the live trading environment, which is a good indication that the market was open and ready for trade. The key parameters are CONFIDENCE_THRESHOLD set to 0.58, with a reason related to the confidence level o",
     "No clean data on CHPT (no_historical_data) \u2014 profit hunt elsewhere.",
     "Review market_data_failure on CHPT",
-    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52904"
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52904",
+    "No clean data on FCEL (no_historical_data) \u2014 profit hunt elsewhere.",
+    "1",
+    "A",
+    "b",
+    "q",
+    "u",
+    "Commander: The event is triggered when the market service returns an error message 'Historical Market Data Service error message: API historical data query cancelled: 52907' after the historical data has been queried."
   ],
   "last_thought": "```json\n{\n    \"gut_feel\": {\n        \"profit_probability\": 63.5,\n        \"direction\": \"high\"\n    },\n    \"intuition\": {\n        \"false_positives\": 20,\n        \"fakeouts\": 15\n    }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:32:20.148206"
+  "updated": "2026-06-26T15:33:17.867791"
 }
