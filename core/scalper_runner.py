@@ -1294,6 +1294,82 @@ class ScalperRunner:
             except Exception as exc:
                 log.debug(f"Session-end IB learning schedule: {exc}")
 
+    def _on_rth_open(self, old_state: str) -> None:
+        """
+        Bell at 09:30 ET — immediate shift to live RTH mode even if bot ran since pre-market.
+        Refreshes streams, clears flaky pre-market MD blocks, forces live scanner rescan.
+        """
+        today = now_et().strftime("%Y-%m-%d")
+        if self._rth_open_day == today:
+            return
+        self._rth_open_day = today
+        self._day_session_ended = False
+
+        status = rth_status_line(self.cfg)
+        log.info(f"🔔 RTH OPEN ({old_state} → open) | {status}")
+        log.info(f"  🧠 {ai_session_context_block(self.cfg)}")
+
+        cleared = clear_transient_md_blocks(self.cfg)
+        if cleared:
+            self._contract_blacklist -= {t.upper() for t in cleared}
+
+        teach_profit_hunt_lesson(
+            self.autopilot, self.consciousness,
+            "RTH open — super alert: opening noise, ride real volume, protect capital.",
+        )
+        self._observe_runtime(
+            "rth_open",
+            old_state=old_state,
+            tier=rth_tier(self.cfg),
+            cleared_md=cleared[:20],
+        )
+
+        if getattr(self.cfg, "RTH_OPEN_STREAM_REFRESH", True):
+            for ticker in list(self._target_monitors.keys()):
+                self._stop_target_stream(ticker)
+            self._scan_data_cache.clear()
+            self._bar_warm_due = True
+            self._bar_warm_idx = 0
+            self._queue_locked_stream_repairs()
+
+        if getattr(self.cfg, "RTH_OPEN_FORCE_RESCAN", True):
+            self._last_scan_time = 0.0
+            self._needs_initial_scan = True
+            log.info("  🔍 RTH open — forcing live IB universe rescan")
+
+        try:
+            from core.ai_session_limits import maybe_refresh_session_limits
+            maybe_refresh_session_limits(self, min_interval_sec=0.0)
+        except Exception:
+            pass
+
+        if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
+            try:
+                send_dynamic_notification(
+                    self.notifier, self.autopilot, "rth_open",
+                    self._notify_context({"tier": rth_tier(self.cfg), "old_state": old_state}),
+                    f"🔔 RTH OPEN — super alert mode\n{status}",
+                    ai_commander=self.ai_commander,
+                    consciousness=self.consciousness,
+                    pilot=self.pilot,
+                )
+            except Exception:
+                pass
+
+    def _queue_locked_stream_repairs(self) -> None:
+        """Schedule stream (re)starts on main loop — safe outside IB callbacks."""
+        if not self._locked_targets:
+            return
+        wanted = stream_ticker_list(self._locked_targets, self.cfg)
+        held = set(self._held_tickers())
+        modes = assign_stream_modes(
+            wanted, self.cfg, held=held, tick_denied=self._tick_limit_denied,
+        )
+        for ticker, mode in modes.items():
+            if mode == "skip":
+                continue
+            self._stream_repair[ticker.upper()] = mode
+
     def _ai_skip_ticker_permanent(self, ticker: str, reason: str) -> str:
         """IB / venue failure — learn + rotate focus (no permanent block in learn mode)."""
         cd = failure_cooldown_sec(self.cfg)
@@ -1377,16 +1453,35 @@ class ScalperRunner:
         message: str,
         entry: Dict[str, Any],
     ) -> None:
-        """IB 162/420/etc. — stop stream, drop from locks, learn, rotate to tradeable names."""
+        """IB 162/420/etc. — learn, rotate; soft-fail outside RTH for flaky HMDS."""
         if not ticker:
             return
         pattern = str(entry.get("pattern", "md_failure"))
         reason = f"MD {code} {pattern}: {message[:100]}"
+        if entry.get("transient"):
+            log.info(
+                f"  ⏳ MD transient {ticker}: HMDS outside RTH — keep lock, streams only "
+                f"({reason[:80]})"
+            )
+            self._observe_runtime(
+                "market_data_failure",
+                ticker=ticker,
+                reason=reason,
+                ib_code=code,
+                pattern=pattern,
+                transient=True,
+                market_state=get_market_state(self.cfg),
+            )
+            self._queue_locked_stream_repairs()
+            return
+
         log.info(f"  🚫 MD skip {ticker}: {reason[:120]}")
         prim = str(entry.get("primary_exchange", "") or "").upper()
         if prim in ("PINK", "OTC", "OTCBB", "ARCAEDGE", "GREY", "GRAY") or pattern in (
-            "no_historical_data", "no_md_permission", "otc_limited",
+            "no_md_permission", "otc_limited",
         ):
+            self._contract_blacklist.add(ticker)
+        elif pattern == "no_historical_data" and is_rth(self.cfg):
             self._contract_blacklist.add(ticker)
         self._stop_target_stream(ticker)
         self._scan_data_cache.pop(ticker, None)
@@ -1427,7 +1522,7 @@ class ScalperRunner:
                     self.top_pick = max(remaining, key=lambda t: t.rank_score)
             except Exception:
                 self.top_pick = max(remaining, key=lambda t: t.rank_score)
-            self._ensure_locked_streams(quiet=True)
+            self._queue_locked_stream_repairs()
 
     def _observe_runtime(self, event: str, **context: Any) -> None:
         try:
@@ -2492,6 +2587,8 @@ class ScalperRunner:
                         )
                     except Exception as exc:
                         log.debug(f"Market transition eval: {exc}")
+                    if market_state == "open" and old_state != "open":
+                        self._on_rth_open(old_state)
                     if old_state in ("open", "pre_market") and market_state in (
                         "after_hours", "overnight", "closed",
                     ):
@@ -2829,7 +2926,7 @@ class ScalperRunner:
         
         if fast and results:
             defer_mtf = not getattr(self.cfg, "SCAN_MTF_DURING_RTH", False)
-            market_open = get_market_state() == "OPEN"
+            market_open = get_market_state() == "open"
             if not (defer_mtf and market_open):
                 results.sort(key=lambda x: x.get("total_score", 0), reverse=True)
                 top_n = int(getattr(self.cfg, "SCAN_REFINE_TOP_N", 12))

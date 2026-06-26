@@ -137,10 +137,24 @@ def passes_pre_entry_gate(
         return True, ""
     min_sc = min_entry_scan_score(cfg)
     min_sp = min_entry_spike_ratio(cfg)
+    opening_note = ""
+    try:
+        from core.rth_session import apply_opening_entry_adjustments
+        min_sc, min_sp, opening_note = apply_opening_entry_adjustments(
+            cfg,
+            scan_score=scan_score,
+            spike_ratio=spike_ratio,
+            min_score=min_sc,
+            min_spike=min_sp,
+        )
+    except Exception:
+        pass
     if scan_score < min_sc:
-        return False, f"quality gate: score {scan_score:.0f} < {min_sc:.0f} (watching)"
+        suffix = f" | {opening_note}" if opening_note else ""
+        return False, f"quality gate: score {scan_score:.0f} < {min_sc:.0f} (watching){suffix}"
     if spike_ratio < min_sp:
-        return False, f"quality gate: vol {spike_ratio:.2f}x < {min_sp:.2f}x (watching)"
+        suffix = f" | {opening_note}" if opening_note else ""
+        return False, f"quality gate: vol {spike_ratio:.2f}x < {min_sp:.2f}x (watching){suffix}"
     fc = forecast or {}
     if float(fc.get("dir", 0)) < 0 and not fc.get("breakout"):
         sl = float(fc.get("spike_likelihood", 0))

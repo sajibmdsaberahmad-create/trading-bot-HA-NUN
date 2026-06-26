@@ -120,12 +120,26 @@ def min_confidence_for_state(cfg: Optional[BotConfig] = None, state: Optional[st
     try:
         from core.ai_learning_policy import learn_dont_block
         if learn_dont_block(cfg):
-            return float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+            base = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+            try:
+                from core.rth_session import is_rth_opening_window, opening_entry_adjustments
+                if is_rth_opening_window(cfg):
+                    base += opening_entry_adjustments(cfg).get("min_conf_add", 0.04)
+            except Exception:
+                pass
+            return base
     except Exception:
         pass
     state = state or get_market_state(cfg)
     if state == "open":
-        return float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+        base = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+        try:
+            from core.rth_session import is_rth_opening_window, opening_entry_adjustments
+            if is_rth_opening_window(cfg):
+                base += opening_entry_adjustments(cfg).get("min_conf_add", 0.04)
+        except Exception:
+            pass
+        return base
     if state == "pre_market":
         return float(getattr(cfg, "MIN_CONFIDENCE_PRE_MARKET", 0.70))
     if state == "after_hours":
