@@ -425,3 +425,7 @@ stop_breach
 Observed trade_closed — recorded for learning.
 stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:49:53.302467+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
