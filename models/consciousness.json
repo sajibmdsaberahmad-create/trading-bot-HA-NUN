@@ -3,31 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 216,
+  "trades_observed": 217,
   "scans_performed": 28,
-  "improvements_applied": 472,
+  "improvements_applied": 473,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-22T08:55:50.936391",
-      "age": "21h 53m 2s",
-      "type": "CONTEXT",
-      "message": "Fetched market context",
-      "metadata": {
-        "spy_trend": "unknown",
-        "qqq_trend": "unknown",
-        "vix_level": null,
-        "vix_regime": "unknown",
-        "timestamp": "2026-06-22T08:55:50.936382"
-      }
-    },
-    {
-      "timestamp": "2026-06-22T08:55:50.936690",
-      "age": "21h 53m 2s",
-      "type": "REGIME",
-      "message": "Market regime: unknown (conf=0%)",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-22T08:55:53.908855",
       "age": "21h 53m 5s",
@@ -21313,6 +21293,27 @@
           "Review loss_streak on RIOT"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:55:51.082851",
+      "age": "5d 7h 53m 2s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:55:51.376149",
+      "age": "5d 7h 53m 2s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #473",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22889,20 +22890,21 @@
     -7.29,
     -4.1,
     0.0,
-    -1.31
+    -1.31,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 10,
+  "consecutive_losses": 11,
   "worst_streak": 21,
-  "veteran_xp": 2945,
+  "veteran_xp": 2955,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 76
   },
-  "flights_completed": 211,
-  "hours_flown": 21.10000000000003,
+  "flights_completed": 212,
+  "hours_flown": 21.20000000000003,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22927,7 +22929,7 @@
     "LCI": 8,
     "RIO": 16,
     "QS": 5,
-    "MAR": 17,
+    "MAR": 18,
     "COI": 4,
     "RIV": 5,
     "RKL": 10,
