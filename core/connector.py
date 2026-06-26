@@ -56,6 +56,7 @@ class IBConnector:
         self._10197_count: int = 0
         self._10197_window_start: float = 0.0
         self._last_md_reclaim_ts: float = 0.0
+        self._pending_session_reclaim: bool = False
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -235,6 +236,21 @@ class IBConnector:
         if last_exc:
             raise last_exc
 
+    def request_session_reclaim(self) -> None:
+        """Schedule reclaim on main loop — never reconnect from IB error callbacks."""
+        self._pending_session_reclaim = True
+
+    def run_pending_session_reclaim(self) -> bool:
+        """Run deferred 10197 reclaim from the trading loop (safe event loop context)."""
+        if not self._pending_session_reclaim:
+            return True
+        self._pending_session_reclaim = False
+        try:
+            return self.reclaim_live_market_data_session()
+        except Exception as exc:
+            log.warning(f"IB session reclaim failed: {exc}")
+            return False
+
     def reclaim_live_market_data_session(self) -> bool:
         """
         Full disconnect/reconnect to reclaim live MD after 10197 competing session.
@@ -258,7 +274,7 @@ class IBConnector:
         pause = float(getattr(self.cfg, "IB_SESSION_RECLAIM_PAUSE_SEC", 3.0))
         time.sleep(pause)
         self._contract = None
-        if not self.connect():
+        if not self.connect(reclaim=True):
             return False
         self._apply_market_data_type(force=True)
         log.info("IB live market data session reclaimed — streams can restart")
@@ -428,14 +444,18 @@ class IBConnector:
                     self.ib.disconnect()
             except Exception:
                 pass
-            # After reconnect, pause briefly so IB can finish setup before scanner resumes
-            if self.connect(reclaim=False):
+            if self.connect(reclaim=(attempt >= 2)):
                 time.sleep(2)
                 self._reconnect_count += 1
                 log.info(f"Reconnected successfully. (total reconnects: {self._reconnect_count})")
                 if self.notifier:
                     self.notifier.reconnect_event(success=True)
                 return True
+            if attempt == 1:
+                try:
+                    self.prepare_fresh_connection()
+                except Exception as exc:
+                    log.debug(f"IB pre-reconnect reclaim: {exc}")
         
         log.error("All reconnection attempts failed.")
         if self.notifier:
