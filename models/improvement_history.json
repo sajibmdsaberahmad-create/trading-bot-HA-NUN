@@ -203,5 +203,14 @@
     "lessons": [
       "Review market_data_failure on PLTR"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T13:30:26.326292+00:00",
+    "source": "runtime_market_data_failure",
+    "adjustments": {},
+    "guidelines_summary": "Market data failure occurred due to a historical market data service error.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data failure occurred due to a historical market data service error, which prevented us from making informed decisions.'}"
+    ]
   }
 ]

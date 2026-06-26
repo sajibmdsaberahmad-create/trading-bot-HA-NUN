@@ -418,5 +418,19 @@
     "first_seen": "2026-06-26T13:29:21.290761+00:00",
     "last_seen": "2026-06-26T13:29:21.305539+00:00",
     "source": "ib_error"
+  },
+  "MARA": {
+    "ticker": "MARA",
+    "failures": 2,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52898",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "NASDAQ",
+    "skip_until": 1782481521.835876,
+    "skip_until_iso": "2026-06-26T13:45:21.835876+00:00",
+    "first_seen": "2026-06-26T13:30:21.823390+00:00",
+    "last_seen": "2026-06-26T13:30:21.836006+00:00",
+    "source": "ib_error"
   }
 }
