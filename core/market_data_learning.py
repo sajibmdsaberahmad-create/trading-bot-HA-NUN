@@ -286,6 +286,30 @@ def record_fetch_failure(
     )
 
 
+def clear_transient_md_blocks(cfg: BotConfig) -> list:
+    """
+    Clear short-lived HMDS denylist entries — call at RTH open so pre-market
+  timeouts do not block liquid names for the rest of the day.
+    """
+    if not getattr(cfg, "MARKET_DATA_LEARN_ENABLED", True):
+        return []
+    denylist = _load_denylist()
+    cleared: list = []
+    for ticker, entry in list(denylist.items()):
+        pattern = str(entry.get("pattern", ""))
+        failures = int(entry.get("failures", 0))
+        if pattern == "no_historical_data" and failures <= 4:
+            cleared.append(ticker)
+            denylist.pop(ticker, None)
+    if cleared:
+        _save_denylist(denylist)
+        log.info(
+            f"  🔓 RTH open — cleared transient MD skips: {', '.join(cleared[:12])}"
+            + ("…" if len(cleared) > 12 else "")
+        )
+    return cleared
+
+
 def denylist_stats() -> Dict[str, Any]:
     data = _load_denylist()
     now = time.time()

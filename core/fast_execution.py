@@ -163,6 +163,11 @@ def warm_budget_sec(cfg: BotConfig) -> float:
 
 
 def fast_monitor_interval(cfg: BotConfig) -> float:
+    try:
+        from core.rth_session import rth_monitor_interval_sec
+        return rth_monitor_interval_sec(cfg)
+    except Exception:
+        pass
     if ai_fast_execution(cfg):
         base = float(getattr(cfg, "FAST_MONITOR_SEC", 0.15))
         if bool(getattr(cfg, "PROFIT_LOCK_ULTRA_FAST", True)):
@@ -179,6 +184,15 @@ def main_loop_sec(
     in_profit: bool = False,
 ) -> float:
     """IB sleep between loop iterations — faster when locked or in profit."""
+    try:
+        from core.rth_session import rth_main_loop_sec
+        rth_sleep = rth_main_loop_sec(
+            cfg, in_position=in_position, have_targets=have_targets, in_profit=in_profit,
+        )
+        if rth_sleep is not None:
+            return rth_sleep
+    except Exception:
+        pass
     if in_position:
         if in_profit and ai_fast_execution(cfg):
             base = float(getattr(cfg, "POSITION_LOOP_IN_PROFIT_SEC", 0.1))
@@ -329,10 +343,17 @@ def apply_micro_spike_boost(
 
 
 def skip_historical_prefetch(cfg: BotConfig) -> bool:
-    """Fast lock uses live stream bars — avoid HMDS 162 on OTC names."""
-    if getattr(cfg, "PAPER_TRADING", False) and getattr(cfg, "PAPER_USE_HISTORICAL_BARS", True):
+    """Fast lock uses live stream bars — avoid HMDS 162 on OTC / pre-market names."""
+    if ai_fast_execution(cfg) and bool(getattr(cfg, "FAST_LOCK_SKIP_HISTORICAL", True)):
+        return True
+    try:
+        from core.rth_session import historical_prefetch_allowed
+        return not historical_prefetch_allowed(cfg)
+    except Exception:
+        pass
+    if getattr(cfg, "PAPER_TRADING", False) and getattr(cfg, "PAPER_USE_HISTORICAL_BARS", False):
         return False
-    return ai_fast_execution(cfg) and bool(getattr(cfg, "FAST_LOCK_SKIP_HISTORICAL", True))
+    return bool(getattr(cfg, "FAST_LOCK_SKIP_HISTORICAL", True))
 
 
 def entry_pending_block_sec(cfg: BotConfig) -> float:
