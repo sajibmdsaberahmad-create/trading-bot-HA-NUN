@@ -79,7 +79,12 @@ def _warm_scanner(ib, timeout_sec: float = 3.0) -> bool:
     return False
 
 
-def emergency_scan_universe(connector, cfg: BotConfig) -> List[str]:
+def emergency_scan_universe(
+    connector,
+    cfg: BotConfig,
+    *,
+    reason: str = "empty",
+) -> List[str]:
     """
     Last-resort universe when IB live scanner returns nothing — keeps bot trading.
     Curated US momentum list first; open USD positions with known US primary only.
@@ -134,10 +139,16 @@ def emergency_scan_universe(connector, cfg: BotConfig) -> List[str]:
             break
 
     if out:
-        log.warning(
-            f"⚠️ IB scanner empty — emergency universe: {len(out)} tickers "
-            f"({', '.join(out[:8])}{'…' if len(out) > 8 else ''})"
-        )
+        preview = f"{', '.join(out[:8])}{'…' if len(out) > 8 else ''}"
+        if reason == "deferred":
+            log.info(
+                f"📋 Startup curated universe: {len(out)} tickers ({preview}) "
+                "— IB live scanner deferred for instant lock"
+            )
+        else:
+            log.warning(
+                f"⚠️ IB scanner empty — emergency universe: {len(out)} tickers ({preview})"
+            )
     return out
 
 

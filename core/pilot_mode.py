@@ -13,7 +13,7 @@ import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 import numpy as np
 
@@ -43,11 +43,11 @@ def get_live_scan_universe(
     *,
     startup: bool = False,
     skip_ib_scanner: bool = False,
-) -> List[str]:
+) -> Tuple[List[str], str]:
     """Live IB scanner with instant emergency fallback so startup never blocks."""
     if not getattr(cfg, "USE_LIVE_IB_SCANNER", True):
         log.warning("USE_LIVE_IB_SCANNER is off — universe empty (static fallback disabled)")
-        return []
+        return [], "none"
 
     defer = skip_ib_scanner or (
         startup and getattr(cfg, "SCAN_DEFER_IB_ON_STARTUP", True)
@@ -55,7 +55,8 @@ def get_live_scan_universe(
     if defer:
         log.info("⚡ Instant startup universe — IB live scanner deferred")
         from core.scanner import emergency_scan_universe
-        return emergency_scan_universe(connector, cfg)
+        tickers = emergency_scan_universe(connector, cfg, reason="deferred")
+        return tickers, "startup_curated"
 
     tickers: List[str] = []
     retries = int(
@@ -91,13 +92,14 @@ def get_live_scan_universe(
 
     if not out and getattr(cfg, "SCAN_EMERGENCY_FALLBACK", True):
         from core.scanner import emergency_scan_universe
-        out = emergency_scan_universe(connector, cfg)
+        out = emergency_scan_universe(connector, cfg, reason="empty")
+        return out[: effective_scan_universe_max(cfg)], "emergency_fallback"
     elif not out:
         log.warning(
             "🔴 Live IB scanner returned 0 tickers — no fallback. "
             "Check IB Gateway login, market hours, and scanner subscription."
         )
-    return out[: effective_scan_universe_max(cfg)]
+    return out[: effective_scan_universe_max(cfg)], "ib_live"
 
 
 def is_ai_unlimited(cfg: BotConfig) -> bool:
