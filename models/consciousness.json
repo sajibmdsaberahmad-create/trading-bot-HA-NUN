@@ -3,18 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 235,
+  "trades_observed": 236,
   "scans_performed": 28,
   "improvements_applied": 501,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T13:01:56.023178",
-      "age": "3d 1h 59m 7s",
-      "type": "TRADE",
-      "message": "Observed trade: HYFM ? P&L=$+0.00",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T13:02:48.591904",
       "age": "3d 1h 59m 59s",
@@ -21371,6 +21364,13 @@
           "Review loss_streak on COIN"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:59:47.657585",
+      "age": "5d 7h 56m 58s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$-119.01",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22730,7 +22730,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "defensive",
-  "total_pnl": 123330.51000000005,
+  "total_pnl": 123211.50000000006,
   "win_history": [
     0.0,
     0.0,
@@ -22966,20 +22966,21 @@
     0.0,
     0.0,
     -60.64,
-    -1.0
+    -1.0,
+    -119.01
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 5,
   "worst_streak": 21,
-  "veteran_xp": 3185,
+  "veteran_xp": 3200,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 52,
+    "risk_management": 54,
     "entry_timing": 82
   },
-  "flights_completed": 230,
-  "hours_flown": 23.000000000000057,
+  "flights_completed": 231,
+  "hours_flown": 23.10000000000006,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -23000,7 +23001,7 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 16,
+    "PLT": 17,
     "LCI": 8,
     "RIO": 19,
     "QS": 5,
