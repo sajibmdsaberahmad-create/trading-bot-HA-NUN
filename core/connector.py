@@ -132,6 +132,25 @@ class IBConnector:
             )
             return False
 
+    def _cancel_ib_subscriptions(self, ib: IB) -> None:
+        """Cancel market data and realtime bars so IB releases the MD slot."""
+        try:
+            for t in list(ib.tickers()):
+                try:
+                    ib.cancelMktData(t.contract)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        try:
+            for rt in list(getattr(ib, "realTimeBars", ()) or ()):
+                try:
+                    ib.cancelRealTimeBars(rt)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
     def prepare_fresh_connection(self) -> int:
         """
         Clear zombie API sessions on IB Gateway before the real bot connects.
@@ -152,6 +171,7 @@ class IBConnector:
                     f"IB pre-connect: claimed client_id={cid} "
                     f"(released stale/zombie API session)"
                 )
+                self._cancel_ib_subscriptions(probe)
                 probe.disconnect()
                 time.sleep(pause)
                 self.cfg.IB_CLIENT_ID = cid

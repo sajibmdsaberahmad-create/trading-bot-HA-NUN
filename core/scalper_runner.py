@@ -7589,6 +7589,8 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"Local cleanup: {exc}")
 
+        self._stop_all_target_streams()
+
         if self.autopilot:
             try:
                 self.autopilot.stop()
