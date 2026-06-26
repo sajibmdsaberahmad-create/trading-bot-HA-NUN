@@ -28,18 +28,12 @@ export TZ="America/New_York"
 IB_PORT="${IB_PORT:-4002}"
 IB_HOST="${IB_HOST:-127.0.0.1}"
 
-# Pick lowest free IB client ID (1–10). Override with CLIENT_ID env var.
-pick_client_id() {
-  local id
-  for id in $(seq 1 10); do
-    if ! pgrep -f "main.py.*--client-id[ =]${id}([ ^]|$)" >/dev/null 2>&1; then
-      echo "$id"
-      return
-    fi
-  done
-  echo 1
-}
-CLIENT_ID="${CLIENT_ID:-$(pick_client_id)}"
+# HANOON uses a single fixed IB client ID (default 1). Do not auto-rotate —
+# extra client IDs leave ghost sessions that block live market data (IB 10197).
+CLIENT_ID="${CLIENT_ID:-1}"
+if pgrep -f "main.py.*--client-id[ =]${CLIENT_ID}([ ^]|$)" >/dev/null 2>&1; then
+  echo "⚠️  Another process already uses IB client_id=${CLIENT_ID} — stop it first (./stop.sh)"
+fi
 OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
 
 # Auto-pick model for 8GB with 2.5GB Ollama budget (override with OLLAMA_MODEL env)

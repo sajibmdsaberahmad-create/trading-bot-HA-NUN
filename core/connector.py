@@ -117,7 +117,8 @@ class IBConnector:
                 f"  3. Correct port? (Paper={self.cfg.IB_PORT}, Live=7496)\n"
                 "  4. Read-Only API = OFF?\n"
                 "  5. Allow connections from 127.0.0.1?\n"
-                f"  6. Client ID {self.cfg.IB_CLIENT_ID} not already in use?\n"
+                f"  6. Client ID {self.cfg.IB_CLIENT_ID} must be free — "
+                "bot never uses another ID (run ./stop.sh first)\n"
             )
             return False
 
