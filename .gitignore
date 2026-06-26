@@ -9,8 +9,13 @@
 .env
 *.pem
 *.key
+!secrets/sync.key
 credentials.json
 secrets.yaml
+secrets/*
+!secrets/.gitkeep
+!secrets/hanoon.env.enc
+!secrets/sync.key
 __pycache__/
 *.pyc
 *.pyo
