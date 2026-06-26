@@ -3848,7 +3848,10 @@ class ScalperRunner:
             self.cfg.TICKER = cfg_ticker
 
     def _prefetch_live_ai_hotline(self):
-        """Keep Ollama hotline ringing on locked watchlist — never blocks IB loop."""
+        """Council prefetch — off in nanny mode to preserve RPM for live entries."""
+        from core.council_nanny import prefetch_enabled
+        if not prefetch_enabled(self.cfg):
+            return
         if not self.ai_commander or not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
             return
         targets = self._locked_targets or []
