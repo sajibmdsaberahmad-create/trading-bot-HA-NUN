@@ -480,53 +480,5 @@
     "source": "fetch:1 min",
     "market_state": "open",
     "transient": false
-  },
-  "CHPT": {
-    "ticker": "CHPT",
-    "failures": 2,
-    "last_code": 162,
-    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52904",
-    "pattern": "no_historical_data",
-    "exchange": "SMART",
-    "primary_exchange": "NYSE",
-    "skip_until": 1782488833.653394,
-    "skip_until_iso": "2026-06-26T15:47:13.653394+00:00",
-    "first_seen": "2026-06-26T15:32:13.644704+00:00",
-    "last_seen": "2026-06-26T15:32:13.653867+00:00",
-    "source": "ib_error",
-    "market_state": "open",
-    "transient": false
-  },
-  "FCEL": {
-    "ticker": "FCEL",
-    "failures": 2,
-    "last_code": 162,
-    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52907",
-    "pattern": "no_historical_data",
-    "exchange": "SMART",
-    "primary_exchange": "NASDAQ",
-    "skip_until": 1782488894.09114,
-    "skip_until_iso": "2026-06-26T15:48:14.091140+00:00",
-    "first_seen": "2026-06-26T15:33:14.078911+00:00",
-    "last_seen": "2026-06-26T15:33:14.091691+00:00",
-    "source": "ib_error",
-    "market_state": "open",
-    "transient": false
-  },
-  "PLUG": {
-    "ticker": "PLUG",
-    "failures": 2,
-    "last_code": 162,
-    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52910",
-    "pattern": "no_historical_data",
-    "exchange": "SMART",
-    "primary_exchange": "NASDAQ",
-    "skip_until": 1782488954.639539,
-    "skip_until_iso": "2026-06-26T15:49:14.639539+00:00",
-    "first_seen": "2026-06-26T15:34:14.625484+00:00",
-    "last_seen": "2026-06-26T15:34:14.639851+00:00",
-    "source": "ib_error",
-    "market_state": "open",
-    "transient": false
   }
 }

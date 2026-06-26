@@ -132,3 +132,6 @@ Market data failure: The service returned an error message indicating no histori
 The market_data_failure event indicates that there is a problem with historical data availability, which might prevent the execution of trades or analyses. In this case, we need to identify the root cause and adjust the algorithmic trade strategy.
 • {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The current threshold value is too low (0.35). Adjusting it to a higher value might help increase opportunistic exits.'}
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:35:39.388791+00:00
+Observed rth_open — recorded for learning.
+

@@ -645,5 +645,14 @@
     "lessons": [
       "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The current threshold value is too low (0.35). Adjusting it to a higher value might help increase opportunistic exits.'}"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:35:39.392221+00:00",
+    "source": "runtime_rth_open",
+    "adjustments": {},
+    "guidelines_summary": "Observed rth_open \u2014 recorded for learning.",
+    "lessons": [
+      "Review rth_open on ?"
+    ]
   }
 ]
