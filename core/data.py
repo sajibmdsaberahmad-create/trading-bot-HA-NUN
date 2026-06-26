@@ -206,8 +206,14 @@ class DataManager:
 
     def _start_realtime_bars_fallback(self):
         contract = self._get_contract()
+        use_rth = False
+        try:
+            from core.rth_session import realtime_bars_use_rth
+            use_rth = realtime_bars_use_rth(self.cfg)
+        except Exception:
+            use_rth = True
         rt_bars = self.ib.reqRealTimeBars(
-            contract, barSize=5, whatToShow="TRADES", useRTH=True,
+            contract, barSize=5, whatToShow="TRADES", useRTH=use_rth,
         )
         rt_bars.updateEvent += self._on_realtime_bar_fallback
         self._realtime_handle = rt_bars
