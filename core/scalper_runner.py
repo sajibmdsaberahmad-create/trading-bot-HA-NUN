@@ -29,6 +29,16 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from core.market_hours import get_market_state, market_status_line, now_et, can_trade_now, is_extended_session, allowed_trading_sessions_label
+from core.rth_session import (
+    is_rth,
+    is_rth_opening_window,
+    is_pre_rth_countdown,
+    rth_status_line,
+    rth_tier,
+    ai_session_context_block,
+    apply_opening_entry_adjustments,
+    seconds_until_rth_open,
+)
 
 import numpy as np
 import pandas as pd
@@ -59,6 +69,7 @@ from core.market_data_learning import (
     filter_tradeable_tickers,
     record_fetch_failure,
     prompt_block as market_data_prompt_block,
+    clear_transient_md_blocks,
 )
 from core.deferred_council_learning import deferred_learning_enabled
 from core.capital_discipline import (
@@ -312,6 +323,7 @@ class ScalperRunner:
         self._last_market_state: Optional[str] = None
         self._last_market_closed_log: float = 0.0
         self._day_session_ended: bool = False
+        self._rth_open_day: Optional[str] = None
         self._entries_this_hour: int = 0
         self._hour_window_start: float = time.time()
         self._last_quality_watch_log: float = 0.0
