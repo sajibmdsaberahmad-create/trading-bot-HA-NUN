@@ -237,12 +237,11 @@ export LOSS_STREAK_RESUME_CONFIDENCE="${LOSS_STREAK_RESUME_CONFIDENCE:-0.52}"
 # Tick-by-tick (sub-second) is default — override stale .env that forced 5s-only paper mode
 export USE_TICK_STREAM=true
 export PAPER_REALTIME_BARS_ONLY=false
-export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-AllLast}"
-export HMDS_FETCH_TIMEOUT_SEC="${HMDS_FETCH_TIMEOUT_SEC:-12}"
-export IB_10197_PAPER_WARN_ONLY="${IB_10197_PAPER_WARN_ONLY:-true}"
-export PAPER_TICK_USE_ALLLAST=false
+export TICK_BY_TICK_TYPE=AllLast
 export HMDS_FETCH_TIMEOUT_SEC=12
-echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | tick-by-tick=on"
+export IB_10197_PAPER_WARN_ONLY=true
+export MD_SOFT_FAIL_HMDS=true
+echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | tick-by-tick=AllLast"
 
 # ── 2b. GitHub CLI (releases + artifact sync) ───────────────────────────────
 ensure_gh() {
