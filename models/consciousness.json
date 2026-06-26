@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 397,
+  "improvements_applied": 398,
   "reports_generated": 27,
   "event_log": [
     {
@@ -19582,6 +19582,28 @@
           {
             "param": "CONFIDENCE_THRESHOLD",
             "value": 0.63,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T12:31:56.850803",
+      "age": "5d 1h 29m 8s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #398",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.61,
             "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
             "ok": true,
             "msg": "applied"
