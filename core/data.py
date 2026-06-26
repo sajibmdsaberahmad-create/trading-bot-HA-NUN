@@ -220,7 +220,10 @@ class DataManager:
         rt_bars.updateEvent += self._on_realtime_bar_fallback
         self._realtime_handle = rt_bars
         self.conn.register_stream_manager(self.cfg.TICKER, self)
-        log.info("Real-time 5-second bar stream started (tick stream fallback mode).")
+        log.info(
+            f"Real-time 5-second bar stream started for {self.cfg.TICKER} "
+            f"(fallback — tick-by-tick unavailable)."
+        )
 
     def fallback_to_realtime_bars(self) -> None:
         """IB 10189/10190 — cancel dead tick-by-tick sub and start 5s bars immediately."""

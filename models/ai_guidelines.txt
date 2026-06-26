@@ -119,3 +119,7 @@ The event 'rth_open' occurred in the live trading environment, which is a good i
 🧭 COMMANDER LEARNING | 2026-06-26T15:30:38.767897+00:00
 Observed rth_open — recorded for learning.
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:32:20.202943+00:00
+Observed market_data_failure — recorded for learning.
+MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52904
+

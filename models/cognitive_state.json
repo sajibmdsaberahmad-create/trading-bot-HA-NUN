@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review trade_closed on QS",
-    "Review loss_streak on RIOT",
-    "u",
     "Commander: Bracket_exit occurs when a stop-loss hit is triggered after taking profit into momentum, preventing opportunistic exits. We need to analyze the entry strategy to understand why this might happen.",
     "Review ib_failure on RIOT",
     "Commander: IB order rejected (201)",
@@ -103,10 +100,13 @@
     "High confidence levels can be beneficial when making trades.",
     "Monitoring market conditions is crucial for successful trading.",
     "Adjusting confidence levels based on recent events helps in staying informed and making more informed decisions",
-    "Commander: The event 'rth_open' occurred in the live trading environment, which is a good indication that the market was open and ready for trade. The key parameters are CONFIDENCE_THRESHOLD set to 0.58, with a reason related to the confidence level o"
+    "Commander: The event 'rth_open' occurred in the live trading environment, which is a good indication that the market was open and ready for trade. The key parameters are CONFIDENCE_THRESHOLD set to 0.58, with a reason related to the confidence level o",
+    "No clean data on CHPT (no_historical_data) \u2014 profit hunt elsewhere.",
+    "Review market_data_failure on CHPT",
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52904"
   ],
   "last_thought": "```json\n{\n    \"gut_feel\": {\n        \"profit_probability\": 63.5,\n        \"direction\": \"high\"\n    },\n    \"intuition\": {\n        \"false_positives\": 20,\n        \"fakeouts\": 15\n    }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:30:38.733591"
+  "updated": "2026-06-26T15:32:20.148206"
 }
