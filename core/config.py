@@ -1190,6 +1190,9 @@ class BotConfig:
     ).lower() in ("1", "true", "yes")
     AI_RUNTIME_EVENT_MIN_SEC: float = float(os.getenv("AI_RUNTIME_EVENT_MIN_SEC", "25"))
     OFF_HOURS_TRAIN_INTERVAL_SEC: float = float(os.getenv("OFF_HOURS_TRAIN_INTERVAL_SEC", "3600"))
+    OFF_HOURS_SUSPEND_MARKET_DATA: bool = os.getenv(
+        "OFF_HOURS_SUSPEND_MARKET_DATA", "true",
+    ).lower() not in ("0", "false", "no")
 
     # Commander chat → self-improvement loop
     COMMANDER_LEARNING_ENABLED: bool = os.getenv(

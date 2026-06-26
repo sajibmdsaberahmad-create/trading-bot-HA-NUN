@@ -340,6 +340,7 @@ class ScalperRunner:
         self._bar_warm_due = False
         self._bar_warm_idx = 0
         self._stream_repair: Dict[str, str] = {}
+        self._md_suspended: bool = False
         self._bootstrap_entry_due = False
         self._lock_review_due = False
         self._lock_review_picks: List[Dict] = []
@@ -1312,6 +1313,33 @@ class ScalperRunner:
             return st["bracket"]
         return self._pending_brackets_by_ticker.get(ticker)
 
+    def _suspend_off_hours_market_data(self, market_state: str) -> None:
+        """Release IB market data streams when session is not tradable."""
+        if not getattr(self.cfg, "OFF_HOURS_SUSPEND_MARKET_DATA", True):
+            return
+        if self._md_suspended:
+            return
+        self._md_suspended = True
+        self.conn.set_market_data_active(False)
+        self._pending_session_reclaim = False
+        n = len(self._target_monitors)
+        if n:
+            log.info(
+                f"⏸ Off-hours ({market_state}) — releasing {n} market data stream(s)"
+            )
+            self._stop_all_target_streams()
+
+    def _resume_tradable_market_data(self) -> None:
+        """Re-open streams when pre-market/RTH returns."""
+        if not self._md_suspended:
+            return
+        self._md_suspended = False
+        self.conn.set_market_data_active(True)
+        if self._locked_targets:
+            log.info("📡 Session tradable — re-subscribing market data streams")
+            self._queue_locked_stream_repairs()
+            self._ensure_locked_streams(quiet=False)
+
     def _halt_trading_for_closed_market(self, market_state: str) -> None:
         """Cancel in-flight entry orders when session is not tradable."""
         if not (
@@ -1343,6 +1371,7 @@ class ScalperRunner:
             f"No new orders until next pre-market. Open brackets remain on IB."
         )
         self._halt_trading_for_closed_market(market_state)
+        self._suspend_off_hours_market_data(market_state)
         self._deferred_exits.clear()
         if getattr(self.cfg, "DAILY_IB_LEARNING_ON_SESSION_END", True):
             try:
@@ -2557,22 +2586,33 @@ class ScalperRunner:
                 if getattr(self, "_needs_initial_scan", False):
                     self._needs_initial_scan = False
                     self.ib.sleep(0.2)  # drain IB event queue before scan
-                    log.info("🔍 Startup scan: instant lock (IB scanner deferred)…")
-                    try:
-                        self._scan_and_rank(startup=True, skip_ib_scanner=True)
-                        log.info("✅ Startup lock complete — entering trading loop")
-                    except Exception as exc:
-                        log.error(f"Initial scan failed: {exc}")
-                    self._last_scan_time = time.time()
-                    if (
-                        getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", True)
-                        and getattr(self.cfg, "SCAN_RUN_DEFERRED_IB", True)
-                    ):
-                        self._deferred_ib_scan = True
+                    defer_scan = getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
+                    if defer_scan:
+                        log.info("🔍 Startup scan: instant lock (IB scanner deferred)…")
+                        try:
+                            self._scan_and_rank(startup=True, skip_ib_scanner=True)
+                        except Exception as exc:
+                            log.error(f"Initial scan failed: {exc}")
+                        if getattr(self.cfg, "SCAN_RUN_DEFERRED_IB", True):
+                            self._deferred_ib_scan = True
+                            log.info(
+                                "🔍 Live IB scanner queued — runs after streams start "
+                                f"(warmup {getattr(self.cfg, 'IB_SCANNER_WARMUP_SEC', 3):.0f}s)"
+                            )
+                    else:
+                        warmup = float(getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 5.0))
                         log.info(
-                            "🔍 Live IB scanner queued — runs after streams start "
-                            f"(warmup {getattr(self.cfg, 'IB_SCANNER_WARMUP_SEC', 3):.0f}s)"
+                            f"🔍 Startup scan: IB live scanner at boot "
+                            f"(warmup {warmup:.0f}s, then query IB)…"
                         )
+                        if warmup > 0:
+                            self.ib.sleep(warmup)
+                        try:
+                            self._scan_and_rank(startup=True, skip_ib_scanner=False)
+                        except Exception as exc:
+                            log.error(f"Initial scan failed: {exc}")
+                    log.info("✅ Startup lock complete — entering trading loop")
+                    self._last_scan_time = time.time()
 
                 in_position = self._in_any_position()
                 have_targets = bool(self._locked_targets)
@@ -2600,9 +2640,14 @@ class ScalperRunner:
                                 break
 
                 self._service_stream_repairs()
-                self.conn.run_pending_session_reclaim()
-                if self.conn.consume_resubscribe_pending():
-                    self._resubscribe_all_streams(force=True)
+                can_trade_md, _md_state = can_trade_now(self.cfg)
+                if can_trade_md:
+                    self._resume_tradable_market_data()
+                    self.conn.run_pending_session_reclaim()
+                    if self.conn.consume_resubscribe_pending():
+                        self._resubscribe_all_streams(force=True)
+                elif getattr(self.cfg, "OFF_HOURS_SUSPEND_MARKET_DATA", True):
+                    self._suspend_off_hours_market_data(_md_state)
 
                 if getattr(self, "_bootstrap_entry_due", False):
                     self._bootstrap_entry_due = False

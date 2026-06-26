@@ -62,6 +62,8 @@ class IBConnector:
         self._connectivity_handlers: list = []
         self._connectivity_lost: bool = False
         self._pending_resubscribe: bool = False
+        self._md_paused: bool = False
+        self._10197_last_log_ts: float = 0.0
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -539,6 +541,13 @@ class IBConnector:
         self._pending_resubscribe = False
         return True
 
+    def set_market_data_active(self, active: bool) -> None:
+        """Runner sets False during off-hours to suppress MD reclaim noise."""
+        self._md_paused = not active
+
+    def market_data_paused(self) -> bool:
+        return bool(self._md_paused)
+
     def _notify_connectivity(self, event: str) -> None:
         for handler in list(self._connectivity_handlers):
             try:
@@ -605,6 +614,8 @@ class IBConnector:
 
         # Competing live session — reclaim MD slot after repeated failures
         if errorCode == 10197:
+            if self._md_paused:
+                return
             now = time.time()
             if now < self._10197_storm_until:
                 if self._10197_count == 0:
@@ -616,7 +627,6 @@ class IBConnector:
                 self._10197_count += 1
                 return
             if self._connectivity_lost:
-                log.warning("IB 10197 — deferred until IB 1101 connectivity restore")
                 return
             self._apply_market_data_type(force=True)
             if now - self._10197_window_start > 20.0:
@@ -631,11 +641,15 @@ class IBConnector:
             ):
                 self._10197_count = 0
                 self._last_md_reclaim_ts = now
+                log.warning(
+                    f"IB 10197 burst ({threshold}+ errors) — scheduling session reclaim"
+                )
                 self.request_session_reclaim()
-            else:
+            elif now - self._10197_last_log_ts >= 5.0:
+                self._10197_last_log_ts = now
                 log.warning(
                     "IB 10197 competing session — forced LIVE "
-                    f"({self._10197_count}/{threshold} before reclaim)"
+                    f"({min(self._10197_count, threshold)}/{threshold} before reclaim)"
                 )
             return
 
