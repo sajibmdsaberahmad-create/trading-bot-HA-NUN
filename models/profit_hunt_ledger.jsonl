@@ -238,3 +238,5 @@
 {"timestamp":"2026-06-26T18:56:21.092448+00:00","event":"green_profit_lock","ticker":"RIOT","pnl_usd":0.0,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +421.71% (peak +0.00%)"}
 {"timestamp":"2026-06-26T18:56:37.912953+00:00","event":"green_profit_lock","ticker":"MARA","pnl_usd":20.4,"pnl_pct":0.0042,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +0.42% (peak +0.42%)","price":14.43,"ai_stalled":true}
 {"timestamp":"2026-06-26T18:56:40.426555+00:00","event":"green_profit_lock","ticker":"MARA","pnl_usd":0.0,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +0.42% (peak +0.42%)"}
+{"timestamp":"2026-06-26T18:57:01.598247+00:00","event":"hard_take_profit","ticker":"RIOT","pnl_usd":2957.46,"pnl_pct":1.988,"primary_goal":true,"reason":"hard_take_profit","price":83.87}
+{"timestamp":"2026-06-26T18:57:03.522974+00:00","event":"hard_take_profit","ticker":"RIOT","pnl_usd":-1.53,"source":"buffer","reason":"hard_take_profit"}

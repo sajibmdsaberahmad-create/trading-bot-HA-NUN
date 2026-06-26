@@ -602,3 +602,11 @@ Scanner+spike after timeout: score=81 vol=12288.0x prob=60% | ATR R:R 2.0
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.62 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:03.865257+00:00
+Observed loss_streak — recorded for learning.
+hard_take_profit
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:03.866010+00:00
+Observed trade_closed — recorded for learning.
+hard_take_profit
+
