@@ -88,6 +88,11 @@ class IBConnector:
             self._last_event_ts = time.time()
             self._last_reconnect_ts = time.time()
             self._apply_market_data_type()
+            try:
+                from core.market_data_learning import clear_competing_session_blocks
+                clear_competing_session_blocks()
+            except Exception:
+                pass
             if self.fill_cache is None:
                 try:
                     from core.fill_reconciler import FillExecutionCache
