@@ -1321,7 +1321,7 @@ class ScalperRunner:
             return
         self._md_suspended = True
         self.conn.set_market_data_active(False)
-        self._pending_session_reclaim = False
+        self.conn.clear_pending_session_reclaim()
         n = len(self._target_monitors)
         if n:
             log.info(
@@ -2613,6 +2613,9 @@ class ScalperRunner:
                             log.error(f"Initial scan failed: {exc}")
                     log.info("✅ Startup lock complete — entering trading loop")
                     self._last_scan_time = time.time()
+                    can_boot, boot_state = can_trade_now(self.cfg)
+                    if not can_boot and getattr(self.cfg, "OFF_HOURS_SUSPEND_MARKET_DATA", True):
+                        self._suspend_off_hours_market_data(boot_state)
 
                 in_position = self._in_any_position()
                 have_targets = bool(self._locked_targets)
@@ -3591,7 +3594,7 @@ class ScalperRunner:
 
     def _service_stream_repairs(self) -> None:
         """Restart streams outside IB error callbacks (avoids nested event loop)."""
-        if not self._stream_repair:
+        if self._md_suspended or not self._stream_repair:
             return
         for ticker, mode in list(self._stream_repair.items()):
             self._stream_repair.pop(ticker, None)

@@ -600,7 +600,7 @@ class BotConfig:
     SCAN_RUN_DEFERRED_IB: bool = os.getenv("SCAN_RUN_DEFERRED_IB", "true").lower() not in (
         "0", "false", "no",
     )
-    IB_SCANNER_WARMUP_SEC: float = float(os.getenv("IB_SCANNER_WARMUP_SEC", "3"))
+    IB_SCANNER_WARMUP_SEC: float = float(os.getenv("IB_SCANNER_WARMUP_SEC", "5"))
     PAPER_REALTIME_BARS_ONLY: bool = os.getenv("PAPER_REALTIME_BARS_ONLY", "true").lower() not in (
         "0", "false", "no",
     )

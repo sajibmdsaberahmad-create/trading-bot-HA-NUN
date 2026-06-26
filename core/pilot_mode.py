@@ -50,7 +50,7 @@ def get_live_scan_universe(
         return [], "none"
 
     defer = skip_ib_scanner or (
-        startup and getattr(cfg, "SCAN_DEFER_IB_ON_STARTUP", True)
+        startup and getattr(cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
     )
     if defer:
         log.info("⚡ Instant startup universe — IB live scanner deferred")

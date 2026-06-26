@@ -245,10 +245,18 @@ class IBConnector:
 
     def request_session_reclaim(self) -> None:
         """Schedule reclaim on main loop — never reconnect from IB error callbacks."""
+        if self._md_paused:
+            return
         self._pending_session_reclaim = True
+
+    def clear_pending_session_reclaim(self) -> None:
+        self._pending_session_reclaim = False
 
     def run_pending_session_reclaim(self) -> bool:
         """Run deferred 10197 reclaim from the trading loop (safe event loop context)."""
+        if self._md_paused:
+            self._pending_session_reclaim = False
+            return False
         if not self._pending_session_reclaim:
             return False
         self._pending_session_reclaim = False
