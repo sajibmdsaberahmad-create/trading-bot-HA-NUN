@@ -206,3 +206,4 @@
 {"timestamp":"2026-06-25T20:04:15.042564+00:00","event":"spike_top_exit","ticker":"RKLB","pnl_usd":472.56,"pnl_pct":0.0082,"primary_goal":true,"extended":true,"last_gain_pct":0.00086,"last_vol_ratio":0.281,"prev_gain_pct":0.00636,"prev_vol_ratio":3.466,"spike_detected":true,"bar":"prev","gain_pct":0.0063622754491018604,"vol_ratio":3.4657453726097684,"near_high":true,"reason":"spike_top_exit: +0.64% vol=3.5x","price":81.1}
 {"timestamp":"2026-06-25T20:04:35.266017+00:00","event":"wave_end_spike_fade","ticker":"COIN","pnl_usd":-27.97,"source":"buffer","reason":"wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading"}
 {"timestamp":"2026-06-25T20:05:03.435462+00:00","event":"spike_top_exit","ticker":"RKLB","pnl_usd":-157.52,"source":"buffer","reason":"spike_top_exit: +0.64% vol=3.5x"}
+{"timestamp":"2026-06-26T18:37:39.983722+00:00","event":"hard_stop","ticker":"MARA","pnl_usd":7.52,"pnl_pct":0.0014,"primary_goal":true,"reason":"hard_stop","price":14.7}

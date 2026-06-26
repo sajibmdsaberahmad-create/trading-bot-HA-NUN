@@ -359,3 +359,7 @@ Real-time event analysis is needed to determine the cause, occurrence time, and 
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Market data failure due to low confidence in execution speed.)
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:37:42.601911+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+

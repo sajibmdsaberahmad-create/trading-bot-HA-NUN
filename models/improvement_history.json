@@ -733,5 +733,14 @@
       "High execution speed can be achieved by optimizing live data availability",
       "Predicting market trends requires a comprehensive understanding of technical indicators."
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:37:42.604888+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on MARA"
+    ]
   }
 ]

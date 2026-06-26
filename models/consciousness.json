@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 150,
   "training_sessions": 28,
-  "trades_observed": 188,
+  "trades_observed": 189,
   "scans_performed": 28,
-  "improvements_applied": 426,
+  "improvements_applied": 427,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20520,6 +20520,27 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #150",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:37:42.216722",
+      "age": "5d 7h 34m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:37:42.557543",
+      "age": "5d 7h 34m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #427",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:36:48.075531",
@@ -21878,7 +21899,7 @@
     }
   ],
   "last_training": "2026-06-25T20:07:35.278799",
-  "mood": "conventional",
+  "mood": "recalibrating",
   "total_pnl": 123564.37000000004,
   "win_history": [
     0.0,
@@ -22068,20 +22089,21 @@
     0.0,
     0,
     -27.97,
-    -157.52
+    -157.52,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 19,
-  "worst_streak": 19,
-  "veteran_xp": 2610,
+  "consecutive_losses": 20,
+  "worst_streak": 20,
+  "veteran_xp": 2620,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 70
   },
-  "flights_completed": 183,
-  "hours_flown": 18.29999999999999,
+  "flights_completed": 184,
+  "hours_flown": 18.39999999999999,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22106,7 +22128,7 @@
     "LCI": 8,
     "RIO": 12,
     "QS": 5,
-    "MAR": 10,
+    "MAR": 11,
     "COI": 2,
     "RIV": 5,
     "RKL": 7,
@@ -22118,5 +22140,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "You are in a comfortable state with a low PNL and recent trading success."
+  "mood_message": "Four losses in a row ($-309.75 recent). Tightening entries until edge returns."
 }
