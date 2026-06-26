@@ -400,3 +400,7 @@
 {"timestamp":"2026-06-26T14:26:49.872620+00:00","event":"rth_open","old_state":"startup","tier":"rth","cleared_md":[]}
 {"timestamp":"2026-06-26T15:04:31.374782+00:00","event":"rth_open","old_state":"startup","tier":"rth","cleared_md":[]}
 {"timestamp":"2026-06-26T15:12:47.715349+00:00","event":"rth_open","old_state":"startup","tier":"rth","cleared_md":[]}
+{"timestamp":"2026-06-26T15:12:58.822750+00:00","event":"market_data_failure","ticker":"PLTR","reason":"MD 10197 ib_10197: No market data during competing live session","ib_code":10197,"pattern":"ib_10197","failures":1,"market_state":"open"}
+{"timestamp":"2026-06-26T15:12:58.840225+00:00","event":"market_data_failure","ticker":"RIOT","reason":"MD 10197 ib_10197: No market data during competing live session","ib_code":10197,"pattern":"ib_10197","failures":1,"market_state":"open"}
+{"timestamp":"2026-06-26T15:12:59.147364+00:00","event":"market_data_failure","ticker":"SOFI","reason":"MD 10197 ib_10197: No market data during competing live session","ib_code":10197,"pattern":"ib_10197","failures":2,"market_state":"open"}
+{"timestamp":"2026-06-26T15:12:59.395005+00:00","event":"market_data_failure","ticker":"MARA","reason":"MD 10197 ib_10197: No market data during competing live session","ib_code":10197,"pattern":"ib_10197","failures":1,"market_state":"open"}
