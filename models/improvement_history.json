@@ -546,5 +546,14 @@
       "Monitoring market conditions is crucial for successful trading.",
       "Adjusting confidence levels based on recent events helps in staying informed and making more informed decisions"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:30:38.768543+00:00",
+    "source": "runtime_rth_open",
+    "adjustments": {},
+    "guidelines_summary": "Observed rth_open \u2014 recorded for learning.",
+    "lessons": [
+      "Review rth_open on ?"
+    ]
   }
 ]
