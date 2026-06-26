@@ -290,5 +290,23 @@
     "lessons": [
       "Review council_timeout on RKLB"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:55:34.236449+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on RIOT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-26T18:55:34.243087+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on RIOT"
+    ]
   }
 ]

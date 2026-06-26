@@ -3,35 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 215,
+  "trades_observed": 216,
   "scans_performed": 28,
-  "improvements_applied": 470,
+  "improvements_applied": 472,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-22T08:55:43.250691",
-      "age": "21h 52m 54s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #5",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-22T08:55:50.935173",
-      "age": "21h 53m 2s",
-      "type": "SCAN",
-      "message": "Market scan #2",
-      "metadata": {
-        "source": "off_hours",
-        "tickers": 72
-      }
-    },
-    {
-      "timestamp": "2026-06-22T08:55:50.935945",
-      "age": "21h 53m 2s",
-      "type": "TRAIN",
-      "message": "Training session #2",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-22T08:55:50.936391",
       "age": "21h 53m 2s",
@@ -21302,6 +21278,41 @@
           "Review council_timeout on RKLB"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:55:33.825048",
+      "age": "5d 7h 52m 45s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$-1.31",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:55:34.086716",
+      "age": "5d 7h 52m 45s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #471",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:55:34.145724",
+      "age": "5d 7h 52m 45s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #472",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on RIOT"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22661,7 +22672,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "recalibrating",
-  "total_pnl": 123495.79000000005,
+  "total_pnl": 123494.48000000005,
   "win_history": [
     0.0,
     0.0,
@@ -22877,20 +22888,21 @@
     0.0,
     -7.29,
     -4.1,
-    0.0
+    0.0,
+    -1.31
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 9,
+  "consecutive_losses": 10,
   "worst_streak": 21,
-  "veteran_xp": 2935,
+  "veteran_xp": 2945,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 76
   },
-  "flights_completed": 210,
-  "hours_flown": 21.00000000000003,
+  "flights_completed": 211,
+  "hours_flown": 21.10000000000003,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22913,7 +22925,7 @@
     "GPU": 19,
     "PLT": 12,
     "LCI": 8,
-    "RIO": 15,
+    "RIO": 16,
     "QS": 5,
     "MAR": 17,
     "COI": 4,
@@ -22927,5 +22939,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-66.58 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-57.43 recent). Tightening entries until edge returns."
 }
