@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "No clean data on MARA (no_historical_data) \u2014 profit hunt elsewhere.",
-    "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data failure occurred due to a historical market data service error, which prevented us from making informed decisions.'}",
     "Commander: The event happened because the Market Data Service returned an error in historical market data.",
     "No clean data on RIOT (no_historical_data) \u2014 profit hunt elsewhere.",
     "Review market_data_failure on RIOT",
@@ -103,10 +101,12 @@
     "Commander: Scanner+spike after timeout: score=81 vol=1320.0x prob=60% | ATR R:R 2.0",
     "ping - are you there ?",
     "Hi",
-    "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- MARA: pnl=$-2.62 slip=0"
+    "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- MARA: pnl=$-2.62 slip=0",
+    "Review loss_streak on COIN",
+    "Review trade_closed on COIN"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 12,
-  "updated": "2026-06-26T18:54:39.371913"
+  "trades_observed": 16,
+  "updated": "2026-06-26T18:55:10.936180"
 }

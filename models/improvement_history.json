@@ -246,5 +246,32 @@
     "lessons": [
       "Review trade_closed on RKLB"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:54:48.941506+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on COIN"
+    ]
+  },
+  {
+    "timestamp": "2026-06-26T18:54:48.942701+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on COIN"
+    ]
+  },
+  {
+    "timestamp": "2026-06-26T18:55:11.009416+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
   }
 ]
