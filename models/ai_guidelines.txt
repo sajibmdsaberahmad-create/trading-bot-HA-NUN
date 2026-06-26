@@ -459,3 +459,7 @@ green_profit_lock:ai_stall quick_scalp +422.62% (peak +422.62%)
 Observed trade_closed — recorded for learning.
 hard_stop
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:50:52.522463+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
