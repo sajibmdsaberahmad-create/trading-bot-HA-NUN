@@ -1408,5 +1408,53 @@
       }
     },
     "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-25T20:07:35.137028\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval\n\u2022 Profit hunting: tune SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO \u2014 exit into momentum spikes, not passive giveback waits"
+  },
+  {
+    "timestamp": "2026-06-26T20:05:10.050760",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 0.5,
+      "institutional": 0.5,
+      "vwap_slope": 0.5,
+      "atr_bonus": 0.5,
+      "mean_reversion": 0.5,
+      "trend_filter": 0.5,
+      "price_rising": 0.5,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.5,
+      "_meta": {
+        "train_timestamp": "2026-06-26T20:04:37.619326",
+        "buffer_total": 6968,
+        "buffer_win_rate": 0.229,
+        "sources": {
+          "backtest": 1305,
+          "market_context": 26,
+          "scan_pick": 167,
+          "ai_scan": 320,
+          "live_entry": 184,
+          "consciousness": 235,
+          "live_trade": 1119,
+          "scan_complete": 37,
+          "ai_council": 1215,
+          "fill_slippage_abort": 86,
+          "runtime_observer": 503,
+          "early_exit": 22,
+          "ib_failure": 20,
+          "market_data_failure": 132,
+          "profit_hunt": 254,
+          "ppo_led": 326,
+          "ppo_entry": 226,
+          "deferred_council": 386,
+          "ppo_entry_eval": 193,
+          "shadow_trade": 2,
+          "ib_day_trade": 210
+        },
+        "missed_profit_hunts": 0,
+        "profit_hunt_events": 254
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-26T20:05:10.039468\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval\n\u2022 Profit hunting: tune SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO \u2014 exit into momentum spikes, not passive giveback waits"
   }
 ]

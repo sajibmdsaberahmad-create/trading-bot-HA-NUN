@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "S",
     "L",
     "y",
     "P",
@@ -103,10 +102,11 @@
     "Commander: green_profit_lock:ai_stall quick_scalp +0.41% (peak +0.41%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +732.71% (peak +732.71%)",
     "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- PLTR: pnl=$-7.26 slip=0",
-    "Commander: ib_day_learning:2026-06-25:IB day 2026-06-25: 210 trades, P&L $+124998.22"
+    "Commander: ib_day_learning:2026-06-25:IB day 2026-06-25: 210 trades, P&L $+124998.22",
+    "Commander: off_hours_review"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T20:04:35.894321"
+  "updated": "2026-06-26T20:05:14.707320"
 }
