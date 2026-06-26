@@ -904,6 +904,15 @@ class BotConfig:
     GITHUB_GRANDMASTER_REPO: str = os.getenv("GITHUB_GRANDMASTER_REPO", "sajibmdsaberahmad-create/trading-bot-Grandmaster")
     GITHUB_LOGS_REPO: str = os.getenv("GITHUB_LOGS_REPO", "sajibmdsaberahmad-create/trading-bot-Logs")
     GITHUB_ALGO_REPO: str = os.getenv("GITHUB_ALGO_REPO", "sajibmdsaberahmad-create/Algo")
+    GITHUB_CLEAN_ALGO_REPO: str = os.getenv(
+        "GITHUB_CLEAN_ALGO_REPO", "sajibmdsaberahmad-create/HANOON"
+    )
+    HANOON_CLEAN_REPO_AUTO_PUBLISH: bool = os.getenv(
+        "HANOON_CLEAN_REPO_AUTO_PUBLISH", "true"
+    ).lower() in ("1", "true", "yes")
+    HANOON_CLEAN_PUBLISH_MIN_SEC: float = float(
+        os.getenv("HANOON_CLEAN_PUBLISH_MIN_SEC", "3600")
+    )
     GITHUB_PAT: str = os.getenv("GITHUB_PAT", "")
     MAX_GIT_PUSH_RETRIES: int = 3
     GIT_PUSH_TIMEOUT_SEC: int = 30
