@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 209,
   "scans_performed": 28,
-  "improvements_applied": 457,
+  "improvements_applied": 458,
   "reports_generated": 27,
   "event_log": [
     {
@@ -21144,6 +21144,28 @@
         "applied": [],
         "lessons": [
           "Review loss_streak on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:54:06.550193",
+      "age": "5d 7h 51m 17s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #458",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.63,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RKLB"
         ]
       }
     }
