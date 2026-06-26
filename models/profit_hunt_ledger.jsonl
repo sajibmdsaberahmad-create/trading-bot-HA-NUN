@@ -226,3 +226,4 @@
 {"timestamp":"2026-06-26T18:53:38.123886+00:00","event":"green_profit_lock","ticker":"MARA","pnl_usd":10.16,"pnl_pct":0.0028,"primary_goal":true,"reason":"green_profit_lock:ai_stall_min_green +0.28%","price":14.43,"ai_stalled":true}
 {"timestamp":"2026-06-26T18:53:40.592025+00:00","event":"green_profit_lock","ticker":"MARA","pnl_usd":-7.62,"source":"buffer","reason":"green_profit_lock:ai_stall_min_green +0.28%"}
 {"timestamp":"2026-06-26T18:53:45.480172+00:00","event":"hard_stop","ticker":"PLTR","pnl_usd":8.33,"pnl_pct":0.0003,"primary_goal":true,"reason":"hard_stop","price":112.41}
+{"timestamp":"2026-06-26T18:54:19.667807+00:00","event":"hard_stop","ticker":"MARA","pnl_usd":0.08,"pnl_pct":0.0,"primary_goal":true,"reason":"hard_stop","price":14.39}

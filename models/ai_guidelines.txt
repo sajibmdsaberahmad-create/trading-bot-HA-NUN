@@ -495,3 +495,34 @@ Scanner+spike after timeout: score=81 vol=1320.0x prob=60% | ATR R:R 2.0
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.63 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:18.221268+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:18.267110+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:23.304609+00:00
+Observed loss_streak — recorded for learning.
+hard_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:23.304682+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:24.679379+00:00
+Could not parse AI plan — retained guidance for prompts only.
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- MARA: pnl=$-2.62 slip=0
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.66 (Loss streak — raise entry bar until pilot regains edge)
+  - VOLUME_SPIKE_MIN_RATIO → 1.35 (Loss streak — require stronger volume confirmation)
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:25.740870+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
