@@ -56,7 +56,12 @@ class IBConnector:
         self._10197_count: int = 0
         self._10197_window_start: float = 0.0
         self._last_md_reclaim_ts: float = 0.0
+        self._10197_reclaim_attempts: int = 0
+        self._10197_storm_until: float = 0.0
         self._pending_session_reclaim: bool = False
+        self._connectivity_handlers: list = []
+        self._connectivity_lost: bool = False
+        self._pending_resubscribe: bool = False
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -98,10 +103,10 @@ class IBConnector:
             try:
                 from core.market_data_learning import (
                     clear_competing_session_blocks,
-                    clear_hmds_transient_blocks,
+                    clear_reconnect_transient_blocks,
                 )
                 clear_competing_session_blocks()
-                clear_hmds_transient_blocks()
+                clear_reconnect_transient_blocks()
             except Exception:
                 pass
             if self.fill_cache is None:
@@ -164,7 +169,7 @@ class IBConnector:
             probe = IB()
             try:
                 probe.connect(host, port, clientId=cid, timeout=8)
-                probe.reqMarketDataType(1)
+                # Do not reqMarketDataType on probe — it grabs the live MD slot.
                 log.info(
                     f"IB pre-connect: reclaimed client_id={cid} "
                     f"(cancelled stale subscriptions, released zombie session)"
@@ -243,10 +248,14 @@ class IBConnector:
     def run_pending_session_reclaim(self) -> bool:
         """Run deferred 10197 reclaim from the trading loop (safe event loop context)."""
         if not self._pending_session_reclaim:
-            return True
+            return False
         self._pending_session_reclaim = False
         try:
-            return self.reclaim_live_market_data_session()
+            ok = self.reclaim_live_market_data_session()
+            if ok:
+                self._pending_resubscribe = True
+                self._notify_connectivity("resubscribe")
+            return ok
         except Exception as exc:
             log.warning(f"IB session reclaim failed: {exc}")
             return False
@@ -256,6 +265,18 @@ class IBConnector:
         Full disconnect/reconnect to reclaim live MD after 10197 competing session.
         Cancels streams first via registered handlers.
         """
+        storm_threshold = int(getattr(self.cfg, "IB_10197_STORM_THRESHOLD", 3))
+        storm_backoff = float(getattr(self.cfg, "IB_10197_STORM_BACKOFF_SEC", 300.0))
+        self._10197_reclaim_attempts += 1
+        if self._10197_reclaim_attempts >= storm_threshold:
+            self._10197_storm_until = time.time() + storm_backoff
+            self._10197_reclaim_attempts = 0
+            log.error(
+                f"IB 10197 reclaim storm — pausing reclaims for {storm_backoff:.0f}s. "
+                "Run ./stop.sh, quit IB Gateway fully, wait 60s, restart Gateway, "
+                "then ./START.command once."
+            )
+
         log.warning(
             "IB 10197 — reclaiming live market data slot "
             "(stop streams → disconnect → reconnect → LIVE)"
@@ -271,11 +292,13 @@ class IBConnector:
                 self.ib.disconnect()
         except Exception:
             pass
-        pause = float(getattr(self.cfg, "IB_SESSION_RECLAIM_PAUSE_SEC", 3.0))
+        base_pause = float(getattr(self.cfg, "IB_SESSION_RECLAIM_PAUSE_SEC", 8.0))
+        pause = base_pause * min(4, max(1, self._10197_reclaim_attempts))
         time.sleep(pause)
         self._contract = None
         if not self.connect(reclaim=True):
             return False
+        self._connectivity_lost = False
         self._apply_market_data_type(force=True)
         log.info("IB live market data session reclaimed — streams can restart")
         return True
@@ -447,6 +470,9 @@ class IBConnector:
             if self.connect(reclaim=(attempt >= 2)):
                 time.sleep(2)
                 self._reconnect_count += 1
+                self._connectivity_lost = False
+                self._pending_resubscribe = True
+                self._notify_connectivity("resubscribe")
                 log.info(f"Reconnected successfully. (total reconnects: {self._reconnect_count})")
                 if self.notifier:
                     self.notifier.reconnect_event(success=True)
@@ -500,6 +526,24 @@ class IBConnector:
         """Called before disconnect/reconnect to cancel live streams."""
         self._session_reclaim_handlers.append(handler)
 
+    def register_connectivity_handler(self, handler) -> None:
+        """Runner callback: connectivity_lost | data_lost | data_ok | resubscribe."""
+        self._connectivity_handlers.append(handler)
+
+    def consume_resubscribe_pending(self) -> bool:
+        """True once when streams must be re-requested after reconnect/reclaim."""
+        if not self._pending_resubscribe:
+            return False
+        self._pending_resubscribe = False
+        return True
+
+    def _notify_connectivity(self, event: str) -> None:
+        for handler in list(self._connectivity_handlers):
+            try:
+                handler(event)
+            except Exception as exc:
+                log.debug(f"Connectivity handler: {exc}")
+
     def register_stream_manager(self, ticker: str, manager: Any) -> None:
         """Per-ticker DataManager — immediate 5s-bar fallback on IB 10189/10190."""
         if ticker:
@@ -535,16 +579,51 @@ class IBConnector:
         if errorCode == 300 and "can't find eid" in (errorString or "").lower():
             return
 
+        # Connectivity lost / restored — IB docs 1100/1101/1102
+        if errorCode == 1100:
+            self._connectivity_lost = True
+            log.warning(
+                "IB 1100 — connectivity between IB and Gateway lost "
+                "(waiting for restore before MD reclaim)"
+            )
+            self._notify_connectivity("connectivity_lost")
+            return
+        if errorCode == 1101:
+            self._connectivity_lost = False
+            self._pending_resubscribe = True
+            log.warning(
+                "IB 1101 — connectivity restored, market data lost (re-subscribe required)"
+            )
+            self._notify_connectivity("data_lost")
+            return
+        if errorCode == 1102:
+            self._connectivity_lost = False
+            log.info("IB 1102 — connectivity restored, market data maintained")
+            self._notify_connectivity("data_ok")
+            return
+
         # Competing live session — reclaim MD slot after repeated failures
         if errorCode == 10197:
-            self._apply_market_data_type(force=True)
             now = time.time()
+            if now < self._10197_storm_until:
+                if self._10197_count == 0:
+                    remain = int(self._10197_storm_until - now)
+                    log.warning(
+                        f"IB 10197 — reclaim paused ({remain}s storm backoff). "
+                        "Quit Gateway fully, wait 60s, restart, then ./START.command"
+                    )
+                self._10197_count += 1
+                return
+            if self._connectivity_lost:
+                log.warning("IB 10197 — deferred until IB 1101 connectivity restore")
+                return
+            self._apply_market_data_type(force=True)
             if now - self._10197_window_start > 20.0:
                 self._10197_count = 0
                 self._10197_window_start = now
             self._10197_count += 1
             threshold = int(getattr(self.cfg, "IB_10197_RECLAIM_THRESHOLD", 3))
-            cooldown = float(getattr(self.cfg, "IB_10197_RECLAIM_COOLDOWN_SEC", 45.0))
+            cooldown = float(getattr(self.cfg, "IB_10197_RECLAIM_COOLDOWN_SEC", 90.0))
             if (
                 self._10197_count >= threshold
                 and now - self._last_md_reclaim_ts >= cooldown

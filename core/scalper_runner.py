@@ -221,7 +221,9 @@ class ScalperRunner:
         self.conn.register_market_data_error_handler(self._on_market_data_failure)
         self.conn.register_tick_limit_handler(self._on_tick_stream_limit)
         self.conn.register_session_reclaim_handler(self._on_ib_session_reclaim)
+        self.conn.register_connectivity_handler(self._on_ib_connectivity)
         self._tick_limit_denied: set = set()
+        self._ib_connectivity_paused: bool = False
 
         # AI / PPO wiring
         self.model = None
@@ -2594,7 +2596,10 @@ class ScalperRunner:
                                 break
 
                 self._service_stream_repairs()
-                self.conn.run_pending_session_reclaim()
+                if self.conn.run_pending_session_reclaim():
+                    self._resubscribe_all_streams(force=True)
+                elif self.conn.consume_resubscribe_pending():
+                    self._resubscribe_all_streams(force=True)
 
                 if getattr(self, "_bootstrap_entry_due", False):
                     self._bootstrap_entry_due = False
@@ -2654,6 +2659,7 @@ class ScalperRunner:
                     log.warning("IB connection lost. Reconnecting...")
                     if not self.conn.reconnect():
                         break
+                    self._resubscribe_all_streams(force=True)
                     self._refresh_account_balance()
                 
                 # Update AI buffers periodically (throttled to every 5s)
@@ -3676,6 +3682,9 @@ class ScalperRunner:
             and len(self._scan_data_cache[t]) >= self._min_bars_for(t)
         )
         priced = sum(1 for t in priority if self._stream_has_price(t))
+        if priced > 0:
+            self.conn._10197_reclaim_attempts = 0
+            self.conn._10197_storm_until = 0.0
         warm_note = ""
         if bars_ready < len(priority) and priced > 0:
             warm_note = f" | bars {bars_ready}/{len(priority)} warming from live streams"
@@ -3710,6 +3719,40 @@ class ScalperRunner:
         """Stop every live tick/bar stream (used on shutdown and IB session reclaim)."""
         for ticker in list(self._target_monitors.keys()):
             self._stop_target_stream(ticker)
+
+    def _on_ib_connectivity(self, event: str) -> None:
+        """IB 1100/1101/1102 and post-reconnect resubscribe signals."""
+        if event == "connectivity_lost":
+            self._ib_connectivity_paused = True
+            return
+        if event == "data_ok":
+            self._ib_connectivity_paused = False
+            return
+        if event in ("data_lost", "resubscribe"):
+            self._ib_connectivity_paused = False
+            self._resubscribe_all_streams(force=True)
+
+    def _resubscribe_all_streams(self, force: bool = False) -> None:
+        """Re-request live streams after IB reconnect, 1101, or 10197 reclaim."""
+        if not self._locked_targets:
+            return
+        try:
+            from core.market_data_learning import (
+                clear_competing_session_blocks,
+                clear_reconnect_transient_blocks,
+            )
+            cleared = clear_competing_session_blocks() + clear_reconnect_transient_blocks()
+            if cleared:
+                log.info(f"  🔓 MD blocks cleared before re-subscribe ({cleared} ticker(s))")
+        except Exception:
+            pass
+        if force:
+            for ticker in list(self._target_monitors.keys()):
+                self._stop_target_stream(ticker)
+        self._queue_locked_stream_repairs()
+        self._ensure_locked_streams(quiet=False)
+        n = len(self._target_monitors)
+        log.info(f"  📡 Re-subscribed {n} live stream(s) after IB reconnect")
 
     def _on_ib_session_reclaim(self) -> None:
         """Cancel streams before IB disconnect/reconnect so zombie MD slots are released."""

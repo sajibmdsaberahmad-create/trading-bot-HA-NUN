@@ -337,17 +337,39 @@ def record_fetch_failure(
 
 def clear_hmds_transient_blocks() -> int:
     """Remove denylist entries from flaky HMDS 162 (cancelled/timeout), not bad tickers."""
+    return clear_reconnect_transient_blocks()
+
+
+def clear_reconnect_transient_blocks() -> int:
+    """Clear 162 skips caused by disconnect/reclaim/timeouts — not structurally bad tickers."""
     denylist = _load_denylist()
     removed = 0
     for ticker in list(denylist.keys()):
         entry = denylist[ticker]
         if int(entry.get("last_code", 0)) != 162:
             continue
+        failures = int(entry.get("failures", 0))
+        if failures > 3:
+            continue
         pattern = str(entry.get("pattern", ""))
         if pattern != "no_historical_data":
             continue
         reason = str(entry.get("last_reason", ""))
-        if entry.get("transient") or is_hmds_transient_message(reason):
+        source = str(entry.get("source", ""))
+        transient = (
+            entry.get("transient")
+            or is_hmds_transient_message(reason)
+            or (
+                source.startswith("fetch:")
+                and (
+                    "possible causes" in reason.lower()
+                    or "timeout" in reason.lower()
+                    or "cancel" in reason.lower()
+                    or "not connected" in reason.lower()
+                )
+            )
+        )
+        if transient:
             denylist.pop(ticker, None)
             removed += 1
     if removed:

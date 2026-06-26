@@ -1,48 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 158,
-  "training_sessions": 29,
+  "total_awakenings": 159,
+  "training_sessions": 30,
   "trades_observed": 243,
-  "scans_performed": 29,
+  "scans_performed": 30,
   "improvements_applied": 514,
   "reports_generated": 28,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T16:15:48.667372",
-      "age": "3d 5h 12m 59s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #51",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T16:18:08.190327",
-      "age": "3d 5h 15m 19s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #52",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T16:18:54.343740",
-      "age": "3d 5h 16m 5s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #53",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T16:24:40.970733",
-      "age": "3d 5h 21m 52s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #54",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T16:26:44.521363",
-      "age": "3d 5h 23m 55s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #55",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T16:29:42.799138",
       "age": "3d 5h 26m 54s",
@@ -21602,9 +21567,53 @@
           "Hi"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T20:07:56.921009",
+      "age": "5d 9h 5m 8s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #159",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:08:09.350657",
+      "age": "5d 9h 5m 20s",
+      "type": "SCAN",
+      "message": "Market scan #30",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": "live_ib"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:08:09.401315",
+      "age": "5d 9h 5m 20s",
+      "type": "TRAIN",
+      "message": "Training session #30",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:08:09.414249",
+      "age": "5d 9h 5m 20s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": 0.0,
+        "vix_regime": "low",
+        "timestamp": "2026-06-26T20:08:09.414240"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:08:09.426211",
+      "age": "5d 9h 5m 20s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-26T20:02:36.268882",
+  "last_awakening": "2026-06-26T20:07:56.920224",
   "current_version": "v20260626_200510",
   "version_history": [
     {
