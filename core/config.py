@@ -318,6 +318,38 @@ class BotConfig:
     MIN_CONFIDENCE_OVERNIGHT: float = float(os.getenv("MIN_CONFIDENCE_OVERNIGHT", "0.78"))
 
     # ════════════════════════════════════════════════════════════════════
+    # RTH OPEN ALERT (09:30 ET bell — bot may run since pre-market)
+    # ════════════════════════════════════════════════════════════════════
+    RTH_OPENING_WINDOW_MIN: int = int(os.getenv("RTH_OPENING_WINDOW_MIN", "30"))
+    RTH_OPENING_MONITOR_SEC: float = float(os.getenv("RTH_OPENING_MONITOR_SEC", "0.05"))
+    RTH_MONITOR_SEC: float = float(os.getenv("RTH_MONITOR_SEC", "0.08"))
+    RTH_OPENING_LOOP_SEC: float = float(os.getenv("RTH_OPENING_LOOP_SEC", "0.05"))
+    RTH_FLAT_LOOP_SEC: float = float(os.getenv("RTH_FLAT_LOOP_SEC", "0.08"))
+    RTH_POSITION_LOOP_SEC: float = float(os.getenv("RTH_POSITION_LOOP_SEC", "0.08"))
+    RTH_PREOPEN_LOOP_SEC: float = float(os.getenv("RTH_PREOPEN_LOOP_SEC", "0.15"))
+    RTH_PREOPEN_MONITOR_SEC: float = float(os.getenv("RTH_PREOPEN_MONITOR_SEC", "0.12"))
+    RTH_OPEN_COUNTDOWN_SEC: float = float(os.getenv("RTH_OPEN_COUNTDOWN_SEC", "120"))
+    RTH_OPENING_SPIKE_MULT: float = float(os.getenv("RTH_OPENING_SPIKE_MULT", "1.12"))
+    RTH_OPENING_SCORE_ADD: float = float(os.getenv("RTH_OPENING_SCORE_ADD", "6"))
+    RTH_OPENING_CONF_ADD: float = float(os.getenv("RTH_OPENING_CONF_ADD", "0.04"))
+    RTH_OPEN_FORCE_RESCAN: bool = os.getenv("RTH_OPEN_FORCE_RESCAN", "true").lower() not in (
+        "0", "false", "no",
+    )
+    RTH_OPEN_STREAM_REFRESH: bool = os.getenv("RTH_OPEN_STREAM_REFRESH", "true").lower() not in (
+        "0", "false", "no",
+    )
+    SKIP_HMDS_OUTSIDE_RTH: bool = os.getenv("SKIP_HMDS_OUTSIDE_RTH", "true").lower() not in (
+        "0", "false", "no",
+    )
+    MD_SOFT_FAIL_OUTSIDE_RTH: bool = os.getenv("MD_SOFT_FAIL_OUTSIDE_RTH", "true").lower() not in (
+        "0", "false", "no",
+    )
+    MD_TRANSIENT_COOLDOWN_SEC: float = float(os.getenv("MD_TRANSIENT_COOLDOWN_SEC", "90"))
+    REALTIME_BARS_USE_RTH_WHEN_OPEN: bool = os.getenv(
+        "REALTIME_BARS_USE_RTH_WHEN_OPEN", "true",
+    ).lower() not in ("0", "false", "no")
+
+    # ════════════════════════════════════════════════════════════════════
     # OBSERVATION WINDOW (PPO input)
     # ════════════════════════════════════════════════════════════════════
     WINDOW_SIZE: int = 30
@@ -517,8 +549,8 @@ class BotConfig:
     PAPER_REALTIME_BARS_ONLY: bool = os.getenv("PAPER_REALTIME_BARS_ONLY", "false").lower() in (
         "1", "true", "yes",
     )
-    PAPER_USE_HISTORICAL_BARS: bool = os.getenv("PAPER_USE_HISTORICAL_BARS", "true").lower() not in (
-        "0", "false", "no",
+    PAPER_USE_HISTORICAL_BARS: bool = os.getenv("PAPER_USE_HISTORICAL_BARS", "false").lower() in (
+        "1", "true", "yes",
     )
     PAPER_MARKET_ENTRIES: bool = os.getenv("PAPER_MARKET_ENTRIES", "true").lower() not in (
         "0", "false", "no",

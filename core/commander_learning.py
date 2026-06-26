@@ -87,14 +87,22 @@ def build_learning_context(
     runner: Optional["ScalperRunner"] = None,
     *,
     trigger: str = "",
+    lightweight: bool = False,
 ) -> Dict[str, Any]:
     connector = getattr(runner, "conn", None) if runner else None
     day_report = collect_day_report(cfg, runner, connector)
     day_str = day_report.get("day") or now_et().strftime("%Y-%m-%d")
     ib_pack_excerpt: Dict[str, Any] = {}
+    trig = (trigger or "").lower()
+    runtime_event = (
+        lightweight
+        or "market_data_failure" in trig
+        or trig.startswith("runtime")
+        or "md_failure" in trig
+    )
     try:
         from core.daily_ib_learning import collect_ib_learning_pack
-        if getattr(cfg, "DAILY_IB_LEARNING_ENABLED", True):
+        if getattr(cfg, "DAILY_IB_LEARNING_ENABLED", True) and not runtime_event:
             pack = collect_ib_learning_pack(
                 cfg, runner, connector, day_str, trigger=trigger or "commander",
             )

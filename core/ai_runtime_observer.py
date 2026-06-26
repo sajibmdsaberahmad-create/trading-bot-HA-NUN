@@ -147,6 +147,7 @@ class AIRuntimeObserver:
             ctx = build_learning_context(
                 self.cfg, runner,
                 trigger=self._format_trigger(event, context),
+                lightweight=True,
             )
             ctx["runtime_event"] = event
             ctx["runtime_detail"] = context
