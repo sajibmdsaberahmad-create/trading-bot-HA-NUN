@@ -404,5 +404,19 @@
     "first_seen": "2026-06-26T13:28:20.761622+00:00",
     "last_seen": "2026-06-26T13:28:20.768995+00:00",
     "source": "ib_error"
+  },
+  "PLTR": {
+    "ticker": "PLTR",
+    "failures": 2,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52890",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "NASDAQ",
+    "skip_until": 1782481461.3052642,
+    "skip_until_iso": "2026-06-26T13:44:21.305264+00:00",
+    "first_seen": "2026-06-26T13:29:21.290761+00:00",
+    "last_seen": "2026-06-26T13:29:21.305539+00:00",
+    "source": "ib_error"
   }
 }
