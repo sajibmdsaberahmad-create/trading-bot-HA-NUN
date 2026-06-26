@@ -83,18 +83,7 @@ class IBConnector:
             )
             if do_reclaim:
                 self.prepare_fresh_connection()
-            if self.ib.isConnected():
-                try:
-                    self.ib.disconnect()
-                except Exception:
-                    pass
-                time.sleep(1.0)
-            self.ib.connect(
-                host=self.cfg.IB_HOST,
-                port=self.cfg.IB_PORT,
-                clientId=self.cfg.IB_CLIENT_ID,
-                timeout=20,
-            )
+            self._connect_ib_socket()
             accounts = self.ib.managedAccounts()
             log.info(f"IB Gateway connected → {self.cfg.IB_HOST}:{self.cfg.IB_PORT}")
             log.info(f"Account(s): {accounts}")
@@ -153,43 +142,93 @@ class IBConnector:
 
     def prepare_fresh_connection(self) -> int:
         """
-        Clear zombie API sessions on IB Gateway before the real bot connects.
-        Sudden kills leave ghost client slots that block live market data (10197).
+        Clear zombie API session on the configured client ID before the real connect.
+
+        Uses ONLY cfg.IB_CLIENT_ID — never rotates to another ID. Opening extra
+        client IDs leaves ghost sessions that steal live market data (IB 10197).
         """
         host = self.cfg.IB_HOST
         port = int(self.cfg.IB_PORT)
-        preferred = int(self.cfg.IB_CLIENT_ID)
-        candidates = [preferred] + [i for i in range(1, 11) if i != preferred]
+        cid = int(self.cfg.IB_CLIENT_ID)
         pause = float(getattr(self.cfg, "IB_SESSION_RECLAIM_PAUSE_SEC", 2.0))
+        retries = int(getattr(self.cfg, "IB_CLIENT_ID_RECLAIM_RETRIES", 5))
+        retry_sec = float(getattr(self.cfg, "IB_CLIENT_ID_RECLAIM_RETRY_SEC", 3.0))
 
-        for cid in candidates:
+        for attempt in range(1, retries + 1):
             probe = IB()
             try:
                 probe.connect(host, port, clientId=cid, timeout=8)
                 probe.reqMarketDataType(1)
                 log.info(
-                    f"IB pre-connect: claimed client_id={cid} "
-                    f"(released stale/zombie API session)"
+                    f"IB pre-connect: reclaimed client_id={cid} "
+                    f"(cancelled stale subscriptions, released zombie session)"
                 )
                 self._cancel_ib_subscriptions(probe)
                 probe.disconnect()
                 time.sleep(pause)
-                self.cfg.IB_CLIENT_ID = cid
                 return cid
             except Exception as exc:
                 msg = str(exc).lower()
-                if "326" in msg or "already in use" in msg:
-                    log.debug(f"IB client_id={cid} held by another live app — trying next")
+                busy = "326" in msg or "already in use" in msg
                 try:
                     if probe.isConnected():
+                        self._cancel_ib_subscriptions(probe)
                         probe.disconnect()
                 except Exception:
                     pass
-        log.warning(
-            f"IB pre-connect: all client IDs 1–10 busy on port {port} — "
-            "close TWS/mobile/other bots, then retry"
-        )
-        return preferred
+                if busy:
+                    if attempt < retries:
+                        log.warning(
+                            f"IB client_id={cid} busy ({attempt}/{retries}) — "
+                            f"waiting {retry_sec}s for slot (will NOT use another client ID)"
+                        )
+                        time.sleep(retry_sec)
+                        continue
+                    log.error(
+                        f"IB client_id={cid} still busy after {retries} attempts. "
+                        "Run ./stop.sh, close TWS/other API apps, or restart IB Gateway. "
+                        "Bot will not open a second client ID — that causes 10197 MD conflicts."
+                    )
+                else:
+                    log.debug(f"IB pre-connect probe failed: {exc}")
+                break
+        return cid
+
+    def _connect_ib_socket(self) -> None:
+        """Connect self.ib with retries on client-id-in-use (326)."""
+        cid = int(self.cfg.IB_CLIENT_ID)
+        retries = int(getattr(self.cfg, "IB_CLIENT_ID_RECLAIM_RETRIES", 5))
+        retry_sec = float(getattr(self.cfg, "IB_CLIENT_ID_RECLAIM_RETRY_SEC", 3.0))
+        last_exc: Optional[Exception] = None
+
+        for attempt in range(1, retries + 1):
+            try:
+                if self.ib.isConnected():
+                    try:
+                        self.ib.disconnect()
+                    except Exception:
+                        pass
+                    time.sleep(1.0)
+                self.ib.connect(
+                    host=self.cfg.IB_HOST,
+                    port=self.cfg.IB_PORT,
+                    clientId=cid,
+                    timeout=20,
+                )
+                return
+            except Exception as exc:
+                last_exc = exc
+                msg = str(exc).lower()
+                if ("326" in msg or "already in use" in msg) and attempt < retries:
+                    log.warning(
+                        f"IB connect client_id={cid} busy ({attempt}/{retries}) — "
+                        f"retrying in {retry_sec}s"
+                    )
+                    time.sleep(retry_sec)
+                    continue
+                raise
+        if last_exc:
+            raise last_exc
 
     def reclaim_live_market_data_session(self) -> bool:
         """

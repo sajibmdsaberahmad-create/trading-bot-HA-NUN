@@ -12,7 +12,7 @@
 #
 # Usage:
 #   ./scripts/start_hanoon.sh
-#   IB_PORT=4002 CLIENT_ID=2 ./scripts/start_hanoon.sh
+#   IB_PORT=4002 ./scripts/start_hanoon.sh
 # ═══════════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 

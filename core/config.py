@@ -93,7 +93,11 @@ class BotConfig:
     # ════════════════════════════════════════════════════════════════════
     IB_HOST:       str  = "127.0.0.1"
     IB_PORT:       int  = 4002     # 4002/4001 = IB Gateway, 7497 = TWS paper, 7496 = TWS live
-    IB_CLIENT_ID:  int  = 1       # IB API client ID (use 1–10; must be unique per connection)
+    IB_CLIENT_ID:  int  = 1       # Single IB API client ID — do not rotate (causes 10197)
+    IB_CLIENT_ID_RECLAIM_RETRIES: int = int(os.getenv("IB_CLIENT_ID_RECLAIM_RETRIES", "5"))
+    IB_CLIENT_ID_RECLAIM_RETRY_SEC: float = float(
+        os.getenv("IB_CLIENT_ID_RECLAIM_RETRY_SEC", "3"),
+    )
     # IB reqMarketDataType: 1=Live, 2=Frozen, 3=Delayed, 4=Delayed frozen
     IB_MARKET_DATA_TYPE: int = int(os.getenv("IB_MARKET_DATA_TYPE", "1"))
     IB_FORCE_LIVE_MARKET_DATA: bool = os.getenv(
