@@ -31,13 +31,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from core.market_hours import get_market_state, market_status_line, now_et, can_trade_now, is_extended_session, allowed_trading_sessions_label
 from core.rth_session import (
     is_rth,
-    is_rth_opening_window,
-    is_pre_rth_countdown,
     rth_status_line,
     rth_tier,
     ai_session_context_block,
-    apply_opening_entry_adjustments,
-    seconds_until_rth_open,
 )
 
 import numpy as np
@@ -1311,7 +1307,9 @@ class ScalperRunner:
 
         cleared = clear_transient_md_blocks(self.cfg)
         if cleared:
-            self._contract_blacklist -= {t.upper() for t in cleared}
+            for t in cleared:
+                self._contract_blacklist.discard(t.upper())
+                self._contract_blacklist.discard(t)
 
         teach_profit_hunt_lesson(
             self.autopilot, self.consciousness,
@@ -2421,6 +2419,15 @@ class ScalperRunner:
         log.info(f"🕐 {market_status_line(self.cfg)}")
         market_state = get_market_state(self.cfg)
         self._last_market_state = market_state
+        rth_line = rth_status_line(self.cfg)
+        if rth_line:
+            log.info(f"  📡 {rth_line}")
+        if market_state == "open":
+            self._on_rth_open("startup")
+        elif market_state == "pre_market":
+            log.info(
+                "  ⏳ Pre-market watch — bot will shift to RTH super-alert at 09:30 ET automatically"
+            )
         if getattr(self.cfg, "AI_ACCOUNT_EVAL_ON_STARTUP", False):
             try:
                 self._worker._executor.submit(
