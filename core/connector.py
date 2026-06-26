@@ -56,8 +56,6 @@ class IBConnector:
         self._10197_count: int = 0
         self._10197_window_start: float = 0.0
         self._last_md_reclaim_ts: float = 0.0
-        self._pending_md_reclaim: bool = False
-        self._connected_at: float = 0.0
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -95,7 +93,6 @@ class IBConnector:
 
             self._last_event_ts = time.time()
             self._last_reconnect_ts = time.time()
-            self._connected_at = time.time()
             self._apply_market_data_type()
             try:
                 from core.market_data_learning import (
