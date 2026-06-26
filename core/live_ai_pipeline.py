@@ -107,7 +107,11 @@ class LiveAILine:
         return float(getattr(self.cfg, "LIVE_AI_MAX_AGE_SEC", 4.0))
 
     def _min_ring_interval(self) -> float:
-        return float(getattr(self.cfg, "LIVE_AI_MIN_RING_SEC", 0.8))
+        try:
+            from core.council_nanny import effective_min_ring_sec
+            return effective_min_ring_sec(self.cfg)
+        except Exception:
+            return float(getattr(self.cfg, "LIVE_AI_MIN_RING_SEC", 0.8))
 
     def _should_ring(self, key: str, fingerprint: str) -> bool:
         with self._lock:
@@ -126,6 +130,14 @@ class LiveAILine:
         """Start async Ollama call — returns immediately."""
         if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
             return False
+        try:
+            from core.council_nanny import should_ring_council
+            ok, reason = should_ring_council(self.cfg, task)
+            if not ok:
+                log.debug(f"Council ring skipped {ticker}/{task}: {reason}")
+                return False
+        except Exception:
+            pass
         key = self._key(ticker, task)
         if not self._should_ring(key, fingerprint):
             return False

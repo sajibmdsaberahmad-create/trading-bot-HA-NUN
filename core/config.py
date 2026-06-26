@@ -685,6 +685,23 @@ class BotConfig:
     LIVE_AI_PREFETCH_SEC: float = float(os.getenv(
         "LIVE_AI_PREFETCH_SEC", "1.5" if _LOW_RAM else "1.0"
     ))
+    LIVE_AI_PREFETCH_ENABLED: bool = os.getenv(
+        "LIVE_AI_PREFETCH_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    # Council nanny — conserve RPM for profit decisions only
+    COUNCIL_NANNY_MODE: bool = os.getenv(
+        "COUNCIL_NANNY_MODE", "true"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_LEARNING_RING_ENABLED: bool = os.getenv(
+        "COUNCIL_LEARNING_RING_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_NANNY_MIN_SPIKE: float = float(os.getenv("COUNCIL_NANNY_MIN_SPIKE", "1.25"))
+    COUNCIL_NANNY_MIN_SCORE: float = float(os.getenv("COUNCIL_NANNY_MIN_SCORE", "55"))
+    COUNCIL_NANNY_RESERVE_PCT: float = float(os.getenv("COUNCIL_NANNY_RESERVE_PCT", "0.25"))
+    COUNCIL_NANNY_MIN_RING_SEC: float = float(os.getenv("COUNCIL_NANNY_MIN_RING_SEC", "3.0"))
+    COUNCIL_NANNY_LOW_TASKS: bool = os.getenv(
+        "COUNCIL_NANNY_LOW_TASKS", "false"
+    ).lower() in ("1", "true", "yes")
     # Live chart vision (llava) — off on 8GB; Telegram upload still works
     LIVE_CHART_VISION_ENABLED: bool = field(
         default_factory=lambda: os.getenv(
