@@ -74,3 +74,7 @@ The root cause is a missing or incorrect historical data service.
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Historical Market Data Service error message: API historical data query cancelled: 52912)
 
+🧭 COMMANDER LEARNING | 2026-06-26T13:33:29.573081+00:00
+Observed market_data_failure — recorded for learning.
+MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52920
+

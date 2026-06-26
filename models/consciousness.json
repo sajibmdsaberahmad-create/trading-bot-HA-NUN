@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 406,
+  "improvements_applied": 407,
   "reports_generated": 27,
   "event_log": [
     {
@@ -19873,6 +19873,20 @@
           "T",
           ")",
           "."
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T13:33:29.506486",
+      "age": "5d 2h 30m 40s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #407",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Observed market_data_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review market_data_failure on RKLB"
         ]
       }
     }

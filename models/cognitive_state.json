@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "n",
-    "f",
-    "o",
     "s",
     "t",
     "l",
@@ -103,10 +100,13 @@
     "y",
     "P",
     ".",
-    "Commander: The root cause is a missing or incorrect historical data service."
+    "Commander: The root cause is a missing or incorrect historical data service.",
+    "No clean data on RKLB (no_historical_data) \u2014 profit hunt elsewhere.",
+    "Review market_data_failure on RKLB",
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52920"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": -0.03\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T13:32:27.626115"
+  "updated": "2026-06-26T13:33:29.504656"
 }
