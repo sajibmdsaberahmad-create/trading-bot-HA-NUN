@@ -101,6 +101,8 @@ def is_hmds_transient_message(message: str) -> bool:
         return True
     if "reqhistoricaldata" in msg and "timeout" in msg:
         return True
+    if "timed out" in msg or "not connected" in msg:
+        return True
     if "hmds" in msg and any(
         k in msg for k in ("cancel", "inactive", "unavailable", "busy", "timeout")
     ):

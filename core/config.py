@@ -107,11 +107,15 @@ class BotConfig:
         "IB_RECLAIM_SESSION_ON_START", "true",
     ).lower() in ("1", "true", "yes")
     IB_SESSION_RECLAIM_PAUSE_SEC: float = float(
-        os.getenv("IB_SESSION_RECLAIM_PAUSE_SEC", "2.5"),
+        os.getenv("IB_SESSION_RECLAIM_PAUSE_SEC", "8"),
     )
     IB_10197_RECLAIM_THRESHOLD: int = int(os.getenv("IB_10197_RECLAIM_THRESHOLD", "3"))
     IB_10197_RECLAIM_COOLDOWN_SEC: float = float(
-        os.getenv("IB_10197_RECLAIM_COOLDOWN_SEC", "45"),
+        os.getenv("IB_10197_RECLAIM_COOLDOWN_SEC", "90"),
+    )
+    IB_10197_STORM_THRESHOLD: int = int(os.getenv("IB_10197_STORM_THRESHOLD", "3"))
+    IB_10197_STORM_BACKOFF_SEC: float = float(
+        os.getenv("IB_10197_STORM_BACKOFF_SEC", "300"),
     )
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
     # Paper $1M+ account: AI sizes from IB equity, learns without small-account caps
