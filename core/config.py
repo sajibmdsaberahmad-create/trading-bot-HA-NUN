@@ -552,6 +552,9 @@ class BotConfig:
     PAPER_USE_HISTORICAL_BARS: bool = os.getenv("PAPER_USE_HISTORICAL_BARS", "false").lower() in (
         "1", "true", "yes",
     )
+    PAPER_REALTIME_BARS_USE_RTH: bool = os.getenv(
+        "PAPER_REALTIME_BARS_USE_RTH", "false",
+    ).lower() in ("1", "true", "yes")
     PAPER_MARKET_ENTRIES: bool = os.getenv("PAPER_MARKET_ENTRIES", "true").lower() not in (
         "0", "false", "no",
     )

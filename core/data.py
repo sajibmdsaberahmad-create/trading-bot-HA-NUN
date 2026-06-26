@@ -385,6 +385,24 @@ class DataManager:
             })
         log.debug(f"Buffer seeded from dataframe: {len(self._bar_buffer)} bars")
 
+    def _minute_bars_from_fast(self) -> Optional[pd.DataFrame]:
+        """Build 1m OHLCV from accumulated 5s stream bars (before minute buffer flushes)."""
+        fast = list(self._fast_bar_buffer)
+        if len(fast) < 2:
+            return None
+        df5 = pd.DataFrame(fast)
+        df5["datetime"] = pd.to_datetime(df5["datetime"], utc=True)
+        df5 = df5.set_index("datetime").sort_index()
+        ohlcv = df5.resample("1min").agg({
+            "open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum",
+        }).dropna(subset=["close"])
+        if ohlcv.empty:
+            return None
+        live_px = self.get_latest_price()
+        if live_px and live_px > 0:
+            ohlcv.iloc[-1, ohlcv.columns.get_loc("close")] = float(live_px)
+        return ohlcv
+
     def get_bar_dataframe(self, min_bars: int = 20) -> Optional[pd.DataFrame]:
         """1-minute decision bars, for the PPO agent."""
         if len(self._bar_buffer) < min_bars:
@@ -397,15 +415,36 @@ class DataManager:
         Freshest 1-min bars for scalper decisions — includes forming minute
         updated with live tick price and accumulated volume.
         """
-        if len(self._bar_buffer) < 3 and self.last_tick_price is None:
-            return None
         rows = list(self._bar_buffer)
-        if not rows and self.last_tick_price:
-            return None
-        df = pd.DataFrame(rows)
-        if df.empty:
-            return None
-        df = df.set_index("datetime").sort_index()
+        df: Optional[pd.DataFrame] = None
+        if rows:
+            df = pd.DataFrame(rows)
+            df = df.set_index(pd.to_datetime(df["datetime"], utc=True)).sort_index()
+            df = df[["open", "high", "low", "close", "volume"]]
+
+        fast_df = self._minute_bars_from_fast()
+        if fast_df is not None and len(fast_df) > 0:
+            if df is not None and len(df) > 0:
+                df = pd.concat([df, fast_df])
+                df = df[~df.index.duplicated(keep="last")].sort_index()
+            else:
+                df = fast_df
+
+        if df is None or df.empty:
+            if self.last_tick_price is None or self.last_tick_price <= 0:
+                return None
+            now = pd.Timestamp.utcnow().floor("1min")
+            df = pd.DataFrame(
+                [{
+                    "open": float(self.last_tick_price),
+                    "high": float(self.last_tick_price),
+                    "low": float(self.last_tick_price),
+                    "close": float(self.last_tick_price),
+                    "volume": 0,
+                }],
+                index=[now],
+            )
+
         live_px = self.get_latest_price()
         if live_px and live_px > 0:
             try:
@@ -414,7 +453,7 @@ class DataManager:
             except Exception:
                 pass
         if len(df) < min_bars:
-            return df if len(df) >= max(3, min_bars // 2) else None
+            return df if len(df) >= max(1, min_bars // 2) else None
         return df
 
     def get_fast_bar_dataframe(self, n: int = 60) -> Optional[pd.DataFrame]:
