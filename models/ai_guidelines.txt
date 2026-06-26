@@ -270,3 +270,9 @@ The event 'market_data_failure' occurred, and the cause is historical data servi
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Confidence threshold (confidence in the event) is set to 0.58. Increase this value for more confidence.)
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:39:04.325619+00:00
+Market data failure triggered by an API error, impacted profitability.
+The market data service returned an error message (MD 162) indicating no historical data. The algorithm should adjust its parameters and logic to handle this situation gracefully.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market data service returned an error message, impacting profitability. Adjusting the confidence threshold to 0.58 can help reduce risks.)
+

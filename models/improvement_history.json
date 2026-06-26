@@ -681,5 +681,22 @@
       "Historical Market Data Service errors can lead to missed profit hunts.",
       "Tune MIN_PROFIT_PROBABILITY, ENTRY_QUALITY_BLEND_WEIGHT, or COUNCIL_TIMEOUT_MIN_SCAN_SCORE if the events repeat"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:39:04.326218+00:00",
+    "source": "runtime_market_data_failure",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Market data service returned an error message, impacting profitability. Adjusting the confidence threshold to 0.58 can help reduce risks.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Market data failure triggered by an API error, impacted profitability.",
+    "lessons": [
+      "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data service returned an error message, impacting profitability. Adjusting the confidence threshold can help mitigate further disruptions.'}"
+    ]
   }
 ]

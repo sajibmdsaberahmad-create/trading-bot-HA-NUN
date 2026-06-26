@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Confidence threshold (confidence in the event) is set to 0.58. Increase this value for more confidence.",
+    "reason": "Market data service returned an error message, impacting profitability. Adjusting the confidence threshold to 0.58 can help reduce risks.",
     "ok": true,
     "msg": "applied"
   }

@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 423,
+  "improvements_applied": 424,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20346,6 +20346,28 @@
         "lessons": [
           "Historical Market Data Service errors can lead to missed profit hunts.",
           "Tune MIN_PROFIT_PROBABILITY, ENTRY_QUALITY_BLEND_WEIGHT, or COUNCIL_TIMEOUT_MIN_SCAN_SCORE if the events repeat"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T15:39:04.290508",
+      "age": "5d 4h 36m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #424",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Market data failure triggered by an API error, impacted profitability.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Market data service returned an error message, impacting profitability. Adjusting the confidence threshold to 0.58 can help reduce risks.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data service returned an error message, impacting profitability. Adjusting the confidence threshold can help mitigate further disruptions.'}"
         ]
       }
     }
