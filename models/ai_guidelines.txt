@@ -614,3 +614,19 @@ hard_take_profit
 Observed trade_closed — recorded for learning.
 hard_stop
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:22.256935+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.41% (peak +0.41%)
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:22.280085+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.41% (peak +0.41%)
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:25.916400+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +732.71% (peak +732.71%)
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:25.944187+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +732.71% (peak +732.71%)
+

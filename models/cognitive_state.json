@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "F",
-    "D",
     "H",
     "R",
     "S",
@@ -103,10 +101,12 @@
     "Commander: green_profit_lock:ai_stall quick_scalp +30.16% (peak +30.16%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +421.71% (peak +0.00%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +0.42% (peak +0.42%)",
-    "Commander: Scanner+spike after timeout: score=81 vol=12288.0x prob=60% | ATR R:R 2.0"
+    "Commander: Scanner+spike after timeout: score=81 vol=12288.0x prob=60% | ATR R:R 2.0",
+    "Commander: green_profit_lock:ai_stall quick_scalp +0.41% (peak +0.41%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +732.71% (peak +732.71%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 36,
-  "updated": "2026-06-26T18:57:15.415822"
+  "trades_observed": 40,
+  "updated": "2026-06-26T18:57:25.870588"
 }
