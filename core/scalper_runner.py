@@ -414,8 +414,8 @@ class ScalperRunner:
                     text = ollama.analyze_image(prompt, image_bytes)
                     if text:
                         return text
-                from core.ollama_brain import OllamaBrain
-                brain = OllamaBrain(self.cfg)
+                from core.council_brain import CouncilBrain
+                brain = CouncilBrain(self.cfg)
                 return brain.analyze_image(prompt, image_bytes) or "Vision model unavailable."
 
             self._telegram_listener = TelegramCommandListener(
@@ -2343,25 +2343,20 @@ class ScalperRunner:
         log.info("HANOON — SINGLE FOCUS SCALPER")
         acct = self.conn.ib.accountValues()
         log.info(f"Account: {acct[0].account if acct else 'unknown'} | Universe: live IB scanner (no static list)")
-        if getattr(self.cfg, "OLLAMA_ENABLED", False):
-            from core.memory_guard import memory_status, is_low_ram_machine
+        if getattr(self.cfg, "COUNCIL_ENABLED", getattr(self.cfg, "OLLAMA_ENABLED", False)):
+            from core.memory_guard import memory_status
             from core.ram_tier import ram_tier_summary
             mem = memory_status(self.cfg)
             tier_info = ram_tier_summary(self.cfg)
             log.info(
-                f"🧠 Generative thinking: ON | model={self.cfg.OLLAMA_MODEL} @ {self.cfg.OLLAMA_HOST} | "
-                f"budget={getattr(self.cfg, 'OLLAMA_MEMORY_BUDGET_MB', 2560)}MB | "
+                f"🧠 Cloud council: ON | backend={getattr(self.cfg, 'COUNCIL_BACKEND', 'groq')} | "
+                f"groq={getattr(self.cfg, 'GROQ_MODEL', '?')} | gemini={getattr(self.cfg, 'GEMINI_MODEL', '?')} | "
                 f"RAM tier={tier_info['label']} ({mem['total_ram_mb']}MB) | "
                 f"chart_vision={'on' if tier_info['chart_vision'] else 'off'} "
                 f"({'opportunistic' if tier_info.get('vision_opportunistic') else 'always'}) | "
-                f"vision_model={tier_info.get('vision_model', '?')} | "
-                f"heavy_train={'on' if tier_info['heavy_training'] else 'off'} | "
-                f"free={mem['available_ram_mb']}MB"
+                f"vision={tier_info.get('vision_model', '?')} | "
+                f"heavy_train={'on' if tier_info['heavy_training'] else 'off'}"
             )
-            if getattr(self.cfg, "RAM_AUTO_TUNE", True):
-                log.info(
-                    f"⚙️ RAM auto-tune active — upgrade RAM to unlock more (set RAM_AUTO_TUNE=false to disable)"
-                )
             try:
                 from core.ollama_models import text_model_startup_warnings
 
@@ -2369,12 +2364,8 @@ class ScalperRunner:
                     log.warning(f"⚠️ {warn}")
             except Exception:
                 pass
-            if is_low_ram_machine() and "llama3" in self.cfg.OLLAMA_MODEL.lower():
-                log.warning(
-                    "⚠️ llama3 uses ~4.7GB RAM — on 8GB Mac use phi3:mini or qwen2.5:1.5b"
-                )
         else:
-            log.warning("🧠 Generative thinking: OFF — set OLLAMA_ENABLED=true and run Ollama locally")
+            log.warning("🧠 Cloud council: OFF — set COUNCIL_ENABLED=true and GROQ_API_KEY in .env")
         if getattr(self.cfg, "AI_FULL_CONTROL", True):
             log.info("🧠 AI FULL CONTROL: all decisions, logs, journals, notifications via AI brain")
         if getattr(self.cfg, "PROFIT_HUNT_PRIMARY_GOAL", True):
@@ -3474,48 +3465,12 @@ class ScalperRunner:
                     thought = f"Gut pick: {review.get('gut_pick', '')}"
                 if thought:
                     log.info(f"🧠 COUNCIL watchlist: {thought[:400]}")
-                    if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
-                        send_dynamic_notification(
-                            self.notifier, self.autopilot, "system_status",
-                            self._notify_context({
-                                "locked": [r["ticker"] for r in picks],
-                                "ai_review": thought[:200],
-                            }),
-                            f"🎯 AI LOCKED: {', '.join(r['ticker'] for r in picks)}\n{thought[:300]}",
-                            ai_commander=self.ai_commander,
-                            consciousness=self.consciousness,
-                            pilot=self.pilot,
-                        )
             except Exception:
                 pass
             return
-        summary = [
-            f"{r['ticker']}@${r['price']:.2f} score={r.get('total_score', 0):.0f} ({r.get('reasons', '')[:40]})"
-            for r in picks[:5]
-        ]
-        prompt = (
-            "You are an expert momentum scalper with veteran intuition. "
-            "I locked these stocks from the LIVE screener.\n"
-            "Use computational scores AND gut feel — rank by what feels most tradeable NOW.\n"
-            + "\n".join(summary) + "\n"
-            'Reply JSON: {"ranked":["T1","T2",...],"gut_pick":"best gut feel ticker",'
-            '"intuition":"why your gut agrees","commentary":"2-3 lines"}'
-        )
-        thought = generative_think(self.cfg, self.autopilot, prompt)
-        if thought:
-            log.info(f"🧠 AI watchlist: {thought[:400]}")
-            if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
-                send_dynamic_notification(
-                    self.notifier, self.autopilot, "system_status",
-                    self._notify_context({
-                        "locked": [r["ticker"] for r in picks],
-                        "ai_review": thought[:200],
-                    }),
-                    f"🎯 AI LOCKED: {', '.join(r['ticker'] for r in picks)}\n{thought[:300]}",
-                    ai_commander=self.ai_commander,
-                    consciousness=self.consciousness,
-                    pilot=self.pilot,
-                )
+        names = ", ".join(r["ticker"] for r in picks[:5])
+        log.info(f"🎯 LOCKED watchlist (no ambient API): {names}")
+        return
 
     def _focused_ticker(self) -> Optional[str]:
         """Best-ranked pick for entry context — NOT the only monitored ticker."""

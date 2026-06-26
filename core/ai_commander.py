@@ -138,11 +138,11 @@ class AICommander:
         if self.autopilot and getattr(self.autopilot, "core", None):
             ollama = getattr(self.autopilot.core, "ollama", None)
         if ollama and hasattr(ollama, "analyze_image"):
-            return (ollama.analyze_image(prompt, image_bytes) or "").strip()
+            return (ollama.analyze_image(prompt, image_bytes, trading_context=True) or "").strip()
         from core.ollama_brain import OllamaBrain
 
         brain = OllamaBrain(self.cfg)
-        return (brain.analyze_image(prompt, image_bytes) or "").strip()
+        return (brain.analyze_image(prompt, image_bytes, trading_context=True) or "").strip()
 
     def prefetch_chart_vision(
         self,
@@ -152,7 +152,7 @@ class AICommander:
         spike_ratio: float,
         scan_score: float,
     ) -> None:
-        """Non-blocking llava read on locked watchlist — feeds entry council."""
+        """Non-blocking Gemini chart read on locked watchlist — feeds entry council."""
         if df is None or len(df) < 20:
             return
         self._chart_line.ring(
@@ -185,7 +185,7 @@ class AICommander:
         read = (live.get("read") or "").strip()
         if not read:
             return ""
-        return f"CHART VISION (llava): {read[:700]}\n"
+        return f"CHART VISION (Gemini): {read[:700]}\n"
 
     def _build_entry_bracket(
         self,
@@ -249,28 +249,59 @@ class AICommander:
         return generative_think(self.cfg, self.autopilot, prompt)
 
     def _ollama_decide_raw(self, full_prompt: str) -> str:
-        """Direct priority Ollama call — bypasses rate limit for trading decisions."""
-        ollama = None
+        """Cloud council call — Groq primary, Gemini fallback."""
+        council = None
         if self.autopilot and getattr(self.autopilot, "core", None):
-            ollama = getattr(self.autopilot.core, "ollama", None)
-        if ollama and hasattr(ollama, "decide_call"):
+            council = getattr(self.autopilot.core, "ollama", None)
+        if council and hasattr(council, "decide_call"):
             try:
-                return (ollama.decide_call(full_prompt) or "").strip()
+                return (council.decide_call(full_prompt) or "").strip()
             except Exception as exc:
-                log.debug(f"Ollama decide: {exc}")
+                log.debug(f"Council decide: {exc}")
+        try:
+            from core.council_client import get_council_client
+            return (get_council_client(self.cfg).decide_call(full_prompt) or "").strip()
+        except Exception as exc:
+            log.debug(f"Council client: {exc}")
         return ""
 
-    def compose_telegram(self, prompt: str) -> str:
-        """Dedicated Ollama path for Telegram — bypasses 30s trading rate limit."""
-        ollama = None
+    def compose_telegram(
+        self,
+        prompt: str,
+        *,
+        purpose: str = "notify",
+        event_type: Optional[str] = None,
+        copilot: bool = False,
+    ) -> str:
+        """Cloud council path for Telegram — budget-gated."""
+        council = None
         if self.autopilot and getattr(self.autopilot, "core", None):
-            ollama = getattr(self.autopilot.core, "ollama", None)
-        if ollama and hasattr(ollama, "compose_notification"):
+            council = getattr(self.autopilot.core, "ollama", None)
+        if council and hasattr(council, "compose_notification"):
             try:
-                return (ollama.compose_notification(prompt) or "").strip()
+                return (
+                    council.compose_notification(
+                        prompt,
+                        purpose=purpose,
+                        event_type=event_type,
+                        copilot=copilot,
+                    ) or ""
+                ).strip()
             except Exception as exc:
                 log.debug(f"AI telegram notify: {exc}")
-        return self.think(prompt)
+        try:
+            from core.council_client import get_council_client
+            text = get_council_client(self.cfg).compose_notification(
+                prompt,
+                purpose=purpose,
+                event_type=event_type,
+                copilot=copilot,
+            )
+            if text:
+                return text.strip()
+        except Exception:
+            pass
+        return ""
 
     def _mood_context(self) -> tuple:
         if self.autopilot and getattr(self.autopilot, "core", None):
@@ -990,7 +1021,7 @@ class AICommander:
         else:
             out = self.think_json(
                 prompt, cache_key=f"entry_{ticker}",
-                ttl=float(getattr(self.cfg, "OLLAMA_MIN_CALL_INTERVAL_SEC", 1.0)),
+                ttl=float(getattr(self.cfg, "COUNCIL_MIN_CALL_INTERVAL_SEC", 0.5)),
                 task="entry_decision",
             )
             if not out:
@@ -2167,5 +2198,4 @@ class AICommander:
                 "pending": False,
                 "pipeline": merged.get("pipeline", ""),
             }
-        thought = generative_think(self.cfg, self.autopilot, prompt)
-        return {"commentary": thought[:400] if thought else "", "pending": False}
+        return {"commentary": "", "pending": False, "ranked": tickers}

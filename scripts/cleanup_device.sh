@@ -17,6 +17,6 @@ stats = cleanup_local_workspace(aggressive=True)
 after = available_ram_mb()
 mem = memory_status(cfg)
 print(f'RAM: {before}MB free → {after}MB free')
-print(f'Profile: low_ram={mem[\"low_ram\"]} model={cfg.OLLAMA_MODEL} ollama_budget={cfg.OLLAMA_MEMORY_BUDGET_MB}MB')
+print(f'Profile: low_ram={mem[\"low_ram\"]} council={cfg.GROQ_MODEL} backend={cfg.COUNCIL_BACKEND}')
 print(f'Freed ~{sum(stats.values()) / (1024*1024):.1f}MB disk')
 "

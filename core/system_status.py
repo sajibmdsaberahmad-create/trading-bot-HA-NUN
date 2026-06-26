@@ -83,7 +83,8 @@ def collect_system_status(cfg: BotConfig, runner: Optional["ScalperRunner"] = No
     except Exception:
         status["telegram_verified_chats"] = 0
 
-    status["ollama_model"] = getattr(cfg, "OLLAMA_MODEL", "") or getattr(cfg, "OLLAMA_CHAT_MODEL", "")
+    status["council_model"] = getattr(cfg, "GROQ_MODEL", "") or getattr(cfg, "GEMINI_MODEL", "")
+    status["ollama_model"] = status["council_model"]  # legacy key
     status["vision_model"] = getattr(cfg, "OLLAMA_VISION_MODEL", "llava")
 
     if runner:

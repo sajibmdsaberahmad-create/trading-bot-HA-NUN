@@ -576,12 +576,16 @@ def run_daily_self_evaluation(
     ctx = collect_self_eval_context(cfg, runner, connector, day_str)
 
     think_fn: Optional[Callable[[str], str]] = None
-    if ai_commander:
+    if getattr(cfg, "COUNCIL_DAILY_DIGEST_ENABLED", True):
         def _think(p: str) -> str:
             try:
-                return (ai_commander.think(p, task="reason") or "").strip()
-            except Exception:
-                return (ai_commander.compose_telegram(p) or "").strip()
+                from core.council_client import get_council_client
+                text = get_council_client(cfg).daily_digest_call(p, day_str=day_str)
+                if text:
+                    return text.strip()
+            except Exception as exc:
+                log.debug(f"Daily digest API: {exc}")
+            return ""
         think_fn = _think
 
     statement = compose_self_evaluation(ctx, think_fn, cfg)
@@ -590,38 +594,21 @@ def run_daily_self_evaluation(
 
     log.info(f"🧠 Self-evaluation saved → {paths.get('statement')}")
 
-    if notifier and getattr(cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
+    if notifier:
+        day_pnl = float(ctx.get("summary", {}).get("day_pnl_usd", 0) or 0)
+        trades = int(ctx.get("summary", {}).get("trades", 0) or 0)
+        headline = statement.splitlines()[0][:200] if statement else brief
+        single_msg = (
+            f"🧠 DAILY REPORT — {day_str}\n"
+            f"{headline}\n"
+            f"Day: {trades} trades · ${day_pnl:+,.2f}\n"
+            f"{'─' * 28}\n"
+            f"{statement[:3200]}"
+        )
         try:
-            from core.pilot_mode import send_dynamic_notification
-            send_dynamic_notification(
-                notifier,
-                autopilot,
-                "daily_self_eval",
-                {
-                    **ctx.get("summary", {}),
-                    "day": day_str,
-                    "statement": statement[:3000],
-                    "brief": brief,
-                    "sessions": ctx.get("sessions", {}),
-                    "before_after": ctx.get("before_after", {}),
-                    "learning": ctx.get("learning", {}),
-                },
-                brief,
-                ai_commander=ai_commander,
-                consciousness=consciousness,
-                pilot=pilot,
-            )
+            notifier.info(single_msg)
         except Exception as exc:
             log.debug(f"Self-eval notify: {exc}")
-            try:
-                notifier.info(f"{brief}\n\n{statement[:2000]}")
-            except Exception:
-                pass
-    elif notifier:
-        try:
-            notifier.info(f"{brief}\n\n{statement[:2500]}")
-        except Exception:
-            pass
 
     return {
         "status": "ok",

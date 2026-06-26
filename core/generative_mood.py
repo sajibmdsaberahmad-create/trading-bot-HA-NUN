@@ -118,7 +118,9 @@ def assess_mood(
     )
 
     mood, message = _fallback_mood(telemetry)
-    if think_fn:
+    from core.council_budget import is_market_hours_active
+    mood_api = getattr(cfg, "COUNCIL_MOOD_API_ENABLED", False)
+    if think_fn and mood_api and not is_market_hours_active(cfg):
         prompt = (
             "You are HANOON trading pilot AI assessing your own mental state from telemetry.\n"
             "Do NOT use canned labels like euphoric/confident/anxious unless they truly fit.\n"

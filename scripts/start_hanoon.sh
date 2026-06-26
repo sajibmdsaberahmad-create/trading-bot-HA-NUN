@@ -6,7 +6,7 @@
 #   1. venv + dependencies
 #   2. Encrypted .env vault (cross-device secrets)
 #   3. Git sync daemon (auto-push on any file change — any IDE)
-#   4. Ollama (serve + model pull) for generative AI
+#   4. Cloud council API keys (Groq + Gemini — no local Ollama)
 #   5. Pre-flight checks (features, model, IB port)
 #   6. HANOON scalper (live IB scanner, pilot mode, cognitive autopilot)
 #
@@ -34,41 +34,34 @@ CLIENT_ID="${CLIENT_ID:-1}"
 if pgrep -f "main.py.*--client-id[ =]${CLIENT_ID}([ ^]|$)" >/dev/null 2>&1; then
   echo "⚠️  Another process already uses IB client_id=${CLIENT_ID} — stop it first (./stop.sh)"
 fi
-OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
-
-# Auto-pick model for 8GB with 2.5GB Ollama budget (override with OLLAMA_MODEL env)
-TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{print int($1/1024/1024)}' || echo 8192)
-export OLLAMA_MEMORY_BUDGET_MB="${OLLAMA_MEMORY_BUDGET_MB:-2560}"
-    if [ -z "${OLLAMA_MODEL:-}" ]; then
-  if [ "$TOTAL_RAM_MB" -le 10240 ]; then
-    OLLAMA_MODEL="qwen2.5:3b"
-  else
-    OLLAMA_MODEL="llama3"
-  fi
-fi
-export OLLAMA_MODEL
-export OLLAMA_KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:-600}"
-export OLLAMA_UNLOAD_AFTER_CALL="${OLLAMA_UNLOAD_AFTER_CALL:-false}"
-export OLLAMA_MIN_CALL_INTERVAL_SEC="${OLLAMA_MIN_CALL_INTERVAL_SEC:-1}"
-export OLLAMA_DECISION_MIN_FREE_RAM_MB="${OLLAMA_DECISION_MIN_FREE_RAM_MB:-768}"
-export OLLAMA_MIN_FREE_RAM_MB="${OLLAMA_MIN_FREE_RAM_MB:-1024}"
-export OLLAMA_NUM_CTX="${OLLAMA_NUM_CTX:-2048}"
-export OLLAMA_MAX_TOKENS="${OLLAMA_MAX_TOKENS:-256}"
-export OLLAMA_VISION_MODEL="${OLLAMA_VISION_MODEL:-llava}"
+# Cloud council — Groq primary, Gemini fallback (set keys in .env)
+export COUNCIL_ENABLED="${COUNCIL_ENABLED:-true}"
+export COUNCIL_BACKEND="${COUNCIL_BACKEND:-groq}"
+export GROQ_MODEL="${GROQ_MODEL:-llama-3.3-70b-versatile}"
+export GROQ_MODEL_FAST="${GROQ_MODEL_FAST:-llama-3.1-8b-instant}"
+export GEMINI_MODEL="${GEMINI_MODEL:-gemini-2.5-flash}"
+export GEMINI_VISION_MODEL="${GEMINI_VISION_MODEL:-gemini-2.5-flash}"
+export COUNCIL_TIMEOUT_SEC="${COUNCIL_TIMEOUT_SEC:-12}"
+export COUNCIL_MAX_TOKENS="${COUNCIL_MAX_TOKENS:-384}"
+export COUNCIL_MIN_CALL_INTERVAL_SEC="${COUNCIL_MIN_CALL_INTERVAL_SEC:-0.5}"
+export COUNCIL_BUDGET_ENABLED="${COUNCIL_BUDGET_ENABLED:-true}"
+export COUNCIL_NOTIFY_API_ENABLED="${COUNCIL_NOTIFY_API_ENABLED:-false}"
+export COUNCIL_NOTIFY_API_COPILOT="${COUNCIL_NOTIFY_API_COPILOT:-true}"
+export COUNCIL_NOTIFY_API_TRADES="${COUNCIL_NOTIFY_API_TRADES:-false}"
+export COUNCIL_DAILY_DIGEST_ENABLED="${COUNCIL_DAILY_DIGEST_ENABLED:-true}"
+export COUNCIL_MOOD_API_ENABLED="${COUNCIL_MOOD_API_ENABLED:-false}"
+export ENV_SYNC_ENABLED="${ENV_SYNC_ENABLED:-true}"
 export TRADING_BOT_TELEGRAM_LISTEN="${TRADING_BOT_TELEGRAM_LISTEN:-true}"
 export TRADING_BOT_TELEGRAM_VERIFY_SECRET="${TRADING_BOT_TELEGRAM_VERIFY_SECRET:-hall of fame}"
 export AI_PAPER_FREE_LEARNING="${AI_PAPER_FREE_LEARNING:-true}"
 export PAPER_EQUITY_HINT="${PAPER_EQUITY_HINT:-1000000}"
 LOG_DIR="${LOG_DIR:-$ROOT/logs}"
 MAIN_LOG="$LOG_DIR/HANOON.log"
-OLLAMA_LOG="$LOG_DIR/ollama.log"
 PID_FILE="$LOG_DIR/hanoon.pid"
 
 mkdir -p "$LOG_DIR" "$ROOT/models/daily_reports" "$ROOT/runtime"
 
 export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/mpl}"
-export OLLAMA_HOST
-export OLLAMA_ENABLED="${OLLAMA_ENABLED:-true}"
 export CAPITAL_DISCIPLINE="${CAPITAL_DISCIPLINE:-true}"
 export TREAT_PAPER_AS_LIVE="${TREAT_PAPER_AS_LIVE:-true}"
 export AI_SPIKE_FAST_ENTRY="${AI_SPIKE_FAST_ENTRY:-false}"
@@ -174,14 +167,13 @@ export HOT_SWAP_ON_EXIT="${HOT_SWAP_ON_EXIT:-true}"
 export FOCUS_PIN_TOP_PICK="${FOCUS_PIN_TOP_PICK:-false}"
 export HYBRID_DISTILL_AUTO_FAST_PATH="${HYBRID_DISTILL_AUTO_FAST_PATH:-false}"
 export LIVE_AI_PIPELINE_ENABLED="${LIVE_AI_PIPELINE_ENABLED:-true}"
-export OLLAMA_DECISION_BYPASS_RATE_LIMIT="${OLLAMA_DECISION_BYPASS_RATE_LIMIT:-true}"
-export OLLAMA_MAX_LOADED_MODELS="${OLLAMA_MAX_LOADED_MODELS:-1}"
-export OLLAMA_NUM_PARALLEL="${OLLAMA_NUM_PARALLEL:-1}"
 export PYTHONUNBUFFERED=1
+
+TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{print int($1/1024/1024)}' || echo 8192)
 
 echo "═══════════════════════════════════════════════════════════════════════"
 echo "  HANOON FULL PILOT LAUNCH"
-echo "  IB: $IB_HOST:$IB_PORT | Client: $CLIENT_ID | Ollama: $OLLAMA_MODEL (${TOTAL_RAM_MB}MB RAM)"
+echo "  IB: $IB_HOST:$IB_PORT | Client: $CLIENT_ID | Council: ${COUNCIL_BACKEND} (${TOTAL_RAM_MB}MB RAM)"
 echo "  Clock: US Eastern (TZ=$TZ)"
 echo "═══════════════════════════════════════════════════════════════════════"
 
@@ -222,7 +214,7 @@ export AI_LEARN_ON_LOSS_STREAK="${AI_LEARN_ON_LOSS_STREAK:-true}"
 export INCREMENTAL_TRAINING_ENABLED=false
 export AI_RUNTIME_OBSERVER_ENABLED="${AI_RUNTIME_OBSERVER_ENABLED:-true}"
 export AI_RUNTIME_AUTO_APPLY="${AI_RUNTIME_AUTO_APPLY:-true}"
-export OLLAMA_VISION_SWAP_TEXT_MODEL="${OLLAMA_VISION_SWAP_TEXT_MODEL:-false}"
+export OLLAMA_VISION_SWAP_TEXT_MODEL=false
 export CHART_VISION_ENTRY_ONLY="${CHART_VISION_ENTRY_ONLY:-true}"
 export LIVE_CHART_VISION_OPPORTUNISTIC="${LIVE_CHART_VISION_OPPORTUNISTIC:-true}"
 export CHART_VISION_OPPORTUNISTIC_COOLDOWN_SEC="${CHART_VISION_OPPORTUNISTIC_COOLDOWN_SEC:-120}"
@@ -266,54 +258,17 @@ ensure_gh() {
 }
 ensure_gh
 
-# ── 3. Ollama (generative thinking) ─────────────────────────────────────────
-start_ollama() {
-  if ! command -v ollama >/dev/null 2>&1; then
-    echo "⚠️  Ollama not installed — generative AI disabled"
-    echo "    Install: https://ollama.com/download"
-    export OLLAMA_ENABLED=false
-    return 0
-  fi
-
-  if ! curl -sf "${OLLAMA_HOST}/api/tags" >/dev/null 2>&1; then
-    echo "🧠 Starting Ollama server..."
-    if command -v brew >/dev/null 2>&1 && brew services list 2>/dev/null | grep -q ollama; then
-      brew services start ollama >>"$OLLAMA_LOG" 2>&1 || true
-    else
-      nohup ollama serve >>"$OLLAMA_LOG" 2>&1 &
-      echo $! >"$LOG_DIR/ollama.pid"
-    fi
-    for i in $(seq 1 15); do
-      if curl -sf "${OLLAMA_HOST}/api/tags" >/dev/null 2>&1; then
-        echo "✅ Ollama server ready"
-        break
-      fi
-      sleep 1
-    done
-  else
-    echo "✅ Ollama already running"
-  fi
-
-  if curl -sf "${OLLAMA_HOST}/api/tags" >/dev/null 2>&1; then
-    if ollama list 2>/dev/null | grep -qE "^${OLLAMA_MODEL}([[:space:]:]|$)"; then
-      echo "✅ Ollama model ready: $OLLAMA_MODEL"
-    else
-      echo "📥 Pulling $OLLAMA_MODEL in background (bot starts now)..."
-      nohup ollama pull "$OLLAMA_MODEL" >>"$OLLAMA_LOG" 2>&1 &
-    fi
-    if ollama list 2>/dev/null | grep -qE "^${OLLAMA_VISION_MODEL%%:*}([[:space:]:]|$)"; then
-      echo "✅ Ollama vision model ready: $OLLAMA_VISION_MODEL"
-    else
-      echo "📥 Pulling $OLLAMA_VISION_MODEL for Telegram chart review (background)..."
-      nohup ollama pull "$OLLAMA_VISION_MODEL" >>"$OLLAMA_LOG" 2>&1 &
-    fi
-    export OLLAMA_ENABLED=true
-  else
-    echo "⚠️  Ollama unreachable — continuing without generative AI"
-    export OLLAMA_ENABLED=false
-  fi
-}
-start_ollama
+# ── 3. Cloud council keys ───────────────────────────────────────────────────
+if [ -n "${GROQ_API_KEY:-}" ]; then
+  echo "✅ Groq API key loaded"
+else
+  echo "⚠️  GROQ_API_KEY not set — council will use Gemini only (if configured)"
+fi
+if [ -n "${GEMINI_API_KEY:-}${GOOGLE_API_KEY:-}" ]; then
+  echo "✅ Google/Gemini API key loaded (fallback + chart vision)"
+else
+  echo "⚠️  GEMINI_API_KEY not set — no Gemini fallback or chart vision"
+fi
 
 # ── 4. Stop stale bot instances ─────────────────────────────────────────────
 if pgrep -f "main.py --mode scalper" >/dev/null 2>&1; then
@@ -354,7 +309,7 @@ else:
 print(f'   Pilot mode: {getattr(cfg, \"PILOT_MODE_ENABLED\", True)}')
 print(f'   Live IB scanner: {getattr(cfg, \"USE_LIVE_IB_SCANNER\", True)} (no static fallback)')
 print(f'   Fast scanner lock: {getattr(cfg, \"FAST_SCANNER_LOCK\", True)} (bars prefetch after lock)')
-print(f'   AI full control: {getattr(cfg, \"AI_FULL_CONTROL\", True)} | Ollama fast-path bypass: {getattr(cfg, \"HYBRID_DISTILL_AUTO_FAST_PATH\", True)}')
+print(f'   AI full control: {getattr(cfg, \"AI_FULL_CONTROL\", True)} | distill fast-path: {getattr(cfg, \"HYBRID_DISTILL_AUTO_FAST_PATH\", True)}')
 print(f'   AI council all decisions: {getattr(cfg, \"AI_COUNCIL_ALL_DECISIONS\", True)}')
 from core.ai_session_limits import should_ai_define_limits, heuristic_session_limits, apply_session_limits, format_limits_log
 if should_ai_define_limits(cfg):
@@ -366,11 +321,14 @@ if should_ai_define_limits(cfg):
 else:
     print(f'   AI unlimited: {getattr(cfg, \"AI_UNLIMITED_MODE\", False)} | Watch pool: {getattr(cfg, \"MAX_LOCKED_TARGETS\", 5)} | Max positions: {getattr(cfg, \"MAX_CONCURRENT_POSITIONS\", 5)}')
     print(f'   Fixed deploy cap: {getattr(cfg, \"USE_FIXED_DEPLOY_CAP\", False)} | Fixed risk cap: {getattr(cfg, \"USE_FIXED_RISK_CAP\", False)} | Account halt: {getattr(cfg, \"USE_ACCOUNT_LOSS_HALT\", False)}')
-print(f'   Ollama: {getattr(cfg, \"OLLAMA_ENABLED\", False)}')
+groq = bool(getattr(cfg, 'GROQ_API_KEY', ''))
+gem = bool(getattr(cfg, 'GEMINI_API_KEY', '') or getattr(cfg, 'GOOGLE_API_KEY', ''))
+print(f'   Council: {getattr(cfg, \"COUNCIL_ENABLED\", False)} | backend={getattr(cfg, \"COUNCIL_BACKEND\", \"groq\")} | groq_key={\"yes\" if groq else \"no\"} | gemini_key={\"yes\" if gem else \"no\"}')
+print(f'   Groq model: {getattr(cfg, \"GROQ_MODEL\", \"?\")} | Gemini: {getattr(cfg, \"GEMINI_MODEL\", \"?\")}')
 print(f'   Learn live: AI_LEARN_ON_LOSS_STREAK={getattr(cfg, \"AI_LEARN_ON_LOSS_STREAK\", False)} | INCREMENTAL_TRAINING={getattr(cfg, \"INCREMENTAL_TRAINING_ENABLED\", True)} | runtime_observer={getattr(cfg, \"AI_RUNTIME_OBSERVER_ENABLED\", True)}')
 from core.ollama_vision import is_vision_model_present, vision_model_name
 vm = vision_model_name(cfg)
-print(f'   Vision ({vm}): {\"ready\" if is_vision_model_present(cfg) else \"pulling/missing\"}')
+print(f'   Chart vision ({vm}): {\"ready\" if is_vision_model_present(cfg) else \"needs GEMINI_API_KEY\"}')
 print(f'   Telegram listen: {getattr(cfg, \"TELEGRAM_LISTEN_ENABLED\", True)} | verify secret: {\"set\" if getattr(cfg, \"TELEGRAM_VERIFY_SECRET\", \"\") else \"MISSING\"}')
 from core.git_sync import ensure_github_cli
 gh_ok = ensure_github_cli(cfg)

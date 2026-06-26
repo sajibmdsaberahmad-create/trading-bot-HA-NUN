@@ -808,8 +808,10 @@ class BotConfig:
         os.getenv("FILL_RECONCILE_FALLBACK_SEC")
         or os.getenv("FILL_RECONCILE_MAX_SEC", "8")
     )
-    AI_TELEGRAM_NOTIFICATIONS: bool = True   # Ollama crafts Telegram text
-    AI_TELEGRAM_ALL_OUTBOUND: bool = os.getenv("TRADING_BOT_AI_TELEGRAM_ALL", "true").lower() in ("1", "true", "yes")
+    AI_TELEGRAM_NOTIFICATIONS: bool = True   # Telegram alerts (templates by default)
+    AI_TELEGRAM_ALL_OUTBOUND: bool = os.getenv(
+        "TRADING_BOT_AI_TELEGRAM_ALL", "false"
+    ).lower() in ("1", "true", "yes")
     AI_TELEGRAM_MIN_INTERVAL_SEC: float = 6.0  # Throttle duplicate event types
     AI_TELEGRAM_MAX_CHARS: int = 450
     AI_TELEGRAM_COMMANDER_MAX_CHARS: int = int(os.getenv("TRADING_BOT_TELEGRAM_AI_CHARS", "3800"))
@@ -846,7 +848,16 @@ class BotConfig:
     ENV_SYNC_ENABLED: bool = os.getenv("ENV_SYNC_ENABLED", "true").lower() in ("1", "true", "yes")
     ENV_SYNC_PUSH_KEY: bool = os.getenv("ENV_SYNC_PUSH_KEY", "true").lower() in ("1", "true", "yes")
     TELEGRAM_ASYNC_DURING_SESSION: bool = True # Ollama Telegram off hot path
-    GENERATIVE_THINKING_ENABLED: bool = True
+    COUNCIL_DAILY_DIGEST_ENABLED: bool = os.getenv(
+        "COUNCIL_DAILY_DIGEST_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_MOOD_API_ENABLED: bool = os.getenv(
+        "COUNCIL_MOOD_API_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    GENERATIVE_THINKING_ENABLED: bool = os.getenv(
+        "GENERATIVE_THINKING_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    # Legacy ambient think — blocked; council + daily_digest handle API
     # AI learns from failures instead of permanent blacklists / rigid gates
     AI_LEARN_DONT_BLOCK: bool = os.getenv(
         "AI_LEARN_DONT_BLOCK", "true"
@@ -927,33 +938,75 @@ class BotConfig:
     # Silent opportunity scan while holding a position (see BACKGROUND_WATCH_SEC above)
 
     # ════════════════════════════════════════════════════════════════════
-    # OLLAMA LOCAL LLM — 2.5GB reserved budget on 8GB Mac (warm, frequent calls)
+    # CLOUD COUNCIL LLM — Groq primary, Gemini fallback (no local Ollama)
     # ════════════════════════════════════════════════════════════════════
-    OLLAMA_ENABLED: bool = field(
-        default_factory=lambda: os.getenv("OLLAMA_ENABLED", "true").lower() in ("1", "true", "yes")
+    COUNCIL_ENABLED: bool = field(
+        default_factory=lambda: os.getenv(
+            "COUNCIL_ENABLED",
+            os.getenv("OLLAMA_ENABLED", "true"),
+        ).lower() in ("1", "true", "yes")
     )
-    OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-    OLLAMA_MEMORY_BUDGET_MB: int = int(os.getenv(
-        "OLLAMA_MEMORY_BUDGET_MB", "2048" if _8GB_RAM else ("2560" if _LOW_RAM else "3072")
-    ))
-    OLLAMA_MODEL: str = os.getenv(
-        "OLLAMA_MODEL",
-        "qwen2.5:3b" if _LOW_RAM else "llama3",
+    COUNCIL_BACKEND: str = os.getenv("COUNCIL_BACKEND", "groq")  # groq | gemini | auto
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GEMINI_API_KEY: str = os.getenv(
+        "GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", "")
     )
-    OLLAMA_DYNAMIC_MODEL: bool = os.getenv(
-        "OLLAMA_DYNAMIC_MODEL", "true" if _LOW_RAM else "false"
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    GROQ_MODEL_FAST: str = os.getenv("GROQ_MODEL_FAST", "llama-3.1-8b-instant")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    GEMINI_VISION_MODEL: str = os.getenv("GEMINI_VISION_MODEL", "gemini-2.5-flash")
+    COUNCIL_TIMEOUT_SEC: int = int(os.getenv("COUNCIL_TIMEOUT_SEC", "12"))
+    COUNCIL_NOTIFY_TIMEOUT_SEC: int = int(os.getenv("COUNCIL_NOTIFY_TIMEOUT_SEC", "12"))
+    COUNCIL_MAX_TOKENS: int = int(os.getenv("COUNCIL_MAX_TOKENS", "384"))
+    COUNCIL_NOTIFY_MAX_TOKENS: int = int(os.getenv("COUNCIL_NOTIFY_MAX_TOKENS", "120"))
+    COUNCIL_VISION_MAX_TOKENS: int = int(os.getenv("COUNCIL_VISION_MAX_TOKENS", "512"))
+    COUNCIL_VISION_TIMEOUT_SEC: int = int(os.getenv("COUNCIL_VISION_TIMEOUT_SEC", "25"))
+    COUNCIL_TEMPERATURE: float = float(os.getenv("COUNCIL_TEMPERATURE", "0.55"))
+    COUNCIL_MIN_CALL_INTERVAL_SEC: float = float(
+        os.getenv("COUNCIL_MIN_CALL_INTERVAL_SEC", "0.5")
+    )
+    # API budget — reserve RPM for live council; templates for routine Telegram
+    COUNCIL_BUDGET_ENABLED: bool = os.getenv(
+        "COUNCIL_BUDGET_ENABLED", "true"
     ).lower() in ("1", "true", "yes")
-    OLLAMA_PRESSURE_FREE_MB: int = int(os.getenv("OLLAMA_PRESSURE_FREE_MB", "1800"))
-    OLLAMA_SEVERE_PRESSURE_FREE_MB: int = int(os.getenv("OLLAMA_SEVERE_PRESSURE_FREE_MB", "1200"))
-    OLLAMA_OS_RESERVE_MB: int = int(os.getenv("OLLAMA_OS_RESERVE_MB", "1500"))
-    OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "12" if _LOW_RAM else "20"))
-    OLLAMA_MAX_TOKENS: int = int(os.getenv("OLLAMA_MAX_TOKENS", "192" if _LOW_RAM else "384"))
-    OLLAMA_TEMPERATURE: float = float(os.getenv("OLLAMA_TEMPERATURE", "0.7"))
-    OLLAMA_KEEP_ALIVE: int = int(os.getenv("OLLAMA_KEEP_ALIVE", "300" if _LOW_RAM else "600"))
-    OLLAMA_NUM_CTX: int = int(os.getenv("OLLAMA_NUM_CTX", "1536" if _LOW_RAM else "4096"))
-    OLLAMA_MIN_CALL_INTERVAL_SEC: float = float(os.getenv("OLLAMA_MIN_CALL_INTERVAL_SEC", "1"))
-    OLLAMA_UNLOAD_AFTER_CALL: bool = os.getenv("OLLAMA_UNLOAD_AFTER_CALL", "false").lower() in ("1", "true", "yes")
-    OLLAMA_MIN_FREE_RAM_MB: int = int(os.getenv("OLLAMA_MIN_FREE_RAM_MB", "1024"))
+    COUNCIL_DECISION_MAX_PER_MIN: int = int(os.getenv("COUNCIL_DECISION_MAX_PER_MIN", "28"))
+    COUNCIL_NOTIFY_MAX_PER_MIN: int = int(os.getenv("COUNCIL_NOTIFY_MAX_PER_MIN", "6"))
+    COUNCIL_RUNTIME_MAX_PER_MIN: int = int(os.getenv("COUNCIL_RUNTIME_MAX_PER_MIN", "3"))
+    COUNCIL_MISC_MAX_PER_MIN: int = int(os.getenv("COUNCIL_MISC_MAX_PER_MIN", "4"))
+    COUNCIL_NOTIFY_MIN_GAP_SEC: float = float(os.getenv("COUNCIL_NOTIFY_MIN_GAP_SEC", "20"))
+    COUNCIL_RUNTIME_MIN_GAP_SEC: float = float(os.getenv("COUNCIL_RUNTIME_MIN_GAP_SEC", "45"))
+    COUNCIL_MISC_MIN_GAP_SEC: float = float(os.getenv("COUNCIL_MISC_MIN_GAP_SEC", "30"))
+    COUNCIL_NOTIFY_API_ENABLED: bool = os.getenv(
+        "COUNCIL_NOTIFY_API_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_NOTIFY_API_COPILOT: bool = os.getenv(
+        "COUNCIL_NOTIFY_API_COPILOT", "true"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_NOTIFY_API_TRADES: bool = os.getenv(
+        "COUNCIL_NOTIFY_API_TRADES", "false"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_RUNTIME_LLM_ENABLED: bool = os.getenv(
+        "COUNCIL_RUNTIME_LLM_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_RUNTIME_RTH_ENABLED: bool = os.getenv(
+        "COUNCIL_RUNTIME_RTH_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_GENERATIVE_RTH_ENABLED: bool = os.getenv(
+        "COUNCIL_GENERATIVE_RTH_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_OFFHOURS_ONLY_JOURNAL: bool = os.getenv(
+        "COUNCIL_OFFHOURS_ONLY_JOURNAL", "true"
+    ).lower() in ("1", "true", "yes")
+    COUNCIL_CHART_VISION_API_ENABLED: bool = os.getenv(
+        "COUNCIL_CHART_VISION_API_ENABLED", "false"
+    ).lower() in ("1", "true", "yes")
+    # Legacy alias — same as COUNCIL_ENABLED (local Ollama removed)
+    OLLAMA_ENABLED: bool = field(
+        default_factory=lambda: os.getenv(
+            "COUNCIL_ENABLED",
+            os.getenv("OLLAMA_ENABLED", "true"),
+        ).lower() in ("1", "true", "yes")
+    )
 
     # ════════════════════════════════════════════════════════════════════
     # MULTI-REPO GIT ARCHITECTURE (HANOON / Grandmaster / Logs)
@@ -1100,10 +1153,12 @@ class BotConfig:
     ).lower() in ("1", "true", "yes")
     GENERATIVE_MOOD_MIN_SEC: float = float(os.getenv("GENERATIVE_MOOD_MIN_SEC", "45"))
 
-    # Vision — quantized llava per RAM tier (see core/ollama_vision.py)
-    OLLAMA_VISION_MODEL: str = os.getenv("OLLAMA_VISION_MODEL", "llava-phi3:3.8b" if _LOW_RAM else "llava")
-    OLLAMA_VISION_TIMEOUT: int = int(os.getenv("OLLAMA_VISION_TIMEOUT", "30" if _LOW_RAM else "45"))
-    OLLAMA_VISION_MAX_TOKENS: int = int(os.getenv("OLLAMA_VISION_MAX_TOKENS", "160" if _LOW_RAM else "512"))
+    # Chart vision — Gemini multimodal (see core/council_client.py)
+    OLLAMA_VISION_MODEL: str = os.getenv(
+        "GEMINI_VISION_MODEL", "gemini-2.5-flash"
+    )
+    OLLAMA_VISION_TIMEOUT: int = int(os.getenv("COUNCIL_VISION_TIMEOUT_SEC", "25"))
+    OLLAMA_VISION_MAX_TOKENS: int = int(os.getenv("COUNCIL_VISION_MAX_TOKENS", "512"))
 
     EMAIL_ENABLED: bool = False
     EMAIL_SMTP_HOST: str = os.getenv("TRADING_BOT_SMTP_HOST", "")
@@ -1148,7 +1203,7 @@ class BotConfig:
     MAX_PARAM_MUTATIONS_PER_DAY: int = 5
     META_OPTIMIZER_MODEL: str = os.getenv(
         "META_OPTIMIZER_MODEL",
-        os.getenv("OLLAMA_MODEL", "qwen2.5:3b" if _LOW_RAM else "llama3"),
+        os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
     )
 
     # RAM auto-tune — upgrades features when more physical RAM is detected
@@ -1164,3 +1219,6 @@ class BotConfig:
         apply_ram_tier_to_config(self)
         if self.PAPER_REALTIME_BARS_ONLY:
             self.USE_TICK_STREAM = False
+        # Keep legacy OLLAMA_ENABLED in sync with COUNCIL_ENABLED
+        object.__setattr__(self, "OLLAMA_ENABLED", self.COUNCIL_ENABLED)
+        object.__setattr__(self, "OLLAMA_MODEL", self.GROQ_MODEL)

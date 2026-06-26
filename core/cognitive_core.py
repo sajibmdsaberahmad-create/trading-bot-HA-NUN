@@ -54,7 +54,7 @@ from core.ai_guardrails import GuardrailController
 from core.cognitive_guardrails import CognitiveGuardrails, HardLimits
 from core.device_optimizer import DeviceOptimizer
 from core.self_evaluator import SelfEvaluator
-from core.ollama_brain import OllamaBrain
+from core.council_brain import CouncilBrain
 from core.human_cognition import get_system_prompt, enrich_prompt, apply_gut_override
 from core.git_sync import init as git_sync_init, push_learning_checkpoint_async
 
@@ -112,7 +112,7 @@ class CognitiveCore:
         self._running = False
 
         # Initialize sub-components
-        self.ollama = OllamaBrain(cfg) if getattr(cfg, 'OLLAMA_ENABLED', False) else None
+        self.ollama = CouncilBrain(cfg) if getattr(cfg, "COUNCIL_ENABLED", getattr(cfg, "OLLAMA_ENABLED", False)) else None
         self.guardrails = GuardrailController(cfg)
         self.cognitive_guardrails = CognitiveGuardrails(cfg)
         self.device = DeviceOptimizer()
@@ -440,7 +440,9 @@ class CognitiveCore:
         if use_decide and hasattr(self.ollama, "decide_call"):
             result = self.ollama.decide_call(full) or ""
         else:
-            result = self.ollama._call_ollama(full) or ""
+            from core.council_budget import PURPOSE_GENERATIVE, should_use_council_api
+            ok, _ = should_use_council_api(self.cfg, PURPOSE_GENERATIVE)
+            result = (self.ollama.think(full) or "") if ok else ""
         if result:
             self.state.last_thought = result[:500]
         return result
@@ -459,7 +461,7 @@ class CognitiveCore:
         if always_active and hasattr(self.ollama, "decide_call"):
             raw = self.ollama.decide_call(prompt) or ""
         else:
-            raw = self.ollama._call_ollama(prompt) or ""
+            raw = self.ollama.think(prompt) or ""
         try:
             start, end = raw.find("{"), raw.rfind("}") + 1
             if start >= 0 and end > start:

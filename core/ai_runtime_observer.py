@@ -129,6 +129,11 @@ class AIRuntimeObserver:
             pass
 
     def _think(self, prompt: str) -> str:
+        from core.council_budget import PURPOSE_RUNTIME, should_use_council_api
+        ok, reason = should_use_council_api(self.cfg, PURPOSE_RUNTIME)
+        if not ok:
+            log.debug(f"Runtime LLM skipped: {reason}")
+            return ""
         runner = self._runner
         if runner and getattr(runner, "ai_commander", None):
             ac = runner.ai_commander

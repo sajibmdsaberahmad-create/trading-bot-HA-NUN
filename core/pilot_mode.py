@@ -521,9 +521,21 @@ def generative_think(
     cfg: BotConfig,
     autopilot: Optional["CognitiveAutopilot"],
     prompt: str,
+    *,
+    force: bool = False,
 ) -> str:
-    """Invoke Ollama reasoning when generative thinking is enabled."""
+    """
+    Ambient LLM commentary — DISABLED during RTH to save API budget.
+
+    Use council hotline (entry/exit) for trade decisions. End-of-day statement
+    uses COUNCIL daily_digest (one call after close). This path is legacy only.
+    """
     if not getattr(cfg, "GENERATIVE_THINKING_ENABLED", True):
+        return ""
+    from core.council_budget import PURPOSE_GENERATIVE, should_use_council_api
+    ok, reason = should_use_council_api(cfg, PURPOSE_GENERATIVE, force=force)
+    if not ok:
+        log.debug(f"Generative think skipped: {reason}")
         return ""
     if not autopilot or not getattr(autopilot, "core", None):
         return ""

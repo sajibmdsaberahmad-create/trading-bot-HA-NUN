@@ -56,33 +56,12 @@ fi
 
 rm -f "$PID_FILE" "$SHUTDOWN_FILE"
 
-# ── 3. Stop Ollama server if we started it ───────────────────────────────────
-if [ -f "$LOG_DIR/ollama.pid" ]; then
-  OPID=$(cat "$LOG_DIR/ollama.pid" 2>/dev/null || true)
-  if [ -n "$OPID" ] && kill -0 "$OPID" 2>/dev/null; then
-    echo "   Stopping Ollama server (pid $OPID)..."
-    kill "$OPID" 2>/dev/null || true
-  fi
-  rm -f "$LOG_DIR/ollama.pid"
-fi
-
-# ── 4. Fallback local cleanup if bot did not finish shutdown hook ────────────
+# ── 3. Fallback local cleanup if bot did not finish shutdown hook ────────────
 if [ -d "$ROOT/venv" ]; then
   python3 -c "
 from core.local_cleanup import cleanup_local_workspace
 cleanup_local_workspace(aggressive=True)
 " 2>/dev/null || true
-fi
-
-# ── 5. Free RAM: unload Ollama models ────────────────────────────────────────
-if command -v ollama >/dev/null 2>&1; then
-  echo "   Unloading Ollama models from RAM..."
-  ollama ps -q 2>/dev/null | while read -r name; do
-    [ -n "$name" ] && ollama stop "$name" 2>/dev/null || true
-  done
-  for m in qwen2.5:3b qwen2.5:1.5b phi3:mini llama3.2:3b qwen2.5:0.5b llama3; do
-    ollama stop "$m" 2>/dev/null || true
-  done
 fi
 
 echo "✅ HANOON stopped gracefully (session report + git sync attempted)"

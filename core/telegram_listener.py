@@ -779,7 +779,11 @@ class TelegramCommandListener:
     def _think(self, prompt: str) -> str:
         if self.ai_commander and hasattr(self.ai_commander, "compose_telegram"):
             try:
-                return (self.ai_commander.compose_telegram(prompt) or "").strip()
+                return (
+                    self.ai_commander.compose_telegram(
+                        prompt, purpose="copilot", copilot=True, event_type="commander_chat",
+                    ) or ""
+                ).strip()
             except Exception:
                 pass
         if self.think_fn:

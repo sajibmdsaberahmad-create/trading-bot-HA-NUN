@@ -2,13 +2,13 @@
 """
 core/hybrid_distiller.py — Automatic Qwen→PPO knowledge distillation.
 
-Phase 0 (R&D): Qwen + PPO run together; every decision is logged.
+Phase 0 (R&D): Cloud council + PPO run together; every decision is logged.
 Phase 1 (distill): Once enough closed trades exist, train a fast TeacherProxy
-    (sklearn) that maps numeric market state → Ollama-style enter/confidence.
+    (sklearn) that maps numeric market state → council-style enter/confidence.
 Phase 2 (fast path): When proxy accuracy is high enough, live entry decisions
-    skip Ollama (milliseconds) and use PPO + TeacherProxy instead.
+    skip cloud council (milliseconds) and use PPO + TeacherProxy instead.
 
-Ollama stays active for Telegram, journaling, and off-hours training.
+Council stays active for Telegram, journaling, and off-hours training.
 """
 
 from __future__ import annotations

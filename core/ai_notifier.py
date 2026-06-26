@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-core/ai_notifier.py — Ollama-crafted Telegram alerts for HANOON.
+core/ai_notifier.py — Telegram alerts for HANOON.
 
-Turns raw trading events into short, analytical pilot briefings —
-not static templates. Falls back to structured numeric summaries
-if Ollama is busy or unavailable.
+Routine alerts use structured templates (zero API). Commander/copilot
+replies may use cloud council when COUNCIL_NOTIFY_API_COPILOT=true.
 """
 
 from __future__ import annotations
@@ -120,8 +119,12 @@ class TelegramAIComposer:
         copilot: bool = False,
         max_chars: Optional[int] = None,
     ) -> str:
-        """AI-driven Telegram text — trading alerts, copilot replies, broadcasts."""
-        all_ai = getattr(self.cfg, "AI_TELEGRAM_ALL_OUTBOUND", True)
+        """Telegram text — API only for copilot / explicitly enabled events."""
+        from core.council_budget import (
+            classify_notify_event,
+            notify_event_wants_api,
+        )
+
         notify_on = getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True)
         if not notify_on and not copilot:
             return fallback or self._structured_fallback(event_type, context, fallback)
@@ -132,32 +135,31 @@ class TelegramAIComposer:
             else int(getattr(self.cfg, "AI_TELEGRAM_MAX_CHARS", 450))
         )
 
+        purpose = classify_notify_event(event_type, copilot=copilot)
+        use_api = notify_event_wants_api(self.cfg, event_type, copilot=copilot)
+
+        if not use_api:
+            return fallback or self._structured_fallback(event_type, context, fallback)
+
         if not copilot:
             min_gap = float(getattr(self.cfg, "AI_TELEGRAM_MIN_INTERVAL_SEC", 6.0))
             now = time.time()
             if now - self._last_sent.get(event_type, 0) < min_gap and event_type in (
                 "watch_pulse", "system_status", "info",
             ):
-                if all_ai:
-                    beautified = self._ollama_beautify(fallback, event_type, context, max_c, copilot=False)
-                    if beautified:
-                        return beautified
-                return self._structured_fallback(event_type, context, fallback)
+                return fallback or self._structured_fallback(event_type, context, fallback)
 
         enriched = self._enrich_context(event_type, context)
         if fallback and not enriched.get("raw_briefing"):
             enriched["raw_briefing"] = fallback[:2500]
 
-        ai_text = self._ollama_compose(event_type, enriched, fallback, max_chars=max_c, copilot=copilot)
+        ai_text = self._ollama_compose(
+            event_type, enriched, fallback,
+            max_chars=max_c, copilot=copilot, purpose=purpose,
+        )
         if ai_text:
             self._last_sent[event_type] = time.time()
             return ai_text
-
-        if all_ai or copilot:
-            beautified = self._ollama_beautify(fallback, event_type, enriched, max_c, copilot=copilot)
-            if beautified:
-                self._last_sent[event_type] = time.time()
-                return beautified
 
         return fallback or self._structured_fallback(event_type, context, fallback)
 
@@ -226,6 +228,7 @@ class TelegramAIComposer:
         *,
         max_chars: int = 450,
         copilot: bool = False,
+        purpose: str = "notify",
     ) -> str:
         mood = context.get("mood", "awake")
         pilot = context.get("pilot_level", "Cadet")
@@ -255,53 +258,46 @@ class TelegramAIComposer:
             "• Plain text only — no JSON, no markdown fences\n"
         )
 
-        raw = self._call_ollama(prompt)
+        raw = self._call_ollama(prompt, purpose=purpose, event_type=event_type, copilot=copilot)
         text = (raw or "").strip()
         if len(text) < 8:
             return ""
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
         return "\n".join(lines[:max_lines])[:max_chars]
 
-    def _ollama_beautify(
+    def _call_ollama(
         self,
-        raw_text: str,
-        event_type: str,
-        context: Dict[str, Any],
-        max_chars: int,
+        prompt: str,
         *,
+        purpose: str = "notify",
+        event_type: Optional[str] = None,
         copilot: bool = False,
     ) -> str:
-        if not (raw_text or "").strip():
-            return ""
-        guidance = self._event_guidance(event_type)
-        prompt = (
-            "You are HANOON on Telegram. Rewrite this briefing to be beautiful, organized, and alive.\n"
-            f"MESSAGE TYPE: {event_type}\nTASK: {guidance}\n"
-            "Keep ALL facts and numbers exactly. First-person pilot voice.\n\n"
-            f"RAW:\n{raw_text[:2200]}\n\n"
-            f"CONTEXT: mood={context.get('mood', '?')} market={context.get('market_state', '?')}\n"
-            f"Max {max_chars} chars. Plain text, emoji section headers OK."
-        )
-        raw = self._call_ollama(prompt)
-        text = (raw or "").strip()
-        if len(text) < 8:
-            return ""
-        max_lines = 30 if copilot else 8
-        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-        return "\n".join(lines[:max_lines])[:max_chars]
-
-    def _call_ollama(self, prompt: str) -> str:
         if self.ai_commander:
             try:
-                return (self.ai_commander.compose_telegram(prompt) or "").strip()
+                return (
+                    self.ai_commander.compose_telegram(
+                        prompt,
+                        purpose=purpose,
+                        event_type=event_type,
+                        copilot=copilot,
+                    ) or ""
+                ).strip()
             except Exception as exc:
                 log.debug(f"AI telegram compose: {exc}")
         elif self.autopilot:
             core = getattr(self.autopilot, "core", None)
-            ollama = getattr(core, "ollama", None) if core else None
-            if ollama and hasattr(ollama, "compose_notification"):
+            council = getattr(core, "ollama", None) if core else None
+            if council and hasattr(council, "compose_notification"):
                 try:
-                    return (ollama.compose_notification(prompt) or "").strip()
+                    return (
+                        council.compose_notification(
+                            prompt,
+                            purpose=purpose,
+                            event_type=event_type,
+                            copilot=copilot,
+                        ) or ""
+                    ).strip()
                 except Exception:
                     pass
             try:

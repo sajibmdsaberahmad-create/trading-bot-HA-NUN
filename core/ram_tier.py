@@ -2,13 +2,8 @@
 """
 core/ram_tier.py — Auto-tune HANOON for installed RAM.
 
-Tiers (by total physical RAM):
-  compact     ≤ 8 GB   — fast council, small Ollama, no live llava, no heavy training
-  balanced    ≤ 12 GB  — qwen 3b, light off-hours training
-  standard    ≤ 24 GB  — live chart vision, full council wait, 4 prefetch
-  performance  > 24 GB  — llama3, llava, heavy training, meta-optimizer
-
-Set RAM_AUTO_TUNE=false to disable. Per-key .env overrides always win.
+Cloud council (Groq/Gemini) — no local LLM RAM budget.
+Tiers adjust council wait, chart vision, and training intensity.
 """
 
 from __future__ import annotations
@@ -20,12 +15,12 @@ from core.memory_guard import total_ram_mb
 
 # Env var names that block auto-tune when explicitly set
 _TIER_ENV_KEYS: Dict[str, str] = {
-    "OLLAMA_MODEL": "OLLAMA_MODEL",
-    "OLLAMA_MEMORY_BUDGET_MB": "OLLAMA_MEMORY_BUDGET_MB",
-    "OLLAMA_TIMEOUT": "OLLAMA_TIMEOUT",
-    "OLLAMA_MAX_TOKENS": "OLLAMA_MAX_TOKENS",
-    "OLLAMA_NUM_CTX": "OLLAMA_NUM_CTX",
-    "OLLAMA_KEEP_ALIVE": "OLLAMA_KEEP_ALIVE",
+    "GROQ_MODEL": "GROQ_MODEL",
+    "GEMINI_MODEL": "GEMINI_MODEL",
+    "GEMINI_VISION_MODEL": "GEMINI_VISION_MODEL",
+    "COUNCIL_TIMEOUT_SEC": "COUNCIL_TIMEOUT_SEC",
+    "COUNCIL_MAX_TOKENS": "COUNCIL_MAX_TOKENS",
+    "COUNCIL_MIN_CALL_INTERVAL_SEC": "COUNCIL_MIN_CALL_INTERVAL_SEC",
     "OLLAMA_META_OPTIMIZER_ENABLED": "OLLAMA_META_OPTIMIZER_ENABLED",
     "LIVE_CHART_VISION_ENABLED": "LIVE_CHART_VISION_ENABLED",
     "LIVE_CHART_VISION_MIN_SCORE": "LIVE_CHART_VISION_MIN_SCORE",
@@ -38,10 +33,7 @@ _TIER_ENV_KEYS: Dict[str, str] = {
     "COUNCIL_SCANNER_FAST_SEC": "COUNCIL_SCANNER_FAST_SEC",
     "OFF_HOURS_HEAVY_TRAINING": "OFF_HOURS_HEAVY_TRAINING",
     "TRAINING_MEMORY_LIMIT_MB": "TRAINING_MEMORY_LIMIT_MB",
-    "OLLAMA_VISION_MODEL": "OLLAMA_VISION_MODEL",
     "LIVE_CHART_VISION_OPPORTUNISTIC": "LIVE_CHART_VISION_OPPORTUNISTIC",
-    "OLLAMA_VISION_UNLOAD_AFTER_CALL": "OLLAMA_VISION_UNLOAD_AFTER_CALL",
-    "OLLAMA_VISION_SWAP_TEXT_MODEL": "OLLAMA_VISION_SWAP_TEXT_MODEL",
     "CAPITAL_DISCIPLINE": "CAPITAL_DISCIPLINE",
     "TREAT_PAPER_AS_LIVE": "TREAT_PAPER_AS_LIVE",
     "AI_SPIKE_FAST_ENTRY": "AI_SPIKE_FAST_ENTRY",
@@ -58,13 +50,10 @@ _TIER_ENV_KEYS: Dict[str, str] = {
 
 TIER_PROFILES: Dict[str, Dict[str, Any]] = {
     "compact": {
-        "OLLAMA_MODEL": "qwen2.5:1.5b",
-        "OLLAMA_DYNAMIC_MODEL": True,
-        "OLLAMA_MEMORY_BUDGET_MB": 2560,
-        "OLLAMA_TIMEOUT": 14,
-        "OLLAMA_MAX_TOKENS": 192,
-        "OLLAMA_NUM_CTX": 1536,
-        "OLLAMA_KEEP_ALIVE": 300,
+        "GROQ_MODEL": "llama-3.1-8b-instant",
+        "COUNCIL_MAX_TOKENS": 256,
+        "COUNCIL_TIMEOUT_SEC": 10,
+        "COUNCIL_MIN_CALL_INTERVAL_SEC": 0.8,
         "OLLAMA_META_OPTIMIZER_ENABLED": False,
         "CAPITAL_DISCIPLINE": True,
         "TREAT_PAPER_AS_LIVE": True,
@@ -91,19 +80,14 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 4.0,
         "OFF_HOURS_HEAVY_TRAINING": False,
         "TRAINING_MEMORY_LIMIT_MB": 2048,
-        "OLLAMA_VISION_MODEL": "llava-phi3:3.8b",
+        "GEMINI_VISION_MODEL": "gemini-2.5-flash",
         "LIVE_CHART_VISION_OPPORTUNISTIC": True,
         "LIVE_CHART_VISION_MIN_SCORE": 92.0,
-        "OLLAMA_VISION_UNLOAD_AFTER_CALL": True,
-        "OLLAMA_VISION_SWAP_TEXT_MODEL": False,
     },
     "balanced": {
-        "OLLAMA_MODEL": "qwen2.5:3b",
-        "OLLAMA_MEMORY_BUDGET_MB": 2560,
-        "OLLAMA_TIMEOUT": 15,
-        "OLLAMA_MAX_TOKENS": 256,
-        "OLLAMA_NUM_CTX": 2048,
-        "OLLAMA_KEEP_ALIVE": 450,
+        "GROQ_MODEL": "llama-3.3-70b-versatile",
+        "COUNCIL_MAX_TOKENS": 320,
+        "COUNCIL_TIMEOUT_SEC": 12,
         "OLLAMA_META_OPTIMIZER_ENABLED": False,
         "LIVE_CHART_VISION_ENABLED": False,
         "LIVE_CHART_VISION_MIN_SCORE": 72.0,
@@ -116,19 +100,14 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 6.0,
         "OFF_HOURS_HEAVY_TRAINING": True,
         "TRAINING_MEMORY_LIMIT_MB": 3072,
-        "OLLAMA_VISION_MODEL": "llava:7b-v1.6-mistral-q4_K_M",
+        "GEMINI_VISION_MODEL": "gemini-2.5-flash",
         "LIVE_CHART_VISION_OPPORTUNISTIC": True,
         "LIVE_CHART_VISION_MIN_SCORE": 78.0,
-        "OLLAMA_VISION_UNLOAD_AFTER_CALL": True,
-        "OLLAMA_VISION_SWAP_TEXT_MODEL": True,
     },
     "standard": {
-        "OLLAMA_MODEL": "qwen2.5:3b",
-        "OLLAMA_MEMORY_BUDGET_MB": 3072,
-        "OLLAMA_TIMEOUT": 18,
-        "OLLAMA_MAX_TOKENS": 320,
-        "OLLAMA_NUM_CTX": 3072,
-        "OLLAMA_KEEP_ALIVE": 600,
+        "GROQ_MODEL": "llama-3.3-70b-versatile",
+        "COUNCIL_MAX_TOKENS": 384,
+        "COUNCIL_TIMEOUT_SEC": 12,
         "OLLAMA_META_OPTIMIZER_ENABLED": True,
         "LIVE_CHART_VISION_ENABLED": True,
         "LIVE_CHART_VISION_MIN_SCORE": 65.0,
@@ -141,18 +120,13 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 8.0,
         "OFF_HOURS_HEAVY_TRAINING": True,
         "TRAINING_MEMORY_LIMIT_MB": 4096,
-        "OLLAMA_VISION_MODEL": "llava:7b-v1.6-mistral-q4_K_M",
+        "GEMINI_VISION_MODEL": "gemini-2.5-flash",
         "LIVE_CHART_VISION_OPPORTUNISTIC": False,
-        "OLLAMA_VISION_UNLOAD_AFTER_CALL": False,
-        "OLLAMA_VISION_SWAP_TEXT_MODEL": False,
     },
     "performance": {
-        "OLLAMA_MODEL": "llama3",
-        "OLLAMA_MEMORY_BUDGET_MB": 4096,
-        "OLLAMA_TIMEOUT": 20,
-        "OLLAMA_MAX_TOKENS": 384,
-        "OLLAMA_NUM_CTX": 4096,
-        "OLLAMA_KEEP_ALIVE": 600,
+        "GROQ_MODEL": "llama-3.3-70b-versatile",
+        "COUNCIL_MAX_TOKENS": 384,
+        "COUNCIL_TIMEOUT_SEC": 15,
         "OLLAMA_META_OPTIMIZER_ENABLED": True,
         "LIVE_CHART_VISION_ENABLED": True,
         "LIVE_CHART_VISION_MIN_SCORE": 60.0,
@@ -165,10 +139,8 @@ TIER_PROFILES: Dict[str, Dict[str, Any]] = {
         "COUNCIL_SCANNER_FAST_SEC": 10.0,
         "OFF_HOURS_HEAVY_TRAINING": True,
         "TRAINING_MEMORY_LIMIT_MB": 6144,
-        "OLLAMA_VISION_MODEL": "llava:13b-v1.6-vicuna-q4_K_M",
+        "GEMINI_VISION_MODEL": "gemini-2.5-flash",
         "LIVE_CHART_VISION_OPPORTUNISTIC": False,
-        "OLLAMA_VISION_UNLOAD_AFTER_CALL": False,
-        "OLLAMA_VISION_SWAP_TEXT_MODEL": False,
     },
 }
 
@@ -228,14 +200,7 @@ def apply_ram_tier_to_config(cfg) -> str:
     cfg.RAM_TIER_LABEL = TIER_LABELS.get(tier, tier)
     cfg._ram_tier_applied = applied  # noqa: SLF001 — debug
     if not os.getenv("META_OPTIMIZER_MODEL"):
-        cfg.META_OPTIMIZER_MODEL = getattr(cfg, "OLLAMA_MODEL", profile.get("OLLAMA_MODEL", "qwen2.5:3b"))
-    if getattr(cfg, "OLLAMA_DYNAMIC_MODEL", True) and not _env_overrides_key("OLLAMA_MODEL"):
-        try:
-            from core.ollama_models import sync_text_model
-
-            sync_text_model(cfg)
-        except Exception:
-            pass
+        cfg.META_OPTIMIZER_MODEL = getattr(cfg, "GROQ_MODEL", profile.get("GROQ_MODEL", "llama-3.3-70b-versatile"))
     return tier
 
 
@@ -246,10 +211,11 @@ def ram_tier_summary(cfg) -> Dict[str, Any]:
         "label": TIER_LABELS.get(tier, tier),
         "total_ram_mb": total_ram_mb(),
         "auto_tune": getattr(cfg, "RAM_AUTO_TUNE", True),
-        "ollama_model": getattr(cfg, "OLLAMA_MODEL", "?"),
+        "ollama_model": getattr(cfg, "GROQ_MODEL", "?"),
+        "council_backend": getattr(cfg, "COUNCIL_BACKEND", "groq"),
         "chart_vision": getattr(cfg, "LIVE_CHART_VISION_ENABLED", False)
         or getattr(cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False),
-        "vision_model": getattr(cfg, "OLLAMA_VISION_MODEL", "?"),
+        "vision_model": getattr(cfg, "GEMINI_VISION_MODEL", "?"),
         "vision_opportunistic": getattr(cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False),
         "heavy_training": getattr(cfg, "OFF_HOURS_HEAVY_TRAINING", False),
         "council_wait_sec": getattr(cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15),
