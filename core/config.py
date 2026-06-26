@@ -730,6 +730,7 @@ class BotConfig:
     COUNCIL_NANNY_LOW_TASKS: bool = os.getenv(
         "COUNCIL_NANNY_LOW_TASKS", "false"
     ).lower() in ("1", "true", "yes")
+    SHUTDOWN_SYNC_TIMEOUT_SEC: float = float(os.getenv("SHUTDOWN_SYNC_TIMEOUT_SEC", "45"))
     # Live chart vision (llava) — off on 8GB; Telegram upload still works
     LIVE_CHART_VISION_ENABLED: bool = field(
         default_factory=lambda: os.getenv(

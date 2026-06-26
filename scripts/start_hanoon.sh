@@ -358,8 +358,11 @@ echo "  🚀 HANOON SCALPER — FULL PILOT MODE"
 echo "  Log: $MAIN_LOG"
 echo "  Graceful stop: ./stop.sh  (or double-click STOP.command)"
 echo "  Avoid Ctrl+C — it skips git sync and IB cleanup"
+echo "  Live tail: tail -f $MAIN_LOG"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-echo $$ >"$PID_FILE"
-python3 main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" 2>&1 | tee -a "$MAIN_LOG"
+python3 -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" >>"$MAIN_LOG" 2>&1 &
+BOT_PID=$!
+echo "$BOT_PID" >"$PID_FILE"
+wait "$BOT_PID"
