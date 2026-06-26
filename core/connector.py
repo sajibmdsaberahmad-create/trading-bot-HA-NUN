@@ -693,16 +693,13 @@ class IBConnector:
                         handler(ticker, int(errorCode), str(errorString))
                     except Exception:
                         pass
+                from core.startup_log import sinfo
                 if errorCode == 10189:
-                    log.info(
-                        f"IB tick-by-tick unavailable on {ticker or '?'} — using 5s bars"
-                    )
+                    sinfo(self.cfg, f"IB tick-by-tick unavailable on {ticker or '?'} — using 5s bars")
                 else:
-                    log.info(
-                        f"IB tick-by-tick cap on {ticker or '?'} — using 5s bars instead"
-                    )
+                    sinfo(self.cfg, f"IB tick-by-tick cap on {ticker or '?'} — using 5s bars instead")
             except Exception:
-                log.info(f"IB tick-by-tick issue ({errorCode}) — using 5s bars instead")
+                log.debug(f"IB tick-by-tick issue ({errorCode}) — using 5s bars instead")
             return
 
         # Market-data failures → learn + avoid (162 no HMDS, 420 no permissions, …)

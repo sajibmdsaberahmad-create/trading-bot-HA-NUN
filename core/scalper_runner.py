@@ -377,8 +377,6 @@ class ScalperRunner:
             from core.cognitive_autopilot import CognitiveAutopilot
             self.autopilot = CognitiveAutopilot(cfg)
             self.autopilot.start()
-            from core.startup_log import sinfo
-            sinfo(self.cfg, "🤖 Cognitive Autopilot integrated into live trading loop")
         except Exception as exc:
             log.debug(f"Cognitive autopilot init skipped: {exc}")
 
@@ -3581,7 +3579,7 @@ class ScalperRunner:
                     continue
             if ticker in self._target_monitors:
                 self._stop_target_stream(ticker)
-            log.info(f"  📡 {ticker}: switching to 5s bars")
+            log.debug(f"  📡 {ticker}: switching to 5s bars")
             self._start_target_stream(ticker, quiet=True, stream_mode=mode)
 
     def _ensure_focus_stream(self, quiet: bool = False):
