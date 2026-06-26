@@ -405,3 +405,4 @@
 {"timestamp":"2026-06-26T15:12:59.147364+00:00","event":"market_data_failure","ticker":"SOFI","reason":"MD 10197 ib_10197: No market data during competing live session","ib_code":10197,"pattern":"ib_10197","failures":2,"market_state":"open"}
 {"timestamp":"2026-06-26T15:12:59.395005+00:00","event":"market_data_failure","ticker":"MARA","reason":"MD 10197 ib_10197: No market data during competing live session","ib_code":10197,"pattern":"ib_10197","failures":1,"market_state":"open"}
 {"timestamp":"2026-06-26T15:13:54.349821+00:00","event":"market_data_failure","ticker":"SOFI","reason":"MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52892","ib_code":162,"pattern":"no_historical_data","failures":4,"market_state":"open"}
+{"timestamp":"2026-06-26T15:16:52.917669+00:00","event":"rth_open","old_state":"startup","tier":"rth","cleared_md":["SOFI"]}

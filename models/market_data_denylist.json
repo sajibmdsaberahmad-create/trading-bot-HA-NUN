@@ -320,21 +320,5 @@
     "first_seen": "2026-06-25T18:19:50.790909+00:00",
     "last_seen": "2026-06-25T18:19:50.790936+00:00",
     "source": "ib_error"
-  },
-  "SOFI": {
-    "ticker": "SOFI",
-    "failures": 4,
-    "last_code": 162,
-    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52892",
-    "pattern": "no_historical_data",
-    "exchange": "SMART",
-    "primary_exchange": "NASDAQ",
-    "skip_until": 1782490434.34848,
-    "skip_until_iso": "2026-06-26T16:13:54.348480+00:00",
-    "first_seen": "2026-06-26T13:50:35.521712+00:00",
-    "last_seen": "2026-06-26T15:13:54.348633+00:00",
-    "source": "ib_error",
-    "market_state": "open",
-    "transient": false
   }
 }
