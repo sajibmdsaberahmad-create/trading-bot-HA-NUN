@@ -1,20 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 160,
+  "total_awakenings": 161,
   "training_sessions": 31,
   "trades_observed": 243,
   "scans_performed": 31,
   "improvements_applied": 518,
   "reports_generated": 30,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T18:30:49.294258",
-      "age": "3d 7h 28m 0s",
-      "type": "TRADE",
-      "message": "Observed trade: CCXI ? P&L=$-0.25",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T18:31:19.144339",
       "age": "3d 7h 28m 30s",
@@ -21872,9 +21865,16 @@
           "Hi"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T20:29:52.755975",
+      "age": "5d 9h 27m 4s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #161",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-26T20:22:14.321236",
+  "last_awakening": "2026-06-26T20:29:52.755708",
   "current_version": "v20260626_202340",
   "version_history": [
     {
