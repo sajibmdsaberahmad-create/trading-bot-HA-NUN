@@ -113,6 +113,13 @@ class BotConfig:
     IB_10197_RECLAIM_COOLDOWN_SEC: float = float(
         os.getenv("IB_10197_RECLAIM_COOLDOWN_SEC", "45"),
     )
+    IB_10197_AUTO_RECLAIM: bool = os.getenv(
+        "IB_10197_AUTO_RECLAIM", "true",
+    ).lower() in ("1", "true", "yes")
+    # Paper + TWS charts share one live MD slot — warn instead of disconnect/reconnect
+    IB_10197_PAPER_WARN_ONLY: bool = os.getenv(
+        "IB_10197_PAPER_WARN_ONLY", "true",
+    ).lower() in ("1", "true", "yes")
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
     # Paper $1M+ account: AI sizes from IB equity, learns without small-account caps
     AI_PAPER_FREE_LEARNING: bool = os.getenv(
@@ -367,9 +374,6 @@ class BotConfig:
         "0", "false", "no",
     )
     HMDS_FETCH_TIMEOUT_SEC: int = int(os.getenv("HMDS_FETCH_TIMEOUT_SEC", "12"))
-    PAPER_TICK_USE_ALLLAST: bool = os.getenv(
-        "PAPER_TICK_USE_ALLLAST", "false",
-    ).lower() in ("1", "true", "yes")
     MD_TRANSIENT_COOLDOWN_SEC: float = float(os.getenv("MD_TRANSIENT_COOLDOWN_SEC", "90"))
     REALTIME_BARS_USE_RTH_WHEN_OPEN: bool = os.getenv(
         "REALTIME_BARS_USE_RTH_WHEN_OPEN", "true",
