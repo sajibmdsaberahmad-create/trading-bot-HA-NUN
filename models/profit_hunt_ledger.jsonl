@@ -210,3 +210,4 @@
 {"timestamp":"2026-06-26T18:37:52.533211+00:00","event":"hard_stop","ticker":"PLTR","pnl_usd":1.48,"pnl_pct":0.0001,"primary_goal":true,"reason":"hard_stop","price":112.75}
 {"timestamp":"2026-06-26T18:37:54.110437+00:00","event":"hard_stop","ticker":"SOFI","pnl_usd":5.3,"pnl_pct":0.0003,"primary_goal":true,"reason":"hard_stop","price":17.64}
 {"timestamp":"2026-06-26T18:38:26.127150+00:00","event":"hard_stop","ticker":"RIOT","pnl_usd":1.0,"pnl_pct":0.0004,"primary_goal":true,"reason":"hard_stop","price":28.14}
+{"timestamp":"2026-06-26T18:38:43.694819+00:00","event":"trailing_stop","ticker":"MARA","pnl_usd":0.6,"pnl_pct":0.0007,"primary_goal":true,"reason":"trailing_stop","price":14.7}

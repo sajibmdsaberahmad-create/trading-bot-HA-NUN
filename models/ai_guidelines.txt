@@ -381,3 +381,11 @@ Scanner+spike after timeout: score=81 vol=2804.0x prob=60% | ATR R:R 2.0
 Observed trade_closed — recorded for learning.
 hard_stop
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:38:36.223534+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:38:36.224670+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
