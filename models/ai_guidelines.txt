@@ -108,3 +108,6 @@ MD 10197 ib_10197: No market data during competing live session
 Observed market_data_failure — recorded for learning.
 MD 10197 ib_10197: No market data during competing live session
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:17:19.147631+00:00
+Observed rth_open — recorded for learning.
+

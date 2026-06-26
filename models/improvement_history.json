@@ -526,5 +526,14 @@
     "lessons": [
       "Review market_data_failure on MARA"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:17:19.150720+00:00",
+    "source": "runtime_rth_open",
+    "adjustments": {},
+    "guidelines_summary": "Observed rth_open \u2014 recorded for learning.",
+    "lessons": [
+      "Review rth_open on ?"
+    ]
   }
 ]

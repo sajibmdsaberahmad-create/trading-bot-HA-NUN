@@ -108,5 +108,5 @@
   "last_thought": "```json\n{\n  \"trade_decision\": {\n    \"profit_probability\": 63.8,\n    \"direction\": \"down\",\n    \"fakeouts\": [\n      {\"volume\": 1000, \"type\": \"high\", \"reason\": \"NOK 14:20 wave\"}\n    ],\n    \"fakeout_type\": \"fade\",\n    \"profit_trend\": \"up\"\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:13:25.686578"
+  "updated": "2026-06-26T15:17:19.098351"
 }
