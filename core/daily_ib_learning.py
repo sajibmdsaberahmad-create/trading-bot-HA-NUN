@@ -638,6 +638,12 @@ def run_daily_ib_learning_cycle(
         except Exception:
             pass
 
+    try:
+        from core.hanoon_clean_publish import schedule_clean_repo_publish
+        schedule_clean_repo_publish(cfg, trigger="daily_learning")
+    except Exception:
+        pass
+
     return {
         "status": "ok",
         "day": day_str,

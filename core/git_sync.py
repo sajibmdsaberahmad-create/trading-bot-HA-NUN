@@ -1580,6 +1580,11 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
 
     log.info(f"📤 Shutdown sync: HANOON={'✓' if ok_ha else '✗'} Logs={'✓' if ok_logs else '✗'} Grandmaster={'✓' if ok_gm else '✗'}")
     try:
+        from core.hanoon_clean_publish import schedule_clean_repo_publish
+        schedule_clean_repo_publish(cfg_bot, trigger="shutdown", force=True)
+    except Exception as exc:
+        log.debug(f"Clean algo repo publish: {exc}")
+    try:
         flush_git_telegram_summary(cfg_bot)
     except Exception:
         pass
@@ -1646,6 +1651,11 @@ def push_model_release(version: str, model_path: str = "ppo_trader.zip", notes: 
             push_large_file_to_release(model_path, tag_name, notes)
 
         log.info(f"🏷 Git release tagged: {tag_name}")
+        try:
+            from core.hanoon_clean_publish import schedule_clean_repo_publish
+            schedule_clean_repo_publish(cfg_bot, trigger="model_release", force=True)
+        except Exception as exc:
+            log.debug(f"Clean algo repo publish: {exc}")
         try:
             from core.telegram_broadcast import notify_model_release
             if cfg_bot is not None:
