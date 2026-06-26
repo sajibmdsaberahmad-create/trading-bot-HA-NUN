@@ -67,6 +67,14 @@ class AIRuntimeObserver:
         self._append_insight(event, context)
         self._record_experience(event, context)
 
+        # rth_open / transient MD — record only; Ollama here starves entry councils
+        if event == "rth_open":
+            log.debug(f"RUNTIME {event}: recorded (no Ollama — avoid council starvation)")
+            return
+        if event == "market_data_failure" and context.get("transient"):
+            log.debug(f"RUNTIME {event}: transient — recorded only")
+            return
+
         if getattr(self.cfg, "AI_RUNTIME_REASONING_ENABLED", True):
             threading.Thread(
                 target=self._reason_and_improve,

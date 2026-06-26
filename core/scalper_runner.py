@@ -566,6 +566,10 @@ class ScalperRunner:
         if dm and getattr(self.cfg, "SCALPER_LIVE_BARS_FIRST", True):
             df = dm.get_live_decision_bars(min_bars=min_b)
             live_px = float(dm.get_latest_price() or 0)
+            if (df is None or len(df) < min_b) and live_px > 0:
+                partial = dm.get_live_decision_bars(min_bars=1)
+                if partial is not None and len(partial) > 0:
+                    df = partial
 
         if df is None or len(df) < min_b:
             cached = self._scan_data_cache.get(ticker)
@@ -1351,8 +1355,8 @@ class ScalperRunner:
 
     def _on_rth_open(self, old_state: str) -> None:
         """
-        Bell at 09:30 ET — immediate shift to live RTH mode even if bot ran since pre-market.
-        Refreshes streams, clears flaky pre-market MD blocks, forces live scanner rescan.
+        Bell at 09:30 ET — shift to live RTH mode when transitioning from pre-market.
+        Mid-day startup (old_state=startup) only clears flaky MD blocks — no teardown.
         """
         today = now_et().strftime("%Y-%m-%d")
         if self._rth_open_day == today:
@@ -1360,15 +1364,33 @@ class ScalperRunner:
         self._rth_open_day = today
         self._day_session_ended = False
 
+        is_startup = old_state == "startup"
         status = rth_status_line(self.cfg)
         log.info(f"🔔 RTH OPEN ({old_state} → open) | {status}")
-        log.info(f"  🧠 {ai_session_context_block(self.cfg)}")
+        if not is_startup:
+            log.info(f"  🧠 {ai_session_context_block(self.cfg)}")
 
         cleared = clear_transient_md_blocks(self.cfg)
         if cleared:
             for t in cleared:
                 self._contract_blacklist.discard(t.upper())
                 self._contract_blacklist.discard(t)
+        try:
+            from core.market_data_learning import clear_hmds_transient_blocks
+            clear_hmds_transient_blocks()
+        except Exception:
+            pass
+
+        if is_startup:
+            log.info(
+                "  📡 Mid-session start — streams/cache kept "
+                "(no 9:30 teardown; live bars warm from tick streams)"
+            )
+            teach_profit_hunt_lesson(
+                self.autopilot, self.consciousness,
+                "RTH session live — profit hunt on stream bars while cache warms.",
+            )
+            return
 
         teach_profit_hunt_lesson(
             self.autopilot, self.consciousness,
