@@ -8,5 +8,5 @@
   "max_shares_per_trade": 100000,
   "min_lock_score": 0.0,
   "source": "ai_heuristic",
-  "equity_basis": 990411.04
+  "equity_basis": 990411.03
 }
