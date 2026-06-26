@@ -220,6 +220,7 @@ class ScalperRunner:
         git_sync_init(cfg)
         self.conn.register_market_data_error_handler(self._on_market_data_failure)
         self.conn.register_tick_limit_handler(self._on_tick_stream_limit)
+        self.conn.register_session_reclaim_handler(self._on_ib_session_reclaim)
         self._tick_limit_denied: set = set()
 
         # AI / PPO wiring
@@ -3660,6 +3661,19 @@ class ScalperRunner:
                 return ratio >= self.cfg.VOLUME_SPIKE_MIN_RATIO, ratio
         return False, 1.0
     
+    def _stop_all_target_streams(self) -> None:
+        """Stop every live tick/bar stream (used on shutdown and IB session reclaim)."""
+        for ticker in list(self._target_monitors.keys()):
+            self._stop_target_stream(ticker)
+
+    def _on_ib_session_reclaim(self) -> None:
+        """Cancel streams before IB disconnect/reconnect so zombie MD slots are released."""
+        n = len(self._target_monitors)
+        if n:
+            log.info(f"IB session reclaim: stopping {n} live stream(s)")
+        self._stop_all_target_streams()
+        self._queue_locked_stream_repairs()
+
     def _stop_target_stream(self, ticker: str):
         """Stop live tick stream for a target."""
         dm = self._target_monitors.pop(ticker, None)
