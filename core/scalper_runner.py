@@ -2192,15 +2192,18 @@ class ScalperRunner:
             scan_data = []
             for r in self.scan_results[:5]:
                 if isinstance(r, dict):
+                    ticker = r.get("ticker", "?")
+                    px = self._live_price_for(ticker, float(r.get("price", 0) or 0))
                     scan_data.append({
-                        "ticker": r.get("ticker", "?"),
-                        "price": r.get("price", 0),
+                        "ticker": ticker,
+                        "price": round(px, 4) if px > 0 else r.get("price", 0),
                         "score": round(float(r.get("total_score", 0)), 1),
                         "reason": str(r.get("reasons", ""))[:30],
                     })
                 else:
+                    px = self._live_price_for(r.ticker, float(r.price or 0))
                     scan_data.append({
-                        "ticker": r.ticker, "price": r.price,
+                        "ticker": r.ticker, "price": round(px, 4) if px > 0 else r.price,
                         "score": round(r.rank_score, 1), "reason": r.reason[:30],
                     })
             metrics = {
@@ -2620,6 +2623,7 @@ class ScalperRunner:
                 
                 # Update AI buffers periodically (throttled to every 5s)
                 now = time.time()
+                self._heal_stale_stream_prices(now)
                 if now - getattr(self, '_last_ai_update', 0) > 5.0:
                     self._last_ai_update = now
                     try:
@@ -3607,7 +3611,6 @@ class ScalperRunner:
                 dm.on_tick(lambda px, ts, t=sym: self._on_locked_stream_tick(t, px, ts))
             self._target_monitors[ticker] = dm
             self._stream_modes[ticker] = stream_mode
-            self.conn.register_stream_manager(ticker, dm)
             self._target_last_bar_count[ticker] = n_cached
             kind = "5s" if stream_mode == "realtime" else "tick"
             warm = "warming" if n_cached < self._min_bars_for(ticker) else f"{n_cached} bars"
