@@ -2451,6 +2451,13 @@ class ScalperRunner:
         self._write_init_report()
         self._refresh_account_balance()
         self._log_startup_banner()
+        if getattr(self.cfg, "COUNCIL_ENABLED", getattr(self.cfg, "OLLAMA_ENABLED", False)):
+            try:
+                from core.ollama_models import text_model_startup_warnings
+                for warn in text_model_startup_warnings(self.cfg):
+                    log.warning(f"⚠️ {warn}")
+            except Exception:
+                pass
         bootstrap_ai_session_limits(self)
         if self._ib_starting_balance:
             try:
@@ -3643,18 +3650,13 @@ class ScalperRunner:
 
         if wanted:
             tickers = ",".join(wanted[:8]) + ("…" if len(wanted) > 8 else "")
-            if quiet:
-                log.info(
-                    f"📡 Streams: {n_tick} tick + {n_rt} 5s-bars"
-                    + (f" ({n_skip} deferred)" if n_skip else "")
-                    + f" [{tickers}]"
-                )
-            elif not quiet:
-                log.info(
-                    f"  📡 PRIORITY STREAMS: {n_tick} tick + {n_rt} 5s-bars"
-                    + (f" ({n_skip} deferred)" if n_skip else "")
-                    + f" [{tickers}]"
-                )
+            body = (
+                f"{n_tick} tick + {n_rt} 5s-bars"
+                + (f" ({n_skip} deferred)" if n_skip else "")
+                + f" [{tickers}]"
+            )
+            prefix = "📡 Streams:" if quiet else "  📡 PRIORITY STREAMS:"
+            log.info(f"{prefix} {body}")
 
     def _ensure_target_stream(self, ticker: str, mode: str = "realtime", quiet: bool = False):
         """Start or switch stream mode for one locked ticker."""

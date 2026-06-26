@@ -72,9 +72,10 @@ class CognitiveAutopilot:
         self._main_thread = None
         self._shutdown_event = threading.Event()
 
-        logger.info("🤖 Cognitive Autopilot ONLINE — AI is fully autonomous")
-        logger.info("   Human cognition: analyze + gut feel + experience on every decision")
-        logger.info("   Computational tools: PPO, scanner, volume, regime — all synthesized")
+        from core.startup_log import startup_compact, sinfo
+        sinfo(cfg, "🤖 Cognitive Autopilot ONLINE — AI is fully autonomous")
+        sinfo(cfg, "   Human cognition: analyze + gut feel + experience on every decision")
+        sinfo(cfg, "   Computational tools: PPO, scanner, volume, regime — all synthesized")
 
     def start(self):
         """Start the background autopilot loop."""
@@ -89,7 +90,7 @@ class CognitiveAutopilot:
         if self.device:
             self.device.start_monitoring()
 
-        logger.info("Autopilot loop started")
+        logger.debug("Autopilot loop started")
 
     def stop(self):
         """Graceful shutdown."""
