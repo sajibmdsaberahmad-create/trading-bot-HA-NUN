@@ -100,6 +100,7 @@ class DataManager:
 
         # Callbacks other components can subscribe to for tick-level reaction
         self._tick_callbacks = []
+        self.conn.register_stream_manager(self.cfg.TICKER, self)
 
     def on_tick(self, callback):
         """Register a function(price: float, ts: pd.Timestamp) called on every tick."""
@@ -219,7 +220,28 @@ class DataManager:
         self._realtime_handle = rt_bars
         log.info("Real-time 5-second bar stream started (tick stream fallback mode).")
 
+    def fallback_to_realtime_bars(self) -> None:
+        """IB 10189/10190 — cancel dead tick-by-tick sub and start 5s bars immediately."""
+        if self._realtime_handle is not None:
+            return
+        try:
+            if self._tick_handle is not None and self._contract is not None:
+                self.ib.cancelTickByTickData(
+                    self._contract, tick_by_tick_type(self.cfg),
+                )
+        except Exception:
+            pass
+        self._tick_handle = None
+        try:
+            self._start_realtime_bars_fallback()
+            log.info(
+                f"  📡 {self.cfg.TICKER}: tick-by-tick denied — switched to 5s realtime bars"
+            )
+        except Exception as exc:
+            log.warning(f"Realtime bar fallback failed for {self.cfg.TICKER}: {exc}")
+
     def stop_tick_stream(self):
+        self.conn.unregister_stream_manager(self.cfg.TICKER)
         try:
             if self._tick_handle is not None and self._contract is not None:
                 self.ib.cancelTickByTickData(

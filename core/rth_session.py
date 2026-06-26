@@ -154,7 +154,9 @@ def apply_opening_entry_adjustments(
 
 
 def realtime_bars_use_rth(cfg: BotConfig) -> bool:
-    """IB reqRealTimeBars useRTH — True during RTH for clean session bars."""
+    """IB reqRealTimeBars useRTH — paper often needs useRTH=False for live 5s bars."""
+    if getattr(cfg, "PAPER_TRADING", False):
+        return bool(getattr(cfg, "PAPER_REALTIME_BARS_USE_RTH", False))
     if not bool(getattr(cfg, "REALTIME_BARS_USE_RTH_WHEN_OPEN", True)):
         return False
     return is_rth(cfg)

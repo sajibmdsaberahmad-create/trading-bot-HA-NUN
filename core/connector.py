@@ -51,6 +51,7 @@ class IBConnector:
         self._order_errors: Dict[int, Dict[str, Any]] = {}
         self._md_error_handlers: list = []
         self._tick_limit_handlers: list = []
+        self._stream_managers: Dict[str, Any] = {}
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -278,6 +279,15 @@ class IBConnector:
         """Runner callback: downgrade ticker from tick-by-tick to 5s bars (IB 10190)."""
         self._tick_limit_handlers.append(handler)
 
+    def register_stream_manager(self, ticker: str, manager: Any) -> None:
+        """Per-ticker DataManager — immediate 5s-bar fallback on IB 10189/10190."""
+        if ticker:
+            self._stream_managers[str(ticker).upper()] = manager
+
+    def unregister_stream_manager(self, ticker: str) -> None:
+        if ticker:
+            self._stream_managers.pop(str(ticker).upper(), None)
+
     def _on_error(self, reqId, errorCode, errorString, contract):
         # Pure informational error codes from IB that aren't real problems
         BENIGN = {2104, 2106, 2107, 2108, 2109, 2119, 2158}
@@ -309,6 +319,12 @@ class IBConnector:
             try:
                 from core.market_data_learning import extract_ticker_from_error
                 ticker = extract_ticker_from_error(contract, errorString)
+                dm = self._stream_managers.get((ticker or "").upper())
+                if dm is not None:
+                    try:
+                        dm.fallback_to_realtime_bars()
+                    except Exception:
+                        pass
                 for handler in self._tick_limit_handlers:
                     try:
                         handler(ticker, int(errorCode), str(errorString))
