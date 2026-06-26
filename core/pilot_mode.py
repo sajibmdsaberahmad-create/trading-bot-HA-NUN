@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple
 import numpy as np
 
 from core.config import BotConfig
+from core.market_hours import get_market_state
 from core.notify import log
 from core.paper_mode import account_equity as resolve_account_equity, is_paper_free_learning
 
@@ -76,6 +77,8 @@ def get_live_scan_universe(
         getattr(cfg, "IB_SCANNER_STARTUP_RETRIES", 1) if startup
         else getattr(cfg, "IB_SCANNER_RETRIES", 2)
     )
+    if get_market_state(cfg) == "after_hours":
+        retries = 1
     for attempt in range(max(1, retries)):
         try:
             force = attempt > 0

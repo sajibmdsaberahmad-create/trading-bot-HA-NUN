@@ -2554,7 +2554,22 @@ class ScalperRunner:
                     self._needs_initial_scan = False
                     self.ib.sleep(0.2)  # drain IB event queue before scan
                     defer_scan = getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
-                    if defer_scan:
+                    can_boot, boot_state = can_trade_now(self.cfg)
+                    use_curated = (
+                        not can_boot
+                        and getattr(self.cfg, "STARTUP_CURATED_WHEN_NOT_TRADABLE", True)
+                        and not defer_scan
+                    )
+                    if use_curated:
+                        log.info(
+                            f"🔍 Startup scan: curated lock ({boot_state} — "
+                            f"training mode, skip live IB scanner)…"
+                        )
+                        try:
+                            self._scan_and_rank(startup=True, skip_ib_scanner=True)
+                        except Exception as exc:
+                            log.error(f"Initial scan failed: {exc}")
+                    elif defer_scan:
                         log.info("🔍 Startup scan: curated lock (IB scanner deferred)…")
                         try:
                             self._scan_and_rank(startup=True, skip_ib_scanner=True)

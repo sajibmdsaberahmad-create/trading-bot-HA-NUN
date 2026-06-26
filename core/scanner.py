@@ -89,9 +89,14 @@ def _req_scanner_with_timeout(
             ib.cancelScannerSubscription(data_list)
         except Exception:
             pass
-    if data_list:
+    n = len(data_list)
+    if n:
         from core.startup_log import sinfo
-        sinfo(None, f"  scanner {scan_code}@{location}: {len(data_list)} rows")
+        sinfo(None, f"  scanner {scan_code}@{location}: {n} rows")
+    elif empty_bail_sec > 0:
+        log.debug(
+            f"  scanner {scan_code}@{location}: 0 rows (cancelled — try snapshot codes off RTH)"
+        )
     return list(data_list)
 
 
@@ -321,6 +326,7 @@ class StockScanner:
                 profile = ib_scanner_profile(self.cfg)
                 scan_codes = list(profile.scan_codes)
                 filter_options = list(profile.filter_options)
+                scan_options = list(profile.scan_options)
                 if not scan_codes:
                     log.info(f"🔍 IB scanner skipped — no codes for session {profile.session}")
                     return []
@@ -332,21 +338,25 @@ class StockScanner:
                     self._scanner_warmed = True
 
                 max_codes = int(getattr(self.cfg, "IB_SCANNER_MAX_CODES_PER_RUN", 2))
+                if profile.snapshot_mode:
+                    max_codes = max(max_codes, 3)
                 disabled_codes: set = set()
                 skipped_universe = 0
-                location_codes = ["STK.US", "STK.US.MAJOR"]
+                location_codes = list(profile.location_codes) or ["STK.US.MAJOR", "STK.US"]
                 deadline = now + float(getattr(self.cfg, "IB_SCANNER_TIMEOUT_SEC", 25))
                 per_code_cap = profile.per_code_sec or float(
                     getattr(self.cfg, "IB_SCANNER_PER_CODE_SEC", 18)
                 )
-                empty_bail = float(getattr(self.cfg, "IB_SCANNER_EMPTY_BAIL_SEC", 4))
+                empty_bail = float(getattr(self.cfg, "IB_SCANNER_EMPTY_BAIL_SEC", 6))
                 codes_tried = 0
 
                 from core.startup_log import sinfo
-                filt_note = f" | filters={len(filter_options)}" if filter_options else ""
+                ext_note = " extHours=1" if scan_options else ""
+                filt_note = f" filters={len(filter_options)}" if filter_options else ""
                 log.info(
                     f"🔍 IB scanner ({profile.label}) "
-                    f"budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s{filt_note}…"
+                    f"budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s"
+                    f"{ext_note}{filt_note}…"
                 )
 
                 for location_code in location_codes:
@@ -364,20 +374,23 @@ class StockScanner:
                             locationCode=location_code,
                             scanCode=scan_code,
                         )
+                        if profile.scanner_setting_pairs:
+                            scan.scannerSettingPairs = profile.scanner_setting_pairs
                         try:
                             remaining = max(6.0, deadline - time.time())
                             code_budget = min(per_code_cap, remaining)
                             sinfo(
                                 self.cfg,
-                                f"  scanner req {scan_code} @ {location_code} "
-                                f"({profile.label}, budget {code_budget:.0f}s)…",
+                                f"  scanner {scan_code} @ {location_code} "
+                                f"({profile.label}, {code_budget:.0f}s)…",
                             )
                             scan_results = _req_scanner_with_timeout(
                                 ib,
                                 scan,
                                 code_budget,
+                                scan_options=scan_options,
                                 filter_options=filter_options,
-                                empty_bail_sec=empty_bail if profile.use_extended_filters else 0.0,
+                                empty_bail_sec=empty_bail,
                             )
                             codes_tried += 1
                         except Exception as exc:
