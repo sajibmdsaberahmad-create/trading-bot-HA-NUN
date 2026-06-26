@@ -334,5 +334,21 @@
     "first_seen": "2026-06-25T18:19:50.790909+00:00",
     "last_seen": "2026-06-25T18:19:50.790936+00:00",
     "source": "ib_error"
+  },
+  "SOFI": {
+    "ticker": "SOFI",
+    "failures": 1,
+    "last_code": 10197,
+    "last_reason": "No market data during competing live session",
+    "pattern": "ib_10197",
+    "exchange": "SMART",
+    "primary_exchange": "NASDAQ",
+    "skip_until": 1782482135.519657,
+    "skip_until_iso": "2026-06-26T13:55:35.519657+00:00",
+    "first_seen": "2026-06-26T13:50:35.521712+00:00",
+    "last_seen": "2026-06-26T13:50:35.521717+00:00",
+    "source": "ib_error",
+    "market_state": "open",
+    "transient": false
   }
 }
