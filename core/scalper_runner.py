@@ -2348,8 +2348,81 @@ class ScalperRunner:
             f"(cap ~5 each — extras deferred)"
         )
 
+    def _log_startup_banner(self) -> None:
+        """One structured boot summary — details at DEBUG when STARTUP_LOG_COMPACT=true."""
+        from core.startup_log import log_block, sinfo, startup_compact
+        from core.data import tick_by_tick_type
+        from core.market_hours import allowed_trading_sessions_label
+        from core.ram_tier import ram_tier_summary
+        from core.memory_guard import memory_status
+        from core.ai_session_limits import format_limits_log, should_ai_define_limits
+
+        acct_vals = self.conn.ib.accountValues()
+        account = acct_vals[0].account if acct_vals else "unknown"
+        mode = "PAPER" if self.cfg.PAPER_TRADING else "LIVE"
+        market_state = get_market_state(self.cfg)
+        can_trade, _ = can_trade_now(self.cfg)
+        sessions = allowed_trading_sessions_label(self.cfg)
+
+        paper_rt = bool(
+            getattr(self.cfg, "PAPER_TRADING", False)
+            and getattr(self.cfg, "PAPER_REALTIME_BARS_ONLY", False)
+        )
+        if paper_rt:
+            md_mode = "5s bars (paper)"
+        elif getattr(self.cfg, "USE_TICK_STREAM", True):
+            md_mode = f"tick ({tick_by_tick_type(self.cfg)})"
+        else:
+            md_mode = "5s bars"
+
+        defer = getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
+        warmup = int(getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 5))
+        scan_mode = f"deferred curated" if defer else f"live IB ({warmup}s warmup)"
+
+        council_on = getattr(self.cfg, "COUNCIL_ENABLED", False)
+        council = (
+            f"{getattr(self.cfg, 'COUNCIL_BACKEND', 'groq')}"
+            if council_on else "off"
+        )
+
+        lines = [
+            f"{mode} | {account} | ${self.account_equity:,.0f}",
+            f"Market: {market_state} | tradable={'yes' if can_trade else 'no'} | sessions: {sessions}",
+            f"Scanner: {scan_mode} | MD: {md_mode} | Council: {council}",
+            f"PPO: {'loaded' if not getattr(self, '_model_fresh', True) else 'fresh'} | "
+            f"tick budget {tick_stream_count(self.cfg)}+{max_realtime_bar_streams(self.cfg)} 5s",
+        ]
+        if hasattr(self, "pilot"):
+            vs = self.pilot.get_veteran_status()
+            lines.append(
+                f"Pilot: {vs.get('level', '?')} XP={vs.get('total_xp', 0)} "
+                f"conf={vs.get('confidence_threshold', 0):.0%}"
+            )
+        if should_ai_define_limits(self.cfg):
+            lines.append(format_limits_log(self.cfg, self.account_equity))
+
+        log_block("HANOON STARTUP", lines)
+
+        if startup_compact(self.cfg):
+            return
+
+        mem = memory_status(self.cfg)
+        tier_info = ram_tier_summary(self.cfg)
+        sinfo(
+            self.cfg,
+            f"🧠 Cloud council detail: groq={getattr(self.cfg, 'GROQ_MODEL', '?')} | "
+            f"gemini={getattr(self.cfg, 'GEMINI_MODEL', '?')} | "
+            f"RAM {mem['total_ram_mb']}MB tier={tier_info['label']}",
+            force=True,
+        )
+        discipline_log = startup_log_line(self.cfg)
+        if discipline_log:
+            sinfo(self.cfg, discipline_log, force=True)
+
     def run(self):
         self._register_shutdown_signals()
+        from core.startup_log import set_quiet_phase
+        set_quiet_phase(getattr(self.cfg, "STARTUP_LOG_COMPACT", True))
         from core.shutdown_control import (
             clear_shutdown_request,
             remove_pid_file,
@@ -2371,149 +2444,25 @@ class ScalperRunner:
             shadow_circuit=getattr(self, "shadow_circuit", None),
             force=bool(getattr(self.cfg, "ARCHITECTURE_EPOCH_RESET", False)),
         )
-        # Full initialization report (pushed to git and Telegram)
-        report_path = self._write_init_report()
-        log.info("HANOON — SINGLE FOCUS SCALPER")
-        acct = self.conn.ib.accountValues()
-        log.info(f"Account: {acct[0].account if acct else 'unknown'} | Universe: live IB scanner (no static list)")
-        if getattr(self.cfg, "COUNCIL_ENABLED", getattr(self.cfg, "OLLAMA_ENABLED", False)):
-            from core.memory_guard import memory_status
-            from core.ram_tier import ram_tier_summary
-            mem = memory_status(self.cfg)
-            tier_info = ram_tier_summary(self.cfg)
-            log.info(
-                f"🧠 Cloud council: ON | backend={getattr(self.cfg, 'COUNCIL_BACKEND', 'groq')} | "
-                f"groq={getattr(self.cfg, 'GROQ_MODEL', '?')} | gemini={getattr(self.cfg, 'GEMINI_MODEL', '?')} | "
-                f"RAM tier={tier_info['label']} ({mem['total_ram_mb']}MB) | "
-                f"chart_vision={'on' if tier_info['chart_vision'] else 'off'} "
-                f"({'opportunistic' if tier_info.get('vision_opportunistic') else 'always'}) | "
-                f"vision={tier_info.get('vision_model', '?')} | "
-                f"heavy_train={'on' if tier_info['heavy_training'] else 'off'}"
-            )
-            try:
-                from core.ollama_models import text_model_startup_warnings
-
-                for warn in text_model_startup_warnings(self.cfg):
-                    log.warning(f"⚠️ {warn}")
-            except Exception:
-                pass
-            if getattr(self.cfg, "COUNCIL_NANNY_MODE", True):
-                from core.council_nanny import (
-                    prefetch_enabled,
-                    learning_ring_enabled,
-                    strong_spike_learning_ring_enabled,
-                )
-                distill = "off"
-                if learning_ring_enabled(self.cfg):
-                    distill = "on"
-                elif strong_spike_learning_ring_enabled(self.cfg):
-                    distill = "strong-spike fills only"
-                log.info(
-                    f"🛡️ Council NANNY: RPM preserved for profit path | "
-                    f"prefetch={'on' if prefetch_enabled(self.cfg) else 'off'} | "
-                    f"learning_ring={distill} | "
-                    f"entry council when spike≥{getattr(self.cfg, 'COUNCIL_NANNY_MIN_SPIKE', 1.25)}x "
-                    f"score≥{getattr(self.cfg, 'COUNCIL_NANNY_MIN_SCORE', 55):.0f}"
-                )
-        else:
-            log.warning("🧠 Cloud council: OFF — set COUNCIL_ENABLED=true and GROQ_API_KEY in .env")
-        if getattr(self.cfg, "AI_FULL_CONTROL", True):
-            log.info("🧠 AI FULL CONTROL: all decisions, logs, journals, notifications via AI brain")
-        if getattr(self.cfg, "PROFIT_HUNT_PRIMARY_GOAL", True):
-            log.info(
-                "🎯 PRIMARY MISSION: full-time profit hunting — AIs work all session to make money; "
-                "any lawful tactic within guardrails"
-            )
-        discipline_log = startup_log_line(self.cfg)
-        if discipline_log:
-            log.info(discipline_log)
-        if getattr(self.cfg, "AI_PROFIT_FULL_POWER", True):
-            log.info(
-                "🧠 AI PROFIT FULL POWER: Ollama+PPO manage exits — ride winners, "
-                "trail/raise TP, exit at calculated peak (no mechanical scalp)"
-            )
-        if learn_dont_block(self.cfg):
-            log.info(
-                "📚 LEARN MODE: failures → experience buffer + soft retry "
-                "(no permanent ticker blocks; AI_UNLIMITED filters lifted)"
-            )
-        if getattr(self.cfg, "AI_RUNTIME_OBSERVER_ENABLED", True):
-            log.info(
-                "🧠 RUNTIME OBSERVER: live 5W reasoning on cancels/trades/errors → "
-                "auto-apply guardrailed fixes + PPO buffer"
-            )
+        # Full initialization report (pushed to git — not echoed to console)
+        self._write_init_report()
         self._refresh_account_balance()
-        self._log_tick_stream_config()
+        self._log_startup_banner()
         bootstrap_ai_session_limits(self)
-        if ai_full_capital_access(self.cfg):
-            log.info(
-                f"💰 FULL CAPITAL ACCESS: IB equity ${self.account_equity:,.0f} | "
-                f"deployable cash ${self._deployable_cash():,.0f} "
-                f"(no $1k cap — AI sizes from live account)"
-            )
-        if not should_ai_define_limits(self.cfg):
-            log.info(
-                f"Max per trade: {'$' + format(self.cfg.MAX_TRADE_SIZE_USD, ',.0f') if getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False) else 'AI-sized'} "
-                f"| Multi-position: {self._max_concurrent()} "
-                f"| Watch pool: {self._max_locked()} "
-                f"| Fixed deploy: {getattr(self.cfg, 'USE_FIXED_DEPLOY_CAP', False)} "
-                f"| Fixed risk: {getattr(self.cfg, 'USE_FIXED_RISK_CAP', False)} "
-                f"| Risk/trade: ${get_trade_risk_usd(self.cfg, self.account_equity):.2f}"
-            )
-        if getattr(self.cfg, "PILOT_MODE_ENABLED", True) and hasattr(self, "pilot"):
-            vs = self.pilot.get_veteran_status()
-            log.info(
-                f"✈️ PILOT MODE: {vs['level']} | XP={vs['total_xp']} | "
-                f"flights={vs['flights_completed']} | conf_gate={vs['confidence_threshold']:.0%}"
-            )
-        try:
-            from core.hybrid_distiller import distillation_status
-            ds = distillation_status(self.cfg)
-            log.info(
-                f"🎓 Hybrid distill: phase={ds['phase']} | "
-                f"closed_trades={ds['closed_trades']}/{ds['full_trades']} | "
-                f"fast_path={'on' if ds['fast_path'] else 'off'}"
-            )
-        except Exception:
-            pass
-        if getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
-            log.info(
-                f"📞 Live AI hotline ON — Ollama+PPO parallel | "
-                f"max_age={getattr(self.cfg, 'LIVE_AI_MAX_AGE_SEC', 4)}s | "
-                f"prefetch top {effective_prefetch_top_n(self.cfg)}"
-            )
-        if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
-            log.info(
-                "⚡ Parallel entry+exit ON — scout all locks while holding | "
-                "non-blocking fills | hot-swap on exit"
-            )
-        if tick_spike_monitor_enabled(self.cfg):
-            log.info(
-                f"⚡ TICK SPIKE MONITOR: on-tick entry/exit | "
-                f"loop flat={getattr(self.cfg, 'FLAT_LOOP_LOCKED_SEC', 0.1)}s "
-                f"in-profit={getattr(self.cfg, 'POSITION_LOOP_IN_PROFIT_SEC', 0.1)}s | "
-                f"monitor={fast_monitor_interval(self.cfg):.2f}s"
-            )
+
         if getattr(self.cfg, "SHADOW_CIRCUIT_ENABLED", True):
             self._maybe_resume_ib_from_shadow()
         if getattr(self.cfg, "SHADOW_CIRCUIT_ENABLED", True) and self.shadow_circuit.in_shadow:
             if self.shadow_circuit.block_broker():
                 st = self.shadow_circuit.shadow_stats()
                 log.warning(
-                    f"  🌑 SHADOW MODE active — IB orders BLOCKED (no IB app fills) | "
-                    f"shadow_closed={st.get('count', 0)} open={st.get('open', 0)} | "
-                    f"run ./scripts/resume_ib_trading.sh or set SHADOW_RESUME_ON_START=true"
+                    f"🌑 SHADOW MODE — IB orders BLOCKED | "
+                    f"closed={st.get('count', 0)} open={st.get('open', 0)} | "
+                    f"./scripts/resume_ib_trading.sh"
                 )
             else:
-                log.info(
-                    "  ☀️ Shadow state on disk ignored on paper — real IB orders enabled"
-                )
-        if self._ib_starting_balance:
-            log.info(f"IB Starting Balance: ${self._ib_starting_balance:,.2f}")
-            try:
-                self.shadow_circuit.reset_daily(self._ib_starting_balance)
-            except Exception:
-                pass
+                from core.startup_log import sinfo
+                sinfo(self.cfg, "☀️ Shadow state ignored on paper — real IB orders enabled")
 
         if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
             send_dynamic_notification(
@@ -2536,19 +2485,18 @@ class ScalperRunner:
         except Exception:
             pass
 
-        # Check market status quietly
-        log.info(f"🕐 {market_status_line(self.cfg)}")
+        # Market clock — one line; extended detail only when verbose boot
         market_state = get_market_state(self.cfg)
         self._last_market_state = market_state
+        from core.startup_log import sinfo, startup_compact
+        log.info(f"🕐 {market_status_line(self.cfg)}")
         rth_line = rth_status_line(self.cfg)
-        if rth_line:
+        if rth_line and not startup_compact(self.cfg):
             log.info(f"  📡 {rth_line}")
         if market_state == "open":
             self._on_rth_open("startup")
         elif market_state == "pre_market":
-            log.info(
-                "  ⏳ Pre-market watch — bot will shift to RTH super-alert at 09:30 ET automatically"
-            )
+            sinfo(self.cfg, "⏳ Pre-market — auto RTH alert at 09:30 ET")
         if getattr(self.cfg, "AI_ACCOUNT_EVAL_ON_STARTUP", False):
             try:
                 self._worker._executor.submit(
@@ -2560,22 +2508,25 @@ class ScalperRunner:
             if is_extended_session(market_state):
                 can_now, _ = can_trade_now(self.cfg)
                 if can_now:
-                    log.info(
-                        f"📊 Extended session: {market_state.upper()} — "
-                        f"trading enabled ({allowed_trading_sessions_label(self.cfg)})"
+                    sinfo(
+                        self.cfg,
+                        f"📊 {market_state.upper()} trading enabled ({allowed_trading_sessions_label(self.cfg)})",
+                        force=True,
                     )
                 else:
                     self._day_session_ended = True
                     log.info(
-                        f"📊 {market_state.upper()} — day finished "
+                        f"📊 {market_state.upper()} — training mode "
                         f"(sessions: {allowed_trading_sessions_label(self.cfg)})"
                     )
             else:
-                log.info(f"📊 Market {market_state.upper()} — no session (weekend/holiday)")
+                log.info(f"📊 {market_state.upper()} — no session")
 
         # Defer blocking IB scanner to first main-loop tick (avoids silent hang at startup)
         self._needs_initial_scan = bool(self.conn.is_connected())
         if not self._needs_initial_scan:
+            from core.startup_log import set_quiet_phase
+            set_quiet_phase(False)
             log.warning("IB Gateway not connected at startup — skipping initial scan until connection is live")
         
         try:
@@ -2590,34 +2541,34 @@ class ScalperRunner:
                     self.ib.sleep(0.2)  # drain IB event queue before scan
                     defer_scan = getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
                     if defer_scan:
-                        log.info("🔍 Startup scan: instant lock (IB scanner deferred)…")
+                        log.info("🔍 Startup scan: curated lock (IB scanner deferred)…")
                         try:
                             self._scan_and_rank(startup=True, skip_ib_scanner=True)
                         except Exception as exc:
                             log.error(f"Initial scan failed: {exc}")
                         if getattr(self.cfg, "SCAN_RUN_DEFERRED_IB", True):
                             self._deferred_ib_scan = True
-                            log.info(
-                                "🔍 Live IB scanner queued — runs after streams start "
-                                f"(warmup {getattr(self.cfg, 'IB_SCANNER_WARMUP_SEC', 3):.0f}s)"
+                            sinfo(
+                                self.cfg,
+                                f"🔍 Deferred IB scanner queued (warmup "
+                                f"{getattr(self.cfg, 'IB_SCANNER_WARMUP_SEC', 5):.0f}s)",
                             )
                     else:
-                        warmup = float(getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 5.0))
                         log.info(
-                            f"🔍 Startup scan: IB live scanner at boot "
-                            f"(warmup {warmup:.0f}s, then query IB)…"
+                            f"🔍 Startup scan: live IB scanner "
+                            f"(warmup {getattr(self.cfg, 'IB_SCANNER_WARMUP_SEC', 5):.0f}s)…"
                         )
-                        if warmup > 0:
-                            self.ib.sleep(warmup)
                         try:
                             self._scan_and_rank(startup=True, skip_ib_scanner=False)
                         except Exception as exc:
                             log.error(f"Initial scan failed: {exc}")
-                    log.info("✅ Startup lock complete — entering trading loop")
+                    log.info("✅ Startup lock complete")
                     self._last_scan_time = time.time()
                     can_boot, boot_state = can_trade_now(self.cfg)
                     if not can_boot and getattr(self.cfg, "OFF_HOURS_SUSPEND_MARKET_DATA", True):
                         self._suspend_off_hours_market_data(boot_state)
+                    from core.startup_log import set_quiet_phase
+                    set_quiet_phase(False)
 
                 in_position = self._in_any_position()
                 have_targets = bool(self._locked_targets)
@@ -3075,7 +3026,8 @@ class ScalperRunner:
     
     def _scan_and_rank(self, startup: bool = False, skip_ib_scanner: bool = False):
         t0 = time.perf_counter()
-        log.info("🔍 HANOON scan: fetching live IB universe…")
+        from core.startup_log import sinfo
+        sinfo(self.cfg, "🔍 HANOON scan: fetching live IB universe…")
         screen_list, universe_source = get_live_scan_universe(
             self.scanner, self.conn, self.cfg,
             startup=startup, skip_ib_scanner=skip_ib_scanner,
@@ -3160,10 +3112,18 @@ class ScalperRunner:
             "emergency_fallback": "emergency fallback",
         }
         src_label = src_labels.get(src, src)
-        log.info(
-            f"⚡ SCAN FAST LOCK: {len(results)}/{len(screen_list)} ranked "
-            f"from {src_label} in {elapsed_ms:.0f}ms (no bar fetch)"
+        from core.startup_log import startup_compact
+        lock_line = (
+            f"⚡ FAST LOCK: {len(results)}/{len(screen_list)} from {src_label} "
+            f"in {elapsed_ms:.0f}ms"
         )
+        if startup_compact(self.cfg):
+            log.info(lock_line)
+        else:
+            log.info(
+                f"⚡ SCAN FAST LOCK: {len(results)}/{len(screen_list)} ranked "
+                f"from {src_label} in {elapsed_ms:.0f}ms (no bar fetch)"
+            )
 
         if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander and results:
             results = self.ai_commander.rank_scan_results(results)
