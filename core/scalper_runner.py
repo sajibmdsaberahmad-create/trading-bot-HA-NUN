@@ -3667,7 +3667,6 @@ class ScalperRunner:
             return
         self._last_flat_pulse = now
         focus = self._focused_ticker() or "?"
-        priority = ",".join(self._priority_tickers()[:10]) or focus
         locked = ",".join(t.ticker for t in self._locked_targets[: self._max_locked()])
         n_streams = len(self._target_monitors)
         nxt = self._next_best_pick.ticker if self._next_best_pick else "-"

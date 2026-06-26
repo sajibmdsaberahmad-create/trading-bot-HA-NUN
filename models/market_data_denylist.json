@@ -432,5 +432,21 @@
     "source": "fetch:1 min",
     "market_state": "open",
     "transient": false
+  },
+  "PLTR": {
+    "ticker": "PLTR",
+    "failures": 1,
+    "last_code": 162,
+    "last_reason": "IB returned no historical data. Possible causes:\n  - Market data subscription does not cover this ticker\n  - IB Gateway is not fully logged in\n  - Outside data availability window\n  - Paper account may need a market data subscription",
+    "pattern": "no_historical_data",
+    "exchange": "",
+    "primary_exchange": "",
+    "skip_until": 1782488975.821134,
+    "skip_until_iso": "2026-06-26T15:49:35.821134+00:00",
+    "first_seen": "2026-06-26T15:44:35.826800+00:00",
+    "last_seen": "2026-06-26T15:44:35.826808+00:00",
+    "source": "fetch:1 min",
+    "market_state": "open",
+    "transient": false
   }
 }
