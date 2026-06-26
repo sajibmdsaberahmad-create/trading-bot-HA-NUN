@@ -715,5 +715,23 @@
     "lessons": [
       "Investigate and fix the problem by using live IB bars (162/420 errors)."
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:41:44.843957+00:00",
+    "source": "runtime_rth_open",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Market data failure due to low confidence in execution speed.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Event rth_open occurred.",
+    "lessons": [
+      "High execution speed can be achieved by optimizing live data availability",
+      "Predicting market trends requires a comprehensive understanding of technical indicators."
+    ]
   }
 ]

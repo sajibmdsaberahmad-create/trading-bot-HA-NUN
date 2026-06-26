@@ -353,3 +353,9 @@ The market data failed, indicating a missing or incorrect historical data.
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (The previous value was 0.35, which is too low for the current error message.)
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:41:44.843343+00:00
+Event rth_open occurred.
+Real-time event analysis is needed to determine the cause, occurrence time, and key parameters.
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Market data failure due to low confidence in execution speed.)
+

@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review trade_closed on LCID",
-    "Review loss_streak on LCID",
-    "Spike-top hunt on RKLB: spike_top_exit: +0.64% vol=3.5x",
     "Commander: The main goal is to increase opportunistic extraction within guardrails. The event suggests a rejection due to an IB order rejected, indicating that the system may be malfunctioning or causing issues with live IB bars.",
     "Review ib_failure on SOFI",
     "Profit hunt worked on RKLB: spike_top_exit: +0.64% vol=3.5x \u2014 reinforce opportunistic exits.",
@@ -103,10 +100,13 @@
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data service returned an error message, impacting profitability. Adjusting the confidence threshold can help mitigate further disruptions.'}",
     "Commander: The market data service returned an error message (MD 162) indicating no historical data. The algorithm should adjust its parameters and logic to handle this situation gracefully.",
     "Investigate and fix the problem by using live IB bars (162/420 errors).",
-    "Commander: The market data failed, indicating a missing or incorrect historical data."
+    "Commander: The market data failed, indicating a missing or incorrect historical data.",
+    "High execution speed can be achieved by optimizing live data availability",
+    "Predicting market trends requires a comprehensive understanding of technical indicators.",
+    "Commander: Real-time event analysis is needed to determine the cause, occurrence time, and key parameters."
   ],
-  "last_thought": "```json\n{\n  \"outcome\": {\n    \"trade_logic\": \"Do not blindly enter every volume spike. Estimate profit_probability and direction before entry. Identify fakeouts quickly \u2014 skip chase entries when fade_risk is high. Fakeout fade plays are allowed when micro predicts a bounce with tight stop. Prefer small consistent wins over noisy entries.\",\n    \"exit_strategy\": \"Enter on calculated edge only; watch everything, miss nothing worth taking\",\n    \"profit_probability\": 0.62,\n    \"fakeout\u98ce\u9669\u9ad8\" : false\n  }",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:40:04.887843"
+  "updated": "2026-06-26T15:41:44.811909"
 }
