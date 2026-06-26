@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "x",
-    "i",
-    "j",
     "g",
     "m",
     "c",
@@ -103,10 +100,13 @@
     "No clean data on PLUG (no_historical_data) \u2014 profit hunt elsewhere.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The current threshold value is too low (0.35). Adjusting it to a higher value might help increase opportunistic exits.'}",
     "Commander: The market_data_failure event indicates that there is a problem with historical data availability, which might prevent the execution of trades or analyses. In this case, we need to identify the root cause and adjust the algorithmic trade st",
-    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52924"
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52924",
+    "Historical Market Data Service errors can lead to missed profit hunts.",
+    "Tune MIN_PROFIT_PROBABILITY, ENTRY_QUALITY_BLEND_WEIGHT, or COUNCIL_TIMEOUT_MIN_SCAN_SCORE if the events repeat",
+    "Commander: The event 'market_data_failure' occurred, and the cause is historical data service error for no_historical_data."
   ],
   "last_thought": "```json\n{\n  \"outcome\": {\n    \"trade_logic\": \"Do not blindly enter every volume spike. Estimate profit_probability and direction before entry. Identify fakeouts quickly \u2014 skip chase entries when fade_risk is high. Fakeout fade plays are allowed when micro predicts a bounce with tight stop. Prefer small consistent wins over noisy entries.\",\n    \"exit_strategy\": \"Enter on calculated edge only; watch everything, miss nothing worth taking\",\n    \"profit_probability\": 0.62,\n    \"fakeout\u98ce\u9669\u9ad8\" : false\n  }",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:37:02.946801"
+  "updated": "2026-06-26T15:38:04.122102"
 }

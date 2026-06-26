@@ -663,5 +663,23 @@
     "lessons": [
       "Review market_data_failure on SOFI"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:38:04.181690+00:00",
+    "source": "runtime_market_data_failure",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.58,
+        "reason": "Confidence threshold (confidence in the event) is set to 0.58. Increase this value for more confidence.",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Heuristic learning for market_data_failure on PLTR",
+    "lessons": [
+      "Historical Market Data Service errors can lead to missed profit hunts.",
+      "Tune MIN_PROFIT_PROBABILITY, ENTRY_QUALITY_BLEND_WEIGHT, or COUNCIL_TIMEOUT_MIN_SCAN_SCORE if the events repeat"
+    ]
   }
 ]

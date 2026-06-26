@@ -139,3 +139,134 @@ Observed rth_open — recorded for learning.
 Observed market_data_failure — recorded for learning.
 MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52924
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:38:04.181163+00:00
+Heuristic learning for market_data_failure on PLTR
+The event 'market_data_failure' occurred, and the cause is historical data service error for no_historical_data.
+• I
+• n
+• c
+• r
+• e
+• a
+• s
+• e
+•  
+• C
+• O
+• N
+• F
+• I
+• D
+• E
+• N
+• C
+• E
+• _
+• T
+• H
+• R
+• E
+• S
+• H
+• O
+• L
+• D
+• ,
+•  
+• t
+• u
+• n
+• e
+•  
+• E
+• N
+• T
+• R
+• Y
+• _
+• Q
+• U
+• A
+• L
+• I
+• T
+• Y
+• _
+• B
+• L
+• E
+• N
+• D
+• _
+• W
+• E
+• I
+• G
+• H
+• T
+• ,
+•  
+• o
+• r
+•  
+• C
+• O
+• U
+• N
+• C
+• I
+• L
+• _
+• T
+• I
+• M
+• E
+• O
+• U
+• T
+• _
+• M
+• I
+• N
+• _
+• S
+• C
+• A
+• N
+• _
+• S
+• C
+• O
+• R
+• E
+•  
+• i
+• f
+•  
+• p
+• r
+• o
+• f
+• i
+• t
+• a
+• b
+• l
+• e
+•  
+• e
+• v
+• e
+• n
+• t
+• s
+•  
+• o
+• c
+• c
+• u
+• r
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (Confidence threshold (confidence in the event) is set to 0.58. Increase this value for more confidence.)
+

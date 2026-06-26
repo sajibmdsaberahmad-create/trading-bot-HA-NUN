@@ -1,1 +1,9 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.58,
+    "reason": "Confidence threshold (confidence in the event) is set to 0.58. Increase this value for more confidence.",
+    "ok": true,
+    "msg": "applied"
+  }
+}

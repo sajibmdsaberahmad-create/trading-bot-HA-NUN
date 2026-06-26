@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 422,
+  "improvements_applied": 423,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20323,6 +20323,29 @@
         "applied": [],
         "lessons": [
           "Review market_data_failure on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T15:38:04.123680",
+      "age": "5d 4h 35m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #423",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Heuristic learning for market_data_failure on PLTR",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "Confidence threshold (confidence in the event) is set to 0.58. Increase this value for more confidence.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Historical Market Data Service errors can lead to missed profit hunts.",
+          "Tune MIN_PROFIT_PROBABILITY, ENTRY_QUALITY_BLEND_WEIGHT, or COUNCIL_TIMEOUT_MIN_SCAN_SCORE if the events repeat"
         ]
       }
     }
