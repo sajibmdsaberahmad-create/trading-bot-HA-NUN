@@ -3553,6 +3553,9 @@ class ScalperRunner:
         """IB 10189/10190 — tick-by-tick unavailable; fall back to 5s bars on next loop tick."""
         if ticker:
             self._tick_limit_denied.add(ticker.upper())
+            dm = self._target_monitors.get(ticker)
+            if dm is not None and dm.has_live_stream() and dm._realtime_handle is not None:
+                return
             self._stream_repair[ticker.upper()] = "realtime"
 
     def _active_tick_stream_count(self) -> int:
@@ -3805,6 +3808,10 @@ class ScalperRunner:
             if getattr(self.cfg, "SCALPER_LIVE_BARS_FIRST", True):
                 if self._bars_from_stream(ticker, need) is not None:
                     continue
+            if ticker in self._target_monitors and bool(
+                getattr(self.cfg, "MD_SOFT_FAIL_HMDS", True),
+            ):
+                continue
             if skip_historical_prefetch(self.cfg) and self._stream_has_price(ticker):
                 continue
             try:
