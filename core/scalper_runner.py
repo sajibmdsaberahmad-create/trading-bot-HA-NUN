@@ -2365,11 +2365,20 @@ class ScalperRunner:
             except Exception:
                 pass
             if getattr(self.cfg, "COUNCIL_NANNY_MODE", True):
-                from core.council_nanny import prefetch_enabled, learning_ring_enabled
+                from core.council_nanny import (
+                    prefetch_enabled,
+                    learning_ring_enabled,
+                    strong_spike_learning_ring_enabled,
+                )
+                distill = "off"
+                if learning_ring_enabled(self.cfg):
+                    distill = "on"
+                elif strong_spike_learning_ring_enabled(self.cfg):
+                    distill = "strong-spike fills only"
                 log.info(
                     f"🛡️ Council NANNY: RPM preserved for profit path | "
                     f"prefetch={'on' if prefetch_enabled(self.cfg) else 'off'} | "
-                    f"learning_ring={'on' if learning_ring_enabled(self.cfg) else 'off'} | "
+                    f"learning_ring={distill} | "
                     f"entry council when spike≥{getattr(self.cfg, 'COUNCIL_NANNY_MIN_SPIKE', 1.25)}x "
                     f"score≥{getattr(self.cfg, 'COUNCIL_NANNY_MIN_SCORE', 55):.0f}"
                 )
