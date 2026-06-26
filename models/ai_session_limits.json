@@ -7,6 +7,7 @@
   "min_cash_reserve_pct": 0.0,
   "max_shares_per_trade": 100000,
   "min_lock_score": 0.0,
-  "source": "ai_heuristic",
-  "equity_basis": 990410.68
+  "source": "ai_ollama",
+  "equity_basis": 990410.68,
+  "ollama_reason": ""
 }
