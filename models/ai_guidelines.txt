@@ -654,3 +654,11 @@ hard_stop
 Observed trade_closed — recorded for learning.
 hard_stop
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:59:27.701759+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:59:35.109450+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
