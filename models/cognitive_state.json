@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Spike-top hunt on COIN: wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading",
     "Profit hunt worked on COIN: wave_end_spike_fade: peak +0.68% now +0.34% vol=0.1x fading \u2014 reinforce opportunistic exits.",
     "Make sure to avoid rejecting orders and instead use the live IB bars for trading.",
     "Always prioritize opportunistic exits when dealing with rejection",
@@ -103,10 +102,11 @@
     "Review trade_closed on PLTR",
     "Review trade_closed on SOFI",
     "Review council_timeout on RKLB",
-    "Commander: Scanner+spike after timeout: score=81 vol=2804.0x prob=60% | ATR R:R 2.0"
+    "Commander: Scanner+spike after timeout: score=81 vol=2804.0x prob=60% | ATR R:R 2.0",
+    "Review trade_closed on RIOT"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 6,
-  "updated": "2026-06-26T18:38:09.854208"
+  "trades_observed": 8,
+  "updated": "2026-06-26T18:38:28.567706"
 }
