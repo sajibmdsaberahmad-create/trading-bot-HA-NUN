@@ -3,53 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 233,
+  "trades_observed": 235,
   "scans_performed": 28,
-  "improvements_applied": 497,
+  "improvements_applied": 501,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T12:13:12.720659",
-      "age": "3d 1h 10m 24s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #26",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T12:23:29.280349",
-      "age": "3d 1h 20m 40s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #27",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T12:54:56.210728",
-      "age": "3d 1h 52m 7s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #28",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:00:30.697510",
-      "age": "3d 1h 57m 42s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #29",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:01:34.266796",
-      "age": "3d 1h 58m 45s",
-      "type": "TRADE",
-      "message": "Observed trade: HYFM ? P&L=$+0.00",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:01:48.662768",
-      "age": "3d 1h 58m 59s",
-      "type": "TRADE",
-      "message": "Observed trade: HYFM ? P&L=$+0.00",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T13:01:56.023178",
       "age": "3d 1h 59m 7s",
@@ -21343,6 +21301,76 @@
           "Review trade_closed on RIOT"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:59:35.849418",
+      "age": "5d 7h 56m 47s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$-60.64",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:59:36.189489",
+      "age": "5d 7h 56m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #499",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:59:36.190501",
+      "age": "5d 7h 56m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #499",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:59:40.355761",
+      "age": "5d 7h 56m 51s",
+      "type": "TRADE",
+      "message": "Observed trade: COIN ? P&L=$-1.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:59:40.640174",
+      "age": "5d 7h 56m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #500",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on COIN"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:59:40.699289",
+      "age": "5d 7h 56m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #501",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on COIN"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22702,7 +22730,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "defensive",
-  "total_pnl": 123392.15000000005,
+  "total_pnl": 123330.51000000005,
   "win_history": [
     0.0,
     0.0,
@@ -22936,20 +22964,22 @@
     -1.38,
     0.07,
     0.0,
-    0.0
+    0.0,
+    -60.64,
+    -1.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 4,
   "worst_streak": 21,
-  "veteran_xp": 3170,
+  "veteran_xp": 3185,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 82
   },
-  "flights_completed": 228,
-  "hours_flown": 22.800000000000054,
+  "flights_completed": 230,
+  "hours_flown": 23.000000000000057,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22970,12 +23000,12 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 15,
+    "PLT": 16,
     "LCI": 8,
     "RIO": 19,
     "QS": 5,
     "MAR": 22,
-    "COI": 5,
+    "COI": 6,
     "RIV": 5,
     "RKL": 11,
     "SOF": 17,
