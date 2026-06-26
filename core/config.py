@@ -597,11 +597,18 @@ class BotConfig:
     IB_SCANNER_EXTENDED_FILTERS: bool = os.getenv(
         "IB_SCANNER_EXTENDED_FILTERS", "true",
     ).lower() not in ("0", "false", "no")
+    IB_SCANNER_EXTENDED_HOURS: bool = os.getenv(
+        "IB_SCANNER_EXTENDED_HOURS", "true",
+    ).lower() not in ("0", "false", "no")
     IB_SCANNER_EXTENDED_PER_CODE_SEC: float = float(
-        os.getenv("IB_SCANNER_EXTENDED_PER_CODE_SEC", "8"),
+        os.getenv("IB_SCANNER_EXTENDED_PER_CODE_SEC", "12"),
     )
     IB_SCANNER_MIN_VOLUME: int = int(os.getenv("IB_SCANNER_MIN_VOLUME", "50000"))
-    IB_SCANNER_EMPTY_BAIL_SEC: float = float(os.getenv("IB_SCANNER_EMPTY_BAIL_SEC", "4"))
+    IB_SCANNER_EMPTY_BAIL_SEC: float = float(os.getenv("IB_SCANNER_EMPTY_BAIL_SEC", "6"))
+    # Skip 25s live IB scanner at startup when session is not tradable (training mode)
+    STARTUP_CURATED_WHEN_NOT_TRADABLE: bool = os.getenv(
+        "STARTUP_CURATED_WHEN_NOT_TRADABLE", "true",
+    ).lower() not in ("0", "false", "no")
     SCAN_EMERGENCY_FALLBACK: bool = os.getenv("SCAN_EMERGENCY_FALLBACK", "true").lower() not in (
         "0", "false", "no",
     )

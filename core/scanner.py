@@ -30,6 +30,7 @@ def _req_scanner_with_timeout(
     scan,
     timeout_sec: float,
     *,
+    scan_options=None,
     filter_options=None,
     empty_bail_sec: float = 0.0,
 ) -> List[Any]:
@@ -45,7 +46,8 @@ def _req_scanner_with_timeout(
     scan_code = getattr(scan, "scanCode", "?")
     location = getattr(scan, "locationCode", "?")
     filters = list(filter_options or [])
-    data_list = ib.reqScannerSubscription(scan, [], filters)
+    options = list(scan_options or [])
+    data_list = ib.reqScannerSubscription(scan, options, filters)
     deadline = time.time() + timeout_sec
     started = time.time()
     last_log = time.time()

@@ -2,14 +2,15 @@
 """
 core/scanner_session.py — IB market scanner profiles by US session.
 
-RTH scan codes (MOST_ACTIVE, TOP_PERC_GAIN) return 0 rows after 16:00 ET unless
-the subscription uses extended-hours filters / session-appropriate scan codes.
+RTH codes (MOST_ACTIVE, TOP_PERC_GAIN) return 0 rows after 16:00 ET.
+After-hours requires snapshot scan codes (MOST_ACTIVE_AVG_USD) and/or
+extendedHours on the ScannerSubscription.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 from core.config import BotConfig
 from core.market_hours import get_market_state
@@ -21,7 +22,7 @@ except ImportError:
     TagValue = None  # type: ignore
 
 
-# Regular session — IB updates these live 09:30–16:00 ET
+# Regular session — live updates 09:30–16:00 ET
 RTH_SCAN_CODES = (
     "MOST_ACTIVE",
     "TOP_PERC_GAIN",
@@ -30,20 +31,20 @@ RTH_SCAN_CODES = (
     "TOP_VOLUME",
 )
 
-# Pre-market — TOP_OPEN_PERC_GAIN is designed for the open / pre-RTH window
+# Pre-market
 PRE_MARKET_SCAN_CODES = (
     "TOP_OPEN_PERC_GAIN",
     "TOP_PERC_GAIN",
+    "MOST_ACTIVE_USD",
     "HOT_BY_VOLUME",
-    "MOST_ACTIVE",
 )
 
-# After 16:00 ET — RTH-only codes stall with 0 rows; use AH-friendly codes + filters
+# After 16:00 ET — IB snapshot scanners (close-based); RTH codes return 0 rows
 AFTER_HOURS_SCAN_CODES = (
-    "TOP_PERC_GAIN",
+    "MOST_ACTIVE_AVG_USD",
+    "MOST_ACTIVE_USD",
+    "TOP_TRADE_COUNT",
     "HOT_BY_VOLUME",
-    "MOST_ACTIVE",
-    "TOP_VOLUME",
 )
 
 
@@ -53,10 +54,13 @@ class ScannerProfile:
 
     session: str
     scan_codes: Tuple[str, ...]
-    filter_options: Tuple  # TagValue tuples
+    filter_options: Tuple
+    scan_options: Tuple
+    scanner_setting_pairs: str
     per_code_sec: float
     label: str
-    use_extended_filters: bool
+    snapshot_mode: bool
+    location_codes: Tuple[str, ...]
 
 
 def _tag(name: str, value: str):
@@ -70,9 +74,17 @@ def ib_scanner_profile(cfg: Optional[BotConfig] = None) -> ScannerProfile:
     cfg = cfg or BotConfig()
     state = get_market_state(cfg)
     base_per = float(getattr(cfg, "IB_SCANNER_PER_CODE_SEC", 18))
-    ext_per = float(getattr(cfg, "IB_SCANNER_EXTENDED_PER_CODE_SEC", 8))
+    ext_per = float(getattr(cfg, "IB_SCANNER_EXTENDED_PER_CODE_SEC", 12))
     min_vol = int(getattr(cfg, "IB_SCANNER_MIN_VOLUME", 50_000))
-    use_filters = bool(getattr(cfg, "IB_SCANNER_EXTENDED_FILTERS", True))
+    use_ext = bool(getattr(cfg, "IB_SCANNER_EXTENDED_HOURS", True))
+    major_only = ("STK.US.MAJOR", "STK.US")
+    both_locs = ("STK.US.MAJOR", "STK.US")
+
+    ext_opts: Tuple = ()
+    ext_pairs = ""
+    if use_ext and TagValue is not None:
+        ext_opts = (_tag("extendedHours", "1"),)
+        ext_pairs = "extendedHours=1"
 
     if state == "open":
         codes = tuple(c for c in RTH_SCAN_CODES if c in PROFIT_HUNT_SCAN_CODES)
@@ -80,50 +92,55 @@ def ib_scanner_profile(cfg: Optional[BotConfig] = None) -> ScannerProfile:
             session=state,
             scan_codes=codes or RTH_SCAN_CODES,
             filter_options=(),
+            scan_options=(),
+            scanner_setting_pairs="",
             per_code_sec=base_per,
             label="RTH live",
-            use_extended_filters=False,
+            snapshot_mode=False,
+            location_codes=both_locs,
         )
 
     if state == "pre_market":
-        codes = tuple(c for c in PRE_MARKET_SCAN_CODES if c in PROFIT_HUNT_SCAN_CODES)
+        codes = PRE_MARKET_SCAN_CODES
         filters: Tuple = ()
-        if use_filters and TagValue is not None:
+        if TagValue is not None:
             filters = (_tag("volumeAbove", str(min_vol)),)
         return ScannerProfile(
             session=state,
-            scan_codes=codes or PRE_MARKET_SCAN_CODES,
+            scan_codes=codes,
             filter_options=filters,
+            scan_options=ext_opts,
+            scanner_setting_pairs=ext_pairs,
             per_code_sec=ext_per,
-            label="pre-market extended",
-            use_extended_filters=use_filters,
+            label="pre-market",
+            snapshot_mode=False,
+            location_codes=both_locs,
         )
 
     if state == "after_hours":
-        codes = tuple(c for c in AFTER_HOURS_SCAN_CODES if c in PROFIT_HUNT_SCAN_CODES)
-        filters = ()
-        if use_filters and TagValue is not None:
-            # afterHoursChangePerc* gates AH movers; volumeAbove avoids dead names
-            filters = (
-                _tag("volumeAbove", str(min_vol)),
-                _tag("afterHoursChangePercAbove", "0.1"),
-            )
+        # Snapshot codes — do NOT use afterHoursChangePerc filters (often 0 rows)
         return ScannerProfile(
             session=state,
-            scan_codes=codes or AFTER_HOURS_SCAN_CODES,
-            filter_options=filters,
+            scan_codes=AFTER_HOURS_SCAN_CODES,
+            filter_options=(),
+            scan_options=ext_opts,
+            scanner_setting_pairs=ext_pairs,
             per_code_sec=ext_per,
-            label="after-hours extended",
-            use_extended_filters=use_filters,
+            label="after-hours snapshot",
+            snapshot_mode=True,
+            location_codes=major_only,
         )
 
     return ScannerProfile(
         session=state,
         scan_codes=(),
         filter_options=(),
+        scan_options=(),
+        scanner_setting_pairs="",
         per_code_sec=0.0,
-        label=f"{state} (scanner off)",
-        use_extended_filters=False,
+        label=f"{state} (off)",
+        snapshot_mode=False,
+        location_codes=(),
     )
 
 
@@ -132,17 +149,14 @@ def should_run_ib_scanner(cfg: Optional[BotConfig] = None) -> Tuple[bool, str]:
     Whether to call IB reqScannerSubscription now.
 
     Scanning can run outside RTH even when ALLOW_AFTER_HOURS_TRADING=false.
-    Overnight/weekend/holiday: skip live scanner (use curated fallback).
     """
     cfg = cfg or BotConfig()
     state = get_market_state(cfg)
     if state in ("open", "pre_market", "after_hours"):
-        if state == "after_hours" and not getattr(cfg, "IB_SCANNER_OUTSIDE_RTH", True):
-            return False, "after_hours scanner disabled (IB_SCANNER_OUTSIDE_RTH=false)"
-        if state == "pre_market" and not getattr(cfg, "IB_SCANNER_OUTSIDE_RTH", True):
-            return False, "pre_market scanner disabled (IB_SCANNER_OUTSIDE_RTH=false)"
+        if not getattr(cfg, "IB_SCANNER_OUTSIDE_RTH", True):
+            return False, f"{state} scanner disabled (IB_SCANNER_OUTSIDE_RTH=false)"
         return True, state
-    return False, f"{state} — IB scanner skipped (no live RTH/AH session)"
+    return False, f"{state} — use curated universe"
 
 
 def scanner_session_log_line(cfg: Optional[BotConfig] = None) -> str:
@@ -150,7 +164,9 @@ def scanner_session_log_line(cfg: Optional[BotConfig] = None) -> str:
     cfg = cfg or BotConfig()
     ok, reason = should_run_ib_scanner(cfg)
     if not ok:
-        return f"scanner: off ({reason})"
+        return f"off ({reason})"
     prof = ib_scanner_profile(cfg)
-    filt = " + AH filters" if prof.filter_options else ""
-    return f"scanner: {prof.label}{filt} [{','.join(prof.scan_codes[:3])}…]"
+    mode = "snapshot" if prof.snapshot_mode else "live"
+    ext = " + extHours" if prof.scan_options else ""
+    codes = ",".join(prof.scan_codes[:2])
+    return f"{prof.label} ({mode}{ext}) [{codes}…]"
