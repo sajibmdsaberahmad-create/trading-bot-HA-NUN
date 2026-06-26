@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Analyze + GUT FEEL + EXPERIENCE",
-    "Commander: The event occurred during the open session with a trailing stop and an exit type of stop hit.",
-    "Commander: bracket_exit",
     "Review trade_closed on RIVN",
     "Review council_timeout on MARA",
     "Commander: High scanner score after timeout: score=88 vol=1.1x | ATR R:R 2.0",
@@ -103,10 +100,13 @@
     "Review council_timeout on RIOT",
     "No clean data on SOFI (no_historical_data) \u2014 profit hunt elsewhere.",
     "Review market_data_failure on SOFI",
-    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52878"
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52878",
+    "No clean data on PLTR (no_historical_data) \u2014 profit hunt elsewhere.",
+    "Review market_data_failure on PLTR",
+    "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52890"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.95,\n  \"intuition\": -0.03\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T13:28:23.863130"
+  "updated": "2026-06-26T13:29:31.147566"
 }

@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 402,
+  "improvements_applied": 403,
   "reports_generated": 27,
   "event_log": [
     {
@@ -19698,6 +19698,20 @@
         "applied": [],
         "lessons": [
           "Review market_data_failure on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T13:29:31.149545",
+      "age": "5d 2h 26m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #403",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Observed market_data_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review market_data_failure on PLTR"
         ]
       }
     }
