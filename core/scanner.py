@@ -164,6 +164,11 @@ def emergency_scan_universe(
                 f"📋 Startup curated universe: {len(out)} tickers ({preview}) "
                 "— IB live scanner deferred for instant lock"
             )
+        elif reason == "outside_session":
+            log.info(
+                f"📋 Session curated universe: {len(out)} tickers ({preview}) "
+                "— IB scanner off outside RTH/AH window"
+            )
         else:
             log.warning(
                 f"⚠️ IB scanner empty — emergency universe: {len(out)} tickers ({preview})"
