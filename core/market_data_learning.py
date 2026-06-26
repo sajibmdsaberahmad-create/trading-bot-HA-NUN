@@ -29,7 +29,6 @@ MARKET_DATA_ERROR_CODES = frozenset({
     200,   # No security definition
     354,   # No market data permissions
     420,   # Invalid real-time query / no permissions (ARCAEDGE, PINK, etc.)
-    10197, # Competing live session
     10314, # End date/time invalid for contract
 })
 
@@ -134,6 +133,21 @@ def is_market_data_blocked(
         reason = str(entry.get("last_reason", entry.get("pattern", "md_failure")))[:120]
         return True, reason
     return False, ""
+
+
+def clear_competing_session_blocks() -> int:
+    """Remove 10197 denylist entries so live MD can retry after force-live."""
+    denylist = _load_denylist()
+    removed = 0
+    for ticker in list(denylist.keys()):
+        entry = denylist[ticker]
+        if int(entry.get("last_code", 0)) == 10197 or entry.get("pattern") == "ib_10197":
+            denylist.pop(ticker, None)
+            removed += 1
+    if removed:
+        _save_denylist(denylist)
+        log.info(f"  🔓 Cleared {removed} ticker(s) blocked by IB 10197 (competing session)")
+    return removed
 
 
 def filter_tradeable_tickers(cfg: BotConfig, tickers: List[str]) -> List[str]:

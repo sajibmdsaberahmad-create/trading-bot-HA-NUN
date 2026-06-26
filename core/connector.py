@@ -195,6 +195,23 @@ class IBConnector:
         except Exception:
             raise
 
+    def _apply_market_data_type(self, force: bool = False) -> None:
+        """Request live (or configured) market data from IB — paper + live accounts."""
+        mdt = 1 if getattr(self.cfg, "IB_FORCE_LIVE_MARKET_DATA", True) else int(
+            getattr(self.cfg, "IB_MARKET_DATA_TYPE", 1)
+        )
+        if force:
+            mdt = 1
+        labels = {1: "LIVE", 2: "FROZEN", 3: "DELAYED", 4: "DELAYED_FROZEN"}
+        try:
+            self.ib.reqMarketDataType(mdt)
+            log.info(
+                f"IB market data → {labels.get(mdt, str(mdt))} "
+                f"(reqMarketDataType={mdt})"
+            )
+        except Exception as exc:
+            log.warning(f"reqMarketDataType({mdt}) failed: {exc}")
+
     def touch(self):
         """Call whenever any IB event arrives, to mark the connection alive."""
         self._last_event_ts = time.time()
@@ -258,6 +275,7 @@ class IBConnector:
     def _on_connected(self):
         self.touch()
         self._last_event_ts = time.time()
+        self._apply_market_data_type()
         try:
             from core.fill_reconciler import FillExecutionCache
             self.fill_cache = FillExecutionCache(self.ib)
@@ -313,6 +331,15 @@ class IBConnector:
 
         # Stale cancel after failed tick-by-tick subscribe
         if errorCode == 300 and "can't find eid" in (errorString or "").lower():
+            return
+
+        # Competing live session — re-assert LIVE data type (user has live MD subscription)
+        if errorCode == 10197:
+            log.warning(
+                "IB 10197 competing live session — re-forcing LIVE market data "
+                "(close other TWS/mobile sessions if this repeats)"
+            )
+            self._apply_market_data_type(force=True)
             return
 
         # IB tick-by-tick unsupported (10189) or cap (10190) — downgrade to 5s bars
