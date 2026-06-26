@@ -4,10 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "N",
-    "E",
-    "_",
-    "Commander: Loss streak analysis: bracket_exit occurs after a loss streak of consecutive losses (consecutive_losses). The strategy should focus on opportunistic exits to reduce risk.",
     "Review trade_closed on QS",
     "Review loss_streak on RIOT",
     "u",
@@ -103,10 +99,14 @@
     "Review rth_open on ?",
     "Commander: Observed rth_open \u2014 recorded for learning.",
     "Commander: MD 10197 ib_10197: No market data during competing live session",
-    "Review market_data_failure on MARA"
+    "Review market_data_failure on MARA",
+    "High confidence levels can be beneficial when making trades.",
+    "Monitoring market conditions is crucial for successful trading.",
+    "Adjusting confidence levels based on recent events helps in staying informed and making more informed decisions",
+    "Commander: The event 'rth_open' occurred in the live trading environment, which is a good indication that the market was open and ready for trade. The key parameters are CONFIDENCE_THRESHOLD set to 0.58, with a reason related to the confidence level o"
   ],
-  "last_thought": "```json\n{\n  \"trade_decision\": {\n    \"profit_probability\": 63.8,\n    \"direction\": \"down\",\n    \"fakeouts\": [\n      {\"volume\": 1000, \"type\": \"high\", \"reason\": \"NOK 14:20 wave\"}\n    ],\n    \"fakeout_type\": \"fade\",\n    \"profit_trend\": \"up\"\n  }\n}\n```",
+  "last_thought": "```json\n{\n  \"gut_feel\": 0.5,\n  \"intuition\": 0.9,\n  \"trade_decision\": {\n    \"strategy\": \"Hunt spikes\",\n    \"entry_volume\": 1,\n    \"profit_probability\": 0.8,\n    \"fakeouts_fast\": true,\n    \"fade_risk_tolerance\": true\n  },\n  \"profit_prediction\": {\n    \"upside_odds\": true,\n    \"trade_direction\": \"take profit into momentum\",\n    \"profit_percentage\": 0.95,\n    \"error_margin\": 1\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:17:19.098351"
+  "updated": "2026-06-26T15:25:30.746222"
 }

@@ -111,3 +111,8 @@ MD 10197 ib_10197: No market data during competing live session
 🧭 COMMANDER LEARNING | 2026-06-26T15:17:19.147631+00:00
 Observed rth_open — recorded for learning.
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:25:30.776223+00:00
+Heuristic learning for rth_open on ?
+The event 'rth_open' occurred in the live trading environment, which is a good indication that the market was open and ready for trade. The key parameters are CONFIDENCE_THRESHOLD set to 0.58, with a reason related to the confidence level of AI performance.
+• {'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'The high value of 0.58 indicates a moderate level of confidence, which is appropriate for most cases.', 'notes': 'This recommendation suggests using a lower threshold for more frequent or important events.'}
+

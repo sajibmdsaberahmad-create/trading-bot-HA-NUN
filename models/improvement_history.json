@@ -535,5 +535,16 @@
     "lessons": [
       "Review rth_open on ?"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:25:30.779033+00:00",
+    "source": "runtime_rth_open",
+    "adjustments": {},
+    "guidelines_summary": "Heuristic learning for rth_open on ?",
+    "lessons": [
+      "High confidence levels can be beneficial when making trades.",
+      "Monitoring market conditions is crucial for successful trading.",
+      "Adjusting confidence levels based on recent events helps in staying informed and making more informed decisions"
+    ]
   }
 ]
