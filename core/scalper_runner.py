@@ -2590,6 +2590,7 @@ class ScalperRunner:
                                 break
 
                 self._service_stream_repairs()
+                self.conn.run_pending_session_reclaim()
 
                 if getattr(self, "_bootstrap_entry_due", False):
                     self._bootstrap_entry_due = False

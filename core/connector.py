@@ -551,10 +551,7 @@ class IBConnector:
             ):
                 self._10197_count = 0
                 self._last_md_reclaim_ts = now
-                try:
-                    self.reclaim_live_market_data_session()
-                except Exception as exc:
-                    log.warning(f"IB session reclaim failed: {exc}")
+                self.request_session_reclaim()
             else:
                 log.warning(
                     "IB 10197 competing session — forced LIVE "
