@@ -610,3 +610,7 @@ hard_take_profit
 Observed trade_closed — recorded for learning.
 hard_take_profit
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:57:15.504757+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+

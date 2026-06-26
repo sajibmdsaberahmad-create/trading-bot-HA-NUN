@@ -7,5 +7,14 @@
     "lessons": [
       "Review trade_closed on RIOT"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:57:15.505545+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on PLTR"
+    ]
   }
 ]
