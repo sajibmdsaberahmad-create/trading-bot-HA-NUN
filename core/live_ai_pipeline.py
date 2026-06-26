@@ -331,6 +331,29 @@ def merge_entry_decision(
 
     waiting = ollama_status in ("in_flight", "missing", "stale_context", "empty")
     if waiting:
+        from core.capital_discipline import (
+            allows_ppo_lead_while_pending,
+            effective_min_profit_probability,
+            is_strong_spike_setup,
+        )
+        min_prob = effective_min_profit_probability(cfg, scan_score, spike_ratio) if cfg else min_prob
+        if allows_ppo_lead_while_pending(
+            cfg, scan_score=scan_score, spike_ratio=spike_ratio,
+        ) and ppo_buy and is_strong_spike_setup(cfg, scan_score, spike_ratio):
+            if profit_prob >= min_prob * 0.90 or (
+                scan_score >= 85 and spike_ratio >= 1.4 and ppo_conf >= min_conf * 0.75
+            ):
+                base.update({
+                    "enter": True,
+                    "pending": False,
+                    "confidence": max(ppo_conf, profit_prob, min_conf * 0.85),
+                    "pipeline": "council:ppo_strong_lead",
+                    "reason": (
+                        f"PPO strong-spike lead (council {ollama_status}): "
+                        f"score={scan_score:.0f} vol={spike_ratio:.1f}x prob={profit_prob:.0%}"
+                    )[:200],
+                })
+                return base
         base.update({
             "pending": True,
             "pipeline": f"council:{ollama_status}",
@@ -342,7 +365,7 @@ def merge_entry_decision(
         return base
 
     if ollama_status == "timeout":
-        if not allows_timeout_fallback_entry(cfg):
+        if not allows_timeout_fallback_entry(cfg, scan_score, spike_ratio):
             base["pipeline"] = "council:timeout_pass"
             base["reason"] = "Council timeout — capital discipline: no fallback entry"
             return base
@@ -391,7 +414,7 @@ def merge_entry_decision(
         return base
 
     if ollama_status == "scanner_fast":
-        if not allows_scanner_fast_bypass(cfg):
+        if not allows_scanner_fast_bypass(cfg, scan_score, spike_ratio):
             base["pipeline"] = "council:scanner_fast_pass"
             base["reason"] = "Scanner fast-path disabled — awaiting full council"
             return base

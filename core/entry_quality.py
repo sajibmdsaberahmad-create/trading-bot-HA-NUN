@@ -105,7 +105,9 @@ def assess_entry_quality(
     min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42))
     try:
         from core.capital_discipline import effective_min_profit_probability
-        min_prob = effective_min_profit_probability(cfg)
+        min_prob = effective_min_profit_probability(
+            cfg, scan_score=scan_score, spike_ratio=spike_ratio,
+        )
     except Exception:
         pass
     min_fakeout = float(getattr(cfg, "MIN_FAKEOUT_FADE_PROB", 0.50))
