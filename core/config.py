@@ -366,6 +366,10 @@ class BotConfig:
     MD_SOFT_FAIL_HMDS: bool = os.getenv("MD_SOFT_FAIL_HMDS", "true").lower() not in (
         "0", "false", "no",
     )
+    HMDS_FETCH_TIMEOUT_SEC: int = int(os.getenv("HMDS_FETCH_TIMEOUT_SEC", "12"))
+    PAPER_TICK_USE_ALLLAST: bool = os.getenv(
+        "PAPER_TICK_USE_ALLLAST", "false",
+    ).lower() in ("1", "true", "yes")
     MD_TRANSIENT_COOLDOWN_SEC: float = float(os.getenv("MD_TRANSIENT_COOLDOWN_SEC", "90"))
     REALTIME_BARS_USE_RTH_WHEN_OPEN: bool = os.getenv(
         "REALTIME_BARS_USE_RTH_WHEN_OPEN", "true",

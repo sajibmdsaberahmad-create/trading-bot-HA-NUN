@@ -3536,6 +3536,10 @@ class ScalperRunner:
             return
         for ticker, mode in list(self._stream_repair.items()):
             self._stream_repair.pop(ticker, None)
+            if mode == "realtime" and self._stream_modes.get(ticker) == "realtime":
+                dm = self._target_monitors.get(ticker)
+                if dm is not None and dm.has_live_stream():
+                    continue
             if ticker in self._target_monitors:
                 self._stop_target_stream(ticker)
             log.info(f"  📡 {ticker}: switching to 5s bars")

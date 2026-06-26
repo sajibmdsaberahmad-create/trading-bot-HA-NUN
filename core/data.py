@@ -47,7 +47,11 @@ _VALID_TICK_BY_TICK_TYPES = frozenset({"Last", "AllLast", "BidAsk", "MidPoint"})
 
 
 def tick_by_tick_type(cfg: BotConfig) -> str:
-    """IB tickType string — case-sensitive; AllLast includes odd-lot/off-exchange."""
+    """IB tickType — on paper use Last (AllLast returns IB 10189 for most US stocks)."""
+    if getattr(cfg, "PAPER_TRADING", False) and not getattr(
+        cfg, "PAPER_TICK_USE_ALLLAST", False,
+    ):
+        return "Last"
     raw = str(getattr(cfg, "TICK_BY_TICK_TYPE", "AllLast") or "AllLast")
     return raw if raw in _VALID_TICK_BY_TICK_TYPES else "AllLast"
 
@@ -143,6 +147,7 @@ class DataManager:
             useRTH=use_rth,
             formatDate=1,
             keepUpToDate=False,
+            timeout=int(getattr(self.cfg, "HMDS_FETCH_TIMEOUT_SEC", 12)),
         )
 
         if not bars:
@@ -186,7 +191,7 @@ class DataManager:
                 contract = self._get_contract()
                 tbt = tick_by_tick_type(self.cfg)
                 types_to_try = [tbt]
-                if tbt == "AllLast" and getattr(self.cfg, "PAPER_TRADING", False):
+                if tbt == "AllLast":
                     types_to_try.append("Last")
                 last_exc: Optional[Exception] = None
                 for tbt_try in types_to_try:
@@ -255,6 +260,10 @@ class DataManager:
             )
         except Exception as exc:
             log.warning(f"Realtime bar fallback failed for {self.cfg.TICKER}: {exc}")
+
+    def has_live_stream(self) -> bool:
+        """True when tick-by-tick or 5s realtime bars are active."""
+        return self._tick_handle is not None or self._realtime_handle is not None
 
     def stop_tick_stream(self):
         self.conn.unregister_stream_manager(self.cfg.TICKER)
