@@ -322,7 +322,11 @@ def record_fetch_failure(
 ) -> Optional[Dict[str, Any]]:
     """Record when fetch_historical raises or returns empty — same learning path."""
     msg = str(exc)
-    if getattr(cfg, "MD_SOFT_FAIL_HMDS", True) and is_hmds_transient_message(msg):
+    if getattr(cfg, "MD_SOFT_FAIL_HMDS", True) and (
+        is_hmds_transient_message(msg)
+        or "timed out" in msg.lower()
+        or "not connected" in msg.lower()
+    ):
         log.debug(f"HMDS prefetch transient for {ticker}: {msg[:120]}")
         return None
     code = 162 if "no historical" in msg.lower() or "no data" in msg.lower() else 200

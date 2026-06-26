@@ -2596,9 +2596,8 @@ class ScalperRunner:
                                 break
 
                 self._service_stream_repairs()
-                if self.conn.run_pending_session_reclaim():
-                    self._resubscribe_all_streams(force=True)
-                elif self.conn.consume_resubscribe_pending():
+                self.conn.run_pending_session_reclaim()
+                if self.conn.consume_resubscribe_pending():
                     self._resubscribe_all_streams(force=True)
 
                 if getattr(self, "_bootstrap_entry_due", False):
@@ -2659,7 +2658,6 @@ class ScalperRunner:
                     log.warning("IB connection lost. Reconnecting...")
                     if not self.conn.reconnect():
                         break
-                    self._resubscribe_all_streams(force=True)
                     self._refresh_account_balance()
                 
                 # Update AI buffers periodically (throttled to every 5s)
@@ -3721,16 +3719,11 @@ class ScalperRunner:
             self._stop_target_stream(ticker)
 
     def _on_ib_connectivity(self, event: str) -> None:
-        """IB 1100/1101/1102 and post-reconnect resubscribe signals."""
+        """IB 1100/1102 — pause/resume bar warm while socket is down."""
         if event == "connectivity_lost":
             self._ib_connectivity_paused = True
-            return
-        if event == "data_ok":
+        elif event == "data_ok":
             self._ib_connectivity_paused = False
-            return
-        if event in ("data_lost", "resubscribe"):
-            self._ib_connectivity_paused = False
-            self._resubscribe_all_streams(force=True)
 
     def _resubscribe_all_streams(self, force: bool = False) -> None:
         """Re-request live streams after IB reconnect, 1101, or 10197 reclaim."""

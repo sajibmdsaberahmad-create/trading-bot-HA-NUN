@@ -5,37 +5,9 @@
   "training_sessions": 30,
   "trades_observed": 243,
   "scans_performed": 30,
-  "improvements_applied": 514,
-  "reports_generated": 28,
+  "improvements_applied": 516,
+  "reports_generated": 29,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T16:29:42.799138",
-      "age": "3d 5h 26m 54s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #56",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T16:35:31.424572",
-      "age": "3d 5h 32m 42s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #57",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T16:37:26.181535",
-      "age": "3d 5h 34m 37s",
-      "type": "TRADE",
-      "message": "Observed trade: FMFC BLOCKED P&L=$+0.00",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T16:44:04.561272",
-      "age": "3d 5h 41m 15s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #58",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T17:02:42.132473",
       "age": "3d 5h 59m 53s",
@@ -21611,10 +21583,164 @@
       "type": "REGIME",
       "message": "Market regime: unknown (conf=0%)",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:08:35.739647",
+      "age": "5d 9h 5m 47s",
+      "type": "TRAIN_COMPLETE",
+      "message": "Unified training completed",
+      "metadata": {
+        "weights_updated": true,
+        "ppo_trained": true
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:08:35.837218",
+      "age": "5d 9h 5m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #515",
+      "metadata": {
+        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-26T20:08:35.835753\nCombined win rate: 21.9% (buffer=23.1%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 Add 5-min confirmation before entry to filter noise\n\u2022 Commander guidance (recent):\n  - Hi\n  - ping - are you there ?\n  - Hi\n  - Hi\n\u2022 Recommended parameter adjustments:\n  - SCALP_STOP_ATR_MULTIPLIER: 0.9 -> 0.7200000000000001 (reason: tighten stops when WR low; widen when WR strong)\n  - SCALP_TP_ATR_MULTIPLIER: 1.5 -> 1.35 (reason: increase targets when WR strong; reduce when WR weak)\n  - SCAN_INTERVAL_SECONDS: 30 -> 39.0 (reason: reduce frequency when WR low; increase when WR strong)\n  - MAX_TRADE_SIZE_USD: 45464.985 -> 31825.4895 (reason: reduce size when WR poor; increase when WR strong)\n  - MAX_RISK_PER_TRADE_USD: 250000.0 -> 187500.0 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)\n  - CONFIDENCE_THRESHOLD: 0.65 -> 0.7000000000000001 (reason: raise entry bar when WR low; lower when WR strong)",
+        "adjustments": {
+          "SCALP_STOP_ATR_MULTIPLIER": {
+            "old": 0.9,
+            "new": 0.7200000000000001,
+            "reason": "tighten stops when WR low; widen when WR strong",
+            "confidence": 0.112
+          },
+          "SCALP_TP_ATR_MULTIPLIER": {
+            "old": 1.5,
+            "new": 1.35,
+            "reason": "increase targets when WR strong; reduce when WR weak",
+            "confidence": 0.043
+          },
+          "SCAN_INTERVAL_SECONDS": {
+            "old": 30,
+            "new": 39.0,
+            "reason": "reduce frequency when WR low; increase when WR strong",
+            "confidence": 0.051
+          },
+          "MAX_TRADE_SIZE_USD": {
+            "old": 45464.985,
+            "new": 31825.4895,
+            "reason": "reduce size when WR poor; increase when WR strong",
+            "confidence": 0.016
+          },
+          "MAX_RISK_PER_TRADE_USD": {
+            "old": 250000.0,
+            "new": 187500.0,
+            "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+            "confidence": 0.275
+          },
+          "CONFIDENCE_THRESHOLD": {
+            "old": 0.65,
+            "new": 0.7000000000000001,
+            "reason": "raise entry bar when WR low; lower when WR strong",
+            "confidence": 0.091
+          }
+        },
+        "win_rate": 0.2190029104801101,
+        "timestamp": "2026-06-26T20:08:35.836963"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:08:35.864307",
+      "age": "5d 9h 5m 47s",
+      "type": "VERSION",
+      "message": "Created version v20260626_200835",
+      "metadata": {
+        "id": "v20260626_200835",
+        "timestamp": "2026-06-26T20:08:35.860602",
+        "age": "5d 9h 5m 47s",
+        "session": 30,
+        "mood": "recalibrating",
+        "total_awakenings": 159,
+        "trades_observed": 243,
+        "scans_performed": 30,
+        "improvements_applied": 515,
+        "total_pnl": 123053.26000000007,
+        "best_streak": 4,
+        "steps": {
+          "market_context": {
+            "spy_trend": "unknown",
+            "qqq_trend": "unknown",
+            "vix_level": 0.0,
+            "vix_regime": "low",
+            "timestamp": "2026-06-26T20:08:09.414240"
+          },
+          "regime": {
+            "regime": "unknown",
+            "confidence": 0.0,
+            "recommendation": "Insufficient data"
+          },
+          "unified_training": {
+            "weights_updated": true,
+            "ppo_trained": true
+          },
+          "self_improvement": {
+            "win_rate": 0.2190029104801101,
+            "adjustments": {
+              "SCALP_STOP_ATR_MULTIPLIER": {
+                "old": 0.9,
+                "new": 0.7200000000000001,
+                "reason": "tighten stops when WR low; widen when WR strong",
+                "confidence": 0.112
+              },
+              "SCALP_TP_ATR_MULTIPLIER": {
+                "old": 1.5,
+                "new": 1.35,
+                "reason": "increase targets when WR strong; reduce when WR weak",
+                "confidence": 0.043
+              },
+              "SCAN_INTERVAL_SECONDS": {
+                "old": 30,
+                "new": 39.0,
+                "reason": "reduce frequency when WR low; increase when WR strong",
+                "confidence": 0.051
+              },
+              "MAX_TRADE_SIZE_USD": {
+                "old": 45464.985,
+                "new": 31825.4895,
+                "reason": "reduce size when WR poor; increase when WR strong",
+                "confidence": 0.016
+              },
+              "MAX_RISK_PER_TRADE_USD": {
+                "old": 250000.0,
+                "new": 187500.0,
+                "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+                "confidence": 0.275
+              },
+              "CONFIDENCE_THRESHOLD": {
+                "old": 0.65,
+                "new": 0.7000000000000001,
+                "reason": "raise entry bar when WR low; lower when WR strong",
+                "confidence": 0.091
+              }
+            }
+          }
+        },
+        "parent_version": "v20260626_200510"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:08:41.575053",
+      "age": "5d 9h 5m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #516",
+      "metadata": {
+        "source": "commander_chat",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T20:07:56.920224",
-  "current_version": "v20260626_200510",
+  "current_version": "v20260626_200835",
   "version_history": [
     {
       "id": "v20260622_085553",
@@ -23039,9 +23165,82 @@
         }
       },
       "parent_version": "v20260625_200735"
+    },
+    {
+      "id": "v20260626_200835",
+      "timestamp": "2026-06-26T20:08:35.860602",
+      "age": "5d 9h 5m 47s",
+      "session": 30,
+      "mood": "recalibrating",
+      "total_awakenings": 159,
+      "trades_observed": 243,
+      "scans_performed": 30,
+      "improvements_applied": 515,
+      "total_pnl": 123053.26000000007,
+      "best_streak": 4,
+      "steps": {
+        "market_context": {
+          "spy_trend": "unknown",
+          "qqq_trend": "unknown",
+          "vix_level": 0.0,
+          "vix_regime": "low",
+          "timestamp": "2026-06-26T20:08:09.414240"
+        },
+        "regime": {
+          "regime": "unknown",
+          "confidence": 0.0,
+          "recommendation": "Insufficient data"
+        },
+        "unified_training": {
+          "weights_updated": true,
+          "ppo_trained": true
+        },
+        "self_improvement": {
+          "win_rate": 0.2190029104801101,
+          "adjustments": {
+            "SCALP_STOP_ATR_MULTIPLIER": {
+              "old": 0.9,
+              "new": 0.7200000000000001,
+              "reason": "tighten stops when WR low; widen when WR strong",
+              "confidence": 0.112
+            },
+            "SCALP_TP_ATR_MULTIPLIER": {
+              "old": 1.5,
+              "new": 1.35,
+              "reason": "increase targets when WR strong; reduce when WR weak",
+              "confidence": 0.043
+            },
+            "SCAN_INTERVAL_SECONDS": {
+              "old": 30,
+              "new": 39.0,
+              "reason": "reduce frequency when WR low; increase when WR strong",
+              "confidence": 0.051
+            },
+            "MAX_TRADE_SIZE_USD": {
+              "old": 45464.985,
+              "new": 31825.4895,
+              "reason": "reduce size when WR poor; increase when WR strong",
+              "confidence": 0.016
+            },
+            "MAX_RISK_PER_TRADE_USD": {
+              "old": 250000.0,
+              "new": 187500.0,
+              "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+              "confidence": 0.275
+            },
+            "CONFIDENCE_THRESHOLD": {
+              "old": 0.65,
+              "new": 0.7000000000000001,
+              "reason": "raise entry bar when WR low; lower when WR strong",
+              "confidence": 0.091
+            }
+          }
+        }
+      },
+      "parent_version": "v20260626_200510"
     }
   ],
-  "last_training": "2026-06-26T20:05:10.197333",
+  "last_training": "2026-06-26T20:08:36.163942",
   "mood": "recalibrating",
   "total_pnl": 123053.26000000007,
   "win_history": [

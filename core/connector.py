@@ -254,7 +254,6 @@ class IBConnector:
             ok = self.reclaim_live_market_data_session()
             if ok:
                 self._pending_resubscribe = True
-                self._notify_connectivity("resubscribe")
             return ok
         except Exception as exc:
             log.warning(f"IB session reclaim failed: {exc}")
@@ -267,8 +266,11 @@ class IBConnector:
         """
         storm_threshold = int(getattr(self.cfg, "IB_10197_STORM_THRESHOLD", 3))
         storm_backoff = float(getattr(self.cfg, "IB_10197_STORM_BACKOFF_SEC", 300.0))
+        if time.time() < self._10197_storm_until:
+            return False
+
         self._10197_reclaim_attempts += 1
-        if self._10197_reclaim_attempts >= storm_threshold:
+        if self._10197_reclaim_attempts > storm_threshold:
             self._10197_storm_until = time.time() + storm_backoff
             self._10197_reclaim_attempts = 0
             log.error(
@@ -276,6 +278,7 @@ class IBConnector:
                 "Run ./stop.sh, quit IB Gateway fully, wait 60s, restart Gateway, "
                 "then ./START.command once."
             )
+            return False
 
         log.warning(
             "IB 10197 — reclaiming live market data slot "
@@ -472,7 +475,6 @@ class IBConnector:
                 self._reconnect_count += 1
                 self._connectivity_lost = False
                 self._pending_resubscribe = True
-                self._notify_connectivity("resubscribe")
                 log.info(f"Reconnected successfully. (total reconnects: {self._reconnect_count})")
                 if self.notifier:
                     self.notifier.reconnect_event(success=True)
@@ -592,9 +594,8 @@ class IBConnector:
             self._connectivity_lost = False
             self._pending_resubscribe = True
             log.warning(
-                "IB 1101 — connectivity restored, market data lost (re-subscribe required)"
+                "IB 1101 — connectivity restored, market data lost (re-subscribe queued)"
             )
-            self._notify_connectivity("data_lost")
             return
         if errorCode == 1102:
             self._connectivity_lost = False
