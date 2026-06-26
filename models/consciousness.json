@@ -3,119 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 217,
+  "trades_observed": 220,
   "scans_performed": 28,
-  "improvements_applied": 473,
+  "improvements_applied": 478,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-22T08:55:53.908855",
-      "age": "21h 53m 5s",
-      "type": "TRAIN_COMPLETE",
-      "message": "Unified training completed",
-      "metadata": {
-        "weights_updated": true,
-        "ppo_trained": false
-      }
-    },
-    {
-      "timestamp": "2026-06-22T08:55:53.916283",
-      "age": "21h 53m 5s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2",
-      "metadata": {
-        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-22T08:55:53.915191\nCombined win rate: 55.0% (buffer=89.3%, returns=20.7%)\n\u2022 Win rate stable: maintain current parameters\n\u2022 Avoid multiple parameter changes simultaneously; isolate effects",
-        "adjustments": {},
-        "win_rate": 0.5500131613582522,
-        "timestamp": "2026-06-22T08:55:53.916169"
-      }
-    },
-    {
-      "timestamp": "2026-06-22T08:55:53.916970",
-      "age": "21h 53m 5s",
-      "type": "VERSION",
-      "message": "Created version v20260622_085553",
-      "metadata": {
-        "id": "v20260622_085553",
-        "timestamp": "2026-06-22T08:55:53.916704",
-        "age": "21h 53m 5s",
-        "session": 2,
-        "mood": "learning",
-        "total_awakenings": 5,
-        "trades_observed": 0,
-        "scans_performed": 2,
-        "improvements_applied": 2,
-        "total_pnl": 0,
-        "best_streak": 0,
-        "steps": {
-          "market_context": {
-            "spy_trend": "unknown",
-            "qqq_trend": "unknown",
-            "vix_level": null,
-            "vix_regime": "unknown",
-            "timestamp": "2026-06-22T08:55:50.936382"
-          },
-          "regime": {
-            "regime": "unknown",
-            "confidence": 0.0,
-            "recommendation": "Insufficient data"
-          },
-          "unified_training": {
-            "weights_updated": true,
-            "ppo_trained": false
-          },
-          "self_improvement": {
-            "win_rate": 0.5500131613582522,
-            "adjustments": {}
-          }
-        },
-        "parent_version": "v20260621_121258"
-      }
-    },
-    {
-      "timestamp": "2026-06-22T08:55:53.918222",
-      "age": "21h 53m 5s",
-      "type": "ERROR",
-      "message": "Training session failed: 'mood'",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-22T09:00:52.040263",
-      "age": "21h 58m 3s",
-      "type": "SCAN",
-      "message": "Market scan #3",
-      "metadata": {
-        "source": "off_hours",
-        "tickers": 72
-      }
-    },
-    {
-      "timestamp": "2026-06-22T09:00:52.041868",
-      "age": "21h 58m 3s",
-      "type": "TRAIN",
-      "message": "Training session #3",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-22T09:00:52.042362",
-      "age": "21h 58m 3s",
-      "type": "CONTEXT",
-      "message": "Fetched market context",
-      "metadata": {
-        "spy_trend": "unknown",
-        "qqq_trend": "unknown",
-        "vix_level": null,
-        "vix_regime": "unknown",
-        "timestamp": "2026-06-22T09:00:52.042356"
-      }
-    },
-    {
-      "timestamp": "2026-06-22T09:00:52.042874",
-      "age": "21h 58m 3s",
-      "type": "REGIME",
-      "message": "Market regime: unknown (conf=0%)",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-22T09:00:55.105723",
       "age": "21h 58m 6s",
@@ -21314,6 +21206,97 @@
           "Review trade_closed on MARA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:03.672847",
+      "age": "5d 7h 53m 14s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$-6.47",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:56:03.933015",
+      "age": "5d 7h 53m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #474",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:04.001925",
+      "age": "5d 7h 53m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #475",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:07.614084",
+      "age": "5d 7h 53m 18s",
+      "type": "TRADE",
+      "message": "Observed trade: RKLB ? P&L=$+14.30",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:56:07.913714",
+      "age": "5d 7h 53m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #476",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RKLB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:12.722974",
+      "age": "5d 7h 53m 24s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$-29.25",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:56:13.030553",
+      "age": "5d 7h 53m 24s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #478",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:56:13.031549",
+      "age": "5d 7h 53m 24s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #478",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22673,7 +22656,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "recalibrating",
-  "total_pnl": 123494.48000000005,
+  "total_pnl": 123473.06000000006,
   "win_history": [
     0.0,
     0.0,
@@ -22891,20 +22874,23 @@
     -4.1,
     0.0,
     -1.31,
-    0.0
+    0.0,
+    -6.47,
+    14.3,
+    -29.25
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 11,
+  "consecutive_losses": 1,
   "worst_streak": 21,
-  "veteran_xp": 2955,
+  "veteran_xp": 3005,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
-    "entry_timing": 76
+    "entry_timing": 78
   },
-  "flights_completed": 212,
-  "hours_flown": 21.20000000000003,
+  "flights_completed": 215,
+  "hours_flown": 21.500000000000036,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22925,15 +22911,15 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 12,
+    "PLT": 13,
     "LCI": 8,
     "RIO": 16,
     "QS": 5,
     "MAR": 18,
     "COI": 4,
     "RIV": 5,
-    "RKL": 10,
-    "SOF": 13,
+    "RKL": 11,
+    "SOF": 14,
     "AST": 4
   },
   "best_streak": 4,
