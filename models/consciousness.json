@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 191,
   "scans_performed": 28,
-  "improvements_applied": 429,
+  "improvements_applied": 430,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20581,6 +20581,28 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:38:09.854498",
+      "age": "5d 7h 35m 21s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #430",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.63,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RKLB"
         ]
       }
     }
