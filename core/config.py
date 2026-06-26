@@ -585,7 +585,7 @@ class BotConfig:
     USE_LIVE_IB_SCANNER: bool = True
     USE_STATIC_SCAN_FALLBACK: bool = False
     IB_SCANNER_RETRIES: int = 2
-    IB_SCANNER_STARTUP_RETRIES: int = int(os.getenv("IB_SCANNER_STARTUP_RETRIES", "1"))
+    IB_SCANNER_STARTUP_RETRIES: int = int(os.getenv("IB_SCANNER_STARTUP_RETRIES", "2"))
     IB_SCANNER_TIMEOUT_SEC: float = float(os.getenv("IB_SCANNER_TIMEOUT_SEC", "25"))
     IB_SCANNER_PER_CODE_SEC: float = float(os.getenv("IB_SCANNER_PER_CODE_SEC", "18"))
     IB_SCANNER_RETRY_WAIT_SEC: float = float(os.getenv("IB_SCANNER_RETRY_WAIT_SEC", "1"))
@@ -593,7 +593,7 @@ class BotConfig:
     SCAN_EMERGENCY_FALLBACK: bool = os.getenv("SCAN_EMERGENCY_FALLBACK", "true").lower() not in (
         "0", "false", "no",
     )
-    SCAN_DEFER_IB_ON_STARTUP: bool = os.getenv("SCAN_DEFER_IB_ON_STARTUP", "true").lower() not in (
+    SCAN_DEFER_IB_ON_STARTUP: bool = os.getenv("SCAN_DEFER_IB_ON_STARTUP", "false").lower() not in (
         "0", "false", "no",
     )
     # Run live IB scanner in main loop after instant startup lock (paper-safe warmup)
