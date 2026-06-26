@@ -26,6 +26,12 @@ _LOW_PRIORITY = frozenset({
     "pick_next_target", "lock_review",
 })
 
+# PPO-led elite entries — one async council ring after fill for distillation only
+STRONG_SPIKE_PIPELINES = frozenset({
+    "ppo:strong_spike",
+    "council:ppo_strong_lead",
+})
+
 
 def nanny_mode_enabled(cfg: BotConfig) -> bool:
     return bool(getattr(cfg, "COUNCIL_NANNY_MODE", True))
@@ -43,6 +49,25 @@ def learning_ring_enabled(cfg: BotConfig) -> bool:
     if not nanny_mode_enabled(cfg):
         return bool(getattr(cfg, "COUNCIL_LEARNING_RING_ENABLED", True))
     return bool(getattr(cfg, "COUNCIL_LEARNING_RING_ENABLED", False))
+
+
+def strong_spike_learning_ring_enabled(cfg: BotConfig) -> bool:
+    """One API ring per strong-spike fill — distillation without full learning_ring burn."""
+    return bool(getattr(cfg, "COUNCIL_LEARNING_RING_STRONG_SPIKE_ONLY", True))
+
+
+def is_strong_spike_pipeline(pipeline: str) -> bool:
+    p = str(pipeline or "").strip()
+    return p in STRONG_SPIKE_PIPELINES or p.startswith("ppo:strong")
+
+
+def learning_ring_for_pipeline(cfg: BotConfig, pipeline: str) -> bool:
+    """Allow deferred council learning for this entry pipeline."""
+    if learning_ring_enabled(cfg):
+        return True
+    if strong_spike_learning_ring_enabled(cfg) and is_strong_spike_pipeline(pipeline):
+        return True
+    return False
 
 
 def council_budget_headroom(cfg: BotConfig) -> float:
@@ -74,6 +99,7 @@ def should_ring_council(
     spike_ratio: float = 0.0,
     scan_score: float = 0.0,
     in_position: bool = False,
+    pipeline: str = "",
 ) -> Tuple[bool, str]:
     """
     Return (allowed, reason). Gates LiveAILine.ring / decide_call hot path.
@@ -90,7 +116,7 @@ def should_ring_council(
 
     task = str(task or "entry_decision")
 
-    if for_learning and not learning_ring_enabled(cfg):
+    if for_learning and not learning_ring_for_pipeline(cfg, pipeline):
         return False, "nanny_no_learning_ring"
 
     if task in _LOW_PRIORITY:
@@ -112,13 +138,13 @@ def should_ring_council(
             return False, f"nanny_weak_spike_{spike_ratio:.2f}"
         if scan_score < min_score:
             return False, f"nanny_weak_score_{scan_score:.0f}"
-        if for_learning:
+        if for_learning and not learning_ring_for_pipeline(cfg, pipeline):
             return False, "nanny_no_learning_ring"
         if headroom <= reserve:
             return False, f"nanny_reserve_{reserve:.0%}"
         return True, "ok"
 
-    if for_learning:
+    if for_learning and not learning_ring_for_pipeline(cfg, pipeline):
         return False, "nanny_no_learning_ring"
     return False, f"nanny_unknown_task_{task}"
 
