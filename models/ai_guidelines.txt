@@ -20,3 +20,9 @@ Combined win rate: 22.9% (buffer=25.1%, returns=20.7%)
 Could not parse AI plan — retained guidance for prompts only.
 off_hours_review
 
+🧭 COMMANDER LEARNING | 2026-06-26T12:31:24.349133+00:00
+Observed council_timeout — recorded for learning.
+Council timeout — capital discipline: no fallback entry
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.63 (Scanner timeout entries — slightly lower bar while council catches up)
+

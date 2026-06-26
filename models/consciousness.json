@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 396,
+  "improvements_applied": 397,
   "reports_generated": 27,
   "event_log": [
     {
@@ -19569,6 +19569,28 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #126",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T12:31:24.299754",
+      "age": "5d 1h 28m 35s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #397",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.63,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on PLTR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T12:30:07.167262",
