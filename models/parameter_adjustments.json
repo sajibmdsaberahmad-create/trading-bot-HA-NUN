@@ -1,1 +1,38 @@
-{}
+{
+  "SCALP_STOP_ATR_MULTIPLIER": {
+    "old": 0.9,
+    "new": 0.7200000000000001,
+    "reason": "tighten stops when WR low; widen when WR strong",
+    "confidence": 0.112
+  },
+  "SCALP_TP_ATR_MULTIPLIER": {
+    "old": 1.5,
+    "new": 1.35,
+    "reason": "increase targets when WR strong; reduce when WR weak",
+    "confidence": 0.043
+  },
+  "SCAN_INTERVAL_SECONDS": {
+    "old": 30,
+    "new": 39.0,
+    "reason": "reduce frequency when WR low; increase when WR strong",
+    "confidence": 0.051
+  },
+  "MAX_TRADE_SIZE_USD": {
+    "old": 45464.981,
+    "new": 31825.486699999998,
+    "reason": "reduce size when WR poor; increase when WR strong",
+    "confidence": 0.016
+  },
+  "MAX_RISK_PER_TRADE_USD": {
+    "old": 250000.0,
+    "new": 187500.0,
+    "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+    "confidence": 0.275
+  },
+  "CONFIDENCE_THRESHOLD": {
+    "old": 0.65,
+    "new": 0.7000000000000001,
+    "reason": "raise entry bar when WR low; lower when WR strong",
+    "confidence": 0.091
+  }
+}
