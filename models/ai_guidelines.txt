@@ -481,3 +481,11 @@ green_profit_lock:ai_stall_min_green +0.28%
 Observed loss_streak — recorded for learning.
 green_profit_lock:ai_stall_min_green +0.28%
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:53:48.106610+00:00
+Observed loss_streak — recorded for learning.
+hard_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:53:48.109454+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+

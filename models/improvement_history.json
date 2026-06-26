@@ -131,5 +131,23 @@
     "lessons": [
       "Review loss_streak on MARA"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:53:48.113273+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-26T18:53:48.114098+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on PLTR"
+    ]
   }
 ]
