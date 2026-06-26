@@ -6582,21 +6582,32 @@ class ScalperRunner:
             self.cfg.TICKER = ticker
             min_bars = self._min_bars_for(ticker)
 
+            scan_score = self.top_pick.rank_score if self.top_pick else 0.0
             df_fast, current_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=min_bars)
+            tick_burst_ratio = 0.0
             if df_fast is None or len(df_fast) < min_bars:
                 if dm:
-                    burst, burst_ratio = self._detect_tick_volume_burst(dm, df_fast if df_fast is not None else pd.DataFrame())
-                    if burst and should_spike_fast_entry(
-                        self.cfg, burst_ratio, self.top_pick.rank_score if self.top_pick else 0,
-                    ):
+                    burst, burst_ratio = self._detect_tick_volume_burst(
+                        dm, df_fast if df_fast is not None else pd.DataFrame(),
+                    )
+                    from core.capital_discipline import is_strong_spike_setup
+                    tick_ok = burst and (
+                        should_spike_fast_entry(self.cfg, burst_ratio, scan_score)
+                        or is_strong_spike_setup(self.cfg, scan_score, burst_ratio)
+                    )
+                    if tick_ok:
+                        tick_burst_ratio = burst_ratio
                         df_fast = dm.get_fast_bar_dataframe(n=24)
                         current_px = float(dm.get_latest_price() or 0)
                         if df_fast is None or len(df_fast) < 3 or current_px <= 0:
                             return 'waiting'
+                        min_bars = min(min_bars, 3)
                     else:
                         return 'waiting'
                 else:
                     return 'waiting'
+            if not forecast:
+                forecast = dict(self._last_micro_forecast.get(ticker, {}))
             avg_volume = float(df_fast["volume"].tail(20).mean())
             bid, ask = self._get_bid_ask(ticker)
             spread_pct = (ask - bid) / current_px if bid and ask and current_px > 0 else 0.0
@@ -6606,13 +6617,18 @@ class ScalperRunner:
                 "recent_volume": float(df_fast["volume"].iloc[-1]),
             }
 
-            scan_score = self.top_pick.rank_score if self.top_pick else 0.0
             is_spike, spike_ratio = self._detect_volume_spike(df_fast)
             vol_ratio = float(df_fast["volume"].tail(3).mean()) / (
                 float(df_fast["volume"].tail(20).mean()) + 1e-9
             )
             if not is_spike and vol_ratio >= 1.15:
                 is_spike, spike_ratio = True, vol_ratio
+            if dm:
+                burst, burst_ratio = self._detect_tick_volume_burst(dm, df_fast)
+                if burst:
+                    is_spike, spike_ratio = True, max(spike_ratio, burst_ratio)
+            elif tick_burst_ratio > 0:
+                is_spike, spike_ratio = True, max(spike_ratio, tick_burst_ratio)
             is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
 
             gate_ok, gate_msg = passes_pre_entry_gate(
@@ -6632,10 +6648,11 @@ class ScalperRunner:
                 return "waiting"
 
             if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
+                from core.capital_discipline import is_strong_spike_setup
                 uptrend_ok = _only_uptrend(df_fast, current_px, min_bars=min_bars)
                 if not uptrend_ok and not (
-                    capital_discipline_enabled(self.cfg) is False
-                    and should_spike_fast_entry(self.cfg, spike_ratio, scan_score)
+                    should_spike_fast_entry(self.cfg, spike_ratio, scan_score)
+                    or is_strong_spike_setup(self.cfg, scan_score, spike_ratio)
                 ):
                     log.debug(f"Entry skip {ticker}: not uptrend")
                     return 'waiting'
