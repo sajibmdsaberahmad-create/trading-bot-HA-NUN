@@ -387,7 +387,7 @@ def assign_stream_modes(
     denied = {str(t).upper() for t in (tick_denied or set())}
     paper_rt_only = bool(
         getattr(cfg, "PAPER_TRADING", False)
-        and getattr(cfg, "PAPER_REALTIME_BARS_ONLY", True)
+        and getattr(cfg, "PAPER_REALTIME_BARS_ONLY", False)
     )
     tick_budget = 0 if paper_rt_only else tick_stream_count(cfg)
     rt_budget = max_realtime_bar_streams(cfg)

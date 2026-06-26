@@ -191,8 +191,9 @@ class DataManager:
                     ticker.updateEvent += self._on_tick
                     self._tick_handle = ticker
                     self.conn.register_stream_manager(self.cfg.TICKER, self)
-                    log.debug(
-                        f"Tick-by-tick stream started ({tbt}, every trade print, sub-second)."
+                    log.info(
+                        f"Tick-by-tick stream started ({tbt}) — "
+                        f"live trade prints for {self.cfg.TICKER}, sub-second."
                     )
                     return
                 except Exception as exc:
