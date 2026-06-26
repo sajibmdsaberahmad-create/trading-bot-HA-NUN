@@ -219,10 +219,10 @@ CODE_TRACKED: Set[str] = {
     "start.sh",
     "START.command",
     "README.md",
-    "core/",
-    "scripts/",
-    "docs/",
-    "mac-cleaner/",
+    "scripts/start_hanoon.sh",
+    "scripts/stop_hanoon.sh",
+    "scripts/start_git_sync.sh",
+    "scripts/git_auto_push.py",
     "secrets/hanoon.env.enc",
     "secrets/sync.key",
     "models/scalper_weights.json",
@@ -745,9 +745,24 @@ _GITIGNORED_ARTIFACTS: Set[str] = {
     "models/flight_log.jsonl",
     "models/account_snapshots.jsonl",
     "models/account_evaluation_log.jsonl",
+    "models/post_mortem_audit.jsonl",
+    "models/ppo_entry_ledger.jsonl",
+    "models/profit_hunt_ledger.jsonl",
+    "models/commander_learning.jsonl",
+    "models/commander_guidance.jsonl",
+    "models/fill_ledger.jsonl",
+    "models/ai_runtime_insights.jsonl",
+    "models/trader_directives.jsonl",
+    "models/market_data_failures.jsonl",
+    "models/regime_atr_efficiency.jsonl",
+    "models/daily_ib_learning_history.jsonl",
+    "models/consciousness.json",
+    "models/cognitive_state.json",
     "audit_trail.jsonl",
     "live_metrics.json",
     "bot_state.json",
+    "performance.csv",
+    "logs/",
 }
 
 
@@ -825,7 +840,11 @@ def _collect_dirty_files(repo_root: str) -> List[str]:
             tracked.append(f)
         elif f.startswith("core/") and f.endswith(".py"):
             tracked.append(f)
-        elif f.startswith("scripts/") or f.startswith("models/"):
+        elif f.startswith("scripts/") and not f.endswith(".jsonl"):
+            tracked.append(f)
+        elif f.startswith("models/") and f.endswith((
+            ".json", ".txt", ".md",
+        )) and not f.endswith(".jsonl"):
             tracked.append(f)
     return tracked[:max_files]
 
