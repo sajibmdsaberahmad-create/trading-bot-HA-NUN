@@ -742,5 +742,23 @@
     "lessons": [
       "Review trade_closed on MARA"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:37:57.012586+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-26T18:37:57.982273+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
   }
 ]

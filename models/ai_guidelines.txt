@@ -363,3 +363,11 @@ Real-time event analysis is needed to determine the cause, occurrence time, and 
 Observed trade_closed — recorded for learning.
 hard_stop
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:37:57.011429+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:37:57.978591+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+

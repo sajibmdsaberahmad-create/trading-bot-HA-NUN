@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 150,
   "training_sessions": 28,
-  "trades_observed": 189,
+  "trades_observed": 191,
   "scans_performed": 28,
-  "improvements_applied": 427,
+  "improvements_applied": 429,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20541,6 +20541,48 @@
           "Review trade_closed on MARA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:37:56.701083",
+      "age": "5d 7h 35m 8s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:37:56.909980",
+      "age": "5d 7h 35m 8s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #428",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:37:57.658048",
+      "age": "5d 7h 35m 8s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+5.30",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:37:57.947695",
+      "age": "5d 7h 35m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #429",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:36:48.075531",
@@ -21900,7 +21942,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "recalibrating",
-  "total_pnl": 123564.37000000004,
+  "total_pnl": 123569.67000000004,
   "win_history": [
     0.0,
     0.0,
@@ -22090,20 +22132,22 @@
     0,
     -27.97,
     -157.52,
-    0.0
+    0.0,
+    0.0,
+    5.3
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 20,
-  "worst_streak": 20,
-  "veteran_xp": 2620,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
+  "worst_streak": 21,
+  "veteran_xp": 2660,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
-    "entry_timing": 70
+    "entry_timing": 72
   },
-  "flights_completed": 184,
-  "hours_flown": 18.39999999999999,
+  "flights_completed": 186,
+  "hours_flown": 18.599999999999994,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22124,7 +22168,7 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 7,
+    "PLT": 8,
     "LCI": 8,
     "RIO": 12,
     "QS": 5,
@@ -22132,7 +22176,7 @@
     "COI": 2,
     "RIV": 5,
     "RKL": 7,
-    "SOF": 6,
+    "SOF": 7,
     "AST": 4
   },
   "best_streak": 4,
