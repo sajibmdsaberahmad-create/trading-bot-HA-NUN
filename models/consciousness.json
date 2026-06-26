@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 152,
   "training_sessions": 28,
-  "trades_observed": 203,
+  "trades_observed": 205,
   "scans_performed": 28,
-  "improvements_applied": 446,
+  "improvements_applied": 450,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20935,6 +20935,76 @@
       "type": "TRADE",
       "message": "Observed trade: PLTR ? P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:50:35.440090",
+      "age": "5d 7h 47m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #447",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:50:39.646462",
+      "age": "5d 7h 47m 50s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$-2.01",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:50:40.006088",
+      "age": "5d 7h 47m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #448",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:50:40.082378",
+      "age": "5d 7h 47m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #449",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:50:45.936207",
+      "age": "5d 7h 47m 57s",
+      "type": "TRADE",
+      "message": "Observed trade: RKLB ? P&L=$+9.54",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:50:46.225944",
+      "age": "5d 7h 47m 57s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #450",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RKLB"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:48:56.370357",
@@ -22294,7 +22364,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "recalibrating",
-  "total_pnl": 123541.08000000005,
+  "total_pnl": 123548.61000000004,
   "win_history": [
     0.0,
     0.0,
@@ -22498,20 +22568,22 @@
     0.0,
     0.0,
     0.0,
-    0.0
+    0.0,
+    -2.01,
+    9.54
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 12,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 21,
-  "veteran_xp": 2780,
+  "veteran_xp": 2820,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
-    "entry_timing": 72
+    "entry_timing": 74
   },
-  "flights_completed": 198,
-  "hours_flown": 19.80000000000001,
+  "flights_completed": 200,
+  "hours_flown": 20.000000000000014,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22534,12 +22606,12 @@
     "GPU": 19,
     "PLT": 11,
     "LCI": 8,
-    "RIO": 13,
+    "RIO": 14,
     "QS": 5,
     "MAR": 14,
     "COI": 3,
     "RIV": 5,
-    "RKL": 8,
+    "RKL": 9,
     "SOF": 10,
     "AST": 4
   },

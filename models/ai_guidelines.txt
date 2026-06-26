@@ -443,3 +443,19 @@ Scanner+spike after timeout: score=81 vol=7602.0x prob=72% | ATR R:R 2.0
 Observed trade_closed — recorded for learning.
 hard_stop
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:50:35.481351+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:50:40.158022+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +422.62% (peak +422.62%)
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:50:40.159846+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +422.62% (peak +422.62%)
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:50:46.268854+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
