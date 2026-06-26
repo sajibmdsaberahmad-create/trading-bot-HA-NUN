@@ -720,6 +720,9 @@ class BotConfig:
     COUNCIL_LEARNING_RING_ENABLED: bool = os.getenv(
         "COUNCIL_LEARNING_RING_ENABLED", "false"
     ).lower() in ("1", "true", "yes")
+    COUNCIL_LEARNING_RING_STRONG_SPIKE_ONLY: bool = os.getenv(
+        "COUNCIL_LEARNING_RING_STRONG_SPIKE_ONLY", "true"
+    ).lower() in ("1", "true", "yes")
     COUNCIL_NANNY_MIN_SPIKE: float = float(os.getenv("COUNCIL_NANNY_MIN_SPIKE", "1.25"))
     COUNCIL_NANNY_MIN_SCORE: float = float(os.getenv("COUNCIL_NANNY_MIN_SCORE", "55"))
     COUNCIL_NANNY_RESERVE_PCT: float = float(os.getenv("COUNCIL_NANNY_RESERVE_PCT", "0.25"))
