@@ -108,6 +108,39 @@ def should_spike_fast_entry(
     return False
 
 
+def should_disciplined_strong_entry(
+    cfg: BotConfig,
+    spike_ratio: float,
+    scan_score: float,
+    ppo_action: int = 0,
+    ppo_conf: float = 0.0,
+    micro: Optional[dict] = None,
+) -> bool:
+    """Elite spike under capital discipline — PPO enters, council logs async."""
+    from core.capital_discipline import (
+        allows_disciplined_spike_fast,
+        is_strong_spike_setup,
+    )
+    if not allows_disciplined_spike_fast(cfg, scan_score, spike_ratio):
+        return False
+    if not is_strong_spike_setup(cfg, scan_score, spike_ratio):
+        return False
+    min_ppo = float(getattr(cfg, "CAPITAL_STRONG_MIN_PPO_CONF", 0.50))
+    if scan_score >= 88 and spike_ratio >= 1.5:
+        return _passes_entry_quality_gate(
+            cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+        )
+    if ppo_action == 1 and ppo_conf >= min_ppo:
+        return _passes_entry_quality_gate(
+            cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+        )
+    if scan_score >= 82 and spike_ratio >= 1.4 and ppo_conf >= 0.48:
+        return _passes_entry_quality_gate(
+            cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+        )
+    return False
+
+
 def prioritize_locked_targets(
     targets: List["ScanResult"],
     cfg: BotConfig,

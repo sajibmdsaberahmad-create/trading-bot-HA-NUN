@@ -6678,7 +6678,11 @@ class ScalperRunner:
                     ppo_c = float(ai_dec.get("ppo_conf", 0.5))
                     min_c = float(ai_dec.get("min_conf", 0.55))
                     ppo_lead = (
-                        allows_ppo_lead_while_pending(self.cfg)
+                        allows_ppo_lead_while_pending(
+                            self.cfg,
+                            scan_score=scan_score,
+                            spike_ratio=spike_ratio,
+                        )
                         and ai_fast_execution(self.cfg)
                         and (
                             should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_a, ppo_c)

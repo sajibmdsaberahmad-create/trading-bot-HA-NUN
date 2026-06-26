@@ -230,6 +230,31 @@ class BotConfig:
         os.getenv("CAPITAL_ENTRY_COOLDOWN_SEC", "0")
     )
     MAX_ENTRIES_PER_HOUR: int = int(os.getenv("MAX_ENTRIES_PER_HOUR", "0"))
+    # Strong-spike PPO lead — enter elite setups without waiting for council RPM
+    CAPITAL_STRONG_SPIKE_FAST: bool = os.getenv(
+        "CAPITAL_STRONG_SPIKE_FAST", "true"
+    ).lower() in ("1", "true", "yes")
+    CAPITAL_PPO_LEAD_STRONG_SPIKE: bool = os.getenv(
+        "CAPITAL_PPO_LEAD_STRONG_SPIKE", "true"
+    ).lower() in ("1", "true", "yes")
+    CAPITAL_SCANNER_FAST_STRONG: bool = os.getenv(
+        "CAPITAL_SCANNER_FAST_STRONG", "true"
+    ).lower() in ("1", "true", "yes")
+    CAPITAL_TIMEOUT_FALLBACK_STRONG: bool = os.getenv(
+        "CAPITAL_TIMEOUT_FALLBACK_STRONG", "true"
+    ).lower() in ("1", "true", "yes")
+    CAPITAL_STRONG_SPIKE_SCORE: float = float(
+        os.getenv("CAPITAL_STRONG_SPIKE_SCORE", "78")
+    )
+    CAPITAL_STRONG_SPIKE_RATIO: float = float(
+        os.getenv("CAPITAL_STRONG_SPIKE_RATIO", "1.35")
+    )
+    CAPITAL_STRONG_PROFIT_PROB_FLOOR: float = float(
+        os.getenv("CAPITAL_STRONG_PROFIT_PROB_FLOOR", "0.48")
+    )
+    CAPITAL_STRONG_MIN_PPO_CONF: float = float(
+        os.getenv("CAPITAL_STRONG_MIN_PPO_CONF", "0.50")
+    )
 
     # Green profit lock — mechanical quick scalp when AI stalls (always close green)
     GREEN_PROFIT_LOCK_ENABLED: bool = os.getenv(
