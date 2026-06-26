@@ -594,6 +594,57 @@ class ScalperRunner:
 
         return df, live_px, dm, forecast
 
+    def _stream_has_price(self, ticker: str) -> bool:
+        """True when live stream or cache already has a usable price for ticker."""
+        dm = self._target_monitors.get(ticker)
+        if dm:
+            px = dm.get_latest_price()
+            if px and px > 0:
+                return True
+        cached = self._scan_data_cache.get(ticker)
+        if cached is not None and len(cached) > 0:
+            px = float(cached["close"].iloc[-1])
+            return px > 0
+        return False
+
+    def _heal_stale_stream_prices(self, now: float) -> None:
+        """IB snapshot when 5s streams are up but prices never arrived."""
+        if not self._locked_targets:
+            return
+        heal_iv = float(getattr(self.cfg, "STREAM_PRICE_HEAL_SEC", 20.0))
+        if now - getattr(self, "_last_stream_heal", 0) < heal_iv:
+            return
+        need_heal = [
+            t.ticker for t in self._locked_targets[: self._max_locked()]
+            if t.ticker in self._target_monitors and not self._stream_has_price(t.ticker)
+        ]
+        if not need_heal:
+            return
+        healed = 0
+        for ticker in need_heal[:4]:
+            px = self._force_price_snapshot(ticker)
+            if px <= 0:
+                continue
+            healed += 1
+            dm = self._target_monitors.get(ticker)
+            if dm:
+                dm.last_tick_price = float(px)
+            for target in self._locked_targets:
+                if target.ticker == ticker and target.price <= 0:
+                    target.price = float(px)
+            cached = self._scan_data_cache.get(ticker)
+            if cached is None or len(cached) == 0:
+                now_ts = pd.Timestamp.utcnow().floor("1min")
+                self._scan_data_cache[ticker] = pd.DataFrame(
+                    [{
+                        "open": px, "high": px, "low": px, "close": px, "volume": 0,
+                    }],
+                    index=[now_ts],
+                )
+        if healed:
+            self._last_stream_heal = now
+            log.info(f"  💉 Stream heal: IB snapshot priced {healed} ticker(s)")
+
     def _bars_from_stream(self, ticker: str, need: int) -> Optional[pd.DataFrame]:
         """Use live tick/5s stream bars — no IB HMDS historical request."""
         dm = self._target_monitors.get(ticker)
@@ -3200,7 +3251,13 @@ class ScalperRunner:
             if live_df is not None:
                 return live_df
 
-        if skip_historical_prefetch(self.cfg):
+        if skip_historical_prefetch(self.cfg) and self._stream_has_price(ticker):
+            return None
+        try:
+            from core.rth_session import historical_prefetch_allowed
+            if not historical_prefetch_allowed(self.cfg):
+                return None
+        except Exception:
             return None
 
         cfg_ticker = self.cfg.TICKER
@@ -3550,6 +3607,7 @@ class ScalperRunner:
                 dm.on_tick(lambda px, ts, t=sym: self._on_locked_stream_tick(t, px, ts))
             self._target_monitors[ticker] = dm
             self._stream_modes[ticker] = stream_mode
+            self.conn.register_stream_manager(ticker, dm)
             self._target_last_bar_count[ticker] = n_cached
             kind = "5s" if stream_mode == "realtime" else "tick"
             warm = "warming" if n_cached < self._min_bars_for(ticker) else f"{n_cached} bars"
@@ -3680,7 +3738,13 @@ class ScalperRunner:
             if getattr(self.cfg, "SCALPER_LIVE_BARS_FIRST", True):
                 if self._bars_from_stream(ticker, need) is not None:
                     continue
-            if skip_historical_prefetch(self.cfg):
+            if skip_historical_prefetch(self.cfg) and self._stream_has_price(ticker):
+                continue
+            try:
+                from core.rth_session import historical_prefetch_allowed
+                if not historical_prefetch_allowed(self.cfg):
+                    continue
+            except Exception:
                 continue
             cfg_ticker = self.cfg.TICKER
             try:
