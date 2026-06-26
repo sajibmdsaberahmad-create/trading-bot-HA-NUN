@@ -64,7 +64,7 @@ class IBConnector:
 
     # ── Public API ─────────────────────────────────────────────────────────
 
-    def connect(self) -> bool:
+    def connect(self, reclaim: Optional[bool] = None) -> bool:
         """Establish the IB Gateway connection. Returns True on success."""
         try:
             # Suppress ib_insync INFO chatter that fills the client output buffer
@@ -76,7 +76,12 @@ class IBConnector:
                 ibi.util.patchAsyncio()
             except Exception:
                 pass
-            if getattr(self.cfg, "IB_RECLAIM_SESSION_ON_START", True):
+            do_reclaim = (
+                getattr(self.cfg, "IB_RECLAIM_SESSION_ON_START", True)
+                if reclaim is None
+                else reclaim
+            )
+            if do_reclaim:
                 self.prepare_fresh_connection()
             if self.ib.isConnected():
                 try:
@@ -360,7 +365,7 @@ class IBConnector:
             except Exception:
                 pass
             # After reconnect, pause briefly so IB can finish setup before scanner resumes
-            if self.connect():
+            if self.connect(reclaim=False):
                 time.sleep(2)
                 self._reconnect_count += 1
                 log.info(f"Reconnected successfully. (total reconnects: {self._reconnect_count})")
