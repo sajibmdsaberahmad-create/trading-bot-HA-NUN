@@ -171,7 +171,7 @@ class DataManager:
 
     # ── Live tick stream ─────────────────────────────────────────────────────
 
-    def start_tick_stream(self, realtime_only: bool = False):
+    def start_tick_stream(self, realtime_only: bool = False, quiet: bool = False):
         """
         Subscribe to live market data for a locked watch target.
         Default: tick-by-tick (sub-second). Paper often needs 5s bars only (10189).
@@ -182,7 +182,7 @@ class DataManager:
         )
         if realtime_only or paper_bars:
             try:
-                self._start_realtime_bars_fallback()
+                self._start_realtime_bars_fallback(quiet=quiet)
             except Exception as exc:
                 log.warning(f"Real-time bar stream failed: {exc}")
             return
@@ -200,10 +200,11 @@ class DataManager:
                         ticker.updateEvent += self._on_tick
                         self._tick_handle = ticker
                         self.conn.register_stream_manager(self.cfg.TICKER, self)
-                        log.info(
+                        msg = (
                             f"Tick-by-tick stream started ({tbt_try}) — "
                             f"live trade prints for {self.cfg.TICKER}, sub-second."
                         )
+                        (log.debug if quiet else log.info)(msg)
                         return
                     except Exception as exc:
                         last_exc = exc
@@ -218,11 +219,11 @@ class DataManager:
                         "Falling back to 5-second real-time bars."
                     )
 
-            self._start_realtime_bars_fallback()
+            self._start_realtime_bars_fallback(quiet=quiet)
         except Exception as exc:
             log.warning(f"Stream start failed entirely: {exc}")
 
-    def _start_realtime_bars_fallback(self):
+    def _start_realtime_bars_fallback(self, quiet: bool = False):
         contract = self._get_contract()
         use_rth = False
         try:
@@ -236,10 +237,17 @@ class DataManager:
         rt_bars.updateEvent += self._on_realtime_bar_fallback
         self._realtime_handle = rt_bars
         self.conn.register_stream_manager(self.cfg.TICKER, self)
-        log.info(
-            f"Real-time 5-second bar stream started for {self.cfg.TICKER} "
-            f"(fallback — tick-by-tick unavailable)."
-        )
+        if paper_bars := bool(
+            getattr(self.cfg, "PAPER_TRADING", False)
+            and getattr(self.cfg, "PAPER_REALTIME_BARS_ONLY", True)
+        ):
+            msg = f"5s bar stream started for {self.cfg.TICKER} (paper mode)."
+        else:
+            msg = (
+                f"Real-time 5-second bar stream started for {self.cfg.TICKER} "
+                f"(fallback — tick-by-tick unavailable)."
+            )
+        (log.debug if quiet else log.info)(msg)
 
     def fallback_to_realtime_bars(self) -> None:
         """IB 10189/10190 — cancel dead tick-by-tick sub and start 5s bars immediately."""

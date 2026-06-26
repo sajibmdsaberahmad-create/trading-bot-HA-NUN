@@ -181,7 +181,9 @@ def bootstrap_ai_session_limits(
     pilot = getattr(runner, "pilot", None)
     limits = heuristic_session_limits(cfg, equity, pilot)
     apply_session_limits(cfg, limits)
-    log.info(format_limits_log(cfg, equity))
+    from core.startup_log import startup_compact, sinfo
+    if not startup_compact(cfg):
+        log.info(format_limits_log(cfg, equity))
 
     if async_ollama and getattr(cfg, "AI_SESSION_LIMITS_OLLAMA", True) and getattr(runner, "ai_commander", None):
 
@@ -190,7 +192,10 @@ def bootstrap_ai_session_limits(
                 refined = _ollama_refine_limits(runner, limits)
                 if refined:
                     apply_session_limits(cfg, refined)
-                    log.info(format_limits_log(cfg, equity))
+                    if not startup_compact(cfg):
+                        log.info(format_limits_log(cfg, equity))
+                    else:
+                        sinfo(cfg, f"🔄 AI limits refined: {format_limits_log(cfg, equity)}")
             except Exception as exc:
                 log.debug(f"Ollama session limits refine: {exc}")
 

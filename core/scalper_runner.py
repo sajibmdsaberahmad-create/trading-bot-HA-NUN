@@ -1399,8 +1399,11 @@ class ScalperRunner:
 
         is_startup = old_state == "startup"
         status = rth_status_line(self.cfg)
-        log.info(f"🔔 RTH OPEN ({old_state} → open) | {status}")
-        if not is_startup:
+        from core.startup_log import sinfo
+        if is_startup:
+            sinfo(self.cfg, f"🔔 RTH OPEN ({old_state} → open) | {status}")
+        else:
+            log.info(f"🔔 RTH OPEN ({old_state} → open) | {status}")
             log.info(f"  🧠 {ai_session_context_block(self.cfg)}")
 
         cleared = clear_transient_md_blocks(self.cfg)
@@ -1415,9 +1418,9 @@ class ScalperRunner:
             pass
 
         if is_startup:
-            log.info(
-                "  📡 Mid-session start — streams/cache kept "
-                "(no 9:30 teardown; live bars warm from tick streams)"
+            sinfo(
+                self.cfg,
+                "📡 Mid-session start — streams kept (no 9:30 teardown)",
             )
             teach_profit_hunt_lesson(
                 self.autopilot, self.consciousness,
@@ -2449,6 +2452,11 @@ class ScalperRunner:
         self._refresh_account_balance()
         self._log_startup_banner()
         bootstrap_ai_session_limits(self)
+        if self._ib_starting_balance:
+            try:
+                self.shadow_circuit.reset_daily(self._ib_starting_balance)
+            except Exception:
+                pass
 
         if getattr(self.cfg, "SHADOW_CIRCUIT_ENABLED", True):
             self._maybe_resume_ib_from_shadow()
@@ -3216,29 +3224,29 @@ class ScalperRunner:
         self._last_focus_rotate = 0.0
         names = ", ".join([p.ticker for p in self._locked_targets])
         lock_tag = "FAST" if fast_lock else "FULL"
-        log.info(f"🎯 LOCKED TARGETS ({len(self._locked_targets)}): {names} | Scan {lock_tag}: {elapsed_ms:.0f}ms")
-        self._last_lock_elapsed_ms = elapsed_ms
+        from core.startup_log import startup_compact, sinfo
         log.info(
-            f"🔒 COMMITTED LOCK: scores≥{min_lock_score:.0f} | "
-            + (
-                f"simultaneous priority focus ({warm_priority_count(self.cfg)} warm + "
-                f"{stream_priority_count(self.cfg)} stream)"
-                if ai_fast_execution(self.cfg)
-                else f"rotate every {getattr(self.cfg, 'LOCK_FOCUS_ROTATE_SEC', 0):.0f}s"
-            )
-            + f" | stale release {getattr(self.cfg, 'LOCK_STALE_RELEASE_SEC', 600):.0f}s"
+            f"🎯 LOCKED ({len(self._locked_targets)}): {names} | {lock_tag} {elapsed_ms:.0f}ms"
         )
-        if ai_fast_execution(self.cfg):
-            priority = self._priority_tickers()
+        self._last_lock_elapsed_ms = elapsed_ms
+        if not startup_compact(self.cfg):
             log.info(
-                f"⚡ AI FAST EXEC: simultaneous focus on {len(priority)} tickers "
-                f"[{','.join(priority[:12])}{'...' if len(priority) > 12 else ''}] | "
-                f"IB budget {tick_stream_count(self.cfg)} tick + "
-                f"{max_realtime_bar_streams(self.cfg)} 5s-bars | "
-                f"monitor {fast_monitor_interval(self.cfg):.2f}s"
+                f"🔒 COMMITTED LOCK: scores≥{min_lock_score:.0f} | "
+                + (
+                    f"priority focus ({warm_priority_count(self.cfg)} warm + "
+                    f"{stream_priority_count(self.cfg)} stream)"
+                    if ai_fast_execution(self.cfg)
+                    else f"rotate every {getattr(self.cfg, 'LOCK_FOCUS_ROTATE_SEC', 0):.0f}s"
+                )
+                + f" | stale release {getattr(self.cfg, 'LOCK_STALE_RELEASE_SEC', 600):.0f}s"
             )
-
-        log.info("📡 Streams-first fast lock — bar warm on main loop")
+            if ai_fast_execution(self.cfg):
+                priority = self._priority_tickers()
+                log.info(
+                    f"⚡ AI FAST EXEC: {len(priority)} tickers "
+                    f"[{','.join(priority[:8])}{'…' if len(priority) > 8 else ''}] | "
+                    f"monitor {fast_monitor_interval(self.cfg):.2f}s"
+                )
         self._ensure_locked_streams(quiet=True)
         self._schedule_bar_prefetch([p.ticker for p in self._locked_targets])
         self._bar_warm_due = True
@@ -3633,13 +3641,20 @@ class ScalperRunner:
             else:
                 n_rt += 1
 
-        if not quiet and wanted:
-            tickers = ",".join(wanted)
-            log.info(
-                f"  📡 PRIORITY STREAMS: {n_tick} tick + {n_rt} 5s-bars"
-                + (f" ({n_skip} deferred)" if n_skip else "")
-                + f" [{tickers}]"
-            )
+        if wanted:
+            tickers = ",".join(wanted[:8]) + ("…" if len(wanted) > 8 else "")
+            if quiet:
+                log.info(
+                    f"📡 Streams: {n_tick} tick + {n_rt} 5s-bars"
+                    + (f" ({n_skip} deferred)" if n_skip else "")
+                    + f" [{tickers}]"
+                )
+            elif not quiet:
+                log.info(
+                    f"  📡 PRIORITY STREAMS: {n_tick} tick + {n_rt} 5s-bars"
+                    + (f" ({n_skip} deferred)" if n_skip else "")
+                    + f" [{tickers}]"
+                )
 
     def _ensure_target_stream(self, ticker: str, mode: str = "realtime", quiet: bool = False):
         """Start or switch stream mode for one locked ticker."""
@@ -3673,7 +3688,7 @@ class ScalperRunner:
             n_cached = len(cached) if cached is not None else 0
             if cached is not None and n_cached > 0:
                 dm.seed_buffer_from_dataframe(cached, n_bars=60)
-            dm.start_tick_stream(realtime_only=(stream_mode == "realtime"))
+            dm.start_tick_stream(realtime_only=(stream_mode == "realtime"), quiet=quiet)
             if tick_spike_monitor_enabled(self.cfg):
                 sym = ticker
                 dm.on_tick(lambda px, ts, t=sym: self._on_locked_stream_tick(t, px, ts))

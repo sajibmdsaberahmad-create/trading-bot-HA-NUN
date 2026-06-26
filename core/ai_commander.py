@@ -390,7 +390,7 @@ class AICommander:
                     f"Micro: spike={micro.get('spike_likelihood', 0):.0%} "
                     f"fade={micro.get('fade_risk', 0):.0%} "
                     f"profit_run={micro.get('profit_run', 0):.0%} "
-                    f"pred_1bar=${micro.get('pred_1bar', current_px):.4f}\n"
+                    f"pred_1bar=${(micro.get('pred_1bar') or current_px):.4f}\n"
                 )
             except Exception:
                 pass
@@ -436,14 +436,24 @@ class AICommander:
         market_ctx: Optional[Dict[str, Any]] = None,
         is_penny: bool = False,
         df: Optional[pd.DataFrame] = None,
+        pipeline: str = "",
     ) -> str:
-        """Fire Ollama async — never blocks execution."""
+        """Fire council async for learning — skipped in nanny mode unless strong-spike fill."""
+        fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
-            return ""
+            return fp
+        from core.council_nanny import should_ring_council
+        ok, reason = should_ring_council(
+            self.cfg, "entry_decision", for_learning=True,
+            spike_ratio=spike_ratio, scan_score=scan_score,
+            pipeline=pipeline,
+        )
+        if not ok:
+            log.debug(f"Council learning ring skipped {ticker}: {reason}")
+            return fp
         chart_line = ""
         if df is not None and len(df) >= 20:
             chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
-        fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         prompt = self._entry_council_prompt(
             ticker, current_px, spike_ratio, scan_score,
             ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
@@ -453,7 +463,10 @@ class AICommander:
         full = enrich_prompt(
             "entry_decision", {"request": prompt[:2500]}, self.cfg, mood, conf_m, lessons,
         )
-        self._live_line.ring(ticker, "entry_decision", full, fp)
+        self._live_line.ring(
+            ticker, "entry_decision", full, fp,
+            spike_ratio=spike_ratio, scan_score=scan_score,
+        )
         return fp
 
     def _schedule_deferred_entry(
@@ -469,6 +482,10 @@ class AICommander:
     ) -> None:
         if not decision.get("enter") or not deferred_learning_enabled(self.cfg):
             return
+        pipeline = str(decision.get("pipeline", ""))
+        from core.council_nanny import learning_ring_for_pipeline
+        if not learning_ring_for_pipeline(self.cfg, pipeline):
+            return
         self._deferred.schedule(
             ticker=ticker,
             task="entry_decision",
@@ -479,6 +496,42 @@ class AICommander:
             ppo_reason=ppo_reason,
             market_ctx=market_ctx,
         )
+
+    def ring_post_fill_learning(
+        self,
+        ticker: str,
+        current_px: float,
+        spike_ratio: float,
+        scan_score: float,
+        decision: Dict[str, Any],
+        *,
+        account: Optional[Dict[str, Any]] = None,
+        market_ctx: Optional[Dict[str, Any]] = None,
+        df: Optional[pd.DataFrame] = None,
+    ) -> None:
+        """One async council ring after strong-spike fill — feeds distillation without RPM burn."""
+        pipeline = str(decision.get("pipeline", ""))
+        from core.council_nanny import learning_ring_for_pipeline
+        if not learning_ring_for_pipeline(self.cfg, pipeline):
+            return
+        ppo_action = 1 if decision.get("enter") else 0
+        ppo_conf = float(decision.get("confidence", 0.5) or 0.5)
+        ppo_reason = str(decision.get("reason", ""))[:200]
+        acct = account or {}
+        fp = self._ring_entry_council_for_learning(
+            ticker, current_px, spike_ratio, scan_score,
+            ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            account=acct, market_ctx=market_ctx, df=df,
+            pipeline=pipeline,
+        )
+        if not fp:
+            return
+        self._schedule_deferred_entry(
+            ticker=ticker, fingerprint=fp, decision=decision,
+            ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            market_ctx=market_ctx,
+        )
+        log.info(f"  📚 Distill ring queued {ticker} ({pipeline}) — council labels async")
 
     def ring_exit_for_deferred_learning(
         self,
@@ -508,7 +561,7 @@ class AICommander:
         full = enrich_prompt(
             "exit_decision", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons,
         )
-        self._live_line.ring(ticker, "exit_decision", full, fp)
+        self._live_line.ring(ticker, "exit_decision", full, fp, in_position=True)
         self._deferred.schedule(
             ticker=ticker,
             task="exit_decision",
@@ -536,7 +589,10 @@ class AICommander:
         market_ctx: Optional[Dict[str, Any]] = None,
         df: Optional[pd.DataFrame] = None,
     ) -> None:
-        """Keep Ollama hotline open on watchlist — non-blocking."""
+        """Keep council hotline warm — disabled in nanny mode (saves RPM)."""
+        from core.council_nanny import prefetch_enabled
+        if not prefetch_enabled(self.cfg):
+            return
         if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
             return
         mctx = market_ctx or {}
@@ -555,7 +611,10 @@ class AICommander:
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         mood, conf, lessons = self._mood_context()
         full = enrich_prompt("entry_decision", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons)
-        self._live_line.ring(ticker, "entry_decision", full, fp)
+        self._live_line.ring(
+            ticker, "entry_decision", full, fp,
+            spike_ratio=spike_ratio, scan_score=scan_score, for_learning=True,
+        )
 
     def think_json(self, prompt: str, cache_key: str = "", ttl: float = 2.0,
                    task: str = "decide") -> Dict[str, Any]:
@@ -884,6 +943,7 @@ class AICommander:
         from core.fast_execution import (
             should_spike_fast_entry,
             should_micro_fast_entry,
+            should_disciplined_strong_entry,
             council_fast_sec,
             council_fast_min_score,
             council_fast_min_spike,
@@ -891,8 +951,34 @@ class AICommander:
         from core.capital_discipline import (
             allows_micro_fast_entry,
             allows_spike_fast_entry,
+            allows_disciplined_spike_fast,
             capital_discipline_enabled,
         )
+        if allows_disciplined_spike_fast(
+            self.cfg, scan_score, spike_ratio,
+        ) and should_disciplined_strong_entry(
+            self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
+        ):
+            fast_out = {
+                "enter": True,
+                "confidence": max(ppo_conf, 0.58, min(scan_score / 80.0, 0.85)),
+                "reason": (
+                    f"⚡ PPO strong-spike: score={scan_score:.0f} vol={spike_ratio:.1f}x "
+                    f"| PPO {ppo_conf:.0%} (council nanny async)"
+                )[:200],
+                "journal": f"Disciplined profit hunt — {ticker}",
+                "pipeline": "ppo:strong_spike",
+                "pending": False,
+            }
+            decision = self._finalize_entry_decision(
+                fast_out, ticker=ticker, current_px=current_px,
+                spike_ratio=spike_ratio, scan_score=scan_score,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
+                use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
+                df=df, equity=equity, cash=float(account.get("cash", 0)),
+            )
+            return decision
         if allows_micro_fast_entry(self.cfg) and should_micro_fast_entry(
             self.cfg, spike_ratio, scan_score, micro, ppo_action, ppo_conf,
         ):
@@ -900,6 +986,7 @@ class AICommander:
                 ticker, current_px, spike_ratio, scan_score,
                 ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
                 account=account, market_ctx=mctx, is_penny=is_penny, df=df,
+                pipeline="ppo:micro_fast",
             )
             fast_out = {
                 "enter": True,
@@ -934,6 +1021,7 @@ class AICommander:
                 ticker, current_px, spike_ratio, scan_score,
                 ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
                 account=account, market_ctx=mctx, is_penny=is_penny, df=df,
+                pipeline="ppo:spike_fast",
             )
             fast_out = {
                 "enter": True,
@@ -967,7 +1055,9 @@ class AICommander:
             and len(df) >= 20
             and getattr(self.cfg, "CHART_VISION_ENTRY_ONLY", True)
         ):
-            self.prefetch_chart_vision(ticker, df, current_px, spike_ratio, scan_score)
+            from core.council_nanny import nanny_mode_enabled
+            if not nanny_mode_enabled(self.cfg):
+                self.prefetch_chart_vision(ticker, df, current_px, spike_ratio, scan_score)
         chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
         pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
 
@@ -982,7 +1072,10 @@ class AICommander:
             full = enrich_prompt(
                 "entry_decision", {"request": prompt[:2500]}, self.cfg, mood, conf_m, lessons,
             )
-            self._live_line.ring(ticker, "entry_decision", full, fp)
+            self._live_line.ring(
+                ticker, "entry_decision", full, fp,
+                spike_ratio=spike_ratio, scan_score=scan_score,
+            )
             live = self._live_line.consume(ticker, "entry_decision", fp)
             merged = merge_entry_decision(
                 live.get("parsed") or {},
@@ -1411,7 +1504,11 @@ class AICommander:
             }
         self._record_council_learning(ticker, decision, "entry_decision", ppo_action, ppo_conf)
         pipeline = str(decision.get("pipeline", ""))
-        if pipeline.startswith(("ppo:", "council:scanner_fast", "council:scanner_timeout")):
+        from core.council_nanny import is_strong_spike_pipeline
+        if (
+            pipeline.startswith(("ppo:", "council:scanner_fast", "council:scanner_timeout"))
+            and not is_strong_spike_pipeline(pipeline)
+        ):
             fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
             self._schedule_deferred_entry(
                 ticker=ticker, fingerprint=fp, decision=decision,
@@ -1428,6 +1525,7 @@ class AICommander:
                         "held_tickers": [], "deployed_usd": 0,
                     },
                     is_penny=is_penny, df=df,
+                    pipeline=pipeline,
                 )
         self.journal("ENTRY_DECISION", journal_note, decision)
         self.ai_log("ENTRY_DECISION", {**decision, "ticker": ticker, "price": current_px})
@@ -1650,7 +1748,11 @@ class AICommander:
         return result
 
     def prefetch_stagnation(self, ctx: Dict[str, Any]) -> None:
-        """Keep stagnation hotline open while position goes flat."""
+        """Stagnation hotline — skipped in nanny mode (local rules handle it)."""
+        from core.council_nanny import should_ring_council
+        ok, _ = should_ring_council(self.cfg, "stagnation_check", in_position=True)
+        if not ok:
+            return
         if not getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
             return
         ticker = str(ctx.get("ticker", "?"))
@@ -1707,7 +1809,7 @@ class AICommander:
             full = enrich_prompt(
                 "position_manage", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons,
             )
-            self._live_line.ring(ticker, "position_manage", full, fp)
+            self._live_line.ring(ticker, "position_manage", full, fp, in_position=True)
             live = self._live_line.consume(ticker, "position_manage", fp)
             merged = merge_position_manage_decision(
                 live.get("parsed") or {},
@@ -1848,7 +1950,7 @@ class AICommander:
         full = enrich_prompt(
             "position_manage", {"request": prompt[:2000]}, self.cfg, mood, conf, lessons,
         )
-        self._live_line.ring(ticker, "position_manage", full, fp)
+        self._live_line.ring(ticker, "position_manage", full, fp, in_position=True)
 
     def decide_exit(self, ctx: Dict[str, Any], obs: Optional[np.ndarray] = None,
                     bar_df: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
@@ -1876,7 +1978,7 @@ class AICommander:
             full = enrich_prompt(
                 "exit_decision", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons,
             )
-            self._live_line.ring(ticker, "exit_decision", full, fp)
+            self._live_line.ring(ticker, "exit_decision", full, fp, in_position=True)
             live = self._live_line.consume(ticker, "exit_decision", fp)
             merged = merge_exit_decision(
                 live.get("parsed") or {},
@@ -2097,7 +2199,7 @@ class AICommander:
             full = enrich_prompt(
                 "risk_exit", {"request": prompt[:2500]}, self.cfg, mood, conf, lessons,
             )
-            self._live_line.ring(ticker, "risk_exit", full, fp)
+            self._live_line.ring(ticker, "risk_exit", full, fp, in_position=True)
             live = self._live_line.consume(ticker, "risk_exit", fp)
             merged = merge_risk_signal_decision(
                 live.get("parsed") or {},

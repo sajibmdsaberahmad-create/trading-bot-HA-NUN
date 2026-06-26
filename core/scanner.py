@@ -54,9 +54,11 @@ def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
             if n >= 50:
                 break
             if now - last_log >= 3.0:
-                log.info(
+                from core.startup_log import sinfo
+                sinfo(
+                    None,
                     f"  scanner {scan_code}@{location}: {n} rows "
-                    f"({'waiting on IB…' if n == 0 else 'receiving'})"
+                    f"({'waiting on IB…' if n == 0 else 'receiving'})",
                 )
                 last_log = now
         else:
@@ -70,7 +72,8 @@ def _req_scanner_with_timeout(ib, scan, timeout_sec: float) -> List[Any]:
         except Exception:
             pass
     if data_list:
-        log.info(f"  scanner {scan_code}@{location}: {len(data_list)} rows")
+        from core.startup_log import sinfo
+        sinfo(None, f"  scanner {scan_code}@{location}: {len(data_list)} rows")
     return list(data_list)
 
 
@@ -303,9 +306,11 @@ class StockScanner:
                 per_code_cap = float(getattr(self.cfg, "IB_SCANNER_PER_CODE_SEC", 18))
                 codes_tried = 0
 
-                log.info(
+                from core.startup_log import sinfo, startup_compact
+                sinfo(
+                    self.cfg,
                     f"🔍 IB live scanner starting "
-                    f"(budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s)…"
+                    f"(budget {getattr(self.cfg, 'IB_SCANNER_TIMEOUT_SEC', 25):.0f}s)…",
                 )
 
                 for location_code in location_codes:
@@ -326,9 +331,11 @@ class StockScanner:
                         try:
                             remaining = max(6.0, deadline - time.time())
                             code_budget = min(per_code_cap, remaining)
-                            log.info(
+                            from core.startup_log import sinfo
+                            sinfo(
+                                self.cfg,
                                 f"  scanner req {scan_code} @ {location_code} "
-                                f"(budget {code_budget:.0f}s)…"
+                                f"(budget {code_budget:.0f}s)…",
                             )
                             scan_results = _req_scanner_with_timeout(ib, scan, code_budget)
                             codes_tried += 1
@@ -384,9 +391,12 @@ class StockScanner:
                     self._dynamic_universe = tickers[:100]
                     self._scanner_hits = hits
                     self._last_dynamic_fetch = now
-                    log.info(
-                        f"Dynamic universe: {len(tickers)} major-exchange tickers "
-                        f"(skipped {skipped_universe} PINK/OTC/distressed)"
+                    from core.startup_log import sinfo
+                    sinfo(
+                        self.cfg,
+                        f"IB scanner: {len(tickers)} tickers "
+                        f"(skipped {skipped_universe} OTC/distressed)",
+                        force=True,
                     )
                 else:
                     log.warning("No tickers returned from IB scanner — check market hours / subscription")

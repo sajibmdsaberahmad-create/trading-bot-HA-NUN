@@ -64,6 +64,7 @@ class IBConnector:
         self._pending_resubscribe: bool = False
         self._md_paused: bool = False
         self._10197_last_log_ts: float = 0.0
+        self._md_type_logged: bool = False
         
         self.ib.connectedEvent  += self._on_connected
         self.ib.disconnectedEvent += self._on_disconnected
@@ -93,11 +94,18 @@ class IBConnector:
                 self.prepare_fresh_connection()
             self._connect_ib_socket()
             accounts = self.ib.managedAccounts()
-            log.info(f"IB Gateway connected → {self.cfg.IB_HOST}:{self.cfg.IB_PORT}")
-            log.info(f"Account(s): {accounts}")
-
             mode_label = "PAPER" if self.cfg.PAPER_TRADING else "LIVE"
-            log.info(f"Mode: {mode_label} | Account: {accounts[0] if accounts else 'unknown'}")
+            acct = accounts[0] if accounts else "unknown"
+            from core.startup_log import startup_compact, sinfo
+            if startup_compact(self.cfg):
+                log.info(
+                    f"IB connected {self.cfg.IB_HOST}:{self.cfg.IB_PORT} | "
+                    f"{mode_label} {acct}"
+                )
+            else:
+                log.info(f"IB Gateway connected → {self.cfg.IB_HOST}:{self.cfg.IB_PORT}")
+                log.info(f"Account(s): {accounts}")
+                log.info(f"Mode: {mode_label} | Account: {acct}")
 
             self._last_event_ts = time.time()
             self._last_reconnect_ts = time.time()
@@ -170,11 +178,13 @@ class IBConnector:
         for attempt in range(1, retries + 1):
             probe = IB()
             try:
+                from core.startup_log import sinfo
                 probe.connect(host, port, clientId=cid, timeout=8)
                 # Do not reqMarketDataType on probe — it grabs the live MD slot.
-                log.info(
+                sinfo(
+                    self.cfg,
                     f"IB pre-connect: reclaimed client_id={cid} "
-                    f"(cancelled stale subscriptions, released zombie session)"
+                    f"(released zombie session)",
                 )
                 self._cancel_ib_subscriptions(probe)
                 probe.disconnect()
@@ -435,10 +445,16 @@ class IBConnector:
         labels = {1: "LIVE", 2: "FROZEN", 3: "DELAYED", 4: "DELAYED_FROZEN"}
         try:
             self.ib.reqMarketDataType(mdt)
-            log.info(
+            from core.startup_log import sinfo
+            msg = (
                 f"IB market data → {labels.get(mdt, str(mdt))} "
                 f"(reqMarketDataType={mdt})"
             )
+            if force or not self._md_type_logged:
+                log.info(msg)
+                self._md_type_logged = True
+            else:
+                sinfo(self.cfg, msg)
         except Exception as exc:
             log.warning(f"reqMarketDataType({mdt}) failed: {exc}")
 

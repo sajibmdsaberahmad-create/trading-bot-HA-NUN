@@ -61,7 +61,8 @@ def get_live_scan_universe(
     tickers: List[str] = []
     warmup = float(getattr(cfg, "IB_SCANNER_WARMUP_SEC", 3.0))
     if warmup > 0 and (startup or not skip_ib_scanner):
-        log.info(f"🔍 IB scanner warmup {warmup:.0f}s (Gateway sync)…")
+        from core.startup_log import sinfo
+        sinfo(cfg, f"🔍 IB scanner warmup {warmup:.0f}s (Gateway sync)…", force=startup)
         time.sleep(warmup)
     retries = int(
         getattr(cfg, "IB_SCANNER_STARTUP_RETRIES", 1) if startup
