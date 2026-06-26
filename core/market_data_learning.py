@@ -333,6 +333,27 @@ def record_fetch_failure(
     )
 
 
+def clear_hmds_transient_blocks() -> int:
+    """Remove denylist entries from flaky HMDS 162 (cancelled/timeout), not bad tickers."""
+    denylist = _load_denylist()
+    removed = 0
+    for ticker in list(denylist.keys()):
+        entry = denylist[ticker]
+        if int(entry.get("last_code", 0)) != 162:
+            continue
+        pattern = str(entry.get("pattern", ""))
+        if pattern != "no_historical_data":
+            continue
+        reason = str(entry.get("last_reason", ""))
+        if entry.get("transient") or is_hmds_transient_message(reason):
+            denylist.pop(ticker, None)
+            removed += 1
+    if removed:
+        _save_denylist(denylist)
+        log.info(f"  🔓 Cleared {removed} ticker(s) blocked by transient HMDS 162")
+    return removed
+
+
 def clear_transient_md_blocks(cfg: BotConfig) -> list:
     """
     Clear short-lived HMDS denylist entries — call at RTH open so pre-market

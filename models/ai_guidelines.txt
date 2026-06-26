@@ -276,3 +276,80 @@ The market data service returned an error message (MD 162) indicating no histori
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.58 (Market data service returned an error message, impacting profitability. Adjusting the confidence threshold to 0.58 can help reduce risks.)
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:40:04.936895+00:00
+Market data failure occurred due to historical data service error.
+The market data failed, indicating a missing or incorrect historical data.
+• I
+• n
+• v
+• e
+• s
+• t
+• i
+• g
+• a
+• t
+• e
+•  
+• a
+• n
+• d
+•  
+• f
+• i
+• x
+•  
+• t
+• h
+• e
+•  
+• p
+• r
+• o
+• b
+• l
+• e
+• m
+•  
+• b
+• y
+•  
+• u
+• s
+• i
+• n
+• g
+•  
+• l
+• i
+• v
+• e
+•  
+• I
+• B
+•  
+• b
+• a
+• r
+• s
+•  
+• (
+• 1
+• 6
+• 2
+• /
+• 4
+• 2
+• 0
+•  
+• e
+• r
+• r
+• o
+• r
+• s
+• )
+• .
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.58 (The previous value was 0.35, which is too low for the current error message.)
+

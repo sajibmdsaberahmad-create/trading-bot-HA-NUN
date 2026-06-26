@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.58,
-    "reason": "Market data service returned an error message, impacting profitability. Adjusting the confidence threshold to 0.58 can help reduce risks.",
+    "reason": "The previous value was 0.35, which is too low for the current error message.",
     "ok": true,
     "msg": "applied"
   }

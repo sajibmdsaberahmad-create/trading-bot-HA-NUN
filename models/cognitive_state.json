@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "c",
-    "Commander: The reason for this event is that the trade closed without achieving the desired outcome or not meeting the specified conditions.",
     "Review trade_closed on LCID",
     "Review loss_streak on LCID",
     "Spike-top hunt on RKLB: spike_top_exit: +0.64% vol=3.5x",
@@ -103,10 +101,12 @@
     "Tune MIN_PROFIT_PROBABILITY, ENTRY_QUALITY_BLEND_WEIGHT, or COUNCIL_TIMEOUT_MIN_SCAN_SCORE if the events repeat",
     "Commander: The event 'market_data_failure' occurred, and the cause is historical data service error for no_historical_data.",
     "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data service returned an error message, impacting profitability. Adjusting the confidence threshold can help mitigate further disruptions.'}",
-    "Commander: The market data service returned an error message (MD 162) indicating no historical data. The algorithm should adjust its parameters and logic to handle this situation gracefully."
+    "Commander: The market data service returned an error message (MD 162) indicating no historical data. The algorithm should adjust its parameters and logic to handle this situation gracefully.",
+    "Investigate and fix the problem by using live IB bars (162/420 errors).",
+    "Commander: The market data failed, indicating a missing or incorrect historical data."
   ],
   "last_thought": "```json\n{\n  \"outcome\": {\n    \"trade_logic\": \"Do not blindly enter every volume spike. Estimate profit_probability and direction before entry. Identify fakeouts quickly \u2014 skip chase entries when fade_risk is high. Fakeout fade plays are allowed when micro predicts a bounce with tight stop. Prefer small consistent wins over noisy entries.\",\n    \"exit_strategy\": \"Enter on calculated edge only; watch everything, miss nothing worth taking\",\n    \"profit_probability\": 0.62,\n    \"fakeout\u98ce\u9669\u9ad8\" : false\n  }",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-26T15:39:04.289080"
+  "updated": "2026-06-26T15:40:04.887843"
 }

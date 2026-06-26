@@ -652,7 +652,14 @@ class ScalperRunner:
         if dm is None:
             return None
         df = dm.get_live_decision_bars(min_bars=need)
-        if df is None or len(df) < max(3, need // 2):
+        if df is None or len(df) == 0:
+            df = dm.get_live_decision_bars(min_bars=1)
+        if df is None or len(df) == 0:
+            return None
+        min_ok = max(3, need // 2)
+        soft_hmds = bool(getattr(self.cfg, "MD_SOFT_FAIL_HMDS", True))
+        has_live_px = bool(dm.get_latest_price() and dm.get_latest_price() > 0)
+        if len(df) < min_ok and not (soft_hmds and has_live_px):
             return None
         self._scan_data_cache[ticker] = df
         if df["close"].iloc[-1] > 0:
@@ -1510,7 +1517,7 @@ class ScalperRunner:
         reason = f"MD {code} {pattern}: {message[:100]}"
         if entry.get("transient"):
             log.info(
-                f"  ⏳ MD transient {ticker}: HMDS outside RTH — keep lock, streams only "
+                f"  ⏳ MD transient {ticker}: HMDS flake — keep lock, live streams only "
                 f"({reason[:80]})"
             )
             self._observe_runtime(
@@ -3257,6 +3264,8 @@ class ScalperRunner:
                 return live_df
 
         if skip_historical_prefetch(self.cfg) and self._stream_has_price(ticker):
+            return None
+        if bool(getattr(self.cfg, "MD_SOFT_FAIL_HMDS", True)) and ticker in self._target_monitors:
             return None
         try:
             from core.rth_session import historical_prefetch_allowed

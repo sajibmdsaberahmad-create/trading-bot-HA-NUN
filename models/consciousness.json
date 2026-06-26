@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 424,
+  "improvements_applied": 425,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20368,6 +20368,28 @@
         ],
         "lessons": [
           "{'param': 'CONFIDENCE_THRESHOLD', 'value': 0.58, 'reason': 'Market data service returned an error message, impacting profitability. Adjusting the confidence threshold can help mitigate further disruptions.'}"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T15:40:04.889099",
+      "age": "5d 4h 37m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #425",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Market data failure occurred due to historical data service error.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.58,
+            "reason": "The previous value was 0.35, which is too low for the current error message.",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Investigate and fix the problem by using live IB bars (162/420 errors)."
         ]
       }
     }
