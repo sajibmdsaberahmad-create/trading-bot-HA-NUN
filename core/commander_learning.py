@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 from core.config import BotConfig
 from core.daily_activity_report import collect_day_report, format_structured_report
 from core.experience_buffer import stats as buffer_stats
+from core.market_hours import now_et
 from core.notify import log
 from core.self_improver import (
     ADJUSTMENTS_PATH,
@@ -89,6 +90,22 @@ def build_learning_context(
 ) -> Dict[str, Any]:
     connector = getattr(runner, "conn", None) if runner else None
     day_report = collect_day_report(cfg, runner, connector)
+    day_str = day_report.get("day") or now_et().strftime("%Y-%m-%d")
+    ib_pack_excerpt: Dict[str, Any] = {}
+    try:
+        from core.daily_ib_learning import collect_ib_learning_pack
+        if getattr(cfg, "DAILY_IB_LEARNING_ENABLED", True):
+            pack = collect_ib_learning_pack(
+                cfg, runner, connector, day_str, trigger=trigger or "commander",
+            )
+            ib_pack_excerpt = {
+                "ib_counts": pack.get("ib", {}).get("counts", {}),
+                "comparison": pack.get("comparison", {}),
+                "day_pnl_usd": pack.get("bot", {}).get("summary", {}).get("day_pnl_usd"),
+                "executions_sample": pack.get("ib", {}).get("executions", [])[:8],
+            }
+    except Exception:
+        pass
     guidance = load_guidance_records(25)
     guidance_text = load_commander_guidance(15)
 
@@ -101,6 +118,7 @@ def build_learning_context(
         "day_activity_excerpt": format_structured_report(day_report, max_lines=35)[:2500],
         "commander_guidance": guidance_text[-10:],
         "recent_trades": day_report.get("trades", [])[-12:],
+        "ib_day_bundle": ib_pack_excerpt,
     }
 
     if runner:
@@ -221,6 +239,8 @@ def generate_commander_plan(
         f"TRIGGER (latest message):\n{context.get('trigger', '')}\n\n"
         f"SESSION:\n{json.dumps({k: context[k] for k in ('day_summary', 'live', 'buffer_stats') if k in context}, default=str)}\n\n"
         f"ACTIVITY:\n{context.get('day_activity_excerpt', '')[:1800]}\n\n"
+        f"FULL IB DAY BUNDLE (executions/orders — beat yesterday):\n"
+        f"{json.dumps(context.get('ib_day_bundle', {}), default=str)[:1200]}\n\n"
         f"CURRENT PARAMS (value + min/max):\n{json.dumps(context.get('params', {}), default=str)[:2000]}\n\n"
         f"LEARNING BOUNDS (stay inside these):\n{bounds_text}\n\n"
         f"TUNABLE PARAMS (sample): {allowed}\n"

@@ -99,6 +99,11 @@ def assess_entry_quality(
         setup_type = "mixed"
 
     min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42))
+    try:
+        from core.capital_discipline import effective_min_profit_probability
+        min_prob = effective_min_profit_probability(cfg)
+    except Exception:
+        pass
     min_fakeout = float(getattr(cfg, "MIN_FAKEOUT_FADE_PROB", 0.50))
     max_fakeout_risk = float(getattr(cfg, "MAX_FAKEOUT_RISK_ENTER", 0.62))
     fakeout_block = float(getattr(cfg, "LIKELY_FAKEOUT_BLOCK_LEVEL", 0.0))
@@ -196,11 +201,21 @@ def apply_ai_entry_quality(
         return decision
 
     blend_w = float(getattr(cfg, "ENTRY_QUALITY_BLEND_WEIGHT", 0.35))
+    try:
+        from core.capital_discipline import effective_entry_quality_blend
+        blend_w = effective_entry_quality_blend(cfg)
+    except Exception:
+        pass
     if blend_w <= 0.01:
         return decision
 
     conf = float(decision.get("confidence", 0.5))
     min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42))
+    try:
+        from core.capital_discipline import effective_min_profit_probability
+        min_prob = effective_min_profit_probability(cfg)
+    except Exception:
+        pass
     ollama_prob = decision.get("ollama_profit_probability")
     if ollama_prob is not None:
         prob = float(ollama_prob)

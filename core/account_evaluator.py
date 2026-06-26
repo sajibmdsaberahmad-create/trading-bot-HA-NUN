@@ -139,6 +139,16 @@ class AccountEvaluator:
                 runner, "market_open", notifier, ai_commander,
                 autopilot, consciousness, pilot,
             )
+            if getattr(self.cfg, "DAILY_IB_LEARNING_ON_MARKET_OPEN", True):
+                try:
+                    from core.daily_ib_learning import schedule_daily_ib_learning
+                    schedule_daily_ib_learning(
+                        self.cfg, runner,
+                        trigger="market_open",
+                        connector=getattr(runner, "conn", None),
+                    )
+                except Exception as exc:
+                    log.debug(f"Market-open IB learning: {exc}")
         elif new_state == "closed" and old_state in ("open", "after_hours", "pre_market", "overnight"):
             self.evaluate(
                 runner, "market_close", notifier, ai_commander,

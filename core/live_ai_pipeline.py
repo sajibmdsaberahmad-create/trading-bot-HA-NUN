@@ -283,9 +283,18 @@ def merge_entry_decision(
     Collaborative Ollama + PPO council — non-blocking.
     Returns pending=True while Ollama is still thinking; never skips on PPO alone mid-deliberation.
     """
+    from core.capital_discipline import (
+        allows_scanner_fast_bypass,
+        allows_timeout_fallback_entry,
+        effective_min_confidence,
+        effective_min_profit_probability,
+        requires_council_alignment,
+    )
     ppo_buy = ppo_action == 1
     profit_prob = float((quality or {}).get("profit_probability", 0.5))
-    min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42)) if cfg else 0.42
+    min_prob = effective_min_profit_probability(cfg) if cfg else 0.58
+    min_conf_eff = effective_min_confidence(cfg) if cfg else min_conf
+    min_conf = max(min_conf, min_conf_eff)
     timeout_min_scan = float(
         getattr(cfg, "COUNCIL_TIMEOUT_MIN_SCAN_SCORE", 40.0),
     ) if cfg else 40.0
@@ -314,6 +323,10 @@ def merge_entry_decision(
         return base
 
     if ollama_status == "timeout":
+        if not allows_timeout_fallback_entry(cfg):
+            base["pipeline"] = "council:timeout_pass"
+            base["reason"] = "Council timeout — capital discipline: no fallback entry"
+            return base
         # Council timed out — PPO + scanner context only (no block, no hard skip)
         blend = ppo_conf
         if ppo_buy and ppo_conf >= min_conf:
@@ -359,6 +372,10 @@ def merge_entry_decision(
         return base
 
     if ollama_status == "scanner_fast":
+        if not allows_scanner_fast_bypass(cfg):
+            base["pipeline"] = "council:scanner_fast_pass"
+            base["reason"] = "Scanner fast-path disabled — awaiting full council"
+            return base
         try:
             from core.fast_execution import council_fast_min_score, council_fast_min_spike
             if cfg is not None:
@@ -419,7 +436,33 @@ def merge_entry_decision(
 
         enter = False
         reason = ""
-        if o_enter and ppo_buy:
+        if requires_council_alignment(cfg):
+            o_prob = float(ollama.get("profit_probability", profit_prob) or profit_prob)
+            o_fake = float(ollama.get("fakeout_risk", (quality or {}).get("fakeout_risk", 0.5)) or 0.5)
+            max_fake = float(getattr(cfg, "MAX_FAKEOUT_RISK_ENTER", 0.48)) if cfg else 0.48
+            min_sc = float(getattr(cfg, "CAPITAL_MIN_ENTRY_SCAN_SCORE", 55)) if cfg else 55
+            min_sp = float(getattr(cfg, "CAPITAL_MIN_ENTRY_SPIKE_RATIO", 1.25)) if cfg else 1.25
+            if (
+                o_enter
+                and ppo_buy
+                and o_conf >= min_conf
+                and ppo_conf >= min_conf
+                and o_prob >= min_prob
+                and o_fake <= max_fake
+                and scan_score >= min_sc
+                and spike_ratio >= min_sp
+            ):
+                enter = True
+                reason = (
+                    f"discipline aligned: Ollama {o_conf:.0%} PPO {ppo_conf:.0%} "
+                    f"prob={o_prob:.0%} score={scan_score:.0f} vol={spike_ratio:.1f}x"
+                )
+            else:
+                reason = (
+                    f"discipline pass: need Ollama+PPO+prob≥{min_prob:.0%} "
+                    f"(got enter={o_enter} ppo={ppo_buy} prob={o_prob:.0%} fake={o_fake:.0%})"
+                )[:200]
+        elif o_enter and ppo_buy:
             enter = True
             reason = f"council aligned: Ollama {o_conf:.0%} + PPO {ppo_conf:.0%}"
         elif o_enter and o_conf >= min_conf * 0.85:
@@ -574,8 +617,14 @@ def merge_position_manage_decision(
     current_target: float = 0.0,
     mechanical_stop: Optional[float] = None,
     mechanical_target: Optional[float] = None,
+    cfg: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """Trail stop / profit-take / hold — Ollama + PPO council."""
+    try:
+        from core.profit_hunting import ai_profit_full_power
+        profit_ai = ai_profit_full_power(cfg) if cfg else False
+    except Exception:
+        profit_ai = False
     base: Dict[str, Any] = {
         "action": "HOLD",
         "pending": False,
@@ -636,8 +685,15 @@ def merge_position_manage_decision(
             action = "EXIT"
             reason = f"Ollama EXIT {o_conf:.0%}"
         elif ppo_exit and ppo_conf >= min_conf:
-            action = "EXIT"
-            reason = f"PPO EXIT {ppo_conf:.0%} | Ollama: {o_action}"
+            if profit_ai and pnl_pct > 0 and o_action in ("HOLD", "RAISE_TP", "TIGHTEN_STOP"):
+                action = "RAISE_TP" if peak_pct > abs(pnl_pct) * 0.3 else "TIGHTEN_STOP"
+                reason = (
+                    f"AI ride: PPO exit signal but council extends profit "
+                    f"(P&L {pnl_pct:+.2f}% peak {peak_pct:+.2f}%)"
+                )
+            else:
+                action = "EXIT"
+                reason = f"PPO EXIT {ppo_conf:.0%} | Ollama: {o_action}"
         elif o_action == "TIGHTEN_STOP" or (
             mechanical_stop and mechanical_stop > current_stop + 0.0001 and ppo_conf >= min_conf * 0.7
         ):

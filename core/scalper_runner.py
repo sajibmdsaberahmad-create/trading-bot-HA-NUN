@@ -61,6 +61,15 @@ from core.market_data_learning import (
     prompt_block as market_data_prompt_block,
 )
 from core.deferred_council_learning import deferred_learning_enabled
+from core.capital_discipline import (
+    allows_ppo_lead_while_pending,
+    startup_log_line,
+    passes_pre_entry_gate,
+    check_entry_rate_limit,
+    entry_cooldown_after_skip,
+    capital_discipline_enabled,
+    max_entries_per_hour,
+)
 from core.fast_execution import (
     ai_fast_execution,
     min_bars_for_ticker,
@@ -266,6 +275,8 @@ class ScalperRunner:
         self._profit_hunt_spike_at: float = 0.0
         self._profit_hunt_spike_ctx: Dict[str, Any] = {}
         self._profit_hunt_missed_logged: bool = False
+        self._profit_ride_started_at: float = 0.0
+        self._was_in_profit: bool = False
         self._last_flat_pulse: float = 0.0
         self.top_pick: Optional[ScanResult] = None
         self._locked_targets: List[ScanResult] = []
@@ -301,6 +312,9 @@ class ScalperRunner:
         self._last_market_state: Optional[str] = None
         self._last_market_closed_log: float = 0.0
         self._day_session_ended: bool = False
+        self._entries_this_hour: int = 0
+        self._hour_window_start: float = time.time()
+        self._last_quality_watch_log: float = 0.0
         self._pending_closes: Dict[str, PendingClose] = {}
         self._deferred_exits: Dict[str, Dict[str, Any]] = {}
         self._last_off_hours_train: float = 0.0
@@ -1257,6 +1271,16 @@ class ScalperRunner:
         )
         self._halt_trading_for_closed_market(market_state)
         self._deferred_exits.clear()
+        if getattr(self.cfg, "DAILY_IB_LEARNING_ON_SESSION_END", True):
+            try:
+                from core.daily_ib_learning import schedule_daily_ib_learning
+                schedule_daily_ib_learning(
+                    self.cfg, self,
+                    trigger="session_end",
+                    connector=self.conn,
+                )
+            except Exception as exc:
+                log.debug(f"Session-end IB learning schedule: {exc}")
 
     def _ai_skip_ticker_permanent(self, ticker: str, reason: str) -> str:
         """IB / venue failure — learn + rotate focus (no permanent block in learn mode)."""
@@ -2173,6 +2197,14 @@ class ScalperRunner:
             log.info(
                 "🎯 PRIMARY MISSION: full-time profit hunting — AIs work all session to make money; "
                 "any lawful tactic within guardrails"
+            )
+        discipline_log = startup_log_line(self.cfg)
+        if discipline_log:
+            log.info(discipline_log)
+        if getattr(self.cfg, "AI_PROFIT_FULL_POWER", True):
+            log.info(
+                "🧠 AI PROFIT FULL POWER: Ollama+PPO manage exits — ride winners, "
+                "trail/raise TP, exit at calculated peak (no mechanical scalp)"
             )
         if learn_dont_block(self.cfg):
             log.info(
@@ -3425,9 +3457,12 @@ class ScalperRunner:
         locked = ",".join(t.ticker for t in self._locked_targets[: self._max_locked()])
         n_streams = len(self._target_monitors)
         nxt = self._next_best_pick.ticker if self._next_best_pick else "-"
+        quality = ""
+        if capital_discipline_enabled(self.cfg):
+            quality = " | full AI — no entry caps"
         log.info(
-            f"💓 WATCHING: {n_streams} streams | priority=[{priority}] | "
-            f"pool=[{locked}] | next_best={nxt}"
+            f"👁 WATCHING: {n_streams} streams | "
+            f"priority=[{priority}] | pool=[{locked}] | next_best={nxt}{quality}"
         )
 
     def _detect_tick_volume_burst(self, dm: DataManager, df: pd.DataFrame) -> Tuple[bool, float]:
@@ -3999,18 +4034,147 @@ class ScalperRunner:
 
         return False, ""
 
+    def _ai_profit_decision_stalled(self, pnl_pct: float = 0.0) -> bool:
+        """True when AI/council has not acted on a green position within the wait window."""
+        if pnl_pct <= 0:
+            return False
+        from core.green_profit_lock import ai_wait_sec
+
+        wait = ai_wait_sec(self.cfg)
+        now = time.time()
+        ticker = self.current_ticker or ""
+
+        for task in ("exit_decision", "position_manage", "stagnation_check", "risk_exit"):
+            if self._has_ai_council(ticker, task):
+                st = self._ai_councils.get(self._council_key(ticker, task), {})
+                if now - float(st.get("started_at", now)) >= wait:
+                    return True
+
+        if self.ai_commander:
+            for task in ("exit_decision", "position_manage", "risk_exit"):
+                try:
+                    st = self.ai_commander._live_line.status(ticker, task)
+                    if st.get("in_flight") and float(st.get("age_sec", 0) or 0) >= wait:
+                        return True
+                except Exception:
+                    pass
+
+        if getattr(self.cfg, "AI_FULL_CONTROL", True) and not self.ai_commander:
+            return True
+
+        ride_at = getattr(self, "_profit_ride_started_at", 0.0)
+        if ride_at and now - ride_at >= wait:
+            return True
+
+        return False
+
+    def _enforce_green_profit_lock(self, current_px: float) -> bool:
+        """Mechanical quick green scalp when AI stalls — never let profit bleed to red."""
+        from core.green_profit_lock import (
+            evaluate_green_lock,
+            green_profit_lock_enabled,
+            min_green_pnl_pct,
+            is_green_lock_reason,
+        )
+
+        if not green_profit_lock_enabled(self.cfg):
+            return False
+        if self.shares <= 0 or self._entry_price <= 0:
+            return False
+
+        entry_px = self._entry_price
+        pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
+        if pnl_pct <= 0:
+            return False
+
+        peak_pct = ((self._position_peak / entry_px) - 1) if entry_px else 0.0
+        giveback = max(0.0, peak_pct - pnl_pct)
+        if pnl_pct >= min_green_pnl_pct(self.cfg):
+            self._was_in_profit = True
+
+        stalled = self._ai_profit_decision_stalled(pnl_pct)
+        should_lock, reason = evaluate_green_lock(
+            self.cfg,
+            pnl_pct=pnl_pct,
+            peak_pct=peak_pct,
+            ai_stalled=stalled,
+            giveback_from_peak=giveback,
+            was_green=self._was_in_profit,
+        )
+        if not should_lock:
+            return False
+
+        log.info(f"  🔒 GREEN LOCK: {reason}")
+        if is_green_lock_reason(reason):
+            ticker = self.current_ticker or ""
+            pnl = pnl_pct * self.shares * entry_px
+            track_profit_hunt_event(
+                self.cfg, "green_profit_lock", ticker,
+                {"reason": reason, "price": current_px, "ai_stalled": stalled},
+                pnl_usd=pnl, pnl_pct=pnl_pct, record_buffer=True, push_git=True,
+            )
+            self._exit_position(current_px, reason)
+            return True
+        return self._execute_mechanical_profit_exit(current_px, reason)
+
     def _execute_mechanical_profit_exit(
         self, current_px: float, reason: str, *, defer: bool = False,
     ) -> bool:
-        """Instant exit for spike-top / mechanical profit hunts."""
+        """Profit hunt signal — AI council decides exit vs ride for higher profit."""
         if not reason:
             return False
+        from core.green_profit_lock import is_green_lock_reason
+
         ticker = self.current_ticker or ""
         entry_px = self._entry_price
         pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
         pnl = pnl_pct * self.shares * entry_px if entry_px else 0.0
 
-        if profit_exit_bypasses_council(self.cfg, reason, pnl_pct):
+        if is_green_lock_reason(reason):
+            log.info(f"  🔒 GREEN LOCK: {reason[:100]}")
+            track_profit_hunt_event(
+                self.cfg, "green_profit_lock", ticker,
+                {**self._profit_hunt_spike_ctx, "reason": reason, "price": current_px},
+                pnl_usd=pnl, pnl_pct=pnl_pct, record_buffer=True, push_git=True,
+            )
+            self._exit_position(current_px, reason, ticker=ticker, defer=defer)
+            return True
+
+        from core.profit_hunting import ai_profit_full_power
+
+        stalled = self._ai_profit_decision_stalled(pnl_pct)
+
+        if (
+            ai_profit_full_power(self.cfg)
+            and pnl_pct > 0
+            and self.ai_commander
+            and not stalled
+        ):
+            log.info(f"  🧠 AI PROFIT SIGNAL: {reason[:80]} — council decides exit vs ride")
+            self._last_ai_position_manage = 0.0
+            self._ai_manage_position(current_px)
+            if self._deliberate_exit_council(
+                ticker, current_px, True, 0.65, reason,
+                {"signal": "profit_hunt", "mechanical": True, "ride_ok": True},
+            ):
+                track_profit_hunt_event(
+                    self.cfg, reason.split(":")[0].strip(), ticker,
+                    {**self._profit_hunt_spike_ctx, "reason": reason, "price": current_px},
+                    pnl_usd=pnl, pnl_pct=pnl_pct, record_buffer=True, push_git=True,
+                )
+                return True
+            track_profit_hunt_event(
+                self.cfg, "ai_ride", ticker,
+                {"reason": reason, "price": current_px, "pnl_pct": pnl_pct},
+                pnl_usd=pnl, pnl_pct=pnl_pct, record_buffer=True, push_git=False,
+            )
+            log.info(f"  🧠 AI RIDING {ticker}: holding for higher profit — {reason[:60]}")
+            self._profit_ride_started_at = time.time()
+            return False
+
+        if profit_exit_bypasses_council(
+            self.cfg, reason, pnl_pct, ai_stalled=stalled,
+        ):
             log.info(f"  🎯 PROFIT HUNT: {reason}")
             if self.ai_commander:
                 ppo_exit, ppo_conf, ppo_reason = (True, 0.65, reason)
@@ -4059,6 +4223,8 @@ class ScalperRunner:
         self._profit_hunt_spike_at = 0.0
         self._profit_hunt_spike_ctx = {}
         self._profit_hunt_missed_logged = False
+        self._profit_ride_started_at = 0.0
+        self._was_in_profit = False
 
     def _live_position_monitor(self, current_px: float):
         """Continuous post-entry tracking: pulse log, AI manage, trail, exit."""
@@ -4170,7 +4336,7 @@ class ScalperRunner:
 
         ai_sec = float(getattr(self.cfg, "AI_POSITION_MANAGE_SEC", 10.0))
         if pnl_frac > float(getattr(self.cfg, "IN_PROFIT_MANAGE_PNL_PCT", 0.003)):
-            ai_sec = float(getattr(self.cfg, "AI_POSITION_MANAGE_IN_PROFIT_SEC", 2.0))
+            ai_sec = float(getattr(self.cfg, "AI_POSITION_MANAGE_IN_PROFIT_SEC", 1.0))
         min_hold = effective_min_position_hold_sec(self.cfg)
         opened = getattr(self, "_position_opened_at", 0.0)
         if now - self._last_ai_position_manage >= ai_sec:
@@ -4178,16 +4344,21 @@ class ScalperRunner:
             if not opened or (now - opened) >= min_hold:
                 self._ai_manage_position(current_px)
 
-        self._update_trailing_stops(current_px)
-
-        # Opportunistic spike-top profit hunt (mechanical — bypass council when configured)
+        # Opportunistic profit hunt — AI full power decides exit vs ride
         hunt_exit, hunt_reason = self._evaluate_profit_hunt_exit(current_px)
         if hunt_exit:
             if self._execute_mechanical_profit_exit(current_px, hunt_reason):
                 self._active_stream_ticker = None
                 return
 
-        # Risk engine tick exits (early loss, trailing profit/stop) — was missing in scalper path
+        # Green profit lock — quick scalp if AI stalls while in profit
+        if self._enforce_green_profit_lock(current_px):
+            self._active_stream_ticker = None
+            return
+
+        self._update_trailing_stops(current_px)
+
+        # Risk engine tick exits — AI council on profit; mechanical only on loss
         if self.risk.plan:
             prev_stop = self.risk.plan.current_stop_price
             should_risk_exit, risk_reason = self.risk.evaluate_tick(current_px)
@@ -4200,7 +4371,10 @@ class ScalperRunner:
                 ticker = self.current_ticker or ""
                 entry_px = self._entry_price
                 pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
-                if profit_exit_bypasses_council(self.cfg, risk_reason, pnl_pct):
+                stalled = self._ai_profit_decision_stalled(pnl_pct)
+                if profit_exit_bypasses_council(
+                    self.cfg, risk_reason, pnl_pct, ai_stalled=stalled,
+                ):
                     log.info(f"  ⚡ MECHANICAL RISK EXIT: {risk_reason}")
                     track_profit_hunt_event(
                         self.cfg, risk_reason, ticker,
@@ -4220,6 +4394,10 @@ class ScalperRunner:
                     self._exit_position(current_px, risk_reason)
                     self._active_stream_ticker = None
                     return
+
+        if self._enforce_green_profit_lock(current_px):
+            self._active_stream_ticker = None
+            return
 
         # Hard stop breach — always exit, bypasses min-hold
         stop_level = self._position_stop if self._position_stop > 0 else self._hard_stop_floor
@@ -4483,13 +4661,26 @@ class ScalperRunner:
                             f"(peak {peak_pct:+.2%})"
                         )
 
-        # Lock profit — council deliberates instead of instant rule exit
+        # Lock profit — AI first; green lock quick-scalp if AI stalls
         if peak_pct > 0.015:
             giveback = peak_pct - pnl_pct
             if giveback > peak_pct * 0.4 and pnl_pct > 0.003:
                 ticker = self.current_ticker or ""
                 reason = f"profit_lock: peak +{peak_pct:.2%} now +{pnl_pct:.2%}"
-                if is_ai_council_mode(self.cfg) and self.ai_commander:
+                stalled = self._ai_profit_decision_stalled(pnl_pct)
+                from core.green_profit_lock import evaluate_green_lock
+
+                should_lock, lock_reason = evaluate_green_lock(
+                    self.cfg,
+                    pnl_pct=pnl_pct,
+                    peak_pct=peak_pct,
+                    ai_stalled=stalled,
+                    giveback_from_peak=giveback,
+                    was_green=getattr(self, "_was_in_profit", False),
+                )
+                if should_lock:
+                    return True, lock_reason
+                if is_ai_council_mode(self.cfg) and self.ai_commander and not stalled:
                     ppo_exit, ppo_conf, ppo_reason = False, 0.55, reason
                     try:
                         ppo_exit, ppo_conf, ppo_reason = self._ai_gate_exit(current_px)
@@ -5387,7 +5578,10 @@ class ScalperRunner:
         pnl_pct_frac = ((current_px / entry_px) - 1) if entry_px else 0.0
         pnl_pct = pnl_pct_frac * 100
 
-        if profit_exit_bypasses_council(self.cfg, ppo_reason or "", pnl_pct_frac) and ppo_exit:
+        if profit_exit_bypasses_council(
+            self.cfg, ppo_reason or "", pnl_pct_frac,
+            ai_stalled=self._ai_profit_decision_stalled(pnl_pct_frac),
+        ) and ppo_exit:
             log.info(f"  🎯 PROFIT HUNT bypass council: {ppo_reason[:80]}")
             track_profit_hunt_event(
                 self.cfg, "profit_hunt_exit", ticker,
@@ -5448,7 +5642,10 @@ class ScalperRunner:
         pnl_pct_frac = ((current_px / entry_px) - 1) if entry_px else 0.0
         pnl_pct = pnl_pct_frac * 100
 
-        if profit_exit_bypasses_council(self.cfg, risk_signal, pnl_pct_frac):
+        if profit_exit_bypasses_council(
+            self.cfg, risk_signal, pnl_pct_frac,
+            ai_stalled=self._ai_profit_decision_stalled(pnl_pct_frac),
+        ):
             log.info(f"  ⚡ PROFIT HUNT risk bypass: {risk_signal}")
             track_profit_hunt_event(
                 self.cfg, risk_signal, ticker,
@@ -6074,6 +6271,8 @@ class ScalperRunner:
                 symbol=ticker,
             )
             self._pending_brackets_by_ticker[ticker] = bracket
+            if capital_discipline_enabled(self.cfg):
+                self._entries_this_hour = getattr(self, "_entries_this_hour", 0) + 1
             if not self._position_slots:
                 self.bracket_handle = bracket
             mode_label = "MARKET" if entry_parent_px is None else f"LIMIT@${entry_parent_px:.4f}"
@@ -6136,6 +6335,22 @@ class ScalperRunner:
 
         if self._open_position_count() >= self._max_concurrent():
             return 'waiting'
+
+        if now - getattr(self, "_hour_window_start", 0) >= 3600:
+            self._hour_window_start = now
+            self._entries_this_hour = 0
+        rate_ok, rate_msg = check_entry_rate_limit(
+            getattr(self, "_entries_this_hour", 0),
+            getattr(self, "_hour_window_start", now),
+            self.cfg,
+        )
+        if not rate_ok:
+            if now - getattr(self, "_last_quality_watch_log", 0) >= float(
+                getattr(self.cfg, "QUALITY_WATCH_HEARTBEAT_SEC", 45)
+            ):
+                self._last_quality_watch_log = now
+                log.info(f"  👁 {rate_msg}")
+            return "waiting"
         
         try:
             self.cfg.TICKER = ticker
@@ -6165,14 +6380,7 @@ class ScalperRunner:
                 "recent_volume": float(df_fast["volume"].iloc[-1]),
             }
 
-            if not is_ai_unlimited(self.cfg):
-                uptrend_ok = _only_uptrend(df_fast, current_px, min_bars=min_bars)
-                if not uptrend_ok and not should_spike_fast_entry(
-                    self.cfg, spike_ratio, scan_score,
-                ):
-                    log.debug(f"Entry skip {ticker}: not uptrend")
-                    return 'waiting'
-
+            scan_score = self.top_pick.rank_score if self.top_pick else 0.0
             is_spike, spike_ratio = self._detect_volume_spike(df_fast)
             vol_ratio = float(df_fast["volume"].tail(3).mean()) / (
                 float(df_fast["volume"].tail(20).mean()) + 1e-9
@@ -6180,6 +6388,32 @@ class ScalperRunner:
             if not is_spike and vol_ratio >= 1.15:
                 is_spike, spike_ratio = True, vol_ratio
             is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
+
+            gate_ok, gate_msg = passes_pre_entry_gate(
+                self.cfg,
+                scan_score=scan_score,
+                spike_ratio=spike_ratio,
+                forecast=forecast,
+            )
+            if not gate_ok:
+                cd = entry_cooldown_after_skip(self.cfg)
+                self._spike_skip_until[ticker] = now + cd
+                if now - getattr(self, "_last_quality_watch_log", 0) >= float(
+                    getattr(self.cfg, "QUALITY_WATCH_HEARTBEAT_SEC", 45)
+                ):
+                    self._last_quality_watch_log = now
+                    log.info(f"  👁 WATCH {ticker}: {gate_msg}")
+                return "waiting"
+
+            if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
+                uptrend_ok = _only_uptrend(df_fast, current_px, min_bars=min_bars)
+                if not uptrend_ok and not (
+                    capital_discipline_enabled(self.cfg) is False
+                    and should_spike_fast_entry(self.cfg, spike_ratio, scan_score)
+                ):
+                    log.debug(f"Entry skip {ticker}: not uptrend")
+                    return 'waiting'
+
             if (
                 forecast.get("dir", 0) < 0
                 and forecast.get("spike_likelihood", 0) < 0.55
@@ -6187,12 +6421,11 @@ class ScalperRunner:
             ):
                 log.debug(f"Entry skip {ticker}: micro bearish forecast")
                 return 'waiting'
-            if not is_spike and not is_ai_unlimited(self.cfg):
+            if not is_spike and (not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg)):
                 log.debug(f"Entry skip {ticker}: no volume spike (ratio={spike_ratio:.2f})")
                 return 'waiting'
             
             self._ai_update_buffers(df_fast, current_px)
-            scan_score = self.top_pick.rank_score if self.top_pick else 0.0
             self._last_spike_ratio = spike_ratio
             self._last_scan_score = scan_score
             self._last_market_ctx = market_ctx
@@ -6219,8 +6452,8 @@ class ScalperRunner:
                     ppo_c = float(ai_dec.get("ppo_conf", 0.5))
                     min_c = float(ai_dec.get("min_conf", 0.55))
                     ppo_lead = (
-                        ai_fast_execution(self.cfg)
-                        and getattr(self.cfg, "PPO_LEAD_WHILE_COUNCIL_PENDING", True)
+                        allows_ppo_lead_while_pending(self.cfg)
+                        and ai_fast_execution(self.cfg)
                         and (
                             should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_a, ppo_c)
                             or should_micro_fast_entry(self.cfg, spike_ratio, scan_score, forecast)
@@ -6273,9 +6506,9 @@ class ScalperRunner:
                         f"  🧠 AI skip {ticker}: {reason}"
                         + (f" | {pipeline}" if pipeline else "")
                     )
-                    if not is_ai_unlimited(self.cfg):
-                        self._spike_skip_until[ticker] = time.time() + float(
-                            getattr(self.cfg, "SPIKE_SKIP_SEC", 30.0)
+                    if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
+                        self._spike_skip_until[ticker] = time.time() + entry_cooldown_after_skip(
+                            self.cfg
                         )
                     return "waiting"
                 pipeline = str(ai_dec.get("pipeline", ""))
@@ -6682,6 +6915,22 @@ class ScalperRunner:
         """
         try:
             log.info("🧠 OFF-HOURS TRAINING: Launching isolated training subprocess...")
+            
+            # Full IB yesterday bundle → Ollama analyze + PPO (beat yesterday goal)
+            if getattr(self.cfg, "DAILY_IB_LEARNING_ENABLED", True):
+                try:
+                    from core.daily_ib_learning import run_daily_ib_learning_cycle
+                    from core.market_hours import learning_day_for_trigger
+                    ib_day = learning_day_for_trigger("off_hours")
+                    run_daily_ib_learning_cycle(
+                        self.cfg, self,
+                        connector=self.conn,
+                        trigger="off_hours",
+                        day_str=ib_day,
+                        train_ppo=True,
+                    )
+                except Exception as exc:
+                    log.debug(f"Off-hours IB learning: {exc}")
             
             # Update market regime from broader context (lightweight, stays in-process)
             self._update_market_context()

@@ -26,16 +26,13 @@ LEDGER_PATH = Path("models/profit_hunt_ledger.jsonl")
 _ledger_lock = threading.Lock()
 
 PROFIT_HUNT_PRIMARY_MISSION = (
-    "PRIMARY MISSION — FULL-TIME PROFIT HUNTING:\n"
-    "You work full-time. Making profit is your ONLY main goal — every scan, tick, "
-    "council call, and open position exists to extract money from the market.\n"
-    "Use any lawful tactic within guardrails to win:\n"
-    "- Enter spikes, momentum bursts, fakeout fades, scanner hits — whenever edge is real\n"
-    "- Exit into strength: spike tops, hard TP, trailing profit — never bleed green trades\n"
-    "- Trail, widen, tighten, raise TP, hot-swap, bypass slow council when profit is obvious\n"
-    "- Tune thresholds aggressively from the ledger — missed hunts are failures\n"
-    "Hard risk limits (max loss/trade, position count, daily loss) are the ONLY constraints.\n"
-    "When in doubt: act for profit. Passive hold through obvious windows is unacceptable."
+    "PRIMARY MISSION — FULL-TIME PROFIT HUNTING (AI FULL POWER):\n"
+    "Extract maximum profit — fast does NOT mean small profit. Use Ollama + PPO together:\n"
+    "- RIDE winners: trail stops, raise TP, follow gut when momentum is real — close watch always\n"
+    "- EXIT when council+PPO agree profit is peaked or fakeout risk spikes\n"
+    "- Enter on calculated edge only; watch everything, miss nothing worth taking\n"
+    "Hard risk limits (max loss/trade, position count) are the ONLY constraints.\n"
+    "Loss on entries is unacceptable; on open profits — let AI maximize the take.\n"
 )
 
 PROFIT_HUNT_DOCTRINE = (
@@ -88,12 +85,29 @@ def profit_exit_bypasses_hold(cfg: BotConfig, pnl_pct: float = 0.0, reason: str 
     return is_mechanical_profit_exit(reason)
 
 
+def ai_profit_full_power(cfg: BotConfig) -> bool:
+    """Profit exits and trails driven by Ollama+PPO — ride winners, don't scalp green."""
+    return bool(getattr(cfg, "AI_PROFIT_FULL_POWER", True))
+
+
 def profit_exit_bypasses_council(
     cfg: BotConfig,
     reason: str = "",
     pnl_pct: float = 0.0,
+    *,
+    ai_stalled: bool = False,
 ) -> bool:
-    """Instant profit exits — council cannot veto when hunting is primary."""
+    """Instant profit exits — green lock when AI stalls; else council leads."""
+    try:
+        from core.green_profit_lock import mechanical_green_fallback, is_green_lock_reason
+        if mechanical_green_fallback(cfg, reason, pnl_pct, ai_stalled=ai_stalled):
+            return True
+        if is_green_lock_reason(reason):
+            return True
+    except Exception:
+        pass
+    if ai_profit_full_power(cfg) and pnl_pct > 0 and not ai_stalled:
+        return False
     if mechanical_bypass_council(cfg) and is_mechanical_profit_exit(reason):
         return True
     if not profit_hunt_full_freedom(cfg) or pnl_pct <= 0:

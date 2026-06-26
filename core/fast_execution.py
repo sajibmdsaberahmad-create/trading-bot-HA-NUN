@@ -79,6 +79,9 @@ def should_spike_fast_entry(
     ppo_conf: float = 0.0,
 ) -> bool:
     """Instant entry on strong spike — skip council wait."""
+    from core.capital_discipline import allows_spike_fast_entry
+    if not allows_spike_fast_entry(cfg):
+        return False
     if not getattr(cfg, "AI_SPIKE_FAST_ENTRY", True):
         return False
     min_spike = float(getattr(cfg, "AI_SPIKE_FAST_MIN_RATIO", 1.15))
@@ -246,7 +249,8 @@ def should_micro_fast_entry(
     ppo_conf: float = 0.58,
 ) -> bool:
     """Enter without Ollama wait — strong scanner score + micro momentum + profit odds."""
-    if not ai_fast_execution(cfg):
+    from core.capital_discipline import allows_micro_fast_entry
+    if not allows_micro_fast_entry(cfg):
         return False
     micro = micro or {}
     sl = float(micro.get("spike_likelihood", 0))

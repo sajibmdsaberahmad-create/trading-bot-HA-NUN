@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+"""
+core/capital_discipline.py — Quality-first capital protection.
+
+Watch always, enter rarely. Every dollar is live capital.
+Entries require aligned Ollama + PPO council with strong profit odds.
+No spike-fast bypasses. Loss avoidance is mandatory — skip beats bad entry.
+"""
+
+from __future__ import annotations
+
+import os
+import time
+from typing import Any, Dict, Optional, Tuple
+
+from core.config import BotConfig
+
+
+def capital_discipline_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    cfg = cfg or BotConfig()
+    env = os.getenv("CAPITAL_DISCIPLINE", "").strip().lower()
+    if env in ("0", "false", "no"):
+        return False
+    if env in ("1", "true", "yes"):
+        return True
+    return bool(getattr(cfg, "CAPITAL_DISCIPLINE", True))
+
+
+def treat_paper_as_live(cfg: Optional[BotConfig] = None) -> bool:
+    cfg = cfg or BotConfig()
+    if not capital_discipline_enabled(cfg):
+        return False
+    env = os.getenv("TREAT_PAPER_AS_LIVE", "").strip().lower()
+    if env in ("0", "false", "no"):
+        return False
+    return bool(getattr(cfg, "TREAT_PAPER_AS_LIVE", True))
+
+
+def allows_spike_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
+    if capital_discipline_enabled(cfg):
+        return False
+    cfg = cfg or BotConfig()
+    return bool(getattr(cfg, "AI_SPIKE_FAST_ENTRY", True))
+
+
+def allows_micro_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
+    if capital_discipline_enabled(cfg):
+        return False
+    cfg = cfg or BotConfig()
+    return bool(getattr(cfg, "AI_FAST_EXECUTION", True))
+
+
+def allows_ppo_lead_while_pending(cfg: Optional[BotConfig] = None) -> bool:
+    if capital_discipline_enabled(cfg):
+        return False
+    cfg = cfg or BotConfig()
+    return bool(getattr(cfg, "PPO_LEAD_WHILE_COUNCIL_PENDING", True))
+
+
+def allows_scanner_fast_bypass(cfg: Optional[BotConfig] = None) -> bool:
+    return not capital_discipline_enabled(cfg)
+
+
+def allows_timeout_fallback_entry(cfg: Optional[BotConfig] = None) -> bool:
+    return not capital_discipline_enabled(cfg)
+
+
+def requires_council_alignment(cfg: Optional[BotConfig] = None) -> bool:
+    return capital_discipline_enabled(cfg)
+
+
+def effective_min_confidence(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    base = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+    if capital_discipline_enabled(cfg):
+        floor = float(getattr(cfg, "CAPITAL_MIN_CONFIDENCE", 0.65))
+        return max(base, floor)
+    return base
+
+
+def effective_min_profit_probability(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    base = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.42))
+    if capital_discipline_enabled(cfg):
+        floor = float(getattr(cfg, "CAPITAL_MIN_PROFIT_PROBABILITY", 0.62))
+        return max(base, floor)
+    return base
+
+
+def effective_entry_quality_blend(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    base = float(getattr(cfg, "ENTRY_QUALITY_BLEND_WEIGHT", 0.35))
+    if capital_discipline_enabled(cfg):
+        return max(base, float(getattr(cfg, "CAPITAL_QUALITY_BLEND_WEIGHT", 0.55)))
+    return base
+
+
+def min_entry_scan_score(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    if capital_discipline_enabled(cfg):
+        return float(getattr(cfg, "CAPITAL_MIN_ENTRY_SCAN_SCORE", 55))
+    return float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15))
+
+
+def min_entry_spike_ratio(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    if capital_discipline_enabled(cfg):
+        return float(getattr(cfg, "CAPITAL_MIN_ENTRY_SPIKE_RATIO", 1.25))
+    return float(getattr(cfg, "AI_SPIKE_FAST_MIN_RATIO", 1.15))
+
+
+def entry_cooldown_after_skip(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    cd = float(getattr(cfg, "CAPITAL_ENTRY_COOLDOWN_SEC", 0))
+    if cd > 0:
+        return cd
+    return float(getattr(cfg, "SPIKE_SKIP_SEC", 15.0))
+
+
+def max_entries_per_hour(cfg: Optional[BotConfig] = None) -> int:
+    cfg = cfg or BotConfig()
+    return int(getattr(cfg, "MAX_ENTRIES_PER_HOUR", 0))
+
+
+def passes_pre_entry_gate(
+    cfg: Optional[BotConfig],
+    *,
+    scan_score: float,
+    spike_ratio: float,
+    forecast: Optional[Dict[str, Any]] = None,
+) -> Tuple[bool, str]:
+    """
+    Mechanical pre-filter before council — watch-only if edge is weak.
+    Monitoring continues; entry is blocked until quality improves.
+    """
+    if not capital_discipline_enabled(cfg):
+        return True, ""
+    min_sc = min_entry_scan_score(cfg)
+    min_sp = min_entry_spike_ratio(cfg)
+    if scan_score < min_sc:
+        return False, f"quality gate: score {scan_score:.0f} < {min_sc:.0f} (watching)"
+    if spike_ratio < min_sp:
+        return False, f"quality gate: vol {spike_ratio:.2f}x < {min_sp:.2f}x (watching)"
+    fc = forecast or {}
+    if float(fc.get("dir", 0)) < 0 and not fc.get("breakout"):
+        sl = float(fc.get("spike_likelihood", 0))
+        if sl < 0.62:
+            return False, "quality gate: bearish micro — watch only"
+    fade = float(fc.get("fade_risk", 0))
+    if fade >= 0.52:
+        return False, f"quality gate: fade_risk {fade:.0%} too high"
+    loss_p = float(fc.get("loss_pressure", 0))
+    if loss_p >= 0.50:
+        return False, f"quality gate: loss_pressure {loss_p:.0%}"
+    return True, ""
+
+
+def check_entry_rate_limit(
+    entries_this_hour: int,
+    hour_window_start: float,
+    cfg: Optional[BotConfig] = None,
+) -> Tuple[bool, str]:
+    """Optional hourly cap — disabled when MAX_ENTRIES_PER_HOUR=0."""
+    cap = max_entries_per_hour(cfg)
+    if cap <= 0:
+        return True, ""
+    now = time.time()
+    if now - hour_window_start >= 3600:
+        return True, ""
+    cap = max_entries_per_hour(cfg)
+    if entries_this_hour >= cap:
+        return False, f"hourly entry cap {cap} reached"
+    return True, ""
+
+
+def discipline_prompt_block(cfg: Optional[BotConfig] = None) -> str:
+    if not capital_discipline_enabled(cfg):
+        return ""
+    return (
+        "QUALITY-FIRST CAPITAL DISCIPLINE — watch always, enter rarely:\n"
+        "- Every dollar is live money. Loss is NOT acceptable — skip beats a bad entry.\n"
+        "- WATCH all locked targets continuously; enter ONLY on calculated high-edge setups.\n"
+        "- enter=true ONLY when YOU + PPO agree, profit_probability≥62%, fakeout risk low.\n"
+        "- Profit is mandatory — use full AI power: ride winners, trail, raise TP, exit at peak.\n"
+        "- Marginal spikes are traps unless council+PPO+profit math align.\n"
+        "- No artificial entry caps — full AI capability; skip only when edge is weak.\n"
+    )
+
+
+def startup_log_line(cfg: Optional[BotConfig] = None) -> str:
+    if not capital_discipline_enabled(cfg):
+        return ""
+    return (
+        f"💎 QUALITY ENTRIES: full AI council | score≥{min_entry_scan_score(cfg):.0f} "
+        f"spike≥{min_entry_spike_ratio(cfg):.2f}x | conf≥{effective_min_confidence(cfg):.0%} "
+        f"prob≥{effective_min_profit_probability(cfg):.0%} | no entry caps"
+    )

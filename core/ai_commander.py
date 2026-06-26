@@ -380,9 +380,9 @@ class AICommander:
                 "Use smaller size — max deploy $350, max ~1200 shares. Limit entry only.\n"
                 if is_penny else ""
             )
-            + "You are the STRATEGIST pilot — full-time profit hunter. Making money is your ONLY main goal.\n"
-            "Full entry freedom within guardrails (max loss, position count). Use any lawful tactic to win.\n"
-            "Quality signals are advisory — YOU decide enter/skip. Tune thresholds via commander learning.\n"
+            + "QUALITY-FIRST ENTRY — watch always, enter rarely. Loss is NOT acceptable.\n"
+            "enter=true ONLY when YOU + PPO agree, profit_probability≥62%, score strong, fakeout low.\n"
+            "Skip marginal spikes — one bad entry costs more than a missed trade. Profit is mandatory.\n"
             "Estimate profit_probability and fakeout risk; fakeout fades OK when bounce odds are clear.\n"
             "Math engine sets brackets from ATR after you decide enter/skip.\n"
             'JSON: {"enter":true/false,"confidence":0-1,"profit_probability":0-1,'
@@ -857,7 +857,14 @@ class AICommander:
             council_fast_min_score,
             council_fast_min_spike,
         )
-        if should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro, ppo_action, ppo_conf):
+        from core.capital_discipline import (
+            allows_micro_fast_entry,
+            allows_spike_fast_entry,
+            capital_discipline_enabled,
+        )
+        if allows_micro_fast_entry(self.cfg) and should_micro_fast_entry(
+            self.cfg, spike_ratio, scan_score, micro, ppo_action, ppo_conf,
+        ):
             fp = self._ring_entry_council_for_learning(
                 ticker, current_px, spike_ratio, scan_score,
                 ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
@@ -889,7 +896,9 @@ class AICommander:
                     market_ctx=mctx,
                 )
             return decision
-        if should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf):
+        if allows_spike_fast_entry(self.cfg) and should_spike_fast_entry(
+            self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf,
+        ):
             fp = self._ring_entry_council_for_learning(
                 ticker, current_px, spike_ratio, scan_score,
                 ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
@@ -971,9 +980,11 @@ class AICommander:
             if live.get("status") == "fresh":
                 gut_feel = float(out.get("gut_feel", 0.5) or 0.5)
                 intuition = str(out.get("intuition", ""))[:120]
-                enter, gut_note = apply_gut_override(enter, gut_feel, ppo_action, ppo_conf, min_conf)
-                if gut_note:
-                    out["reason"] = f"{out.get('reason', '')} | {gut_note}".strip(" |")
+                from core.capital_discipline import capital_discipline_enabled
+                if not capital_discipline_enabled(self.cfg):
+                    enter, gut_note = apply_gut_override(enter, gut_feel, ppo_action, ppo_conf, min_conf)
+                    if gut_note:
+                        out["reason"] = f"{out.get('reason', '')} | {gut_note}".strip(" |")
                 if intuition:
                     out["journal"] = f"{intuition} — {out.get('journal', '')}"[:300]
         else:
@@ -1004,8 +1015,10 @@ class AICommander:
                     confidence = max(confidence, ppo_conf)
                     out["reason"] = f"PPO+AI ensemble: {ppo_reason}"
 
-        # PPO-led momentum — execute now, Ollama logs async when council paths timeout
-        if not enter and getattr(self.cfg, "AI_FAST_EXECUTION", True):
+        # PPO-led momentum — only when capital discipline is off
+        if not enter and not capital_discipline_enabled(self.cfg) and getattr(
+            self.cfg, "AI_FAST_EXECUTION", True
+        ):
             if should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf):
                 enter = True
                 confidence = max(confidence, 0.58)
@@ -1019,7 +1032,12 @@ class AICommander:
                 confidence = max(confidence, ppo_conf)
                 out["reason"] = f"PPO buy lead: {ppo_reason or 'ensemble'} (Ollama logging async)"
                 out["pipeline"] = "ppo:buy_lead"
-        if not enter and not is_ai_unlimited(self.cfg) and not self.council_mode:
+        if (
+            not enter
+            and not capital_discipline_enabled(self.cfg)
+            and not is_ai_unlimited(self.cfg)
+            and not self.council_mode
+        ):
             if spike_ratio >= 1.5 and scan_score >= 35:
                 enter = True
                 confidence = max(confidence, 0.55)
@@ -1640,8 +1658,10 @@ class AICommander:
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
         fp = position_fingerprint(ticker, price, pnl_pct, stop, target)
         prompt = (
-            "You are HANOON live pilot managing an OPEN position — full-time profit hunter.\n"
-            "Profit is your only main goal: trail, tighten, raise TP, or EXIT to free capital for the next hunt.\n"
+            "You are HANOON live pilot — AI FULL POWER profit management.\n"
+            "Fast does NOT mean small profit: RIDE winners when momentum is real — trail stop, "
+            "raise TP, follow gut. EXIT only when council+PPO agree peak is in or fakeout hits.\n"
+            "Close watch always; maximize profit per trade, never scalp green prematurely.\n"
             f"{json.dumps(ctx, default=str)[:900]}\n"
             f"PPO manage signal: exit={ppo_exit} conf={ppo_conf:.2f} {ppo_reason[:80]}\n"
             f"Mechanical trail stop={mechanical_stop} target={mechanical_target}\n"
@@ -1668,6 +1688,7 @@ class AICommander:
                 current_target=target,
                 mechanical_stop=mechanical_stop,
                 mechanical_target=mechanical_target,
+                cfg=self.cfg,
             )
             if merged.get("pending"):
                 return {
@@ -1698,6 +1719,7 @@ class AICommander:
                 result, ctx, bar_df=None,
                 mechanical_stop=mechanical_stop,
                 mechanical_target=mechanical_target,
+                cfg=self.cfg,
             )
         else:
             out = self.think_json(prompt, task="position_manage")
@@ -1715,6 +1737,7 @@ class AICommander:
                 result, ctx,
                 mechanical_stop=mechanical_stop,
                 mechanical_target=mechanical_target,
+                cfg=self.cfg,
             )
         if result["journal"]:
             self.journal("POSITION", result["journal"], {**ctx, **result})
@@ -1745,6 +1768,7 @@ class AICommander:
             current_target=float(ctx.get("target", 0)),
             mechanical_stop=state.get("mechanical_stop"),
             mechanical_target=state.get("mechanical_target"),
+            cfg=self.cfg,
         )
         if merged.get("pending"):
             return {

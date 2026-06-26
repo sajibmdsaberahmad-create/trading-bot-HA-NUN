@@ -138,14 +138,19 @@ class BotConfig:
 
     TRAILING_PROFIT_ENABLED:        bool  = True
     TRAILING_PROFIT_ACTIVATE_PCT:   float = 0.01
-    TRAILING_PROFIT_GIVEBACK_PCT:   float = 0.40
+    TRAILING_PROFIT_GIVEBACK_PCT:   float = float(
+        os.getenv("TRAILING_PROFIT_GIVEBACK_PCT", "0.50")
+    )
 
     # Opportunistic profit hunting — thresholds AI-tunes via param_bounds (not static doctrine)
     PROFIT_HUNT_ENABLED: bool = os.getenv(
         "PROFIT_HUNT_ENABLED", "true"
     ).lower() in ("1", "true", "yes")
     PROFIT_HUNT_MECHANICAL_BYPASS_COUNCIL: bool = os.getenv(
-        "PROFIT_HUNT_MECHANICAL_BYPASS_COUNCIL", "true"
+        "PROFIT_HUNT_MECHANICAL_BYPASS_COUNCIL", "false"
+    ).lower() in ("1", "true", "yes")
+    AI_PROFIT_FULL_POWER: bool = os.getenv(
+        "AI_PROFIT_FULL_POWER", "true"
     ).lower() in ("1", "true", "yes")
     SPIKE_TOP_EXIT_ENABLED: bool = os.getenv(
         "SPIKE_TOP_EXIT_ENABLED", "true"
@@ -182,6 +187,66 @@ class BotConfig:
         "PROFIT_HUNT_SKIP_MIN_HOLD", "true"
     ).lower() in ("1", "true", "yes")
 
+    # Capital discipline — every dollar treated as live; council+ppo alignment required
+    CAPITAL_DISCIPLINE: bool = os.getenv(
+        "CAPITAL_DISCIPLINE", "true"
+    ).lower() in ("1", "true", "yes")
+    TREAT_PAPER_AS_LIVE: bool = os.getenv(
+        "TREAT_PAPER_AS_LIVE", "true"
+    ).lower() in ("1", "true", "yes")
+    CAPITAL_MIN_CONFIDENCE: float = float(os.getenv("CAPITAL_MIN_CONFIDENCE", "0.65"))
+    CAPITAL_MIN_PROFIT_PROBABILITY: float = float(
+        os.getenv("CAPITAL_MIN_PROFIT_PROBABILITY", "0.62")
+    )
+    CAPITAL_QUALITY_BLEND_WEIGHT: float = float(
+        os.getenv("CAPITAL_QUALITY_BLEND_WEIGHT", "0.55")
+    )
+    CAPITAL_MIN_ENTRY_SCAN_SCORE: float = float(
+        os.getenv("CAPITAL_MIN_ENTRY_SCAN_SCORE", "55")
+    )
+    CAPITAL_MIN_ENTRY_SPIKE_RATIO: float = float(
+        os.getenv("CAPITAL_MIN_ENTRY_SPIKE_RATIO", "1.25")
+    )
+    CAPITAL_ENTRY_COOLDOWN_SEC: float = float(
+        os.getenv("CAPITAL_ENTRY_COOLDOWN_SEC", "0")
+    )
+    MAX_ENTRIES_PER_HOUR: int = int(os.getenv("MAX_ENTRIES_PER_HOUR", "0"))
+
+    # Green profit lock — mechanical quick scalp when AI stalls (always close green)
+    GREEN_PROFIT_LOCK_ENABLED: bool = os.getenv(
+        "GREEN_PROFIT_LOCK_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    GREEN_PROFIT_LOCK_MIN_PNL_PCT: float = float(
+        os.getenv("GREEN_PROFIT_LOCK_MIN_PNL_PCT", "0.0025")
+    )
+    GREEN_PROFIT_LOCK_QUICK_SCALP_PCT: float = float(
+        os.getenv("GREEN_PROFIT_LOCK_QUICK_SCALP_PCT", "0.0035")
+    )
+    GREEN_PROFIT_LOCK_AI_WAIT_SEC: float = float(
+        os.getenv("GREEN_PROFIT_LOCK_AI_WAIT_SEC", "4.0")
+    )
+    GREEN_PROFIT_LOCK_GIVEBACK_PCT: float = float(
+        os.getenv("GREEN_PROFIT_LOCK_GIVEBACK_PCT", "0.22")
+    )
+    GREEN_PROFIT_LOCK_FADE_FLOOR_PCT: float = float(
+        os.getenv("GREEN_PROFIT_LOCK_FADE_FLOOR_PCT", "0.0015")
+    )
+
+    # Daily IB learning — full IB day bundle → Ollama + PPO (beat yesterday)
+    DAILY_IB_LEARNING_ENABLED: bool = os.getenv(
+        "DAILY_IB_LEARNING_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    DAILY_IB_PPO_TRAIN_STEPS: int = int(os.getenv("DAILY_IB_PPO_TRAIN_STEPS", "15000"))
+    DAILY_IB_LEARNING_ON_SESSION_END: bool = os.getenv(
+        "DAILY_IB_LEARNING_ON_SESSION_END", "true"
+    ).lower() in ("1", "true", "yes")
+    DAILY_IB_LEARNING_ON_MARKET_OPEN: bool = os.getenv(
+        "DAILY_IB_LEARNING_ON_MARKET_OPEN", "true"
+    ).lower() in ("1", "true", "yes")
+    QUALITY_WATCH_HEARTBEAT_SEC: float = float(
+        os.getenv("QUALITY_WATCH_HEARTBEAT_SEC", "45")
+    )
+
     # AI fast execution — prioritize top names, fewer bars, spike fast-entry
     AI_FAST_EXECUTION: bool = os.getenv(
         "AI_FAST_EXECUTION", "true"
@@ -191,7 +256,7 @@ class BotConfig:
     AI_MIN_BARS_FOCUS: int = int(os.getenv("AI_MIN_BARS_FOCUS", "6"))
     AI_MIN_BARS_SCAN: int = int(os.getenv("AI_MIN_BARS_SCAN", "10"))
     AI_SPIKE_FAST_ENTRY: bool = os.getenv(
-        "AI_SPIKE_FAST_ENTRY", "true"
+        "AI_SPIKE_FAST_ENTRY", "false"
     ).lower() in ("1", "true", "yes")
     AI_SPIKE_FAST_MIN_RATIO: float = float(os.getenv("AI_SPIKE_FAST_MIN_RATIO", "1.15"))
     AI_SPIKE_FAST_MIN_SCORE: float = float(os.getenv("AI_SPIKE_FAST_MIN_SCORE", "15"))
@@ -297,7 +362,7 @@ class BotConfig:
 
     # Minimum confidence threshold for action execution (0.0 to 1.0)
     # Higher = fewer but higher-quality trades
-    CONFIDENCE_THRESHOLD: float = 0.52
+    CONFIDENCE_THRESHOLD: float = float(os.getenv("CONFIDENCE_THRESHOLD", "0.65"))
 
     # Ensemble voting: combine PPO with rule-based strategies
     USE_ENSEMBLE: bool = True
@@ -401,7 +466,7 @@ class BotConfig:
     )
     PPO_LEARNING_WEIGHT: float = float(os.getenv("PPO_LEARNING_WEIGHT", "1.5"))
     PPO_LEAD_WHILE_COUNCIL_PENDING: bool = os.getenv(
-        "PPO_LEAD_WHILE_COUNCIL_PENDING", "true"
+        "PPO_LEAD_WHILE_COUNCIL_PENDING", "false"
     ).lower() in ("1", "true", "yes")
     PPO_LEARN_EVERY_ENTRY: bool = os.getenv(
         "PPO_LEARN_EVERY_ENTRY", "true"
@@ -472,9 +537,9 @@ class BotConfig:
     ENTRY_QUALITY_HARD_BLOCK: bool = os.getenv(
         "ENTRY_QUALITY_HARD_BLOCK", "false",
     ).lower() in ("1", "true", "yes")
-    ENTRY_QUALITY_HARDNESS: float = float(os.getenv("ENTRY_QUALITY_HARDNESS", "0.0"))
-    ENTRY_QUALITY_BLEND_WEIGHT: float = float(os.getenv("ENTRY_QUALITY_BLEND_WEIGHT", "0.35"))
-    MIN_PROFIT_PROBABILITY: float = float(os.getenv("MIN_PROFIT_PROBABILITY", "0.42"))
+    ENTRY_QUALITY_HARDNESS: float = float(os.getenv("ENTRY_QUALITY_HARDNESS", "0.45"))
+    ENTRY_QUALITY_BLEND_WEIGHT: float = float(os.getenv("ENTRY_QUALITY_BLEND_WEIGHT", "0.55"))
+    MIN_PROFIT_PROBABILITY: float = float(os.getenv("MIN_PROFIT_PROBABILITY", "0.62"))
     MIN_FAKEOUT_FADE_PROB: float = float(os.getenv("MIN_FAKEOUT_FADE_PROB", "0.50"))
     MAX_FAKEOUT_RISK_ENTER: float = float(os.getenv("MAX_FAKEOUT_RISK_ENTER", "0.62"))
     LIKELY_FAKEOUT_BLOCK_LEVEL: float = float(os.getenv("LIKELY_FAKEOUT_BLOCK_LEVEL", "0.0"))
@@ -523,7 +588,7 @@ class BotConfig:
     FLAT_PULSE_SEC: float = 15.0              # WATCHING heartbeat log interval (not the monitor rate)
     AI_POSITION_MANAGE_SEC: float = 10.0    # Ollama position decisions — frequent, priority path
     AI_POSITION_MANAGE_IN_PROFIT_SEC: float = float(
-        os.getenv("AI_POSITION_MANAGE_IN_PROFIT_SEC", "2.0")
+        os.getenv("AI_POSITION_MANAGE_IN_PROFIT_SEC", "1.0")
     )
     IN_PROFIT_MANAGE_PNL_PCT: float = float(
         os.getenv("IN_PROFIT_MANAGE_PNL_PCT", "0.003")

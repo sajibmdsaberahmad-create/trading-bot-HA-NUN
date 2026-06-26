@@ -31,6 +31,9 @@ def learn_dont_block(cfg: Optional[BotConfig] = None) -> bool:
     if not getattr(cfg, "AI_LEARN_DONT_BLOCK", True):
         return False
     if getattr(cfg, "AI_FULL_CONTROL", True) and getattr(cfg, "AI_PAPER_FREE_LEARNING", True):
+        from core.capital_discipline import treat_paper_as_live
+        if treat_paper_as_live(cfg):
+            return False
         return True
     return bool(getattr(cfg, "AI_LEARN_DONT_BLOCK", True))
 

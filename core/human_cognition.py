@@ -113,6 +113,14 @@ def enrich_prompt(
     except Exception:
         pass
 
+    discipline_line = ""
+    try:
+        from core.capital_discipline import discipline_prompt_block
+        if cfg is not None:
+            discipline_line = discipline_prompt_block(cfg) + "\n"
+    except Exception:
+        pass
+
     return (
         f"TASK: {task}\n"
         f"Mental state: mood={mood} | self-confidence={confidence:.0%}\n"
@@ -120,6 +128,7 @@ def enrich_prompt(
         f"{lesson_line}"
         f"{commander_line}"
         f"{profit_hunt_line}"
+        f"{discipline_line}"
         f"{md_line}"
         f"FULL-TIME PROFIT MISSION: making money is your only main goal — use any tactic "
         f"within guardrails. Reason with math AND gut feel; act decisively.\n"

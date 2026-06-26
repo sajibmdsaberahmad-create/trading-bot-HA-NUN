@@ -256,6 +256,16 @@ def collect_self_eval_context(
     segmented = _segment_timeline(report.get("timeline", []))
     trades = report.get("trades", [])
 
+    ib_learning: Dict[str, Any] = {}
+    try:
+        from core.daily_ib_learning import collect_ib_learning_pack
+        if getattr(cfg, "DAILY_IB_LEARNING_ENABLED", True):
+            ib_learning = collect_ib_learning_pack(
+                cfg, runner, connector, day_str, trigger="self_eval",
+            )
+    except Exception:
+        pass
+
     sessions = {
         name: _session_summary(segmented.get(name, []), trades, name)
         for name in ("premarket", "regular_hours", "after_hours")
@@ -340,6 +350,12 @@ def collect_self_eval_context(
         "weights": _load_weights(),
         "structured_activity": format_structured_report(report, max_lines=40),
         "recent_trades": trades[-15:],
+        "ib_day_learning": {
+            "counts": ib_learning.get("ib", {}).get("counts", {}),
+            "comparison": ib_learning.get("comparison", {}),
+            "orders": len(ib_learning.get("ib", {}).get("orders", [])),
+            "executions": len(ib_learning.get("ib", {}).get("executions", [])),
+        } if ib_learning else {},
     }
 
 

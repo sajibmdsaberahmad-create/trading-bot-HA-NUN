@@ -177,3 +177,42 @@ def market_status_line(cfg: Optional[BotConfig] = None) -> str:
         f"ET {now.strftime('%Y-%m-%d %H:%M:%S')} | "
         f"RTH 09:30–16:00 ET"
     )
+
+
+def is_market_day(day_str: str) -> bool:
+    """True when day_str (YYYY-MM-DD) is a weekday and not a US holiday."""
+    try:
+        dt = datetime.strptime(day_str, "%Y-%m-%d").replace(tzinfo=MARKET_TZ)
+    except ValueError:
+        return False
+    if dt.weekday() >= 5:
+        return False
+    return day_str not in US_MARKET_HOLIDAYS
+
+
+def previous_market_day(anchor=None) -> str:
+    """Most recent US market day strictly before anchor (ET)."""
+    from datetime import timedelta
+
+    anchor = anchor or now_et()
+    d = anchor.date()
+    for _ in range(14):
+        d = d - timedelta(days=1)
+        ds = d.strftime("%Y-%m-%d")
+        if is_market_day(ds):
+            return ds
+    return (anchor - timedelta(days=1)).strftime("%Y-%m-%d")
+
+
+def learning_day_for_trigger(trigger: str, anchor=None) -> str:
+    """
+    Which ET calendar day to learn from.
+
+    session_end → today (day that just finished)
+    market_open / off_hours / pre_session → yesterday (last full market day)
+    """
+    anchor = anchor or now_et()
+    today = anchor.strftime("%Y-%m-%d")
+    if trigger in ("session_end", "market_close", "day_finished"):
+        return today if is_market_day(today) else previous_market_day(anchor)
+    return previous_market_day(anchor)
