@@ -185,5 +185,14 @@
     "lessons": [
       "Review council_timeout on PLTR"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T13:28:23.909971+00:00",
+    "source": "runtime_market_data_failure",
+    "adjustments": {},
+    "guidelines_summary": "Observed market_data_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review market_data_failure on SOFI"
+    ]
   }
 ]

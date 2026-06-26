@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 401,
+  "improvements_applied": 402,
   "reports_generated": 27,
   "event_log": [
     {
@@ -19686,6 +19686,20 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #127",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T13:28:23.865124",
+      "age": "5d 2h 25m 35s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #402",
+      "metadata": {
+        "source": "runtime_market_data_failure",
+        "summary": "Observed market_data_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review market_data_failure on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T13:27:05.709989",
