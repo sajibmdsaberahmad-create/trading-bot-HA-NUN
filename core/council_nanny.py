@@ -63,6 +63,8 @@ def is_strong_spike_pipeline(pipeline: str) -> bool:
 
 def learning_ring_for_pipeline(cfg: BotConfig, pipeline: str) -> bool:
     """Allow deferred council learning for this entry pipeline."""
+    if _providers_hot(cfg):
+        return False
     if learning_ring_enabled(cfg):
         return True
     if strong_spike_learning_ring_enabled(cfg) and is_strong_spike_pipeline(pipeline):
@@ -108,8 +110,7 @@ def should_ring_council(
         return False, "council_disabled"
 
     if _providers_hot(cfg):
-        if task not in _HIGH_PRIORITY:
-            return False, "provider_429_cooldown"
+        return False, "provider_429_cooldown"
 
     if not nanny_mode_enabled(cfg):
         return True, "nanny_off"
@@ -150,9 +151,12 @@ def should_ring_council(
 
 
 def effective_min_ring_sec(cfg: BotConfig) -> float:
-    """Longer gap between rings in nanny mode."""
+    """Longer gap between rings in nanny mode; much longer when APIs are 429."""
     base = float(getattr(cfg, "LIVE_AI_MIN_RING_SEC", 0.8))
     if nanny_mode_enabled(cfg):
         nanny = float(getattr(cfg, "COUNCIL_NANNY_MIN_RING_SEC", 3.0))
-        return max(base, nanny)
+        base = max(base, nanny)
+    if _providers_hot(cfg):
+        hot = float(getattr(cfg, "COUNCIL_NANNY_HOT_RING_SEC", 20.0))
+        base = max(base, hot)
     return base

@@ -46,7 +46,10 @@ def position_fingerprint(ticker: str, price: float, pnl_pct: float, stop: float,
 
 
 def exit_fingerprint(ticker: str, price: float, pnl_pct: float) -> str:
-    return f"{ticker}|{price:.4f}|{pnl_pct:.1f}"
+    """Bucket P&L/price so exit council is not re-rung every tick."""
+    pnl_bucket = round(float(pnl_pct) * 2) / 2.0
+    px_bucket = round(float(price), 2)
+    return f"{ticker}|{px_bucket:.2f}|pnl{pnl_bucket:.1f}"
 
 
 def stagnation_fingerprint(
@@ -117,8 +120,6 @@ class LiveAILine:
         with self._lock:
             slot = self._slots.get(key)
             if slot is None:
-                return True
-            if slot.fingerprint != fingerprint:
                 return True
             if slot.in_flight:
                 return False
@@ -359,7 +360,7 @@ def merge_entry_decision(
             "pipeline": f"council:{ollama_status}",
             "reason": (
                 f"PPO conf={ppo_conf:.0%} ({ppo_reason or 'neutral'}) — "
-                f"awaiting Ollama ({ollama_status})"
+                f"awaiting council ({ollama_status})"
             )[:200],
         })
         return base
@@ -559,7 +560,7 @@ def _council_pending_base(
         "pipeline": f"council:{ollama_status}",
         "reason": (
             f"{ppo_label} conf={ppo_conf:.0%} ({ppo_reason or 'neutral'}) — "
-            f"awaiting Ollama ({ollama_status})"
+            f"awaiting council ({ollama_status})"
         )[:200],
     }
 
