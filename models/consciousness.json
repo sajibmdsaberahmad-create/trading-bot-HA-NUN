@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 239,
+  "trades_observed": 240,
   "scans_performed": 28,
-  "improvements_applied": 508,
+  "improvements_applied": 510,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T13:41:27.306520",
-      "age": "3d 2h 38m 38s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #34",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:45:37.160365",
-      "age": "3d 2h 42m 48s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #35",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:51:04.992738",
-      "age": "3d 2h 48m 16s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #36",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T13:53:06.847811",
       "age": "3d 2h 50m 18s",
@@ -21437,6 +21416,41 @@
           "Review loss_streak on SOFI"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T19:01:20.954269",
+      "age": "5d 7h 58m 32s",
+      "type": "TRADE",
+      "message": "Observed trade: COIN ? P&L=$-29.24",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T19:01:21.260692",
+      "age": "5d 7h 58m 32s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #509",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on COIN"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T19:01:21.327195",
+      "age": "5d 7h 58m 32s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #510",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on COIN"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22796,7 +22810,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "recalibrating",
-  "total_pnl": 123082.50000000007,
+  "total_pnl": 123053.26000000007,
   "win_history": [
     0.0,
     0.0,
@@ -23036,20 +23050,21 @@
     -119.01,
     -7.26,
     -8.4,
-    -113.34
+    -113.34,
+    -29.24
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 8,
+  "consecutive_losses": 9,
   "worst_streak": 21,
-  "veteran_xp": 3235,
+  "veteran_xp": 3245,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 82
   },
-  "flights_completed": 234,
-  "hours_flown": 23.400000000000063,
+  "flights_completed": 235,
+  "hours_flown": 23.500000000000064,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -23075,7 +23090,7 @@
     "RIO": 20,
     "QS": 5,
     "MAR": 22,
-    "COI": 6,
+    "COI": 7,
     "RIV": 5,
     "RKL": 11,
     "SOF": 18,
@@ -23086,5 +23101,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-290.24 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-419.80 recent). Tightening entries until edge returns."
 }
