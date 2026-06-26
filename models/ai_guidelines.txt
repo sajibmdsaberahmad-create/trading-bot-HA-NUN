@@ -725,3 +725,7 @@ bracket_exit
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-26T20:04:35.940464+00:00
+Could not parse AI plan — retained guidance for prompts only.
+ib_day_learning:2026-06-25:IB day 2026-06-25: 210 trades, P&L $+124998.22
+

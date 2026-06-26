@@ -16,5 +16,16 @@
     "lessons": [
       "Review trade_closed on PLTR"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T20:04:35.941556+00:00",
+    "source": "commander_chat",
+    "adjustments": {},
+    "guidelines_summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+    "lessons": [
+      "ping - are you there ?",
+      "Hi",
+      "Hi"
+    ]
   }
 ]

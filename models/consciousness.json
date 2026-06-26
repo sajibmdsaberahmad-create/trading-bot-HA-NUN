@@ -2,61 +2,12 @@
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 158,
-  "training_sessions": 28,
-  "trades_observed": 241,
-  "scans_performed": 28,
-  "improvements_applied": 511,
+  "training_sessions": 29,
+  "trades_observed": 243,
+  "scans_performed": 29,
+  "improvements_applied": 512,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T14:19:47.238230",
-      "age": "3d 3h 16m 58s",
-      "type": "TRADE",
-      "message": "Observed trade: None ? P&L=$-3.80",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T14:23:59.394380",
-      "age": "3d 3h 21m 10s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #41",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T14:32:51.192516",
-      "age": "3d 3h 30m 2s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #42",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T14:38:30.718880",
-      "age": "3d 3h 35m 42s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #43",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T14:42:19.536815",
-      "age": "3d 3h 39m 30s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #44",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T14:48:22.339281",
-      "age": "3d 3h 45m 33s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #45",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T14:55:18.922662",
-      "age": "3d 3h 52m 30s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #46",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T15:30:11.791372",
       "age": "3d 4h 27m 23s",
@@ -21458,6 +21409,73 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #158",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:04:35.902347",
+      "age": "5d 9h 1m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #512",
+      "metadata": {
+        "source": "commander_chat",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:04:35.946139",
+      "age": "5d 9h 1m 47s",
+      "type": "TRADE",
+      "message": "Observed trade: SESSION IB_DAY_LESSON P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:04:35.969245",
+      "age": "5d 9h 1m 47s",
+      "type": "TRADE",
+      "message": "Observed trade: SESSION IB_DAY_LESSON P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:04:37.494686",
+      "age": "5d 9h 1m 48s",
+      "type": "SCAN",
+      "message": "Market scan #29",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": "live_ib"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:04:37.519216",
+      "age": "5d 9h 1m 48s",
+      "type": "TRAIN",
+      "message": "Training session #29",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T20:04:37.531469",
+      "age": "5d 9h 1m 48s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": 0.0,
+        "vix_regime": "low",
+        "timestamp": "2026-06-26T20:04:37.531456"
+      }
+    },
+    {
+      "timestamp": "2026-06-26T20:04:37.543256",
+      "age": "5d 9h 1m 48s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-26T20:02:36.268882",
@@ -23059,20 +23077,22 @@
     -8.4,
     -113.34,
     -29.24,
-    0.0
+    0.0,
+    0,
+    0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 10,
+  "consecutive_losses": 12,
   "worst_streak": 21,
-  "veteran_xp": 3255,
+  "veteran_xp": 3275,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 82
   },
-  "flights_completed": 236,
-  "hours_flown": 23.600000000000065,
+  "flights_completed": 238,
+  "hours_flown": 23.800000000000068,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -23102,12 +23122,13 @@
     "RIV": 5,
     "RKL": 11,
     "SOF": 18,
-    "AST": 4
+    "AST": 4,
+    "SES": 2
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-419.80 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-421.86 recent). Tightening entries until edge returns."
 }
