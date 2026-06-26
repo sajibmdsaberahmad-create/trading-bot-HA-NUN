@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 207,
+  "trades_observed": 208,
   "scans_performed": 28,
-  "improvements_applied": 453,
+  "improvements_applied": 455,
   "reports_generated": 27,
   "event_log": [
     {
@@ -21076,6 +21076,41 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #153",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:53:40.551929",
+      "age": "5d 7h 50m 51s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$-7.62",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:53:40.890138",
+      "age": "5d 7h 50m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #454",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:53:41.004404",
+      "age": "5d 7h 50m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #455",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on MARA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22435,7 +22470,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "defensive",
-  "total_pnl": 123549.53000000004,
+  "total_pnl": 123541.91000000005,
   "win_history": [
     0.0,
     0.0,
@@ -22643,20 +22678,21 @@
     -2.01,
     9.54,
     0.92,
-    0.0
+    0.0,
+    -7.62
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 21,
-  "veteran_xp": 2860,
+  "veteran_xp": 2870,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 76
   },
-  "flights_completed": 202,
-  "hours_flown": 20.200000000000017,
+  "flights_completed": 203,
+  "hours_flown": 20.30000000000002,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22681,7 +22717,7 @@
     "LCI": 8,
     "RIO": 14,
     "QS": 5,
-    "MAR": 15,
+    "MAR": 16,
     "COI": 3,
     "RIV": 5,
     "RKL": 9,
@@ -22693,5 +22729,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 15% \u00b7 $-172.36. Preserving capital over action."
+  "mood_message": "Win rate 15% \u00b7 $-22.46. Preserving capital over action."
 }

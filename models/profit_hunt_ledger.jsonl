@@ -223,3 +223,6 @@
 {"timestamp":"2026-06-26T18:50:41.151868+00:00","event":"hard_stop","ticker":"RKLB","pnl_usd":9.54,"pnl_pct":0.0005,"primary_goal":true,"reason":"hard_stop","price":83.71}
 {"timestamp":"2026-06-26T18:51:28.969570+00:00","event":"hard_stop","ticker":"SOFI","pnl_usd":5.48,"pnl_pct":0.0006,"primary_goal":true,"reason":"hard_stop","price":17.56}
 {"timestamp":"2026-06-26T18:51:33.546944+00:00","event":"hard_stop","ticker":"PLTR","pnl_usd":4.06,"pnl_pct":0.0001,"primary_goal":true,"reason":"hard_stop","price":112.42}
+{"timestamp":"2026-06-26T18:53:38.123886+00:00","event":"green_profit_lock","ticker":"MARA","pnl_usd":10.16,"pnl_pct":0.0028,"primary_goal":true,"reason":"green_profit_lock:ai_stall_min_green +0.28%","price":14.43,"ai_stalled":true}
+{"timestamp":"2026-06-26T18:53:40.592025+00:00","event":"green_profit_lock","ticker":"MARA","pnl_usd":-7.62,"source":"buffer","reason":"green_profit_lock:ai_stall_min_green +0.28%"}
+{"timestamp":"2026-06-26T18:53:45.480172+00:00","event":"hard_stop","ticker":"PLTR","pnl_usd":8.33,"pnl_pct":0.0003,"primary_goal":true,"reason":"hard_stop","price":112.41}
