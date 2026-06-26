@@ -460,5 +460,19 @@
     "first_seen": "2026-06-26T13:32:23.445792+00:00",
     "last_seen": "2026-06-26T13:32:23.455612+00:00",
     "source": "ib_error"
+  },
+  "RKLB": {
+    "ticker": "RKLB",
+    "failures": 2,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:API historical data query cancelled: 52920",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "NASDAQ",
+    "skip_until": 1782481703.8973691,
+    "skip_until_iso": "2026-06-26T13:48:23.897369+00:00",
+    "first_seen": "2026-06-26T13:33:23.863502+00:00",
+    "last_seen": "2026-06-26T13:33:23.897987+00:00",
+    "source": "ib_error"
   }
 }
