@@ -92,6 +92,24 @@ def is_ib_scanner_cancel_162(message: str) -> bool:
     return "scanner subscription cancelled" in (message or "").lower()
 
 
+def is_hmds_transient_message(message: str) -> bool:
+    """HMDS inactive, cancelled, or timeout — not 'this ticker has no data'."""
+    msg = (message or "").lower()
+    if "scanner subscription cancelled" in msg:
+        return True
+    if "historical data query cancelled" in msg:
+        return True
+    if "reqhistoricaldata" in msg and "timeout" in msg:
+        return True
+    if "hmds" in msg and any(
+        k in msg for k in ("cancel", "inactive", "unavailable", "busy", "timeout")
+    ):
+        return True
+    if "api historical data" in msg and "cancel" in msg:
+        return True
+    return False
+
+
 def classify_failure(code: int, message: str) -> str:
     msg = (message or "").lower()
     if code == 420 or "arcaedge" in msg or "no market data permissions" in msg:
@@ -191,7 +209,9 @@ def record_market_data_failure(
         from core.market_hours import get_market_state
         state = get_market_state(cfg)
         from core.rth_session import is_transient_md_failure
-        transient = is_transient_md_failure(cfg, code=code, pattern=pattern, state=state)
+        transient = is_transient_md_failure(
+            cfg, code=code, pattern=pattern, state=state, message=message,
+        )
         if transient:
             cd = min(cd, float(getattr(cfg, "MD_TRANSIENT_COOLDOWN_SEC", 90.0)))
     except Exception:
@@ -242,6 +262,7 @@ def record_market_data_failure(
     log.info(
         f"  📚 MD LEARN {ticker}: IB {code} ({pattern}) — "
         f"skip {cd / 60:.0f}m | failures={failures}"
+        + (" | transient" if transient else "")
     )
 
     for h in _handlers:
@@ -265,6 +286,15 @@ def handle_ib_market_data_error(
         return None
     if error_code == 162 and is_ib_scanner_cancel_162(error_string):
         return None
+    if error_code == 162 and is_hmds_transient_message(error_string):
+        if getattr(cfg, "MD_SOFT_FAIL_HMDS", True):
+            ticker = extract_ticker_from_error(contract, error_string)
+            if ticker:
+                log.debug(
+                    f"HMDS transient 162 {ticker}: {str(error_string)[:100]} "
+                    "(live streams only — not denylisting)"
+                )
+            return None
     ticker = extract_ticker_from_error(contract, error_string)
     if not ticker:
         return None
@@ -290,6 +320,9 @@ def record_fetch_failure(
 ) -> Optional[Dict[str, Any]]:
     """Record when fetch_historical raises or returns empty — same learning path."""
     msg = str(exc)
+    if getattr(cfg, "MD_SOFT_FAIL_HMDS", True) and is_hmds_transient_message(msg):
+        log.debug(f"HMDS prefetch transient for {ticker}: {msg[:120]}")
+        return None
     code = 162 if "no historical" in msg.lower() or "no data" in msg.lower() else 200
     return record_market_data_failure(
         cfg,

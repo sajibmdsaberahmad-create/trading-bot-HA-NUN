@@ -181,8 +181,12 @@ def is_transient_md_failure(
     code: int,
     pattern: str,
     state: Optional[str] = None,
+    message: str = "",
 ) -> bool:
-    """HMDS 162 outside RTH is flaky — do not drop locks or permanent-blacklist."""
+    """HMDS 162 flakes (cancelled/timeout/inactive) — keep lock, use live streams."""
+    if code == 162 and pattern == "no_historical_data":
+        if is_hmds_transient_message(message):
+            return bool(getattr(cfg, "MD_SOFT_FAIL_HMDS", True))
     if not bool(getattr(cfg, "MD_SOFT_FAIL_OUTSIDE_RTH", True)):
         return False
     state = state or get_market_state(cfg)

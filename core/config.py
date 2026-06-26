@@ -363,6 +363,9 @@ class BotConfig:
     MD_SOFT_FAIL_OUTSIDE_RTH: bool = os.getenv("MD_SOFT_FAIL_OUTSIDE_RTH", "true").lower() not in (
         "0", "false", "no",
     )
+    MD_SOFT_FAIL_HMDS: bool = os.getenv("MD_SOFT_FAIL_HMDS", "true").lower() not in (
+        "0", "false", "no",
+    )
     MD_TRANSIENT_COOLDOWN_SEC: float = float(os.getenv("MD_TRANSIENT_COOLDOWN_SEC", "90"))
     REALTIME_BARS_USE_RTH_WHEN_OPEN: bool = os.getenv(
         "REALTIME_BARS_USE_RTH_WHEN_OPEN", "true",
