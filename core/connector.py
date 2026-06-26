@@ -76,6 +76,14 @@ class IBConnector:
                 ibi.util.patchAsyncio()
             except Exception:
                 pass
+            if getattr(self.cfg, "IB_RECLAIM_SESSION_ON_START", True):
+                self.prepare_fresh_connection()
+            if self.ib.isConnected():
+                try:
+                    self.ib.disconnect()
+                except Exception:
+                    pass
+                time.sleep(1.0)
             self.ib.connect(
                 host=self.cfg.IB_HOST,
                 port=self.cfg.IB_PORT,
@@ -119,10 +127,102 @@ class IBConnector:
             )
             return False
 
-    def disconnect(self):
+    def prepare_fresh_connection(self) -> int:
+        """
+        Clear zombie API sessions on IB Gateway before the real bot connects.
+        Sudden kills leave ghost client slots that block live market data (10197).
+        """
+        host = self.cfg.IB_HOST
+        port = int(self.cfg.IB_PORT)
+        preferred = int(self.cfg.IB_CLIENT_ID)
+        candidates = [preferred] + [i for i in range(1, 11) if i != preferred]
+        pause = float(getattr(self.cfg, "IB_SESSION_RECLAIM_PAUSE_SEC", 2.0))
+
+        for cid in candidates:
+            probe = IB()
+            try:
+                probe.connect(host, port, clientId=cid, timeout=8)
+                probe.reqMarketDataType(1)
+                log.info(
+                    f"IB pre-connect: claimed client_id={cid} "
+                    f"(released stale/zombie API session)"
+                )
+                probe.disconnect()
+                time.sleep(pause)
+                self.cfg.IB_CLIENT_ID = cid
+                return cid
+            except Exception as exc:
+                msg = str(exc).lower()
+                if "326" in msg or "already in use" in msg:
+                    log.debug(f"IB client_id={cid} held by another live app — trying next")
+                try:
+                    if probe.isConnected():
+                        probe.disconnect()
+                except Exception:
+                    pass
+        log.warning(
+            f"IB pre-connect: all client IDs 1–10 busy on port {port} — "
+            "close TWS/mobile/other bots, then retry"
+        )
+        return preferred
+
+    def reclaim_live_market_data_session(self) -> bool:
+        """
+        Full disconnect/reconnect to reclaim live MD after 10197 competing session.
+        Cancels streams first via registered handlers.
+        """
+        log.warning(
+            "IB 10197 — reclaiming live market data slot "
+            "(stop streams → disconnect → reconnect → LIVE)"
+        )
+        for handler in list(self._session_reclaim_handlers):
+            try:
+                handler()
+            except Exception as exc:
+                log.debug(f"Session reclaim handler: {exc}")
+        self._stream_managers.clear()
         try:
-            self.ib.disconnect()
-            log.info("Disconnected from IB Gateway")
+            if self.ib.isConnected():
+                self.ib.disconnect()
+        except Exception:
+            pass
+        pause = float(getattr(self.cfg, "IB_SESSION_RECLAIM_PAUSE_SEC", 3.0))
+        time.sleep(pause)
+        self._contract = None
+        if not self.connect():
+            return False
+        self._apply_market_data_type(force=True)
+        log.info("IB live market data session reclaimed — streams can restart")
+        return True
+
+    def disconnect(self):
+        """Release all IB subscriptions and close the API socket."""
+        for handler in list(self._session_reclaim_handlers):
+            try:
+                handler()
+            except Exception:
+                pass
+        self._stream_managers.clear()
+        try:
+            if self.ib.isConnected():
+                try:
+                    for t in list(self.ib.tickers()):
+                        try:
+                            self.ib.cancelMktData(t.contract)
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+                try:
+                    for rt in list(getattr(self.ib, "realTimeBars", ()) or ()):
+                        try:
+                            self.ib.cancelRealTimeBars(rt)
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+                self.ib.disconnect()
+            log.info("Disconnected from IB Gateway (subscriptions cancelled)")
         except Exception:
             pass
 
@@ -307,6 +407,10 @@ class IBConnector:
         """Runner callback: downgrade ticker from tick-by-tick to 5s bars (IB 10190)."""
         self._tick_limit_handlers.append(handler)
 
+    def register_session_reclaim_handler(self, handler) -> None:
+        """Called before disconnect/reconnect to cancel live streams."""
+        self._session_reclaim_handlers.append(handler)
+
     def register_stream_manager(self, ticker: str, manager: Any) -> None:
         """Per-ticker DataManager — immediate 5s-bar fallback on IB 10189/10190."""
         if ticker:
@@ -342,13 +446,31 @@ class IBConnector:
         if errorCode == 300 and "can't find eid" in (errorString or "").lower():
             return
 
-        # Competing live session — re-assert LIVE data type (user has live MD subscription)
+        # Competing live session — reclaim MD slot after repeated failures
         if errorCode == 10197:
-            log.warning(
-                "IB 10197 competing live session — re-forcing LIVE market data "
-                "(close other TWS/mobile sessions if this repeats)"
-            )
             self._apply_market_data_type(force=True)
+            now = time.time()
+            if now - self._10197_window_start > 20.0:
+                self._10197_count = 0
+                self._10197_window_start = now
+            self._10197_count += 1
+            threshold = int(getattr(self.cfg, "IB_10197_RECLAIM_THRESHOLD", 3))
+            cooldown = float(getattr(self.cfg, "IB_10197_RECLAIM_COOLDOWN_SEC", 45.0))
+            if (
+                self._10197_count >= threshold
+                and now - self._last_md_reclaim_ts >= cooldown
+            ):
+                self._10197_count = 0
+                self._last_md_reclaim_ts = now
+                try:
+                    self.reclaim_live_market_data_session()
+                except Exception as exc:
+                    log.warning(f"IB session reclaim failed: {exc}")
+            else:
+                log.warning(
+                    "IB 10197 competing session — forced LIVE "
+                    f"({self._10197_count}/{threshold} before reclaim)"
+                )
             return
 
         # IB tick-by-tick unsupported (10189) or cap (10190) — downgrade to 5s bars

@@ -99,6 +99,16 @@ class BotConfig:
     IB_FORCE_LIVE_MARKET_DATA: bool = os.getenv(
         "IB_FORCE_LIVE_MARKET_DATA", "true",
     ).lower() in ("1", "true", "yes")
+    IB_RECLAIM_SESSION_ON_START: bool = os.getenv(
+        "IB_RECLAIM_SESSION_ON_START", "true",
+    ).lower() in ("1", "true", "yes")
+    IB_SESSION_RECLAIM_PAUSE_SEC: float = float(
+        os.getenv("IB_SESSION_RECLAIM_PAUSE_SEC", "2.5"),
+    )
+    IB_10197_RECLAIM_THRESHOLD: int = int(os.getenv("IB_10197_RECLAIM_THRESHOLD", "3"))
+    IB_10197_RECLAIM_COOLDOWN_SEC: float = float(
+        os.getenv("IB_10197_RECLAIM_COOLDOWN_SEC", "45"),
+    )
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
     # Paper $1M+ account: AI sizes from IB equity, learns without small-account caps
     AI_PAPER_FREE_LEARNING: bool = os.getenv(
