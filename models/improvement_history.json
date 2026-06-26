@@ -273,5 +273,22 @@
     "lessons": [
       "Review trade_closed on SOFI"
     ]
+  },
+  {
+    "timestamp": "2026-06-26T18:55:23.193868+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.64,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on RKLB"
+    ]
   }
 ]

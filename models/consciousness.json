@@ -5,15 +5,9 @@
   "training_sessions": 28,
   "trades_observed": 215,
   "scans_performed": 28,
-  "improvements_applied": 469,
+  "improvements_applied": 470,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-21T12:33:52.965691",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #4",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-22T08:55:43.250691",
       "age": "21h 52m 54s",
@@ -21284,6 +21278,28 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:55:23.171947",
+      "age": "5d 7h 52m 34s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #470",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.64,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on RKLB"
         ]
       }
     }
