@@ -3,60 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 236,
+  "trades_observed": 238,
   "scans_performed": 28,
-  "improvements_applied": 501,
+  "improvements_applied": 506,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T13:02:48.591904",
-      "age": "3d 1h 59m 59s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #30",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:05:38.009858",
-      "age": "3d 2h 2m 49s",
-      "type": "TRADE",
-      "message": "Observed trade: None ? P&L=$-2962.08",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:06:45.276051",
-      "age": "3d 2h 3m 56s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #31",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:08:23.850002",
-      "age": "3d 2h 5m 35s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #32",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:12:41.779403",
-      "age": "3d 2h 9m 53s",
-      "type": "TRADE",
-      "message": "Observed trade: None ? P&L=$-2020.20",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:23:52.787427",
-      "age": "3d 2h 21m 4s",
-      "type": "TRADE",
-      "message": "Observed trade: None ? P&L=$-11044.70",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T13:28:19.456292",
-      "age": "3d 2h 25m 30s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #33",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-24T13:31:12.290334",
       "age": "3d 2h 28m 23s",
@@ -21371,6 +21322,107 @@
       "type": "TRADE",
       "message": "Observed trade: PLTR ? P&L=$-119.01",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T19:00:32.225308",
+      "age": "5d 7h 57m 43s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$-7.26",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T19:00:32.530158",
+      "age": "5d 7h 57m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #502",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T19:00:32.530826",
+      "age": "5d 7h 57m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #503",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T19:00:34.535929",
+      "age": "5d 7h 57m 45s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #504",
+      "metadata": {
+        "source": "loss_streak",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.65,
+            "reason": "Loss streak \u2014 raise entry bar until pilot regains edge",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "VOLUME_SPIKE_MIN_RATIO",
+            "value": 1.4500000000000002,
+            "reason": "Loss streak \u2014 require stronger volume confirmation",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T19:00:42.608962",
+      "age": "5d 7h 57m 53s",
+      "type": "TRADE",
+      "message": "Observed trade: RIOT ? P&L=$-8.40",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T19:00:42.912046",
+      "age": "5d 7h 57m 54s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #505",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RIOT"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T19:00:42.932501",
+      "age": "5d 7h 57m 54s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #506",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on RIOT"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22729,8 +22781,8 @@
     }
   ],
   "last_training": "2026-06-25T20:07:35.278799",
-  "mood": "defensive",
-  "total_pnl": 123211.50000000006,
+  "mood": "recalibrating",
+  "total_pnl": 123195.84000000007,
   "win_history": [
     0.0,
     0.0,
@@ -22967,20 +23019,22 @@
     0.0,
     -60.64,
     -1.0,
-    -119.01
+    -119.01,
+    -7.26,
+    -8.4
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 5,
+  "consecutive_losses": 7,
   "worst_streak": 21,
-  "veteran_xp": 3200,
+  "veteran_xp": 3220,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 54,
     "entry_timing": 82
   },
-  "flights_completed": 231,
-  "hours_flown": 23.10000000000006,
+  "flights_completed": 233,
+  "hours_flown": 23.30000000000006,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -23001,9 +23055,9 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 17,
+    "PLT": 18,
     "LCI": 8,
-    "RIO": 19,
+    "RIO": 20,
     "QS": 5,
     "MAR": 22,
     "COI": 6,
@@ -23017,5 +23071,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 15% \u00b7 $-115.03. Preserving capital over action."
+  "mood_message": "Four losses in a row ($-290.24 recent). Tightening entries until edge returns."
 }

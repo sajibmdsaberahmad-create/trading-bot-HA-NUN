@@ -678,3 +678,30 @@ stop_breach
 Observed trade_closed — recorded for learning.
 stop_breach
 
+🧭 COMMANDER LEARNING | 2026-06-26T19:00:32.576237+00:00
+Observed loss_streak — recorded for learning.
+hard_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T19:00:32.576296+00:00
+Observed trade_closed — recorded for learning.
+hard_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T19:00:34.567885+00:00
+Could not parse AI plan — retained guidance for prompts only.
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- PLTR: pnl=$-7.26 slip=0
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.65 (Loss streak — raise entry bar until pilot regains edge)
+  - VOLUME_SPIKE_MIN_RATIO → 1.4500000000000002 (Loss streak — require stronger volume confirmation)
+
+🧭 COMMANDER LEARNING | 2026-06-26T19:00:42.960122+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-26T19:00:42.972407+00:00
+Observed loss_streak — recorded for learning.
+stop_breach
+
