@@ -187,7 +187,7 @@ class DataManager:
                 contract = self._get_contract()
                 tbt = tick_by_tick_type(self.cfg)
                 types_to_try = [tbt]
-                if tbt == "AllLast":
+                if tbt != "Last":
                     types_to_try.append("Last")
                 last_exc: Optional[Exception] = None
                 for tbt_try in types_to_try:

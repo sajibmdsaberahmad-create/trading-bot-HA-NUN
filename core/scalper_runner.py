@@ -2314,11 +2314,6 @@ class ScalperRunner:
             f"📡 Market data: {mode} | IB budget {n_tick} tick + {n_rt} 5s-bars "
             f"(cap ~5 each — extras deferred)"
         )
-        if getattr(self.cfg, "PAPER_TRADING", False) and use_tick and not paper_rt_only:
-            log.info(
-                "📡 Paper tick-by-tick: enabled — log out of live TWS/Gateway "
-                "or IB may throttle paper streams (data mirroring rule)"
-            )
 
     def run(self):
         self._register_shutdown_signals()
