@@ -3393,6 +3393,11 @@ class ScalperRunner:
             if cached is not None and len(cached) >= need:
                 idx += 1
                 continue
+            if self._stream_has_price(ticker):
+                self._bars_from_stream(ticker, need)
+                idx += 1
+                warmed += 1
+                continue
             self._prefetch_one_ticker_bars(ticker, quiet=True)
             idx += 1
             warmed += 1
@@ -3938,7 +3943,10 @@ class ScalperRunner:
                 continue
             min_bars = self._min_bars_for(ticker)
             df, live_px, dm, forecast = self._resolve_live_bars(ticker, min_bars=min_bars)
-            if df is None or len(df) < min_bars:
+            min_ok = min_bars
+            if dm and live_px > 0 and bool(getattr(self.cfg, "MD_SOFT_FAIL_HMDS", True)):
+                min_ok = max(3, min_bars // 2)
+            if df is None or len(df) < min_ok:
                 if dm and ticker.upper() in priority_names:
                     burst, burst_ratio = self._detect_tick_volume_burst(dm, df if df is not None else pd.DataFrame())
                     if burst:
