@@ -89,3 +89,6 @@ The root cause was an overreliance on technical analysis for profit hunting. The
 The event 'rth_open' occurred with real-time data in the live IB bar.
 Root cause: The event is missed profit hunts due to a high spike top (SPIKE_TOP_MIN_GAIN_PCT) within the guardrails. A high gain percentage prevents profitable exits.
 
+🧭 COMMANDER LEARNING | 2026-06-26T15:13:14.006450+00:00
+Observed rth_open — recorded for learning.
+

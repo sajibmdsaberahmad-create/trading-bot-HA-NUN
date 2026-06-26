@@ -5,7 +5,7 @@
   "training_sessions": 28,
   "trades_observed": 188,
   "scans_performed": 28,
-  "improvements_applied": 409,
+  "improvements_applied": 410,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20050,6 +20050,20 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #131",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T15:13:13.956225",
+      "age": "5d 4h 10m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #410",
+      "metadata": {
+        "source": "runtime_rth_open",
+        "summary": "Observed rth_open \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review rth_open on ?"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T15:12:43.760748",

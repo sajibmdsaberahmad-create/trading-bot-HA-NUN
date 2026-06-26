@@ -481,5 +481,14 @@
       "g",
       "."
     ]
+  },
+  {
+    "timestamp": "2026-06-26T15:13:14.009809+00:00",
+    "source": "runtime_rth_open",
+    "adjustments": {},
+    "guidelines_summary": "Observed rth_open \u2014 recorded for learning.",
+    "lessons": [
+      "Review rth_open on ?"
+    ]
   }
 ]
