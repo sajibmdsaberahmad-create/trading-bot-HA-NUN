@@ -150,6 +150,7 @@ export IB_10197_RECLAIM_THRESHOLD="${IB_10197_RECLAIM_THRESHOLD:-3}"
 export IB_10197_RECLAIM_COOLDOWN_SEC="${IB_10197_RECLAIM_COOLDOWN_SEC:-45}"
 export SKIP_HMDS_OUTSIDE_RTH="${SKIP_HMDS_OUTSIDE_RTH:-true}"
 export MD_SOFT_FAIL_OUTSIDE_RTH="${MD_SOFT_FAIL_OUTSIDE_RTH:-true}"
+export MD_SOFT_FAIL_HMDS="${MD_SOFT_FAIL_HMDS:-true}"
 export RTH_OPENING_WINDOW_MIN="${RTH_OPENING_WINDOW_MIN:-30}"
 export RTH_OPENING_MONITOR_SEC="${RTH_OPENING_MONITOR_SEC:-0.05}"
 export RTH_MONITOR_SEC="${RTH_MONITOR_SEC:-0.08}"
@@ -235,6 +236,7 @@ export LOSS_STREAK_RESUME_CONFIDENCE="${LOSS_STREAK_RESUME_CONFIDENCE:-0.52}"
 export USE_TICK_STREAM=true
 export PAPER_REALTIME_BARS_ONLY=false
 export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-AllLast}"
+export MD_SOFT_FAIL_HMDS=true
 echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | tick-by-tick=on"
 
 # ── 2b. GitHub CLI (releases + artifact sync) ───────────────────────────────
