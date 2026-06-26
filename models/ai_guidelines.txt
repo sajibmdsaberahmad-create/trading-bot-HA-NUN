@@ -389,3 +389,23 @@ bracket_exit
 Observed loss_streak — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:38:48.639505+00:00
+Observed trade_closed — recorded for learning.
+trailing_stop
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:38:49.740442+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:38:49.743280+00:00
+Observed loss_streak — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:38:54.270743+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:38:54.270894+00:00
+Observed loss_streak — recorded for learning.
+stop_breach
+

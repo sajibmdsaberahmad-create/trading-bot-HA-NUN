@@ -3,9 +3,9 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 150,
   "training_sessions": 28,
-  "trades_observed": 193,
+  "trades_observed": 196,
   "scans_performed": 28,
-  "improvements_applied": 433,
+  "improvements_applied": 438,
   "reports_generated": 27,
   "event_log": [
     {
@@ -20661,6 +20661,97 @@
           "Review trade_closed on COIN"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:38:48.311039",
+      "age": "5d 7h 35m 59s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:38:48.538700",
+      "age": "5d 7h 35m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #434",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:38:49.274120",
+      "age": "5d 7h 36m 0s",
+      "type": "TRADE",
+      "message": "Observed trade: PLTR ? P&L=$-2.76",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:38:49.691490",
+      "age": "5d 7h 36m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #436",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:38:49.692165",
+      "age": "5d 7h 36m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #436",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:38:53.807428",
+      "age": "5d 7h 36m 5s",
+      "type": "TRADE",
+      "message": "Observed trade: RKLB ? P&L=$-11.80",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:38:54.172000",
+      "age": "5d 7h 36m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #438",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on RKLB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:38:54.172675",
+      "age": "5d 7h 36m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #438",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RKLB"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:36:48.075531",
@@ -22020,7 +22111,7 @@
   ],
   "last_training": "2026-06-25T20:07:35.278799",
   "mood": "defensive",
-  "total_pnl": 123566.47000000004,
+  "total_pnl": 123551.91000000005,
   "win_history": [
     0.0,
     0.0,
@@ -22214,20 +22305,23 @@
     0.0,
     5.3,
     0.0,
-    -3.2
+    -3.2,
+    0.0,
+    -2.76,
+    -11.8
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 5,
   "worst_streak": 21,
-  "veteran_xp": 2680,
+  "veteran_xp": 2710,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 72
   },
-  "flights_completed": 188,
-  "hours_flown": 18.799999999999997,
+  "flights_completed": 191,
+  "hours_flown": 19.1,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22248,14 +22342,14 @@
     "SOX": 12,
     "BIT": 13,
     "GPU": 19,
-    "PLT": 8,
+    "PLT": 9,
     "LCI": 8,
     "RIO": 13,
     "QS": 5,
-    "MAR": 11,
+    "MAR": 12,
     "COI": 3,
     "RIV": 5,
-    "RKL": 7,
+    "RKL": 8,
     "SOF": 7,
     "AST": 4
   },
