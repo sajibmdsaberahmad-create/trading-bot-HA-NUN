@@ -5060,15 +5060,15 @@ class ScalperRunner:
                     from core.council_nanny import prefetch_enabled
                     if prefetch_enabled(self.cfg):
                         self.ai_commander.prefetch_position_manage({
-                        "ticker": ticker,
-                        "price": current_px,
-                        "pnl_pct": round(pnl_pct, 2),
-                        "peak_pct": round(peak_pct, 2),
-                        "stop": self._position_stop,
-                        "target": self._position_target,
-                        "mechanical_stop": mech_stop,
-                        "mechanical_target": mech_target,
-                    })
+                            "ticker": ticker,
+                            "price": current_px,
+                            "pnl_pct": round(pnl_pct, 2),
+                            "peak_pct": round(peak_pct, 2),
+                            "stop": self._position_stop,
+                            "target": self._position_target,
+                            "mechanical_stop": mech_stop,
+                            "mechanical_target": mech_target,
+                        })
                 except Exception:
                     pass
 
