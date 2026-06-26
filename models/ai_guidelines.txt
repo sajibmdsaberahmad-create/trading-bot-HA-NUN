@@ -526,3 +526,11 @@ Recent losses:
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:39.407171+00:00
+Observed loss_streak — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-26T18:54:39.434083+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+

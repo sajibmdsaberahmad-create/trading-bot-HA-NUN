@@ -3,38 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 153,
   "training_sessions": 28,
-  "trades_observed": 212,
+  "trades_observed": 213,
   "scans_performed": 28,
-  "improvements_applied": 464,
+  "improvements_applied": 466,
   "reports_generated": 27,
   "event_log": [
-    {
-      "timestamp": "2026-06-21T12:12:55.033494",
-      "type": "SCAN",
-      "message": "Market scan #1",
-      "metadata": {
-        "source": "off_hours",
-        "tickers": 72
-      }
-    },
-    {
-      "timestamp": "2026-06-21T12:12:55.033806",
-      "type": "TRAIN",
-      "message": "Training session #1",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-21T12:12:55.033996",
-      "type": "CONTEXT",
-      "message": "Fetched market context",
-      "metadata": {
-        "spy_trend": "unknown",
-        "qqq_trend": "unknown",
-        "vix_level": null,
-        "vix_regime": "unknown",
-        "timestamp": "2026-06-21T12:12:55.033990"
-      }
-    },
     {
       "timestamp": "2026-06-21T12:12:55.034125",
       "type": "REGIME",
@@ -21260,6 +21233,41 @@
           "Review trade_closed on RIOT"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-26T18:54:38.945545",
+      "age": "5d 7h 51m 50s",
+      "type": "TRADE",
+      "message": "Observed trade: RKLB ? P&L=$-7.29",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-26T18:54:39.330863",
+      "age": "5d 7h 51m 50s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #465",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on RKLB"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-26T18:54:39.380400",
+      "age": "5d 7h 51m 50s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #466",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on RKLB"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-26T18:52:36.331555",
@@ -22618,8 +22626,8 @@
     }
   ],
   "last_training": "2026-06-25T20:07:35.278799",
-  "mood": "defensive",
-  "total_pnl": 123507.18000000005,
+  "mood": "recalibrating",
+  "total_pnl": 123499.89000000006,
   "win_history": [
     0.0,
     0.0,
@@ -22832,20 +22840,21 @@
     -1.19,
     -30.92,
     -2.62,
-    0.0
+    0.0,
+    -7.29
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 6,
+  "consecutive_losses": 7,
   "worst_streak": 21,
-  "veteran_xp": 2905,
+  "veteran_xp": 2915,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 52,
     "entry_timing": 76
   },
-  "flights_completed": 207,
-  "hours_flown": 20.700000000000024,
+  "flights_completed": 208,
+  "hours_flown": 20.800000000000026,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -22873,7 +22882,7 @@
     "MAR": 17,
     "COI": 3,
     "RIV": 5,
-    "RKL": 9,
+    "RKL": 10,
     "SOF": 12,
     "AST": 4
   },
@@ -22882,5 +22891,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 15% \u00b7 $-22.46. Preserving capital over action."
+  "mood_message": "Four losses in a row ($-66.58 recent). Tightening entries until edge returns."
 }
