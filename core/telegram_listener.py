@@ -436,6 +436,14 @@ class TelegramCommandListener:
         self.send_instant(chat_id, "Unknown command. Try /help", reply_to=reply_id)
 
     def _handle_free_text(self, chat_id: int, text: str, reply_id: Optional[int]) -> None:
+        try:
+            from core.trading_focus_guard import halim_lm_blocked_during_trading, trading_focus_message
+            if halim_lm_blocked_during_trading("commander_chat"):
+                self.send_instant(chat_id, trading_focus_message(via="telegram"), reply_to=reply_id)
+                return
+        except Exception:
+            pass
+
         exit_match = self._parse_exit_intent(text)
         if exit_match:
             ticker, reason = exit_match
@@ -473,6 +481,19 @@ class TelegramCommandListener:
         caption: str,
         reply_id: Optional[int],
     ) -> None:
+        try:
+            from core.trading_focus_guard import is_trading_session_active, trading_focus_message
+            if is_trading_session_active() and not __import__("os").getenv(
+                "HALIM_CHAT_DURING_TRADING", "false"
+            ).lower() in ("1", "true", "yes"):
+                self.send_instant(
+                    chat_id,
+                    trading_focus_message(via="telegram") + "\n(Chart vision paused during trading.)",
+                    reply_to=reply_id,
+                )
+                return
+        except Exception:
+            pass
         from core.ollama_vision import ensure_vision_model, is_vision_model_present, vision_model_name
 
         model = vision_model_name(self.cfg)
@@ -777,6 +798,12 @@ class TelegramCommandListener:
         self.send_ai(chat_id, "mood", ctx, fallback, reply_to=reply_id)
 
     def _think(self, user_text: str, extra: str = "") -> str:
+        try:
+            from core.trading_focus_guard import halim_lm_blocked_during_trading
+            if halim_lm_blocked_during_trading("commander_chat"):
+                return ""
+        except Exception:
+            pass
         try:
             from core.halim_companion import companion_speak
             r = companion_speak(

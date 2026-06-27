@@ -155,6 +155,21 @@ class HalimHandler(BaseHTTPRequestHandler):
         if self.path == "/v1/complete":
             prompt = str(body.get("prompt", ""))
             purpose = str(body.get("purpose", "reasoning"))
+            try:
+                root = os.getenv("HALIM_REPO_ROOT", "")
+                if root and root not in sys.path:
+                    sys.path.insert(0, root)
+                from core.trading_focus_guard import halim_lm_blocked_during_trading, trading_focus_message
+                if halim_lm_blocked_during_trading(purpose):
+                    self._json(503, {
+                        "ok": False,
+                        "reason": "trading_focus",
+                        "message": trading_focus_message(via="cli"),
+                        "purpose": purpose,
+                    })
+                    return
+            except Exception:
+                pass
             out = complete_reasoning(prompt, purpose=purpose)
             if out.get("ok") and out.get("text"):
                 rec = _record_action({

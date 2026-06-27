@@ -78,6 +78,13 @@ def try_reasoning_complete(
     if os.getenv("HALIM_REASONING_VIA_SERVER", "auto").lower() in ("0", "false", "off"):
         return None, "disabled"
 
+    try:
+        from core.trading_focus_guard import halim_lm_blocked_during_trading
+        if halim_lm_blocked_during_trading(purpose):
+            return None, "trading_focus"
+    except Exception:
+        pass
+
     if not _ensure_halim_package():
         return None, "unavailable"
 
@@ -121,6 +128,12 @@ def try_reasoning_complete(
 
 def _try_inline_lm(prompt: str, *, purpose: str = "reasoning") -> Tuple[Optional[str], str]:
     """Load toddler LM in-process when serve is down."""
+    try:
+        from core.trading_focus_guard import halim_lm_blocked_during_trading
+        if halim_lm_blocked_during_trading(purpose):
+            return None, "trading_focus"
+    except Exception:
+        pass
     try:
         from halim.engine import complete_reasoning, reasoning_available
 
