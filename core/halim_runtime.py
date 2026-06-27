@@ -211,11 +211,25 @@ class HalimRuntime:
     def _off_hours_export_gold(self) -> None:
         try:
             from core.halim_action_learn import export_action_gold
-            r = export_action_gold()
+            r = export_action_gold(include_learn_cache=True)
             if r.get("added", 0):
                 self._journal("export_action_gold", r)
         except Exception as exc:
             log.debug(f"Halim export action gold: {exc}")
+
+    def _off_hours_auto_lm_check(self) -> None:
+        """Export + maybe schedule LM retrain (non-blocking)."""
+        if os.getenv("HALIM_AUTO_LM_RETRAIN", "true").lower() not in ("1", "true", "yes"):
+            return
+        try:
+            from core.halim_action_learn import export_action_gold
+            from core.halim_auto_lm import schedule_auto_retrain
+            r = export_action_gold(include_learn_cache=True)
+            sched = schedule_auto_retrain(r, self.cfg, trigger="off_hours")
+            if sched.get("scheduled"):
+                self._journal("auto_lm_scheduled", sched)
+        except Exception as exc:
+            log.debug(f"Halim auto-LM check: {exc}")
 
     def _off_hours_develop(self, runner: Optional["ScalperRunner"]) -> None:
         if os.getenv("HALIM_OFF_HOURS_DEV", "true").lower() not in ("1", "true", "yes"):
