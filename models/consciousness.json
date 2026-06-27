@@ -3,18 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 175,
   "training_sessions": 35,
-  "trades_observed": 490,
+  "trades_observed": 491,
   "scans_performed": 35,
   "improvements_applied": 851,
   "reports_generated": 34,
   "event_log": [
-    {
-      "timestamp": "2026-06-25T19:26:44.136967",
-      "age": "4d 8h 23m 55s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$+31.22",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-25T19:26:48.400812",
       "age": "4d 8h 23m 59s",
@@ -13942,6 +13935,13 @@
           "Review loss_streak on MARA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-27T07:10:40.060427",
+      "age": "5d 20h 7m 51s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$-22.70",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-27T07:02:22.597213",
@@ -15811,8 +15811,8 @@
     }
   ],
   "last_training": "2026-06-27T05:25:36.662226",
-  "mood": "steady",
-  "total_pnl": 121969.3300000004,
+  "mood": "recalibrating",
+  "total_pnl": 121946.6300000004,
   "win_history": [
     0.0,
     0.0,
@@ -16303,10 +16303,11 @@
     164.21,
     -14.23,
     -10.63,
-    -22.52
+    -22.52,
+    -22.7
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 4,
   "worst_streak": 86,
   "veteran_xp": 6385,
   "veteran_level": "Ace",
@@ -16355,5 +16356,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Mixed session \u00b7 $+525.88. Watching for cleaner setups."
+  "mood_message": "Four losses in a row ($+521.00 recent). Tightening entries until edge returns."
 }
