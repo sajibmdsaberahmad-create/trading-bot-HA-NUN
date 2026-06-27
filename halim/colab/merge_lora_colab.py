@@ -11,18 +11,19 @@ from pathlib import Path
 
 
 def _fix_peft_torchao() -> None:
-    """Colab often ships torchao 0.10 — peft requires >=0.16 or no torchao."""
-    try:
-        import torchao  # noqa: F401
-        ver = getattr(torchao, "__version__", "0")
-        parts = [int(x) for x in ver.split(".")[:2]]
-        if parts[0] == 0 and parts[1] < 16:
-            print(f"Fixing torchao {ver} (too old for peft)…")
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "-q", "torchao>=0.16.0"],
-            )
-    except ImportError:
-        pass
+    """Colab ships torchao 0.10 — peft 0.14+ crashes unless removed or upgraded."""
+    # Uninstall beats upgrade on Colab (preinstalled wheel often wins pip install -U)
+    subprocess.run(
+        [sys.executable, "-m", "pip", "uninstall", "-y", "torchao"],
+        check=False,
+        capture_output=True,
+    )
+    # Optional upgrade if user wants torchao later
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "-q", "torchao>=0.16.0"],
+        check=False,
+        capture_output=True,
+    )
 
 
 def main() -> None:
