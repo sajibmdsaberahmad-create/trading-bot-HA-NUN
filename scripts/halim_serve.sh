@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-export HALIM_REPO_ROOT="$ROOT"
-export PYTHONPATH="$ROOT/halim:$ROOT${PYTHONPATH:+:$PYTHONPATH}"
+# shellcheck disable=SC1091
+source "$ROOT/scripts/halim_env.sh"
 if [[ -d venv ]]; then source venv/bin/activate; fi
 exec python -m halim.serve "$@"

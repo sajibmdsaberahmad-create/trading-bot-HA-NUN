@@ -17,6 +17,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+# shellcheck disable=SC1091
+source "$ROOT/scripts/halim_env.sh"
 export TZ="America/New_York"
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 

@@ -79,3 +79,4 @@
 {"timestamp": "2026-06-27T12:41:01.145836+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}
 {"timestamp": "2026-06-27T12:58:59.087883+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}
 {"timestamp": "2026-06-27T13:01:27.811594+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}
+{"timestamp": "2026-06-27T14:12:28.782647+00:00", "event": "register_checkpoint", "name": "toddler_v1", "latest": "/Users/mdsabersajib/Downloads/tradingbot/halim/data/checkpoints/latest"}

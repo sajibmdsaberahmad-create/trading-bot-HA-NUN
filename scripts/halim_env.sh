@@ -10,6 +10,7 @@ export HALIM_LM_BACKEND="${HALIM_LM_BACKEND:-hf}"
 export HALIM_MODEL_PATH="${HALIM_MODEL_PATH:-halim/data/checkpoints/latest}"
 export HALIM_BASE_MODEL="${HALIM_BASE_MODEL:-Qwen/Qwen2.5-0.5B-Instruct}"
 export HALIM_REASONING_VIA_SERVER="${HALIM_REASONING_VIA_SERVER:-auto}"
+export HALIM_FORCE_LM="${HALIM_FORCE_LM:-true}"
 
 # PPO ↔ Halim mutual distillation — always on
 export HALIM_PPO_COEVOLUTION="${HALIM_PPO_COEVOLUTION:-true}"

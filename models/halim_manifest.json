@@ -1,16 +1,18 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-27T12:22:31.119223+00:00",
-  "phase": "newborn",
+  "updated_at": "2026-06-27T14:12:30.613457+00:00",
+  "phase": "adult",
   "phase_info": {
-    "index": 0,
-    "description": "Numeric students only \u2014 PPO reflex, proxy, scalper weights.",
+    "index": 3,
+    "description": "Halim runs on your hardware \u2014 HANOON + general assistant.",
     "external_llm": false,
     "capabilities": [
-      "trade_reflex",
-      "enter_skip_proxy",
-      "heuristic_copilot"
+      "trade",
+      "code",
+      "math",
+      "generative",
+      "tool_use"
     ]
   },
   "identity": {
@@ -36,14 +38,12 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-27T12:22:29.569270+00:00",
+    "timestamp": "2026-06-27T14:12:28.932992+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
-        "exists": true,
-        "path": "ppo_trader.zip",
-        "size_kb": 28474.7,
-        "modified": "2026-06-27T12:19:51.787417+00:00"
+        "exists": false,
+        "path": "ppo_trader.zip"
       },
       "ppo_replay": {
         "exists": true,
@@ -67,19 +67,19 @@
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-27T12:19:26.622086+00:00"
+        "modified": "2026-06-27T12:39:30.845474+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 24930.3,
-        "modified": "2026-06-27T12:19:30.167733+00:00"
+        "size_kb": 21960.1,
+        "modified": "2026-06-27T12:40:22.996924+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2321.3,
-        "modified": "2026-06-27T12:19:24.350553+00:00"
+        "size_kb": 2320.6,
+        "modified": "2026-06-27T12:40:22.946704+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -110,7 +110,7 @@
       "win_rate": 0.206,
       "avg_pnl": -4.3
     },
-    "buffer_records": 5805,
+    "buffer_records": 5000,
     "dataset_pairs": 2204,
     "maturity": {
       "stage": "adult",
@@ -118,7 +118,7 @@
       "stage_count": 6,
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
-        "closed_trades": 1980,
+        "closed_trades": 1791,
         "dataset_pairs": 2204,
         "evolution_count": 12,
         "proxy_accuracy": 1.0,
@@ -149,5 +149,5 @@
       "next_stage": null
     }
   },
-  "next_milestone": "Export to halim repo \u2192 train first small Halim transformer (one-time GPU)"
+  "next_milestone": "Expand to frontier \u2014 multimodal, agents, full generative stack"
 }
