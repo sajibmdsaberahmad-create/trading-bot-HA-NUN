@@ -1,0 +1,52 @@
+# Brain development log
+
+Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
+
+- `2026-06-27 06:33 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=100% (645 samples)
+- `2026-06-27 06:34 UTC` **brain_evolution** · stage **adult** — Evolution cli — stage adult, dataset 2023 pairs
+- `2026-06-27 07:17 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 30%, source heuristic_fallback
+- `2026-06-27 07:22 UTC` **brain_ppo_teacher** — PPO teacher replay_close_QS: WR 26%, source heuristic_fallback
+- `2026-06-27 07:27 UTC` **brain_ppo_teacher** — PPO teacher replay_close_COIN: WR 19%, source heuristic_fallback
+- `2026-06-27 07:32 UTC` **brain_ppo_teacher** — PPO teacher replay_close_QS: WR 15%, source heuristic_fallback
+- `2026-06-27 07:38 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 7%, source heuristic_fallback
+- `2026-06-27 07:43 UTC` **brain_ppo_teacher** — PPO teacher replay_close_QS: WR 9%, source heuristic_fallback
+- `2026-06-27 07:44 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 14%, source heuristic_fallback
+- `2026-06-27 07:44 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 1990 pairs
+- `2026-06-27 07:48 UTC` **brain_ppo_teacher** — PPO teacher replay_session_end: WR 14%, source heuristic_fallback
+- `2026-06-27 07:48 UTC` **brain_evolution** · stage **adult** — Evolution replay_session_end — stage adult, dataset 1878 pairs
+- `2026-06-27 07:58 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 14%, source heuristic_fallback
+- `2026-06-27 07:58 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 1878 pairs
+- `2026-06-27 07:58 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 14%, source heuristic_fallback
+- `2026-06-27 07:58 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 1878 pairs
+- `2026-06-27 08:02 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 13%, source heuristic_fallback
+- `2026-06-27 08:02 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 1878 pairs
+- `2026-06-27 08:04 UTC` **brain_ppo_teacher** — PPO teacher replay_session_end: WR 13%, source heuristic_fallback
+- `2026-06-27 08:04 UTC` **brain_evolution** · stage **adult** — Evolution replay_session_end — stage adult, dataset 1879 pairs
+- `2026-06-27 08:05 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 13%, source heuristic_fallback
+- `2026-06-27 08:05 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 1879 pairs
+- `2026-06-27 08:28 UTC` **brain_ppo_teacher** — PPO teacher replay_close_PLTR: WR 13%, source heuristic_fallback
+- `2026-06-27 08:35 UTC` **brain_ppo_teacher** — PPO teacher replay_close_COIN: WR 15%, source heuristic_fallback
+- `2026-06-27 08:44 UTC` **brain_ppo_teacher** — PPO teacher replay_close_COIN: WR 19%, source heuristic_fallback
+- `2026-06-27 08:55 UTC` **brain_ppo_teacher** — PPO teacher replay_close_MARA: WR 26%, source heuristic_fallback
+- `2026-06-27 09:00 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 29%, source heuristic_fallback
+- `2026-06-27 09:06 UTC` **brain_ppo_teacher** — PPO teacher replay_close_MARA: WR 15%, source heuristic_fallback
+- `2026-06-27 09:11 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 23%, source heuristic_fallback
+- `2026-06-27 09:11 UTC` **brain_evolution** · stage **adult** — Evolution replay_teardown — stage adult, dataset 2042 pairs
+- `2026-06-27 09:29 UTC` **brain_ppo_teacher** — PPO teacher replay_close_RIVN: WR 26%, source heuristic_fallback
+- `2026-06-27 09:31 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 22%, source heuristic_fallback
+- `2026-06-27 09:32 UTC` **brain_evolution** · stage **adult** — Evolution replay_teardown — stage adult, dataset 2060 pairs
+- `2026-06-27 10:08 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 22%, source heuristic_fallback
+- `2026-06-27 10:12 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 25%, source heuristic_fallback
+- `2026-06-27 10:19 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 31%, source heuristic_fallback
+- `2026-06-27 10:23 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 31%, source heuristic_fallback
+- `2026-06-27 10:28 UTC` **brain_ppo_teacher** — PPO teacher replay_close_MARA: WR 31%, source heuristic_fallback
+- `2026-06-27 10:33 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 26%, source heuristic_fallback
+- `2026-06-27 10:40 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 28%, source heuristic_fallback
+- `2026-06-27 10:57 UTC` **brain_ppo_teacher** — PPO teacher replay_close_MARA: WR 36%, source heuristic_fallback
+- `2026-06-27 11:02 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 36%, source heuristic_fallback
+- `2026-06-27 11:07 UTC` **brain_ppo_teacher** — PPO teacher replay_close_MARA: WR 27%, source heuristic_fallback
+- `2026-06-27 11:14 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 22%, source heuristic_fallback
+- `2026-06-27 11:22 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 29%, source heuristic_fallback
+- `2026-06-27 11:26 UTC` **brain_ppo_teacher** — PPO teacher replay_close_COIN: WR 27%, source heuristic_fallback
+- `2026-06-27 11:55 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 26%, source heuristic_fallback
+- `2026-06-27 11:55 UTC` **brain_evolution** · stage **adult** — Evolution replay_teardown — stage adult, dataset 2204 pairs

@@ -1,0 +1,7 @@
+{"timestamp":"2026-06-27T07:03:39.874821+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-27T07:14:46.711416+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-27T08:02:16.975664+00:00","event":"off_hours_learn","mode":"off_hours","topic":"wiki:Stock_market","chars":12000}
+{"timestamp":"2026-06-27T08:03:14.731522+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-27T08:26:56.564154+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-27T09:27:11.981297+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-27T10:07:12.307094+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}

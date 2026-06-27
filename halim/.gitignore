@@ -1,0 +1,11 @@
+# M. A. Halim — owned model repo
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+data/checkpoints/
+*.gguf
+*.safetensors
+*.bin
+.DS_Store

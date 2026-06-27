@@ -1,62 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 181,
-  "training_sessions": 36,
+  "total_awakenings": 182,
+  "training_sessions": 37,
   "trades_observed": 784,
-  "scans_performed": 36,
+  "scans_performed": 37,
   "improvements_applied": 1256,
   "reports_generated": 35,
   "event_log": [
-    {
-      "timestamp": "2026-06-27T06:22:11.006355",
-      "age": "5d 19h 19m 22s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #693",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-27T06:22:11.006614",
-      "age": "5d 19h 19m 22s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #693",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-27T06:22:23.513383",
-      "age": "5d 19h 19m 34s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+4.66",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-27T06:22:25.509347",
-      "age": "5d 19h 19m 36s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-0.73",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-27T06:22:26.547196",
-      "age": "5d 19h 19m 37s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-6.46",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-27T06:22:26.973028",
       "age": "5d 19h 19m 38s",
@@ -11330,9 +11281,53 @@
       "type": "TRADE",
       "message": "Observed trade: LCID ? P&L=$-1.83",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T12:19:10.789538",
+      "age": "6d 1h 16m 22s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #182",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T12:19:29.713348",
+      "age": "6d 1h 16m 41s",
+      "type": "SCAN",
+      "message": "Market scan #37",
+      "metadata": {
+        "source": "off_hours",
+        "tickers": "live_ib"
+      }
+    },
+    {
+      "timestamp": "2026-06-27T12:19:29.730774",
+      "age": "6d 1h 16m 41s",
+      "type": "TRAIN",
+      "message": "Training session #37",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T12:19:30.119076",
+      "age": "6d 1h 16m 41s",
+      "type": "CONTEXT",
+      "message": "Fetched market context",
+      "metadata": {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "vix_level": 0.0,
+        "vix_regime": "low",
+        "timestamp": "2026-06-27T12:19:30.119051"
+      }
+    },
+    {
+      "timestamp": "2026-06-27T12:19:30.128173",
+      "age": "6d 1h 16m 41s",
+      "type": "REGIME",
+      "message": "Market regime: unknown (conf=0%)",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-27T10:06:57.120104",
+  "last_awakening": "2026-06-27T12:19:10.789274",
   "current_version": "v20260627_080015",
   "version_history": [
     {

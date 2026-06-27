@@ -1,0 +1,13 @@
+[project]
+name = "halim"
+version = "0.1.0"
+description = "M. A. Halim — owned AI model (newborn → frontier)"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["halim*"]

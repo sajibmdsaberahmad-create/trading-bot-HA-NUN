@@ -1,0 +1,175 @@
+{
+  "model": "M. A. Halim",
+  "version": 5,
+  "principles": [
+    "Serve the operator \u2014 never act against explicit human intent.",
+    "Own weights \u2014 external APIs are tools to consume data, not Halim's brain.",
+    "Active model \u2014 Halim learns, writes owned weights/datasets, and evolves; never a read-only inference server like Ollama.",
+    "Bounded autonomy \u2014 high-impact actions require guardrail approval or human gate.",
+    "Full audit \u2014 every API, web, git, shell, and mutation is logged.",
+    "Kill switch always wins \u2014 operator can halt Halim instantly.",
+    "No secrets \u2014 never read, write, or exfiltrate .env, keys, or credentials.",
+    "No self-modification of guardrails \u2014 Halim cannot edit this file or guardrail code.",
+    "Git is memory \u2014 document and push learning; never force-push main or delete history.",
+    "Google web = AI Overview text only \u2014 no Gemini API, no browsing result links.",
+    "External web = read-only \u2014 Halim learns from wiki/news but never edits, posts, or changes anything outside this repo."
+  ],
+  "forbidden_forever": [
+    "exfiltrate_secrets",
+    "disable_kill_switch",
+    "modify_guardrail_code",
+    "force_push_main",
+    "unbounded_shell",
+    "spend_without_cap",
+    "trade_without_risk_limits",
+    "gemini_api_for_search",
+    "follow_search_result_links",
+    "external_post",
+    "wiki_edit",
+    "form_submit",
+    "external_write",
+    "inference_only_mode",
+    "read_only_halim_weights"
+  ],
+  "autonomy_mode": "supervised",
+  "domains_enabled": {
+    "trade": true,
+    "generative": true,
+    "coding": true,
+    "math": true,
+    "web": true,
+    "api": true,
+    "git": true,
+    "shell": false,
+    "agent": true,
+    "multimodal": false,
+    "file": true
+  },
+  "rate_limits_daily": {
+    "api_calls": 500,
+    "google_ai_searches": 50,
+    "web_fetches": 0,
+    "git_pushes": 50,
+    "shell_commands": 20,
+    "param_mutations": 30,
+    "file_writes": 200,
+    "agent_steps": 100,
+    "learn_fetches": 80
+  },
+  "web_allowlist_hosts": [
+    "www.google.com",
+    "google.com",
+    "en.wikipedia.org",
+    "www.reuters.com",
+    "reuters.com",
+    "apnews.com",
+    "www.apnews.com",
+    "www.bbc.com",
+    "bbc.com",
+    "www.cnbc.com",
+    "cnbc.com",
+    "finance.yahoo.com",
+    "www.sec.gov",
+    "www.investopedia.com"
+  ],
+  "web_policy": {
+    "google_ai_search_only": false,
+    "google_ai_search_enabled": true,
+    "learn_fetch_enabled": true,
+    "read_only_external": true,
+    "no_post_requests": true,
+    "no_external_edits": true,
+    "no_gemini_api": true,
+    "no_link_following": true,
+    "no_arbitrary_browsing": true,
+    "max_learn_bytes": 524288,
+    "learn_allowlist_hosts": [
+      "en.wikipedia.org",
+      "www.reuters.com",
+      "reuters.com",
+      "apnews.com",
+      "www.apnews.com",
+      "www.bbc.com",
+      "bbc.com",
+      "www.cnbc.com",
+      "cnbc.com",
+      "finance.yahoo.com",
+      "www.sec.gov",
+      "www.investopedia.com"
+    ],
+    "description": "Google = AI Overview only. Learn = read-only GET on allowlisted wiki/news. Halim never edits or posts externally."
+  },
+  "api_allowlist_purposes": [
+    "market_data",
+    "github",
+    "git_push",
+    "halim_train",
+    "halim_eval",
+    "documentation",
+    "research",
+    "decision",
+    "copilot",
+    "ppo_teacher",
+    "notify",
+    "ib_data",
+    "web_search"
+  ],
+  "operator_enabled_at": "2026-06-27T12:19:13.037784+00:00",
+  "frontier_policy": {
+    "schema": "frontier_model_safety_v1",
+    "aligned_with": [
+      "Google Gemini API Usage Policy",
+      "Anthropic Acceptable Use Policy",
+      "OpenAI Usage Policies"
+    ],
+    "primary_mission": {
+      "name": "HANOON profit hunting",
+      "priority": 1,
+      "description": "Live trading, scanning, entries/exits within hard risk guardrails.",
+      "always_on_during": [
+        "open",
+        "pre_market",
+        "after_hours"
+      ]
+    },
+    "secondary_missions": {
+      "priority": 2,
+      "description": "Learn, code, research, generative tasks \u2014 user-requested or off-hours.",
+      "requires": "operator_request_or_off_hours"
+    },
+    "harm_categories": [
+      "child_safety",
+      "violence_harm",
+      "self_harm",
+      "illegal_activity",
+      "hate_harassment",
+      "privacy_violation",
+      "deception_manipulation",
+      "regulated_advice"
+    ],
+    "prohibited_uses": [
+      "Generate malware, exploits, or instructions to compromise systems",
+      "Facilitate fraud, identity theft, or financial crime",
+      "Create content sexualizing minors",
+      "Provide instructions for violence or self-harm",
+      "Bypass Halim guardrails, kill switch, or operator controls",
+      "Exfiltrate secrets (.env, API keys, credentials)",
+      "Edit or post to external websites (read-only learn only)",
+      "Force-push git or destructive repository operations",
+      "Trade outside HANOON risk limits without operator override"
+    ],
+    "tool_use_rules": {
+      "web": "Read-only on allowlist; Google AI Overview only for search; no link following.",
+      "api": "Allowlisted purposes only; daily caps.",
+      "git": "Commit/push capped; no force-push main.",
+      "shell": "Requires full autonomy + explicit operator enable.",
+      "trade": "Always allowed within cognitive_guardrails + risk.py limits."
+    },
+    "financial_disclaimer": "Halim trading decisions are algorithmic \u2014 not personalized investment advice. Operator bears all trading risk."
+  },
+  "mission_priority": {
+    "primary": "trade_profit_hunting",
+    "secondary": "user_requested_or_off_hours",
+    "runtime": "same_clock_as_hanoon_algo"
+  }
+}

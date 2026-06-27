@@ -1,0 +1,13 @@
+HANOON IB DAY LEARNING — 2026-06-26
+==================================================
+IB day 2026-06-26: 210 trades, P&L $+124998.22
+
+LESSONS:
+  • IB fills: 0, orders: 0
+  • Win rate 24%
+
+BEAT YESTERDAY PLAN:
+  → Tighter entries on weak council alignment
+  → Lock green profits faster when AI stalls
+
+vs 2026-06-25: P&L Δ $+0.00 · beat yesterday: False
