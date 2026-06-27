@@ -49,6 +49,36 @@ def _load_rows(path: Path) -> list:
     return rows
 
 
+def _build_sft_config(SFTConfig, *, adapter_dir: Path) -> object:
+    """TRL API changed: max_seq_length → max_length in v0.16+."""
+    import inspect
+
+    kwargs = {
+        "output_dir": str(adapter_dir),
+        "num_train_epochs": EPOCHS,
+        "per_device_train_batch_size": BATCH_SIZE,
+        "per_device_eval_batch_size": BATCH_SIZE,
+        "gradient_accumulation_steps": GRAD_ACCUM,
+        "learning_rate": 2e-4,
+        "logging_steps": 25,
+        "eval_strategy": "epoch",
+        "save_strategy": "epoch",
+        "fp16": False,
+        "bf16": True,
+        "report_to": "none",
+        "dataset_text_field": "text",
+    }
+    sig = inspect.signature(SFTConfig.__init__)
+    params = set(sig.parameters.keys())
+    if "max_length" in params:
+        kwargs["max_length"] = MAX_SEQ_LENGTH
+    elif "max_seq_length" in params:
+        kwargs["max_seq_length"] = MAX_SEQ_LENGTH
+    if "evaluation_strategy" in params and "eval_strategy" not in params:
+        kwargs["evaluation_strategy"] = kwargs.pop("eval_strategy")
+    return SFTConfig(**{k: v for k, v in kwargs.items() if k in params})
+
+
 def main() -> None:
     import torch
     from datasets import Dataset
@@ -102,22 +132,7 @@ def main() -> None:
         shutil.rmtree(adapter_dir)
     adapter_dir.mkdir(parents=True, exist_ok=True)
 
-    training_args = SFTConfig(
-        output_dir=str(adapter_dir),
-        num_train_epochs=EPOCHS,
-        per_device_train_batch_size=BATCH_SIZE,
-        per_device_eval_batch_size=BATCH_SIZE,
-        gradient_accumulation_steps=GRAD_ACCUM,
-        learning_rate=2e-4,
-        logging_steps=25,
-        eval_strategy="epoch",
-        save_strategy="epoch",
-        max_seq_length=MAX_SEQ_LENGTH,
-        fp16=False,
-        bf16=True,
-        report_to="none",
-        dataset_text_field="text",
-    )
+    training_args = _build_sft_config(SFTConfig, adapter_dir=adapter_dir)
 
     trainer = SFTTrainer(
         model=model,

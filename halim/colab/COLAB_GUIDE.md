@@ -116,6 +116,7 @@ In another Terminal tab:
 | `halim_sft.zip` missing | Run `./scripts/halim_package_colab.sh` on Mac |
 | Chat returns empty | Check `./scripts/halim_status.sh` — checkpoint must exist |
 | Out of memory on Colab | Rare on T4; restart runtime and re-run |
+| `unexpected keyword argument 'max_seq_length'` | Colab TRL is new — use latest `train_toddler_colab.py` (uses `max_length`) |
 
 ---
 
