@@ -49,6 +49,41 @@ class HalimTelegramBot:
         self._offset = 0
         self._stop = threading.Event()
         self._thread: Optional[threading.Thread] = None
+        self._maint_thread: Optional[threading.Thread] = None
+
+    def _maintenance_loop(self) -> None:
+        """Standalone: learn, export gold, maybe auto-retrain LM (off-hours)."""
+        interval = float(os.getenv("HALIM_STANDALONE_MAINT_SEC", "7200"))
+        while not self._stop.wait(interval):
+            if self._stop.is_set():
+                break
+            try:
+                from core.halim_web_learn import fetch_wikipedia_summary
+                topics = os.getenv(
+                    "HALIM_LEARN_TOPICS",
+                    "wiki:Stock_market,wiki:Algorithmic_trading,wiki:Volatility",
+                ).split(",")
+                topic = topics[int(time.time()) % max(1, len(topics))].strip()
+                if topic.startswith("wiki:"):
+                    fetch_wikipedia_summary(topic[5:], self.cfg)
+                from core.halim_action_learn import export_action_gold
+                from core.halim_auto_lm import schedule_auto_retrain
+                r = export_action_gold(include_learn_cache=True)
+                sched = schedule_auto_retrain(r, self.cfg, trigger="standalone_maint")
+                if sched.get("scheduled"):
+                    log.info("🧠 Halim standalone: auto-LM retrain scheduled")
+            except Exception as exc:
+                log.debug(f"Halim standalone maintenance: {exc}")
+
+    def start_maintenance(self) -> None:
+        if os.getenv("HALIM_STANDALONE_MAINT", "true").lower() not in ("1", "true", "yes"):
+            return
+        self._maint_thread = threading.Thread(
+            target=self._maintenance_loop,
+            name="halim-standalone-maint",
+            daemon=True,
+        )
+        self._maint_thread.start()
 
     def _api(self, method: str, params: Optional[Dict[str, Any]] = None, timeout: int = 35) -> Dict:
         url = f"https://api.telegram.org/bot{self._token}/{method}"
@@ -94,6 +129,7 @@ class HalimTelegramBot:
 
     def run_forever(self) -> None:
         self.start()
+        self.start_maintenance()
         try:
             while not self._stop.is_set():
                 time.sleep(1.0)

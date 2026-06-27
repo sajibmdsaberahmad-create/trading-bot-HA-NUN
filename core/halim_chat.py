@@ -46,6 +46,14 @@ def halim_chat(
     if context:
         full_prompt = f"{context.strip()}\n\nCommander: {message}"
 
+    try:
+        from core.halim_learn_rag import learn_rag_block
+        rag = learn_rag_block(message, cfg=cfg)
+        if rag:
+            full_prompt = f"{rag}\n\n{full_prompt}"
+    except Exception:
+        pass
+
     # All companion dialogue goes through Halim's generative brain — no static scripts
     use_companion = purpose in (
         "chat", "commander_chat", "dialogue", "companion", "copilot",
