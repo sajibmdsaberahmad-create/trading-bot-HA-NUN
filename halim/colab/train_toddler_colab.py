@@ -163,7 +163,11 @@ def main() -> None:
     peft_model = PeftModel.from_pretrained(base, str(adapter_dir))
     merged = peft_model.merge_and_unload()
     merged.save_pretrained(str(merged_dir), safe_serialization=True)
-    tokenizer.save_pretrained(str(merged_dir))
+    # Always copy full tokenizer from base — merged save can miss files Colab needs
+    tok_save = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
+    if tok_save.pad_token is None:
+        tok_save.pad_token = tok_save.eos_token
+    tok_save.save_pretrained(str(merged_dir))
 
     cfg = {
         "halim_phase": "toddler",

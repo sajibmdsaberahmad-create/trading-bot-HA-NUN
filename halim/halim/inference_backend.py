@@ -106,7 +106,15 @@ def hf_complete(
     if not model_dir:
         return None, "no_merged_model_in_checkpoint"
 
-    key = str(model_dir.resolve())
+    manifest = _load_manifest(checkpoint)
+    tokenizer_source = str(model_dir)
+    tok_cfg = model_dir / "tokenizer.json"
+    if not tok_cfg.is_file():
+        tokenizer_source = manifest.get("base_model") or os.getenv(
+            "HALIM_BASE_MODEL", "Qwen/Qwen2.5-0.5B-Instruct"
+        )
+
+    key = f"{model_dir.resolve()}|{tokenizer_source}"
     if key not in _model_cache:
         try:
             if torch.backends.mps.is_available():
@@ -118,7 +126,9 @@ def hf_complete(
             else:
                 device = "cpu"
                 dtype = torch.float32
-            tokenizer = AutoTokenizer.from_pretrained(str(model_dir), trust_remote_code=True)
+            tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, trust_remote_code=True)
+            if tokenizer.pad_token is None:
+                tokenizer.pad_token = tokenizer.eos_token
             model = AutoModelForCausalLM.from_pretrained(
                 str(model_dir),
                 torch_dtype=dtype,
