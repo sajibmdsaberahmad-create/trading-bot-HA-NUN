@@ -292,7 +292,7 @@ class HalimTelegramBot:
         return "\n".join(lines)
 
     def _handle_chat(self, chat_id: int, text: str, reply_id: Optional[int]) -> None:
-        self.send(chat_id, "🧠 Halim is thinking…", reply_to=reply_id)
+        self.send(chat_id, "🧠 Halim is thinking… (first reply may take ~20s while model loads)", reply_to=reply_id)
 
         def work() -> None:
             try:
