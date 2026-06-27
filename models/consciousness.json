@@ -1,27 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 177,
+  "total_awakenings": 178,
   "training_sessions": 36,
   "trades_observed": 561,
   "scans_performed": 36,
   "improvements_applied": 957,
   "reports_generated": 35,
   "event_log": [
-    {
-      "timestamp": "2026-06-26T15:35:39.336644",
-      "age": "5d 4h 32m 50s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #421",
-      "metadata": {
-        "source": "runtime_rth_open",
-        "summary": "Observed rth_open \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review rth_open on ?"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-26T15:37:02.948146",
       "age": "5d 4h 34m 14s",
@@ -11984,9 +11970,16 @@
           "Skip repeat losers until proxy confidence rises"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-27T08:03:05.838652",
+      "age": "5d 21h 0m 17s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #178",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-27T07:59:17.898089",
+  "last_awakening": "2026-06-27T08:03:05.838294",
   "current_version": "v20260627_080015",
   "version_history": [
     {
