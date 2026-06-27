@@ -22,3 +22,4 @@
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T11:52:05.638073+00:00"}
 {"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T11:55:03.978632+00:00"}
 {"event":"learning_snapshot","trigger":"pre_stop_weekend","fsync_files":18,"ppo":false,"timestamp":"2026-06-27T12:16:42.876058+00:00"}
+{"event":"learning_snapshot","trigger":"periodic","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T12:24:11.011379+00:00"}
