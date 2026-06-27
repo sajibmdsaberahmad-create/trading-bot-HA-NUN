@@ -115,6 +115,24 @@ def should_auto_retrain(
     return True, "ok"
 
 
+def _parse_json_stdout(stdout: str) -> Dict[str, Any]:
+    stdout = (stdout or "").strip()
+    if not stdout:
+        return {}
+    try:
+        return json.loads(stdout)
+    except Exception:
+        pass
+    for line in reversed(stdout.splitlines()):
+        line = line.strip()
+        if line.startswith("{"):
+            try:
+                return json.loads(line)
+            except Exception:
+                continue
+    return {}
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -132,26 +150,28 @@ def _run_train_pipeline(cfg: BotConfig, *, trigger: str) -> Dict[str, Any]:
     env.setdefault("HALIM_REPO_ROOT", str(root))
     env["PYTHONPATH"] = f"{root / 'halim'}{os.pathsep}{root}{os.pathsep}{env.get('PYTHONPATH', '')}"
 
+    min_sft = os.getenv("HALIM_AUTO_LM_MIN_SFT_PAIRS", "400")
+    env["HALIM_TODDLER_MIN_PAIRS"] = min_sft
+
     # 1. Prepare SFT
     try:
         proc = subprocess.run(
-            [py, str(root / "halim/scripts/prepare_sft.py")],
+            [py, str(root / "halim/scripts/prepare_sft.py"), "--min-pairs", min_sft],
             cwd=str(root),
             env=env,
             capture_output=True,
             text=True,
             timeout=600,
         )
-        if proc.returncode == 0 and proc.stdout.strip():
-            try:
-                result["steps"]["prepare_sft"] = json.loads(proc.stdout.strip().split("\n")[-1])
-            except Exception:
-                result["steps"]["prepare_sft"] = {"ok": True}
+        parsed = _parse_json_stdout(proc.stdout)
+        if proc.returncode == 0 and parsed.get("ok", True):
+            result["steps"]["prepare_sft"] = parsed or {"ok": True}
         else:
             result["steps"]["prepare_sft"] = {
                 "ok": False,
                 "code": proc.returncode,
                 "stderr": (proc.stderr or "")[:300],
+                "parsed": parsed,
             }
             return result
     except Exception as exc:
@@ -179,17 +199,15 @@ def _run_train_pipeline(cfg: BotConfig, *, trigger: str) -> Dict[str, Any]:
             text=True,
             timeout=int(os.getenv("HALIM_AUTO_LM_TRAIN_TIMEOUT_SEC", "7200")),
         )
-        tail = (proc.stdout or "").strip()
-        if proc.returncode == 0 and tail:
-            try:
-                result["steps"]["train"] = json.loads(tail.split("\n")[-1] if "\n" in tail else tail)
-            except Exception:
-                result["steps"]["train"] = {"ok": True, "raw": tail[:200]}
+        parsed = _parse_json_stdout(proc.stdout)
+        if proc.returncode == 0 and parsed.get("ok"):
+            result["steps"]["train"] = parsed
         else:
             result["steps"]["train"] = {
                 "ok": False,
                 "code": proc.returncode,
                 "stderr": (proc.stderr or "")[:400],
+                "parsed": parsed,
             }
             return result
     except subprocess.TimeoutExpired:

@@ -247,7 +247,7 @@ def export_action_gold(
 
     try:
         from core.halim_auto_lm import schedule_auto_retrain
-        schedule_auto_retrain(result, cfg, trigger="export_action_gold")
+        schedule_auto_retrain(result, trigger="export_action_gold")
     except Exception:
         pass
 
