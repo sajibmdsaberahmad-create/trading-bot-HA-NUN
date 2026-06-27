@@ -328,6 +328,25 @@ def main() -> None:
         except ImportError:
             pass
 
+    # Match halim_env — toddler LM needs long timeout on 8GB Mac
+    try:
+        from pathlib import Path as _Path
+        import subprocess
+
+        _env_sh = ROOT / "scripts" / "halim_env.sh"
+        if _env_sh.is_file():
+            out = subprocess.check_output(
+                ["bash", "-c", f'source "{_env_sh}" && env'],
+                text=True,
+                cwd=str(ROOT),
+            )
+            for line in out.splitlines():
+                if "=" in line and line.startswith("HALIM_"):
+                    k, _, v = line.partition("=")
+                    os.environ.setdefault(k, v)
+    except Exception:
+        os.environ.setdefault("HALIM_INFERENCE_TIMEOUT_SEC", "90")
+
     cfg = BotConfig()
     log.info("Halim standalone Telegram — waiting for messages (Ctrl+C to stop)")
     HalimTelegramBot(cfg).run_forever()

@@ -112,7 +112,7 @@ def halim_chat(
                 }
         except Exception as exc:
             log.debug(f"Halim companion speak: {exc}")
-        return {"ok": False, "text": "", "mode": mode, "source": "unavailable", "capability": cap}
+        # Fall through — server/council may still answer (LM cold start, timeout, etc.)
 
     if mode == "collecting":
         use_teacher = os.getenv("HALIM_CHAT_COLLECTING_USE_TEACHER", "true").lower() in ("1", "true", "yes")
@@ -140,7 +140,7 @@ def halim_chat(
         except Exception:
             pass
 
-    if not text and mode in ("teacher", "native"):
+    if not text and mode in ("teacher", "native", "collecting"):
         try:
             from core.halim_capabilities import try_capability_complete
             text, source = try_capability_complete(

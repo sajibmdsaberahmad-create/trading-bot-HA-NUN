@@ -73,13 +73,22 @@ def try_reasoning_complete(
     """
     Optional slow-path completion via Halim server.
     Returns (text_or_none, source) where source is halim_server | unavailable.
-    Never raises; max timeout HALIM_INFERENCE_TIMEOUT_SEC (default 2.5s).
+    Never raises; timeout HALIM_INFERENCE_TIMEOUT_SEC (chat ~90s, other ~30s).
     """
     if os.getenv("HALIM_REASONING_VIA_SERVER", "auto").lower() in ("0", "false", "off"):
         return None, "disabled"
 
     if not _ensure_halim_package():
         return None, "unavailable"
+
+    chat_purposes = frozenset({
+        "chat", "commander_chat", "dialogue", "companion", "copilot",
+    })
+    default_timeout = float(os.getenv("HALIM_INFERENCE_TIMEOUT_SEC", "90"))
+    if purpose in chat_purposes:
+        timeout = float(os.getenv("HALIM_CHAT_INFERENCE_TIMEOUT_SEC", str(default_timeout)))
+    else:
+        timeout = float(os.getenv("HALIM_REASONING_TIMEOUT_SEC", str(min(default_timeout, 30.0))))
 
     try:
         from halim.client import complete, server_url
@@ -91,7 +100,7 @@ def try_reasoning_complete(
         if not url:
             return None, "unavailable"
 
-        out = complete(prompt, purpose=purpose)
+        out = complete(prompt, purpose=purpose, timeout=timeout)
         if out and out.get("ok") and out.get("text"):
             return str(out["text"]), "halim_server"
         return None, "unavailable"
