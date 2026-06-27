@@ -33,7 +33,7 @@ cfg = {
     "halim_phase": "toddler",
     "model": "M. A. Halim",
     "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
-    "backend": "hf",
+    "backend": "mlx" if __import__("platform").system() == "Darwin" else "hf",
     "merged_path": "merged" if merged.is_file() else None,
     "adapter_path": "lora_adapter" if lora.is_file() and not merged.is_file() else None,
     "registered_at": datetime.now(timezone.utc).isoformat(),
@@ -47,10 +47,10 @@ PY
 fi
 
 if [[ -d "$ROOT/venv" ]]; then source "$ROOT/venv/bin/activate"; fi
-pip install -q torch transformers peft 2>/dev/null || pip install torch transformers peft
-pip uninstall -y torchao 2>/dev/null || true
+chmod +x "$ROOT/scripts/halim_install_lm.sh"
+"$ROOT/scripts/halim_install_lm.sh"
 
-./scripts/halim_register_checkpoint.sh toddler_v1 --backend hf
+./scripts/halim_register_checkpoint.sh toddler_v1 --backend "${HALIM_LM_BACKEND:-mlx}"
 
 echo ""
 echo "🧠 Starting Halim serve (PPO distillation always on via halim_env.sh)…"

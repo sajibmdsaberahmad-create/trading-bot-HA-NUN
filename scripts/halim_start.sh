@@ -20,6 +20,9 @@ if [[ -f "$ROOT/requirements.txt" ]]; then
   pip install -q -r "$ROOT/requirements.txt" 2>/dev/null || true
 fi
 
+chmod +x "$ROOT/scripts/halim_install_lm.sh" 2>/dev/null || true
+"$ROOT/scripts/halim_install_lm.sh" 2>/dev/null || true
+
 python3 -c "
 from core.env_secrets import bootstrap_env
 bootstrap_env('$ROOT')

@@ -48,7 +48,7 @@ _ensure_checkpoint() {
       # shellcheck disable=SC1091
       source "$ROOT/venv/bin/activate"
     fi
-    "$ROOT/scripts/halim_register_checkpoint.sh" toddler_v1 --backend hf 2>/dev/null || true
+    "$ROOT/scripts/halim_register_checkpoint.sh" toddler_v1 --backend "${HALIM_LM_BACKEND:-mlx}" 2>/dev/null || true
   else
     echo "⚠️  No Halim toddler checkpoint — LM may be unavailable."
     echo "    Run: ./scripts/halim_start_toddler.sh  or set HALIM_TODDLER_ZIP=/path/to/halim_toddler_v1.zip"
@@ -134,9 +134,17 @@ _start_telegram() {
   echo "✅ Halim Telegram listener started — message the bot after /verify"
 }
 
-_ensure_checkpoint
+_ensure_lm_deps() {
+  if [[ -d "$ROOT/halim/data/checkpoints/latest" ]] || [[ -d "$ROOT/halim/data/checkpoints/toddler_v1" ]]; then
+    chmod +x "$ROOT/scripts/halim_install_lm.sh" 2>/dev/null || true
+    "$ROOT/scripts/halim_install_lm.sh" 2>/dev/null || {
+      echo "⚠️  Halim LM deps missing — run: ./scripts/halim_install_lm.sh"
+    }
+  fi
+}
 
-if _halim_health; then
+_ensure_checkpoint
+_ensure_lm_deps
   echo "✅ Halim already active at $HALIM_URL"
 elif _serve_running; then
   echo "⏳ Halim serve starting — waiting for /health…"
