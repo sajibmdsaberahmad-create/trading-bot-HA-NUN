@@ -29,7 +29,7 @@ HALIM_DIR="$ROOT/halim"
 CKPT="$HALIM_DIR/data/checkpoints/toddler_v1"
 ZIP_SRC="${HALIM_TODDLER_ZIP:-$HOME/Downloads/halim_toddler_v1.zip}"
 RELEASE_DIR="$ROOT/halim-release"
-GITHUB_REPO="${HALIM_GITHUB_REPO:-sajibmdsaberahmad-create/halim-toddler}"
+GITHUB_REPO="${HALIM_GITHUB_REPO:-sajibmdsaberahmad-create/M-A-Halim}"
 
 echo "══════════════════════════════════════════════════════════════"
 echo "  Halim release helper"
