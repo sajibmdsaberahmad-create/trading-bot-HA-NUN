@@ -117,7 +117,7 @@ export HALIM_USER_TASK="wiki:Federal_Reserve"   # optional secondary task
 
 Env: `HALIM_SERVER=auto` (default) · `HALIM_DEVICE=m2_8gb` · `HALIM_MODEL_PATH=halim/data/checkpoints/latest`
 
-**Mac inference (Apple Silicon):** default backend is **MLX** (`HALIM_LM_BACKEND=mlx`), not HuggingFace. See [HALIM_MAC_INFERENCE.md](HALIM_MAC_INFERENCE.md).
+**Mac inference (Apple Silicon):** default backend is **MLX** (`HALIM_LM_BACKEND=mlx`). Learn **RAG** + **auto-retrain** are wired — see [HALIM_MAC_INFERENCE.md](HALIM_MAC_INFERENCE.md).
 
 ```bash
 ./scripts/halim_install_lm.sh   # mlx-lm on Mac; torch on Linux

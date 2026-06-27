@@ -252,7 +252,7 @@ def _run_train_pipeline(cfg: BotConfig, *, trigger: str) -> Dict[str, Any]:
     if os.getenv("HALIM_AUTO_LM_RESTART_SERVE", "true").lower() in ("1", "true", "yes"):
         try:
             stop = subprocess.run(
-                [str(root / "scripts/halim_stop.sh")],
+                [str(root / "scripts/halim_stop.sh"), "--serve-only"],
                 cwd=str(root),
                 capture_output=True,
                 text=True,
