@@ -207,3 +207,24 @@ class DeferredCouncilLearner:
           )
       except Exception as exc:
           log.debug(f"PPO council eval: {exc}")
+
+      try:
+          from core.halim_ppo_coevolution import record_coevolution
+          halim_sig = parsed.get("enter") if task == "entry_decision" else parsed.get("exit")
+          record_coevolution(
+              self.cfg,
+              ticker=ticker,
+              task=task,
+              ppo_signal=ppo_signal,
+              ppo_conf=ppo_conf,
+              ppo_reason=str(job.get("ppo_reason", "")),
+              halim_source="deferred",
+              halim_signal=halim_sig,
+              halim_conf=ollama_conf,
+              halim_reason=str(parsed.get("reason", ""))[:300],
+              executed=executed,
+              pipeline=pipeline,
+              extra={"late_latency_ms": latency_ms, "agreement": agreement},
+          )
+      except Exception:
+          pass

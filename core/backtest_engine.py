@@ -105,6 +105,11 @@ class BacktestConfig:
     verbose: bool = True
     show_progress_every: int = 100      # Log every N bars
 
+    # Replay stream (REPLAY_DATA_DIR + optional time dilation)
+    use_replay_stream: bool = False
+    replay_time_dilation_ms: int = 0      # 0 = fast; 50–200 = fake-live pacing
+    replay_source_tag: str = "replay"     # Tag on journal events / PPO buffer
+
 
 # ═════════════════════════════════════════════════════════════════════════════
 # MARKET SIMULATOR
@@ -1196,6 +1201,12 @@ class EventDrivenBacktester:
         log.info(f"  Slippage: {self.bt_cfg.slippage_model}")
         log.info(f"  Latency: {self.bt_cfg.latency_ticks} ticks")
         log.info(f"  Initial Cash: ${self.cfg.INITIAL_CASH:,.0f}")
+        if self.bt_cfg.use_replay_stream or self.bt_cfg.replay_time_dilation_ms > 0:
+            log.info(
+                f"  Replay: stream={self.bt_cfg.use_replay_stream} | "
+                f"dilation={self.bt_cfg.replay_time_dilation_ms}ms/bar | "
+                f"source={self.bt_cfg.replay_source_tag}"
+            )
         log.info("=" * 70)
         
         # Get data if not provided
@@ -1217,9 +1228,12 @@ class EventDrivenBacktester:
         # Process each bar sequentially (event-driven loop)
         total_bars = len(data)
         start_time = time.time()
+        dilation = max(0.0, float(self.bt_cfg.replay_time_dilation_ms) / 1000.0)
         
         for idx, (bar_time, row) in enumerate(data.iterrows()):
             event = self._on_bar(row)
+            if dilation > 0:
+                time.sleep(dilation)
             
             # Progress logging
             if self.bt_cfg.verbose and (idx + 1) % self.bt_cfg.show_progress_every == 0:
@@ -1340,7 +1354,38 @@ class EventDrivenBacktester:
         return results
     
     def _fetch_data(self) -> Optional[pd.DataFrame]:
-        """Fetch historical data for backtest."""
+        """Fetch historical data: REPLAY_DATA_DIR first, then IB, then synthetic."""
+        import os
+        from core.replay_data import load_replay_csv, resolve_replay_dir
+
+        replay_root = resolve_replay_dir()
+        use_replay = self.bt_cfg.use_replay_stream or bool(
+            os.getenv("REPLAY_DATA_DIR", "").strip()
+        ) or os.getenv("REPLAY_STREAM", "").lower() in ("1", "true", "yes")
+        if use_replay and replay_root is not None:
+            try:
+                df = load_replay_csv(
+                    self.bt_cfg.ticker,
+                    root=replay_root,
+                    start=self.bt_cfg.start_date or None,
+                    end=self.bt_cfg.end_date or None,
+                )
+                if self.bt_cfg.bar_size != "1 day" and "day" not in self.bt_cfg.bar_size:
+                    log.info(
+                        f"Replay data is daily — using 1 day bars "
+                        f"(requested {self.bt_cfg.bar_size})"
+                    )
+                    self.bt_cfg.bar_size = "1 day"
+                log.info(
+                    f"Replay CSV: {self.bt_cfg.ticker} | {len(df)} bars | "
+                    f"root={replay_root}"
+                )
+                return df
+            except FileNotFoundError:
+                log.debug(f"No replay CSV for {self.bt_cfg.ticker} in {replay_root}")
+            except Exception as exc:
+                log.warning(f"Replay load failed: {exc}")
+
         try:
             # Try to fetch from IB
             from core.connector import IBConnector
@@ -1473,7 +1518,8 @@ def run_backtest_cli():
 Examples:
   python core/backtest_engine.py --ticker SPY --start 2025-01-01 --end 2025-06-01
   python core/backtest_engine.py --ticker AAPL --start 2025-01-01 --end 2025-06-01 --no-enhanced
-  python core/backtest_engine.py --ticker TSLA --start 2025-03-01 --end 2025-04-01 --slippage adaptive
+  python core/backtest_engine.py --ticker SOFI --replay-stream --replay-dilation-ms 50
+  python core/backtest_engine.py --ticker ANET --start 2023-01-01 --end 2025-06-01 --replay-stream
         """
     )
     parser.add_argument("--ticker", default="SPY", help="Ticker symbol")
@@ -1490,8 +1536,27 @@ Examples:
                         choices=["1 min", "5 min", "15 min", "1 day"],
                         help="Bar size for backtest")
     parser.add_argument("--quiet", action="store_true", help="Less verbose output")
+    parser.add_argument(
+        "--replay-stream",
+        action="store_true",
+        help="Load from REPLAY_DATA_DIR (local CSV) instead of IB",
+    )
+    parser.add_argument(
+        "--replay-dilation-ms",
+        type=int,
+        default=None,
+        help="Ms pause between bars (fake-live stream). Default: REPLAY_TIME_DILATION_MS or 0",
+    )
     
     args = parser.parse_args()
+    
+    import os
+    dilation = args.replay_dilation_ms
+    if dilation is None:
+        dilation = int(os.getenv("REPLAY_TIME_DILATION_MS", "0"))
+    use_replay = args.replay_stream or os.getenv("REPLAY_STREAM", "").lower() in (
+        "1", "true", "yes",
+    )
     
     bt_cfg = BacktestConfig(
         ticker=args.ticker.upper(),
@@ -1504,6 +1569,8 @@ Examples:
         confidence_threshold=args.confidence,
         verbose=not args.quiet,
         journal_path=f"backtest_journal_{args.ticker}.jsonl",
+        use_replay_stream=use_replay,
+        replay_time_dilation_ms=dilation,
     )
     
     bt = EventDrivenBacktester(bt_cfg)

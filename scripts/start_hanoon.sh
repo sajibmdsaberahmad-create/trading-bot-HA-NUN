@@ -181,6 +181,9 @@ export FOCUS_PIN_TOP_PICK="${FOCUS_PIN_TOP_PICK:-false}"
 export HYBRID_DISTILL_AUTO_FAST_PATH="${HYBRID_DISTILL_AUTO_FAST_PATH:-false}"
 export LIVE_AI_PIPELINE_ENABLED="${LIVE_AI_PIPELINE_ENABLED:-true}"
 export PYTHONUNBUFFERED=1
+export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
+export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-300}"
+export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-600}"
 
 TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{print int($1/1024/1024)}' || echo 8192)
 
@@ -370,8 +373,8 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  🚀 HANOON SCALPER — FULL PILOT MODE"
 echo "  Log: $MAIN_LOG"
-echo "  Graceful stop: ./stop.sh  (or double-click STOP.command)"
-echo "  Avoid Ctrl+C — it skips git sync and IB cleanup"
+echo "  Graceful stop: ./stop.sh  (Halim gold + evolution + git — not Ctrl+C)"
+echo "  Avoid Ctrl+C — it skips evolution and git sync"
 echo "  Live tail: tail -f $MAIN_LOG"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

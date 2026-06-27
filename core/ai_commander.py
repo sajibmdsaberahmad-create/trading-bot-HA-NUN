@@ -881,6 +881,25 @@ class AICommander:
         if obs is not None:
             ppo_action, ppo_conf, ppo_reason = self.ppo_action(obs, bar_df, for_entry=True)
 
+        try:
+            from core.trading_copilot import copilot_blocks_entry, get_copilot_brief
+            blocked, creason = copilot_blocks_entry(self.cfg, ticker)
+            if blocked:
+                return {
+                    "enter": False,
+                    "confidence": ppo_conf,
+                    "reason": f"Copilot SKIP — {creason}",
+                    "pipeline": "copilot:veto",
+                    "ppo_action": ppo_action,
+                    "ppo_conf": ppo_conf,
+                }
+            brief = get_copilot_brief()
+            boost = brief.conf_boost()
+            if boost and ppo_conf > 0:
+                ppo_conf = min(0.99, ppo_conf + boost)
+        except Exception:
+            pass
+
         deploy_cap = get_ai_deploy_budget(
             self.cfg, pilot,
             float(account.get("equity", 0)),
@@ -1060,6 +1079,37 @@ class AICommander:
                 self.prefetch_chart_vision(ticker, df, current_px, spike_ratio, scan_score)
         chart_line = self._chart_context_line(ticker, current_px, spike_ratio, scan_score)
         pipeline_on = getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True)
+
+        # Student proxy path — grows with brain maturity (before cloud council)
+        if obs is not None:
+            try:
+                from core.brain_maturity import should_use_student_entry
+                from core.hybrid_distiller import proxy_entry_decision
+                if should_use_student_entry(self.cfg):
+                    proxy_dec = proxy_entry_decision(
+                        obs, spike_ratio, scan_score, mctx, self.cfg,
+                    )
+                    if proxy_dec is not None:
+                        proxy_dec.setdefault("pipeline", "student:proxy")
+                        proxy_dec["ppo_action"] = ppo_action
+                        proxy_dec["ppo_conf"] = ppo_conf
+                        decision = self._finalize_entry_decision(
+                            proxy_dec, ticker=ticker, current_px=current_px,
+                            spike_ratio=spike_ratio, scan_score=scan_score,
+                            ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                            min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
+                            use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
+                            df=df, equity=equity, cash=float(account.get("cash", 0)),
+                        )
+                        if decision.get("enter"):
+                            self._schedule_deferred_entry(
+                                ticker=ticker, fingerprint=fp, decision=decision,
+                                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                                market_ctx=mctx,
+                            )
+                        return decision
+            except Exception as exc:
+                log.debug(f"Student proxy entry: {exc}")
 
         prompt = self._entry_council_prompt(
             ticker, current_px, spike_ratio, scan_score,
@@ -1604,6 +1654,41 @@ class AICommander:
                 "ollama_deferred": ppo_primary or pipeline.startswith("council:scanner"),
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             })
+        except Exception:
+            pass
+        try:
+            from core.halim_action_learn import record_action
+            cap = "enter_skip" if "student" in str(decision.get("pipeline", "")) else "decision_text"
+            record_action(
+                cap, task,
+                input_text=f"{ticker} ppo={ppo_signal} conf={ppo_conf:.2f}",
+                output_text=str(decision.get("reason", decision))[:800],
+                outcome="ok",
+                source=str(decision.get("pipeline", "decision"))[:60],
+                meta={"enter": decision.get("enter"), "exit": decision.get("exit")},
+                cfg=self.cfg,
+            )
+        except Exception:
+            pass
+        try:
+            from core.halim_ppo_coevolution import record_coevolution
+            pipeline = str(decision.get("pipeline", ""))
+            halim_src = "proxy" if "proxy" in pipeline else "council" if "council" in pipeline else "halim"
+            halim_sig = decision.get("enter") if task == "entry_decision" else decision.get("exit")
+            record_coevolution(
+                self.cfg,
+                ticker=ticker,
+                task=task,
+                ppo_signal=ppo_signal,
+                ppo_conf=ppo_conf,
+                ppo_reason=str(decision.get("ppo_reason", ""))[:200],
+                halim_source=halim_src,
+                halim_signal=halim_sig,
+                halim_conf=float(decision.get("confidence", 0.5) or 0.5),
+                halim_reason=str(decision.get("reason", ""))[:300],
+                executed=decision,
+                pipeline=pipeline,
+            )
         except Exception:
             pass
 

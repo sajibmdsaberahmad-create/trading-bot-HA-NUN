@@ -17,6 +17,34 @@
 - `daily_reports/` — one daily report per day
 - `trade_journal.json` — optional trade journal from live scalper
 
+## M. A. Halim (your own AI model)
+
+**Halim** replaces external LLMs over time. See [docs/HALIM.md](../docs/HALIM.md) and the separate model home in [halim/](../halim/).
+
+| File | Role |
+|------|------|
+| `halim_identity.json` | Halim birth, phase, native-mode policy |
+| `halim_manifest.json` | Full Halim status snapshot |
+
+## Owned Brain (evolution flywheel)
+
+Portable, git-synced students that learn every session. Full guide: [docs/OWNED_BRAIN.md](../docs/OWNED_BRAIN.md).
+
+| File | Role |
+|------|------|
+| `ppo_trader_replay.zip` | PPO policy trained during replay (separate from live `ppo_trader.zip`) |
+| `teacher_proxy.joblib` | Distilled council enter/skip (sklearn, microseconds) |
+| `council_training_dataset.jsonl` | Exported prompt→decision→outcome pairs for future LLM student |
+| `copilot_state.json` | Session reasoning cache (Trading Copilot) |
+| `copilot_journal.jsonl` | Copilot call log |
+| `owned_brain_manifest.json` | Portable index: assets, device profile, last evolution |
+| `owned_brain_state.json` | Evolution counters and last trigger |
+| `device_profile.json` | Active device tier (`m2_8gb`, etc.) |
+| `ppo_teacher_sessions.jsonl` | PPO teacher critique sessions |
+
+Check status: `PYTHONPATH=. python scripts/owned_brain_status.py`  
+Manual evolution: `./scripts/post_session_evolve.sh`
+
 ## Versioning model
 
 - Training and improvement artifacts are committed to git automatically.

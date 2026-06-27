@@ -62,9 +62,12 @@ _gh_auth_verified: bool = False
 _git_init_done: bool = False
 _learning_restore_done: bool = False
 _checkpoint_lock = Lock()
-_checkpoint_pending: Set[str] = set()
+_checkpoint_pending: Set[str] = set()  # legacy — use _checkpoint_batched_reasons
+_checkpoint_batched_reasons: Set[str] = set()
+_checkpoint_flush_timer: Optional[Timer] = None
 _last_checkpoint_ts: float = 0.0
 _CHECKPOINT_MIN_INTERVAL_SEC: float = 45.0
+_deferred_push_count: int = 0
 
 # Auto-push watcher (standalone daemon only)
 _standalone_mode: bool = False
@@ -544,6 +547,17 @@ def init(cfg: BotConfig, ollama_brain: Optional[Any] = None):
     else:
         log.info("GitHub sync disabled (no token/repo configured)")
     _git_init_done = True
+    if _enabled and is_replay_live():
+        log.info(
+            "📤 Git sync: REPLAY — all pushes deferred until session end "
+            "(1 consolidated sync after evolution)"
+        )
+    elif _enabled and _batch_checkpoints_enabled():
+        deb = float(os.getenv("GIT_CHECKPOINT_DEBOUNCE_SEC", "180"))
+        log.info(
+            f"📤 Git sync: batched checkpoints — one push every ~{deb:.0f}s max "
+            "(no per-trade triple-repo spam)"
+        )
     # Git auto-watch runs only via scripts/start_git_sync.sh (standalone daemon).
     # HANOON session never starts the watcher — zero impact on trading loop.
 
@@ -564,7 +578,8 @@ def push_change(message: str, files: Optional[List[str]] = None,
         True if push succeeded, False otherwise
     """
     if _should_defer_git_push(category):
-        log.debug(f"Git push deferred until shutdown: {message[:70]}")
+        _queue_batched_checkpoint(message[:80] if category == "training" else f"{category}:{message[:40]}")
+        log.debug(f"Git push deferred (batched): {message[:70]}")
         return True
     if not _enabled:
         return False
@@ -605,7 +620,8 @@ def push_change_async(
 ) -> None:
     """Non-blocking push — safe from trading loop and file watcher."""
     if _should_defer_git_push(category):
-        log.debug(f"Git push deferred until shutdown: {message[:70]}")
+        _queue_batched_checkpoint(f"{category}:{message[:60]}")
+        log.debug(f"Git push deferred (batched): {message[:70]}")
         return
     if not _enabled:
         return
@@ -1400,15 +1416,128 @@ def set_global_config(cfg: Any):
     cfg_bot = cfg
 
 
+def is_replay_live() -> bool:
+    """True when running CSV replay-live (not wall-clock live IB)."""
+    return os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+
+
+def _batch_checkpoints_enabled() -> bool:
+    """Collapse many checkpoint reasons into one debounced push (live) or end flush (replay)."""
+    if is_replay_live():
+        return True
+    if os.getenv("GIT_BATCH_CHECKPOINTS", "true").lower() in ("0", "false", "no"):
+        return False
+    if cfg_bot is not None and getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
+        return True
+    return os.getenv("GIT_PUSH_DURING_SESSION", "true").lower() in ("1", "true", "yes")
+
+
 def _should_defer_git_push(category: str = "general") -> bool:
-    """HANOON defers session pushes; standalone daemon never defers."""
-    if is_standalone_mode():
+    """HANOON defers session pushes; replay defers ALL until teardown; live batches."""
+    if is_standalone_mode() and not is_replay_live():
         return False
-    if category in ("shutdown", "manual_sync"):
+    if category in ("shutdown", "manual_sync", "replay_end"):
         return False
+    if is_replay_live():
+        return True
+    if _batch_checkpoints_enabled() and category in (
+        "training", "trade", "checkpoint", "auto", "general", "daily",
+        "guardrail", "model", "release",
+    ):
+        return True
     if cfg_bot is not None and not getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
         return True
     return False
+
+
+def _queue_batched_checkpoint(reason: str) -> None:
+    """Accumulate checkpoint reasons — flushed once (debounced live / replay end)."""
+    global _deferred_push_count
+    r = (reason or "checkpoint").strip()[:120]
+    with _checkpoint_lock:
+        if r not in _checkpoint_batched_reasons:
+            _checkpoint_batched_reasons.add(r)
+            _deferred_push_count += 1
+
+
+def _schedule_batched_checkpoint_flush() -> None:
+    """Live only — reset debounce timer; replay waits for teardown flush."""
+    if is_replay_live():
+        return
+    global _checkpoint_flush_timer
+    delay = float(os.getenv("GIT_CHECKPOINT_DEBOUNCE_SEC", "180"))
+    with _checkpoint_lock:
+        if _checkpoint_flush_timer is not None:
+            _checkpoint_flush_timer.cancel()
+        _checkpoint_flush_timer = Timer(delay, _batched_checkpoint_flush_callback)
+        _checkpoint_flush_timer.daemon = True
+        _checkpoint_flush_timer.start()
+
+
+def _batched_checkpoint_flush_callback() -> None:
+    try:
+        flush_batched_git_sync("session_batch", full_sync=False, force=True)
+    except Exception as exc:
+        log.debug(f"Batched git flush: {exc}")
+
+
+def flush_batched_git_sync(
+    summary_reason: str = "batched",
+    *,
+    full_sync: bool = False,
+    force: bool = True,
+) -> bool:
+    """One consolidated learning push from all queued checkpoint reasons."""
+    global _checkpoint_flush_timer, _last_checkpoint_ts
+    with _checkpoint_lock:
+        reasons = sorted(_checkpoint_batched_reasons)
+        _checkpoint_batched_reasons.clear()
+        if _checkpoint_flush_timer is not None:
+            _checkpoint_flush_timer.cancel()
+            _checkpoint_flush_timer = None
+
+    if not reasons and not full_sync:
+        return False
+
+    combined = summary_reason
+    if reasons:
+        preview = ", ".join(reasons[:8])
+        if len(reasons) > 8:
+            preview += f" +{len(reasons) - 8} more"
+        combined = f"{summary_reason}: {preview}"
+
+    _last_checkpoint_ts = 0
+    log.info(f"📤 Consolidated git sync — {len(reasons)} batched reason(s)")
+    return push_learning_checkpoint(combined, full_sync=full_sync, force=force)
+
+
+def flush_replay_session_git_sync(
+    final_nav: float = 0.0,
+    return_pct: float = 0.0,
+    report_path: str = "",
+) -> bool:
+    """Single end-of-replay push (after evolution). Replaces per-event triple-repo spam."""
+    global _last_push_ts
+    n = len(_checkpoint_batched_reasons)
+    if n:
+        log.info(f"📤 Replay session end — 1 git sync ({n} deferred event(s) batched)")
+    with _checkpoint_lock:
+        _checkpoint_batched_reasons.clear()
+    _last_push_ts = 0
+    _last_checkpoint_ts = 0
+    return push_full_shutdown_sync(final_nav, return_pct, report_path)
+
+
+def batched_git_stats() -> Dict[str, Any]:
+    with _checkpoint_lock:
+        pending = sorted(_checkpoint_batched_reasons)
+    return {
+        "replay_live": is_replay_live(),
+        "batch_enabled": _batch_checkpoints_enabled(),
+        "deferred_skips": _deferred_push_count,
+        "pending_reasons": pending,
+        "pending_count": len(pending),
+    }
 
 def push_trade(ticker: str, action: str, price: float, qty: float):
     """Push after a trade event."""
@@ -1800,6 +1929,41 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "models/pattern_snapshots.jsonl",
         "models/scalper_weights.json",
         "models/improvement_history.json",
+        "models/owned_brain_state.json",
+        "models/owned_brain_manifest.json",
+        "models/device_profile.json",
+        "models/copilot_state.json",
+        "models/council_training_dataset.jsonl",
+        "models/owned_brain_journal.jsonl",
+        "models/halim_identity.json",
+        "models/halim_manifest.json",
+        "models/halim_developer.jsonl",
+        "models/halim_constitution.json",
+        "models/halim_guardrail_state.json",
+        "models/halim_kill_switch.json",
+        "models/halim_guardrail_audit.jsonl",
+        "models/halim_google_search.jsonl",
+        "models/halim_web_learn.jsonl",
+        "models/halim_web_monitor.jsonl",
+        "models/halim_frontier_policy.json",
+        "models/halim_frontier_audit.jsonl",
+        "models/halim_runtime.jsonl",
+        "models/halim_runtime_state.json",
+        "halim/data/actions/action_log.jsonl",
+        "halim/data/training/action_gold.jsonl",
+        "halim/data/registry.jsonl",
+        "halim/data/coevolution/correction_log.jsonl",
+        "halim/data/coevolution/dialogue.jsonl",
+        "halim/data/training/coevolution_gold.jsonl",
+        "halim/data/training/dialogue_gold.jsonl",
+        "models/halim_companion_state.json",
+        "halim/data/companion/conversation_gold.jsonl",
+        "models/halim_ppo_coevolution_state.json",
+        "models/halim_shutdown.jsonl",
+        "docs/OWNED_BRAIN.md",
+        "docs/HALIM.md",
+        "docs/HALIM_GUARDRAILS.md",
+        "docs/BRAIN_DEVELOPMENT_LOG.md",
         "models/profit_hunt_ledger.jsonl",
         "models/market_data_denylist.json",
         "models/market_data_failures.jsonl",
@@ -1817,6 +1981,9 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "models/market_data_denylist.json",
         "models/market_data_failures.jsonl",
         "models/ai_decision_log.jsonl",
+        "models/copilot_journal.jsonl",
+        "models/ppo_teacher_sessions.jsonl",
+        "models/owned_brain_journal.jsonl",
         "models/flight_log.jsonl",
         "models/account_snapshots.jsonl",
         "models/account_evaluation_log.jsonl",
@@ -1832,6 +1999,8 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "models/model_manifest.json",
         "models/teacher_proxy.joblib",
         "models/hybrid_distill_state.json",
+        "models/ppo_trader_replay.zip",
+        "models/council_training_dataset.jsonl",
     ],
 }
 
@@ -2042,10 +2211,16 @@ def restore_all_learning(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     return {"hanoon": hanoon, "logs": logs, "grandmaster": gm, "model_release": model_ok, "total": total}
 
 
-def push_learning_checkpoint(reason: str = "checkpoint", full_sync: bool = False) -> bool:
+def push_learning_checkpoint(
+    reason: str = "checkpoint",
+    full_sync: bool = False,
+    *,
+    force: bool = False,
+) -> bool:
     """Push learning artifacts to HANOON + Logs + Grandmaster (never blocks trading loop if called via async)."""
-    if not full_sync and _should_defer_git_push("training"):
-        log.debug(f"Learning checkpoint deferred until shutdown: {reason}")
+    if not force and _should_defer_git_push("training"):
+        _queue_batched_checkpoint(reason)
+        _schedule_batched_checkpoint_flush()
         return True
     if not _enabled:
         return False
@@ -2096,8 +2271,16 @@ def push_learning_checkpoint(reason: str = "checkpoint", full_sync: bool = False
 
 
 def push_learning_checkpoint_async(reason: str = "checkpoint", full_sync: bool = False) -> None:
-    """Non-blocking learning checkpoint — safe during startup / trading loop."""
+    """Non-blocking learning checkpoint — batched (one push, many reasons)."""
     if not _enabled:
+        return
+
+    if _batch_checkpoints_enabled() or _should_defer_git_push("training"):
+        _queue_batched_checkpoint(reason)
+        if is_replay_live():
+            log.debug(f"Git checkpoint queued for replay end: {reason}")
+            return
+        _schedule_batched_checkpoint_flush()
         return
 
     with _checkpoint_lock:

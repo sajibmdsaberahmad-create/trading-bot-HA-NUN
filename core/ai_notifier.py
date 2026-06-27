@@ -42,7 +42,8 @@ _EVENT_GUIDANCE: Dict[str, str] = {
         "before vs after improvements, what you're looking toward tomorrow."
     ),
     "daily_progress": "Short ack that you're building their report.",
-    "commander_chat": "Reply to commander message with analysis and direction.",
+    "commander_chat": "Reply as Halim — HANOON's companion mind. Fresh generative voice, pilot first-person.",
+    "halim_companion_session": "Halim proactively greets commander at session open — warm companion, hunt tone from live data.",
     "vision_analysis": "Chart analysis from uploaded image.",
     "guide_stored": "Acknowledge guidance stored for next session.",
     "improve_progress": "Short ack you're building improvement plan.",
@@ -54,6 +55,10 @@ _EVENT_GUIDANCE: Dict[str, str] = {
     "git_push": "Announce code/learning pushed to GitHub — pilot ops update.",
     "model_release": "New model version tagged and released.",
     "learning_checkpoint": "Learning artifacts synced to git.",
+    "brain_evolution": "Owned brain finished a growth cycle — summarize stage, dataset, proxy, PPO teacher.",
+    "brain_proxy_trained": "Teacher proxy distilled from council decisions — accuracy and samples.",
+    "brain_ppo_teacher": "PPO teacher session — win rate, mutations, local vs cloud.",
+    "brain_stage_up": "Brain matured to next growth stage — less API, smarter students.",
     "commander_exit": "Position closed on commander order.",
     "warning": "Important warning — explain clearly, stay calm pilot tone.",
     "error": "Explain what failed clearly; stay calm pilot tone.",
@@ -161,7 +166,16 @@ class TelegramAIComposer:
             self._last_sent[event_type] = time.time()
             return ai_text
 
-        return fallback or self._structured_fallback(event_type, context, fallback)
+        out = fallback or self._structured_fallback(event_type, context, fallback)
+        try:
+            from core.halim_capabilities import record_teacher_action
+            record_teacher_action(
+                purpose or "notify", fallback or str(context)[:500], out,
+                source="template_fallback", cfg=self.cfg,
+            )
+        except Exception:
+            pass
+        return out
 
     def _enrich_context(self, event_type: str, context: Dict[str, Any]) -> Dict[str, Any]:
         out = dict(context)
@@ -382,6 +396,48 @@ class TelegramAIComposer:
                 f"📊 SESSION WRAP\n"
                 f"NAV ${float(nav):,.2f} · Day P&L ${float(pnl):+,.2f}\n"
                 f"Trades {trades} · {et}"
+            )
+
+        if event_type == "brain_evolution":
+            wr = ctx.get("win_rate")
+            wr_s = f"{float(wr):.0%}" if wr is not None else "—"
+            return (
+                f"🧬 BRAIN EVOLUTION │ {str(ctx.get('stage', '?')).upper()}\n"
+                f"Dataset {ctx.get('dataset_pairs', '—')} · Trades {ctx.get('trade_count', '—')} · WR {wr_s}\n"
+                f"Proxy {ctx.get('proxy_status', '—')} · Git {ctx.get('git_push', 'queued')}\n"
+                f"{footer}"
+            )
+
+        if event_type == "brain_proxy_trained":
+            acc = ctx.get("accuracy")
+            acc_s = f"{float(acc):.0%}" if acc is not None else "—"
+            return (
+                f"🎓 PROXY TRAINED │ acc {acc_s}\n"
+                f"Samples {ctx.get('samples', '—')} · stage {ctx.get('stage', '?')}\n"
+                f"{footer}"
+            )
+
+        if event_type == "brain_ppo_teacher":
+            try:
+                from core.halim_companion import explain_ppo_teacher_notify
+                return explain_ppo_teacher_notify(ctx) + f"\n{footer}"
+            except Exception:
+                pass
+            wr = ctx.get("win_rate")
+            wr_s = f"{float(wr):.0%}" if wr is not None else "—"
+            ppo_ok = bool(ctx.get("ppo_trained", False))
+            ppo_note = "weights updated" if ppo_ok else "weights unchanged (normal — tuning still applied)"
+            return (
+                f"🧠 Halim learning │ WR {wr_s} · {ctx.get('trade_count', '?')} trades\n"
+                f"Tuning {ctx.get('mutations_applied', 0)} adj · PPO {ppo_note}\n"
+                f"{footer}"
+            )
+
+        if event_type == "brain_stage_up":
+            return (
+                f"👶 STAGE UP │ {ctx.get('from_stage', '?')} → {ctx.get('to_stage', '?')}\n"
+                f"{str(ctx.get('description', ''))[:120]}\n"
+                f"{footer}"
             )
 
         if event_type == "session_close":

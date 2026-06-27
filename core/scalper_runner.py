@@ -1469,6 +1469,13 @@ class ScalperRunner:
             except Exception:
                 pass
 
+        if not is_startup:
+            try:
+                from core.halim_companion import companion_session_ping
+                companion_session_ping(self, self.cfg, trigger="rth_open")
+            except Exception as exc:
+                log.debug(f"Halim companion RTH ping: {exc}")
+
     def _queue_locked_stream_repairs(self) -> None:
         """Schedule stream (re)starts on main loop — safe outside IB callbacks."""
         if not self._locked_targets:
@@ -1939,6 +1946,16 @@ class ScalperRunner:
                 self.ai_commander.record_trade(trade_rec)
             except Exception:
                 pass
+        try:
+            from core.halim_ppo_coevolution import attach_trade_outcome
+            attach_trade_outcome(
+                ticker,
+                pnl=float(pnl),
+                win=(result == "win"),
+                cfg=self.cfg,
+            )
+        except Exception:
+            pass
         try:
             self.account_evaluator.evaluate(
                 self, "trade_closed", ai_commander=self.ai_commander,
@@ -2433,6 +2450,18 @@ class ScalperRunner:
         )
         clear_shutdown_request()
         write_pid()
+        replay_mode = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+        try:
+            from core.learning_persistence import start_learning_guard
+            self._learning_guard = start_learning_guard(
+                self.cfg,
+                lambda: getattr(self, "model", None),
+                mode="replay" if replay_mode else "live",
+                runner=self,
+            )
+        except Exception as exc:
+            log.debug(f"Learning persistence: {exc}")
+            self._learning_guard = None
         try:
             from core.trader_directives import seed_default_directives_if_empty
             seed_default_directives_if_empty()
@@ -2450,6 +2479,26 @@ class ScalperRunner:
         self._write_init_report()
         self._refresh_account_balance()
         self._log_startup_banner()
+        if os.getenv("REPLAY_LIVE", "").lower() not in ("1", "true", "yes"):
+            try:
+                from core.brain_maturity import apply_maturity_to_config, log_maturity_banner
+                apply_maturity_to_config(self.cfg)
+                log_maturity_banner(self.cfg)
+            except Exception as exc:
+                log.debug(f"Brain maturity init: {exc}")
+            try:
+                from core.halim_runtime import init_halim_runtime
+                self._halim_runtime = init_halim_runtime(self.cfg)
+                if self._halim_runtime:
+                    self._halim_runtime.attach_runner(self)
+            except Exception as exc:
+                log.debug(f"Halim runtime init: {exc}")
+                self._halim_runtime = None
+        try:
+            from core.halim_developer import enable_halim_developer_mode
+            enable_halim_developer_mode(self.cfg)
+        except Exception as exc:
+            log.debug(f"Halim developer mode: {exc}")
         if getattr(self.cfg, "COUNCIL_ENABLED", getattr(self.cfg, "OLLAMA_ENABLED", False)):
             try:
                 from core.ollama_models import text_model_startup_warnings
@@ -2489,6 +2538,12 @@ class ScalperRunner:
             )
         else:
             self.notifier.info("🚀 HANOON STARTED")
+
+        try:
+            from core.halim_companion import companion_session_ping
+            companion_session_ping(self, self.cfg, trigger="session_startup")
+        except Exception as exc:
+            log.debug(f"Halim companion startup ping: {exc}")
 
         # Clear orphaned bracket orders from previous sessions before trading
         try:
@@ -2706,6 +2761,11 @@ class ScalperRunner:
                 if now - getattr(self, '_last_ai_update', 0) > 5.0:
                     self._last_ai_update = now
                     try:
+                        from core.trading_copilot import maybe_refresh_copilot
+                        maybe_refresh_copilot(self)
+                    except Exception:
+                        pass
+                    try:
                         fast_df = self.data.get_fast_bar_dataframe(n=60)
                         if fast_df is not None and len(fast_df) >= 30:
                             self._ai_update_buffers(fast_df, current_px)
@@ -2918,6 +2978,12 @@ class ScalperRunner:
                 self._refresh_account_balance()
                 maybe_refresh_session_limits(self)
                 self._write_live_metrics()
+                rt = getattr(self, "_halim_runtime", None)
+                if rt is not None:
+                    try:
+                        rt.tick(self)
+                    except Exception as exc:
+                        log.debug(f"Halim runtime tick: {exc}")
                 self._maybe_daily_push()
                 if getattr(self.cfg, "LEARNING_SYNC_INTERVAL_SEC", 1800) > 0:
                     sync_iv = float(getattr(self.cfg, "LEARNING_SYNC_INTERVAL_SEC", 1800))
@@ -2953,6 +3019,11 @@ class ScalperRunner:
 
         def _handler(signum, _frame):
             log.info(f"Signal {signum} received — graceful shutdown...")
+            try:
+                from core.learning_persistence import emergency_snapshot
+                emergency_snapshot(self.cfg, model=getattr(self, "model", None), runner=self)
+            except Exception:
+                pass
             self._shutdown_requested_flag = True
             try:
                 self.ib.sleep(0)
@@ -7725,6 +7796,33 @@ class ScalperRunner:
             return
         self._shutdown_done = True
 
+        guard = getattr(self, "_learning_guard", None)
+        if guard is not None:
+            try:
+                guard.stop(trigger="session_shutdown")
+            except Exception as exc:
+                log.debug(f"Learning guard stop: {exc}")
+            self._learning_guard = None
+
+        try:
+            from core.graceful_shutdown import flush_halim_data
+            flush_halim_data(self.cfg, trigger="session_shutdown")
+        except Exception as exc:
+            log.debug(f"Halim shutdown flush: {exc}")
+
+        if os.getenv("REPLAY_LIVE", "").lower() not in ("1", "true", "yes"):
+            log.info("🛑 Live shutdown — flushing Halim + evolution + git…")
+            try:
+                from core.graceful_shutdown import flush_owned_brain
+                flush_owned_brain(
+                    self.cfg,
+                    model=getattr(self, "model", None),
+                    trigger="live_session_end",
+                    push_git=False,
+                )
+            except Exception as exc:
+                log.debug(f"Owned brain evolution: {exc}")
+
         self._run_account_eval("session_shutdown", force=True)
 
         # Write and push full session report
@@ -7764,36 +7862,22 @@ class ScalperRunner:
         else:
             self.notifier.info(summary)
 
-        try:
-            import threading
-
-            sync_done = threading.Event()
-            sync_err: list = []
-
-            def _run_sync():
-                try:
-                    push_full_shutdown_sync(self.bot_nav, pnl_pct, report_path or "")
-                except Exception as exc:
-                    sync_err.append(exc)
-                finally:
-                    sync_done.set()
-
-            timeout = float(getattr(self.cfg, "SHUTDOWN_SYNC_TIMEOUT_SEC", 45))
-            threading.Thread(target=_run_sync, daemon=True).start()
-            if not sync_done.wait(timeout=timeout):
-                log.warning(f"Shutdown git sync timed out after {timeout:.0f}s — continuing exit")
-            elif sync_err:
-                log.error(f"Shutdown git sync failed: {sync_err[0]}")
+        if os.getenv("REPLAY_LIVE", "").lower() not in ("1", "true", "yes"):
+            try:
+                from core.graceful_shutdown import flush_git_sync
+                git_r = flush_git_sync(
+                    replay=False,
+                    nav=self.bot_nav,
+                    pnl_pct=pnl_pct,
+                    report_path=str(report_path or ""),
+                )
+                log.info(f"📤 Live git shutdown complete — {git_r}")
+            except Exception as exc:
+                log.error(f"Shutdown git sync failed: {exc}")
                 try:
                     push_daily_summary(self.bot_nav, self.account_equity)
                 except Exception:
                     pass
-        except Exception as exc:
-            log.error(f"Shutdown git sync failed: {exc}")
-            try:
-                push_daily_summary(self.bot_nav, self.account_equity)
-            except Exception:
-                pass
 
         try:
             cleanup_local_workspace(aggressive=True)

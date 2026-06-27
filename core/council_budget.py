@@ -27,6 +27,7 @@ PURPOSE_JOURNAL = "journal"
 PURPOSE_GENERATIVE = "generative"
 PURPOSE_OFFHOURS = "offhours"
 PURPOSE_DAILY_DIGEST = "daily_digest"
+PURPOSE_PPO_TEACHER = "ppo_teacher"
 
 _lock = threading.Lock()
 _minute_buckets: Dict[str, Deque[float]] = {}
@@ -36,6 +37,7 @@ _last_daily_digest_day: Optional[str] = None
 # Telegram events — structured fallback is enough (no API)
 _NOTIFY_TEMPLATE_ONLY: FrozenSet[str] = frozenset({
     "watch_pulse", "system_status", "info", "git_push", "learning_checkpoint",
+    "brain_evolution", "brain_proxy_trained", "brain_ppo_teacher", "brain_stage_up",
     "model_release", "startup", "targets_locked", "warning", "error",
     "help", "usage", "flat_positions", "exit_progress", "improve_progress",
     "daily_progress", "verify_locked", "verify_success", "verify_failed",
@@ -224,6 +226,23 @@ def should_use_council_api(
         return False, "council_disabled"
     if not budget_enabled(cfg):
         return True, "budget_off"
+
+    # Infant→adult daily caps — teacher API fades as students grow
+    try:
+        from core.brain_maturity import allow_teacher_api
+        mat_purpose = None
+        if purpose == PURPOSE_PPO_TEACHER:
+            mat_purpose = "ppo_teacher"
+        elif purpose == PURPOSE_COPILOT:
+            mat_purpose = "copilot"
+        elif purpose == PURPOSE_DECISION:
+            mat_purpose = "decision"
+        if mat_purpose and not force:
+            ok, mat_reason = allow_teacher_api(mat_purpose, cfg)
+            if not ok:
+                return False, mat_reason
+    except Exception:
+        pass
 
     purpose = str(purpose or PURPOSE_NOTIFY).lower()
 

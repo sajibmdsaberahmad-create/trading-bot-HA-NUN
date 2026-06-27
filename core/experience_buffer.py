@@ -41,6 +41,7 @@ def append(record: Dict[str, Any]) -> None:
     with _lock:
         with open(BUFFER_PATH, "a") as f:
             f.write(line + "\n")
+            f.flush()
 
 
 def load_all() -> list:

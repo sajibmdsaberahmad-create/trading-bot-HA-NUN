@@ -1,5 +1,5 @@
-🧭 SELF-IMPROVEMENT GUIDELINES | 2026-06-26T20:35:40.390530
-Combined win rate: 22.2% (buffer=23.6%, returns=20.7%)
+🧭 SELF-IMPROVEMENT GUIDELINES | 2026-06-27T08:02:17.132412
+Combined win rate: 18.0% (buffer=15.3%, returns=20.7%)
 • Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER
 • Reduce SCAN_INTERVAL_SECONDS to avoid overtrading
 • Lower MAX_TRADE_SIZE_USD to preserve capital
@@ -10,13 +10,1414 @@ Combined win rate: 22.2% (buffer=23.6%, returns=20.7%)
   - Hi
   - Hi
 • Recommended parameter adjustments:
-  - SCALP_STOP_ATR_MULTIPLIER: 0.7200000000000001 -> 0.5760000000000001 (reason: tighten stops when WR low; widen when WR strong)
-  - SCALP_TP_ATR_MULTIPLIER: 1.35 -> 1.215 (reason: increase targets when WR strong; reduce when WR weak)
-  - SCAN_INTERVAL_SECONDS: 39 -> 50.7 (reason: reduce frequency when WR low; increase when WR strong)
-  - MAX_TRADE_SIZE_USD: 31825.489149999998 -> 22277.842404999996 (reason: reduce size when WR poor; increase when WR strong)
-  - MAX_RISK_PER_TRADE_USD: 187500.0 -> 140625.0 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
-  - CONFIDENCE_THRESHOLD: 0.7000000000000001 -> 0.7500000000000001 (reason: raise entry bar when WR low; lower when WR strong)
-🧭 COMMANDER LEARNING | 2026-06-26T20:35:45.576982+00:00
-Could not parse AI plan — retained guidance for prompts only.
-off_hours_review
+  - SCALP_STOP_ATR_MULTIPLIER: 0.5760000000000001 -> 0.4608000000000001 (reason: tighten stops when WR low; widen when WR strong)
+  - SCALP_TP_ATR_MULTIPLIER: 1.215 -> 1.0935000000000001 (reason: increase targets when WR strong; reduce when WR weak)
+  - SCAN_INTERVAL_SECONDS: 51 -> 66.3 (reason: reduce frequency when WR low; increase when WR strong)
+  - MAX_TRADE_SIZE_USD: 22277.843875 -> 15594.490712499997 (reason: reduce size when WR poor; increase when WR strong)
+  - MAX_RISK_PER_TRADE_USD: 140625.0 -> 105468.75 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
+  - CONFIDENCE_THRESHOLD: 0.7500000000000001 -> 0.8000000000000002 (reason: raise entry bar when WR low; lower when WR strong)
+🧭 COMMANDER LEARNING | 2026-06-27T08:02:17.293111+00:00
+Halim heuristic dev plan — WR 13%
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.78 (Halim dev: WR 13% — tighten entry confidence)
+  - MIN_PROFIT_PROBABILITY → 0.65 (Halim dev: raise profit probability gate)
+  - SCAN_INTERVAL_SECONDS → 76 (Halim dev: slow scan cadence after heavy losses)
 
+🧭 COMMANDER LEARNING | 2026-06-27T08:02:31.328433+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.6900000000000001 (trade WR 13% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.62 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 08:02 UTC
+Diagnosis: Local teacher: 13% WR on 400 trades. 0 stop exits. Repeat tickers: MARA, LCID, ASTS, COIN, QS
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T08:04:05.130810+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.6900000000000001 (trade WR 13% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.5 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 08:04 UTC
+Diagnosis: Local teacher: 13% WR on 394 trades. 0 stop exits. Repeat tickers: MARA, LCID, ASTS, COIN, QS
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T08:05:24.777431+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.6900000000000001 (trade WR 13% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.62 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 08:05 UTC
+Diagnosis: Local teacher: 13% WR on 394 trades. 0 stop exits. Repeat tickers: MARA, LCID, ASTS, COIN, QS
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T08:27:42.367345+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +0.39% (peak +0.58% gave back 0.19%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:27:49.721966+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:27:50.185717+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.6900000000000001 (trade WR 13% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.5 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 08:28 UTC
+Diagnosis: Local teacher: 13% WR on 372 trades. 1 stop exits. Repeat tickers: ASTS, COIN, QS, MARA, LCID
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T08:28:31.068526+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:28:31.068484+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:28:59.392651+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +0.22% (peak +0.40% gave back 0.18%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:29:14.298099+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:29:53.640659+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:29:53.646258+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:29:54.997605+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:29:55.006489+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:31:11.597842+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:31:11.598483+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:32:14.268420+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:32:14.268527+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:34:46.233450+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:34:46.233722+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:34:52.082608+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.7300000000000001 (trade WR 15% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.55 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 08:35 UTC
+Diagnosis: Local teacher: 15% WR on 288 trades. 9 stop exits. Repeat tickers: QS, COIN, ASTS, LCID, PLTR, RIVN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T08:35:57.389217+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:35:57.388076+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:36:02.309114+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:36:02.318022+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:38:23.165625+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:38:23.194029+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:42:20.811391+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:42:20.811444+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:43:31.056762+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:43:31.066910+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:44:19.230332+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:44:19.386780+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:44:19.667453+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.75 (trade WR 19% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.6000000000000001 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 08:44 UTC
+Diagnosis: Local teacher: 19% WR on 189 trades. 15 stop exits. Repeat tickers: LCID, ASTS, QS, COIN, PLTR, RIVN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T08:45:35.669925+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +0.74% vol=13.9x
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:45:49.591493+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:45:49.611199+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:46:48.834967+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:46:53.959023+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.41% (peak +0.41%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:47:31.671356+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:47:31.709757+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:48:26.259637+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:48:26.259672+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:49:14.318452+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:49:14.318495+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:49:50.616447+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:49:50.631911+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:50:37.473072+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:50:37.472971+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:07.714250+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:07.716008+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:09.258359+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:09.346557+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:49.363705+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:49.366926+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:51.228760+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:51:51.228793+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:52:56.139319+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:53:46.233978+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:53:46.263568+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:54:28.669470+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:54:28.709883+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:55:27.728892+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:55:27.747221+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 08:55 UTC
+Diagnosis: Local teacher: 26% WR on 35 trades. 19 stop exits. Repeat tickers: LCID, COIN, ASTS, MARA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T08:57:18.877034+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:57:19.007099+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:57:20.431366+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:57:20.431311+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:57:38.453485+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:57:38.541574+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:58:35.354929+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:58:35.354985+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:59:00.634104+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:59:00.636330+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:59:51.146968+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T08:59:51.183927+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:00:09.599479+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+
+
+# PPO Teacher 2026-06-27 09:00 UTC
+Diagnosis: Local teacher: 29% WR on 35 trades. 18 stop exits. Repeat tickers: COIN, ASTS, MARA, LCID, QS, NVDA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T09:01:37.591652+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:01:37.591218+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:02:47.600370+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:02:47.607892+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:03:50.544255+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:03:50.545815+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:04:01.429763+00:00
+Could not parse AI plan — retained guidance for prompts only.
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- COIN: pnl=$-3.83 slip=-
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.75 (Loss streak — raise entry bar until pilot regains edge)
+  - VOLUME_SPIKE_MIN_RATIO → 1.35 (Loss streak — require stronger volume confirmation)
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:05:45.046863+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:05:45.122057+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:06:24.122490+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:06:24.128889+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:06:24.952980+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.75 (trade WR 15% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.62 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 09:06 UTC
+Diagnosis: Local teacher: 15% WR on 33 trades. 20 stop exits. Repeat tickers: MARA, ASTS, COIN, LCID, QS, NVDA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T09:07:12.933763+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:07:13.026235+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:08:08.030925+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:08:08.030992+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:09:26.840378+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.36% (peak +0.36%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:09:30.952150+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.48% (peak +0.92%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:11:07.137692+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.75 (trade WR 23% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.62 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 09:11 UTC
+Diagnosis: Local teacher: 23% WR on 78 trades. 18 stop exits. Repeat tickers: ASTS, COIN, LCID, MARA, QS, NVDA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T09:27:41.833333+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.59% (peak +0.59%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:28:46.431129+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:28:46.431637+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:28:49.419666+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.47% (peak +0.47%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:28:51.565096+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 09:29 UTC
+Diagnosis: Local teacher: 26% WR on 78 trades. 18 stop exits. Repeat tickers: COIN, LCID, MARA, QS, NVDA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T09:29:33.673008+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:29:33.823230+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:29:59.318089+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:29:59.327142+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:30:50.451173+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:30:50.460308+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T09:31:35.607978+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.6900000000000001 (trade WR 22% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.5 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 09:31 UTC
+Diagnosis: Local teacher: 22% WR on 105 trades. 17 stop exits. Repeat tickers: COIN, MARA, QS, NVDA, LCID, PLTR, RIVN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:07:18.847799+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:07:18.899439+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:07:39.514022+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:07:39.511644+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:08:04.073373+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:08:04.076007+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:08:04.999040+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.6900000000000001 (trade WR 22% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.5 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 10:08 UTC
+Diagnosis: Local teacher: 22% WR on 94 trades. 17 stop exits. Repeat tickers: QS, COIN, NVDA, LCID, MARA, PLTR, RIVN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:09:13.609603+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:09:20.473953+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +0.18% (peak +0.31% gave back 0.13%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:09:44.299977+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:09:44.482896+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:16.806252+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:16.875830+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:39.196882+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:39.196929+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:43.890438+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:43.913910+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:45.828608+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:10:46.084790+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:11:24.603780+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:11:24.604480+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:11:51.876876+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:11:51.890802+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:12:07.192254+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+
+
+# PPO Teacher 2026-06-27 10:12 UTC
+Diagnosis: Local teacher: 25% WR on 76 trades. 15 stop exits. Repeat tickers: LCID, ASTS, PLTR, RIVN, QS, MARA, COIN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:12:32.633493+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.34%
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:12:47.790593+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:12:47.793905+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:13:44.114009+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:14:43.912573+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:14:43.912605+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:15:18.861282+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:15:53.695967+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:15:53.835994+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:16:12.497610+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:16:12.514079+00:00
+Observed loss_streak — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:17:03.549594+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:17:03.551037+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:18:32.526302+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:18:32.692288+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:18:56.844202+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:18:56.844234+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 10:19 UTC
+Diagnosis: Local teacher: 31% WR on 48 trades. 16 stop exits. Repeat tickers: QS, MARA, ASTS, COIN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:19:23.687018+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.33%
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:19:29.330172+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +0.61% vol=1.9x
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:20:24.697523+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:20:24.705652+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:21:12.516768+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:21:12.526914+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:22:22.813179+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:22:22.813204+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:23:03.640296+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:23:03.640335+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:23:30.587212+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:23:30.587257+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 10:23 UTC
+Diagnosis: Local teacher: 31% WR on 39 trades. 17 stop exits. Repeat tickers: COIN, MARA, ASTS, LCID
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:23:59.971204+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:23:59.971174+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:24:16.917417+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:24:16.917481+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:24:31.672797+00:00
+Could not parse AI plan — retained guidance for prompts only.
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- ASTS: pnl=$-4.50 slip=0
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.7200000000000001 (Loss streak — raise entry bar until pilot regains edge)
+  - VOLUME_SPIKE_MIN_RATIO → 1.35 (Loss streak — require stronger volume confirmation)
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:27:18.737440+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:27:18.746264+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:27:35.980834+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:27:36.041994+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:28:28.230979+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:28:28.231029+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 10:28 UTC
+Diagnosis: Local teacher: 31% WR on 42 trades. 16 stop exits. Repeat tickers: ASTS, COIN, LCID, MARA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:30:52.990570+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:30:53.006026+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:32:02.116901+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:fade_floor +0.04% (peak was +0.36%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:32:25.812163+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:32:42.224038+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:32:54.124632+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+
+
+# PPO Teacher 2026-06-27 10:33 UTC
+Diagnosis: Local teacher: 26% WR on 42 trades. 17 stop exits. Repeat tickers: LCID, MARA, ASTS, COIN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:34:06.298649+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:34:06.298707+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:35:13.468963+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:35:13.469737+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:35:20.128374+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:37:03.423830+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:37:03.423864+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:37:56.771188+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.28%
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:39:55.699704+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:39:55.743251+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 10:40 UTC
+Diagnosis: Local teacher: 28% WR on 39 trades. 16 stop exits. Repeat tickers: LCID, MARA, COIN, ASTS
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:40:59.716802+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:41:08.641651+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:41:59.514428+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:41:59.514461+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:43:26.382819+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:43:43.940549+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:43:43.943554+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:43:46.107022+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:43:46.149573+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:44:16.990953+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:44:55.524336+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:44:55.533777+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:45:48.174964+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:45:48.176369+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:46:11.460121+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:46:11.468563+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:47:37.679564+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:48:18.499354+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:49:08.833518+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +1.09% (peak +1.50% gave back 0.41%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:49:11.088419+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:50:35.561560+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:50:35.563695+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:51:13.627465+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:51:13.627573+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:53:19.842797+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:53:19.851666+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:53:23.431733+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.43% (peak +0.43%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:53:32.712202+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:54:12.938865+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:54:12.938901+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:54:33.479635+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:54:33.500464+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:56:14.734540+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:56:14.839858+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:56:50.057551+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:56:50.058291+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:57:19.338223+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:57:19.338178+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:57:21.627732+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:57:21.627772+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 10:57 UTC
+Diagnosis: Local teacher: 36% WR on 36 trades. 16 stop exits. Repeat tickers: ASTS, LCID, MARA, COIN
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T10:58:44.500067+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:58:44.508758+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:59:22.693845+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T10:59:22.737836+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:01:32.980489+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:01:32.989623+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:02:02.229347+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:02:21.685285+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:02:21.698089+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 11:02 UTC
+Diagnosis: Local teacher: 36% WR on 36 trades. 17 stop exits. Repeat tickers: COIN, LCID, ASTS, MARA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T11:03:06.941127+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:03:06.950511+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:04:26.448592+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:04:26.466396+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:05:39.745277+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:05:39.791169+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:05:45.091580+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:05:45.090360+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:06:17.224971+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:06:17.225034+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:06:28.519255+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:06:28.614227+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:07:18.649120+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:07:18.650885+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 11:07 UTC
+Diagnosis: Local teacher: 27% WR on 30 trades. 21 stop exits. Repeat tickers: LCID, COIN, ASTS, MARA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T11:07:59.740076+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:07:59.741575+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:08:26.426386+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:08:26.439882+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:09:19.499370+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:10:09.829900+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:10:09.845394+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:10:50.441086+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:10:50.447884+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:11:46.326115+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:11:46.326154+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:14:08.666650+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:14:09.771054+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.75 (trade WR 22% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.55 (repeat losses — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-27 11:14 UTC
+Diagnosis: Local teacher: 22% WR on 32 trades. 22 stop exits. Repeat tickers: COIN, LCID, MARA, ASTS
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T11:14:39.746227+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +0.57% vol=1.3x
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:14:42.129795+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:14:42.179403+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:15:12.476582+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:15:12.492156+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:15:52.763731+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:15:52.786908+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:16:00.319437+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:16:00.667999+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:17:09.373347+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.38% (peak +0.38%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:17:13.457353+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:17:13.452431+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:17:21.193286+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:17:21.193935+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:17:23.359434+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:18:05.906203+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:18:05.907233+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:20:01.954866+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:21:01.669390+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:21:46.826816+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+
+
+# PPO Teacher 2026-06-27 11:22 UTC
+Diagnosis: Local teacher: 29% WR on 34 trades. 20 stop exits. Repeat tickers: ASTS, COIN, LCID, MARA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T11:22:37.939411+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:22:37.941275+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:22:42.049071+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:22:42.050559+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:23:45.731487+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.26%
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:23:48.381482+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:23:48.382884+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:25:28.419862+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:25:28.418524+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:25:32.268607+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:25:32.636788+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:25:58.206999+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:25:58.281678+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 11:26 UTC
+Diagnosis: Local teacher: 27% WR on 37 trades. 16 stop exits. Repeat tickers: ASTS, LCID, COIN, MARA
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-27T11:26:25.119152+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:26:25.137285+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:26:26.729591+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:26:26.783433+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:27:12.279414+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:28:38.131792+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-27T11:28:38.131753+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+
+
+# PPO Teacher 2026-06-27 11:55 UTC
+Diagnosis: Local teacher: 26% WR on 86 trades. 15 stop exits. Repeat tickers: COIN, LCID, MARA, ASTS
+- Do not re-enter same ticker after same-bar stop loss
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Wait for volume spike confirmation before chase entries

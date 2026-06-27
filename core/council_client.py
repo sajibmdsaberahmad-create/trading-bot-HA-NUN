@@ -223,6 +223,13 @@ class CouncilClient:
         text = self._gemini_vision(full_prompt, image_bytes)
         if text:
             record_council_api_call(purpose)
+            try:
+                from core.halim_capabilities import record_teacher_action
+                record_teacher_action(
+                    "chart_vision", prompt, text, source="gemini_vision", cfg=self.cfg,
+                )
+            except Exception:
+                pass
         return text
 
     def health_check(self) -> Dict[str, Any]:
@@ -272,6 +279,42 @@ class CouncilClient:
         if not self._rate_ok(priority=priority):
             return None
 
+        try:
+            from core.halim_guardrails import gate_api_call, kill_switch_active
+            if kill_switch_active():
+                return None
+            api_purpose = purpose if purpose in (
+                "decision", "copilot", "ppo_teacher", "notify", "market_data",
+                "github", "documentation", "research", "halim_train", "halim_eval",
+            ) else "research"
+            ok, reason = gate_api_call(api_purpose, self.cfg, action=purpose, prompt=prompt)
+            if not ok:
+                log.debug(f"Halim guardrail blocked API ({purpose}): {reason}")
+                return None
+        except Exception:
+            pass
+
+        try:
+            from core.halim_frontier_policy import check_content_policy
+            fp_ok, fp_reason = check_content_policy(
+                prompt, purpose=purpose, domain="api", cfg=self.cfg,
+            )
+            if not fp_ok:
+                log.debug(f"Halim frontier policy blocked prompt ({purpose}): {fp_reason}")
+                return None
+        except Exception:
+            pass
+
+        try:
+            from core.halim_capabilities import try_capability_complete
+            text, src = try_capability_complete(
+                prompt, purpose=purpose, system=system, cfg=self.cfg,
+            )
+            if text and src in ("halim_server",):
+                return text
+        except Exception:
+            pass
+
         use_system = system or self._system_prompt
         backends = self._backend_order()
         errors: List[str] = []
@@ -293,9 +336,31 @@ class CouncilClient:
                 else self._gemini_chat(prompt, use_system, notify=notify)
             )
             if text:
+                try:
+                    from core.halim_frontier_policy import check_output_policy
+                    out_ok, out_reason = check_output_policy(
+                        text, purpose=purpose, cfg=self.cfg,
+                    )
+                    if not out_ok:
+                        log.debug(f"Halim frontier policy blocked output: {out_reason}")
+                        continue
+                except Exception:
+                    pass
                 if not priority:
                     self._last_call_time = time.time()
                 self._call_count += 1
+                try:
+                    from core.brain_maturity import record_api_call
+                    record_api_call(purpose)
+                except Exception:
+                    pass
+                try:
+                    from core.halim_capabilities import record_teacher_action
+                    record_teacher_action(
+                        purpose, prompt, text, source=backend, cfg=self.cfg,
+                    )
+                except Exception:
+                    pass
                 return text
             if err:
                 errors.append(f"{backend}:{err}")

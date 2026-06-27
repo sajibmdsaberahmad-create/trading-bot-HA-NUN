@@ -899,12 +899,15 @@ class BotConfig:
     AI_ACCOUNT_EVAL_MIN_SEC: float = 300.0     # Min gap between same event type
     LEARNING_RESTORE_ON_STARTUP: bool = True   # Pull experience from GitHub on boot
     LEARNING_SYNC_INTERVAL_SEC: float = 1800.0 # Push all learning artifacts every 30 min
+    LEARNING_SNAPSHOT_INTERVAL_SEC: float = float(
+        os.getenv("LEARNING_SNAPSHOT_INTERVAL_SEC", "300"),
+    )  # fsync + PPO save — crash protection
     LEARNING_PUSH_ON_TRADE: bool = os.getenv(
         "LEARNING_PUSH_ON_TRADE", "true"
     ).lower() in ("1", "true", "yes")
     # HANOON session: defer git pushes (shutdown hook still syncs). Standalone daemon handles live pushes.
     GIT_PUSH_DURING_SESSION: bool = os.getenv(
-        "GIT_PUSH_DURING_SESSION", "false"
+        "GIT_PUSH_DURING_SESSION", "true"
     ).lower() in ("1", "true", "yes")
     GIT_AUTO_WATCH_IN_BOT: bool = False        # Never watch from HANOON — use start_git_sync.sh
     GIT_AUTO_WATCH_ENABLED: bool = os.getenv(
@@ -1195,6 +1198,9 @@ class BotConfig:
     GIT_NOTIFY_MODE: str = os.getenv("GIT_NOTIFY_MODE", "off")  # off | log | session | failures | all
     TELEGRAM_BROADCAST_LEARNING: bool = os.getenv(
         "TRADING_BOT_TELEGRAM_BROADCAST_LEARNING", "false"
+    ).lower() in ("1", "true", "yes")
+    TELEGRAM_BROADCAST_BRAIN: bool = os.getenv(
+        "TRADING_BOT_TELEGRAM_BROADCAST_BRAIN", "true"
     ).lower() in ("1", "true", "yes")
 
     # Real-time AI self-correction (5W reasoning on every algo event)

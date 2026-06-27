@@ -90,7 +90,9 @@ def _count_closed_trades() -> int:
                 r = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if r.get("source") == "live_trade" and r.get("action") == "SELL":
+            if r.get("source") in ("live_trade", "replay_live") and r.get("action") in (
+                "SELL", "TRADE", None,
+            ):
                 n += 1
     return n
 
@@ -157,13 +159,16 @@ def _build_feature_matrix(
     """
     entries_by_ticker: Dict[str, List[Dict]] = {}
     trades_by_ticker: Dict[str, List[Dict]] = {}
+    all_feats_by_ticker: Dict[str, List[Dict]] = {}
     for r in buffer:
         t = r.get("ticker", "")
         if not t:
             continue
-        if r.get("source") == "live_entry" and r.get("features"):
+        if r.get("source") in ("live_entry", "replay_live", "ppo_entry") and r.get("features"):
             entries_by_ticker.setdefault(t, []).append(r)
-        if r.get("source") == "live_trade":
+        if r.get("features"):
+            all_feats_by_ticker.setdefault(t, []).append(r)
+        if r.get("source") in ("live_trade", "replay_live"):
             trades_by_ticker.setdefault(t, []).append(r)
 
     rows_x: List[np.ndarray] = []
@@ -172,32 +177,48 @@ def _build_feature_matrix(
 
     obs_dim = cfg.WINDOW_SIZE * cfg.N_FEATURES + 2 + N_EXTRA
 
+    def _pick_features(ticker: str, ts: float, max_dt: float = 600.0) -> Optional[Dict]:
+        best, best_dt = None, 999999.0
+        for pool in (entries_by_ticker.get(ticker, []), all_feats_by_ticker.get(ticker, [])):
+            for c in pool:
+                dt = abs(_parse_ts(c.get("timestamp", "")) - ts)
+                if dt < best_dt and dt < max_dt:
+                    best_dt = dt
+                    best = c
+        return best
+
     for dec in decisions:
         ticker = dec["ticker"]
         ts = dec["ts"]
-        candidates = entries_by_ticker.get(ticker, [])
-        feat_rec = None
-        best_dt = 999999.0
-        for c in candidates:
-            dt = abs(_parse_ts(c.get("timestamp", "")) - ts)
-            if dt < best_dt and dt < 120:
-                best_dt = dt
-                feat_rec = c
+        feat_rec = _pick_features(ticker, ts)
+        if feat_rec is None and dec["enter"]:
+            continue
         if feat_rec is None:
-            continue
-        flat = feat_rec.get("features") or []
-        if len(flat) < cfg.WINDOW_SIZE * cfg.N_FEATURES:
-            continue
-        base = np.array(flat[: cfg.WINDOW_SIZE * cfg.N_FEATURES], dtype=np.float32)
-        cash = float(feat_rec.get("cash_ratio", 0.9))
-        pos = float(feat_rec.get("pos_ratio", 0.0))
-        spike = float(feat_rec.get("spike_ratio", 1.0))
-        scan = float(feat_rec.get("scan_score", 0.0))
-        spread = float(feat_rec.get("spread_pct", 0.0))
-        vol = float(feat_rec.get("vol_ratio", 1.0))
+            # Skip decisions: use zero base + council confidence channel
+            base = np.zeros(cfg.WINDOW_SIZE * cfg.N_FEATURES, dtype=np.float32)
+            cash, pos, spike, scan, spread, vol = 0.9, 0.0, 1.0, 0.0, 0.0, 1.0
+        else:
+            flat = feat_rec.get("features") or []
+            if len(flat) < cfg.WINDOW_SIZE * cfg.N_FEATURES:
+                if dec["enter"]:
+                    continue
+                base = np.zeros(cfg.WINDOW_SIZE * cfg.N_FEATURES, dtype=np.float32)
+                cash, pos = 0.9, 0.0
+                spike = float(feat_rec.get("spike_ratio", 1.0))
+                scan = float(feat_rec.get("scan_score", 0.0))
+                spread = float(feat_rec.get("spread_pct", 0.0))
+                vol = float(feat_rec.get("vol_ratio", 1.0))
+            else:
+                base = np.array(flat[: cfg.WINDOW_SIZE * cfg.N_FEATURES], dtype=np.float32)
+                cash = float(feat_rec.get("cash_ratio", 0.9))
+                pos = float(feat_rec.get("pos_ratio", 0.0))
+                spike = float(feat_rec.get("spike_ratio", 1.0))
+                scan = float(feat_rec.get("scan_score", 0.0))
+                spread = float(feat_rec.get("spread_pct", 0.0))
+                vol = float(feat_rec.get("vol_ratio", 1.0))
         vec = np.concatenate([
             base,
-            [cash, pos, spike, scan, spread, vol, 0.0],
+            [cash, pos, spike, scan, spread, vol, float(dec.get("confidence", 0.5))],
         ]).astype(np.float32)
         if vec.shape[0] != obs_dim:
             vec = np.resize(vec, obs_dim)
@@ -268,7 +289,18 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
     )
 
     clf = LogisticRegression(max_iter=500, class_weight="balanced")
-    clf.fit(X_train, y_train, sample_weight=w_train)
+    try:
+        clf.fit(X_train, y_train, sample_weight=w_train)
+    except ValueError as exc:
+        if "needs samples of at least 2 classes" in str(exc):
+            return {
+                "ok": False,
+                "reason": "single_class",
+                "error": str(exc)[:120],
+                "paired": int(len(y)),
+                "class_counts": {"enter": int(y.sum()), "skip": int(len(y) - y.sum())},
+            }
+        raise
     accuracy = float(clf.score(X_test, y_test))
 
     bundle = {
@@ -304,6 +336,23 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
         f"🎓 Teacher proxy trained — acc={accuracy:.0%} | samples={len(y)} | "
         f"phase={distillation_status(cfg)['phase']}"
     )
+    try:
+        from core.brain_notify import notify_brain_development
+        from core.brain_maturity import maturity_snapshot
+        snap = maturity_snapshot(cfg)
+        notify_brain_development(
+            cfg,
+            "brain_proxy_trained",
+            {
+                "accuracy": accuracy,
+                "samples": len(y),
+                "stage": snap.get("stage"),
+                "fast_path": bool(state.get("fast_path")),
+                "summary": f"Teacher proxy acc={accuracy:.0%} ({len(y)} samples)",
+            },
+        )
+    except Exception:
+        pass
     return {"ok": True, "accuracy": accuracy, "samples": len(y)}
 
 
@@ -368,10 +417,17 @@ def proxy_entry_decision(
     market_ctx: Optional[Dict[str, Any]],
     cfg: BotConfig,
 ) -> Optional[Dict[str, Any]]:
-    """Full entry JSON shape for AICommander when fast path is active."""
-    if not is_fast_path_enabled(cfg):
+    """Full entry JSON shape for AICommander when student proxy is active."""
+    if not PROXY_PATH.exists():
         return None
-    return predict_teacher_proxy(obs, spike_ratio, scan_score, market_ctx, cfg)
+    try:
+        from core.brain_maturity import should_use_student_entry
+        if should_use_student_entry(cfg) or is_fast_path_enabled(cfg):
+            return predict_teacher_proxy(obs, spike_ratio, scan_score, market_ctx, cfg)
+    except Exception:
+        if is_fast_path_enabled(cfg):
+            return predict_teacher_proxy(obs, spike_ratio, scan_score, market_ctx, cfg)
+    return None
 
 
 def maybe_run_hybrid_distillation(cfg: BotConfig) -> Dict[str, Any]:

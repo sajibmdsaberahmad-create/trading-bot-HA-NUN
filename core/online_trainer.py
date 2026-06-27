@@ -140,6 +140,13 @@ def _update_weights_from_buffer():
     except Exception:
         pass
     win_rate = stats.get("win_rate", 0.5)
+    try:
+        from core.ppo_teacher_training import trade_stats
+        tstats = trade_stats(n=400)
+        if tstats.get("count", 0) >= 5:
+            win_rate = float(tstats.get("win_rate", win_rate))
+    except Exception:
+        pass
     factor = 1.0 + (win_rate - 0.5) * 0.4  # centered on 50%
     for k in weights:
         if k.startswith("_"):
@@ -148,14 +155,18 @@ def _update_weights_from_buffer():
     weights["_meta"] = {
         "train_timestamp": datetime.utcnow().isoformat(),
         "buffer_total": stats.get("total", 0),
-        "buffer_win_rate": round(win_rate, 3),
+        "buffer_win_rate": round(float(stats.get("win_rate", 0)), 3),
+        "trade_win_rate": round(float(win_rate), 3),
         "sources": stats.get("sources", {}),
         "missed_profit_hunts": stats.get("missed_profit_hunts", 0),
         "profit_hunt_events": stats.get("profit_hunt_events", 0),
     }
     with open(WEIGHTS_PATH, "w") as f:
         json.dump(weights, f, indent=2)
-    log.info(f"🧠 Updated rule weights from buffer (win_rate={win_rate:.1%})")
+    log.info(
+        f"🧠 Updated rule weights from buffer "
+        f"(trade_win_rate={win_rate:.1%}, buffer={stats.get('win_rate', 0):.1%})"
+    )
     return weights
 
 
@@ -174,6 +185,8 @@ def _train_ppo_on_buffer(cfg: BotConfig, steps: int = 20_000):
         if r.get("source") in (
             "backtest", "live_trade", "live_entry", "scan_pick",
             "ppo_entry", "ppo_entry_eval", "ppo_led", "deferred_council",
+            "halim_ppo_coevolution",
+            "teacher_ppo", "replay_live",
         )
         and r.get("features")
     ]

@@ -84,6 +84,30 @@ def broadcast_ops(
     threading.Thread(target=_run, name=f"tg-broadcast-{event}", daemon=True).start()
 
 
+def broadcast_precomposed(cfg: BotConfig, text: str) -> None:
+    """Send Halim-generated text directly — no second AI pass, no static template."""
+    if not text or not getattr(cfg, "TELEGRAM_ENABLED", True):
+        return
+    if not getattr(cfg, "TELEGRAM_BROADCAST_OPS", True):
+        return
+    token = (getattr(cfg, "TELEGRAM_BOT_TOKEN", "") or "").strip()
+    if not token or not outbound_chat_ids(cfg):
+        return
+
+    def _run():
+        listener = _listener_ref() if _listener_ref else None
+        for cid in outbound_chat_ids(cfg):
+            try:
+                if listener and hasattr(listener, "send"):
+                    listener.send(cid, text)
+                else:
+                    send_telegram_to_chat(token, cid, text)
+            except Exception as exc:
+                log.debug(f"broadcast_precomposed chat {cid}: {exc}")
+
+    threading.Thread(target=_run, name="tg-broadcast-precomposed", daemon=True).start()
+
+
 def _should_broadcast_learning(cfg: BotConfig) -> bool:
     if not getattr(cfg, "TELEGRAM_ENABLED", True):
         return False

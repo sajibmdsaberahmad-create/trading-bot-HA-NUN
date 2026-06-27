@@ -54,9 +54,9 @@ EXAMPLES:
     )
     parser.add_argument("--mode", choices=["warmup", "trade", "evaluate", "scalper",
                                             "advanced-train", "fusion-trade",
-                                            "fusion-backtest"], required=True,
-                         help="scalper: HANOON | warmup: train PPO | trade: PPO live | "
-                              "evaluate: backtest | advanced-train: train all AI models | "
+                                            "fusion-backtest", "replay-live"], required=True,
+                         help="scalper: HANOON | replay-live: fake-live from CSV | warmup: train PPO | "
+                              "trade: PPO live | evaluate: backtest | advanced-train: train all AI models | "
                               "fusion-trade: multi-model AI trade | fusion-backtest: multi-model backtest")
     parser.add_argument("--algo", choices=["ppo", "scalper", "fusion"], default=None,
                          help="Override: ppo (legacy), scalper (HANOON), or fusion (multi-model AI)")
@@ -433,6 +433,22 @@ if __name__ == "__main__":
             connector.disconnect()
             sys.exit(1)
 
+    elif args.mode == "replay-live":
+        from core.replay_scalper_runner import run_replay_scalper
+        try:
+            run_replay_scalper(cfg)
+        except KeyboardInterrupt:
+            log.info("Replay-live stopped by user.")
+        except Exception as exc:
+            log.exception(f"Fatal error in replay-live: {exc}")
+            try:
+                from core.learning_persistence import emergency_snapshot, mark_session_end
+                emergency_snapshot(cfg)
+                mark_session_end()
+            except Exception:
+                pass
+            sys.exit(1)
+
     elif args.mode == "scalper":
         notifier = Notifier(cfg)
         connector = IBConnector(cfg, notifier)
@@ -445,6 +461,12 @@ if __name__ == "__main__":
             scalper.run()
         except Exception as exc:
             log.exception(f"Fatal error in HANOON loop: {exc}")
+            try:
+                from core.learning_persistence import emergency_snapshot, mark_session_end
+                emergency_snapshot(cfg, model=getattr(scalper, "model", None), runner=scalper)
+                mark_session_end()
+            except Exception:
+                pass
             notifier.error("HANOON main loop", str(exc))
             connector.disconnect()
             sys.exit(1)

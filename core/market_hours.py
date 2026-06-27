@@ -29,7 +29,17 @@ US_MARKET_HOLIDAYS = {
 
 
 def now_et() -> datetime:
-    """Current wall-clock time in US Eastern (DST-aware)."""
+    """Current wall-clock time in US Eastern (DST-aware).
+
+    During replay-live sessions, returns the virtual replay clock instead.
+    """
+    try:
+        from core.replay_clock import replay_now_et
+        virtual = replay_now_et()
+        if virtual is not None:
+            return virtual
+    except ImportError:
+        pass
     return datetime.now(MARKET_TZ)
 
 

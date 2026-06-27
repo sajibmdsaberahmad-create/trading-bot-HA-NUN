@@ -441,9 +441,9 @@ class TelegramCommandListener:
             ticker, reason = exit_match
             self._cmd_exit(chat_id, f"{ticker} {reason}".strip(), reply_id)
             return
+
         self._store_guidance(chat_id, text)
         append_directive(text, source="telegram_chat", chat_id=str(chat_id))
-        self.send_instant(chat_id, "🧠 On it — pulling live state…", reply_to=reply_id)
         threading.Thread(
             target=self._ai_reply,
             args=(chat_id, text, reply_id, "commander_chat"),
@@ -776,7 +776,24 @@ class TelegramCommandListener:
         fallback = f"MOOD: {mood}\n{message}\nMarket {ctx.get('market_state', '?').upper()} · {ctx.get('trades_today', 0)} trades today"
         self.send_ai(chat_id, "mood", ctx, fallback, reply_to=reply_id)
 
-    def _think(self, prompt: str) -> str:
+    def _think(self, user_text: str, extra: str = "") -> str:
+        try:
+            from core.halim_companion import companion_speak
+            r = companion_speak(
+                user_text, cfg=self.cfg, runner=self.runner, extra=extra,
+            )
+            if r.get("text"):
+                return str(r["text"]).strip()
+        except Exception:
+            pass
+        try:
+            from core.halim_chat import halim_chat
+            r = halim_chat(user_text, context=extra, purpose="commander_chat", cfg=self.cfg)
+            if r.get("text") and r.get("source") not in ("halim_locked", "halim_fallback"):
+                return str(r["text"]).strip()
+        except Exception:
+            pass
+        prompt = f"{extra}\n\nCommander: {user_text}" if extra else user_text
         if self.ai_commander and hasattr(self.ai_commander, "compose_telegram"):
             try:
                 return (
@@ -813,25 +830,29 @@ class TelegramCommandListener:
                 pass
 
         draft = self._think(
-            f"Commander said: {text}\n\nLIVE:\n{json.dumps(ctx, default=str)}\n"
-            f"POSITIONS:\n{pos_snip}\nRISK:\n{risk_snip}\nACTIVITY:\n{report_snip}"
+            text,
+            extra=(
+                f"LIVE:\n{json.dumps(ctx, default=str)}\n"
+                f"POSITIONS:\n{pos_snip}\nRISK:\n{risk_snip}\nACTIVITY:\n{report_snip}"
+            ),
         )
-        fallback = draft or f"Received — noted: {text[:200]}"
-        self.send_ai(
-            chat_id,
-            "commander_chat",
-            {
-                "commander_message": text,
-                "live_state": ctx,
-                "positions_excerpt": pos_snip,
-                "risk_excerpt": risk_snip,
-                "activity_excerpt": report_snip,
-                "draft_reply": draft,
-            },
-            fallback,
-            reply_to=reply_id,
-            sync=True,
-        )
+        if draft:
+            self.send(chat_id, draft, reply_to=reply_id)
+        else:
+            self.send_ai(
+                chat_id,
+                "commander_chat",
+                {
+                    "commander_message": text,
+                    "live_state": ctx,
+                    "positions_excerpt": pos_snip,
+                    "risk_excerpt": risk_snip,
+                    "activity_excerpt": report_snip,
+                },
+                f"Received — noted: {text[:200]}",
+                reply_to=reply_id,
+                sync=True,
+            )
         threading.Thread(
             target=self._learning_worker,
             args=(chat_id, text, None),
