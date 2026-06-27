@@ -1,120 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 169,
+  "total_awakenings": 171,
   "training_sessions": 35,
-  "trades_observed": 247,
+  "trades_observed": 249,
   "scans_performed": 35,
-  "improvements_applied": 528,
+  "improvements_applied": 529,
   "reports_generated": 34,
   "event_log": [
-    {
-      "timestamp": "2026-06-24T20:20:30.110768",
-      "age": "3d 9h 17m 41s",
-      "type": "REGIME",
-      "message": "Market regime: unknown (conf=0%)",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-24T20:20:47.029884",
-      "age": "3d 9h 17m 58s",
-      "type": "TRAIN_COMPLETE",
-      "message": "Unified training completed",
-      "metadata": {
-        "weights_updated": true,
-        "ppo_trained": true
-      }
-    },
-    {
-      "timestamp": "2026-06-24T20:20:47.057645",
-      "age": "3d 9h 17m 58s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #9",
-      "metadata": {
-        "guidelines": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-24T20:20:47.056149\nCombined win rate: 29.5% (buffer=38.4%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 Add 5-min confirmation before entry to filter noise\n\u2022 Recommended parameter adjustments:\n  - SCALP_TP_ATR_MULTIPLIER: 0.6457008150000002 -> 0.5811307335000002 (reason: increase targets when WR strong; reduce when WR weak)\n  - SCAN_INTERVAL_SECONDS: 376.49110200000007 -> 489.4384326000001 (reason: reduce frequency when WR low; increase when WR strong)",
-        "adjustments": {
-          "SCALP_TP_ATR_MULTIPLIER": {
-            "old": 0.6457008150000002,
-            "new": 0.5811307335000002,
-            "reason": "increase targets when WR strong; reduce when WR weak",
-            "confidence": 0.018
-          },
-          "SCAN_INTERVAL_SECONDS": {
-            "old": 376.49110200000007,
-            "new": 489.4384326000001,
-            "reason": "reduce frequency when WR low; increase when WR strong",
-            "confidence": 0.134
-          }
-        },
-        "win_rate": 0.295355790312936,
-        "timestamp": "2026-06-24T20:20:47.057409"
-      }
-    },
-    {
-      "timestamp": "2026-06-24T20:20:47.062313",
-      "age": "3d 9h 17m 58s",
-      "type": "VERSION",
-      "message": "Created version v20260624_202047",
-      "metadata": {
-        "id": "v20260624_202047",
-        "timestamp": "2026-06-24T20:20:47.060578",
-        "age": "3d 9h 17m 58s",
-        "session": 9,
-        "mood": "learning",
-        "total_awakenings": 74,
-        "trades_observed": 23,
-        "scans_performed": 9,
-        "improvements_applied": 9,
-        "total_pnl": -17694.23,
-        "best_streak": 2,
-        "steps": {
-          "market_context": {
-            "spy_trend": "unknown",
-            "qqq_trend": "unknown",
-            "vix_level": 0.0,
-            "vix_regime": "low",
-            "timestamp": "2026-06-24T20:20:30.107354"
-          },
-          "regime": {
-            "regime": "unknown",
-            "confidence": 0.0,
-            "recommendation": "Insufficient data"
-          },
-          "unified_training": {
-            "weights_updated": true,
-            "ppo_trained": true
-          },
-          "self_improvement": {
-            "win_rate": 0.295355790312936,
-            "adjustments": {
-              "SCALP_TP_ATR_MULTIPLIER": {
-                "old": 0.6457008150000002,
-                "new": 0.5811307335000002,
-                "reason": "increase targets when WR strong; reduce when WR weak",
-                "confidence": 0.018
-              },
-              "SCAN_INTERVAL_SECONDS": {
-                "old": 376.49110200000007,
-                "new": 489.4384326000001,
-                "reason": "reduce frequency when WR low; increase when WR strong",
-                "confidence": 0.134
-              }
-            }
-          }
-        },
-        "parent_version": "v20260624_201609"
-      }
-    },
-    {
-      "timestamp": "2026-06-24T20:25:30.422442",
-      "age": "3d 9h 22m 41s",
-      "type": "SCAN",
-      "message": "Market scan #10",
-      "metadata": {
-        "source": "off_hours",
-        "tickers": "live_ib"
-      }
-    },
     {
       "timestamp": "2026-06-24T20:25:30.434100",
       "age": "3d 9h 22m 41s",
@@ -22025,9 +21918,53 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #169",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T05:35:31.143829",
+      "age": "5d 18h 32m 42s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #170",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T05:37:06.256586",
+      "age": "5d 18h 34m 17s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #529",
+      "metadata": {
+        "source": "commander_chat",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-27T05:37:06.311685",
+      "age": "5d 18h 34m 17s",
+      "type": "TRADE",
+      "message": "Observed trade: SESSION IB_DAY_LESSON P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T05:37:06.335943",
+      "age": "5d 18h 34m 17s",
+      "type": "TRADE",
+      "message": "Observed trade: SESSION IB_DAY_LESSON P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T05:38:52.602150",
+      "age": "5d 18h 36m 3s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #171",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-27T05:33:12.708491",
+  "last_awakening": "2026-06-27T05:38:52.601810",
   "current_version": "v20260627_052536",
   "version_history": [
     {
@@ -24143,20 +24080,22 @@
     0,
     0,
     0,
+    0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 16,
+  "consecutive_losses": 18,
   "worst_streak": 21,
-  "veteran_xp": 3315,
+  "veteran_xp": 3335,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 82
   },
-  "flights_completed": 242,
-  "hours_flown": 24.200000000000074,
+  "flights_completed": 244,
+  "hours_flown": 24.400000000000077,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -24187,7 +24126,7 @@
     "RKL": 11,
     "SOF": 18,
     "AST": 4,
-    "SES": 6
+    "SES": 8
   },
   "best_streak": 4,
   "mood_epoch_start_index": 20,
