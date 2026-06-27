@@ -100,6 +100,9 @@ def try_reasoning_complete(
 
         url = server_url() or os.getenv("HALIM_SERVER_URL")
         if not url:
+            inline = _try_inline_lm(prompt, purpose=purpose)
+            if inline[0]:
+                return inline
             return None, "unavailable"
 
         out = complete(prompt, purpose=purpose, timeout=timeout)
