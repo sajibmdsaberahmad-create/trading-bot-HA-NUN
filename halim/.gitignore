@@ -4,8 +4,10 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-data/checkpoints/
+data/checkpoints/*
+!data/checkpoints/toddler_v1/
+!data/checkpoints/toddler_v1/**
+!data/checkpoints/latest
 *.gguf
-*.safetensors
 *.bin
 .DS_Store
