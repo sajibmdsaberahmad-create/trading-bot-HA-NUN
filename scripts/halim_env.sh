@@ -7,9 +7,21 @@ export HALIM_REPO_ROOT="$_HALIM_SCRIPT_ROOT"
 export PYTHONPATH="$HALIM_REPO_ROOT/halim:$HALIM_REPO_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
 # Toddler LM (Colab-trained checkpoint)
-export HALIM_LM_BACKEND="${HALIM_LM_BACKEND:-hf}"
+# Apple Silicon Mac → MLX (Metal, 4-bit, low RAM). Linux/Colab → HuggingFace.
+if [[ -z "${HALIM_LM_BACKEND:-}" ]]; then
+  if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+    HALIM_LM_BACKEND=mlx
+  else
+    HALIM_LM_BACKEND=hf
+  fi
+fi
+export HALIM_LM_BACKEND
 export HALIM_MODEL_PATH="${HALIM_MODEL_PATH:-halim/data/checkpoints/latest}"
-export HALIM_BASE_MODEL="${HALIM_BASE_MODEL:-Qwen/Qwen2.5-0.5B-Instruct}"
+if [[ "$HALIM_LM_BACKEND" == "mlx" ]]; then
+  export HALIM_BASE_MODEL="${HALIM_BASE_MODEL:-mlx-community/Qwen2.5-0.5B-Instruct-4bit}"
+else
+  export HALIM_BASE_MODEL="${HALIM_BASE_MODEL:-Qwen/Qwen2.5-0.5B-Instruct}"
+fi
 export HALIM_REASONING_VIA_SERVER="${HALIM_REASONING_VIA_SERVER:-auto}"
 export HALIM_FORCE_LM="${HALIM_FORCE_LM:-true}"
 

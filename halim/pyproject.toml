@@ -6,7 +6,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
-train = ["mlx-lm", "mlx"]
+train = ["mlx-lm>=0.19", "mlx>=0.21"]
+serve = ["mlx-lm>=0.19", "mlx>=0.21"]
+serve-hf = ["torch", "transformers", "peft"]
 dev = []
 
 [tool.setuptools.packages.find]
