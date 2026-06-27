@@ -62,12 +62,14 @@ def mlx_complete(
 
     model, tokenizer = _model_cache[key]
     try:
+        from mlx_lm.sample_utils import make_sampler
+
         text = generate(
             model,
             tokenizer,
             prompt=prompt,
             max_tokens=max_tokens,
-            temp=temperature,
+            sampler=make_sampler(temp=temperature),
             verbose=False,
         )
         return (text or "").strip() or None, "ok"
