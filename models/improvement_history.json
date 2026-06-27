@@ -1,138 +1,103 @@
 [
   {
-    "timestamp": "2026-06-27T11:28:38.132216+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on LCID"
-    ]
-  }
-]},
-  {
-    "timestamp": "2026-06-27T11:23:45.733821+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on COIN"
-    ]
+    "timestamp": "2026-06-27T12:20:39.222221",
+    "win_rate": 0.15573079093528172,
+    "buffer_win_rate": 0.1045650301464255,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.9,
+        "new": 0.7200000000000001,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.112
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.5,
+        "new": 1.35,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.043
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 30,
+        "new": 39.0,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.051
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 45464.9875,
+        "new": 31825.49125,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.016
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 250000.0,
+        "new": 187500.0,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 0.275
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.65,
+        "new": 0.7000000000000001,
+        "reason": "raise entry bar when WR low; lower when WR strong",
+        "confidence": 0.091
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-27T12:20:39.219694\nCombined win rate: 15.6% (buffer=10.5%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
   },
   {
-    "timestamp": "2026-06-27T11:23:48.385024+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on MARA"
-    ]
+    "timestamp": "2026-06-27T12:20:39.810128",
+    "win_rate": 0.15573079093528172,
+    "buffer_win_rate": 0.1045650301464255,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.7200000000000001,
+        "new": 0.5760000000000001,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.09
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.35,
+        "new": 1.215,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.039
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 39,
+        "new": 50.7,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.067
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 31825.49125,
+        "new": 22277.843875,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.011
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 187500.0,
+        "new": 140625.0,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 0.206
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.7000000000000001,
+        "new": 0.7500000000000001,
+        "reason": "raise entry bar when WR low; lower when WR strong",
+        "confidence": 0.091
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-27T12:20:39.809532\nCombined win rate: 15.6% (buffer=10.5%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
   },
   {
-    "timestamp": "2026-06-27T11:23:48.386484+00:00",
-    "source": "runtime_trade_closed",
+    "timestamp": "2026-06-27T12:20:47.339302+00:00",
+    "source": "commander_chat",
     "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "guidelines_summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
     "lessons": [
-      "Review trade_closed on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:25:28.422040+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on COIN"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:25:32.296716+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on ASTS"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:25:32.647687+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on ASTS"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:25:58.265273+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on COIN"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:25:58.286704+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on COIN"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:26:25.124093+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:26:25.141928+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:26:26.738753+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on LCID"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:26:26.810304+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
-    "lessons": [
-      "Review loss_streak on LCID"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:27:12.279668+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on LCID"
-    ]
-  },
-  {
-    "timestamp": "2026-06-27T11:28:38.132067+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on LCID"
+      "ping - are you there ?",
+      "Hi",
+      "Hi"
     ]
   }
 ]

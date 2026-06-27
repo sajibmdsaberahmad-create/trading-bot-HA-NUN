@@ -67,3 +67,5 @@
 {"timestamp":"2026-06-27T11:55:27.114161+00:00","event":"ppo_halim_coevolution","agreements":78,"disagreements":559,"corrections_for_ppo":736,"corrections_for_halim":2,"log_path":"halim/data/coevolution/correction_log.jsonl","export":{"ok":true,"added":1553,"total":6399},"trigger":"replay_teardown"}
 {"timestamp":"2026-06-27T11:55:56.389974+00:00","event":"evolution","trigger":"replay_teardown","phase":"newborn","stage":"adult","dataset_pairs":null,"device_profile":"m2_8gb","steps_ok":{"export_dataset":true,"train_proxy":false,"ppo_teacher":true,"weights":true,"export_action_gold":true}}
 {"timestamp":"2026-06-27T11:55:56.459964+00:00","event":"ppo_halim_coevolution","agreements":78,"disagreements":559,"corrections_for_ppo":736,"corrections_for_halim":2,"log_path":"halim/data/coevolution/correction_log.jsonl","export":{"ok":true,"added":1553,"total":7952},"trigger":"replay_teardown"}
+{"timestamp":"2026-06-27T12:20:47.321849+00:00","event":"capability_milestone","capability":"text_compose","level_pct":25,"phase":"newborn"}
+{"timestamp":"2026-06-27T12:20:47.322085+00:00","event":"capability_milestone","capability":"text_compose","level_pct":50,"phase":"newborn"}
