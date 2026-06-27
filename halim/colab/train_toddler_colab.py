@@ -154,6 +154,22 @@ def main() -> None:
         shutil.rmtree(merged_dir)
     merged_dir.mkdir(parents=True, exist_ok=True)
 
+    try:
+        import subprocess
+        import sys
+        try:
+            import torchao
+            ver = getattr(torchao, "__version__", "0")
+            parts = [int(x) for x in ver.split(".")[:2]]
+            if parts[0] == 0 and parts[1] < 16:
+                subprocess.check_call(
+                    [sys.executable, "-m", "pip", "install", "-q", "torchao>=0.16.0"],
+                )
+        except ImportError:
+            pass
+    except Exception:
+        pass
+
     base = AutoModelForCausalLM.from_pretrained(
         BASE_MODEL,
         torch_dtype=torch.float16,
