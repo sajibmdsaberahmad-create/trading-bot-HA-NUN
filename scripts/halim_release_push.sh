@@ -39,7 +39,7 @@ echo "════════════════════════�
 
 if [[ ! -f "$CKPT/merged/model.safetensors" ]]; then
   if [[ -f "$ZIP_SRC" ]]; then
-    echo "📦 Extracting toddler checkpoint from $ZIP_SRC…"
+    echo "📦 Extracting toddler checkpoint from ${ZIP_SRC}…"
     mkdir -p "$HALIM_DIR/data/checkpoints"
     unzip -o "$ZIP_SRC" -d "$HALIM_DIR/data/checkpoints/"
     "$ROOT/scripts/halim_register_checkpoint.sh" toddler_v1 --backend hf 2>/dev/null || true
@@ -66,7 +66,7 @@ EOF
 }
 
 if [[ "$DO_NEW_REPO" == "true" ]]; then
-  echo "📁 Building standalone Halim-only repo at $RELEASE_DIR…"
+  echo "📁 Building standalone Halim-only repo at ${RELEASE_DIR}…"
   rm -rf "$RELEASE_DIR"
   mkdir -p "$RELEASE_DIR"
   rsync -a \
