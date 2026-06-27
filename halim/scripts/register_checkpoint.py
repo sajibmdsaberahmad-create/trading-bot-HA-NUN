@@ -17,6 +17,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Register Halim checkpoint")
     parser.add_argument("name", help="Checkpoint dir name under halim/data/checkpoints/")
     parser.add_argument("--base-model", default=None, help="Set base_model in config.json if missing")
+    parser.add_argument(
+        "--backend",
+        default=None,
+        choices=("mlx", "hf"),
+        help="Inference backend (use hf for Colab-trained checkpoints)",
+    )
     args = parser.parse_args()
 
     ckpt_root = ROOT / "halim/data/checkpoints"
@@ -32,6 +38,8 @@ def main() -> int:
         cfg = {}
     if args.base_model:
         cfg["base_model"] = args.base_model
+    if args.backend:
+        cfg["backend"] = args.backend
     cfg.setdefault("halim_phase", "toddler")
     cfg.setdefault("backend", "mlx")
     cfg.setdefault("model", "M. A. Halim")

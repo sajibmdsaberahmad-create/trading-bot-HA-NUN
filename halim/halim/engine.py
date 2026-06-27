@@ -168,6 +168,33 @@ def complete_reasoning(prompt: str, purpose: str = "reasoning") -> Dict[str, Any
 
     backend = os.getenv("HALIM_LM_BACKEND", "").lower()
     ckpt = checkpoint_path()
+    if backend == "hf" and ckpt:
+        try:
+            from halim.inference_backend import hf_complete
+
+            text, err = hf_complete(prompt, ckpt)
+            if text:
+                return {
+                    "ok": True,
+                    "text": text,
+                    "source": "halim_lm",
+                    "backend": "hf",
+                    "purpose": purpose,
+                }
+            return {
+                "ok": False,
+                "reason": err,
+                "message": "HF inference failed — pip install torch transformers",
+                "backend": "hf",
+            }
+        except Exception as exc:
+            return {
+                "ok": False,
+                "reason": "hf_error",
+                "message": str(exc)[:200],
+                "backend": "hf",
+            }
+
     if backend == "mlx" and ckpt:
         try:
             from halim.inference_backend import mlx_complete
