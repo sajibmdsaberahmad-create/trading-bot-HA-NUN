@@ -4,12 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "No clean data on SOFI (ib_10197) \u2014 profit hunt elsewhere.",
-    "No clean data on MARA (ib_10197) \u2014 profit hunt elsewhere.",
-    "Review rth_open on ?",
-    "Commander: Observed rth_open \u2014 recorded for learning.",
-    "Commander: MD 10197 ib_10197: No market data during competing live session",
-    "Review market_data_failure on MARA",
     "High confidence levels can be beneficial when making trades.",
     "Monitoring market conditions is crucial for successful trading.",
     "Adjusting confidence levels based on recent events helps in staying informed and making more informed decisions",
@@ -103,10 +97,16 @@
     "Commander: green_profit_lock:ai_stall quick_scalp +12.40% (peak +12.40%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +10.98% (peak +10.98%)",
     "Commander: green_profit_lock:giveback +0.24% (peak +0.44% gave back 0.20%)",
-    "RTH open \u2014 super alert: opening noise, ride real volume, protect capital."
+    "RTH open \u2014 super alert: opening noise, ride real volume, protect capital.",
+    "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- LCID: pnl=$-7.74 slip=0",
+    "Commander: green_profit_lock:ai_stall_min_green +0.31%",
+    "Do not re-enter same ticker after same-bar stop loss",
+    "Penalize PPO micro-fast when council confidence is neutral (50%)",
+    "Wait for volume spike confirmation before chase entries",
+    "Commander: green_profit_lock:fade_floor +0.14% (peak was +1.42%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-27T07:08:11.363064"
+  "trades_observed": 140,
+  "updated": "2026-06-27T07:47:53.512197"
 }
