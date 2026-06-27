@@ -3,25 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 174,
   "training_sessions": 35,
-  "trades_observed": 486,
+  "trades_observed": 487,
   "scans_performed": 35,
   "improvements_applied": 847,
   "reports_generated": 34,
   "event_log": [
-    {
-      "timestamp": "2026-06-25T19:07:58.347945",
-      "age": "4d 8h 5m 9s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #306",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on RIOT"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-25T19:09:26.724587",
       "age": "4d 8h 6m 38s",
@@ -13959,6 +13945,13 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #174",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T06:55:02.093502",
+      "age": "5d 19h 52m 13s",
+      "type": "TRADE",
+      "message": "Observed trade: QS ? P&L=$+164.21",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-27T06:50:51.219858",
@@ -15829,7 +15822,7 @@
   ],
   "last_training": "2026-06-27T05:25:36.662226",
   "mood": "steady",
-  "total_pnl": 121852.5000000004,
+  "total_pnl": 122016.7100000004,
   "win_history": [
     0.0,
     0.0,
@@ -16316,10 +16309,11 @@
     -17.83,
     94.46,
     -5.59,
-    -1.18
+    -1.18,
+    164.21
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 86,
   "veteran_xp": 6335,
   "veteran_level": "Ace",
@@ -16368,5 +16362,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Mixed session \u00b7 $+472.02. Watching for cleaner setups."
+  "mood_message": "Mixed session \u00b7 $+565.17. Watching for cleaner setups."
 }
