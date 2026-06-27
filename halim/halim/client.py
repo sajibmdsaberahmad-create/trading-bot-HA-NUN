@@ -65,7 +65,7 @@ def complete(
     url = server_url()
     if not url:
         return None
-    t = timeout if timeout is not None else float(os.getenv("HALIM_INFERENCE_TIMEOUT_SEC", "2.5"))
+    t = timeout if timeout is not None else float(os.getenv("HALIM_INFERENCE_TIMEOUT_SEC", "90"))
     return _request(
         "POST",
         "/v1/complete",
