@@ -5,23 +5,9 @@
   "training_sessions": 37,
   "trades_observed": 784,
   "scans_performed": 37,
-  "improvements_applied": 1258,
+  "improvements_applied": 1259,
   "reports_generated": 36,
   "event_log": [
-    {
-      "timestamp": "2026-06-27T06:22:50.237628",
-      "age": "5d 19h 20m 1s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #696",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-27T06:22:50.968614",
       "age": "5d 19h 20m 2s",
@@ -11435,6 +11421,22 @@
           "ping - are you there ?",
           "Hi",
           "Hi"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-27T12:22:29.039557",
+      "age": "6d 1h 19m 40s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #1259",
+      "metadata": {
+        "source": "halim_developer_off_hours",
+        "summary": "Halim heuristic dev plan \u2014 WR 24%",
+        "applied": [],
+        "lessons": [
+          "Halim documents every mutation in git \u2014 review improvement_history.json",
+          "Session trade WR 24% on 400 round-trips",
+          "Skip repeat losers until proxy confidence rises"
         ]
       }
     }
