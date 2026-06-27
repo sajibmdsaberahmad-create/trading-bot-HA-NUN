@@ -7,9 +7,11 @@ export HALIM_REPO_ROOT="$_HALIM_SCRIPT_ROOT"
 export PYTHONPATH="$HALIM_REPO_ROOT/halim:$HALIM_REPO_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
 # Toddler LM (Colab-trained checkpoint)
-# Apple Silicon Mac → MLX (Metal, 4-bit, low RAM). Linux/Colab → HuggingFace.
-# On arm64 Mac we always prefer MLX unless HALIM_LM_BACKEND_LOCKED=true (e.g. Colab export testing).
-if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+# Colab toddler uses HF merged weights — prefer HF when merged model exists on disk.
+_MERGED_CKPT="$_HALIM_SCRIPT_ROOT/halim/data/checkpoints/toddler_v1/merged/model.safetensors"
+if [[ -f "$_MERGED_CKPT" ]] && [[ "${HALIM_LM_BACKEND_LOCKED:-}" != "true" ]]; then
+  HALIM_LM_BACKEND=hf
+elif [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
   if [[ "${HALIM_LM_BACKEND_LOCKED:-}" != "true" ]]; then
     HALIM_LM_BACKEND=mlx
   elif [[ -z "${HALIM_LM_BACKEND:-}" ]]; then
@@ -27,6 +29,8 @@ else
 fi
 export HALIM_REASONING_VIA_SERVER="${HALIM_REASONING_VIA_SERVER:-auto}"
 export HALIM_FORCE_LM="${HALIM_FORCE_LM:-true}"
+# Toddler LM on 8GB Mac needs >2.5s (cold load + generate ~10–15s first reply)
+export HALIM_INFERENCE_TIMEOUT_SEC="${HALIM_INFERENCE_TIMEOUT_SEC:-90}"
 
 # Learn cache RAG + auto LM retrain (wired in core/halim_learn_rag.py, core/halim_auto_lm.py)
 export HALIM_LEARN_RAG="${HALIM_LEARN_RAG:-true}"
