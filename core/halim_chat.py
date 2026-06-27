@@ -156,7 +156,7 @@ def halim_chat(
             if cc.enabled():
                 text = cc.compose_notification(
                     full_prompt,
-                    purpose="copilot",
+                    purpose="commander_chat",
                     copilot=True,
                 )
                 if text:

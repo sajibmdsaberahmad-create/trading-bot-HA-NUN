@@ -94,7 +94,9 @@ def try_reasoning_complete(
         from halim.client import complete, server_url
 
         if os.getenv("HALIM_REASONING_VIA_SERVER", "auto").lower() == "auto" and not server_url():
-            return None, "unavailable"
+            inline = _try_inline_lm(prompt, purpose=purpose)
+            if inline[0]:
+                return inline
 
         url = server_url() or os.getenv("HALIM_SERVER_URL")
         if not url:
@@ -103,9 +105,31 @@ def try_reasoning_complete(
         out = complete(prompt, purpose=purpose, timeout=timeout)
         if out and out.get("ok") and out.get("text"):
             return str(out["text"]), "halim_server"
-        return None, "unavailable"
-    except Exception:
-        return None, "unavailable"
+    except Exception as exc:
+        log.debug(f"Halim server complete: {exc}")
+
+    if os.getenv("HALIM_INLINE_LM_FALLBACK", "true").lower() in ("1", "true", "yes"):
+        inline = _try_inline_lm(prompt, purpose=purpose)
+        if inline[0]:
+            return inline
+
+    return None, "unavailable"
+
+
+def _try_inline_lm(prompt: str, *, purpose: str = "reasoning") -> Tuple[Optional[str], str]:
+    """Load toddler LM in-process when serve is down."""
+    try:
+        from halim.engine import complete_reasoning, reasoning_available
+
+        os.environ.setdefault("HALIM_REPO_ROOT", str(Path(__file__).resolve().parents[1]))
+        if not reasoning_available():
+            return None, "unavailable"
+        result = complete_reasoning(prompt, purpose=purpose)
+        if result.get("ok") and result.get("text"):
+            return str(result["text"]), str(result.get("source", "halim_lm"))
+    except Exception as exc:
+        log.debug(f"Halim inline LM: {exc}")
+    return None, "unavailable"
 
 
 def log_inference_banner(cfg: Optional[BotConfig] = None) -> None:

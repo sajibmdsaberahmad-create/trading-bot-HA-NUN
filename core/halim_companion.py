@@ -272,7 +272,8 @@ def _companion_generate(
         if cc.enabled():
             text = cc.compose_notification(
                 prompt,
-                purpose="copilot",
+                system=companion_system_prompt(cfg),
+                purpose="commander_chat",
                 copilot=True,
             )
             if text and len(text.strip()) >= 8:

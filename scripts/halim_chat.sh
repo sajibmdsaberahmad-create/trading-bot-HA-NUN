@@ -28,6 +28,9 @@ if [[ $# -eq 0 ]]; then
   exit 1
 fi
 
+echo "🧠 Ensuring Halim serve…"
+"$ROOT/scripts/ensure_halim_active.sh" --serve-only 2>/dev/null || true
+
 python - "$@" <<'PY'
 import json
 import sys

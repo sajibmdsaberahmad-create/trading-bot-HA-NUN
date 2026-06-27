@@ -296,19 +296,33 @@ class HalimTelegramBot:
 
         def work() -> None:
             try:
+                import subprocess
+                subprocess.run(
+                    [str(ROOT / "scripts" / "ensure_halim_active.sh"), "--serve-only"],
+                    cwd=str(ROOT),
+                    timeout=130,
+                    capture_output=True,
+                )
+            except Exception:
+                pass
+            try:
                 from core.halim_chat import halim_chat
 
                 r = halim_chat(text, purpose="commander_chat", cfg=self.cfg)
                 out = (r.get("text") or "").strip()
                 if not out:
-                    out = "Halim couldn't reply right now — is serve running? Check logs/halim_serve.log"
+                    out = (
+                        "Halim couldn't reply — serve may be starting.\n"
+                        "Try: ./scripts/halim_start.sh\n"
+                        f"mode={r.get('mode')} source={r.get('source')}"
+                    )
                 src = r.get("source", "")
-                if src and src not in ("companion", "halim_native"):
+                if src and src not in ("companion", "halim_native", "halim_lm"):
                     out = f"{out}\n\n— via {src}"
                 self.send(chat_id, out)
             except Exception as exc:
                 log.warning(f"Halim chat error: {exc}")
-                self.send(chat_id, f"Halim error: {exc}")
+                self.send(chat_id, f"Halim error: {exc}\nCheck logs/halim_serve.log")
 
         threading.Thread(target=work, name="halim-chat", daemon=True).start()
 
