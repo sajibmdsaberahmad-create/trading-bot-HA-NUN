@@ -60,6 +60,9 @@ def checkpoint_path() -> Optional[Path]:
         p = _root() / raw
     if (p / "config.json").is_file() or p.with_suffix(".gguf").is_file():
         return p
+    # LoRA-only checkpoint (no merge): config + lora_adapter/
+    if (p / "lora_adapter" / "adapter_model.safetensors").is_file():
+        return p
     gguf = p if str(p).endswith(".gguf") else None
     if gguf and gguf.is_file():
         return gguf

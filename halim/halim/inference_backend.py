@@ -75,6 +75,18 @@ def mlx_complete(
         return None, f"generate_failed:{exc}"[:120]
 
 
+def _adapter_dir(checkpoint: Path) -> Optional[Path]:
+    manifest = _load_manifest(checkpoint)
+    rel = manifest.get("adapter_path", "lora_adapter")
+    for candidate in (checkpoint / rel, checkpoint / "lora_adapter"):
+        if candidate.is_dir() and (
+            (candidate / "adapter_model.safetensors").is_file()
+            or (candidate / "adapters.safetensors").is_file()
+        ):
+            return candidate
+    return None
+
+
 def _merged_model_dir(checkpoint: Path) -> Optional[Path]:
     manifest = _load_manifest(checkpoint)
     rel = manifest.get("merged_path", "merged")
@@ -95,26 +107,27 @@ def hf_complete(
     max_tokens: int = 512,
     temperature: float = 0.7,
 ) -> Tuple[Optional[str], str]:
-    """Generate with HuggingFace merged model (Colab export). Works on Mac MPS/CPU."""
+    """Generate with HuggingFace merged model or LoRA adapter (Colab export)."""
     try:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
     except ImportError:
         return None, "transformers_not_installed"
 
-    model_dir = _merged_model_dir(checkpoint)
-    if not model_dir:
-        return None, "no_merged_model_in_checkpoint"
-
     manifest = _load_manifest(checkpoint)
-    tokenizer_source = str(model_dir)
-    tok_cfg = model_dir / "tokenizer.json"
-    if not tok_cfg.is_file():
-        tokenizer_source = manifest.get("base_model") or os.getenv(
-            "HALIM_BASE_MODEL", "Qwen/Qwen2.5-0.5B-Instruct"
-        )
+    model_dir = _merged_model_dir(checkpoint)
+    adapter_dir = _adapter_dir(checkpoint) if not model_dir else None
+    if not model_dir and not adapter_dir:
+        return None, "no_merged_or_adapter_in_checkpoint"
 
-    key = f"{model_dir.resolve()}|{tokenizer_source}"
+    base_model = manifest.get("base_model") or os.getenv(
+        "HALIM_BASE_MODEL", "Qwen/Qwen2.5-0.5B-Instruct"
+    )
+    tokenizer_source = base_model
+    if model_dir and (model_dir / "tokenizer.json").is_file():
+        tokenizer_source = str(model_dir)
+
+    key = f"{checkpoint.resolve()}|{model_dir}|{adapter_dir}|{tokenizer_source}"
     if key not in _model_cache:
         try:
             if torch.backends.mps.is_available():
@@ -129,11 +142,16 @@ def hf_complete(
             tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, trust_remote_code=True)
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
-            model = AutoModelForCausalLM.from_pretrained(
-                str(model_dir),
-                torch_dtype=dtype,
-                trust_remote_code=True,
-            ).to(device)
+            if model_dir:
+                model = AutoModelForCausalLM.from_pretrained(
+                    str(model_dir), torch_dtype=dtype, trust_remote_code=True,
+                ).to(device)
+            else:
+                from peft import PeftModel
+                model = AutoModelForCausalLM.from_pretrained(
+                    base_model, torch_dtype=dtype, trust_remote_code=True,
+                ).to(device)
+                model = PeftModel.from_pretrained(model, str(adapter_dir))
             model.eval()
             _model_cache[key] = (model, tokenizer, device)
         except Exception as exc:
