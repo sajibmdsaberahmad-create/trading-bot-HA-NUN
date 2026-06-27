@@ -346,6 +346,7 @@ def main() -> None:
                     os.environ.setdefault(k, v)
     except Exception:
         os.environ.setdefault("HALIM_INFERENCE_TIMEOUT_SEC", "90")
+        os.environ.setdefault("HALIM_REPO_ROOT", str(ROOT))
 
     cfg = BotConfig()
     log.info("Halim standalone Telegram — waiting for messages (Ctrl+C to stop)")
