@@ -4,10 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "High confidence levels can be beneficial when making trades.",
-    "Monitoring market conditions is crucial for successful trading.",
-    "Adjusting confidence levels based on recent events helps in staying informed and making more informed decisions",
-    "Commander: The event 'rth_open' occurred in the live trading environment, which is a good indication that the market was open and ready for trade. The key parameters are CONFIDENCE_THRESHOLD set to 0.58, with a reason related to the confidence level o",
     "No clean data on CHPT (no_historical_data) \u2014 profit hunt elsewhere.",
     "Review market_data_failure on CHPT",
     "Commander: MD 162 no_historical_data: Historical Market Data Service error message:API historical data query cancelled: 52904",
@@ -103,10 +99,14 @@
     "Do not re-enter same ticker after same-bar stop loss",
     "Penalize PPO micro-fast when council confidence is neutral (50%)",
     "Wait for volume spike confirmation before chase entries",
-    "Commander: green_profit_lock:fade_floor +0.14% (peak was +1.42%)"
+    "Commander: green_profit_lock:fade_floor +0.14% (peak was +1.42%)",
+    "Halim documents every mutation in git \u2014 review improvement_history.json",
+    "Session trade WR 13% on 400 round-trips",
+    "Skip repeat losers until proxy confidence rises",
+    "Commander: Halim heuristic dev plan \u2014 WR 13%"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-27T08:00:21.850340"
+  "updated": "2026-06-27T08:02:17.272986"
 }

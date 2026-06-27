@@ -5,16 +5,9 @@
   "training_sessions": 36,
   "trades_observed": 561,
   "scans_performed": 36,
-  "improvements_applied": 956,
+  "improvements_applied": 957,
   "reports_generated": 35,
   "event_log": [
-    {
-      "timestamp": "2026-06-26T15:35:28.823498",
-      "age": "5d 4h 32m 40s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #135",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-26T15:35:39.336644",
       "age": "5d 4h 32m 50s",
@@ -11951,6 +11944,44 @@
           "ping - are you there ?",
           "Hi",
           "Hi"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-27T08:02:17.273580",
+      "age": "5d 20h 59m 28s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #957",
+      "metadata": {
+        "source": "halim_developer_off_hours",
+        "summary": "Halim heuristic dev plan \u2014 WR 13%",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.78,
+            "reason": "Halim dev: WR 13% \u2014 tighten entry confidence",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "MIN_PROFIT_PROBABILITY",
+            "value": 0.65,
+            "reason": "Halim dev: raise profit probability gate",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "SCAN_INTERVAL_SECONDS",
+            "value": 76,
+            "reason": "Halim dev: slow scan cadence after heavy losses",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Halim documents every mutation in git \u2014 review improvement_history.json",
+          "Session trade WR 13% on 400 round-trips",
+          "Skip repeat losers until proxy confidence rises"
         ]
       }
     }
