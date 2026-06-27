@@ -6,3 +6,5 @@
 {"timestamp":"2026-06-27T09:27:11.981297+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
 {"timestamp":"2026-06-27T10:07:12.307094+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
 {"timestamp":"2026-06-27T12:22:28.497205+00:00","event":"off_hours_learn","mode":"off_hours","topic":"wiki:Stock_market","chars":12000}
+{"timestamp":"2026-06-27T12:27:21.848684+00:00","event":"off_hours_dev","mode":"off_hours","trigger":"scheduled"}
+{"timestamp":"2026-06-27T12:27:21.897373+00:00","event":"export_action_gold","mode":"off_hours","ok":true,"added":1,"skipped":557,"total_gold":515}
