@@ -26,6 +26,20 @@ def halim_chat(
     Returns {ok, text, mode, source, capability}.
     """
     cfg = cfg or BotConfig()
+
+    try:
+        from core.trading_focus_guard import halim_lm_blocked_during_trading, trading_focus_message
+        if halim_lm_blocked_during_trading(purpose):
+            return {
+                "ok": True,
+                "text": trading_focus_message(via="cli"),
+                "mode": "trading_focus",
+                "source": "trading_guard",
+                "capability": "chat",
+            }
+    except Exception:
+        pass
+
     cap = "chat"
     if purpose in ("code", "coding"):
         cap = "code_generate"
