@@ -3,33 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 175,
   "training_sessions": 35,
-  "trades_observed": 489,
+  "trades_observed": 490,
   "scans_performed": 35,
   "improvements_applied": 849,
   "reports_generated": 34,
   "event_log": [
-    {
-      "timestamp": "2026-06-25T19:22:33.155375",
-      "age": "4d 8h 19m 44s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #309",
-      "metadata": {
-        "source": "runtime_council_timeout",
-        "summary": "Observed council_timeout \u2014 recorded for learning.",
-        "applied": [
-          {
-            "param": "CONFIDENCE_THRESHOLD",
-            "value": 0.5599999999999999,
-            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
-            "ok": true,
-            "msg": "applied"
-          }
-        ],
-        "lessons": [
-          "Review council_timeout on RIOT"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-25T19:23:42.188901",
       "age": "4d 8h 20m 53s",
@@ -13943,6 +13921,13 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #175",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T07:06:30.266648",
+      "age": "5d 20h 3m 41s",
+      "type": "TRADE",
+      "message": "Observed trade: MARA ? P&L=$-22.52",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-27T07:02:22.597213",
@@ -15813,7 +15798,7 @@
   ],
   "last_training": "2026-06-27T05:25:36.662226",
   "mood": "steady",
-  "total_pnl": 121991.8500000004,
+  "total_pnl": 121969.3300000004,
   "win_history": [
     0.0,
     0.0,
@@ -16303,10 +16288,11 @@
     -1.18,
     164.21,
     -14.23,
-    -10.63
+    -10.63,
+    -22.52
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 3,
   "worst_streak": 86,
   "veteran_xp": 6375,
   "veteran_level": "Ace",
@@ -16355,5 +16341,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Mixed session \u00b7 $+538.51. Watching for cleaner setups."
+  "mood_message": "Mixed session \u00b7 $+525.88. Watching for cleaner setups."
 }
