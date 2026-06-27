@@ -2,7 +2,10 @@
 # Shared Halim + PPO distillation env — source from start scripts.
 # PPO knowledge always flows into Halim (coevolution gold, dialogue, proxy, teacher).
 
-export HALIM_REPO_ROOT="${HALIM_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+_HALIM_SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ -z "${HALIM_REPO_ROOT:-}" ]] || [[ ! -d "${HALIM_REPO_ROOT}/models" ]]; then
+  export HALIM_REPO_ROOT="$_HALIM_SCRIPT_ROOT"
+fi
 export PYTHONPATH="$HALIM_REPO_ROOT/halim:$HALIM_REPO_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
 # Toddler LM (Colab-trained checkpoint)
