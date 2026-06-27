@@ -77,6 +77,23 @@ Set explicitly: `export HALIM_DEVICE=m2_8gb`
 
 See also: [halim/colab/COLAB_GUIDE.md](../halim/colab/COLAB_GUIDE.md)
 
+## Wired loops (RAG + auto-retrain)
+
+| Feature | Env | What it does |
+|---------|-----|--------------|
+| **Learn RAG** | `HALIM_LEARN_RAG=true` | Injects `learn_cache` into chat prompts immediately |
+| **Auto LM retrain** | `HALIM_AUTO_LM_RETRAIN=true` | Off-hours: export gold → SFT → short MLX LoRA when +150 new pairs |
+| **Standalone maint** | `HALIM_STANDALONE_MAINT=true` | Telegram-only mode still learns wiki + checks retrain every 2h |
+
+Manual retrain now:
+
+```bash
+./scripts/halim_auto_evolve_lm.sh          # respects thresholds
+./scripts/halim_auto_evolve_lm.sh --force # skip thresholds
+```
+
+State: `models/halim_lm_evolve_state.json` · journal: `models/halim_lm_evolve.jsonl`
+
 ## Troubleshooting
 
 | Symptom | Fix |
