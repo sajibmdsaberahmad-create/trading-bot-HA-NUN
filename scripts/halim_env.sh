@@ -8,12 +8,15 @@ export PYTHONPATH="$HALIM_REPO_ROOT/halim:$HALIM_REPO_ROOT${PYTHONPATH:+:$PYTHON
 
 # Toddler LM (Colab-trained checkpoint)
 # Apple Silicon Mac → MLX (Metal, 4-bit, low RAM). Linux/Colab → HuggingFace.
-if [[ -z "${HALIM_LM_BACKEND:-}" ]]; then
-  if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+# On arm64 Mac we always prefer MLX unless HALIM_LM_BACKEND_LOCKED=true (e.g. Colab export testing).
+if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+  if [[ "${HALIM_LM_BACKEND_LOCKED:-}" != "true" ]]; then
     HALIM_LM_BACKEND=mlx
-  else
-    HALIM_LM_BACKEND=hf
+  elif [[ -z "${HALIM_LM_BACKEND:-}" ]]; then
+    HALIM_LM_BACKEND=mlx
   fi
+elif [[ -z "${HALIM_LM_BACKEND:-}" ]]; then
+  HALIM_LM_BACKEND=hf
 fi
 export HALIM_LM_BACKEND
 export HALIM_MODEL_PATH="${HALIM_MODEL_PATH:-halim/data/checkpoints/latest}"

@@ -25,7 +25,7 @@ HALIM_MODEL_PATH=halim/data/checkpoints/latest
 HALIM_FORCE_LM=true
 ```
 
-Override only if you know you need HF on Mac (unusual):
+On `Darwin` + `arm64`, `halim_env.sh` sets **MLX** even if `.env` still has `HALIM_LM_BACKEND=hf` from an older setup. To force HF on Mac: `export HALIM_LM_BACKEND_LOCKED=true HALIM_LM_BACKEND=hf`.
 
 ```bash
 export HALIM_LM_BACKEND=hf
