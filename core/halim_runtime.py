@@ -48,6 +48,7 @@ class HalimRuntime:
         self._learn_interval = float(os.getenv("HALIM_OFF_HOURS_LEARN_SEC", "3600"))
         self._dev_interval = float(os.getenv("HALIM_OFF_HOURS_DEV_SEC", "7200"))
         self._export_interval = float(os.getenv("HALIM_OFF_HOURS_EXPORT_SEC", "7200"))
+        self._auto_lm_interval = float(os.getenv("HALIM_AUTO_LM_CHECK_SEC", "10800"))
 
     def _save_state(self, extra: Optional[Dict[str, Any]] = None) -> None:
         row = {
@@ -179,6 +180,10 @@ class HalimRuntime:
         if now - self._last_export >= self._export_interval:
             self._last_export = now
             self._off_hours_export_gold()
+
+        if now - self._last_evolve >= self._auto_lm_interval:
+            self._last_evolve = now
+            self._off_hours_auto_lm_check()
 
     def _off_hours_learn(self) -> None:
         if os.getenv("HALIM_WEB_LEARN", "true").lower() not in ("1", "true", "yes"):

@@ -243,7 +243,15 @@ def export_action_gold(
         with open(ACTION_GOLD, encoding="utf-8") as fh:
             total = sum(1 for _ in fh)
 
-    return {"ok": True, "added": added, "skipped": skipped, "total_gold": total}
+    result = {"ok": True, "added": added, "skipped": skipped, "total_gold": total}
+
+    try:
+        from core.halim_auto_lm import schedule_auto_retrain
+        schedule_auto_retrain(result, cfg, trigger="export_action_gold")
+    except Exception:
+        pass
+
+    return result
 
 
 def _instruction_for(capability: str, action: str) -> str:

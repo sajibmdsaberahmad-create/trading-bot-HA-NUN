@@ -227,11 +227,18 @@ def build_companion_context(
     snap = live_snapshot(runner, cfg)
     directive = task or _intent_task(intent)
     user_line = message.strip() if message.strip() else f"[{intent}]"
+    rag_block = ""
+    try:
+        from core.halim_learn_rag import learn_rag_block
+        rag_block = learn_rag_block(message, cfg=cfg)
+    except Exception:
+        pass
+    rag_section = f"\n\n{rag_block}\n" if rag_block else ""
     return (
         f"{companion_system_prompt(cfg)}\n\n"
         f"TASK: {directive}\n\n"
         f"LIVE SNAPSHOT: {json.dumps(snap, default=str)}\n"
-        f"{extra}\n\n"
+        f"{extra}{rag_section}\n"
         f"Commander message: {user_line}"
     )
 
