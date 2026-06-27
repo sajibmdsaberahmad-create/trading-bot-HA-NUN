@@ -5,6 +5,7 @@
     "google_ai_searches": 1,
     "learn_fetches": 3,
     "param_mutations": 3,
-    "git_pushes": 2
+    "git_pushes": 2,
+    "file_writes": 12
   }
 }
