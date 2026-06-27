@@ -1839,5 +1839,55 @@
       }
     },
     "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-27T05:37:04.487477\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval\n\u2022 Profit hunting: tune SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO \u2014 exit into momentum spikes, not passive giveback waits"
+  },
+  {
+    "timestamp": "2026-06-27T07:59:56.022877",
+    "ppo_trained": true,
+    "steps": 4096,
+    "weights": {
+      "momentum": 0.5,
+      "volume": 0.5,
+      "institutional": 0.5,
+      "vwap_slope": 0.5,
+      "atr_bonus": 0.5,
+      "mean_reversion": 0.5,
+      "trend_filter": 0.5,
+      "price_rising": 0.5,
+      "rsi_filter": 0.5,
+      "volatility_gate": 0.5,
+      "_meta": {
+        "train_timestamp": "2026-06-27T07:59:30.483195",
+        "buffer_total": 8548,
+        "buffer_win_rate": 0.153,
+        "trade_win_rate": 0.13,
+        "sources": {
+          "ppo_led": 789,
+          "deferred_council": 186,
+          "ppo_entry_eval": 93,
+          "scan_pick": 83,
+          "shadow_trade": 6,
+          "ppo_entry": 397,
+          "profit_hunt": 185,
+          "consciousness": 124,
+          "runtime_observer": 651,
+          "live_trade": 3264,
+          "ai_council": 508,
+          "fill_slippage_abort": 17,
+          "ib_failure": 9,
+          "scan_complete": 11,
+          "market_context": 9,
+          "backtest": 319,
+          "market_data_failure": 98,
+          "ib_day_trade": 840,
+          "replay_live": 572,
+          "replay_slippage_abort": 270,
+          "teacher_ppo": 115,
+          "halim_ppo_coevolution": 2
+        },
+        "missed_profit_hunts": 0,
+        "profit_hunt_events": 185
+      }
+    },
+    "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-27T07:59:56.018217\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval\n\u2022 Profit hunting: tune SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO \u2014 exit into momentum spikes, not passive giveback waits"
   }
 ]
