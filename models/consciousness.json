@@ -5,23 +5,9 @@
   "training_sessions": 35,
   "trades_observed": 488,
   "scans_performed": 35,
-  "improvements_applied": 847,
+  "improvements_applied": 849,
   "reports_generated": 34,
   "event_log": [
-    {
-      "timestamp": "2026-06-25T19:17:27.580575",
-      "age": "4d 8h 14m 38s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #120",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-25T19:21:20.804059",
-      "age": "4d 8h 18m 32s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-2592.81",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-25T19:21:23.939057",
       "age": "4d 8h 18m 35s",
@@ -13952,6 +13938,34 @@
       "type": "TRADE",
       "message": "Observed trade: QS ? P&L=$-14.23",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-27T06:58:53.649347",
+      "age": "5d 19h 56m 4s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #848",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on QS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-27T06:58:53.650766",
+      "age": "5d 19h 56m 4s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #849",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on QS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-27T06:50:51.219858",
