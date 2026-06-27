@@ -147,6 +147,10 @@ if [[ -d venv ]]; then
 fi
 
 mkdir -p logs
+
+echo "🧠 Ensuring Halim serve is active…"
+"$ROOT/scripts/ensure_halim_active.sh" --serve-only || echo "   Halim serve warning (non-fatal — see logs/halim_serve.log)"
+
 echo "══════════════════════════════════════════════════════════════"
 echo "  REPLAY SCALPER — full HANOON clone (multi-ticker, council on)"
 echo "  Universe: ${REPLAY_TICKERS:-$TICKER_LIST}"

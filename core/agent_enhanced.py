@@ -961,15 +961,18 @@ def build_enhanced_agent(cfg: BotConfig, model_path: Optional[str] = None,
     if torch.backends.mps.is_available():
         device_str = "mps"
         net_arch = (1024, 768, 512)
-        log.info("🍎 Apple MPS detected — using deep network (1024, 768, 512)")
+        from core.startup_log import sinfo
+        sinfo(cfg, "🍎 Apple MPS detected — using deep network (1024, 768, 512)")
     elif torch.cuda.is_available():
         device_str = "cuda"
         net_arch = (1024, 512, 256)
-        log.info(f"🎮 CUDA detected ({torch.cuda.get_device_name(0)}) — using deep network (1024, 512, 256)")
+        from core.startup_log import sinfo
+        sinfo(cfg, f"🎮 CUDA detected ({torch.cuda.get_device_name(0)}) — using deep network (1024, 512, 256)")
     else:
         device_str = "cpu"
         net_arch = list(cfg.PPO_NET_ARCH)
-        log.info(f"💻 CPU detected — using standard network {net_arch}")
+        from core.startup_log import sinfo
+        sinfo(cfg, f"💻 CPU detected — using standard network {net_arch}")
     
     # Override with config if explicitly set
     if cfg.PPO_NET_ARCH and len(cfg.PPO_NET_ARCH) > 0:
@@ -985,11 +988,13 @@ def build_enhanced_agent(cfg: BotConfig, model_path: Optional[str] = None,
     
     # Build model
     if model_path and os.path.exists(model_path):
-        log.info(f"Loading existing model from {model_path} …")
+        from core.startup_log import sinfo
+        sinfo(cfg, f"Loading existing model from {model_path} …")
         model = PPO.load(model_path, env=vec_env, device=device_str)
         model.set_env(vec_env)
     else:
-        log.info("Building new enhanced PPO agent …")
+        from core.startup_log import sinfo
+        sinfo(cfg, "Building new enhanced PPO agent …")
         policy_kwargs = {
             "net_arch": net_arch,
             "activation_fn": torch.nn.Tanh,  # Stable for financial data
@@ -1019,7 +1024,7 @@ def build_enhanced_agent(cfg: BotConfig, model_path: Optional[str] = None,
         )
     
     device_name = str(model.device)
-    log.info(f"PPO agent ready | device: {device_name} | net: {net_arch} | obs: {dummy_env.observation_space.shape}")
+    log.debug(f"PPO agent ready | device: {device_name} | net: {net_arch} | obs: {dummy_env.observation_space.shape}")
     
     # Build enhanced components
     components = {

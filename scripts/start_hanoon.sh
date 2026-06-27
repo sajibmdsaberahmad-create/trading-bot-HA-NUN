@@ -359,6 +359,14 @@ gh_ok = ensure_github_cli(cfg)
 print(f'   GitHub CLI: {\"ready\" if gh_ok else \"WARN\"}')
 " 2>&1 || echo "   Pre-flight warnings (non-fatal)"
 
+# ── 6a. Halim serve — always active before scalper (toddler LM + PPO distillation) ──
+if [ "${TRADING_BOT_TELEGRAM_LISTEN:-true}" = "true" ]; then
+  "$ROOT/scripts/halim_stop.sh" --telegram-only 2>/dev/null || true
+fi
+echo ""
+echo "🧠 Ensuring Halim serve is active…"
+"$ROOT/scripts/ensure_halim_active.sh" --serve-only || echo "   Halim serve warning (non-fatal — see logs/halim_serve.log)"
+
 # ── 6b. Standalone git sync (auto-push any IDE save — separate process) ───
 if [ "${START_GIT_SYNC_WITH_HANOON:-true}" = "true" ]; then
   echo ""
