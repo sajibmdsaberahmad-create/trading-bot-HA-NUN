@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Train Halim toddler on Google Colab (free T4 GPU).
+SCRIPT_VERSION = halim-toddler-v2  (uses _build_sft_config — NOT raw max_seq_length)
 
 Expects:
   sft/train.jsonl
