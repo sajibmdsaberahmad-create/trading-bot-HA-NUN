@@ -31,6 +31,21 @@ fi
 echo "🧠 Ensuring Halim serve…"
 "$ROOT/scripts/ensure_halim_active.sh" --serve-only 2>/dev/null || true
 
+if PYTHONPATH="$ROOT/halim:$ROOT" python3 -c "
+from core.trading_focus_guard import is_trading_session_active, trading_focus_message
+import sys
+if is_trading_session_active():
+    print(trading_focus_message(via='cli'))
+    sys.exit(2)
+" 2>/dev/null; then
+  :
+else
+  st=$?
+  if [[ $st -eq 2 ]]; then
+    exit 0
+  fi
+fi
+
 python - "$@" <<'PY'
 import json
 import sys

@@ -11,6 +11,13 @@ export HALIM_STANDALONE_TELEGRAM=true
 LOG_DIR="${LOG_DIR:-$ROOT/logs}"
 mkdir -p "$LOG_DIR"
 
+if pgrep -f "main.py --mode scalper" >/dev/null 2>&1 \
+   || pgrep -f "main.py --mode replay-live" >/dev/null 2>&1; then
+  echo "🎯 Live/replay trading is running — Halim chat stays off (full focus on algo)."
+  echo "   Stop trading first, then run START_HALIM.command again."
+  exit 0
+fi
+
 if [[ -d "$ROOT/venv" ]]; then
   # shellcheck disable=SC1091
   source "$ROOT/venv/bin/activate"
