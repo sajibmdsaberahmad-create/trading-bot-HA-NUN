@@ -52,6 +52,8 @@ models/*.onnx
 models/checkpoints/
 models/backups/
 checkpoints/
+!halim/data/checkpoints/
+!halim/data/checkpoints/**
 backups/
 
 # ════════════════════════════════════════════════════════════════════════════════

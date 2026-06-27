@@ -1,0 +1,10 @@
+{
+  "halim_phase": "toddler",
+  "model": "M. A. Halim",
+  "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "backend": "hf",
+  "merged_path": "merged",
+  "adapter_path": "lora_adapter",
+  "registered_at": "2026-06-27T14:12:28.781955+00:00",
+  "trained_on": "google_colab"
+}

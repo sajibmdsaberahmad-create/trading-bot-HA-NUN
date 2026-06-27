@@ -1,0 +1,2 @@
+halim/data/checkpoints/**/*.safetensors filter=lfs diff=lfs merge=lfs -text
+halim/data/checkpoints/**/*.bin filter=lfs diff=lfs merge=lfs -text
