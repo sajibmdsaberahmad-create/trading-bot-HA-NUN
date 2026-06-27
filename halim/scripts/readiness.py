@@ -15,8 +15,8 @@ from halim.dataset import count_raw_sources, repo_root, sft_pair_count  # noqa: 
 from halim.device import detect_profile, profile_spec  # noqa: E402
 from halim.engine import checkpoint_path, collect_status  # noqa: E402
 
-TODDLER_MIN_PAIRS = 5000
-COUNCIL_TARGET = 5000
+TODDLER_MIN_PAIRS = int(__import__("os").getenv("HALIM_TODDLER_MIN_PAIRS", "2500"))
+COUNCIL_TARGET = int(__import__("os").getenv("HALIM_COUNCIL_TARGET", "5000"))
 
 
 def _checkpoint_ready() -> bool:
@@ -32,7 +32,7 @@ def _checkpoint_ready() -> bool:
     return False
 
 
-def _next_commands(root: Path, profile: str, blockers: list) -> list:
+def _next_commands(root: Path, profile: str, blockers: list, recommendations: list | None = None) -> list:
     cmds = []
     if "sft_not_prepared" in blockers:
         cmds.append("./scripts/halim_prepare_train.sh")
@@ -51,7 +51,8 @@ def _next_commands(root: Path, profile: str, blockers: list) -> list:
         cmds.append("export HALIM_LM_BACKEND=mlx")
         cmds.append("export HALIM_MODEL_PATH=halim/data/checkpoints/latest")
         cmds.append("./scripts/halim_serve.sh")
-    if "replay_dataset" in blockers:
+    if recommendations and "replay_dataset" in recommendations:
+        cmds.append("# Optional — grow dataset while you train:")
         cmds.append("./scripts/start_replay_live.sh turbo")
         cmds.append("./stop_replay.sh   # flush evolution at session end")
     return cmds
@@ -68,8 +69,6 @@ def assess(root: Path | None = None) -> dict:
     backend = __import__("os").getenv("HALIM_LM_BACKEND", "none")
 
     blockers = []
-    if raw.get("council", 0) < COUNCIL_TARGET:
-        blockers.append("replay_dataset")
     if deduped < TODDLER_MIN_PAIRS:
         blockers.append("insufficient_deduped_pairs")
     if not sft_manifest.is_file():
@@ -78,6 +77,10 @@ def assess(root: Path | None = None) -> dict:
         blockers.append("no_checkpoint")
     elif backend in ("", "none"):
         blockers.append("backend_not_set")
+
+    soft_recommendations = []
+    if raw.get("council", 0) < COUNCIL_TARGET:
+        soft_recommendations.append("replay_dataset")
 
     ready = len(blockers) == 0 or (ckpt_ok and backend not in ("", "none"))
 
@@ -100,7 +103,8 @@ def assess(root: Path | None = None) -> dict:
         "sft_prepared": sft_manifest.is_file(),
         "checkpoint": str(checkpoint_path()) if ckpt_ok else None,
         "blockers": blockers,
-        "next_commands": _next_commands(root, profile, blockers),
+        "recommendations": soft_recommendations,
+        "next_commands": _next_commands(root, profile, blockers, soft_recommendations),
         "engine": collect_status(),
     }
 

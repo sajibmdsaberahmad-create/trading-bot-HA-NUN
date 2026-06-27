@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Halim toddler readiness — blockers + exact next commands.
+# Point halim/data/checkpoints/latest at a trained checkpoint dir.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 export HALIM_REPO_ROOT="$ROOT"
 export PYTHONPATH="$ROOT/halim:$ROOT${PYTHONPATH:+:$PYTHONPATH}"
 if [[ -d venv ]]; then source venv/bin/activate; fi
-python halim/scripts/readiness.py "$@"
+NAME="${1:-toddler_v1}"
+python halim/scripts/register_checkpoint.py "$NAME" "${@:2}"

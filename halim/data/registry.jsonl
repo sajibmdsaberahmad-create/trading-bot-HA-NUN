@@ -71,3 +71,6 @@
 {"timestamp":"2026-06-27T12:20:47.322085+00:00","event":"capability_milestone","capability":"text_compose","level_pct":50,"phase":"newborn"}
 {"timestamp": "2026-06-27T12:22:31.174098+00:00", "event": "sync_from_tradingbot", "source": "/Users/mdsabersajib/Downloads/tradingbot", "files": ["data/trading/council_training_dataset.jsonl", "data/students/teacher_proxy.joblib", "data/students/scalper_weights.json", "HALIM_IDENTITY.json", "HALIM_MANIFEST.json", "data/trading/owned_brain_manifest.json", "data/trading/experience_buffer.jsonl"]}
 {"timestamp":"2026-06-27T12:27:21.880646+00:00","event":"export_action_gold","added":1,"skipped":557}
+{"timestamp": "2026-06-27T12:32:43.396411+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}
+{"timestamp": "2026-06-27T12:32:56.205903+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}
+{"timestamp": "2026-06-27T12:33:08.945746+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}

@@ -18,7 +18,7 @@ from halim.dataset import count_raw_sources, prepare_sft_dataset, repo_root, sft
 def main() -> int:
     parser = argparse.ArgumentParser(description="Prepare Halim toddler SFT dataset")
     parser.add_argument("--root", type=Path, default=None)
-    parser.add_argument("--min-pairs", type=int, default=500)
+    parser.add_argument("--min-pairs", type=int, default=int(__import__("os").getenv("HALIM_TODDLER_MIN_PAIRS", "2500")))
     args = parser.parse_args()
 
     root = args.root or repo_root()

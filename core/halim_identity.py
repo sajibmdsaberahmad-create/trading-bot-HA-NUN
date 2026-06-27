@@ -160,9 +160,10 @@ def compute_halim_phase(cfg: Optional[BotConfig] = None) -> str:
     proxy = Path("models/teacher_proxy.joblib")
     sft_manifest = Path("halim/data/training/sft/manifest.json")
 
-    if n_sft >= 5000 and proxy.is_file() and sft_manifest.is_file():
+    toddler_min = int(os.getenv("HALIM_TODDLER_MIN_PAIRS", "2500"))
+    if n_sft >= toddler_min and proxy.is_file() and sft_manifest.is_file():
         return "toddler"  # SFT ready — train first Halim LM (one GPU run)
-    if n_sft >= 5000 and proxy.is_file():
+    if n_sft >= toddler_min and proxy.is_file():
         return "newborn"  # enough gold — run halim_prepare_train.sh
     return "newborn"
 

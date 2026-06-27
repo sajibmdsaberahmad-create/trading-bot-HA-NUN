@@ -142,6 +142,8 @@ def standard_gold(raw: Dict[str, Any], *, default_source: str) -> Optional[Dict[
     inp = str(raw.get("input", raw.get("input_excerpt", "")))
     out = str(raw.get("output", raw.get("output_excerpt", "")))
     source = str(raw.get("source", default_source))
+    if default_source == "coevolution" and inp and len(out) < 120:
+        out = f"Setup: {inp[:500]}\nReconcile: {out}"
     return _gold_row(
         capability=cap,
         instruction=instruction,
@@ -182,7 +184,7 @@ def prepare_sft_dataset(
     root: Optional[Path] = None,
     out_dir: Optional[Path] = None,
     val_ratio: float = 0.05,
-    min_pairs: int = 500,
+    min_pairs: int = 2500,
     max_pairs: int = 100_000,
 ) -> Dict[str, Any]:
     """Write deduped train/valid JSONL under halim/data/training/sft/."""
