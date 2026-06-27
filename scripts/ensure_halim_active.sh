@@ -145,6 +145,8 @@ _ensure_lm_deps() {
 
 _ensure_checkpoint
 _ensure_lm_deps
+
+if _halim_health; then
   echo "✅ Halim already active at $HALIM_URL"
 elif _serve_running; then
   echo "⏳ Halim serve starting — waiting for /health…"

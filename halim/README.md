@@ -65,7 +65,18 @@ cd halim
 python scripts/sync_from_tradingbot.py --source ../
 ```
 
-### 3. Initialize as separate git repo (optional)
+### 3. Toddler LM on Mac (MLX — default on Apple Silicon)
+
+```bash
+./scripts/halim_install_lm.sh              # mlx-lm + mlx on M-series Mac
+./scripts/halim_start_toddler.sh           # Colab zip → serve
+# or
+./scripts/halim_serve.sh                   # if checkpoint already registered
+```
+
+Backend auto-selects **MLX** on `arm64` Mac, **HuggingFace** on Linux/Colab. See [docs/HALIM_MAC_INFERENCE.md](../docs/HALIM_MAC_INFERENCE.md).
+
+### 4. Initialize as separate git repo (optional)
 
 ```bash
 cd halim

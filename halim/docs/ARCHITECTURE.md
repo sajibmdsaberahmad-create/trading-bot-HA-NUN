@@ -105,7 +105,14 @@ Env:
 | `HALIM_INFERENCE_TIMEOUT_SEC` | `2.5` | Max wait — trading never blocks longer |
 | `HALIM_REASONING_VIA_SERVER` | `auto` | Route slow text to server when up |
 | `HALIM_MODEL_PATH` | `halim/data/checkpoints/latest` | Future LM |
-| `HALIM_LM_BACKEND` | `none` | `mlx` \| `llama_cpp` when ready |
+| `HALIM_LM_BACKEND` | `mlx` on Apple Silicon Mac; `hf` on Linux/Colab | `mlx` \| `hf` \| `llama_cpp` |
+| `HALIM_BASE_MODEL` | `mlx-community/Qwen2.5-0.5B-Instruct-4bit` (MLX) or `Qwen/Qwen2.5-0.5B-Instruct` (HF) | Open base for adapter |
+
+**Mac default:** MLX uses Metal + 4-bit quant — fits M2 8GB. Full guide: [docs/HALIM_MAC_INFERENCE.md](../../docs/HALIM_MAC_INFERENCE.md).
+
+```bash
+./scripts/halim_install_lm.sh   # auto-picks MLX on arm64 Mac
+```
 
 Bridge in tradingbot: `core/halim_inference.py`
 
