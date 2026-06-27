@@ -16315,15 +16315,15 @@
   "consecutive_wins": 1,
   "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 6335,
+  "veteran_xp": 6365,
   "veteran_level": "Ace",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 100
   },
-  "flights_completed": 481,
-  "hours_flown": 48.10000000000041,
+  "flights_completed": 482,
+  "hours_flown": 48.200000000000415,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -16347,7 +16347,7 @@
     "PLT": 19,
     "LCI": 51,
     "RIO": 20,
-    "QS": 126,
+    "QS": 127,
     "MAR": 40,
     "COI": 49,
     "RIV": 5,
