@@ -156,7 +156,9 @@ fi
 
 mkdir -p logs
 
-echo "🧠 Ensuring Halim serve is active…"
+"$ROOT/scripts/halim_stop.sh" --telegram-only 2>/dev/null || true
+
+echo "🧠 Ensuring Halim serve is active (chat paused — replay has full focus)…"
 "$ROOT/scripts/ensure_halim_active.sh" --serve-only || echo "   Halim serve warning (non-fatal — see logs/halim_serve.log)"
 
 echo "══════════════════════════════════════════════════════════════"

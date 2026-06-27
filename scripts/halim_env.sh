@@ -31,6 +31,8 @@ export HALIM_REASONING_VIA_SERVER="${HALIM_REASONING_VIA_SERVER:-auto}"
 export HALIM_FORCE_LM="${HALIM_FORCE_LM:-true}"
 # Toddler LM on 8GB Mac needs >2.5s (cold load + generate ~10–15s first reply)
 export HALIM_INFERENCE_TIMEOUT_SEC="${HALIM_INFERENCE_TIMEOUT_SEC:-90}"
+# Chat off while live/replay trading — full CPU/RAM for algo (see core/trading_focus_guard.py)
+export HALIM_CHAT_DURING_TRADING="${HALIM_CHAT_DURING_TRADING:-false}"
 
 # Learn cache RAG + auto LM retrain (wired in core/halim_learn_rag.py, core/halim_auto_lm.py)
 export HALIM_LEARN_RAG="${HALIM_LEARN_RAG:-true}"

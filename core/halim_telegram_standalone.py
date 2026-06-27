@@ -141,6 +141,14 @@ class HalimTelegramBot:
     def _poll_loop(self) -> None:
         while not self._stop.is_set():
             try:
+                from core.trading_focus_guard import is_trading_session_active
+                if is_trading_session_active():
+                    log.info("Trading session active — stopping standalone Halim Telegram (full focus on algo)")
+                    self._stop.set()
+                    break
+            except Exception:
+                pass
+            try:
                 result = self._api(
                     "getUpdates",
                     {
@@ -182,6 +190,14 @@ class HalimTelegramBot:
         if not is_verified(self.cfg, chat_id):
             self._handle_unverified(chat_id, text, username, first_name, reply_id)
             return
+
+        try:
+            from core.trading_focus_guard import halim_lm_blocked_during_trading, trading_focus_message
+            if halim_lm_blocked_during_trading("commander_chat"):
+                self.send(chat_id, trading_focus_message(via="telegram"), reply_to=reply_id)
+                return
+        except Exception:
+            pass
 
         if text.startswith("/"):
             self._handle_command(chat_id, text, reply_id)
@@ -295,6 +311,13 @@ class HalimTelegramBot:
         self.send(chat_id, "🧠 Halim is thinking… (first reply may take ~20s while model loads)", reply_to=reply_id)
 
         def work() -> None:
+            try:
+                from core.trading_focus_guard import halim_lm_blocked_during_trading, trading_focus_message
+                if halim_lm_blocked_during_trading("commander_chat"):
+                    self.send(chat_id, trading_focus_message(via="telegram"))
+                    return
+            except Exception:
+                pass
             try:
                 import subprocess
                 subprocess.run(
