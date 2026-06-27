@@ -26,3 +26,6 @@
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T12:29:11.133452+00:00"}
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T12:34:11.268991+00:00"}
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T12:39:11.379748+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T12:40:17.775474+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_live","fsync_files":18,"ppo":false,"timestamp":"2026-06-27T12:40:17.775457+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":18,"ppo":true,"timestamp":"2026-06-27T12:40:17.856689+00:00"}
