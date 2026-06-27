@@ -1,11 +1,190 @@
 [
   {
-    "timestamp": "2026-06-27T07:08:11.405233+00:00",
-    "source": "runtime_trade_closed",
+    "timestamp": "2026-06-27T07:47:53.580496+00:00",
+    "source": "runtime_loss_streak",
     "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
     "lessons": [
-      "Review trade_closed on MARA"
+      "Review loss_streak on COIN"
+    ]
+  },
+  {
+    "timestamp": "2026-06-27T07:48:35.280902+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.75,
+        "reason": "trade WR 14% \u2014 tighten PPO entry bar",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MIN_PROFIT_PROBABILITY": {
+        "param": "MIN_PROFIT_PROBABILITY",
+        "value": 0.62,
+        "reason": "repeat losses \u2014 raise profit probability gate",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "",
+    "lessons": [
+      "Do not re-enter same ticker after same-bar stop loss",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Wait for volume spike confirmation before chase entries"
+    ]
+  },
+  {
+    "timestamp": "2026-06-27T07:58:28.404283+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.6900000000000001,
+        "reason": "trade WR 14% \u2014 tighten PPO entry bar",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MIN_PROFIT_PROBABILITY": {
+        "param": "MIN_PROFIT_PROBABILITY",
+        "value": 0.62,
+        "reason": "repeat losses \u2014 raise profit probability gate",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "",
+    "lessons": [
+      "Do not re-enter same ticker after same-bar stop loss",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Wait for volume spike confirmation before chase entries"
+    ]
+  },
+  {
+    "timestamp": "2026-06-27T07:58:47.098987+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.6900000000000001,
+        "reason": "trade WR 14% \u2014 tighten PPO entry bar",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MIN_PROFIT_PROBABILITY": {
+        "param": "MIN_PROFIT_PROBABILITY",
+        "value": 0.62,
+        "reason": "repeat losses \u2014 raise profit probability gate",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "",
+    "lessons": [
+      "Do not re-enter same ticker after same-bar stop loss",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Wait for volume spike confirmation before chase entries"
+    ]
+  },
+  {
+    "timestamp": "2026-06-27T08:00:15.014454",
+    "win_rate": 0.18007438723314992,
+    "buffer_win_rate": 0.1532522227421619,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.9,
+        "new": 0.7200000000000001,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.112
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.5,
+        "new": 1.35,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.043
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 30,
+        "new": 39.0,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.051
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 45464.9875,
+        "new": 31825.49125,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.016
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 250000.0,
+        "new": 187500.0,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 0.275
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.65,
+        "new": 0.7000000000000001,
+        "reason": "raise entry bar when WR low; lower when WR strong",
+        "confidence": 0.091
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-27T08:00:15.013365\nCombined win rate: 18.0% (buffer=15.3%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
+  },
+  {
+    "timestamp": "2026-06-27T08:00:15.341671",
+    "win_rate": 0.18007438723314992,
+    "buffer_win_rate": 0.1532522227421619,
+    "returns_win_rate": 0.20689655172413793,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.7200000000000001,
+        "new": 0.5760000000000001,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.09
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.35,
+        "new": 1.215,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.039
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 39,
+        "new": 50.7,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.067
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 31825.49125,
+        "new": 22277.843875,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.011
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 187500.0,
+        "new": 140625.0,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 0.206
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.7000000000000001,
+        "new": 0.7500000000000001,
+        "reason": "raise entry bar when WR low; lower when WR strong",
+        "confidence": 0.091
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-27T08:00:15.341098\nCombined win rate: 18.0% (buffer=15.3%, returns=20.7%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
+  },
+  {
+    "timestamp": "2026-06-27T08:00:21.870200+00:00",
+    "source": "commander_chat",
+    "adjustments": {},
+    "guidelines_summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+    "lessons": [
+      "ping - are you there ?",
+      "Hi",
+      "Hi"
     ]
   }
 ]
