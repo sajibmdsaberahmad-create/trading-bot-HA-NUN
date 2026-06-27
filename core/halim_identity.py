@@ -145,17 +145,25 @@ def compute_halim_phase(cfg: Optional[BotConfig] = None) -> str:
         with open(dataset) as f:
             n_ds = sum(1 for _ in f)
 
-    proxy = Path("models/teacher_proxy.joblib")
+    n_sft = 0
     try:
-        from core.brain_maturity import compute_stage
-        brain_stage = compute_stage(cfg)
+        import sys
+        from pathlib import Path as _Path
+        halim_root = _Path(__file__).resolve().parents[1] / "halim"
+        if halim_root.is_dir() and str(halim_root) not in sys.path:
+            sys.path.insert(0, str(halim_root))
+        from halim.dataset import sft_pair_count
+        n_sft = sft_pair_count()
     except Exception:
-        brain_stage = "newborn"
+        n_sft = n_ds
 
-    if n_ds >= 5000 and proxy.is_file():
-        return "toddler"  # ready for first Halim LM train
-    if brain_stage in ("teen", "adult") and proxy.is_file():
-        return "newborn"  # still numeric-only until Halim LM exists
+    proxy = Path("models/teacher_proxy.joblib")
+    sft_manifest = Path("halim/data/training/sft/manifest.json")
+
+    if n_sft >= 5000 and proxy.is_file() and sft_manifest.is_file():
+        return "toddler"  # SFT ready — train first Halim LM (one GPU run)
+    if n_sft >= 5000 and proxy.is_file():
+        return "newborn"  # enough gold — run halim_prepare_train.sh
     return "newborn"
 
 
@@ -220,7 +228,9 @@ def _next_milestone(phase: str, brain: Dict[str, Any]) -> str:
     if phase == "newborn":
         if n_ds < 500:
             return f"Collect {500 - n_ds} more trading decision pairs for first Halim LM"
-        return "Export to halim repo → train first small Halim transformer (one-time GPU)"
+        return "./scripts/halim_readiness.sh → prepare SFT → train toddler checkpoint (one GPU run)"
+    if phase == "toddler":
+        return "./scripts/halim_train_toddler.sh → register checkpoint → HALIM_LM_BACKEND=mlx"
     if phase == "toddler":
         return "Add code + math datasets in halim repo → Halim child phase"
     if phase == "child":

@@ -167,12 +167,39 @@ def complete_reasoning(prompt: str, purpose: str = "reasoning") -> Dict[str, Any
         }
 
     backend = os.getenv("HALIM_LM_BACKEND", "").lower()
+    ckpt = checkpoint_path()
+    if backend == "mlx" and ckpt:
+        try:
+            from halim.inference_backend import mlx_complete
+
+            text, err = mlx_complete(prompt, ckpt)
+            if text:
+                return {
+                    "ok": True,
+                    "text": text,
+                    "source": "halim_lm",
+                    "backend": "mlx",
+                    "purpose": purpose,
+                }
+            return {
+                "ok": False,
+                "reason": err,
+                "message": "MLX inference failed — check mlx-lm install and checkpoint",
+                "backend": "mlx",
+            }
+        except Exception as exc:
+            return {
+                "ok": False,
+                "reason": "mlx_error",
+                "message": str(exc)[:200],
+                "backend": "mlx",
+            }
+
     if backend in ("mlx", "llama_cpp"):
-        # Plug-in point for toddler phase — load once in server process
         return {
             "ok": False,
             "reason": "backend_not_wired",
-            "message": f"Checkpoint found; wire {backend} in halim.engine",
+            "message": f"Checkpoint found; set HALIM_LM_BACKEND=mlx and install mlx-lm",
             "backend": backend,
         }
 
