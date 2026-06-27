@@ -80,3 +80,5 @@
 {"timestamp": "2026-06-27T12:58:59.087883+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}
 {"timestamp": "2026-06-27T13:01:27.811594+00:00", "event": "prepare_sft", "pairs_total": 2580, "by_source": {"council": 952, "action_gold": 513, "coevolution": 1115}}
 {"timestamp": "2026-06-27T14:12:28.782647+00:00", "event": "register_checkpoint", "name": "toddler_v1", "latest": "/Users/mdsabersajib/Downloads/tradingbot/halim/data/checkpoints/latest"}
+{"timestamp":"2026-06-27T15:36:03.942004+00:00","event":"capability_milestone","capability":"chat","level_pct":25,"phase":"adult"}
+{"timestamp":"2026-06-27T15:36:03.951955+00:00","event":"capability_milestone","capability":"chat","level_pct":25,"phase":"adult"}
