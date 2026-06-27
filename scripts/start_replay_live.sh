@@ -123,9 +123,12 @@ export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-300}"
 export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-600}"
 export REPLAY_PURGE_DATA_ON_STOP="${REPLAY_PURGE_DATA_ON_STOP:-true}"
 
-if [[ ! -d "$REPLAY_ROOT/intraday" ]] || [[ -z "$(ls -A "$REPLAY_ROOT/intraday" 2>/dev/null)" ]]; then
+if [[ ! -d "$REPLAY_ROOT/intraday" ]] || [[ -z "$(find "$REPLAY_ROOT/intraday" -maxdepth 1 -name '*_1min.csv' -print -quit 2>/dev/null)" ]]; then
+  echo ""
   echo "⚠️  No intraday CSVs in $REPLAY_ROOT/intraday"
-  echo "    PYTHONPATH=. python scripts/download_ib_replay_data.py --days 60"
+  echo "    Download replay data first (IB Gateway must be running):"
+  echo "    cd \"$ROOT\" && PYTHONPATH=. python scripts/download_ib_replay_data.py --days 60"
+  echo ""
   exit 1
 fi
 
@@ -139,7 +142,12 @@ if st.get("min_bars", 0) < 2000:
     print("  ⚠️  Thin IB farm — deepen: PYTHONPATH=. python scripts/download_ib_replay_data.py --days 60 --refresh-partial")
 PY
 
-TICKER_LIST=$(ls "$REPLAY_ROOT/intraday"/*_1min.csv 2>/dev/null | xargs -n1 basename | sed 's/_1min.csv//' | tr '\n' ',' | sed 's/,$//')
+TICKER_LIST=$(find "$REPLAY_ROOT/intraday" -maxdepth 1 -name '*_1min.csv' -print 2>/dev/null \
+  | xargs -n1 basename 2>/dev/null | sed 's/_1min.csv//' | tr '\n' ',' | sed 's/,$//' || true)
+if [[ -z "$TICKER_LIST" ]]; then
+  echo "⚠️  No *_1min.csv tickers found under $REPLAY_ROOT/intraday"
+  exit 1
+fi
 
 if [[ -d venv ]]; then
   # shellcheck disable=SC1091
