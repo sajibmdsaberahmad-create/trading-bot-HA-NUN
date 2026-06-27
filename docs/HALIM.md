@@ -117,6 +117,13 @@ export HALIM_USER_TASK="wiki:Federal_Reserve"   # optional secondary task
 
 Env: `HALIM_SERVER=auto` (default) · `HALIM_DEVICE=m2_8gb` · `HALIM_MODEL_PATH=halim/data/checkpoints/latest`
 
+**Mac inference (Apple Silicon):** default backend is **MLX** (`HALIM_LM_BACKEND=mlx`), not HuggingFace. See [HALIM_MAC_INFERENCE.md](HALIM_MAC_INFERENCE.md).
+
+```bash
+./scripts/halim_install_lm.sh   # mlx-lm on Mac; torch on Linux
+./scripts/halim_start.sh        # standalone serve + Telegram
+```
+
 **Not read-only like Ollama.** Halim is an **active model** — learns by action, writes datasets/checkpoints, evolves. External web (wiki/news) is read-only; Halim's own weights and memory are writable. Dedicated server adds reasoning + `/v1/record` + `/v1/export` + `/v1/evolve`. Flags `HALIM_INFERENCE_ONLY` and `HALIM_READ_ONLY` are blocked.
 
 ### PPO ↔ Halim co-evolution

@@ -66,10 +66,20 @@ EOF
 }
 
 if [[ "$DO_NEW_REPO" == "true" ]]; then
-  echo "📁 Building standalone repo at $RELEASE_DIR…"
+  echo "📁 Building standalone Halim-only repo at $RELEASE_DIR…"
   rm -rf "$RELEASE_DIR"
   mkdir -p "$RELEASE_DIR"
-  rsync -a --exclude='.git' --exclude='__pycache__' --exclude='.venv' --exclude='venv' "$HALIM_DIR/" "$RELEASE_DIR/"
+  rsync -a \
+    --exclude='.git' \
+    --exclude='__pycache__' \
+    --exclude='.venv' \
+    --exclude='venv' \
+    --exclude='data/actions/action_log.jsonl' \
+    --exclude='data/coevolution/correction_log.jsonl' \
+    --exclude='data/trading/experience_buffer.jsonl' \
+    --exclude='data/trading/council_training_dataset.jsonl' \
+    --exclude='data/learn_cache/' \
+    "$HALIM_DIR/" "$RELEASE_DIR/"
   mkdir -p "$RELEASE_DIR/data/checkpoints"
   rsync -a "$CKPT/" "$RELEASE_DIR/data/checkpoints/toddler_v1/"
   ln -sfn toddler_v1 "$RELEASE_DIR/data/checkpoints/latest"
@@ -80,18 +90,70 @@ __pycache__/
 venv/
 .DS_Store
 *.log
+data/actions/
+data/coevolution/
+data/learn_cache/
+data/trading/experience_buffer.jsonl
+data/trading/council_training_dataset.jsonl
+EOF
+  cat >"$RELEASE_DIR/STANDALONE.md" <<'EOF'
+# M. A. Halim — standalone model repo
+
+This repository is **Halim only** — no HANOON trading bot code.
+
+## Clone + run
+
+```bash
+git clone https://github.com/sajibmdsaberahmad-create/M-A-Halim.git
+cd M-A-Halim
+git lfs pull
+pip install -e ".[hf]"
+export HALIM_REPO_ROOT="$PWD"
+export HALIM_LM_BACKEND=hf
+export HALIM_MODEL_PATH=data/checkpoints/latest
+export HALIM_FORCE_LM=true
+python halim/serve.py
+```
+
+Health: `curl http://127.0.0.1:8765/health`
+
+## Contents
+
+- `halim/` — Python package (serve, engine, inference)
+- `data/checkpoints/toddler_v1/` — Colab-trained toddler LM (Git LFS)
+- `scripts/` — train, register checkpoint, prepare SFT
+- `colab/` — Google Colab training notebooks
 EOF
   cd "$RELEASE_DIR"
   git init -b main
   _setup_lfs "$RELEASE_DIR"
   git add .
-  git status
-  echo ""
-  echo "Next:"
-  echo "  cd halim-release"
-  echo "  git remote add origin https://github.com/$GITHUB_REPO.git"
-  echo "  git commit -m 'Halim toddler v1 + training pipeline'"
-  echo "  git push -u origin main"
+  git commit -m "$(cat <<'EOF'
+Initial Halim standalone repo — toddler v1 model + training pipeline.
+
+Owned personal AI (M. A. Halim): merged Qwen2.5-0.5B-Instruct checkpoint via Git LFS.
+EOF
+)"
+  if [[ "$DO_PUSH" == "true" ]]; then
+    echo "📤 Creating GitHub repo $GITHUB_REPO and pushing…"
+    if gh repo view "$GITHUB_REPO" >/dev/null 2>&1; then
+      git remote add origin "https://github.com/$GITHUB_REPO.git" 2>/dev/null || \
+        git remote set-url origin "https://github.com/$GITHUB_REPO.git"
+    else
+      gh repo create "$GITHUB_REPO" --public \
+        --description "M. A. Halim — owned personal AI model (toddler LM + training pipeline)" \
+        --source=. --remote=origin
+    fi
+    git push -u origin main
+    git lfs push origin main --all
+    echo "✅ Standalone Halim repo: https://github.com/$GITHUB_REPO"
+  else
+    git status
+    echo ""
+    echo "Next:"
+    echo "  ./scripts/halim_release_push.sh --new-repo --push"
+    echo "  Or: cd halim-release && gh repo create $GITHUB_REPO --public --source=. --push"
+  fi
   exit 0
 fi
 
