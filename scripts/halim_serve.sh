@@ -7,4 +7,4 @@ cd "$ROOT"
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_env.sh"
 if [[ -d venv ]]; then source venv/bin/activate; fi
-exec python -m halim.serve "$@"
+exec python "$ROOT/halim/halim/serve.py" "$@"
