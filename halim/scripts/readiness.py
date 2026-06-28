@@ -86,7 +86,17 @@ def assess(root: Path | None = None) -> dict:
 
     phase_hint = "newborn"
     if ckpt_ok:
-        phase_hint = "adult"
+        ck = checkpoint_path()
+        try:
+            if ck and (ck / "config.json").is_file():
+                meta = json.loads((ck / "config.json").read_text())
+                phase_hint = str(meta.get("halim_phase") or "toddler")
+            elif ck and "toddler" in str(ck).lower():
+                phase_hint = "toddler"
+            else:
+                phase_hint = "adult"
+        except Exception:
+            phase_hint = "toddler" if ckpt_ok else "newborn"
     elif deduped >= TODDLER_MIN_PAIRS and raw.get("council", 0) >= 2000:
         phase_hint = "toddler_ready"
 

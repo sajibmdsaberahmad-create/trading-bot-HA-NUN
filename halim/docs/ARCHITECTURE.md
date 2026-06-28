@@ -106,7 +106,7 @@ Env:
 | `HALIM_REASONING_VIA_SERVER` | `auto` | Route slow text to server when up |
 | `HALIM_MODEL_PATH` | `halim/data/checkpoints/latest` | Future LM |
 | `HALIM_LM_BACKEND` | `mlx` on Apple Silicon Mac; `hf` on Linux/Colab | `mlx` \| `hf` \| `llama_cpp` |
-| `HALIM_BASE_MODEL` | `mlx-community/Qwen2.5-0.5B-Instruct-4bit` (MLX) or `Qwen/Qwen2.5-0.5B-Instruct` (HF) | Open base for adapter |
+| `HALIM_BASE_MODEL` | scaffold registry id (see `halim/halim/scaffold.py`) | HuggingFace/MLX id for **training scaffold** weights — not the Halim product name |
 
 **Mac default:** MLX uses Metal + 4-bit quant — fits M2 8GB. Full guide: [docs/HALIM_MAC_INFERENCE.md](../../docs/HALIM_MAC_INFERENCE.md).
 

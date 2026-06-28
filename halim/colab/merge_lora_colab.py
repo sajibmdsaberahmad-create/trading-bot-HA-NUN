@@ -33,7 +33,8 @@ def main() -> None:
     from peft import PeftModel
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    BASE = "Qwen/Qwen2.5-0.5B-Instruct"
+    # HF scaffold registry id — required by transformers; product name is M. A. Halim.
+    BASE = os.getenv("HALIM_BASE_MODEL", os.getenv("HALIM_SCAFFOLD_HF", "Qwen/Qwen2.5-0.5B-Instruct"))
     adapter = Path("toddler_v1/lora_adapter")
     if not (adapter / "adapter_model.safetensors").is_file():
         adapter = Path("toddler_v1/lora_adapter/checkpoint-614")

@@ -14,7 +14,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from core.config import BotConfig
 from core.notify import log
@@ -54,6 +54,13 @@ def _should_run_dialogue(
 ) -> bool:
     if not _dialogue_enabled(cfg):
         return False
+    if os.getenv("HALIM_DIALOGUE_DURING_TRADING", "true").lower() not in ("1", "true", "yes"):
+        try:
+            from core.trading_focus_guard import is_trading_session_active
+            if is_trading_session_active():
+                return False
+        except Exception:
+            pass
     if task in ("entry_decision", "exit_decision", "trade_close"):
         return True
     if comparison.get("ppo_halim_agree") is False:
@@ -312,3 +319,167 @@ def schedule_trade_outcome_dialogue(
         name=f"ppo-halim-outcome-{ticker[:4]}",
         daemon=True,
     ).start()
+
+
+def _format_ppo_voice(ev: Dict[str, Any], cmp: Dict[str, Any]) -> str:
+    sig = cmp.get("ppo_signal")
+    action = {True: "ENTER", False: "SKIP", None: "HOLD"}.get(sig, str(sig))
+    conf = cmp.get("ppo_conf", 0)
+    reason = str(ev.get("ppo_reason") or "").strip()
+    line = f"PPO reflex: {action} (conf={conf:.0%})"
+    if reason:
+        line += f" — {reason[:160]}"
+    return line
+
+
+def _format_halim_voice(ev: Dict[str, Any], cmp: Dict[str, Any]) -> str:
+    sig = cmp.get("halim_signal")
+    action = {True: "ENTER", False: "SKIP", None: "HOLD"}.get(sig, str(sig))
+    conf = cmp.get("halim_conf", 0)
+    reason = str(ev.get("halim_reason") or "").strip()
+    src = ev.get("halim_source", "halim")
+    line = f"Halim ({src}): {action} (conf={conf:.0%})"
+    if reason:
+        line += f" — {reason[:200]}"
+    return line
+
+
+def _synthesize_dialogue(ev: Dict[str, Any]) -> Optional[str]:
+    cmp = ev.get("comparison") or {}
+    task = str(ev.get("task") or "")
+    if task in ("None", ""):
+        return None
+    ppo_line = _format_ppo_voice(ev, cmp)
+    halim_line = _format_halim_voice(ev, cmp)
+    if len(ppo_line) < 12 or len(halim_line) < 12:
+        return None
+    agree = cmp.get("ppo_halim_agree")
+    verdict = ""
+    if ev.get("outcome") is not None:
+        verdict = f"\nOutcome: {ev.get('outcome')}"
+        if ev.get("outcome_pnl") is not None:
+            verdict += f" (${ev.get('outcome_pnl')})"
+    elif cmp.get("correction_for") not in (None, "none"):
+        verdict = f"\nCorrection needed: {cmp.get('correction_for')}"
+    return f"{ppo_line}\n{halim_line}\nAgree: {agree}{verdict}"
+
+
+def export_dialogue_gold(*, max_records: int = 20_000) -> Dict[str, Any]:
+    """
+    Rewrite dialogue training gold — from generative dialogue log + co-evolution synthesis.
+    Runs even when LM was blocked during trading (synthesizes PPO↔Halim voice pairs).
+    """
+    from core.halim_ppo_coevolution import COEVOLUTION_LOG
+
+    DIALOGUE_GOLD.parent.mkdir(parents=True, exist_ok=True)
+    seen_dialogue: set = set()
+    out_rows: List[Dict[str, Any]] = []
+
+    def _add_row(
+        *,
+        ticker: str,
+        task: str,
+        dialogue: str,
+        data: Dict[str, Any],
+        phase: str,
+        source: str,
+        timestamp: str,
+    ) -> None:
+        dkey = dialogue[:400]
+        if dkey in seen_dialogue or len(dialogue) < 20:
+            return
+        seen_dialogue.add(dkey)
+        base_input = json.dumps(data, default=str)[:1400]
+        out_rows.append({
+            "capability": "decision_text",
+            "instruction": f"PPO ↔ Halim {phase} dialogue — {task}",
+            "input": base_input,
+            "output": dialogue[:1400],
+            "source": source,
+            "ticker": ticker.upper(),
+            "task": task,
+            "timestamp": timestamp,
+        })
+        out_rows.append({
+            "capability": "trade_reflex",
+            "instruction": f"PPO reflex voice — learn Halim reconciliation ({task})",
+            "input": base_input,
+            "output": dialogue[:1400],
+            "source": "dialogue_ppo",
+            "ticker": ticker.upper(),
+            "task": task,
+            "timestamp": timestamp,
+        })
+
+    if DIALOGUE_LOG.is_file():
+        with open(DIALOGUE_LOG, encoding="utf-8") as fh:
+            for line in fh.readlines()[-max_records:]:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except Exception:
+                    continue
+                dialogue = str(row.get("dialogue") or "").strip()
+                if not dialogue:
+                    continue
+                _add_row(
+                    ticker=str(row.get("ticker") or ""),
+                    task=str(row.get("task") or "entry_decision"),
+                    dialogue=dialogue,
+                    data={"comparison": row.get("comparison"), "source": row.get("source")},
+                    phase=str(row.get("phase") or "pre_action"),
+                    source=f"dialogue_{row.get('phase', 'pre_action')}",
+                    timestamp=str(row.get("timestamp") or ""),
+                )
+
+    if COEVOLUTION_LOG.is_file():
+        seen_events: set = set()
+        with open(COEVOLUTION_LOG, encoding="utf-8") as fh:
+            for line in fh.readlines()[-max_records:]:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    ev = json.loads(line)
+                except Exception:
+                    continue
+                ekey = f"{ev.get('timestamp')}|{ev.get('ticker')}|{ev.get('task')}"
+                if ekey in seen_events:
+                    continue
+                seen_events.add(ekey)
+                cmp = ev.get("comparison") or {}
+                if cmp.get("ppo_halim_agree") is not True and ev.get("outcome") is None:
+                    if cmp.get("correction_for") in (None, "none"):
+                        continue
+                dialogue = _synthesize_dialogue(ev)
+                if not dialogue:
+                    continue
+                _add_row(
+                    ticker=str(ev.get("ticker") or ""),
+                    task=str(ev.get("task") or "entry_decision"),
+                    dialogue=dialogue,
+                    data={
+                        "ppo": cmp,
+                        "pipeline": ev.get("pipeline"),
+                        "halim_source": ev.get("halim_source"),
+                        "outcome": ev.get("outcome"),
+                    },
+                    phase="synthesized",
+                    source="dialogue_synthesized",
+                    timestamp=str(ev.get("timestamp") or ""),
+                )
+
+    tmp = DIALOGUE_GOLD.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        for row in out_rows:
+            fh.write(json.dumps(row, default=str, separators=(",", ":")) + "\n")
+    tmp.replace(DIALOGUE_GOLD)
+
+    return {
+        "ok": True,
+        "pairs": len(out_rows),
+        "dialogue_lines": len(seen_dialogue),
+        "rewritten": True,
+    }

@@ -15,6 +15,7 @@ Uses CLIENT_ID / IB_CLIENT_ID env (default 1) — same as live HANOON. Disconnec
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -47,6 +48,13 @@ def _fetch_chunks(
     on_chunk=None,
 ) -> pd.DataFrame:
     """Pull 1-min bars in 5-day chunks going backward from now."""
+    timeout = int(os.getenv(
+        "REPLAY_IB_HMDS_TIMEOUT_SEC",
+        os.getenv("HMDS_FETCH_TIMEOUT_SEC", "45"),
+    ))
+    chunk_pause = float(os.getenv("REPLAY_IB_CHUNK_PAUSE_SEC", "1.25"))
+    max_retries = int(os.getenv("REPLAY_IB_CHUNK_RETRIES", "2"))
+
     frames: list[pd.DataFrame] = []
     end = datetime.now(timezone.utc)
     remaining = days
@@ -60,18 +68,34 @@ def _fetch_chunks(
         if on_chunk:
             on_chunk(chunk_i, total_chunks, end_str)
         contract = dm._get_contract()
-        bars = dm.ib.reqHistoricalData(
-            contract,
-            endDateTime=end_str,
-            durationStr=duration,
-            barSizeSetting="1 min",
-            whatToShow="TRADES",
-            useRTH=use_rth,
-            formatDate=1,
-            keepUpToDate=False,
-            timeout=int(getattr(dm.cfg, "HMDS_FETCH_TIMEOUT_SEC", 20)),
-        )
+        bars = None
+        for attempt in range(max_retries + 1):
+            try:
+                bars = dm.ib.reqHistoricalData(
+                    contract,
+                    endDateTime=end_str,
+                    durationStr=duration,
+                    barSizeSetting="1 min",
+                    whatToShow="TRADES",
+                    useRTH=use_rth,
+                    formatDate=1,
+                    keepUpToDate=False,
+                    timeout=timeout,
+                )
+            except Exception as exc:
+                from core.notify import log
+                log.warning(f"  {ticker} chunk {chunk_i} attempt {attempt + 1}: {exc}")
+                bars = None
+            if bars:
+                break
+            if attempt < max_retries:
+                time.sleep(2.0 * (attempt + 1))
         if not bars:
+            from core.notify import log
+            log.warning(
+                f"  {ticker} chunk {chunk_i}/{total_chunks} empty after {max_retries + 1} tries "
+                f"(timeout={timeout}s) — stopping backward fetch for this ticker"
+            )
             break
         df = pd.DataFrame(
             [
@@ -96,7 +120,7 @@ def _fetch_chunks(
                 f"    └ chunk {chunk_i}/{total_chunks}: +{len(bars)} bars "
                 f"(total {sum(len(f) for f in frames):,} so far)"
             )
-        time.sleep(0.5)  # pacing for IB rate limits
+        time.sleep(chunk_pause)
 
     if not frames:
         return pd.DataFrame()
@@ -175,6 +199,14 @@ def main() -> int:
     cfg.IB_PORT = args.port
     cfg.IB_CLIENT_ID = args.client_id
     cfg.PAPER_TRADING = True
+    cfg.HMDS_FETCH_TIMEOUT_SEC = int(os.getenv(
+        "REPLAY_IB_HMDS_TIMEOUT_SEC",
+        os.getenv("HMDS_FETCH_TIMEOUT_SEC", "45"),
+    ))
+
+    ticker_retries = int(os.getenv("REPLAY_IB_TICKER_RETRIES", "2"))
+    ticker_pause = float(os.getenv("REPLAY_IB_TICKER_PAUSE_SEC", "2.0"))
+    min_bars_target = int(os.getenv("REPLAY_IB_MIN_BARS_TARGET", "12000"))
 
     connector = IBConnector(cfg)
     log.info(f"Connecting IB Gateway {cfg.IB_HOST}:{cfg.IB_PORT} client_id={cfg.IB_CLIENT_ID} …")
@@ -195,9 +227,18 @@ def main() -> int:
                 def _chunk_cb(ci, total, end_str, _t=ticker, _ti=ti):
                     _progress(f"  [{_ti}/{n_tickers}] {_t} chunk {ci}/{total} → {end_str}")
 
-                df = _fetch_chunks(
-                    dm, args.days, use_rth=use_rth, ticker=ticker, on_chunk=_chunk_cb,
-                )
+                df = pd.DataFrame()
+                for attempt in range(ticker_retries + 1):
+                    df = _fetch_chunks(
+                        dm, args.days, use_rth=use_rth, ticker=ticker, on_chunk=_chunk_cb,
+                    )
+                    if len(df) >= min_bars_target or attempt >= ticker_retries:
+                        break
+                    log.warning(
+                        f"  {ticker}: thin farm ({len(df):,} bars < {min_bars_target:,}) "
+                        f"— retry {attempt + 2}/{ticker_retries + 1}"
+                    )
+                    time.sleep(ticker_pause * (attempt + 1))
                 if df.empty or len(df) < 100:
                     log.warning(f"  {ticker}: insufficient data ({len(df)} bars)")
                     fail += 1

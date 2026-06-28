@@ -101,6 +101,18 @@ fi
 
 rm -f "$PID_FILE" "$SHUTDOWN_FILE"
 
+echo "▶ Final Halim gold export + SFT + Colab zip…"
+python3 -c "
+from core.config import BotConfig
+from core.halim_gold_pipeline import run_halim_gold_pipeline
+run_halim_gold_pipeline(
+    BotConfig(),
+    trigger='live_session_stop',
+    prepare_sft=True,
+    package_colab=True,
+)
+" 2>/dev/null || true
+
 if [ -d "$ROOT/venv" ]; then
   python3 -c "
 from core.local_cleanup import cleanup_local_workspace

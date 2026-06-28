@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-core/async_utils.py — Non-blocking background workers for Git, Ollama, and heavy I/O.
+core/async_utils.py — Non-blocking background workers for Git, council I/O, and heavy tasks.
 
 PURPOSE
 ═══════════════════════════════════════════════════════════════════════════

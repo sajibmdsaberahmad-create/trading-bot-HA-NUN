@@ -10,6 +10,7 @@ Full freedom within hard risk guardrails. All hunts tracked in profit_hunt_ledge
 from __future__ import annotations
 
 import json
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -71,6 +72,16 @@ def _parse_float_price(value: Any, default: float) -> float:
     except (TypeError, ValueError):
         return default
 
+
+def _deferred_gold_log_tag(cfg: Optional[BotConfig] = None) -> str:
+    """When PPO enters now and decision/coevolution text is logged asynchronously."""
+    cfg = cfg or BotConfig()
+    if os.getenv("HALIM_PPO_DIALOGUE", "true").lower() in ("1", "true", "yes"):
+        return "Halim gold async"
+    backend = str(getattr(cfg, "COUNCIL_BACKEND", None) or os.getenv("COUNCIL_BACKEND", "groq"))
+    return f"{backend} gold async"
+
+
 DECISION_LOG = Path("models/ai_decision_log.jsonl")
 TRADE_JOURNAL = Path("models/trade_journal.json")
 
@@ -88,7 +99,7 @@ def _parse_json_response(raw: str) -> Dict[str, Any]:
     return {}
 
 
-# Live trading tasks always use the priority Ollama path (no rate-limit deferral).
+# Live trading tasks always use the priority council path (no rate-limit deferral).
 _DECISION_TASKS = frozenset({
     "entry_decision", "position_manage", "exit_decision", "stagnation_check",
     "scan_score", "rank_scan", "pick_next_target", "risk_exit", "lock_review",
@@ -114,8 +125,10 @@ class AICommander:
         self.ai_components = ai_components or {}
         self._cache: Dict[str, Tuple[float, Any]] = {}
         self._trade_journal: List[Dict] = []
-        self._live_line = LiveAILine(cfg, self._ollama_decide_raw)
+        self._live_line = LiveAILine(cfg, self._council_decide_raw)
         self._chart_line = ChartVisionLine(cfg)
+        from core.halim_entry_line import HalimEntryLine
+        self._halim_entry = HalimEntryLine(cfg)
         self._deferred = DeferredCouncilLearner(cfg, self._live_line)
         self._ppo_model_ref: Any = None
         DECISION_LOG.parent.mkdir(parents=True, exist_ok=True)
@@ -129,9 +142,13 @@ class AICommander:
     def council_mode(self) -> bool:
         return is_ai_council_mode(self.cfg)
 
-    def ollama_audit_snapshot(self, ticker: str, task: str = "entry_decision") -> Dict[str, Any]:
-        """Raw + parsed Ollama output for post-mortem (hallucination audit)."""
+    def council_audit_snapshot(self, ticker: str, task: str = "entry_decision") -> Dict[str, Any]:
+        """Raw + parsed cloud council output for post-mortem."""
         return self._live_line.peek(ticker, task)
+
+    def ollama_audit_snapshot(self, ticker: str, task: str = "entry_decision") -> Dict[str, Any]:
+        """Legacy alias — council snapshot (not local Ollama)."""
+        return self.council_audit_snapshot(ticker, task)
 
     def _vision_analyze(self, prompt: str, image_bytes: bytes) -> str:
         ollama = None
@@ -248,7 +265,7 @@ class AICommander:
                 pass
         return generative_think(self.cfg, self.autopilot, prompt)
 
-    def _ollama_decide_raw(self, full_prompt: str) -> str:
+    def _council_decide_raw(self, full_prompt: str) -> str:
         """Cloud council call — Groq primary, Gemini fallback."""
         council = None
         if self.autopilot and getattr(self.autopilot, "core", None):
@@ -264,6 +281,59 @@ class AICommander:
         except Exception as exc:
             log.debug(f"Council client: {exc}")
         return ""
+
+    _ollama_decide_raw = _council_decide_raw  # legacy alias
+
+    def _ring_halim_entry(
+        self,
+        ticker: str,
+        fingerprint: str,
+        *,
+        price: float,
+        spike: float,
+        scan: float,
+        ppo_buy: bool,
+        ppo_conf: float,
+        ppo_reason: str = "",
+    ) -> None:
+        try:
+            self._halim_entry.ring(
+                ticker,
+                fingerprint,
+                price=price,
+                spike=spike,
+                scan=scan,
+                ppo_buy=ppo_buy,
+                ppo_conf=ppo_conf,
+                ppo_reason=ppo_reason,
+            )
+        except Exception as exc:
+            log.debug(f"Halim entry ring: {exc}")
+
+    def _blend_halim_entry(
+        self,
+        decision: Dict[str, Any],
+        *,
+        ticker: str,
+        fingerprint: str,
+        ppo_buy: bool,
+        ppo_conf: float,
+        min_conf: float,
+    ) -> Dict[str, Any]:
+        try:
+            from core.halim_entry_line import merge_halim_entry_advisory
+            halim_live = self._halim_entry.consume(ticker, fingerprint)
+            return merge_halim_entry_advisory(
+                decision,
+                halim_live,
+                ppo_buy=ppo_buy,
+                ppo_conf=ppo_conf,
+                min_conf=min_conf,
+                cfg=self.cfg,
+            )
+        except Exception as exc:
+            log.debug(f"Halim entry blend: {exc}")
+            return decision
 
     def compose_telegram(
         self,
@@ -842,7 +912,7 @@ class AICommander:
                 f"⚡ PPO-led (council pending): {ppo_reason or 'profit hunt'} | "
                 f"spike={spike_ratio:.1f}x score={scan_score:.0f}"
             )[:200],
-            "journal": f"PPO execute while Ollama deliberates — {ticker}",
+            "journal": f"PPO execute while council deliberates — {ticker}",
             "pipeline": "ppo:pending_lead",
             "pending": False,
         }
@@ -947,6 +1017,11 @@ class AICommander:
         )
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        self._ring_halim_entry(
+            ticker, fp,
+            price=current_px, spike=spike_ratio, scan=scan_score,
+            ppo_buy=ppo_action == 1, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+        )
         micro = (account or {}).get("micro_forecast") or {}
         from core.entry_quality import assess_entry_quality, apply_ai_entry_quality
         quality = assess_entry_quality(
@@ -1012,7 +1087,7 @@ class AICommander:
                 "confidence": max(ppo_conf, 0.58, min(scan_score / 80.0, 0.85)),
                 "reason": (
                     f"⚡ PPO-led micro-fast: score={scan_score:.0f} micro={float(micro.get('spike_likelihood', 0)):.0%} "
-                    f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%} (Ollama logging async)"
+                    f"vol={spike_ratio:.1f}x | PPO {ppo_conf:.0%} ({_deferred_gold_log_tag(self.cfg)})"
                 )[:200],
                 "journal": f"PPO profit hunt — {ticker}",
                 "pipeline": "ppo:micro_fast",
@@ -1047,7 +1122,7 @@ class AICommander:
                 "confidence": max(ppo_conf, 0.58, min(scan_score / 80.0, 0.85)),
                 "reason": (
                     f"⚡ PPO-led spike-fast: vol={spike_ratio:.1f}x score={scan_score:.0f} "
-                    f"| PPO {ppo_conf:.0%} (Ollama logging async)"
+                    f"| PPO {ppo_conf:.0%} ({_deferred_gold_log_tag(self.cfg)})"
                 )[:200],
                 "journal": f"PPO fast execution — hunting spike on {ticker}",
                 "pipeline": "ppo:spike_fast",
@@ -1171,7 +1246,7 @@ class AICommander:
                 enter = ppo_action == 1 and ppo_conf >= min_conf
                 confidence = ppo_conf
                 out = {
-                    "reason": ppo_reason or f"PPO ensemble conf={ppo_conf:.0%} (Ollama offline)",
+                    "reason": ppo_reason or f"PPO ensemble conf={ppo_conf:.0%} (council offline)",
                     "journal": f"PPO ensemble: spike {spike_ratio:.1f}x score {scan_score:.0f}",
                 }
             else:
@@ -1198,13 +1273,13 @@ class AICommander:
                 confidence = max(confidence, 0.58)
                 out["reason"] = (
                     f"⚡ PPO spike hunt: vol={spike_ratio:.1f}x score={scan_score:.0f} "
-                    f"(Ollama logging async)"
+                    f"({_deferred_gold_log_tag(self.cfg)})"
                 )[:200]
                 out["pipeline"] = "ppo:spike_fast_fallback"
             elif ppo_action == 1 and ppo_conf >= min_conf * 0.85:
                 enter = True
                 confidence = max(confidence, ppo_conf)
-                out["reason"] = f"PPO buy lead: {ppo_reason or 'ensemble'} (Ollama logging async)"
+                out["reason"] = f"PPO buy lead: {ppo_reason or 'ensemble'} ({_deferred_gold_log_tag(self.cfg)})"
                 out["pipeline"] = "ppo:buy_lead"
         if (
             not enter
@@ -1444,6 +1519,15 @@ class AICommander:
         equity: float = 0.0,
         cash: float = 0.0,
     ) -> Dict[str, Any]:
+        fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        out = self._blend_halim_entry(
+            out,
+            ticker=ticker,
+            fingerprint=fp,
+            ppo_buy=ppo_action == 1,
+            ppo_conf=ppo_conf,
+            min_conf=min_conf,
+        )
         enter = bool(out.get("enter"))
         confidence = float(out.get("confidence", ppo_conf))
         if out.get("gut_feel") is not None:
@@ -1673,8 +1757,16 @@ class AICommander:
         try:
             from core.halim_ppo_coevolution import record_coevolution
             pipeline = str(decision.get("pipeline", ""))
-            halim_src = "proxy" if "proxy" in pipeline else "council" if "council" in pipeline else "halim"
-            halim_sig = decision.get("enter") if task == "entry_decision" else decision.get("exit")
+            if decision.get("halim_enter") is not None:
+                halim_src = "halim_lm"
+                halim_sig = bool(decision.get("halim_enter"))
+                halim_conf = float(decision.get("halim_conf", decision.get("confidence", 0.5)) or 0.5)
+                halim_reason = str(decision.get("halim_reason", decision.get("reason", "")))[:300]
+            else:
+                halim_src = "proxy" if "proxy" in pipeline else "council" if "council" in pipeline else "halim"
+                halim_sig = decision.get("enter") if task == "entry_decision" else decision.get("exit")
+                halim_conf = float(decision.get("confidence", 0.5) or 0.5)
+                halim_reason = str(decision.get("reason", ""))[:300]
             record_coevolution(
                 self.cfg,
                 ticker=ticker,
@@ -1684,8 +1776,8 @@ class AICommander:
                 ppo_reason=str(decision.get("ppo_reason", ""))[:200],
                 halim_source=halim_src,
                 halim_signal=halim_sig,
-                halim_conf=float(decision.get("confidence", 0.5) or 0.5),
-                halim_reason=str(decision.get("reason", ""))[:300],
+                halim_conf=halim_conf,
+                halim_reason=halim_reason,
                 executed=decision,
                 pipeline=pipeline,
             )

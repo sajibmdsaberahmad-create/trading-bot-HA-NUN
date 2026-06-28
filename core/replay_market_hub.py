@@ -93,6 +93,20 @@ class ReplayMarketHub:
             for ts, row in df.iterrows():
                 by_ts[pd.Timestamp(ts)][ticker] = row
         self._timeline = sorted(by_ts.items(), key=lambda x: x[0])
+        if not self._timeline:
+            raise FileNotFoundError(
+                "No fresh replay bars — all CSV data already trained. "
+                "Re-download: python scripts/download_ib_replay_data.py --days 60"
+            )
+        try:
+            from core.replay_consumption import farm_unconsumed_stats
+            unc = farm_unconsumed_stats(self.root)
+            log.info(
+                f"  Fresh replay bars: {unc.get('unconsumed_bars', 0):,} "
+                f"across {unc.get('tickers', 0)} tickers (already-trained bars skipped)"
+            )
+        except Exception:
+            pass
         log.info(
             f"Replay hub: {len(self.tickers)} tickers | "
             f"{len(self._timeline):,} time steps | "

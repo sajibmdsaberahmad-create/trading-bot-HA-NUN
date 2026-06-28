@@ -61,12 +61,16 @@ flush_git_sync(replay=True)
 " 2>/dev/null || true
 fi
 
-echo "🗑  Purging replay CSV farm (training done — learning in models/)…"
+echo "🗑  Final replay cleanup (trim trained + purge leftovers)…"
 export REPLAY_PURGE_DATA_ON_STOP=true
 export WEEKEND_REPLAY_LOOP=0
+export REPLAY_KEEP_CSV_BETWEEN_EPOCHS=false
+export REPLAY_PURGE_ALL_ON_STOP=true
 PYTHONPATH="${ROOT}/halim:${ROOT}" python3 -c "
+from core.replay_consumption import finalize_replay_session
 from core.replay_data_housekeeping import purge_replay_farm
-purge_replay_farm(verbose=True)
+finalize_replay_session(hub=None, trigger='stop_weekend', verbose=True)
+purge_replay_farm(verbose=True, force=True)
 " 2>/dev/null || true
 
 echo "✅ Weekend replay stopped"

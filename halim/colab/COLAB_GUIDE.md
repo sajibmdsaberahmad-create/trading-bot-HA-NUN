@@ -6,17 +6,37 @@ Train Halim's first language model **for free** on Google's GPU. Your Mac only p
 
 ## Part A — On your Mac (10 minutes)
 
-### Step A1 — Prepare data
+### Step A1 — Prepare data (one command)
 
 Open **Terminal** and run:
 
 ```bash
 cd ~/Downloads/tradingbot
-./scripts/halim_readiness.sh
-./scripts/halim_prepare_train.sh
+chmod +x scripts/halim_colab_ready.sh
+./scripts/halim_colab_ready.sh
 ```
 
-You should see `"ok": true` and about **2,580** pairs.
+This upgrades live PPO, exports **all** training gold, rebuilds `sft/train.jsonl`, and **overwrites** the single canonical **`halim_sft.zip`** (same path every time — never keep old copies).
+
+### One zip rule
+
+| Do | Don't |
+|----|-------|
+| Upload `tradingbot/halim_sft.zip` only | Keep `halim_sft_old.zip` or dated copies in Downloads |
+| Run `./scripts/halim_colab_ready.sh` before each Colab train | Re-upload a zip from last week |
+| Check `build_id` in Colab cell output | Guess which zip is newest |
+
+After packaging, see `models/halim_sft_package.meta.json` for `build_id` and `updated_at`.
+
+You should see `"ok": true` and **2,500+** deduped pairs (more after replay sessions).
+
+Manual path (same result):
+
+```bash
+./scripts/halim_readiness.sh
+./scripts/halim_prepare_train.sh
+./scripts/halim_package_colab.sh
+```
 
 ### Step A2 — Create upload zip
 

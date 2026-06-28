@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-core/hybrid_distiller.py — Automatic Qwen→PPO knowledge distillation.
+core/hybrid_distiller.py — Automatic Halim↔PPO knowledge distillation.
 
 Phase 0 (R&D): Cloud council + PPO run together; every decision is logged.
 Phase 1 (distill): Once enough closed trades exist, train a fast TeacherProxy
@@ -446,7 +446,7 @@ def maybe_run_hybrid_distillation(cfg: BotConfig) -> Dict[str, Any]:
         if closed % max(every_n, 1) == 0:
             log.info(
                 f"🎓 Hybrid distill collecting — {closed}/{min_trades} closed trades "
-                f"(Qwen+PPO teaching each other; distill auto-starts at {min_trades})"
+                f"(Halim+PPO teaching each other; distill auto-starts at {min_trades})"
             )
         return {"phase": "collecting", "closed_trades": closed}
 

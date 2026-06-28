@@ -12,7 +12,7 @@ Halim’s toddler LM runs **locally on your Mac** via **MLX** — Apple’s Meta
 | Checkpoint | Same LoRA adapter + base quant model | Merged full weights or LoRA |
 | Training | On-device LoRA (`mlx_lm.lora`) | Colab HF path |
 
-**Comparison baseline:** Halim toddler = **Qwen2.5-0.5B-Instruct** fine-tuned with your action gold. Compare against the public base **`Qwen/Qwen2.5-0.5B-Instruct`** (unfine-tuned), not against Groq/Gemini — those are optional **teacher** models when API budget allows.
+**Comparison baseline:** Halim toddler = **M. A. Halim** fine-tuned on your action gold. For A/B eval, compare against the unfine-tuned **training scaffold** (`HALIM_BASE_MODEL` — HuggingFace registry id, not the product name), not against Groq/Gemini — those are optional **teacher** models when API budget allows.
 
 ## Auto-config (`scripts/halim_env.sh`)
 
@@ -20,6 +20,7 @@ On `Darwin` + `arm64`:
 
 ```bash
 HALIM_LM_BACKEND=mlx
+# Scaffold registry id (internal — loads base weights for Halim LoRA)
 HALIM_BASE_MODEL=mlx-community/Qwen2.5-0.5B-Instruct-4bit
 HALIM_MODEL_PATH=halim/data/checkpoints/latest
 HALIM_FORCE_LM=true
@@ -29,6 +30,7 @@ On `Darwin` + `arm64`, `halim_env.sh` sets **MLX** even if `.env` still has `HAL
 
 ```bash
 export HALIM_LM_BACKEND=hf
+# HF scaffold registry id (required by transformers — not the Halim product name)
 export HALIM_BASE_MODEL=Qwen/Qwen2.5-0.5B-Instruct
 ./scripts/halim_install_lm.sh
 ```
@@ -69,7 +71,7 @@ Set explicitly: `export HALIM_DEVICE=m2_8gb`
 
 ## Colab train → Mac serve flow
 
-1. **Colab:** train LoRA on `Qwen/Qwen2.5-0.5B-Instruct`, export zip (`halim_toddler_v1.zip`).
+1. **Colab:** train Halim toddler LoRA (`train_toddler_colab.py`), export zip (`halim_toddler_v1.zip`).
 2. **Mac:** `./scripts/halim_start_toddler.sh ~/Downloads/halim_toddler_v1.zip`
    - Registers checkpoint with `--backend mlx`
    - Installs MLX (not torch)

@@ -17,8 +17,9 @@ if str(ROOT / "halim") not in sys.path:
 
 from halim.dataset import prepare_sft_dataset, repo_root  # noqa: E402
 from halim.device import detect_profile, profile_spec  # noqa: E402
+from halim.scaffold import SCAFFOLD_MLX_4BIT  # noqa: E402
 
-DEFAULT_BASE = "mlx-community/Qwen2.5-0.5B-Instruct-4bit"
+DEFAULT_BASE = SCAFFOLD_MLX_4BIT
 DEFAULT_ITERS = 600
 DEFAULT_BATCH = 2
 DEFAULT_LORA = 8

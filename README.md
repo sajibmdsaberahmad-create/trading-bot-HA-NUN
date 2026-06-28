@@ -17,7 +17,8 @@ Clone this repo on **any Mac**, run **one command**, and trade. Includes PPO mod
 | macOS 12+ | 8 GB RAM minimum (M1/M2 OK) |
 | Python 3.10–3.11 | Not 3.12 |
 | IB Gateway | Paper mode, port **4002**, API enabled |
-| Ollama | `brew install ollama` |
+| Groq / Gemini API keys | Cloud council teacher (in `.env`) |
+| M. A. Halim LM | `halim/data/checkpoints/toddler_v1` + `./scripts/halim_start_toddler.sh` |
 | Git | Access to this private repo |
 
 ### 2. Clone
@@ -38,8 +39,7 @@ The launcher will:
 
 1. Create `venv` + install dependencies  
 2. **Decrypt** `secrets/hanoon.env.enc` → `.env` (your keys, synced from primary machine)  
-3. Start Ollama + pull the right model for your RAM  
-4. Connect to IB Gateway and run the HANOON scalper  
+3. Start **Halim serve** (owned LM) + connect to IB Gateway and run the HANOON scalper  
 
 Stop: `./scripts/stop_hanoon.sh`  
 Logs: `logs/HANOON.log`
@@ -160,9 +160,9 @@ This copies only essential files + encrypts env. Other repos are untouched.
 
 ## What HANOON does
 
-- **AI entries** — Ollama council + PPO alignment; quality over blind spikes  
+- **AI entries** — Halim LM + cloud council + PPO alignment; quality over blind spikes  
 - **AI profit** — ride winners, trail stops; green profit lock if AI stalls  
-- **Daily IB learning** — end-of-day full IB data → Ollama analyze → PPO train (beat yesterday)  
+- **Daily IB learning** — end-of-day IB data → council analyze → PPO train (beat yesterday)  
 - **Pre-market + RTH only** — no after-hours order spam  
 
 ---
@@ -173,7 +173,7 @@ This copies only essential files + encrypts env. Other repos are untouched.
 |-------|-----|
 | No `.env` after clone | `pip install cryptography` then `./start.sh` |
 | IB connection refused | Start IB Gateway on port 4002 |
-| Ollama errors | `brew install ollama` |
+| Council / Halim errors | Check `logs/halim_serve.log` and Groq/Gemini keys in `.env` |
 | Missing `ppo_trader.zip` | `git pull` or `./scripts/bootstrap_from_release.sh` |
 
 ---

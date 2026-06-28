@@ -2,8 +2,8 @@
 """
 core/ppo_teacher_training.py — Cloud teacher improves PPO (teacher–student distillation).
 
-Like Alibaba using Claude to improve Qwen: a strong cloud LLM (Groq/Gemini council)
-reviews recent closed trades, labels what PPO *should* have done, adjusts strategy
+Cloud teacher (Groq/Gemini council) improves student PPO — teacher–student distillation.
+Reviews recent closed trades, labels what PPO *should* have done, adjusts strategy
 params within bounds, and drives weighted PPO micro-training on corrected rewards.
 """
 
@@ -217,7 +217,7 @@ def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Option
     bounds = format_bounds_for_prompt(cfg, 25)
     allowed = ", ".join(tunable_param_names(cfg)[:18])
     prompt = (
-        "You are the TEACHER model improving a student PPO trading agent (like Claude teaching Qwen).\n"
+        "You are the TEACHER model improving student PPO and Halim reflex agents.\n"
         "The student PPO picks entries/exits on 1-min scalps. Win rate is falling — diagnose and fix.\n\n"
         f"PERFORMANCE SUMMARY:\n{summary}\n\n"
         "Analyze WHY losses cluster (bad entries, slippage, stops too tight, repeat tickers).\n"
@@ -419,6 +419,24 @@ def run_ppo_teacher_session(
     state["sessions"] = int(state.get("sessions", 0)) + 1
     _save_state(state)
     _append_session(result)
+
+    try:
+        from core.halim_capabilities import record_teacher_action
+        out_text = (
+            f"Diagnosis: {diagnosis}\n"
+            f"Strategy: {plan.get('strategy_shift', '')}\n"
+            f"PPO focus: {plan.get('ppo_focus', '')}\n"
+            f"Lessons: {', '.join(plan.get('lessons', [])[:5])}"
+        )
+        record_teacher_action(
+            "decision_text",
+            summary[:2000],
+            out_text[:2000],
+            source=f"ppo_teacher:{source}",
+            cfg=cfg,
+        )
+    except Exception:
+        pass
 
     if plan.get("lessons"):
         try:

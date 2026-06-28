@@ -150,6 +150,7 @@ DEFAULT_CONSTITUTION: Dict[str, Any] = {
             "en.wikipedia.org",
             "www.reuters.com",
             "reuters.com",
+            "feeds.reuters.com",
             "apnews.com",
             "www.apnews.com",
             "www.bbc.com",
@@ -158,7 +159,15 @@ DEFAULT_CONSTITUTION: Dict[str, Any] = {
             "cnbc.com",
             "finance.yahoo.com",
             "www.sec.gov",
+            "sec.gov",
             "www.investopedia.com",
+            "investopedia.com",
+            "www.investor.gov",
+            "investor.gov",
+            "docs.python.org",
+            "developer.mozilla.org",
+            "www.federalreserve.gov",
+            "fred.stlouisfed.org",
         ],
         "description": (
             "Google = AI Overview only. Learn = read-only GET on allowlisted wiki/news/reference. "
@@ -375,7 +384,7 @@ def request_action(
                     return False, "google_ai_search_disabled"
                 ok, _ = _check_rate(
                     state, "google_ai_searches",
-                    int(limits.get("google_ai_searches", limits.get("web_fetches", 50))),
+                    int(limits.get("google_ai_searches", int(os.getenv("HALIM_GOOGLE_AI_DAILY_CAP", "150")))),
                 )
                 if not ok:
                     _save_state(state)
@@ -391,7 +400,7 @@ def request_action(
                     return False, url_reason
                 ok, _ = _check_rate(
                     state, "learn_fetches",
-                    int(limits.get("learn_fetches", 80)),
+                    int(limits.get("learn_fetches", int(os.getenv("HALIM_LEARN_FETCH_DAILY_CAP", "500")))),
                 )
                 if not ok:
                     _save_state(state)
@@ -631,8 +640,8 @@ def apply_operator_frontier_settings(cfg: Optional[BotConfig] = None) -> Dict[st
             forbidden.append(item)
 
     limits = constitution.setdefault("rate_limits_daily", {})
-    limits.setdefault("google_ai_searches", 50)
-    limits.setdefault("learn_fetches", 80)
+    limits["google_ai_searches"] = int(os.getenv("HALIM_GOOGLE_AI_DAILY_CAP", "150"))
+    limits["learn_fetches"] = int(os.getenv("HALIM_LEARN_FETCH_DAILY_CAP", "500"))
     limits["web_fetches"] = 0
     constitution["operator_enabled_at"] = datetime.now(timezone.utc).isoformat()
     CONSTITUTION_PATH.write_text(json.dumps(constitution, indent=2))

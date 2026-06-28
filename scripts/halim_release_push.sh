@@ -131,7 +131,7 @@ EOF
   git commit -m "$(cat <<'EOF'
 Initial Halim standalone repo — toddler v1 model + training pipeline.
 
-Owned personal AI (M. A. Halim): merged Qwen2.5-0.5B-Instruct checkpoint via Git LFS.
+Owned personal AI (M. A. Halim): toddler LM checkpoint (merged weights) via Git LFS.
 EOF
 )"
   if [[ "$DO_PUSH" == "true" ]]; then
@@ -186,7 +186,7 @@ if [[ "$DO_RELEASE" == "true" ]]; then
     gh release create "$TAG" "$RELEASE_ZIP" \
       --repo "$GITHUB_REPO" \
       --title "Halim Toddler v1" \
-      --notes "Colab-trained M. A. Halim toddler LM (merged Qwen2.5-0.5B-Instruct)" \
+      --notes "Colab-trained M. A. Halim toddler LM (merged checkpoint)" \
       2>/dev/null || gh release upload "$TAG" "$RELEASE_ZIP" --repo "$GITHUB_REPO"
     echo "✅ Release uploaded to $GITHUB_REPO"
   else

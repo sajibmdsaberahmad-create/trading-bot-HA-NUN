@@ -119,6 +119,12 @@ def try_reasoning_complete(
         log.debug(f"Halim server complete: {exc}")
 
     if os.getenv("HALIM_INLINE_LM_FALLBACK", "true").lower() in ("1", "true", "yes"):
+        try:
+            from core.trading_focus_guard import is_trading_session_active
+            if is_trading_session_active():
+                return None, "trading_focus"
+        except Exception:
+            pass
         inline = _try_inline_lm(prompt, purpose=purpose)
         if inline[0]:
             return inline

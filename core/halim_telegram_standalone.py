@@ -58,14 +58,12 @@ class HalimTelegramBot:
             if self._stop.is_set():
                 break
             try:
-                from core.halim_web_learn import fetch_wikipedia_summary
-                topics = os.getenv(
-                    "HALIM_LEARN_TOPICS",
-                    "wiki:Stock_market,wiki:Algorithmic_trading,wiki:Volatility",
-                ).split(",")
+                from core.halim_learn_catalog import build_learn_topic_pool
+                from core.halim_learn_browse import _fetch_one
+                topics = build_learn_topic_pool()
                 topic = topics[int(time.time()) % max(1, len(topics))].strip()
-                if topic.startswith("wiki:"):
-                    fetch_wikipedia_summary(topic[5:], self.cfg)
+                if topic:
+                    _fetch_one(topic, self.cfg)
                 from core.halim_action_learn import export_action_gold
                 from core.halim_auto_lm import schedule_auto_retrain
                 r = export_action_gold(include_learn_cache=True)
@@ -203,6 +201,15 @@ class HalimTelegramBot:
             self._handle_command(chat_id, text, reply_id)
             return
 
+        try:
+            from core.halim_learn_browse import parse_learn_command
+            parsed = parse_learn_command(text)
+            if parsed.get("mode") != "none":
+                self._handle_learn(chat_id, parsed, reply_id)
+                return
+        except Exception:
+            pass
+
         if text:
             log.info(f"Halim TG chat={chat_id} @{username or first_name}: {text[:80]!r}")
             self._handle_chat(chat_id, text, reply_id)
@@ -233,7 +240,7 @@ class HalimTelegramBot:
                 "1. Verify from any Telegram account:\n"
                 "   /verify hall of fame\n\n"
                 "2. Then chat freely — Halim runs even when trading is off.\n\n"
-                "Commands: /halim · /status · /help",
+                "Commands: /halim · /status · /learn · /help",
                 reply_to=reply_id,
             )
             return
@@ -265,8 +272,10 @@ class HalimTelegramBot:
                 "🧠 Halim standalone chat\n\n"
                 "/halim — who is Halim\n"
                 "/status — brain + server health\n"
+                "/learn — browse web for trading + general gold (maintenance mode)\n"
+                "/learn wiki:Risk_management — one topic\n"
                 "/help — this message\n\n"
-                "Or send any message — Halim replies via toddler LM + council teacher.",
+                "Or say: \"browse and learn\" / \"earn gold\" — read-only Wikipedia harvest.",
                 reply_to=reply_id,
             )
         elif cmd == "/halim":
@@ -277,8 +286,54 @@ class HalimTelegramBot:
             )
         elif cmd == "/status":
             self.send(chat_id, self._format_status(), reply_to=reply_id)
+        elif cmd == "/learn":
+            from core.halim_learn_browse import parse_learn_command
+            self._handle_learn(chat_id, parse_learn_command(text), reply_id)
         else:
             self.send(chat_id, f"Unknown command {cmd}. Try /help", reply_to=reply_id)
+
+    def _handle_learn(
+        self,
+        chat_id: int,
+        parsed: Dict[str, Any],
+        reply_id: Optional[int],
+    ) -> None:
+        self.send(
+            chat_id,
+            "📚 Halim is browsing (read-only) — wiki, news RSS, investopedia/SEC, "
+            "market hours, coding docs → action gold. This may take 1–3 minutes…",
+            reply_to=reply_id,
+        )
+
+        def work() -> None:
+            try:
+                from core.halim_learn_browse import run_learn_browse_cycle
+                if parsed.get("mode") == "single":
+                    r = run_learn_browse_cycle(
+                        self.cfg,
+                        topics=[parsed["topic"]],
+                        max_pages=1,
+                    )
+                else:
+                    r = run_learn_browse_cycle(self.cfg)
+                if r.get("reason") == "trading_active":
+                    self.send(chat_id, r.get("message", "Trading active — learn paused."))
+                    return
+                added = (r.get("export_gold") or {}).get("added", 0)
+                self.send(
+                    chat_id,
+                    f"📚 Learn browse complete\n"
+                    f"Pages: {r.get('pages_ok', 0)}/{r.get('pages_attempted', 0)} "
+                    f"({r.get('total_chars', 0)} chars)\n"
+                    f"Google snippets: {r.get('google_ok', 0)}/{r.get('google_attempted', 0)}\n"
+                    f"Action gold: +{added} new pairs\n"
+                    f"Journal: models/halim_web_learn.jsonl",
+                )
+            except Exception as exc:
+                log.warning(f"Halim learn browse: {exc}")
+                self.send(chat_id, f"Learn browse error: {exc}")
+
+        threading.Thread(target=work, name="halim-learn", daemon=True).start()
 
     def _format_status(self) -> str:
         lines = ["🧠 Halim status"]

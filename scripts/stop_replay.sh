@@ -102,12 +102,14 @@ fi
 rm -f "$PID_FILE" "$SHUTDOWN_FILE"
 echo "✅ Replay stopped — session data + Halim gold + git sync attempted"
 
-if [[ "${REPLAY_PURGE_DATA_ON_STOP:-true}" == "true" ]] \
-    && [[ "${WEEKEND_REPLAY_LOOP:-0}" != "1" ]]; then
-  echo "🗑  Purging replay CSV farm (learning kept in models/)…"
+if [[ "${REPLAY_PURGE_DATA_ON_STOP:-true}" == "true" ]]; then
+  echo "✂️  Trimming already-trained replay bars (keeping fresh data)…"
   python3 -c "
+from core.replay_consumption import finalize_replay_session, purge_all_on_stop
 from core.replay_data_housekeeping import purge_replay_farm
-purge_replay_farm(verbose=True)
+fin = finalize_replay_session(hub=None, trigger='stop_replay', verbose=True)
+if purge_all_on_stop() or (fin.get('steps', {}).get('unconsumed', {}).get('unconsumed_bars', 999) < 20):
+    purge_replay_farm(verbose=True, force=True)
 " 2>/dev/null || true
 fi
 

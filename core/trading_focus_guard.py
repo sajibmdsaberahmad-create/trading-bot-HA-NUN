@@ -33,6 +33,12 @@ def _pid_alive(path: Path) -> bool:
         return False
 
 
+def is_replay_session_active() -> bool:
+    """True when replay-live is running (not weekend loop parent shell)."""
+    log_dir = Path(os.getenv("LOG_DIR", str(ROOT / "logs")))
+    return _pid_alive(log_dir / "replay.pid")
+
+
 def is_trading_session_active() -> bool:
     """True when HANOON live, replay-live, or weekend replay loop is running."""
     log_dir = Path(os.getenv("LOG_DIR", str(ROOT / "logs")))
@@ -60,11 +66,44 @@ def is_chat_like_purpose(purpose: str) -> bool:
     return (purpose or "chat").lower() in CHAT_LIKE_PURPOSES
 
 
+def is_live_scalper_active() -> bool:
+    """True when live HANOON scalper is running (not replay-live)."""
+    if os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes"):
+        return False
+    log_dir = Path(os.getenv("LOG_DIR", str(ROOT / "logs")))
+    if _pid_alive(log_dir / "hanoon.pid"):
+        return True
+    try:
+        r = subprocess.run(
+            ["pgrep", "-f", "main.py --mode scalper"],
+            capture_output=True,
+            timeout=2,
+        )
+        return r.returncode == 0
+    except Exception:
+        return False
+
+
 def halim_lm_blocked_during_trading(purpose: str = "chat") -> bool:
     if chat_allowed_during_trading():
         return False
     if not is_trading_session_active():
         return False
+    # Replay/live: allow LM for training gold (dialogue, copilot, decisions) — block user chat only
+    replay_gold = os.getenv("HALIM_REPLAY_GOLD_COLLECT", "true").lower() in ("1", "true", "yes")
+    live_gold = os.getenv("HALIM_LIVE_GOLD_COLLECT", "true").lower() in ("1", "true", "yes")
+    gold_purposes = frozenset({
+        "decision_text", "dialogue", "copilot", "reasoning", "notify",
+        "entry_decision", "exit_decision", "commander_chat",
+    })
+    if (purpose or "chat").lower() in gold_purposes:
+        if replay_gold and (
+            is_replay_session_active()
+            or os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+        ):
+            return False
+        if live_gold and is_live_scalper_active():
+            return False
     return is_chat_like_purpose(purpose)
 
 

@@ -157,9 +157,13 @@ def _capability_summary() -> Dict[str, Any]:
 
 def complete_reasoning(prompt: str, purpose: str = "reasoning") -> Dict[str, Any]:
     """
-    Slow path — future LM inference. Returns structured result; never raises.
-    Phase 0: checkpoint missing → clear not_ready response.
+    Slow path — Halim LM inference. Returns structured result; never raises.
     """
+    max_tokens = int(os.getenv("HALIM_MAX_TOKENS", "512"))
+    temperature = float(os.getenv("HALIM_TEMPERATURE", "0.7"))
+    if purpose == "entry_decision":
+        max_tokens = int(os.getenv("HALIM_ENTRY_MAX_TOKENS", "72"))
+        temperature = float(os.getenv("HALIM_ENTRY_TEMPERATURE", "0.12"))
     if not reasoning_available():
         return {
             "ok": False,
@@ -175,7 +179,7 @@ def complete_reasoning(prompt: str, purpose: str = "reasoning") -> Dict[str, Any
         try:
             from halim.inference_backend import hf_complete
 
-            text, err = hf_complete(prompt, ckpt)
+            text, err = hf_complete(prompt, ckpt, max_tokens=max_tokens, temperature=temperature)
             if text:
                 return {
                     "ok": True,
@@ -202,7 +206,7 @@ def complete_reasoning(prompt: str, purpose: str = "reasoning") -> Dict[str, Any
         try:
             from halim.inference_backend import mlx_complete
 
-            text, err = mlx_complete(prompt, ckpt)
+            text, err = mlx_complete(prompt, ckpt, max_tokens=max_tokens, temperature=temperature)
             if text:
                 return {
                     "ok": True,

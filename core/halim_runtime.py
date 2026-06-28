@@ -188,21 +188,18 @@ class HalimRuntime:
     def _off_hours_learn(self) -> None:
         if os.getenv("HALIM_WEB_LEARN", "true").lower() not in ("1", "true", "yes"):
             return
-        topics = os.getenv(
-            "HALIM_LEARN_TOPICS",
-            "wiki:Stock_market,wiki:Algorithmic_trading,wiki:Volatility",
-        ).split(",")
+        topics = os.getenv("HALIM_LEARN_TOPICS", "").split(",")
+        if not any(t.strip() for t in topics):
+            from core.halim_learn_catalog import build_learn_topic_pool
+            topics = build_learn_topic_pool()
+        else:
+            topics = [t.strip() for t in topics if t.strip()]
         topic = topics[int(time.time()) % max(1, len(topics))].strip()
         if not topic:
             return
         try:
-            from core.halim_web_learn import fetch_learn_page, fetch_wikipedia_summary
-            if topic.startswith("wiki:"):
-                r = fetch_wikipedia_summary(topic[5:], self.cfg)
-            elif topic.startswith("http"):
-                r = fetch_learn_page(topic, self.cfg)
-            else:
-                r = fetch_wikipedia_summary(topic, self.cfg)
+            from core.halim_learn_browse import _fetch_one
+            r = _fetch_one(topic, self.cfg)
             if r.get("ok"):
                 self._journal("off_hours_learn", {"topic": topic, "chars": r.get("text_chars", 0)})
         except Exception as exc:

@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
+from halim.scaffold import SCAFFOLD_HF, SCAFFOLD_MLX_4BIT
+
 _model_cache: Dict[str, Any] = {}
 
 
@@ -22,9 +24,7 @@ def _load_manifest(checkpoint: Path) -> Dict[str, Any]:
 
 def _resolve_paths(checkpoint: Path) -> Tuple[str, Optional[str]]:
     manifest = _load_manifest(checkpoint)
-    base = manifest.get("base_model") or os.getenv(
-        "HALIM_BASE_MODEL", "mlx-community/Qwen2.5-0.5B-Instruct-4bit"
-    )
+    base = manifest.get("base_model") or os.getenv("HALIM_BASE_MODEL", SCAFFOLD_MLX_4BIT)
     adapter = manifest.get("adapter_path")
     if adapter:
         ap = checkpoint / adapter if not Path(adapter).is_absolute() else Path(adapter)
@@ -122,9 +122,7 @@ def hf_complete(
     if not model_dir and not adapter_dir:
         return None, "no_merged_or_adapter_in_checkpoint"
 
-    base_model = manifest.get("base_model") or os.getenv(
-        "HALIM_BASE_MODEL", "Qwen/Qwen2.5-0.5B-Instruct"
-    )
+    base_model = manifest.get("base_model") or os.getenv("HALIM_BASE_MODEL", SCAFFOLD_HF)
     tokenizer_source = base_model
     if model_dir and (model_dir / "tokenizer.json").is_file():
         tokenizer_source = str(model_dir)

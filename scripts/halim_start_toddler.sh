@@ -24,15 +24,21 @@ fi
 if [[ ! -f "$CKPT/config.json" ]]; then
   python3 - <<'PY'
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+sys.path.insert(0, str(Path("halim")))
+try:
+    from halim.scaffold import SCAFFOLD_HF
+except ImportError:
+    SCAFFOLD_HF = "Qwen/Qwen2.5-0.5B-Instruct"
 p = Path("halim/data/checkpoints/toddler_v1/config.json")
 merged = Path("halim/data/checkpoints/toddler_v1/merged/model.safetensors")
 lora = Path("halim/data/checkpoints/toddler_v1/lora_adapter/adapter_model.safetensors")
 cfg = {
     "halim_phase": "toddler",
     "model": "M. A. Halim",
-    "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "base_model": SCAFFOLD_HF,
     "backend": "mlx" if __import__("platform").system() == "Darwin" else "hf",
     "merged_path": "merged" if merged.is_file() else None,
     "adapter_path": "lora_adapter" if lora.is_file() and not merged.is_file() else None,

@@ -50,21 +50,32 @@ cleanup() {
   rm -f "$LOOP_PID_FILE"
   unset WEEKEND_REPLAY_LOOP 2>/dev/null || true
   export -n WEEKEND_REPLAY_LOOP 2>/dev/null || true
+  _PY="${ROOT}/venv/bin/python3"
+  [[ -x "$_PY" ]] || _PY="$(command -v python3)"
   if pgrep -f "main.py --mode replay-live" >/dev/null 2>&1; then
     "$ROOT/scripts/stop_replay.sh" >>"$WEEKEND_LOG" 2>&1 || true
   fi
+  log "▶ Final Halim gold + Colab zip…"
+  PYTHONPATH="${ROOT}/halim:${ROOT}" "$_PY" -c "
+from core.config import BotConfig
+from core.halim_gold_pipeline import run_halim_gold_pipeline
+run_halim_gold_pipeline(BotConfig(), trigger='weekend_loop_stop', prepare_sft=True, package_colab=True)
+" >>"$WEEKEND_LOG" 2>&1 || true
   if [[ "$GIT_PUSH" == "true" ]]; then
     log "Final git sync…"
-    PYTHONPATH="${ROOT}/halim:${ROOT}" python3 -c "
+    PYTHONPATH="${ROOT}/halim:${ROOT}" "$_PY" -c "
 from core.graceful_shutdown import flush_git_sync
 flush_git_sync(replay=True)
 " >>"$WEEKEND_LOG" 2>&1 || true
   fi
-  log "▶ Purging replay CSV farm (training data — learning kept in models/)…"
-  REPLAY_PURGE_DATA_ON_STOP=true WEEKEND_REPLAY_LOOP=0 PYTHONPATH="${ROOT}/halim:${ROOT}" \
-    python3 -c "
+  log "▶ Final replay cleanup (trim trained bars + purge if fully consumed)…"
+  REPLAY_PURGE_DATA_ON_STOP=true WEEKEND_REPLAY_LOOP=0 REPLAY_KEEP_CSV_BETWEEN_EPOCHS=false \
+    REPLAY_PURGE_ALL_ON_STOP=true PYTHONPATH="${ROOT}/halim:${ROOT}" \
+    "$_PY" -c "
+from core.replay_consumption import finalize_replay_session
 from core.replay_data_housekeeping import purge_replay_farm
-purge_replay_farm(verbose=True)
+finalize_replay_session(hub=None, trigger='weekend_loop_stop', verbose=True)
+purge_replay_farm(verbose=True, force=True)
 " 2>&1 | tee -a "$WEEKEND_LOG" || true
   log "Weekend replay loop ended."
 }
@@ -77,6 +88,8 @@ if [[ -d "$ROOT/venv" ]]; then
 fi
 
 export PYTHONPATH="${ROOT}/halim:${ROOT}${PYTHONPATH:+:$PYTHONPATH}"
+# shellcheck source=/dev/null
+source "$ROOT/scripts/halim_env.sh"
 
 # One replay data root — intraday IB farm only (not hanoon daily yfinance)
 export REPLAY_DATA_DIR="${REPLAY_DATA_DIR:-$ROOT/data/replay}"
@@ -90,7 +103,28 @@ export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
 export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-300}"
 export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-600}"
 export REPLAY_PURGE_DATA_ON_STOP="${REPLAY_PURGE_DATA_ON_STOP:-true}"
+export REPLAY_SKIP_CONSUMED="${REPLAY_SKIP_CONSUMED:-true}"
+export REPLAY_TRIM_CONSUMED_ON_STOP="${REPLAY_TRIM_CONSUMED_ON_STOP:-true}"
+export REPLAY_PURGE_ALL_ON_STOP="${REPLAY_PURGE_ALL_ON_STOP:-false}"
+export REPLAY_KEEP_CSV_BETWEEN_EPOCHS="${REPLAY_KEEP_CSV_BETWEEN_EPOCHS:-true}"
 export WEEKEND_REPLAY_LOOP=1
+
+# Halim gold collection during replay (dialogue/copilot LM allowed; user chat still off)
+export HALIM_REPLAY_GOLD_COLLECT="${HALIM_REPLAY_GOLD_COLLECT:-true}"
+export HALIM_ACTION_LEARN="${HALIM_ACTION_LEARN:-true}"
+export HALIM_PPO_COEVOLUTION="${HALIM_PPO_COEVOLUTION:-true}"
+export HALIM_PPO_DIALOGUE="${HALIM_PPO_DIALOGUE:-true}"
+export HALIM_PPO_GENERATIVE_REFLECT="${HALIM_PPO_GENERATIVE_REFLECT:-true}"
+export HALIM_COMPANION_LEARN="${HALIM_COMPANION_LEARN:-true}"
+export HALIM_AUTO_PACKAGE_COLAB="${HALIM_AUTO_PACKAGE_COLAB:-true}"
+export REPLAY_PREPARE_SFT="${REPLAY_PREPARE_SFT:-true}"
+export HALIM_LEARN_PACKAGE_ON_STOP="${HALIM_LEARN_PACKAGE_ON_STOP:-true}"
+export REPLAY_RELAX_COPILOT="${REPLAY_RELAX_COPILOT:-true}"
+export REPLAY_IB_HMDS_TIMEOUT_SEC="${REPLAY_IB_HMDS_TIMEOUT_SEC:-45}"
+export REPLAY_IB_CHUNK_PAUSE_SEC="${REPLAY_IB_CHUNK_PAUSE_SEC:-1.25}"
+export REPLAY_IB_CHUNK_RETRIES="${REPLAY_IB_CHUNK_RETRIES:-2}"
+export REPLAY_IB_TICKER_RETRIES="${REPLAY_IB_TICKER_RETRIES:-2}"
+export REPLAY_IB_MIN_BARS_TARGET="${REPLAY_IB_MIN_BARS_TARGET:-12000}"
 
 python3 -c "from core.shutdown_control import clear_shutdown_request; clear_shutdown_request()" \
   2>/dev/null || rm -f "$ROOT/runtime/shutdown.request"
@@ -185,6 +219,27 @@ while true; do
 
   python3 -c "from core.shutdown_control import clear_shutdown_request; clear_shutdown_request()" \
     2>/dev/null || rm -f "$ROOT/runtime/shutdown.request"
+
+  NEED_DL="$(PYTHONPATH="${ROOT}/halim:${ROOT}" python3 -c "
+from core.replay_consumption import farm_has_unconsumed_data
+print('0' if farm_has_unconsumed_data() else '1')
+" 2>/dev/null || echo 0)"
+  if [[ "$NEED_DL" == "1" ]] && [[ "$SKIP_DOWNLOAD" != "true" ]]; then
+    log "▶ All replay bars already trained — re-downloading fresh IB farm…"
+    ensure_ib_free_for_download
+    if PYTHONPATH=. IB_PORT="$IB_PORT" CLIENT_ID="$CLIENT_ID" \
+        python3 -u "$ROOT/scripts/download_ib_replay_data.py" \
+        --days "$IB_DAYS" --client-id "$CLIENT_ID" --port "$IB_PORT" --merge \
+        2>&1 | tee -a "$WEEKEND_LOG"; then
+      log "  ✅ Fresh IB farm ready for epoch $epoch"
+    else
+      log "  ⚠️  Re-download failed — skipping epoch $epoch"
+      continue
+    fi
+  elif [[ "$NEED_DL" == "1" ]]; then
+    log "❌ No unconsumed replay bars and WEEKEND_SKIP_DOWNLOAD=true — stopping loop"
+    break
+  fi
 
   set +e
   "$ROOT/scripts/start_replay_live.sh" "$PACE"

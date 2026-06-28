@@ -39,15 +39,27 @@ def flush_halim_data(cfg: Optional[BotConfig] = None, *, trigger: str = "shutdow
     result: Dict[str, Any] = {"trigger": trigger, "steps": {}}
 
     try:
-        from core.halim_action_learn import export_action_gold
-        result["steps"]["export_action_gold"] = export_action_gold()
+        from core.halim_gold_pipeline import run_halim_gold_pipeline
+        export_result = run_halim_gold_pipeline(
+            cfg,
+            trigger=trigger,
+            prepare_sft=True,
+            package_colab=True,
+        )
+        result["steps"]["halim_gold_pipeline"] = export_result
+        result["steps"]["export_training_gold"] = export_result.get("steps", {}).get("export", {})
+        result["steps"]["export_action_gold"] = (export_result.get("steps", {}).get("export") or {}).get("action_gold", {})
+        result["steps"]["prepare_sft"] = export_result.get("steps", {}).get("prepare_sft")
+        result["steps"]["colab_package"] = export_result.get("steps", {}).get("colab_package")
     except Exception as exc:
+        result["steps"]["halim_gold_pipeline"] = {"ok": False, "error": str(exc)[:120]}
+        result["steps"]["export_training_gold"] = {"ok": False, "error": str(exc)[:120]}
         result["steps"]["export_action_gold"] = {"ok": False, "error": str(exc)[:120]}
 
     try:
-        from core.halim_identity import write_halim_manifest, compute_halim_phase
+        from core.halim_identity import write_halim_manifest, sync_identity_phase
         result["steps"]["halim_manifest"] = write_halim_manifest(cfg)
-        result["phase"] = compute_halim_phase(cfg)
+        result["phase"] = sync_identity_phase(cfg)
     except Exception as exc:
         result["steps"]["halim_manifest"] = {"ok": False, "error": str(exc)[:120]}
 
@@ -133,6 +145,7 @@ def run_graceful_shutdown(
     model: Any = None,
     push_git: bool = True,
     trigger: str = "shutdown",
+    skip_replay_consumption: bool = False,
 ) -> Dict[str, Any]:
     """
     Full data flush — Halim + owned brain + git.
@@ -152,6 +165,14 @@ def run_graceful_shutdown(
     summary["steps"]["halim"] = flush_halim_data(cfg, trigger=trigger)
     summary["steps"]["coevolution"] = flush_coevolution(cfg, trigger=trigger)
 
+    try:
+        from core.ppo_entry_learning import flush_pending_ppo_micro_learn
+        summary["steps"]["ppo_micro_flush"] = {
+            "ok": flush_pending_ppo_micro_learn(cfg, model=model),
+        }
+    except Exception as exc:
+        summary["steps"]["ppo_micro_flush"] = {"ok": False, "error": str(exc)[:120]}
+
     ev_trigger = "replay_session_end" if replay else "live_session_end"
     if trigger not in ("evolution_done",):
         summary["steps"]["evolution"] = flush_owned_brain(
@@ -165,6 +186,22 @@ def run_graceful_shutdown(
         summary["steps"]["git"] = flush_git_sync(
             replay=replay, nav=nav, pnl_pct=pnl_pct, report_path=report_path,
         )
+
+    if replay and not skip_replay_consumption:
+        try:
+            from core.replay_consumption import (
+                farm_fully_consumed,
+                finalize_replay_session,
+                purge_all_on_stop,
+            )
+            summary["steps"]["replay_consumption"] = finalize_replay_session(
+                hub=None, trigger=trigger, verbose=True,
+            )
+            if purge_all_on_stop() or farm_fully_consumed():
+                from core.replay_data_housekeeping import purge_replay_farm
+                summary["steps"]["replay_purge"] = purge_replay_farm(verbose=True, force=True)
+        except Exception as exc:
+            summary["steps"]["replay_consumption"] = {"ok": False, "error": str(exc)[:120]}
 
     _journal("graceful_shutdown_complete", {
         "mode": mode,

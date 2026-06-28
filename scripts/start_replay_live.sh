@@ -19,6 +19,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_env.sh"
+# shellcheck disable=SC1091
+source "$ROOT/scripts/halim_memory_profile.sh" 2>/dev/null || true
 export TZ="America/New_York"
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
@@ -35,8 +37,9 @@ export REPLAY_SLIPPAGE_MODEL="${REPLAY_SLIPPAGE_MODEL:-adaptive}"
 export REPLAY_FILL_PROB="${REPLAY_FILL_PROB:-0.93}"
 export REPLAY_PARTIAL_FILL_PROB="${REPLAY_PARTIAL_FILL_PROB:-0.14}"
 export REPLAY_RELAX_COUNCIL="${REPLAY_RELAX_COUNCIL:-true}"
+export REPLAY_RELAX_COPILOT="${REPLAY_RELAX_COPILOT:-true}"
 export REPLAY_MIN_PROFIT_PROB="${REPLAY_MIN_PROFIT_PROB:-0.45}"
-# Teacher–student PPO (Groq/Gemini critiques PPO like Claude→Qwen)
+# Teacher–student PPO (Groq/Gemini critiques PPO → distills into Halim + PPO)
 export PPO_TEACHER_ENABLED="${PPO_TEACHER_ENABLED:-true}"
 export PPO_TEACHER_WIN_RATE_FLOOR="${PPO_TEACHER_WIN_RATE_FLOOR:-0.38}"
 export PPO_TEACHER_EVERY_N_TRADES="${PPO_TEACHER_EVERY_N_TRADES:-4}"
@@ -91,6 +94,8 @@ export COUNCIL_ENABLED="${COUNCIL_ENABLED:-true}"
 export COUNCIL_BACKEND="${COUNCIL_BACKEND:-groq}"
 export PPO_LEARN_EVERY_ENTRY="${PPO_LEARN_EVERY_ENTRY:-true}"
 export PPO_ENTRY_MICRO_STEPS="${PPO_ENTRY_MICRO_STEPS:-512}"
+export PPO_ENTRY_MICRO_ASYNC="${PPO_ENTRY_MICRO_ASYNC:-false}"
+export PPO_ENTRY_MICRO_DEBOUNCE_SEC="${PPO_ENTRY_MICRO_DEBOUNCE_SEC:-0}"
 export USE_ENHANCED_AI="${USE_ENHANCED_AI:-true}"
 export SHADOW_ON_PAPER=true
 export DYNAMIC_AI_NOTIFICATIONS=false
@@ -105,6 +110,11 @@ export HALIM_PPO_DIALOGUE_TELEGRAM="${HALIM_PPO_DIALOGUE_TELEGRAM:-false}"
 export HALIM_PPO_GENERATIVE_REFLECT="${HALIM_PPO_GENERATIVE_REFLECT:-true}"
 export HALIM_COMPANION_PING="${HALIM_COMPANION_PING:-true}"
 export HALIM_COMPANION_LEARN="${HALIM_COMPANION_LEARN:-true}"
+export HALIM_ACTION_LEARN="${HALIM_ACTION_LEARN:-true}"
+export HALIM_REPLAY_GOLD_COLLECT="${HALIM_REPLAY_GOLD_COLLECT:-true}"
+export HALIM_AUTO_PACKAGE_COLAB="${HALIM_AUTO_PACKAGE_COLAB:-true}"
+export REPLAY_PREPARE_SFT="${REPLAY_PREPARE_SFT:-true}"
+export HALIM_LEARN_PACKAGE_ON_STOP="${HALIM_LEARN_PACKAGE_ON_STOP:-true}"
 export OFF_HOURS_HEAVY_TRAINING=false
 export SCAN_RUN_DEFERRED_IB=false
 export OFF_HOURS_SUSPEND_MARKET_DATA=false
@@ -121,6 +131,9 @@ export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/mpl}"
 export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
 export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-300}"
 export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-600}"
+export REPLAY_SKIP_CONSUMED="${REPLAY_SKIP_CONSUMED:-true}"
+export REPLAY_TRIM_CONSUMED_ON_STOP="${REPLAY_TRIM_CONSUMED_ON_STOP:-true}"
+export REPLAY_PURGE_ALL_ON_STOP="${REPLAY_PURGE_ALL_ON_STOP:-false}"
 export REPLAY_PURGE_DATA_ON_STOP="${REPLAY_PURGE_DATA_ON_STOP:-true}"
 
 if [[ ! -d "$REPLAY_ROOT/intraday" ]] || [[ -z "$(find "$REPLAY_ROOT/intraday" -maxdepth 1 -name '*_1min.csv' -print -quit 2>/dev/null)" ]]; then
@@ -167,8 +180,11 @@ echo "  Universe: ${REPLAY_TICKERS:-$TICKER_LIST}"
 echo "  Data: $REPLAY_ROOT"
 echo "  Pace: $PACE (dilation=${REPLAY_TIME_DILATION_MS}ms realtime=$REPLAY_REALTIME_PACE)"
 echo "  Council: $COUNCIL_ENABLED (relax=$REPLAY_RELAX_COUNCIL) | Model: $REPLAY_MODEL_PATH"
-echo "  Training: REPLAY_TRAINING=$REPLAY_TRAINING_ENABLED incremental=$INCREMENTAL_TRAINING_ENABLED"
-echo "  Halim: coevolution=$HALIM_PPO_COEVOLUTION dialogue=$HALIM_PPO_DIALOGUE"
+echo "  Training: REPLAY_TRAINING=$REPLAY_TRAINING_ENABLED incremental=$INCREMENTAL_TRAINING_ENABLED micro_async=${PPO_ENTRY_MICRO_ASYNC:-false}"
+  echo "  Halim: M. A. Halim (${HALIM_LM_BACKEND:-?}) coevolution=$HALIM_PPO_COEVOLUTION dialogue=$HALIM_PPO_DIALOGUE gold=$HALIM_ACTION_LEARN"
+  if [[ "${HALIM_LOW_MEMORY_ACTIVE:-}" == "true" ]]; then
+    echo "  Memory: low-RAM profile ON — dialogue deferred, async PPO, MLX backend"
+  fi
 echo "  Fills: stochastic ($REPLAY_SLIPPAGE_MODEL slip, partial=${REPLAY_PARTIAL_FILL_PROB})"
 echo "  Git: deferred during replay → 1 sync at session end"
 echo "  Stop: ./stop_replay.sh  (graceful — Halim gold + evolution + git)
@@ -176,5 +192,5 @@ echo "  Stop: ./stop_replay.sh  (graceful — Halim gold + evolution + git)
 echo "══════════════════════════════════════════════════════════════"
 
 export HANOON_PID_FILE="${REPLAY_PID_FILE:-logs/replay.pid}"
-PYTHONPATH=. python main.py --mode replay-live --ticker SPY --cash "${CASH:-1000}" \
+PYTHONPATH=. "${ROOT}/venv/bin/python3" main.py --mode replay-live --ticker SPY --cash "${CASH:-1000}" \
   2>&1 | tee -a "logs/REPLAY_SCALPER.log"

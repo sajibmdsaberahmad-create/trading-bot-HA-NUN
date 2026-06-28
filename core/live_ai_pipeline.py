@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
-core/live_ai_pipeline.py — Dedicated async hotline for Ollama + PPO.
+core/live_ai_pipeline.py — Dedicated async hotline for cloud council + PPO.
 
-Ollama ALWAYS participates in live decisions but NEVER blocks the IB loop.
-Like an open phone line: both brains stay in sync; latest context wins;
-stale answers are discarded (no TTL cache of old decisions).
+Council (Groq/Gemini) participates in live decisions but NEVER blocks the IB loop.
+Halim LM entry advisory runs in parallel via core/halim_entry_line.py.
 
 Flow:
-  1. ring()  — fire Ollama async for current market fingerprint (non-blocking)
+  1. ring()  — fire council async for current market fingerprint (non-blocking)
   2. consume() — read result ONLY if fingerprint matches and answer is fresh
-  3. PPO runs synchronously every tick; Ollama catches up in parallel
+  3. PPO runs synchronously every tick; council catches up in parallel
 """
 
 from __future__ import annotations
@@ -92,7 +91,7 @@ class LiveSlot:
 
 class LiveAILine:
     """
-    Per-ticker async Ollama hotline — always ringing, never blocking.
+    Per-ticker async cloud council hotline — always ringing, never blocking.
     """
 
     def __init__(self, cfg: BotConfig, decide_fn: Callable[[str], str]):
@@ -300,8 +299,8 @@ def merge_entry_decision(
     cfg: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """
-    Collaborative Ollama + PPO council — non-blocking.
-    Returns pending=True while Ollama is still thinking; never skips on PPO alone mid-deliberation.
+    Collaborative cloud council + PPO — non-blocking.
+    Returns pending=True while council is still thinking; never skips on PPO alone mid-deliberation.
     """
     from core.capital_discipline import (
         allows_scanner_fast_bypass,

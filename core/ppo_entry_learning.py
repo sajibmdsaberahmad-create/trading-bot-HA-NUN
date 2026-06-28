@@ -10,6 +10,7 @@ micro-update so it improves from analysis — not only from closed trades.
 from __future__ import annotations
 
 import json
+import os
 import threading
 import time
 import uuid
@@ -30,6 +31,10 @@ LEDGER_PATH = Path("models/ppo_entry_ledger.jsonl")
 _pending: Dict[str, Dict[str, Any]] = {}
 _lock = threading.Lock()
 _model_ref: Any = None
+_micro_queue: List[Dict[str, Any]] = []
+_micro_lock = threading.Lock()
+_micro_timer: Optional[threading.Timer] = None
+_micro_running = False
 
 
 def set_ppo_model(model: Any) -> None:
@@ -285,6 +290,92 @@ def attach_council_to_entry(
     return entry_id
 
 
+def ppo_entry_micro_async() -> bool:
+    return os.getenv("PPO_ENTRY_MICRO_ASYNC", "false").lower() in ("1", "true", "yes")
+
+
+def ppo_entry_micro_debounce_sec() -> float:
+    raw = os.getenv("PPO_ENTRY_MICRO_DEBOUNCE_SEC", "0")
+    try:
+        return max(0.0, float(raw))
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _run_queued_micro_improve(cfg: BotConfig, model: Any) -> None:
+    global _micro_running
+    with _micro_lock:
+        if _micro_running:
+            return
+        batch = list(_micro_queue)
+        _micro_queue.clear()
+        _micro_running = True
+    try:
+        if batch and model is not None:
+            ppo_micro_improve(cfg, model, batch)
+    finally:
+        with _micro_lock:
+            _micro_running = False
+            if _micro_queue:
+                _schedule_micro_improve(cfg, model)
+
+
+def _schedule_micro_improve(cfg: BotConfig, model: Any, records: List[Dict[str, Any]]) -> None:
+    """Queue PPO micro-learn — async/debounced so entries never block on SB3."""
+    global _micro_timer
+    steps = int(getattr(cfg, "PPO_ENTRY_MICRO_STEPS", 512))
+    if steps <= 0 or model is None or not records:
+        return
+    with _micro_lock:
+        _micro_queue.extend(records)
+    debounce = ppo_entry_micro_debounce_sec()
+    if not ppo_entry_micro_async() and debounce <= 0:
+        with _micro_lock:
+            batch = list(_micro_queue)
+            _micro_queue.clear()
+        if batch:
+            ppo_micro_improve(cfg, model, batch)
+        return
+    delay = debounce if debounce > 0 else 0.05
+    with _micro_lock:
+        if _micro_timer is not None:
+            return
+        _micro_timer = threading.Timer(
+            delay,
+            lambda: _fire_micro_timer(cfg, model),
+        )
+        _micro_timer.daemon = True
+        _micro_timer.start()
+
+
+def _fire_micro_timer(cfg: BotConfig, model: Any) -> None:
+    global _micro_timer
+    with _micro_lock:
+        _micro_timer = None
+    threading.Thread(
+        target=_run_queued_micro_improve,
+        args=(cfg, model),
+        name="ppo-micro-improve",
+        daemon=True,
+    ).start()
+
+
+def flush_pending_ppo_micro_learn(cfg: Optional[BotConfig] = None, model: Any = None) -> bool:
+    """Drain queued entry micro-learns at session end."""
+    global _micro_timer
+    cfg = cfg or BotConfig()
+    model = model or get_ppo_model()
+    with _micro_lock:
+        if _micro_timer is not None:
+            _micro_timer.cancel()
+            _micro_timer = None
+        batch = list(_micro_queue)
+        _micro_queue.clear()
+    if not batch or model is None:
+        return False
+    return ppo_micro_improve(cfg, model, batch)
+
+
 def ppo_micro_improve(
     cfg: BotConfig,
     model: Any,
@@ -351,7 +442,10 @@ def evaluate_and_improve_ppo(
     except Exception:
         pass
     if model is not None:
-        improved = ppo_micro_improve(cfg, model, recs) or improved
+        steps = int(getattr(cfg, "PPO_ENTRY_MICRO_STEPS", 512))
+        if steps > 0:
+            _schedule_micro_improve(cfg, model, recs)
+            improved = True
     return improved
 
 

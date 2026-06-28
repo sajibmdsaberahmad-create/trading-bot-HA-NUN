@@ -218,7 +218,15 @@ def record_coevolution(
             f"  🔄 PPO↔Halim {ticker}/{task}: correction→{cmp['correction_for']} "
             f"(source={halim_source})"
         )
-        if os.getenv("HALIM_PPO_GENERATIVE_REFLECT", "true").lower() in ("1", "true", "yes"):
+        reflect_ok = os.getenv("HALIM_PPO_GENERATIVE_REFLECT", "true").lower() in ("1", "true", "yes")
+        if reflect_ok and os.getenv("HALIM_DIALOGUE_DURING_TRADING", "true").lower() not in ("1", "true", "yes"):
+            try:
+                from core.trading_focus_guard import is_trading_session_active
+                if is_trading_session_active():
+                    reflect_ok = False
+            except Exception:
+                pass
+        if reflect_ok:
             def _reflect() -> None:
                 try:
                     from core.halim_companion import coevolution_generative_reflect
@@ -338,14 +346,99 @@ def attach_trade_outcome(
         log.debug(f"Trade outcome dialogue: {exc}")
 
 
-def export_coevolution_gold(*, max_records: int = 20_000) -> Dict[str, Any]:
-    """Export mutual-learning pairs for Halim SFT and PPO teacher."""
-    if not COEVOLUTION_LOG.is_file():
-        return {"ok": True, "added": 0, "total": 0}
+def _coevolution_event_key(ev: Dict[str, Any]) -> str:
+    return f"{ev.get('timestamp')}|{ev.get('ticker')}|{ev.get('task')}"
 
-    added = 0
+
+def _coevolution_row_key(row: Dict[str, Any]) -> str:
+    return "|".join(
+        str(row.get(k, ""))[:200]
+        for k in ("capability", "instruction", "input", "output", "source")
+    )
+
+
+def _coevolution_quality_ok(ev: Dict[str, Any], cmp: Dict[str, Any]) -> bool:
+    """Skip empty/noise rows that waste SFT capacity."""
+    halim_reason = str(ev.get("halim_reason") or "").strip()
+    ppo_reason = str(ev.get("ppo_reason") or "").strip()
+    task = str(ev.get("task") or "")
+    if task in ("None", ""):
+        return False
+    if len(halim_reason) < 4 and not ppo_reason and ev.get("outcome") is None:
+        return False
+    if cmp.get("ppo_signal") is None and cmp.get("halim_signal") is None:
+        return False
+    return True
+
+
+def _rows_from_coevolution_event(ev: Dict[str, Any]) -> List[Dict[str, Any]]:
+    cmp = ev.get("comparison") or {}
+    if not _coevolution_quality_ok(ev, cmp):
+        return []
+
+    ticker = str(ev.get("ticker") or "").upper()
+    task = str(ev.get("task") or "entry_decision")
+    outcome = ev.get("outcome")
+    outcome_pnl = ev.get("outcome_pnl")
+    outcome_bit = ""
+    if outcome is not None:
+        outcome_bit = f" outcome={outcome}"
+        if outcome_pnl is not None:
+            outcome_bit += f" pnl={outcome_pnl}"
+
+    user_input = (
+        f"{ticker} {task}\n"
+        f"PPO signal={cmp.get('ppo_signal')} conf={cmp.get('ppo_conf')} "
+        f"reason={str(ev.get('ppo_reason') or '')[:120]}\n"
+        f"Pipeline: {ev.get('pipeline', '')}"
+    )
+    halim_out = (
+        f"Halim({ev.get('halim_source')}): {str(ev.get('halim_reason') or '')[:240]} | "
+        f"agree={cmp.get('ppo_halim_agree')}{outcome_bit}"
+    )
+
+    rows: List[Dict[str, Any]] = [{
+        "capability": "decision_text",
+        "instruction": f"Trade {task} — reconcile PPO reflex with Halim mind.",
+        "input": user_input,
+        "output": halim_out,
+        "source": "coevolution_halim",
+        "timestamp": ev.get("timestamp"),
+        "ticker": ticker,
+        "task": task,
+    }]
+
+    correction_for = ev.get("post_trade_correction_for") or cmp.get("correction_for")
+    if correction_for == "ppo" or (
+        cmp.get("ppo_halim_agree") is False and cmp.get("halim_exec_agree") is True
+    ):
+        rows.append({
+            "capability": "trade_reflex",
+            "instruction": "PPO reflex — learn from Halim correction after trade context.",
+            "input": user_input,
+            "output": (
+                f"Better action: {cmp.get('halim_signal')} — "
+                f"{str(ev.get('halim_reason') or '')[:240]}{outcome_bit}"
+            ),
+            "source": "coevolution_ppo",
+            "timestamp": ev.get("timestamp"),
+            "ticker": ticker,
+            "task": task,
+        })
+    return rows
+
+
+def export_coevolution_gold(*, max_records: int = 20_000) -> Dict[str, Any]:
+    """Rewrite deduped co-evolution gold from correction_log (idempotent)."""
     COEVOLUTION_GOLD.parent.mkdir(parents=True, exist_ok=True)
-    seen: set = set()
+    if not COEVOLUTION_LOG.is_file():
+        if COEVOLUTION_GOLD.is_file():
+            COEVOLUTION_GOLD.unlink()
+        return {"ok": True, "added": 0, "total": 0, "rewritten": True}
+
+    seen_events: set = set()
+    seen_rows: set = set()
+    out_rows: List[Dict[str, Any]] = []
 
     with open(COEVOLUTION_LOG, encoding="utf-8") as fh:
         lines = fh.readlines()[-max_records:]
@@ -358,48 +451,31 @@ def export_coevolution_gold(*, max_records: int = 20_000) -> Dict[str, Any]:
             ev = json.loads(line)
         except Exception:
             continue
-        cmp = ev.get("comparison") or {}
-        key = f"{ev.get('timestamp')}|{ev.get('ticker')}|{ev.get('task')}"
-        if key in seen:
+        ekey = _coevolution_event_key(ev)
+        if ekey in seen_events:
             continue
-        seen.add(key)
+        seen_events.add(ekey)
 
-        # Halim learns from PPO + outcome
-        halim_row = {
-            "capability": "decision_text",
-            "instruction": f"Trade {ev.get('task')} — reconcile with PPO reflex.",
-            "input": (
-                f"{ev.get('ticker')} PPO={cmp.get('ppo_signal')} conf={cmp.get('ppo_conf')} "
-                f"reason={ev.get('ppo_reason','')[:120]}"
-            ),
-            "output": (
-                f"Halim({ev.get('halim_source')}): {ev.get('halim_reason','')[:200]} | "
-                f"agree={cmp.get('ppo_halim_agree')} outcome={ev.get('outcome')}"
-            ),
-            "source": "coevolution_halim",
-            "timestamp": ev.get("timestamp"),
-        }
-        _append(COEVOLUTION_GOLD, halim_row)
-        added += 1
+        for row in _rows_from_coevolution_event(ev):
+            rkey = _coevolution_row_key(row)
+            if rkey in seen_rows:
+                continue
+            seen_rows.add(rkey)
+            out_rows.append(row)
 
-        # PPO teacher learns when Halim corrected it
-        if cmp.get("correction_for") == "ppo" or ev.get("post_trade_correction_for") == "ppo":
-            ppo_row = {
-                "capability": "trade_reflex",
-                "instruction": "PPO entry/exit — learn from Halim correction.",
-                "input": halim_row["input"],
-                "output": f"Better action: {cmp.get('halim_signal')} — {ev.get('halim_reason','')[:200]}",
-                "source": "coevolution_ppo",
-                "timestamp": ev.get("timestamp"),
-            }
-            _append(COEVOLUTION_GOLD, ppo_row)
-            added += 1
+    tmp = COEVOLUTION_GOLD.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        for row in out_rows:
+            fh.write(json.dumps(row, default=str, separators=(",", ":")) + "\n")
+    tmp.replace(COEVOLUTION_GOLD)
 
-    total = 0
-    if COEVOLUTION_GOLD.is_file():
-        with open(COEVOLUTION_GOLD, encoding="utf-8") as fh:
-            total = sum(1 for _ in fh)
-    return {"ok": True, "added": added, "total": total}
+    return {
+        "ok": True,
+        "added": len(out_rows),
+        "total": len(out_rows),
+        "events": len(seen_events),
+        "rewritten": True,
+    }
 
 
 def coevolution_stats() -> Dict[str, Any]:
@@ -446,6 +522,11 @@ def run_coevolution_cycle(
 
     log.info("  🔄 PPO ↔ Halim co-evolution — mutual learning cycle…")
     export = export_coevolution_gold()
+    try:
+        from core.halim_ppo_dialogue import export_dialogue_gold
+        dialogue_export = export_dialogue_gold()
+    except Exception as exc:
+        dialogue_export = {"ok": False, "error": str(exc)[:80]}
     stats = coevolution_stats()
 
     try:
@@ -459,6 +540,7 @@ def run_coevolution_cycle(
     state["trigger"] = trigger
     state["stats"] = stats
     state["export"] = export
+    state["dialogue_export"] = dialogue_export
     state["cycles"] = int(state.get("cycles", 0)) + 1
     _save_state(state)
 

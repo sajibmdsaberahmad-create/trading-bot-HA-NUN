@@ -194,6 +194,12 @@ def load_replay_intraday(
             df[col] = pd.to_numeric(df[col], errors="coerce")
     df = df.dropna(subset=["close"]).sort_index()
     df = _apply_date_range(df, start, end)
+    try:
+        from core.replay_consumption import filter_unconsumed_bars, skip_consumed_enabled
+        if skip_consumed_enabled():
+            df, _skipped = filter_unconsumed_bars(df, ticker, path)
+    except Exception as exc:
+        log.debug(f"Replay consumption filter skip {ticker}: {exc}")
     if len(df) < 20:
         raise ValueError(f"Insufficient intraday replay rows for {ticker}: {len(df)}")
     log.debug(f"Intraday replay {ticker}: {len(df)} bars from {path}")

@@ -478,10 +478,16 @@ def run_post_session_evolution(
         pass
 
     try:
-        from core.halim_action_learn import export_action_gold
-        result["steps"]["export_action_gold"] = export_action_gold()
+        from core.halim_gold_pipeline import run_halim_gold_pipeline
+        is_replay = "replay" in str(trigger).lower()
+        result["steps"]["halim_gold_pipeline"] = run_halim_gold_pipeline(
+            cfg,
+            trigger=trigger,
+            prepare_sft=is_replay or os.getenv("HALIM_PREPARE_SFT_ON_EVOLUTION", "true").lower() in ("1", "true", "yes"),
+            package_colab=is_replay or os.getenv("HALIM_AUTO_PACKAGE_COLAB", "true").lower() in ("1", "true", "yes"),
+        )
     except Exception as exc:
-        result["steps"]["export_action_gold"] = {"ok": False, "error": str(exc)[:120]}
+        result["steps"]["halim_gold_pipeline"] = {"ok": False, "error": str(exc)[:120]}
 
     try:
         from core.halim_registry import append_evolution_registry

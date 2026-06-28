@@ -57,7 +57,7 @@ Groq / Gemini (teacher)     ← reasoning, rate-limited, best quality
 └───────────────────────────────────────────────────────────┘
 ```
 
-Think of it like **Claude teaching Qwen**: the cloud model critiques trades; your students compress that knowledge into weights you own.
+Think of it like **cloud teachers training Halim**: Groq/Gemini critique trades; your owned students (PPO, proxy, Halim LM) compress that knowledge into weights you keep.
 
 ## Device profiles
 
@@ -151,4 +151,4 @@ PYTHONPATH=. python scripts/owned_brain_status.py --json
 2. **16GB:** Optional MLX 3B local copilot; longer PPO micro-trains
 3. **32GB+:** Local small LLM fine-tuned once on `council_training_dataset.jsonl`; copilot mostly on-device
 
-The dataset you build today is what makes a future “your own Qwen/Gemini-sized student” possible without throwing away replay history.
+The dataset you build today is what makes a future **frontier-scale Halim** possible without throwing away replay history.

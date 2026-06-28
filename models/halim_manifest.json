@@ -1,18 +1,16 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-27T14:14:38.398835+00:00",
-  "phase": "adult",
+  "updated_at": "2026-06-28T05:36:57.175349+00:00",
+  "phase": "toddler",
   "phase_info": {
-    "index": 3,
-    "description": "Halim runs on your hardware \u2014 HANOON + general assistant.",
+    "index": 1,
+    "description": "First Halim language core \u2014 fine-tune small transformer on trading dataset.",
     "external_llm": false,
     "capabilities": [
-      "trade",
-      "code",
-      "math",
-      "generative",
-      "tool_use"
+      "trade_reflex",
+      "enter_skip_proxy",
+      "halim_trade_reasoning"
     ]
   },
   "identity": {
@@ -20,7 +18,7 @@
     "short_name": "Halim",
     "version": 1,
     "birth_at": "2026-06-27T06:40:22.991421+00:00",
-    "phase": "newborn",
+    "phase": "toddler",
     "philosophy": "Own every weight. No permanent dependency on Groq, Gemini, Claude, or Ollama. Grow from trading reflexes into a frontier model \u2014 generative, calculative, coding.",
     "body": "HANOON trading bot (first embodiment)",
     "repo": "halim",
@@ -38,18 +36,20 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-27T14:14:36.814922+00:00",
+    "timestamp": "2026-06-28T05:36:55.727503+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
-        "exists": false,
-        "path": "ppo_trader.zip"
+        "exists": true,
+        "path": "models/ppo_trader_replay.zip",
+        "size_kb": 28474.7,
+        "modified": "2026-06-28T05:01:49.748707+00:00"
       },
       "ppo_replay": {
         "exists": true,
         "path": "models/ppo_trader_replay.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-27T11:55:49.845733+00:00"
+        "modified": "2026-06-28T05:01:49.748707+00:00"
       },
       "teacher_proxy": {
         "exists": true,
@@ -60,26 +60,26 @@
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
-        "size_kb": 0.4,
-        "modified": "2026-06-27T12:22:28.776134+00:00"
+        "size_kb": 0.8,
+        "modified": "2026-06-28T04:58:46.340637+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
-        "size_kb": 0.6,
-        "modified": "2026-06-27T12:39:30.845474+00:00"
+        "size_kb": 0.4,
+        "modified": "2026-06-28T05:36:53.814703+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 21960.1,
-        "modified": "2026-06-27T12:40:22.996924+00:00"
+        "size_kb": 22228.3,
+        "modified": "2026-06-28T04:58:45.707558+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2320.6,
-        "modified": "2026-06-27T12:40:22.946704+00:00"
+        "size_kb": 2344.0,
+        "modified": "2026-06-28T05:00:30.174583+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -90,8 +90,8 @@
       "ppo_teacher_sessions": {
         "exists": true,
         "path": "models/ppo_teacher_sessions.jsonl",
-        "size_kb": 26.3,
-        "modified": "2026-06-27T11:55:49.851704+00:00"
+        "size_kb": 27.0,
+        "modified": "2026-06-28T04:58:45.109859+00:00"
       }
     },
     "phases": {
@@ -106,11 +106,11 @@
     "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 500,
-      "win_rate": 0.206,
-      "avg_pnl": -4.3
+      "count": 416,
+      "win_rate": 0.233,
+      "avg_pnl": -3.26
     },
-    "buffer_records": 5000,
+    "buffer_records": 5090,
     "dataset_pairs": 2204,
     "maturity": {
       "stage": "adult",
@@ -118,7 +118,7 @@
       "stage_count": 6,
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
-        "closed_trades": 1791,
+        "closed_trades": 1801,
         "dataset_pairs": 2204,
         "evolution_count": 12,
         "proxy_accuracy": 1.0,
@@ -140,8 +140,8 @@
       },
       "api_budget_multiplier": 0.2,
       "api_usage_today": {
-        "day": "2026-06-27",
-        "decision": 190
+        "day": "2026-06-28",
+        "decision": 2
       },
       "decision_budget_left": 0,
       "copilot_budget_left": 0,
@@ -149,5 +149,5 @@
       "next_stage": null
     }
   },
-  "next_milestone": "Expand to frontier \u2014 multimodal, agents, full generative stack"
+  "next_milestone": "./scripts/halim_train_toddler.sh \u2192 register checkpoint \u2192 HALIM_LM_BACKEND=mlx"
 }

@@ -48,6 +48,9 @@ CRITICAL_ARTIFACTS: Tuple[str, ...] = (
     "models/pilot_experience.json",
     "halim/data/actions/action_log.jsonl",
     "halim/data/coevolution/correction_log.jsonl",
+    "halim/data/training/action_gold.jsonl",
+    "halim/data/training/coevolution_gold.jsonl",
+    "halim/data/training/dialogue_gold.jsonl",
 )
 
 
@@ -156,10 +159,14 @@ def snapshot_learning(
     do_halim = halim_export or (_snapshot_count % 3 == 0)
     if do_halim:
         try:
-            from core.halim_action_learn import export_action_gold
-            result["steps"]["action_gold"] = export_action_gold()
+            from core.halim_gold_pipeline import export_halim_gold
+            result["steps"]["halim_gold"] = export_halim_gold(include_learn_cache=True)
+            replay = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+            if replay and _snapshot_count % 6 == 0:
+                from core.halim_gold_pipeline import package_halim_colab
+                result["steps"]["colab_package"] = package_halim_colab()
         except Exception as exc:
-            result["steps"]["action_gold"] = {"ok": False, "error": str(exc)[:80]}
+            result["steps"]["halim_gold"] = {"ok": False, "error": str(exc)[:80]}
 
     if push_git:
         try:

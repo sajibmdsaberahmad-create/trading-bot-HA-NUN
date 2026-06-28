@@ -136,7 +136,20 @@ def compute_halim_phase(cfg: Optional[BotConfig] = None) -> str:
     ensure_identity(cfg)
 
     halim_model = Path(os.getenv("HALIM_MODEL_PATH", "halim/data/checkpoints/latest"))
-    if (halim_model / "config.json").is_file() or (halim_model.with_suffix(".gguf")).is_file():
+    if not halim_model.is_absolute():
+        halim_model = Path(__file__).resolve().parents[1] / halim_model
+
+    if (halim_model / "config.json").is_file() or halim_model.with_suffix(".gguf").is_file():
+        try:
+            meta = json.loads((halim_model / "config.json").read_text())
+            phase_in_ckpt = str(meta.get("halim_phase", "")).lower()
+            if phase_in_ckpt in HALIM_PHASES:
+                return phase_in_ckpt
+        except Exception:
+            pass
+        name = halim_model.name.lower()
+        if "toddler" in name or "child" in name:
+            return "toddler" if "toddler" in name else "child"
         return "adult"
 
     dataset = Path("models/council_training_dataset.jsonl")
@@ -162,10 +175,24 @@ def compute_halim_phase(cfg: Optional[BotConfig] = None) -> str:
 
     toddler_min = int(os.getenv("HALIM_TODDLER_MIN_PAIRS", "2500"))
     if n_sft >= toddler_min and proxy.is_file() and sft_manifest.is_file():
-        return "toddler"  # SFT ready — train first Halim LM (one GPU run)
+        return "toddler"
     if n_sft >= toddler_min and proxy.is_file():
-        return "newborn"  # enough gold — run halim_prepare_train.sh
+        return "newborn"
     return "newborn"
+
+
+def sync_identity_phase(cfg: Optional[BotConfig] = None) -> str:
+    """Keep models/halim_identity.json phase in sync with artifacts."""
+    cfg = cfg or BotConfig()
+    phase = compute_halim_phase(cfg)
+    ident = ensure_identity(cfg)
+    changed = ident.get("phase") != phase
+    ident["phase"] = phase
+    ident["native_mode"] = halim_native_mode()
+    if changed:
+        IDENTITY_PATH.write_text(json.dumps(ident, indent=2))
+        log.info(f"🧠 Halim phase → {phase.upper()}")
+    return phase
 
 
 def apply_halim_native_mode(cfg: BotConfig) -> BotConfig:
@@ -192,7 +219,7 @@ def apply_halim_native_mode(cfg: BotConfig) -> BotConfig:
 def write_halim_manifest(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
     ident = ensure_identity(cfg)
-    phase = compute_halim_phase(cfg)
+    phase = sync_identity_phase(cfg)
 
     try:
         from core.owned_brain_evolution import evolution_status

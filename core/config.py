@@ -559,6 +559,12 @@ class BotConfig:
         "PPO_LEARN_EVERY_ENTRY", "true"
     ).lower() in ("1", "true", "yes")
     PPO_ENTRY_MICRO_STEPS: int = int(os.getenv("PPO_ENTRY_MICRO_STEPS", "512"))
+    PPO_ENTRY_MICRO_ASYNC: bool = os.getenv(
+        "PPO_ENTRY_MICRO_ASYNC", "false"
+    ).lower() in ("1", "true", "yes")
+    PPO_ENTRY_MICRO_DEBOUNCE_SEC: float = float(
+        os.getenv("PPO_ENTRY_MICRO_DEBOUNCE_SEC", "0")
+    )
     AI_STREAM_WATCH_CAP: int = int(os.getenv("AI_STREAM_WATCH_CAP", "10"))
     MICRO_SPIKE_BOOST: float = float(os.getenv("MICRO_SPIKE_BOOST", "0.35"))
     MICRO_FADE_EXIT: float = float(os.getenv("MICRO_FADE_EXIT", "0.55"))
@@ -706,7 +712,7 @@ class BotConfig:
     AI_ALWAYS_ACTIVE: bool = True           # Never defer trading decisions to PPO-only fallbacks
     OLLAMA_DECISION_BYPASS_RATE_LIMIT: bool = True  # Entry/exit/position calls skip interval gate
     OLLAMA_DECISION_MIN_FREE_RAM_MB: int = int(os.getenv("OLLAMA_DECISION_MIN_FREE_RAM_MB", "768"))
-    # Hybrid distillation — Qwen teacher → fast PPO proxy (auto when enough trades)
+    # Hybrid distillation — council teacher → fast PPO proxy (auto when enough trades)
     HYBRID_DISTILLATION_ENABLED: bool = True
     HYBRID_DISTILL_MIN_TRADES: int = int(os.getenv("HYBRID_DISTILL_MIN_TRADES", "100"))
     HYBRID_DISTILL_FULL_TRADES: int = int(os.getenv("HYBRID_DISTILL_FULL_TRADES", "500"))

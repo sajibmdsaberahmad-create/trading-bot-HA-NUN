@@ -66,6 +66,32 @@ def _copilot_enabled(cfg: BotConfig) -> bool:
     return os.getenv("TRADING_COPILOT_ENABLED", "true").lower() in ("1", "true", "yes")
 
 
+def is_replay_relax_copilot() -> bool:
+    """Replay gold collection — allow entries; don't veto from stale live skip list."""
+    return (
+        os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+        and os.getenv("REPLAY_RELAX_COPILOT", "true").lower() in ("1", "true", "yes")
+    )
+
+
+def reset_copilot_for_replay(cfg: Optional[BotConfig] = None) -> None:
+    """Clear stale live-session SKIP list so replay can trade and collect gold."""
+    global _copilot
+    brief = CopilotBrief(
+        narrative="Replay session — training gold collection (copilot entry veto relaxed).",
+        regime_read="replay",
+        risk_posture="aggressive",
+        ticker_bias={},
+        repeat_losers=[],
+        ppo_hints={"confidence_boost": 0.0, "skip_repeat_losers": False},
+        updated_at=time.time(),
+        source="replay_reset",
+    )
+    _save_brief(brief)
+    _copilot = None
+    log.info("🧭 Copilot reset for replay — skip list cleared, entries allowed for gold")
+
+
 def _load_brief() -> CopilotBrief:
     if not STATE_PATH.exists():
         return CopilotBrief()
@@ -192,11 +218,15 @@ def _heuristic_brief(stats: Dict[str, Any]) -> CopilotBrief:
         by_t[str(t.get("ticker", "")).upper()].append(t)
     bias: Dict[str, str] = {}
     repeat: List[str] = []
+    relax = is_replay_relax_copilot()
     for tk, xs in by_t.items():
         losses = sum(1 for x in xs if float(x.get("pnl_usd", 0) or 0) < 0)
         if losses >= 2:
-            bias[tk] = "SKIP"
-            repeat.append(tk)
+            if relax:
+                bias[tk] = "CAUTION"
+            else:
+                bias[tk] = "SKIP"
+                repeat.append(tk)
         elif losses >= 1:
             bias[tk] = "CAUTION"
     wr = float(stats.get("win_rate", 0))
@@ -208,8 +238,15 @@ def _heuristic_brief(stats: Dict[str, Any]) -> CopilotBrief:
         session_wr=wr,
         ticker_bias=bias,
         repeat_losers=repeat,
-        ppo_hints={"confidence_boost": 0.04 if wr < 0.2 else 0.0, "skip_repeat_losers": True},
-        lessons=["Skip tickers with 2+ losses this session", "Require PPO+council alignment on entries"],
+        ppo_hints={
+            "confidence_boost": 0.04 if wr < 0.2 else 0.0,
+            "skip_repeat_losers": not relax,
+        },
+        lessons=(
+            ["Replay: collect gold on all tickers; copilot skip relaxed"]
+            if relax
+            else ["Skip tickers with 2+ losses this session", "Require PPO+council alignment on entries"]
+        ),
         updated_at=time.time(),
         source="heuristic",
     )
@@ -292,6 +329,14 @@ class TradingCopilot:
                 brief = _heuristic_brief(stats)
                 self._brief = brief
                 _save_brief(brief)
+                try:
+                    from core.halim_capabilities import record_teacher_action
+                    record_teacher_action(
+                        "copilot", ctx[:2000], brief.narrative[:1500],
+                        source="copilot_heuristic", cfg=self.cfg,
+                    )
+                except Exception:
+                    pass
                 return brief
             from core.council_client import CouncilClient
             client = CouncilClient(self.cfg)
@@ -309,6 +354,17 @@ class TradingCopilot:
 
         self._brief = brief
         _save_brief(brief)
+        try:
+            from core.halim_capabilities import record_teacher_action
+            record_teacher_action(
+                "copilot",
+                ctx[:2000],
+                f"{brief.narrative}\nRegime: {brief.regime_read} | Risk: {brief.risk_posture}",
+                source=brief.source or "copilot",
+                cfg=self.cfg,
+            )
+        except Exception:
+            pass
         try:
             with open(JOURNAL_PATH, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps({**brief.to_dict(), "timestamp": datetime.now(timezone.utc).isoformat()}) + "\n")
@@ -341,6 +397,8 @@ def maybe_refresh_copilot(runner: Optional["ScalperRunner"] = None) -> None:
 
 def copilot_blocks_entry(cfg: BotConfig, ticker: str) -> tuple[bool, str]:
     """Gate used by entry path — respects copilot SKIP bias."""
+    if is_replay_relax_copilot():
+        return False, ""
     if not _copilot_enabled(cfg):
         return False, ""
     brief = get_copilot_brief()

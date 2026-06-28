@@ -123,6 +123,11 @@ class ReplayScalperRunner(ScalperRunner):
         except Exception as exc:
             log.debug(f"Halim developer mode: {exc}")
         try:
+            from core.trading_copilot import reset_copilot_for_replay
+            reset_copilot_for_replay(self.cfg)
+        except Exception as exc:
+            log.debug(f"Copilot replay reset: {exc}")
+        try:
             from core.shutdown_control import write_pid
             os.environ.setdefault("HANOON_PID_FILE", "logs/replay.pid")
             write_pid()
@@ -169,6 +174,26 @@ class ReplayScalperRunner(ScalperRunner):
                 )
         except Exception as exc:
             log.debug(f"Replay teardown training: {exc}")
+
+        try:
+            from core.replay_consumption import finalize_replay_session
+            fin = finalize_replay_session(
+                self.replay_hub,
+                trigger="replay_teardown",
+                verbose=True,
+            )
+            unc = (fin.get("steps") or {}).get("unconsumed") or {}
+            if int(unc.get("unconsumed_bars", 0)) < 20:
+                log.info("🗑  Replay farm fully consumed — all CSV training data removed")
+            elif (fin.get("steps") or {}).get("purge", {}).get("files_deleted"):
+                purged = fin["steps"]["purge"]
+                log.info(
+                    f"🗑  Replay CSV farm purged ({purged.get('files_deleted')} files) — "
+                    "re-download next session"
+                )
+        except Exception as exc:
+            log.debug(f"Replay consumption finalize: {exc}")
+
         try:
             from core.graceful_shutdown import run_graceful_shutdown
             log.info("🛑 Replay teardown — Halim + co-evolution + evolution + git…")
@@ -180,6 +205,7 @@ class ReplayScalperRunner(ScalperRunner):
                 model=self.model,
                 push_git=False,
                 trigger="replay_teardown",
+                skip_replay_consumption=True,
             )
             git_step = (summary.get("steps") or {}).get("git") or {}
             log.info(f"📤 Replay flush complete — git={git_step.get('ok', '?')}")
@@ -197,17 +223,6 @@ class ReplayScalperRunner(ScalperRunner):
             remove_pid_file()
         except Exception:
             pass
-
-        try:
-            from core.replay_data_housekeeping import maybe_purge_replay_farm
-            purged = maybe_purge_replay_farm(reason="replay_teardown", verbose=True)
-            if purged and purged.get("files_deleted", 0) > 0:
-                log.info(
-                    f"🗑  Replay CSV farm purged ({purged.get('files_deleted')} files) — "
-                    "re-download next session"
-                )
-        except Exception as exc:
-            log.debug(f"Replay farm purge: {exc}")
 
     def _prefetch_one_ticker_bars(self, ticker: str, quiet: bool = True):
         need = self._min_bars_for(ticker)

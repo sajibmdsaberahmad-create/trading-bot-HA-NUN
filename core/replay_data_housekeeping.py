@@ -87,6 +87,69 @@ def _intraday_tickers(intraday_dir: Path) -> Set[str]:
     return out
 
 
+def remove_redundant_replay_sources(
+    root: Optional[Path] = None,
+    *,
+    verbose: bool = True,
+) -> Dict[str, Any]:
+    """
+    Drop duplicate/unused replay sources — intraday IB farm is the only training source.
+    Removes: hanoon daily dupes, archive/SP500 daily folders, stray root CSVs.
+    """
+    root = root or resolve_replay_dir()
+    if root is None:
+        return {"ok": False, "error": "no_replay_dir"}
+
+    result: Dict[str, Any] = {
+        "ok": True,
+        "root": str(root),
+        "deleted_dirs": [],
+        "deleted_files": [],
+        "bytes_freed": 0,
+    }
+    intraday_syms = _intraday_tickers(root / "intraday") if (root / "intraday").is_dir() else set()
+
+    def _rm_path(p: Path, bucket: str) -> None:
+        try:
+            if p.is_file():
+                result["bytes_freed"] += p.stat().st_size
+                p.unlink()
+                result["deleted_files"].append(str(p.relative_to(root)))
+            elif p.is_dir():
+                size = sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+                import shutil
+                shutil.rmtree(p, ignore_errors=True)
+                result["bytes_freed"] += size
+                result["deleted_dirs"].append(str(p.relative_to(root)))
+            if verbose and bucket:
+                _progress(f"  🗑  removed unused {p.relative_to(root)}")
+        except Exception as exc:
+            log.debug(f"remove redundant {p}: {exc}")
+
+    # Legacy daily folders — never used when intraday exists
+    for sub in ("archive", "SP500_Data_10Y", "hanoon"):
+        d = root / sub
+        if d.is_dir():
+            if sub == "hanoon":
+                for p in sorted(d.glob("*.csv")):
+                    if p.stem.upper() in intraday_syms:
+                        _rm_path(p, "hanoon_dupe")
+            elif any(d.iterdir()):
+                _rm_path(d, "legacy_dir")
+
+    for p in sorted(root.glob("*.csv")):
+        sym = p.stem.upper()
+        if sym in intraday_syms:
+            _rm_path(p, "stray_root")
+
+    if verbose:
+        n = len(result["deleted_files"]) + len(result["deleted_dirs"])
+        mb = result["bytes_freed"] / (1024 * 1024)
+        if n:
+            _progress(f"🧹 Removed {n} redundant replay source(s) · ~{mb:.1f} MB freed")
+    return result
+
+
 def clean_replay_farm(
     root: Optional[Path] = None,
     *,
@@ -133,6 +196,11 @@ def clean_replay_farm(
 
     if verbose:
         _progress(f"🧹 Replay farm clean — {intraday_dir} ({len(tickers)} intraday tickers)")
+
+    try:
+        remove_redundant_replay_sources(root, verbose=verbose)
+    except Exception as exc:
+        log.debug(f"Redundant replay source cleanup: {exc}")
 
     # Normalize intraday files
     for p in sorted(intraday_dir.glob(f"*{INTRADAY_SUFFIX}")):
@@ -204,21 +272,42 @@ def clean_replay_farm(
 
 
 def should_purge_replay_data() -> bool:
-    """True when session end should wipe downloaded CSV farm (learning stays in models/)."""
-    if os.getenv("WEEKEND_REPLAY_LOOP", "").lower() in ("1", "true", "yes"):
+    """
+    True when session end should wipe all replay CSVs (learning stays in models/).
+    Default: trim consumed bars only (REPLAY_TRIM_CONSUMED_ON_STOP=true).
+    Full wipe when REPLAY_PURGE_ALL_ON_STOP=true, farm fully consumed, or legacy mode.
+    """
+    if os.getenv("REPLAY_PURGE_DATA_ON_STOP", "true").lower() not in ("1", "true", "yes"):
         return False
-    return os.getenv("REPLAY_PURGE_DATA_ON_STOP", "true").lower() in ("1", "true", "yes")
+    if os.getenv("REPLAY_PURGE_ALL_ON_STOP", "false").lower() in ("1", "true", "yes"):
+        return True
+    trim_on = os.getenv("REPLAY_TRIM_CONSUMED_ON_STOP", "true").lower() in ("1", "true", "yes")
+    if trim_on:
+        try:
+            from core.replay_consumption import farm_fully_consumed
+            if not farm_fully_consumed():
+                return False
+        except Exception:
+            pass
+    if os.getenv("REPLAY_KEEP_CSV_BETWEEN_EPOCHS", "false").lower() in ("1", "true", "yes"):
+        if os.getenv("WEEKEND_REPLAY_LOOP", "").lower() in ("1", "true", "yes"):
+            return False
+    return not trim_on
 
 
 def purge_replay_farm(
     root: Optional[Path] = None,
     *,
     verbose: bool = True,
+    force: bool = False,
 ) -> Dict[str, Any]:
     """
     Delete all replay CSV training data after session ends.
     Learning artifacts (models/, halim/data/training/) are untouched.
     """
+    if not force and not should_purge_replay_data():
+        return {"ok": True, "skipped": True, "reason": "purge_disabled"}
+
     root = root or resolve_replay_dir()
     if root is None:
         return {"ok": False, "error": "no_replay_dir"}
@@ -229,15 +318,18 @@ def purge_replay_farm(
         "deleted_intraday": [],
         "deleted_hanoon": [],
         "deleted_stray": [],
+        "deleted_other": [],
         "bytes_freed": 0,
     }
 
     def _unlink(p: Path, bucket: str) -> None:
         try:
+            if not p.is_file():
+                return
             size = p.stat().st_size
             p.unlink()
             result["bytes_freed"] = int(result.get("bytes_freed", 0)) + size
-            result[bucket].append(p.name)
+            result[bucket].append(p.name if bucket != "deleted_other" else str(p.relative_to(root)))
         except Exception as exc:
             log.debug(f"purge skip {p}: {exc}")
 
@@ -247,18 +339,30 @@ def purge_replay_farm(
     if verbose:
         _progress(f"🗑  Purging replay CSV farm under {root} (models/ learning kept)…")
 
+    # Intraday IB historicals — primary storage consumer
     if intraday_dir.is_dir():
-        for p in sorted(intraday_dir.glob("*.csv")):
-            _unlink(p, "deleted_intraday")
-        for p in sorted(intraday_dir.glob("*.tmp")):
-            _unlink(p, "deleted_intraday")
+        for pattern in ("*.csv", "*.tmp", "*.parquet", "*.jsonl"):
+            for p in sorted(intraday_dir.glob(pattern)):
+                _unlink(p, "deleted_intraday")
+        for p in sorted(intraday_dir.rglob("*")):
+            if p.is_file() and p.suffix.lower() in (".csv", ".tmp", ".parquet", ".bak"):
+                rel = str(p.relative_to(intraday_dir))
+                if rel not in result["deleted_intraday"]:
+                    _unlink(p, "deleted_intraday")
 
     if hanoon_dir.is_dir():
-        for p in sorted(hanoon_dir.glob("*.csv")):
-            _unlink(p, "deleted_hanoon")
+        for p in sorted(hanoon_dir.rglob("*")):
+            if p.is_file():
+                _unlink(p, "deleted_hanoon")
 
     for p in sorted(root.glob("*.csv")):
         _unlink(p, "deleted_stray")
+
+    # Staging / partial download artifacts anywhere under replay root
+    for pattern in ("*.tmp", "*.partial", "*.download", "*_partial.csv"):
+        for p in sorted(root.rglob(pattern)):
+            if p.is_file():
+                _unlink(p, "deleted_other")
 
     # Keep folder structure
     intraday_dir.mkdir(parents=True, exist_ok=True)
@@ -274,22 +378,39 @@ def purge_replay_farm(
         len(result["deleted_intraday"])
         + len(result["deleted_hanoon"])
         + len(result["deleted_stray"])
+        + len(result["deleted_other"])
     )
     if verbose:
         mb = result.get("bytes_freed", 0) / (1024 * 1024)
         _progress(
-            f"🗑  Purged {n} CSV file(s) · freed ~{mb:.1f} MB · "
+            f"🗑  Purged {n} file(s) · freed ~{mb:.1f} MB · "
             f"re-download next session via IB or weekend start"
         )
     result["files_deleted"] = n
+
+    try:
+        from datetime import datetime, timezone
+        import json
+        journal = Path("models/replay_purge.jsonl")
+        journal.parent.mkdir(parents=True, exist_ok=True)
+        with open(journal, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "files_deleted": n,
+                "bytes_freed": result.get("bytes_freed", 0),
+                "root": str(root),
+            }, separators=(",", ":")) + "\n")
+    except Exception:
+        pass
+
     return result
 
 
 def maybe_purge_replay_farm(*, reason: str = "session_end", verbose: bool = True) -> Optional[Dict[str, Any]]:
-    """Purge if env allows — safe no-op during weekend epoch loops."""
+    """Purge replay CSV farm when env allows."""
     if not should_purge_replay_data():
         if verbose:
-            log.debug(f"Replay farm purge skipped ({reason})")
+            log.info(f"Replay farm purge skipped ({reason}) — REPLAY_KEEP_CSV_BETWEEN_EPOCHS=true")
         return None
     return purge_replay_farm(verbose=verbose)
 

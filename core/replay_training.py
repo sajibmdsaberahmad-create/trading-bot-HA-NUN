@@ -118,6 +118,18 @@ def run_replay_training_cycle(
     log_ib_farm_banner(cfg)
 
     try:
+        from core.halim_gold_pipeline import run_halim_gold_pipeline
+        result["steps"]["halim_gold"] = run_halim_gold_pipeline(
+            cfg,
+            trigger=trigger,
+            prepare_sft=os.getenv("REPLAY_PREPARE_SFT", "true").lower() in ("1", "true", "yes"),
+            package_colab=os.getenv("HALIM_AUTO_PACKAGE_COLAB", "true").lower() in ("1", "true", "yes"),
+            min_sft_pairs=int(os.getenv("HALIM_REPLAY_MIN_SFT_PAIRS", os.getenv("HALIM_TODDLER_MIN_PAIRS", "2500"))),
+        )
+    except Exception as exc:
+        result["steps"]["halim_gold"] = {"ok": False, "error": str(exc)[:120]}
+
+    try:
         from core.halim_ppo_coevolution import run_coevolution_cycle
         result["steps"]["coevolution"] = run_coevolution_cycle(
             cfg, model=getattr(runner, "model", None) if runner else None, trigger=trigger,
@@ -125,23 +137,20 @@ def run_replay_training_cycle(
     except Exception as exc:
         result["steps"]["coevolution"] = {"ok": False, "error": str(exc)[:120]}
 
-    try:
-        from core.halim_action_learn import export_action_gold
-        result["steps"]["halim_gold"] = export_action_gold(include_learn_cache=True)
-    except Exception as exc:
-        result["steps"]["halim_gold"] = {"ok": False, "error": str(exc)[:120]}
-
     fresh = _replay_buffer_records()
     result["buffer_records"] = len(fresh)
 
     if getattr(cfg, "INCREMENTAL_TRAINING_ENABLED", False) and fresh:
-        try:
-            from core.online_trainer import run_incremental_training
-            steps = int(os.getenv("REPLAY_PPO_INCREMENTAL_STEPS", "2048"))
-            ok = run_incremental_training(cfg, fresh_records=fresh, ppo_steps=steps)
-            result["steps"]["incremental_ppo"] = {"ok": ok, "records": len(fresh)}
-        except Exception as exc:
-            result["steps"]["incremental_ppo"] = {"ok": False, "error": str(exc)[:120]}
+        steps = int(os.getenv("REPLAY_PPO_INCREMENTAL_STEPS", "2048"))
+        if steps > 0:
+            try:
+                from core.online_trainer import run_incremental_training
+                ok = run_incremental_training(cfg, fresh_records=fresh, ppo_steps=steps)
+                result["steps"]["incremental_ppo"] = {"ok": ok, "records": len(fresh)}
+            except Exception as exc:
+                result["steps"]["incremental_ppo"] = {"ok": False, "error": str(exc)[:120]}
+        else:
+            result["steps"]["incremental_ppo"] = {"ok": False, "skipped": "REPLAY_PPO_INCREMENTAL_STEPS=0"}
 
     if os.getenv("REPLAY_TRAIN_PROXY", "true").lower() in ("1", "true", "yes"):
         try:

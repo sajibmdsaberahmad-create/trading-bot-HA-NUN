@@ -51,3 +51,5 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-27 11:55 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 26%, source heuristic_fallback
 - `2026-06-27 11:55 UTC` **brain_evolution** · stage **adult** — Evolution replay_teardown — stage adult, dataset 2204 pairs
 - `2026-06-27 12:27 UTC` **brain_evolution** · stage **newborn** — Halim developer off_hours: 0 mutation(s), git=ok
+- `2026-06-28 04:58 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 24%, source heuristic_fallback
+- `2026-06-28 05:40 UTC` **brain_ppo_teacher** — PPO teacher replay_close_MARA: WR 27%, source heuristic_fallback

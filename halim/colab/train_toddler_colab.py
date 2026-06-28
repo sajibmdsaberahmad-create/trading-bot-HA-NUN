@@ -20,15 +20,38 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-BASE_MODEL = os.getenv("HALIM_BASE_MODEL", "Qwen/Qwen2.5-0.5B-Instruct")
+BASE_MODEL = os.getenv("HALIM_BASE_MODEL", os.getenv("HALIM_SCAFFOLD_HF", "Qwen/Qwen2.5-0.5B-Instruct"))
+# ^ HALIM_SCAFFOLD_HF / default: HuggingFace registry id for training scaffold only (M. A. Halim = product).
 SFT_DIR = Path(os.getenv("HALIM_SFT_DIR", "sft"))
 OUT_DIR = Path(os.getenv("HALIM_OUT_DIR", "toddler_v1"))
 MAX_SEQ_LENGTH = int(os.getenv("HALIM_MAX_SEQ_LENGTH", "1024"))
-EPOCHS = float(os.getenv("HALIM_EPOCHS", "2"))
+EPOCHS = float(os.getenv("HALIM_EPOCHS", "0"))  # 0 = auto from dataset size
 BATCH_SIZE = int(os.getenv("HALIM_BATCH_SIZE", "2"))
 GRAD_ACCUM = int(os.getenv("HALIM_GRAD_ACCUM", "4"))
 LORA_R = int(os.getenv("HALIM_LORA_R", "16"))
 LORA_ALPHA = int(os.getenv("HALIM_LORA_ALPHA", "32"))
+
+
+def _auto_epochs(train_n: int) -> float:
+    if EPOCHS > 0:
+        return EPOCHS
+    if train_n < 2000:
+        return 2.0
+    if train_n < 4000:
+        return 2.5
+    if train_n < 8000:
+        return 3.0
+    return 3.5
+
+
+def _load_colab_manifest() -> dict:
+    path = SFT_DIR / "colab_manifest.json"
+    if path.is_file():
+        try:
+            return json.loads(path.read_text())
+        except Exception:
+            pass
+    return {}
 
 
 def _require_files() -> None:
@@ -56,7 +79,7 @@ def _build_sft_config(SFTConfig, *, adapter_dir: Path) -> object:
 
     kwargs = {
         "output_dir": str(adapter_dir),
-        "num_train_epochs": EPOCHS,
+        "num_train_epochs": epochs,
         "per_device_train_batch_size": BATCH_SIZE,
         "per_device_eval_batch_size": BATCH_SIZE,
         "gradient_accumulation_steps": GRAD_ACCUM,
@@ -94,7 +117,16 @@ def main() -> None:
 
     train_rows = _load_rows(SFT_DIR / "train.jsonl")
     valid_rows = _load_rows(SFT_DIR / "valid.jsonl")
-    print(f"Train: {len(train_rows)} | Valid: {len(valid_rows)}")
+    colab_manifest = _load_colab_manifest()
+    epochs = _auto_epochs(len(train_rows))
+    build_id = colab_manifest.get("build_id", "unknown")
+    created = colab_manifest.get("created_at", "")
+    print(f"Train: {len(train_rows)} | Valid: {len(valid_rows)} | Epochs: {epochs}")
+    print(f"Halim SFT build_id: {build_id}  packaged_at: {created}")
+    if build_id == "unknown":
+        print("WARNING: colab_manifest.json missing — re-run ./scripts/halim_colab_ready.sh on your Mac")
+    if colab_manifest.get("by_source"):
+        print("Source mix:", colab_manifest["by_source"])
 
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
     if tokenizer.pad_token is None:
@@ -194,7 +226,13 @@ def main() -> None:
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "train_pairs": len(train_rows),
         "valid_pairs": len(valid_rows),
+        "epochs": epochs,
+        "by_source": colab_manifest.get("by_source") or {},
+        "raw_sources": colab_manifest.get("raw_sources") or {},
         "trained_on": "google_colab",
+        "package_version": colab_manifest.get("version", 1),
+        "build_id": build_id,
+        "packaged_at": colab_manifest.get("created_at"),
     }
     (OUT_DIR / "config.json").write_text(json.dumps(cfg, indent=2))
 

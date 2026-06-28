@@ -119,6 +119,8 @@ export PPO_LEARNING_WEIGHT="${PPO_LEARNING_WEIGHT:-1.5}"
 export PPO_LEAD_WHILE_COUNCIL_PENDING="${PPO_LEAD_WHILE_COUNCIL_PENDING:-true}"
 export PPO_LEARN_EVERY_ENTRY="${PPO_LEARN_EVERY_ENTRY:-true}"
 export PPO_ENTRY_MICRO_STEPS="${PPO_ENTRY_MICRO_STEPS:-512}"
+export PPO_ENTRY_MICRO_ASYNC="${PPO_ENTRY_MICRO_ASYNC:-false}"
+export PPO_ENTRY_MICRO_DEBOUNCE_SEC="${PPO_ENTRY_MICRO_DEBOUNCE_SEC:-0}"
 export AI_STREAM_WATCH_CAP="${AI_STREAM_WATCH_CAP:-10}"
 export AI_STREAM_PRIORITY_COUNT="${AI_STREAM_PRIORITY_COUNT:-6}"
 export SCALP_PROFIT_GIVEBACK_PCT="${SCALP_PROFIT_GIVEBACK_PCT:-0.20}"
@@ -183,6 +185,18 @@ export HYBRID_DISTILL_MIN_TRADES="${HYBRID_DISTILL_MIN_TRADES:-10}"
 # Halim toddler LM + PPO↔Halim distillation always on
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_env.sh" 2>/dev/null || true
+# shellcheck disable=SC1091
+source "$ROOT/scripts/halim_memory_profile.sh" 2>/dev/null || true
+# Live session gold collection (dialogue/copilot LM for training; user chat still off)
+export HALIM_LIVE_GOLD_COLLECT="${HALIM_LIVE_GOLD_COLLECT:-true}"
+export HALIM_PREPARE_SFT_ON_SHUTDOWN="${HALIM_PREPARE_SFT_ON_SHUTDOWN:-true}"
+export HALIM_PPO_COEVOLUTION="${HALIM_PPO_COEVOLUTION:-true}"
+export HALIM_PPO_DIALOGUE="${HALIM_PPO_DIALOGUE:-true}"
+export HALIM_PPO_GENERATIVE_REFLECT="${HALIM_PPO_GENERATIVE_REFLECT:-true}"
+export HALIM_COMPANION_LEARN="${HALIM_COMPANION_LEARN:-true}"
+export HALIM_ACTION_LEARN="${HALIM_ACTION_LEARN:-true}"
+export HALIM_AUTO_PACKAGE_COLAB="${HALIM_AUTO_PACKAGE_COLAB:-true}"
+export HALIM_LEARN_PACKAGE_ON_STOP="${HALIM_LEARN_PACKAGE_ON_STOP:-true}"
 export LIVE_AI_PIPELINE_ENABLED="${LIVE_AI_PIPELINE_ENABLED:-true}"
 export PYTHONUNBUFFERED=1
 export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
@@ -194,6 +208,9 @@ TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{print int($1/1024/1024)}
 echo "═══════════════════════════════════════════════════════════════════════"
 echo "  HANOON FULL PILOT LAUNCH"
 echo "  IB: $IB_HOST:$IB_PORT | Client: $CLIENT_ID | Council: ${COUNCIL_BACKEND} (${TOTAL_RAM_MB}MB RAM)"
+if [[ "${HALIM_LOW_MEMORY_ACTIVE:-}" == "true" ]]; then
+  echo "  Halim: M. A. Halim low-RAM profile — async PPO, MLX LM, dialogue deferred"
+fi
 echo "  Clock: US Eastern (TZ=$TZ)"
 echo "═══════════════════════════════════════════════════════════════════════"
 

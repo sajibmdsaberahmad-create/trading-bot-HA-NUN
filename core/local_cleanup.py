@@ -333,7 +333,9 @@ def cleanup_local_workspace(aggressive: bool = True) -> dict:
     )
 
     if aggressive:
-        stats["replay_bytes"] = _purge_replay_csv_farm()
+        # Replay CSV purge only during replay sessions — not on live stop (preserves pre-downloaded farm)
+        if os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes"):
+            stats["replay_bytes"] = _purge_replay_csv_farm()
         stats["worktree_bytes"] = _remove_ide_worktrees()
         stats["artifacts_bytes"] = _remove_root_artifacts()
         stats["reports_bytes"] = _prune_old_reports(days=7)
