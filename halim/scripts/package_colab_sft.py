@@ -118,7 +118,8 @@ def package_colab_sft(*, root: Path | None = None) -> Dict[str, Any]:
         "upload_rule": (
             "Always upload THIS halim_sft.zip from your tradingbot folder. "
             "Do not keep old copies in Downloads — delete them after upload. "
-            "Re-run ./scripts/halim_colab_ready.sh before each Colab train."
+            "Auto-rebuilt on replay/live stop when HALIM_AUTO_PACKAGE_COLAB=true "
+            "(export all gold → merge SFT → zip). Check build_id in colab_manifest.json."
         ),
     }
     colab_manifest_path = sft_dir / "colab_manifest.json"

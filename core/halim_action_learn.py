@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -171,6 +172,13 @@ def export_action_gold(
 
     def _write(row: Dict[str, Any]) -> None:
         nonlocal added, skipped
+        try:
+            from core.halim_guardrails import learn_gold_budget_remaining, record_learn_gold_exported
+            if learn_gold_budget_remaining() <= 0:
+                skipped += 1
+                return
+        except Exception:
+            pass
         h = _gold_hash(row)
         if h in known:
             skipped += 1
@@ -180,12 +188,16 @@ def export_action_gold(
             fh.write(json.dumps(row, default=str, separators=(",", ":")) + "\n")
         _append_hash(h)
         added += 1
+        try:
+            from core.halim_guardrails import record_learn_gold_exported
+            record_learn_gold_exported(1)
+        except Exception:
+            pass
 
     if ACTION_LOG.is_file():
-        lines: List[str] = []
         with open(ACTION_LOG, encoding="utf-8") as fh:
-            lines = fh.readlines()
-        for line in lines[-max_records:]:
+            tail_lines = deque(fh, maxlen=max_records)
+        for line in tail_lines:
             line = line.strip()
             if not line:
                 continue

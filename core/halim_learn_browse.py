@@ -108,6 +108,9 @@ def _fetch_one(topic: str, cfg: BotConfig) -> Dict[str, Any]:
     topic = topic.strip()
     if not topic:
         return {"ok": False, "reason": "empty_topic", "topic": topic}
+    if topic.startswith("local:commander_ib_report"):
+        from core.halim_commander_report_learn import fetch_commander_report_learn
+        return {**fetch_commander_report_learn(cfg), "topic": topic}
     if topic.startswith("local:market_hours"):
         return {**fetch_market_hours_learn(cfg), "topic": topic}
     if topic.startswith("rss:"):
@@ -265,6 +268,15 @@ def run_learn_browse_loop(
     total_pages = 0
 
     _learn_loop_mark_active()
+    try:
+        from core.halim_guardrails import learn_uncapped_active, effective_learn_fetch_daily_cap, learn_gold_budget_remaining
+        if learn_uncapped_active():
+            log.info(
+                f"📚 Learn UNCAPPED today — fetch cap {effective_learn_fetch_daily_cap()}, "
+                f"gold budget left {learn_gold_budget_remaining()}"
+            )
+    except Exception:
+        pass
     log.info(
         f"📚 Halim learn loop started — batch={os.getenv('HALIM_LEARN_BATCH_MAX', '8')}, "
         f"{'back-to-back batches' if pause <= 0 else f'pause={pause:.0f}s between batches'} "
@@ -288,6 +300,16 @@ def run_learn_browse_loop(
             if r.get("reason") == "learn_fetch_daily_cap":
                 print("Learn loop stopping — daily fetch cap reached.", flush=True)
                 break
+            try:
+                from core.halim_guardrails import learn_gold_budget_remaining, learn_uncapped_active
+                if learn_uncapped_active() and learn_gold_budget_remaining() <= 0:
+                    print(
+                        "Learn loop stopping — daily gold export cap reached (dedup + anti-overfit).",
+                        flush=True,
+                    )
+                    break
+            except Exception:
+                pass
             if not r.get("ok") and r.get("reason") not in (None, "trading_active"):
                 log.warning(f"📚 Halim learn cycle {cycle} issue: {r.get('reason')}")
                 break

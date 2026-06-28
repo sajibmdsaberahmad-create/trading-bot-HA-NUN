@@ -218,6 +218,13 @@ class ScalperRunner:
         self.institutional = InstitutionalDetector()
         self.risk = RiskManager(cfg, cfg.INITIAL_CASH, notifier)
         git_sync_init(cfg)
+        try:
+            from core.commander_learning import reload_persisted_params
+            n = reload_persisted_params(cfg)
+            if n:
+                log.info(f"🧬 Restored {n} persisted learning param(s) from prior sessions")
+        except Exception as exc:
+            log.debug(f"Persisted param reload: {exc}")
         self.conn.register_market_data_error_handler(self._on_market_data_failure)
         self.conn.register_tick_limit_handler(self._on_tick_stream_limit)
         self.conn.register_session_reclaim_handler(self._on_ib_session_reclaim)
@@ -302,7 +309,9 @@ class ScalperRunner:
         self._last_metrics_write: float = 0.0
         self._last_ai_narrative: float = 0.0
         self._loss_learning_in_flight: bool = False
-        self._scan_data_cache: Dict[str, pd.DataFrame] = {}  # Cache scanned data
+        self._scan_data_cache: Dict[str, pd.DataFrame] = {}
+        self._scan_cache_max_tickers = int(os.getenv("SCAN_CACHE_MAX_TICKERS", "14"))
+        self._scan_cache_max_bars = int(os.getenv("SCAN_CACHE_MAX_BARS", "150"))  # Cache scanned data
         self._bar_prefetch_queue: List[str] = []
         self._tick_spike_pending: Dict[str, Dict[str, Any]] = {}
         self._tick_spike_last_at: Dict[str, float] = {}
@@ -316,6 +325,7 @@ class ScalperRunner:
         self._risk_plans: Dict[str, TradePlan] = {}             # ticker -> active risk plan
         
         self.trade_journal: List[Dict] = []
+        self._trade_journal_max = int(os.getenv("TRADE_JOURNAL_MAX", "500"))
         self.trades_today: int = 0
         self._current_day: Optional[str] = None
         self._last_daily_push_date: Optional[str] = None
@@ -588,7 +598,7 @@ class ScalperRunner:
                 live_px = float(df["close"].iloc[-1])
             elif getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
                 df = bars_with_live_tick(df, live_px, dm)
-            self._scan_data_cache[ticker] = df
+            self._store_scan_cache(ticker, df)
 
         forecast: Dict[str, Any] = {}
         if (
@@ -643,12 +653,12 @@ class ScalperRunner:
             cached = self._scan_data_cache.get(ticker)
             if cached is None or len(cached) == 0:
                 now_ts = pd.Timestamp.utcnow().floor("1min")
-                self._scan_data_cache[ticker] = pd.DataFrame(
+                self._store_scan_cache(ticker, pd.DataFrame(
                     [{
                         "open": px, "high": px, "low": px, "close": px, "volume": 0,
                     }],
                     index=[now_ts],
-                )
+                ))
         if healed:
             self._last_stream_heal = now
             log.info(f"  💉 Stream heal: IB snapshot priced {healed} ticker(s)")
@@ -668,7 +678,7 @@ class ScalperRunner:
         has_live_px = bool(dm.get_latest_price() and dm.get_latest_price() > 0)
         if len(df) < min_ok and not (soft_hmds and has_live_px):
             return None
-        self._scan_data_cache[ticker] = df
+        self._store_scan_cache(ticker, df)
         if df["close"].iloc[-1] > 0:
             for target in self._locked_targets:
                 if target.ticker == ticker and target.price <= 0:
@@ -1864,20 +1874,10 @@ class ScalperRunner:
         except Exception:
             pass
         try:
-            maybe_incremental_train(
-                self.cfg, self.trades_today, self.consciousness, self.autopilot,
-            )
-        except Exception:
-            pass
-        try:
-            from core.hybrid_distiller import maybe_run_hybrid_distillation
-            maybe_run_hybrid_distillation(self.cfg)
-        except Exception:
-            pass
-        try:
-            self._schedule_self_train()
-        except Exception:
-            pass
+            from core.learning_coordinator import schedule_post_close_learning
+            schedule_post_close_learning(self.cfg, self)
+        except Exception as exc:
+            log.debug(f"Post-close learning schedule: {exc}")
         self._attempt_hot_swap_entry()
 
     def _clear_closed_position_state(self, ticker: str) -> None:
@@ -1941,6 +1941,8 @@ class ScalperRunner:
             limit_px=trade_rec.get("limit_px"),
         )
         self.trade_journal.append(trade_rec)
+        if len(self.trade_journal) > self._trade_journal_max:
+            self.trade_journal = self.trade_journal[-self._trade_journal_max:]
         if self.ai_commander:
             try:
                 self.ai_commander.record_trade(trade_rec)
@@ -1953,7 +1955,13 @@ class ScalperRunner:
                 pnl=float(pnl),
                 win=(result == "win"),
                 cfg=self.cfg,
+                trade_rec=trade_rec,
             )
+        except Exception:
+            pass
+        try:
+            from core.halim_outcome_gold import record_trade_outcome
+            record_trade_outcome(trade_rec, cfg=self.cfg)
         except Exception:
             pass
         try:
@@ -2051,6 +2059,11 @@ class ScalperRunner:
                     pnl, self.cfg,
                     slippage_pct=combined_slip,
                     spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0)),
+                    pnl_pct=float(trade_rec.get("pnl_pct", 0) or 0),
+                    peak_pct=float(trade_rec.get("peak_pct", 0) or 0),
+                    entry_fill=float(entry_fill or 0),
+                    exit_fill=float(exit_fill or 0),
+                    shares=float(trade_rec.get("shares", 0) or 0),
                 ),
                 "regime": regime,
                 "confidence": getattr(self, "_last_ai_confidence", 0.5),
@@ -2507,6 +2520,11 @@ class ScalperRunner:
             except Exception:
                 pass
         bootstrap_ai_session_limits(self)
+        try:
+            from core.commander_runtime import ensure_commander_runtime
+            ensure_commander_runtime(self.cfg, replay=replay_mode)
+        except Exception as exc:
+            log.debug(f"Commander runtime: {exc}")
         if self._ib_starting_balance:
             try:
                 self.shadow_circuit.reset_daily(self._ib_starting_balance)
@@ -2996,7 +3014,8 @@ class ScalperRunner:
 
                 cleanup_iv = float(getattr(self.cfg, "PERIODIC_CLEANUP_SEC", 1800))
                 _now = time.time()
-                if _now - getattr(self, "_last_periodic_cleanup", 0) >= cleanup_iv:
+                replay_mode = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+                if cleanup_iv > 0 and not replay_mode and _now - getattr(self, "_last_periodic_cleanup", 0) >= cleanup_iv:
                     self._last_periodic_cleanup = _now
                     try:
                         from core.memory_guard import is_memory_pressured
@@ -3087,7 +3106,7 @@ class ScalperRunner:
                     score["total_score"] = round(ai_adjusted, 1)
                     score["ai_score"] = round(ai_adjusted, 1)
                 if score and score.get("total_score", 0) > 0:
-                    self._scan_data_cache[ticker] = hist_1m
+                    self._store_scan_cache(ticker, hist_1m)
 
             if score and score.get("total_score", 0) > 0:
                 log.debug(f"  ✅ {ticker}: score={score['total_score']:.1f} | {score.get('reasons', '')[:60]}")
@@ -3469,14 +3488,14 @@ class ScalperRunner:
             )
             min_accept = need if ai_fast_execution(self.cfg) else 20
             if fresh is not None and len(fresh) >= min_accept:
-                self._scan_data_cache[ticker] = fresh
+                self._store_scan_cache(ticker, fresh)
                 if fresh["close"].iloc[-1] > 0:
                     for target in self._locked_targets:
                         if target.ticker == ticker and target.price <= 0:
                             target.price = float(fresh["close"].iloc[-1])
                 return fresh
             if fresh is not None and len(fresh) >= 3 and ai_fast_execution(self.cfg):
-                self._scan_data_cache[ticker] = fresh
+                self._store_scan_cache(ticker, fresh)
                 return fresh
         except Exception as exc:
             record_fetch_failure(self.cfg, ticker, exc, bar_size="1 min")
@@ -3988,7 +4007,7 @@ class ScalperRunner:
                 )
                 min_bars = self._min_bars_for(ticker)
                 if fresh is not None and len(fresh) >= min_bars:
-                    self._scan_data_cache[ticker] = fresh
+                    self._store_scan_cache(ticker, fresh)
             except Exception as exc:
                 record_fetch_failure(self.cfg, ticker, exc, bar_size="1 min")
             finally:
@@ -4030,7 +4049,7 @@ class ScalperRunner:
                         )
                     if fresh is None or len(fresh) < need:
                         continue
-                    self._scan_data_cache[ticker] = fresh
+                    self._store_scan_cache(ticker, fresh)
                     px = float(fresh["close"].iloc[-1])
                     if not _only_uptrend(fresh.tail(60), px):
                         continue
@@ -4236,7 +4255,7 @@ class ScalperRunner:
                 if self._pending_entry_ticker == ticker:
                     continue
 
-            self._scan_data_cache[ticker] = work_df
+            self._store_scan_cache(ticker, work_df)
             self.top_pick = target
             self._last_entry_attempt_at = time.time()
             self._spike_attempt_until[ticker] = time.time() + spike_entry_cooldown_sec(self.cfg)
@@ -4251,7 +4270,9 @@ class ScalperRunner:
                 f"score={target.rank_score:.0f} | micro={fc.get('spike_likelihood', 0):.0%} "
                 f"pred→${(fc.get('pred_1bar') or live_px):.2f}{q_extra} | attempting entry..."
             )
-            from core.entry_quality import assess_entry_quality, quality_blocks_entry
+            from core.entry_quality import (
+                assess_entry_quality, quality_blocks_entry, regime_blocks_entry, mtf_blocks_entry,
+            )
             quality = assess_entry_quality(
                 self.cfg, fc,
                 spike_ratio=spike_ratio,
@@ -4268,6 +4289,44 @@ class ScalperRunner:
                 log.info(
                     f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}"
                 )
+                self._spike_skip_until[ticker] = time.time() + float(
+                    getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                )
+                continue
+            spike_regime = "unknown"
+            fast_df, _, _, _ = self._resolve_live_bars(ticker, min_bars=10)
+            if fast_df is not None and len(fast_df) >= 10:
+                try:
+                    rr = self.regime_detector.classify(fast_df)
+                    if rr is not None:
+                        raw = getattr(rr, "regime", "unknown")
+                        spike_regime = getattr(raw, "value", str(raw))
+                except Exception:
+                    pass
+            if regime_blocks_entry(self.cfg, spike_regime):
+                log.info(
+                    f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry"
+                )
+                self._spike_skip_until[ticker] = time.time() + float(
+                    getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                )
+                continue
+            df_5m = df_15m = None
+            fast_df_mtf, _, _, _ = self._resolve_live_bars(ticker, min_bars=20)
+            if fast_df_mtf is not None:
+                ticker_dm = self._dm_for_ticker(ticker)
+                if ticker_dm is not None:
+                    try:
+                        df_5m = ticker_dm.fetch_historical(
+                            duration="1 D", bar_size="5 mins", use_rth=False, quiet=True,
+                        )
+                        df_15m = ticker_dm.fetch_historical(
+                            duration="1 D", bar_size="15 mins", use_rth=False, quiet=True,
+                        )
+                    except Exception:
+                        pass
+            if mtf_blocks_entry(self.cfg, df_5m, df_15m):
+                log.info(f"  ⏭ MTF block {ticker}: 5m/15m not aligned — skip entry")
                 self._spike_skip_until[ticker] = time.time() + float(
                     getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                 )
@@ -5244,6 +5303,31 @@ class ScalperRunner:
         if mech_target:
             self._apply_target_update(mech_target, "momentum TP extension")
     
+    def _store_scan_cache(self, ticker: str, df: pd.DataFrame) -> None:
+        """Bounded LRU-style scan bar cache — avoids unbounded DataFrame RAM."""
+        key = str(ticker or "").upper()
+        if not key:
+            return
+        try:
+            slim = df.tail(self._scan_cache_max_bars).copy()
+        except Exception:
+            slim = df
+        self._scan_data_cache[key] = slim
+        if len(self._scan_data_cache) <= self._scan_cache_max_tickers:
+            return
+        locked = set()
+        if self.current_ticker:
+            locked.add(str(self.current_ticker).upper())
+        for t in getattr(self, "_locked_target_names", []) or []:
+            locked.add(str(t).upper())
+        if self.top_pick and getattr(self.top_pick, "ticker", None):
+            locked.add(str(self.top_pick.ticker).upper())
+        for cache_key in list(self._scan_data_cache.keys()):
+            if len(self._scan_data_cache) <= self._scan_cache_max_tickers:
+                break
+            if cache_key not in locked:
+                self._scan_data_cache.pop(cache_key, None)
+
     def _score_ticker(self, ticker: str, df: pd.DataFrame) -> Dict:
         closes = df["close"].values
         volumes = df["volume"].values
@@ -5252,17 +5336,24 @@ class ScalperRunner:
             return {"ticker": ticker, "total_score": 0, "price": current_px, "volume": int(volumes[-1]), "avg_volume": int(np.mean(volumes[-20:])), "rel_vol": 1.0, "reasons": "not_uptrend"}
         score = 1.0
         reasons = ["uptrend"]
+        weights = self._load_weights()
+        w_mom = float(weights.get("momentum", 2.0))
+        w_vol = float(weights.get("volume", 15.0))
+        w_inst = float(weights.get("institutional", 20.0))
+        w_vwap = float(weights.get("vwap_slope", 5.0))
+        w_atr = float(weights.get("atr_bonus", 5.0))
+        w_mr = float(weights.get("mean_reversion", 5.0))
         ret_5 = (closes[-1] / closes[-6] - 1) * 100 if len(closes) > 5 else 0
         ret_10 = (closes[-1] / closes[-11] - 1) * 100 if len(closes) > 10 else 0
         ret_20 = (closes[-1] / closes[-21] - 1) * 100 if len(closes) > 20 else 0
         mom_score = ret_5 * 0.5 + ret_10 * 0.3 + ret_20 * 0.2
-        score += mom_score * 2.0
+        score += mom_score * w_mom
         if mom_score > 2:
             reasons.append(f"strong_mom_{mom_score:.1f}")
         vol_avg20 = np.mean(volumes[-20:])
         vol_avg5 = np.mean(volumes[-5:])
         vol_ratio = vol_avg5 / (vol_avg20 + 1e-9)
-        score += max(0, vol_ratio - 1.0) * 15
+        score += max(0, vol_ratio - 1.0) * w_vol
         if vol_ratio > 1.3:
             reasons.append(f"vol_{vol_ratio:.1f}x")
         inst = InstitutionalDetector()
@@ -5270,7 +5361,7 @@ class ScalperRunner:
             inst.feed_bar(float(volumes[i]), float(closes[i]))
         sig = inst.scan()
         if sig.direction == "accumulating" and sig.strength > 0.5:
-            score += sig.strength * 20
+            score += sig.strength * w_inst
             reasons.append(f"inst_{sig.strength:.1f}")
         typical = (df["high"] + df["low"] + df["close"]) / 3.0
         try:
@@ -5281,17 +5372,17 @@ class ScalperRunner:
             vwap_slope = (vwap_hist[-1] - vwap_hist[-5]) / (vwap_hist[-5] + 1e-9) * 100
         except Exception:
             vwap_slope = 0
-        score += max(0, vwap_slope) * 5
+        score += max(0, vwap_slope) * w_vwap
         if vwap_slope > 0.5:
             reasons.append(f"vwap_up_{vwap_slope:.2f}%")
         atr = compute_atr(df, period=10)
         atr_pct = (atr / current_px) * 100
         if 0.3 < atr_pct < 3.0:
-            score += 5
+            score += w_atr
         ema9 = pd.Series(closes).ewm(span=9, adjust=False).mean().iloc[-1]
         dist = (current_px - ema9) / (pd.Series(closes).diff().rolling(20).std().iloc[-1] + 1e-9)
         if abs(dist) < 1.5:
-            score += 5
+            score += w_mr
         rule_result = {
             "ticker": ticker, "price": current_px, "volume": int(volumes[-1]),
             "avg_volume": int(vol_avg20), "rel_vol": round(vol_ratio, 2),
@@ -7880,7 +7971,10 @@ class ScalperRunner:
                     pass
 
         try:
-            cleanup_local_workspace(aggressive=True)
+            if os.getenv("REPLAY_LIVE", "").lower() not in ("1", "true", "yes"):
+                cleanup_local_workspace(aggressive=True)
+            else:
+                log.debug("Replay shutdown — skipping aggressive cleanup (teardown flush handles learning)")
         except Exception as exc:
             log.debug(f"Local cleanup: {exc}")
 

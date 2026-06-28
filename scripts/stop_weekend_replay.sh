@@ -23,12 +23,35 @@ snapshot_learning(BotConfig(), trigger='pre_stop_weekend', halim_export=True)
 
 echo "🛑 Stopping weekend replay loop…"
 
+# Stop replay FIRST — the loop bash ignores SIGTERM while blocked in start_replay_live.sh.
+_replay_running=0
+if pgrep -f "main.py --mode replay-live" >/dev/null 2>&1 \
+  || pgrep -f "start_replay_live.sh" >/dev/null 2>&1; then
+  _replay_running=1
+elif [[ -f "${LOG_DIR}/replay.pid" ]]; then
+  RPID=$(tr -d '[:space:]' <"${LOG_DIR}/replay.pid" 2>/dev/null || true)
+  [[ -n "$RPID" ]] && kill -0 "$RPID" 2>/dev/null && _replay_running=1
+fi
+
+if [[ "$_replay_running" -eq 1 ]]; then
+  echo "   Stopping active replay session…"
+  WEEKEND_GIT_PUSH=false "$ROOT/scripts/stop_replay.sh"
+else
+  echo "   No active replay process"
+fi
+
+while IFS= read -r pid; do
+  [[ -n "$pid" ]] || continue
+  echo "   SIGTERM start_replay wrapper PID $pid"
+  kill -TERM "$pid" 2>/dev/null || true
+done < <(pgrep -f "start_replay_live.sh" 2>/dev/null || true)
+
 if [[ -f "$LOOP_PID_FILE" ]]; then
   LPID=$(tr -d '[:space:]' <"$LOOP_PID_FILE" 2>/dev/null || true)
   if [[ -n "$LPID" ]] && kill -0 "$LPID" 2>/dev/null; then
     echo "   SIGTERM loop PID $LPID"
     kill -TERM "$LPID" 2>/dev/null || true
-    for _ in $(seq 1 30); do
+    for _ in $(seq 1 15); do
       kill -0 "$LPID" 2>/dev/null || break
       sleep 1
     done
@@ -39,14 +62,6 @@ if [[ -f "$LOOP_PID_FILE" ]]; then
   fi
   rm -f "$LOOP_PID_FILE"
 fi
-
-if pgrep -f "main.py --mode replay-live" >/dev/null 2>&1; then
-  "$ROOT/scripts/stop_replay.sh"
-else
-  echo "   No active replay process"
-fi
-
-rm -f "$STOP_FILE"
 
 if [[ "${WEEKEND_GIT_PUSH:-true}" == "true" ]]; then
   if [[ -d "$ROOT/venv" ]]; then
@@ -72,5 +87,7 @@ from core.replay_data_housekeeping import purge_replay_farm
 finalize_replay_session(hub=None, trigger='stop_weekend', verbose=True)
 purge_replay_farm(verbose=True, force=True)
 " 2>/dev/null || true
+
+rm -f "$STOP_FILE"
 
 echo "✅ Weekend replay stopped"

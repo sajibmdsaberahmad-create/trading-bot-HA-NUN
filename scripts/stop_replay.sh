@@ -11,6 +11,18 @@ export PYTHONPATH="${ROOT}/halim:${ROOT}${PYTHONPATH:+:$PYTHONPATH}"
 
 echo "🛑 Graceful REPLAY shutdown (up to ${WAIT_SEC}s for evolution + git sync)…"
 
+LOOP_PID_FILE="${WEEKEND_LOOP_PID_FILE:-$LOG_DIR/weekend_replay.pid}"
+WEEKEND_STOP_FILE="${ROOT}/runtime/weekend_replay.stop"
+if [[ -f "$LOOP_PID_FILE" ]]; then
+  LPID=$(tr -d '[:space:]' <"$LOOP_PID_FILE" 2>/dev/null || true)
+  if [[ -n "$LPID" ]] && kill -0 "$LPID" 2>/dev/null; then
+    echo "   Weekend replay loop detected (PID $LPID) — will stop after this session"
+    echo "   (Use ./scripts/stop_weekend_replay.sh to stop immediately without waiting)"
+    mkdir -p "$(dirname "$WEEKEND_STOP_FILE")"
+    touch "$WEEKEND_STOP_FILE"
+  fi
+fi
+
 mkdir -p "$(dirname "$SHUTDOWN_FILE")"
 if [ -d "$ROOT/venv" ]; then
   # shellcheck disable=SC1091

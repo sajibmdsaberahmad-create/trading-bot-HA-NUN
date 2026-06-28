@@ -1,0 +1,16 @@
+{
+  "url": "local:commander_ib_report/turnover_fees",
+  "final_url": "local:commander_ib_report/turnover_fees",
+  "host": "local",
+  "topic": "commander:ib_report_turnover_fees",
+  "text": "TURNOVER + FEES (commander report economics)\n\nHigh turnover was INTENTIONAL \u2014 ~$73,789 notional on ~$2k capital.\nBut fees \u2212$317.20 consumed 29% of gross MTM profit.\n\nRULE: churn is good ONLY when net_edge_per_dollar > fee_rate.\n- Productive turnover: calculated lottery wins (NAK, RXT, ELAB\u2026) \u2014 vol spike, quick exit\n- Unproductive turnover: low-conviction entries (<80% setup) and hope-holds \u2014 not sector/ticker bans\n- Bot metric: reward = net_pnl / notional_traded; penalize fee-bleed trips\n\nFebruary \u22127.94% = traded without edge (cold start). March/April +20%/+22% = edge confirmed.\nStand aside when conviction < 80% or after loss streak \u2014 commander ended flat in cash.",
+  "text_excerpt": "TURNOVER + FEES (commander report economics)\n\nHigh turnover was INTENTIONAL \u2014 ~$73,789 notional on ~$2k capital.\nBut fees \u2212$317.20 consumed 29% of gross MTM profit.\n\nRULE: churn is good ONLY when net_edge_per_dollar > fee_rate.\n- Productive turnover: calculated lottery wins (NAK, RXT, ELAB\u2026) \u2014 vol spike, quick exit\n- Unproductive turnover: low-conviction entries (<80% setup) and hope-holds \u2014 not sector/ticker bans\n- Bot metric: reward = net_pnl / notional_traded; penalize fee-bleed trips\n\nFebruary \u22127.94% = traded without edge (cold start). March/April +20%/+22% = edge confirmed.\nStand aside when conviction < 80% or after loss streak \u2014 commander ended flat in cash.",
+  "text_chars": 672,
+  "content_hash": "47d5693281ffad59",
+  "read_only": true,
+  "source_type": "commander_ib_report",
+  "fetched_at": "2026-06-28T15:00:34.456076+00:00",
+  "report": "Since_Inception_Detailed_11_20260427",
+  "section": "turnover_fees",
+  "polarity": "mixed"
+}

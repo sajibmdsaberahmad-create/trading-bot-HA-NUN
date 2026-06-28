@@ -128,7 +128,9 @@ class AICommander:
         self._live_line = LiveAILine(cfg, self._council_decide_raw)
         self._chart_line = ChartVisionLine(cfg)
         from core.halim_entry_line import HalimEntryLine
+        from core.halim_exit_line import HalimExitLine
         self._halim_entry = HalimEntryLine(cfg)
+        self._halim_exit = HalimExitLine(cfg)
         self._deferred = DeferredCouncilLearner(cfg, self._live_line)
         self._ppo_model_ref: Any = None
         DECISION_LOG.parent.mkdir(parents=True, exist_ok=True)
@@ -319,11 +321,12 @@ class AICommander:
         ppo_buy: bool,
         ppo_conf: float,
         min_conf: float,
+        advisory_ctx: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         try:
             from core.halim_entry_line import merge_halim_entry_advisory
             halim_live = self._halim_entry.consume(ticker, fingerprint)
-            return merge_halim_entry_advisory(
+            result = merge_halim_entry_advisory(
                 decision,
                 halim_live,
                 ppo_buy=ppo_buy,
@@ -331,9 +334,154 @@ class AICommander:
                 min_conf=min_conf,
                 cfg=self.cfg,
             )
+            if result.get("halim_enter") is not None:
+                ctx = advisory_ctx or {}
+                try:
+                    from core.halim_outcome_gold import register_entry_advisory
+                    register_entry_advisory(
+                        ticker,
+                        halim_enter=bool(result["halim_enter"]),
+                        halim_conf=float(result.get("halim_conf", 0)),
+                        halim_reason=str(result.get("halim_reason", "")),
+                        spike_ratio=float(ctx.get("spike_ratio", 0)),
+                        scan_score=float(ctx.get("scan_score", 0)),
+                        ppo_buy=ppo_buy,
+                        ppo_conf=ppo_conf,
+                        pipeline=str(result.get("pipeline", "")),
+                        cfg=self.cfg,
+                    )
+                except Exception:
+                    pass
+            return result
         except Exception as exc:
             log.debug(f"Halim entry blend: {exc}")
             return decision
+
+    def _ring_halim_exit(
+        self,
+        ticker: str,
+        fingerprint: str,
+        *,
+        price: float,
+        pnl_pct: float,
+        peak_pct: float = 0.0,
+        stop: float = 0.0,
+        target: float = 0.0,
+        ppo_exit: bool = False,
+        ppo_conf: float = 0.5,
+        ppo_reason: str = "",
+        task: str = "exit_decision",
+    ) -> None:
+        try:
+            self._halim_exit.ring(
+                ticker,
+                fingerprint,
+                price=price,
+                pnl_pct=pnl_pct,
+                peak_pct=peak_pct,
+                stop=stop,
+                target=target,
+                ppo_exit=ppo_exit,
+                ppo_conf=ppo_conf,
+                ppo_reason=ppo_reason,
+                task=task,
+            )
+        except Exception as exc:
+            log.debug(f"Halim exit ring: {exc}")
+
+    def _blend_halim_exit(
+        self,
+        decision: Dict[str, Any],
+        *,
+        ticker: str,
+        fingerprint: str,
+        ppo_exit: bool,
+        ppo_conf: float,
+        min_conf: float,
+        advisory_ctx: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        try:
+            from core.halim_exit_line import merge_halim_exit_advisory
+            halim_live = self._halim_exit.consume(ticker, fingerprint)
+            result = merge_halim_exit_advisory(
+                decision,
+                halim_live,
+                ppo_exit=ppo_exit,
+                ppo_conf=ppo_conf,
+                min_conf=min_conf,
+                cfg=self.cfg,
+            )
+            if result.get("halim_exit") is not None:
+                ctx = advisory_ctx or decision
+                try:
+                    from core.halim_outcome_gold import register_exit_advisory
+                    register_exit_advisory(
+                        ticker,
+                        halim_exit=bool(result["halim_exit"]),
+                        halim_conf=float(result.get("halim_conf", 0)),
+                        halim_reason=str(result.get("halim_reason", "")),
+                        pnl_pct=float(ctx.get("pnl_pct", 0)),
+                        peak_pct=float(ctx.get("peak_pct", ctx.get("pnl_pct", 0))),
+                        ppo_exit=ppo_exit,
+                        ppo_conf=ppo_conf,
+                        task=str(ctx.get("task", "exit_decision")),
+                        pipeline=str(result.get("pipeline", "")),
+                        cfg=self.cfg,
+                    )
+                except Exception:
+                    pass
+            return result
+        except Exception as exc:
+            log.debug(f"Halim exit blend: {exc}")
+            return decision
+
+    def _apply_halim_exit_to_manage(
+        self,
+        result: Dict[str, Any],
+        *,
+        ticker: str,
+        fingerprint: str,
+        ppo_exit: bool,
+        ppo_conf: float,
+        min_conf: float,
+        advisory_ctx: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Map position_manage EXIT/HOLD through Halim exit advisory."""
+        action = str(result.get("action", "HOLD")).upper()
+        exit_base = {
+            "exit": action == "EXIT",
+            "confidence": float(result.get("confidence", ppo_conf) or ppo_conf),
+            "reason": str(result.get("reason", ""))[:200],
+            "pipeline": str(result.get("pipeline", "")),
+        }
+        ctx = advisory_ctx or {
+            "pnl_pct": float(result.get("pnl_pct", 0)),
+            "peak_pct": float(result.get("peak_pct", result.get("pnl_pct", 0))),
+            "task": "position_manage",
+        }
+        blended = self._blend_halim_exit(
+            exit_base,
+            ticker=ticker,
+            fingerprint=fingerprint,
+            ppo_exit=ppo_exit or action == "EXIT",
+            ppo_conf=ppo_conf,
+            min_conf=min_conf,
+            advisory_ctx=ctx,
+        )
+        out = dict(result)
+        if not blended.get("exit") and action == "EXIT":
+            out["action"] = "HOLD"
+            out["reason"] = str(blended.get("reason", out.get("reason", "")))[:120]
+            out["pipeline"] = str(blended.get("pipeline", out.get("pipeline", "")))
+        elif blended.get("exit") and action != "EXIT":
+            out["action"] = "EXIT"
+            out["reason"] = str(blended.get("reason", out.get("reason", "")))[:120]
+            out["pipeline"] = str(blended.get("pipeline", out.get("pipeline", "")))
+        out["confidence"] = float(blended.get("confidence", out.get("confidence", ppo_conf)))
+        for key in ("halim_exit", "halim_conf", "halim_agree", "halim_reason"):
+            if key in blended:
+                out[key] = blended[key]
+        return out
 
     def compose_telegram(
         self,
@@ -952,7 +1100,7 @@ class AICommander:
             ppo_action, ppo_conf, ppo_reason = self.ppo_action(obs, bar_df, for_entry=True)
 
         try:
-            from core.trading_copilot import copilot_blocks_entry, get_copilot_brief
+            from core.trading_copilot import copilot_blocks_entry, get_copilot_brief, copilot_caution_for_ticker
             blocked, creason = copilot_blocks_entry(self.cfg, ticker)
             if blocked:
                 return {
@@ -984,6 +1132,13 @@ class AICommander:
             get_effective_confidence_threshold(self.cfg, pilot),
             min_confidence_for_state(self.cfg),
         )
+        try:
+            from core.trading_copilot import copilot_caution_for_ticker
+            caution_bump = copilot_caution_for_ticker(self.cfg, ticker)
+            if caution_bump:
+                min_conf = min(0.95, min_conf + caution_bump)
+        except Exception:
+            pass
         mctx = market_ctx or {}
         bid = mctx.get("bid")
         ask = mctx.get("ask")
@@ -1109,7 +1264,7 @@ class AICommander:
                 )
             return decision
         if allows_spike_fast_entry(self.cfg) and should_spike_fast_entry(
-            self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf,
+            self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
         ):
             fp = self._ring_entry_council_for_learning(
                 ticker, current_px, spike_ratio, scan_score,
@@ -1527,6 +1682,10 @@ class AICommander:
             ppo_buy=ppo_action == 1,
             ppo_conf=ppo_conf,
             min_conf=min_conf,
+            advisory_ctx={
+                "spike_ratio": spike_ratio,
+                "scan_score": scan_score,
+            },
         )
         enter = bool(out.get("enter"))
         confidence = float(out.get("confidence", ppo_conf))
@@ -1757,7 +1916,12 @@ class AICommander:
         try:
             from core.halim_ppo_coevolution import record_coevolution
             pipeline = str(decision.get("pipeline", ""))
-            if decision.get("halim_enter") is not None:
+            if decision.get("halim_exit") is not None:
+                halim_src = "halim_lm"
+                halim_sig = bool(decision.get("halim_exit"))
+                halim_conf = float(decision.get("halim_conf", decision.get("confidence", 0.5)) or 0.5)
+                halim_reason = str(decision.get("halim_reason", decision.get("reason", "")))[:300]
+            elif decision.get("halim_enter") is not None:
                 halim_src = "halim_lm"
                 halim_sig = bool(decision.get("halim_enter"))
                 halim_conf = float(decision.get("halim_conf", decision.get("confidence", 0.5)) or 0.5)
@@ -1765,6 +1929,8 @@ class AICommander:
             else:
                 halim_src = "proxy" if "proxy" in pipeline else "council" if "council" in pipeline else "halim"
                 halim_sig = decision.get("enter") if task == "entry_decision" else decision.get("exit")
+                if task == "position_manage":
+                    halim_sig = str(decision.get("action", "")).upper() == "EXIT"
                 halim_conf = float(decision.get("confidence", 0.5) or 0.5)
                 halim_reason = str(decision.get("reason", ""))[:300]
             record_coevolution(
@@ -1811,6 +1977,16 @@ class AICommander:
         stagnation_sec = float(getattr(self.cfg, "STAGNATION_EXIT_SEC", 90.0))
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
         fp = stagnation_fingerprint(ticker, price, pnl_pct, stagnant_sec)
+        stop = float(ctx.get("stop", 0) or 0)
+        target = float(ctx.get("target", 0) or 0)
+        peak_pct = float(ctx.get("peak_pct", pnl_pct) or pnl_pct)
+        self._ring_halim_exit(
+            ticker, fp,
+            price=price, pnl_pct=pnl_pct, peak_pct=peak_pct,
+            stop=stop, target=target,
+            ppo_exit=ppo_exit, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            task="stagnation_check",
+        )
         prompt = (
             "You are HANOON live pilot — full-time profit hunter. Profit is your only main goal.\n"
             "This OPEN position may be DEAD — no progress, bleeding time and opportunity cost.\n"
@@ -1863,6 +2039,15 @@ class AICommander:
                 "pending": False,
                 "council_agreement": merged.get("council_agreement"),
             }
+            result = self._blend_halim_exit(
+                result,
+                ticker=ticker,
+                fingerprint=fp,
+                ppo_exit=ppo_exit,
+                ppo_conf=ppo_conf,
+                min_conf=min_conf,
+                advisory_ctx={**ctx, "task": "stagnation_check"},
+            )
         else:
             out = self.think_json(prompt, task="stagnation_check")
             should_exit = bool(out.get("exit", ppo_exit))
@@ -1967,6 +2152,13 @@ class AICommander:
         target = float(ctx.get("target", 0) or 0)
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
         fp = position_fingerprint(ticker, price, pnl_pct, stop, target)
+        self._ring_halim_exit(
+            ticker, fp,
+            price=price, pnl_pct=pnl_pct, peak_pct=peak_pct,
+            stop=stop, target=target,
+            ppo_exit=ppo_exit, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            task="position_manage",
+        )
         prompt = (
             "You are HANOON live pilot — AI FULL POWER profit management.\n"
             "Fast does NOT mean small profit: RIDE winners when momentum is real — trail stop, "
@@ -2030,6 +2222,15 @@ class AICommander:
                 mechanical_stop=mechanical_stop,
                 mechanical_target=mechanical_target,
                 cfg=self.cfg,
+            )
+            result = self._apply_halim_exit_to_manage(
+                result,
+                ticker=ticker,
+                fingerprint=fp,
+                ppo_exit=ppo_exit,
+                ppo_conf=ppo_conf,
+                min_conf=min_conf,
+                advisory_ctx={**ctx, "task": "position_manage"},
             )
         else:
             out = self.think_json(prompt, task="position_manage")
@@ -2102,6 +2303,15 @@ class AICommander:
             mechanical_stop=state.get("mechanical_stop"),
             mechanical_target=state.get("mechanical_target"),
         )
+        result = self._apply_halim_exit_to_manage(
+            result,
+            ticker=ticker,
+            fingerprint=fp,
+            ppo_exit=bool(state.get("ppo_exit", False)),
+            ppo_conf=float(state.get("ppo_conf", 0.5)),
+            min_conf=float(state.get("min_conf", 0.55)),
+            advisory_ctx={**ctx, "task": "position_manage"},
+        )
         self._record_council_learning(
             ticker, result, "position_manage",
             bool(state.get("ppo_exit", False)), float(state.get("ppo_conf", 0.5)),
@@ -2150,6 +2360,16 @@ class AICommander:
         pnl_pct = float(ctx.get("pnl_pct", 0) or 0)
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
         fp = exit_fingerprint(ticker, price, pnl_pct)
+        stop = float(ctx.get("stop", 0) or 0)
+        target = float(ctx.get("target", 0) or 0)
+        peak_pct = float(ctx.get("peak_pct", pnl_pct) or pnl_pct)
+        self._ring_halim_exit(
+            ticker, fp,
+            price=price, pnl_pct=pnl_pct, peak_pct=peak_pct,
+            stop=stop, target=target,
+            ppo_exit=ppo_exit, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            task="exit_decision",
+        )
         if getattr(self.cfg, "LIVE_AI_PIPELINE_ENABLED", True):
             mood, conf, lessons = self._mood_context()
             full = enrich_prompt(
@@ -2186,6 +2406,15 @@ class AICommander:
                 "pending": False,
                 "council_agreement": merged.get("council_agreement"),
             }
+            result = self._blend_halim_exit(
+                result,
+                ticker=ticker,
+                fingerprint=fp,
+                ppo_exit=ppo_exit,
+                ppo_conf=ppo_conf,
+                min_conf=min_conf,
+                advisory_ctx={**ctx, "task": "exit_decision"},
+            )
         else:
             out = self.think_json(prompt, ttl=1.0, task="exit_decision")
             should_exit = bool(out.get("exit", ppo_exit))
@@ -2236,6 +2465,15 @@ class AICommander:
             "pending": False,
             "council_agreement": merged.get("council_agreement"),
         }
+        result = self._blend_halim_exit(
+            result,
+            ticker=ticker,
+            fingerprint=fp,
+            ppo_exit=bool(state.get("ppo_exit", False)),
+            ppo_conf=float(state.get("ppo_conf", 0.5)),
+            min_conf=float(state.get("min_conf", 0.55)),
+            advisory_ctx={**ctx, "task": "exit_decision"},
+        )
         self._record_council_learning(
             ticker, result, "exit_decision",
             bool(state.get("ppo_exit", False)), float(state.get("ppo_conf", 0.5)),

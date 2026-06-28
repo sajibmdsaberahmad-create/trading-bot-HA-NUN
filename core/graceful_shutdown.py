@@ -173,6 +173,13 @@ def run_graceful_shutdown(
     except Exception as exc:
         summary["steps"]["ppo_micro_flush"] = {"ok": False, "error": str(exc)[:120]}
 
+    try:
+        from core.learning_coordinator import flush_pending_learning
+        flush_pending_learning(cfg, runner=None, force=True)
+        summary["steps"]["learning_coordinator"] = {"ok": True}
+    except Exception as exc:
+        summary["steps"]["learning_coordinator"] = {"ok": False, "error": str(exc)[:120]}
+
     ev_trigger = "replay_session_end" if replay else "live_session_end"
     if trigger not in ("evolution_done",):
         summary["steps"]["evolution"] = flush_owned_brain(

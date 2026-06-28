@@ -9,6 +9,7 @@ waiting for slow Ollama council deliberation.
 
 from __future__ import annotations
 
+import os
 from typing import Any, List, Optional, Tuple, TYPE_CHECKING
 
 from core.config import BotConfig
@@ -77,8 +78,9 @@ def should_spike_fast_entry(
     scan_score: float,
     ppo_action: int = 0,
     ppo_conf: float = 0.0,
+    micro: Optional[dict] = None,
 ) -> bool:
-    """Instant entry on strong spike — skip council wait."""
+    """Instant entry on strong spike — skip council wait when quality confirms."""
     from core.capital_discipline import allows_spike_fast_entry
     if not allows_spike_fast_entry(cfg):
         return False
@@ -86,26 +88,21 @@ def should_spike_fast_entry(
         return False
     min_spike = float(getattr(cfg, "AI_SPIKE_FAST_MIN_RATIO", 1.15))
     min_score = float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15.0))
-    min_conf = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55)) * 0.75
+    relax_conf = os.getenv("SPIKE_FAST_RELAX_CONF", "false").lower() in ("1", "true", "yes")
+    base_conf = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+    min_conf = base_conf * 0.75 if relax_conf else base_conf
+    raw = False
     if spike_ratio >= min_spike and scan_score >= min_score:
-        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
-            return _passes_entry_quality_gate(
-                cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
-            )
-        return True
-    if spike_ratio >= min_spike * 1.1 and ppo_action == 1 and ppo_conf >= min_conf:
-        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
-            return _passes_entry_quality_gate(
-                cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
-            )
-        return True
-    if spike_ratio >= 1.3:
-        if getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
-            return _passes_entry_quality_gate(
-                cfg, {}, spike_ratio, scan_score, ppo_action, ppo_conf,
-            )
-        return True
-    return False
+        raw = True
+    elif spike_ratio >= min_spike * 1.1 and ppo_action == 1 and ppo_conf >= min_conf:
+        raw = True
+    elif spike_ratio >= 1.3 and scan_score >= min_score:
+        raw = True
+    if not raw:
+        return False
+    return _passes_entry_quality_gate(
+        cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+    )
 
 
 def should_disciplined_strong_entry(

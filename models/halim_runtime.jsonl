@@ -8,3 +8,12 @@
 {"timestamp":"2026-06-27T12:22:28.497205+00:00","event":"off_hours_learn","mode":"off_hours","topic":"wiki:Stock_market","chars":12000}
 {"timestamp":"2026-06-27T12:27:21.848684+00:00","event":"off_hours_dev","mode":"off_hours","trigger":"scheduled"}
 {"timestamp":"2026-06-27T12:27:21.897373+00:00","event":"export_action_gold","mode":"off_hours","ok":true,"added":1,"skipped":557,"total_gold":515}
+{"timestamp":"2026-06-28T04:21:30.730330+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T04:51:11.733928+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T05:37:18.920943+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T06:56:43.904374+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T07:00:25.225999+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T07:02:53.890321+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T07:47:08.309441+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T09:27:21.492163+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-28T12:02:58.921846+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}

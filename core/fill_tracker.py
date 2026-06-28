@@ -282,6 +282,9 @@ def build_round_trip_record(
     entry_slip = slippage_vs_quote(entry_fill, limit_px) if limit_px else slippage_vs_quote(entry_fill, quote_entry)
     exit_slip = slippage_vs_quote(exit_fill, quote_exit)
     result = "win" if pnl_usd > 0 else "loss"
+    peak_pct = 0.0
+    if entry_fill > 0 and peak_px > 0:
+        peak_pct = round(((peak_px / entry_fill) - 1) * 100, 3)
     return {
         "ticker": ticker,
         "entry": round(entry_fill, 4),
@@ -293,6 +296,7 @@ def build_round_trip_record(
         "shares": shares,
         "pnl_usd": round(pnl_usd, 2),
         "pnl_pct": round(pnl_pct, 2),
+        "peak_pct": peak_pct,
         "result": result,
         "exit_reason": exit_reason[:200],
         "entry_slippage_pct": entry_slip,

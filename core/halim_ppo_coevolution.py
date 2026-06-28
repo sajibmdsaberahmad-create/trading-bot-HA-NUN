@@ -289,6 +289,7 @@ def attach_trade_outcome(
     pnl: float,
     win: bool,
     cfg: Optional[BotConfig] = None,
+    trade_rec: Optional[Dict[str, Any]] = None,
 ) -> None:
     """After trade close — label who was right; generative outcome dialogue."""
     if not _enabled(cfg):
@@ -301,7 +302,8 @@ def attach_trade_outcome(
             recent_cmp = item.get("comparison") or {}
             break
 
-    _append(COEVOLUTION_LOG, {
+    tr = trade_rec or {}
+    outcome_row = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "event": "trade_outcome",
         "ticker": ticker.upper(),
@@ -309,7 +311,16 @@ def attach_trade_outcome(
         "outcome_pnl": round(float(pnl), 2),
         "win": win,
         "comparison": recent_cmp,
-    })
+    }
+    if tr:
+        outcome_row.update({
+            "pnl_pct": tr.get("pnl_pct"),
+            "peak_pct": tr.get("peak_pct"),
+            "exit_reason": str(tr.get("exit_reason", ""))[:200],
+            "hold_sec": tr.get("hold_sec"),
+            "regime": tr.get("regime"),
+        })
+    _append(COEVOLUTION_LOG, outcome_row)
 
     # Label recent correction rows with trade outcome
     if recent_cmp:

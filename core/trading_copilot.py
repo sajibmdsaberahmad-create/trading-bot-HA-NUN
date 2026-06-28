@@ -66,6 +66,40 @@ def _copilot_enabled(cfg: BotConfig) -> bool:
     return os.getenv("TRADING_COPILOT_ENABLED", "true").lower() in ("1", "true", "yes")
 
 
+def copilot_block_repeat_losers(cfg: Optional[BotConfig] = None) -> bool:
+    """Hard SKIP on repeat losers — off by default; live markets need adaptation not bans."""
+    return os.getenv("COPILOT_BLOCK_REPEAT_LOSERS", "false").lower() in ("1", "true", "yes")
+
+
+def copilot_repeat_loss_threshold(cfg: Optional[BotConfig] = None) -> int:
+    """Losses on same ticker before CAUTION (or SKIP if blocking enabled)."""
+    try:
+        return max(2, int(os.getenv("COPILOT_REPEAT_LOSS_THRESHOLD", "3")))
+    except (TypeError, ValueError):
+        return 3
+
+
+def copilot_caution_conf_bump(cfg: Optional[BotConfig] = None) -> float:
+    """Extra PPO confidence required when copilot marks ticker CAUTION."""
+    try:
+        return max(0.0, float(os.getenv("COPILOT_CAUTION_CONF_BUMP", "0.07")))
+    except (TypeError, ValueError):
+        return 0.07
+
+
+def copilot_caution_for_ticker(cfg: BotConfig, ticker: str) -> float:
+    """Return confidence bump if ticker is on copilot caution list (not a hard block)."""
+    if is_replay_relax_copilot() or not _copilot_enabled(cfg):
+        return 0.0
+    brief = get_copilot_brief()
+    age = time.time() - brief.updated_at
+    if age > float(getattr(cfg, "COPILOT_MAX_AGE_SEC", 300.0)):
+        return 0.0
+    if brief.bias_for(ticker) == "CAUTION":
+        return copilot_caution_conf_bump(cfg)
+    return 0.0
+
+
 def is_replay_relax_copilot() -> bool:
     """Replay gold collection — allow entries; don't veto from stale live skip list."""
     return (
@@ -169,6 +203,13 @@ def _build_session_context(runner: Optional["ScalperRunner"], cfg: BotConfig) ->
     except Exception:
         pass
 
+    try:
+        from core.commander_runtime import commander_runtime_context, commander_runtime_enabled
+        if commander_runtime_enabled(cfg):
+            lines.append(commander_runtime_context().split("\n")[0])
+    except Exception:
+        pass
+
     if getattr(runner, "consciousness", None):
         try:
             c = runner.consciousness
@@ -209,9 +250,10 @@ def _parse_brief_json(raw: str, stats: Dict[str, Any]) -> CopilotBrief:
     )
 
 
-def _heuristic_brief(stats: Dict[str, Any]) -> CopilotBrief:
+def _heuristic_brief(stats: Dict[str, Any], cfg: Optional[BotConfig] = None) -> CopilotBrief:
     """No API — pattern-based brief from trade stats."""
     from collections import defaultdict
+    cfg = cfg or BotConfig()
     trades = stats.get("trades") or []
     by_t: Dict[str, List] = defaultdict(list)
     for t in trades:
@@ -219,20 +261,23 @@ def _heuristic_brief(stats: Dict[str, Any]) -> CopilotBrief:
     bias: Dict[str, str] = {}
     repeat: List[str] = []
     relax = is_replay_relax_copilot()
+    hard_block = copilot_block_repeat_losers(cfg) and not relax
+    loss_thr = copilot_repeat_loss_threshold(cfg)
     for tk, xs in by_t.items():
         losses = sum(1 for x in xs if float(x.get("pnl_usd", 0) or 0) < 0)
-        if losses >= 2:
-            if relax:
-                bias[tk] = "CAUTION"
-            else:
-                bias[tk] = "SKIP"
-                repeat.append(tk)
+        if losses >= loss_thr:
+            repeat.append(tk)
+            bias[tk] = "SKIP" if hard_block else "CAUTION"
         elif losses >= 1:
             bias[tk] = "CAUTION"
     wr = float(stats.get("win_rate", 0))
     posture = "defensive" if wr < 0.25 else "normal"
     return CopilotBrief(
-        narrative=f"Local copilot: {wr:.0%} session WR. Repeat losers: {', '.join(repeat) or 'none'}.",
+        narrative=(
+            f"Local copilot: {wr:.0%} session WR. "
+            f"Adapt entry quality on: {', '.join(repeat) or 'none'} "
+            f"({'hard skip' if hard_block else 'caution — tighter setup required'})."
+        ),
         regime_read="mixed",
         risk_posture=posture,
         session_wr=wr,
@@ -240,12 +285,16 @@ def _heuristic_brief(stats: Dict[str, Any]) -> CopilotBrief:
         repeat_losers=repeat,
         ppo_hints={
             "confidence_boost": 0.04 if wr < 0.2 else 0.0,
-            "skip_repeat_losers": not relax,
+            "require_quality_on_repeat": bool(repeat) and not relax,
+            "min_spike_mult": 1.15 if repeat else 1.0,
         },
         lessons=(
             ["Replay: collect gold on all tickers; copilot skip relaxed"]
             if relax
-            else ["Skip tickers with 2+ losses this session", "Require PPO+council alignment on entries"]
+            else [
+                "Repeat-loss tickers: require profit_probability + spike confirmation — do not blanket-skip",
+                "Raise PPO bar on re-entry after losses; adapt stops not ticker bans",
+            ]
         ),
         updated_at=time.time(),
         source="heuristic",
@@ -305,8 +354,9 @@ class TradingCopilot:
             "You are HANOON Trading Copilot — a full reasoning AI running ALONGSIDE a PPO scalper.\n"
             "You have the FULL session context below. Think step-by-step, then output JSON only.\n\n"
             f"{ctx}\n\n"
-            "Analyze: what is going wrong/right? Which tickers to avoid? Regime? Risk posture?\n"
-            "Give PPO hints (confidence boost/penalty, skip lists).\n\n"
+            "Analyze: what is going wrong/right? Which tickers need tighter entry quality?\n"
+            "Prefer CAUTION (raise bar) over SKIP for repeat-loss tickers — markets fluctuate.\n"
+            "Give PPO hints (confidence boost/penalty, quality requirements).\n\n"
             "JSON schema:\n"
             "{\n"
             '  "narrative": "2-4 sentences pilot voice — what you see and plan",\n'
@@ -326,7 +376,7 @@ class TradingCopilot:
             ok, reason = allow_teacher_api("copilot", self.cfg)
             if not ok:
                 log.debug(f"Copilot: local student ({reason})")
-                brief = _heuristic_brief(stats)
+                brief = _heuristic_brief(stats, self.cfg)
                 self._brief = brief
                 _save_brief(brief)
                 try:
@@ -350,7 +400,7 @@ class TradingCopilot:
         if raw:
             brief = _parse_brief_json(raw, stats)
         else:
-            brief = _heuristic_brief(stats)
+            brief = _heuristic_brief(stats, self.cfg)
 
         self._brief = brief
         _save_brief(brief)
@@ -396,10 +446,12 @@ def maybe_refresh_copilot(runner: Optional["ScalperRunner"] = None) -> None:
 
 
 def copilot_blocks_entry(cfg: BotConfig, ticker: str) -> tuple[bool, str]:
-    """Gate used by entry path — respects copilot SKIP bias."""
+    """Gate used by entry path — hard SKIP only when COPILOT_BLOCK_REPEAT_LOSERS=true."""
     if is_replay_relax_copilot():
         return False, ""
     if not _copilot_enabled(cfg):
+        return False, ""
+    if not copilot_block_repeat_losers(cfg):
         return False, ""
     brief = get_copilot_brief()
     age = time.time() - brief.updated_at

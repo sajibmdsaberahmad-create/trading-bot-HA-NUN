@@ -66,6 +66,12 @@ def _score_doc(query_terms: List[str], doc: Dict[str, Any]) -> int:
         if term in topic:
             score += 4
         score += hay.count(term)
+    if topic.startswith("commander:ib_report"):
+        try:
+            from core.halim_commander_report_learn import commander_report_rag_boost
+            score += commander_report_rag_boost(topic)
+        except Exception:
+            score += 6
     if topic.startswith("wikipedia:"):
         title = topic[10:].replace("_", " ")
         for term in query_terms:

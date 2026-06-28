@@ -1,99 +1,594 @@
-🧭 SELF-IMPROVEMENT GUIDELINES | 2026-06-27T12:22:28.776242
-Combined win rate: 15.6% (buffer=10.5%, returns=20.7%)
+🧭 SELF-IMPROVEMENT GUIDELINES | 2026-06-28T09:34:10.615636
+Combined win rate: 15.1% (buffer=9.6%, returns=20.7%)
 • Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER
 • Reduce SCAN_INTERVAL_SECONDS to avoid overtrading
 • Lower MAX_TRADE_SIZE_USD to preserve capital
 • Add 5-min confirmation before entry to filter noise
+• Average reward is negative — review exit logic and trailing-stop settings
 • Commander guidance (recent):
   - Hi
   - ping - are you there ?
   - Hi
   - Hi
 • Recommended parameter adjustments:
-  - SCALP_STOP_ATR_MULTIPLIER: 0.5760000000000001 -> 0.4608000000000001 (reason: tighten stops when WR low; widen when WR strong)
-  - SCALP_TP_ATR_MULTIPLIER: 1.215 -> 1.0935000000000001 (reason: increase targets when WR strong; reduce when WR weak)
-  - SCAN_INTERVAL_SECONDS: 51 -> 66.3 (reason: reduce frequency when WR low; increase when WR strong)
-  - MAX_TRADE_SIZE_USD: 22277.843875 -> 15594.490712499997 (reason: reduce size when WR poor; increase when WR strong)
-  - MAX_RISK_PER_TRADE_USD: 140625.0 -> 105468.75 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
-  - CONFIDENCE_THRESHOLD: 0.7500000000000001 -> 0.8000000000000002 (reason: raise entry bar when WR low; lower when WR strong)
-🧭 COMMANDER LEARNING | 2026-06-27T12:22:29.056020+00:00
-Halim heuristic dev plan — WR 24%
+  - SCALP_STOP_ATR_MULTIPLIER: 0.9 -> 0.7200000000000001 (reason: tighten stops when WR low; widen when WR strong)
+  - SCALP_TP_ATR_MULTIPLIER: 1.5 -> 1.35 (reason: increase targets when WR strong; reduce when WR weak)
+  - SCAN_INTERVAL_SECONDS: 30 -> 39.0 (reason: reduce frequency when WR low; increase when WR strong)
+  - MAX_TRADE_SIZE_USD: 50000.0 -> 35000.0 (reason: reduce size when WR poor; increase when WR strong)
+  - MAX_RISK_PER_TRADE_USD: 250000.0 -> 187500.0 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
+  - CONFIDENCE_THRESHOLD: 0.68 -> 0.7300000000000001 (reason: raise entry bar when WR low; lower when WR strong)
+🧭 COMMANDER LEARNING | 2026-06-28T09:34:10.655740+00:00
+Halim heuristic dev plan — WR 21%
 
-🧭 COMMANDER LEARNING | 2026-06-28T04:51:17.094854+00:00
-Observed loss_streak — recorded for learning.
-replay_stop
-
-🧭 COMMANDER LEARNING | 2026-06-28T04:51:17.095179+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:03:03.765980+00:00
 Observed trade_closed — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T04:55:02.881111+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:03:03.773601+00:00
 Observed loss_streak — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T04:55:02.882672+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:03:44.890990+00:00
 Observed trade_closed — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T04:57:08.859621+00:00
-Observed loss_streak — recorded for learning.
-bracket_exit
-
-🧭 COMMANDER LEARNING | 2026-06-28T04:57:09.107011+00:00
-Observed trade_closed — recorded for learning.
-bracket_exit
-
-🧭 COMMANDER LEARNING | 2026-06-28T04:58:12.769928+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:03:44.891019+00:00
 Observed loss_streak — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T04:58:12.770180+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:03:48.628360+00:00
 Observed trade_closed — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T04:58:14.532337+00:00
-• Applied mutations:
-  - CONFIDENCE_THRESHOLD → 0.6900000000000001 (trade WR 24% — tighten PPO entry bar)
-  - MIN_PROFIT_PROBABILITY → 0.5 (repeat losses — raise profit probability gate)
-
-
-
-# PPO Teacher 2026-06-28 04:58 UTC
-Diagnosis: Local teacher: 24% WR on 330 trades. 4 stop exits. Repeat tickers: MARA, LCID, ASTS, COIN
-- Do not re-enter same ticker after same-bar stop loss
-- Penalize PPO micro-fast when council confidence is neutral (50%)
-- Wait for volume spike confirmation before chase entries🧭 COMMANDER LEARNING | 2026-06-28T05:37:22.880759+00:00
-Observed trade_closed — recorded for learning.
-replay_stop
-
-🧭 COMMANDER LEARNING | 2026-06-28T05:37:22.933089+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:03:48.638368+00:00
 Observed loss_streak — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T05:38:34.286665+00:00
-Observed loss_streak — recorded for learning.
-replay_stop
-
-🧭 COMMANDER LEARNING | 2026-06-28T05:38:34.286780+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:04:57.528991+00:00
 Observed trade_closed — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T05:39:14.019573+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:04:57.539252+00:00
 Observed loss_streak — recorded for learning.
 replay_stop
 
-🧭 COMMANDER LEARNING | 2026-06-28T05:39:14.019471+00:00
-Observed trade_closed — recorded for learning.
-replay_stop
-
-🧭 COMMANDER LEARNING | 2026-06-28T05:40:32.614575+00:00
+🧭 COMMANDER LEARNING | 2026-06-28T12:05:30.661052+00:00
 Observed trade_closed — recorded for learning.
 replay_target
 
+🧭 COMMANDER LEARNING | 2026-06-28T12:05:46.688347+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +1.30% (peak +1.88% gave back 0.58%)
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:06:40.962575+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:06:40.962610+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:06:48.982198+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:07:38.795207+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:07:38.795179+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:08:42.494243+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:08:42.494287+00:00
+Observed loss_streak — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:08:47.043071+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:08:47.043024+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:10:54.373782+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:10:54.373842+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:10:58.574849+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:10:58.575291+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:11:37.221296+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:11:37.221354+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:11:40.720528+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:11:40.733749+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:11:46.466631+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:11:46.466662+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:12:37.247731+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:12:37.262645+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:12:43.036523+00:00
+Could not parse AI plan — retained guidance for prompts only.
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- LCID: pnl=$-4.37 slip=-
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.68 (Loss streak — raise entry bar until pilot regains edge)
+  - VOLUME_SPIKE_MIN_RATIO → 1.35 (Loss streak — require stronger volume confirmation)
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:12:46.535004+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:12:46.614901+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:14:58.418662+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:14:58.420530+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:06.698298+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:06.712269+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:11.590040+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:11.590538+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:14.585122+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:14.585206+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:40.529161+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.49% (peak +0.49%)
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:47.820407+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:47.820475+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:49.573615+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +0.20% (peak +0.58% gave back 0.38%)
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:15:59.167716+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:16:25.353911+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.28%
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:16:30.050258+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.27%
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:16:32.764620+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:18:17.073426+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:18:17.113869+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:19:55.676372+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:19:55.707122+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:20:01.569202+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:20:01.614783+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:20:39.358965+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.27%
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:21:41.909539+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:21:41.918784+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:22:22.714606+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:22:22.826598+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:22:35.442757+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:22:35.470480+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:23:17.054007+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:23:17.057991+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:24:03.012861+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:25:56.100201+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:25:56.110338+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:03.847611+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:03.847521+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:11.085965+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:11.086015+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:13.133418+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:13.133372+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:47.532527+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:47.539515+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:53.263991+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:28:53.281472+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:29:00.910572+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:29:00.933382+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:29:29.698799+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:29:40.483712+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:29:40.513309+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:30:23.042114+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:31:07.978355+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:32:58.587486+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:34:16.742946+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:34:16.787413+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:35:53.865277+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:35:53.896635+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:36:35.030976+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:36:35.420337+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:37:38.301587+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.44% (peak +0.44%)
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:37:43.748095+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:37:44.155990+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:38:18.830674+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:39:18.869514+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:39:18.869471+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:39:56.325041+00:00
+Observed trade_closed — recorded for learning.
+spike_top_exit: +0.84% vol=2.4x
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:40:02.298980+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:40:02.445426+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:40:51.843867+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:40:51.846553+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:41:40.974313+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:41:40.978547+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:42:38.056061+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:42:38.059349+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:42:43.878063+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:42:44.228769+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:42:51.674363+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.49% (peak +0.49%)
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:43:17.760931+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:43:20.345669+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:44:19.766948+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:44:19.805896+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:44:29.494878+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:44:29.561954+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:45:33.715322+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:45:33.717099+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:46:30.395104+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:46:30.396572+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:47:23.373721+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:48:13.545353+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:48:13.546967+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:49:00.968578+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:49:01.049021+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:49:01.056303+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:49:01.098207+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:49:45.549744+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.30%
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:50:40.691690+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.30%
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:51:30.484479+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:51:30.566741+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:51:48.143165+00:00
+Observed trade_closed — recorded for learning.
+replay_target
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:52:33.165977+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall_min_green +0.31%
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:54:07.950157+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:54:07.984057+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:54:50.011577+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:54:50.031261+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:54:55.287422+00:00
+Observed trade_closed — recorded for learning.
+replay_stop
+
+🧭 COMMANDER LEARNING | 2026-06-28T12:54:55.294311+00:00
+Observed loss_streak — recorded for learning.
+replay_stop
 
 
-# PPO Teacher 2026-06-28 05:40 UTC
-Diagnosis: Local teacher: 27% WR on 236 trades. 7 stop exits. Repeat tickers: ASTS, COIN, MARA, LCID
-- Do not re-enter same ticker after same-bar stop loss
-- Penalize PPO micro-fast when council confidence is neutral (50%)
-- Wait for volume spike confirmation before chase entries
+🧭 COMMANDER IB REPORT GOLD | 2026-06-28T13:09:14.771697+00:00
+Period 2026-02-06 → 2026-04-27 | +35.03% TWR
+Algo must beat human: cut tail losses, fee-aware turnover, stand aside when edge gone.
+• Max single-trip loss ~3% equity — human had −13% contributors (CTEV/PLUG/ENVB)
+• Turnover OK only when net edge > round-trip fees (~29% fee drag on human MTM)
+• EXIT into spike tops; never hope-hold losers
+• SKIP low vol / negative sector attribution (energy net −10%)
+• Pause entries after loss streak — human overtraded; ended flat in cash

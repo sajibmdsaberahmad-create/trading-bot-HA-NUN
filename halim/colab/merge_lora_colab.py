@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -26,6 +27,30 @@ def _fix_peft_torchao() -> None:
     )
 
 
+def _resolve_adapter() -> Path:
+    """Local LoRA only — never treat toddler_v1/... as a HuggingFace repo id."""
+    base = Path("toddler_v1/lora_adapter")
+    candidates: list[Path] = []
+    if base.is_dir():
+        for cp in sorted(base.glob("checkpoint-*"), reverse=True):
+            candidates.append(cp)
+        candidates.append(base)
+    else:
+        candidates.append(base)
+
+    for path in candidates:
+        has_cfg = (path / "adapter_config.json").is_file()
+        has_weights = (path / "adapter_model.safetensors").is_file() or (path / "adapter.bin").is_file()
+        if has_cfg and has_weights:
+            return path.resolve()
+
+    raise FileNotFoundError(
+        "No local LoRA adapter at toddler_v1/lora_adapter/.\n"
+        "Run training first:  python train_toddler_colab.py\n"
+        "(train_toddler_colab.py merges automatically — merge_lora_colab.py is only if train stopped early)"
+    )
+
+
 def main() -> None:
     _fix_peft_torchao()
 
@@ -35,9 +60,7 @@ def main() -> None:
 
     # HF scaffold registry id — required by transformers; product name is M. A. Halim.
     BASE = os.getenv("HALIM_BASE_MODEL", os.getenv("HALIM_SCAFFOLD_HF", "Qwen/Qwen2.5-0.5B-Instruct"))
-    adapter = Path("toddler_v1/lora_adapter")
-    if not (adapter / "adapter_model.safetensors").is_file():
-        adapter = Path("toddler_v1/lora_adapter/checkpoint-614")
+    adapter = _resolve_adapter()
     merged = Path("toddler_v1/merged")
     merged.mkdir(parents=True, exist_ok=True)
 
@@ -47,7 +70,7 @@ def main() -> None:
         BASE, torch_dtype=torch.float16, device_map="cpu", trust_remote_code=True,
     )
     print("2/4 Loading LoRA…")
-    peft_model = PeftModel.from_pretrained(base, str(adapter))
+    peft_model = PeftModel.from_pretrained(base, str(adapter), local_files_only=True)
     print("3/4 Merging…")
     merged_model = peft_model.merge_and_unload()
     print("4/4 Saving merged (~1 GB)…")

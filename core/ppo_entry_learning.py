@@ -311,32 +311,49 @@ def _run_queued_micro_improve(cfg: BotConfig, model: Any) -> None:
         _micro_queue.clear()
         _micro_running = True
     try:
-        if batch and model is not None:
-            ppo_micro_improve(cfg, model, batch)
+        if batch:
+            from core.ppo_reward_trainer import defer_reward_records
+            defer_reward_records(batch)
+            try:
+                from core.learning_coordinator import (
+                    is_replay_session,
+                    schedule_async_live_ppo_if_due,
+                )
+                if not is_replay_session():
+                    schedule_async_live_ppo_if_due(cfg, model)
+            except Exception:
+                pass
     finally:
         with _micro_lock:
             _micro_running = False
-            if _micro_queue:
-                _schedule_micro_improve(cfg, model)
+            pending = bool(_micro_queue)
+        if pending:
+            _fire_micro_timer(cfg, model)
 
 
 def _schedule_micro_improve(cfg: BotConfig, model: Any, records: List[Dict[str, Any]]) -> None:
-    """Queue PPO micro-learn — async/debounced so entries never block on SB3."""
+    """Queue records; live fires debounced async micro-PPO — never sync SB3 on hot path."""
     global _micro_timer
     steps = int(getattr(cfg, "PPO_ENTRY_MICRO_STEPS", 512))
     if steps <= 0 or model is None or not records:
         return
+    try:
+        from core.learning_coordinator import should_queue_only_learning
+        from core.ppo_reward_trainer import defer_reward_records
+        defer_reward_records(records)
+        if should_queue_only_learning(cfg):
+            return
+    except Exception:
+        pass
+    max_q = int(os.getenv("PPO_MICRO_QUEUE_MAX", "48"))
     with _micro_lock:
         _micro_queue.extend(records)
-    debounce = ppo_entry_micro_debounce_sec()
-    if not ppo_entry_micro_async() and debounce <= 0:
-        with _micro_lock:
-            batch = list(_micro_queue)
-            _micro_queue.clear()
-        if batch:
-            ppo_micro_improve(cfg, model, batch)
+        if len(_micro_queue) > max_q:
+            del _micro_queue[:-max_q]
+    if not ppo_entry_micro_async():
         return
-    delay = debounce if debounce > 0 else 0.05
+    debounce = ppo_entry_micro_debounce_sec()
+    delay = debounce if debounce > 0 else 120.0
     with _micro_lock:
         if _micro_timer is not None:
             return
@@ -361,7 +378,7 @@ def _fire_micro_timer(cfg: BotConfig, model: Any) -> None:
 
 
 def flush_pending_ppo_micro_learn(cfg: Optional[BotConfig] = None, model: Any = None) -> bool:
-    """Drain queued entry micro-learns at session end."""
+    """Drain queued entry micro-learns at session end (reward-linked PPO)."""
     global _micro_timer
     cfg = cfg or BotConfig()
     model = model or get_ppo_model()
@@ -371,9 +388,16 @@ def flush_pending_ppo_micro_learn(cfg: Optional[BotConfig] = None, model: Any = 
             _micro_timer = None
         batch = list(_micro_queue)
         _micro_queue.clear()
-    if not batch or model is None:
+    if model is None:
         return False
-    return ppo_micro_improve(cfg, model, batch)
+    try:
+        from core.ppo_reward_trainer import run_reward_linked_ppo_train
+        return run_reward_linked_ppo_train(
+            cfg, model=model, extra_records=batch or None, force=True,
+        )
+    except Exception as exc:
+        log.debug(f"PPO micro flush: {exc}")
+        return False
 
 
 def ppo_micro_improve(
@@ -381,43 +405,25 @@ def ppo_micro_improve(
     model: Any,
     records: List[Dict[str, Any]],
 ) -> bool:
-    """Small PPO fine-tune on entry evaluation records (features required)."""
-    if model is None or not records:
+    """Queue-only during session; full reward PPO only off-hours / teardown."""
+    if not records:
         return False
-    feat_rows: List[np.ndarray] = []
-    for r in records:
-        vec = _feat_vector(r.get("obs") or r.get("features"), cfg)
-        if vec is not None:
-            feat_rows.append(vec)
-    if not feat_rows:
-        return False
-    steps = int(getattr(cfg, "PPO_ENTRY_MICRO_STEPS", 512))
     try:
-        from stable_baselines3.common.vec_env import DummyVecEnv
-        from core.env import TradingEnv
+        from core.learning_coordinator import should_queue_only_learning
+        from core.ppo_reward_trainer import defer_reward_records, run_reward_linked_ppo_train
 
-        feats = np.stack(feat_rows[-32:], axis=0).astype(np.float32)
-        n_feat = int(getattr(cfg, "N_FEATURES", 18))
-        if feats.shape[1] != n_feat:
+        defer_reward_records(records)
+        if should_queue_only_learning(cfg):
             return False
-        prices = np.array(
-            [float(r.get("entry_price", 100.0) or 100.0) for r in records[-32:]],
-            dtype=np.float32,
+
+        steps = int(getattr(cfg, "PPO_ENTRY_MICRO_STEPS", 512))
+        if model is None:
+            model = get_ppo_model()
+        if model is None:
+            return False
+        return run_reward_linked_ppo_train(
+            cfg, model=model, steps=steps, extra_records=records, force=False,
         )
-        if len(prices) < cfg.WINDOW_SIZE + 2:
-            prices = np.pad(prices, (0, cfg.WINDOW_SIZE + 2 - len(prices)), constant_values=prices[-1] if len(prices) else 100.0)
-        window = max(cfg.WINDOW_SIZE + 2, len(prices))
-        feat_block = np.tile(feats[-1], (window, 1)).astype(np.float32)
-        env = TradingEnv(
-            feat_block, prices[:window], cfg.INITIAL_CASH,
-            cfg.TRANSACTION_COST_PCT, cfg.WINDOW_SIZE, cfg.DEFAULT_MAX_POSITION_PCT,
-        )
-        vec_env = DummyVecEnv([lambda: env])
-        model.set_env(vec_env)
-        model.learn(total_timesteps=steps, reset_num_timesteps=False, progress_bar=False)
-        model.save(cfg.MODEL_PATH)
-        log.info(f"  🧠 PPO micro-improve: {len(feat_rows)} entry evals | {steps} steps")
-        return True
     except Exception as exc:
         log.debug(f"PPO micro-improve: {exc}")
         return False
@@ -428,19 +434,23 @@ def evaluate_and_improve_ppo(
     model: Any = None,
     records: Optional[List[Dict[str, Any]]] = None,
 ) -> bool:
-    """Run weight nudge + optional micro PPO train after entry/council eval."""
+    """Capture entry records + queue async micro-PPO — no sync weight/PPO on hot path."""
     if not ppo_learn_every_entry(cfg):
         return False
     recs = records or []
     if not recs:
         return False
-    improved = False
+
     try:
-        from core.online_trainer import _update_weights_from_buffer
-        _update_weights_from_buffer()
-        improved = True
+        from core.learning_coordinator import should_queue_only_learning
+        from core.ppo_reward_trainer import defer_reward_records
+        defer_reward_records(recs)
+        if should_queue_only_learning(cfg):
+            return True
     except Exception:
         pass
+
+    improved = False
     if model is not None:
         steps = int(getattr(cfg, "PPO_ENTRY_MICRO_STEPS", 512))
         if steps > 0:

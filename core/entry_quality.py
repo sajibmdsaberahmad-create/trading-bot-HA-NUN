@@ -8,6 +8,7 @@ Code never hard-vetoes unless ENTRY_QUALITY_HARD_BLOCK or hardness ≥ 0.5.
 
 from __future__ import annotations
 
+import os
 from typing import Any, Dict, Optional
 
 from core.config import BotConfig
@@ -175,6 +176,46 @@ def _pack(
         "profit_run": micro.get("profit_run", 0),
         "pred_1bar": pred_1bar,
     }
+
+
+def regime_blocks_entry(cfg: BotConfig, regime: str) -> bool:
+    """Block new entries in choppy/low-vol regimes when enabled."""
+    if not getattr(cfg, "REGIME_ENTRY_BLOCK", False):
+        return False
+    label = (regime or "").strip().lower()
+    if not label or label == "unknown":
+        return False
+    blocked = getattr(cfg, "REGIME_ENTRY_BLOCK_LIST", None)
+    if not blocked:
+        raw = os.getenv("REGIME_ENTRY_BLOCK_LIST", "ranging,low_volatility")
+        blocked = [x.strip().lower() for x in raw.split(",") if x.strip()]
+    else:
+        blocked = [str(x).strip().lower() for x in blocked]
+    return label in blocked
+
+
+def mtf_trend_aligned(df_5m: Any, df_15m: Any) -> tuple[bool, str]:
+    """Require price above 20-bar SMA on 5m and 15m (human-style trend filter)."""
+    import pandas as pd
+
+    for label, df in (("5m", df_5m), ("15m", df_15m)):
+        if df is None:
+            continue
+        if not isinstance(df, pd.DataFrame) or len(df) < 20:
+            continue
+        closes = df["close"].values
+        sma = float(closes[-20:].mean())
+        if float(closes[-1]) <= sma:
+            return False, f"{label}_below_sma20"
+    return True, "mtf_aligned"
+
+
+def mtf_blocks_entry(cfg: BotConfig, df_5m: Any, df_15m: Any) -> bool:
+    """Block spike entries when higher timeframes are not in uptrend."""
+    if not getattr(cfg, "MTF_ENTRY_BLOCK", False):
+        return False
+    ok, _ = mtf_trend_aligned(df_5m, df_15m)
+    return not ok
 
 
 def quality_blocks_entry(cfg: BotConfig, quality: Dict[str, Any]) -> bool:

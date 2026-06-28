@@ -172,7 +172,11 @@ export USE_FIXED_DEPLOY_CAP="${USE_FIXED_DEPLOY_CAP:-false}"
 export USE_FIXED_RISK_CAP="${USE_FIXED_RISK_CAP:-false}"
 export AI_DEFINE_ALL_LIMITS="${AI_DEFINE_ALL_LIMITS:-true}"
 export AI_SESSION_LIMITS_OLLAMA="${AI_SESSION_LIMITS_OLLAMA:-true}"
-export USE_ACCOUNT_LOSS_HALT="${USE_ACCOUNT_LOSS_HALT:-false}"
+export USE_ACCOUNT_LOSS_HALT="${USE_ACCOUNT_LOSS_HALT:-true}"
+export REGIME_ENTRY_BLOCK="${REGIME_ENTRY_BLOCK:-true}"
+export MTF_ENTRY_BLOCK="${MTF_ENTRY_BLOCK:-true}"
+export PPO_REWARD_FEE_AWARE="${PPO_REWARD_FEE_AWARE:-true}"
+export PPO_PROMOTION_GATE="${PPO_PROMOTION_GATE:-true}"
 export USE_MULTI_POSITION="${USE_MULTI_POSITION:-true}"
 export AI_UNLIMITED_MODE="${AI_UNLIMITED_MODE:-true}"
 export AI_COUNCIL_ALL_DECISIONS="${AI_COUNCIL_ALL_DECISIONS:-true}"
@@ -187,6 +191,9 @@ export HYBRID_DISTILL_MIN_TRADES="${HYBRID_DISTILL_MIN_TRADES:-10}"
 source "$ROOT/scripts/halim_env.sh" 2>/dev/null || true
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_memory_profile.sh" 2>/dev/null || true
+export LEARNING_QUEUE_ONLY="${LEARNING_QUEUE_ONLY:-false}"
+export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-true}"
+export LEARNING_DEFER_DURING_RTH="${LEARNING_DEFER_DURING_RTH:-true}"
 # Live session gold collection (dialogue/copilot LM for training; user chat still off)
 export HALIM_LIVE_GOLD_COLLECT="${HALIM_LIVE_GOLD_COLLECT:-true}"
 export HALIM_PREPARE_SFT_ON_SHUTDOWN="${HALIM_PREPARE_SFT_ON_SHUTDOWN:-true}"
@@ -210,6 +217,7 @@ echo "  HANOON FULL PILOT LAUNCH"
 echo "  IB: $IB_HOST:$IB_PORT | Client: $CLIENT_ID | Council: ${COUNCIL_BACKEND} (${TOTAL_RAM_MB}MB RAM)"
 if [[ "${HALIM_LOW_MEMORY_ACTIVE:-}" == "true" ]]; then
   echo "  Halim: M. A. Halim low-RAM profile — async PPO, MLX LM, dialogue deferred"
+  echo "  Learning: bounded live (async micro-PPO + debounced weights, heavy off-hours)"
 fi
 echo "  Clock: US Eastern (TZ=$TZ)"
 echo "═══════════════════════════════════════════════════════════════════════"

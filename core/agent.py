@@ -384,60 +384,35 @@ class OnlineLearningManager:
         return False
 
     def _fine_tune(self, features: np.ndarray, prices: np.ndarray):
-        """Standard fine-tuning with Experience Replay Anchoring."""
+        """Reward-linked buffer training — live-bounded during RTH, full off-hours."""
         self._tune_count += 1
-        log.info(f"Online fine-tune #{self._tune_count} | {len(features)} bars | {self.cfg.FINE_TUNE_STEPS:,} PPO steps")
+        steps = int(getattr(self.cfg, "FINE_TUNE_STEPS", 4096))
         try:
-            # ── Experience Replay Anchoring ───────────────────────────────
-            # Blend recent live data with a diverse historical anchor buffer
-            # to prevent catastrophic forgetting / policy shock on 30-bar windows.
-            live_features = features
-            live_prices = prices
-            anchor_features = live_features
-            anchor_prices = live_prices
-            try:
-                from core.experience_buffer import load_recent
-                anchor_recs = load_recent(n=max(getattr(self.cfg, "FINE_TUNE_ANCHOR_SAMPLES", 256), 0))
-                if anchor_recs:
-                    af, ap = [], []
-                    for rec in anchor_recs:
-                        feats = rec.get("features")
-                        if isinstance(feats, list) and len(feats) == getattr(self.cfg, "N_FEATURES", 18):
-                            af.append(feats)
-                            ap.append(float(rec.get("entry_price", 0.0) or 0.0))
-                    if af:
-                        anchor_features = np.vstack([live_features, np.array(af, dtype=np.float32)])
-                        anchor_prices = np.concatenate([live_prices, np.array(ap, dtype=np.float32)])
-                        log.info(f"Anchor replay: added {len(af)} historical records to fine-tune")
-            except Exception as exc:
-                log.debug(f"Anchor replay load failed: {exc}")
+            from core.learning_coordinator import (
+                allow_live_micro_ppo,
+                live_micro_ppo_steps,
+                memory_pressure_high,
+                should_defer_heavy_learning,
+            )
+            from core.ppo_reward_trainer import run_reward_linked_ppo_train
 
-            env = TradingEnv(anchor_features, anchor_prices, self.cfg.INITIAL_CASH, self.cfg.TRANSACTION_COST_PCT,
-                              self.cfg.WINDOW_SIZE, self.cfg.DEFAULT_MAX_POSITION_PCT)
-            vec_env = DummyVecEnv([lambda: env])
-            self.model.set_env(vec_env)
-            self.model.learn(total_timesteps=self.cfg.FINE_TUNE_STEPS, reset_num_timesteps=False, progress_bar=False)
-            self.model.save(self.cfg.MODEL_PATH)
-            log.info(f"Fine-tune #{self._tune_count} saved -> {self.cfg.MODEL_PATH}")
-
-            # Push model update to GitHub
-            try:
-                from core.git_sync import push_model_update
-                push_model_update(self.cfg.MODEL_PATH)
-            except Exception:
-                pass
-
-            # Record fine-tuning event in journal
-            metrics = {
-                "fine_tune_number": self._tune_count,
-                "fine_tune_steps": self.cfg.FINE_TUNE_STEPS,
-                "features_length": len(features)
-            }
-            try:
-                from core.journal import record_training_session
-                record_training_session(self.cfg, f"FINETUNE_{self._tune_count}", metrics, self.cfg.MODEL_PATH)
-            except ImportError:
-                pass
+            in_session = should_defer_heavy_learning(self.cfg) or memory_pressure_high(self.cfg)
+            if in_session:
+                if not allow_live_micro_ppo(self.cfg):
+                    log.debug("Online fine-tune deferred (memory tight)")
+                    return
+                steps = live_micro_ppo_steps(self.cfg, steps)
+                log.info(f"Online fine-tune #{self._tune_count} (live) | {steps} reward-linked steps")
+                ok = run_reward_linked_ppo_train(
+                    self.cfg, model=self.model, steps=steps, live=True,
+                )
+            else:
+                log.info(f"Online fine-tune #{self._tune_count} | {steps:,} reward-linked steps")
+                ok = run_reward_linked_ppo_train(
+                    self.cfg, model=self.model, steps=steps, force=False,
+                )
+            if ok:
+                log.info(f"Fine-tune #{self._tune_count} saved -> {self.cfg.MODEL_PATH}")
         except Exception as exc:
             log.error(f"Fine-tune #{self._tune_count} failed: {exc}")
 

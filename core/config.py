@@ -247,6 +247,26 @@ class BotConfig:
     CAPITAL_TIMEOUT_FALLBACK_STRONG: bool = os.getenv(
         "CAPITAL_TIMEOUT_FALLBACK_STRONG", "true"
     ).lower() in ("1", "true", "yes")
+
+    # Commander IB report — runtime calculated-lottery floors (live + replay)
+    COMMANDER_RUNTIME_ENABLED: bool = os.getenv(
+        "COMMANDER_RUNTIME_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    COMMANDER_LOTTERY_MIN_PROFIT_PROB: float = float(
+        os.getenv("COMMANDER_LOTTERY_MIN_PROFIT_PROB", "0.80")
+    )
+    COMMANDER_LOTTERY_MIN_SPIKE_RATIO: float = float(
+        os.getenv("COMMANDER_LOTTERY_MIN_SPIKE_RATIO", "2.0")
+    )
+    COMMANDER_LOTTERY_MIN_SCAN_SCORE: float = float(
+        os.getenv("COMMANDER_LOTTERY_MIN_SCAN_SCORE", "70")
+    )
+    COMMANDER_LOTTERY_MAX_FAKEOUT: float = float(
+        os.getenv("COMMANDER_LOTTERY_MAX_FAKEOUT", "0.25")
+    )
+    COMMANDER_MAX_TRIP_LOSS_PCT: float = float(
+        os.getenv("COMMANDER_MAX_TRIP_LOSS_PCT", "3.0")
+    )
     CAPITAL_STRONG_SPIKE_SCORE: float = float(
         os.getenv("CAPITAL_STRONG_SPIKE_SCORE", "78")
     )
@@ -662,7 +682,7 @@ class BotConfig:
         "0", "false", "no",
     )
     SPIKE_FAST_REQUIRES_QUALITY: bool = os.getenv(
-        "SPIKE_FAST_REQUIRES_QUALITY", "false",
+        "SPIKE_FAST_REQUIRES_QUALITY", "true",
     ).lower() not in ("0", "false", "no")
     EQ_WEIGHT_PROFIT_RUN: float = float(os.getenv("EQ_WEIGHT_PROFIT_RUN", "0.22"))
     EQ_WEIGHT_SPIKE_LIK: float = float(os.getenv("EQ_WEIGHT_SPIKE_LIK", "0.18"))
@@ -672,6 +692,23 @@ class BotConfig:
     EQ_WEIGHT_MOM: float = float(os.getenv("EQ_WEIGHT_MOM", "0.10"))
     EQ_PENALTY_FADE: float = float(os.getenv("EQ_PENALTY_FADE", "0.28"))
     EQ_PENALTY_LOSS: float = float(os.getenv("EQ_PENALTY_LOSS", "0.22"))
+    REGIME_ENTRY_BLOCK: bool = os.getenv("REGIME_ENTRY_BLOCK", "false").lower() in (
+        "1", "true", "yes",
+    )
+    REGIME_ENTRY_BLOCK_LIST: tuple = tuple(
+        x.strip().lower()
+        for x in os.getenv("REGIME_ENTRY_BLOCK_LIST", "ranging,low_volatility").split(",")
+        if x.strip()
+    )
+    MTF_ENTRY_BLOCK: bool = os.getenv("MTF_ENTRY_BLOCK", "false").lower() in (
+        "1", "true", "yes",
+    )
+    PPO_REWARD_FEE_AWARE: bool = os.getenv("PPO_REWARD_FEE_AWARE", "true").lower() not in (
+        "0", "false", "no",
+    )
+    PPO_PROMOTION_GATE: bool = os.getenv("PPO_PROMOTION_GATE", "true").lower() not in (
+        "0", "false", "no",
+    )
     FAKEOUT_FADE_MIN_FADE: float = float(os.getenv("FAKEOUT_FADE_MIN_FADE", "0.40"))
     FAKEOUT_FADE_MIN_SL: float = float(os.getenv("FAKEOUT_FADE_MIN_SL", "0.35"))
     COUNCIL_TIMEOUT_MIN_SCAN_SCORE: float = float(

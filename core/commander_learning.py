@@ -566,3 +566,27 @@ def format_apply_report(result: Dict[str, Any]) -> str:
             lines.append(f"• {lesson[:100]}")
 
     return "\n".join(lines)[:3800]
+
+
+def reload_persisted_params(cfg: BotConfig) -> int:
+    """Restore teacher/commander mutations from models/parameter_adjustments.json on startup."""
+    if not ADJUSTMENTS_PATH.is_file():
+        return 0
+    try:
+        raw = json.loads(ADJUSTMENTS_PATH.read_text())
+    except Exception:
+        return 0
+    if not isinstance(raw, dict) or not raw:
+        return 0
+    applied = 0
+    for param, rec in raw.items():
+        if not isinstance(rec, dict):
+            continue
+        value = rec.get("value")
+        if value is None:
+            continue
+        reason = rec.get("reason", "restored from parameter_adjustments.json")
+        ok, _msg = _apply_mutation(cfg, str(param), value, reason, autopilot=None)
+        if ok:
+            applied += 1
+    return applied

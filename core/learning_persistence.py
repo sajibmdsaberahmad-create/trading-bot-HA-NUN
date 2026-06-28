@@ -140,31 +140,47 @@ def snapshot_learning(
     except Exception as exc:
         result["steps"]["cognitive"] = str(exc)[:60]
 
-    # PPO weights — primary learnable that is lost on hard kill
+    # PPO weights — skip mid-session snapshots (teardown/flush saves)
     if model is not None and os.getenv("LEARNING_SNAPSHOT_SAVE_PPO", "true").lower() in (
         "1", "true", "yes",
     ):
         try:
-            path = getattr(cfg, "MODEL_PATH", "ppo_trader.zip")
-            model.save(path)
-            fsync_path(Path(str(path)))
-            fsync_path(Path(str(path) + ".zip"))  # SB3 may use either
-            result["steps"]["ppo_saved"] = path
-        except Exception as exc:
-            result["steps"]["ppo_saved"] = False
-            result["steps"]["ppo_error"] = str(exc)[:80]
+            from core.learning_coordinator import should_queue_only_learning
+            skip_ppo_snap = should_queue_only_learning(cfg)
+        except Exception:
+            skip_ppo_snap = False
+        if not skip_ppo_snap:
+            try:
+                path = getattr(cfg, "MODEL_PATH", "ppo_trader.zip")
+                model.save(path)
+                fsync_path(Path(str(path)))
+                fsync_path(Path(str(path) + ".zip"))  # SB3 may use either
+                result["steps"]["ppo_saved"] = path
+            except Exception as exc:
+                result["steps"]["ppo_saved"] = False
+                result["steps"]["ppo_error"] = str(exc)[:80]
 
-    # Halim action gold — every 3rd snapshot or when explicitly requested
+    # Halim action gold — off-hours / explicit only (avoid RTH memory spikes)
     _snapshot_count += 1
-    do_halim = halim_export or (_snapshot_count % 3 == 0)
+    try:
+        from core.learning_coordinator import should_defer_heavy_learning, memory_pressure_high
+        defer = should_defer_heavy_learning(cfg) or memory_pressure_high(cfg)
+    except Exception:
+        defer = False
+    do_halim = halim_export or (not defer and _snapshot_count % 3 == 0)
     if do_halim:
         try:
             from core.halim_gold_pipeline import export_halim_gold
             result["steps"]["halim_gold"] = export_halim_gold(include_learn_cache=True)
             replay = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
             if replay and _snapshot_count % 6 == 0:
-                from core.halim_gold_pipeline import package_halim_colab
-                result["steps"]["colab_package"] = package_halim_colab()
+                from core.halim_gold_pipeline import run_halim_gold_pipeline
+                result["steps"]["colab_package"] = run_halim_gold_pipeline(
+                    cfg,
+                    trigger=f"snapshot_{trigger}",
+                    prepare_sft=True,
+                    package_colab=True,
+                )
         except Exception as exc:
             result["steps"]["halim_gold"] = {"ok": False, "error": str(exc)[:80]}
 

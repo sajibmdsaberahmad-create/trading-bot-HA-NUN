@@ -33,7 +33,7 @@ def _parse_json_stdout(stdout: str) -> Dict[str, Any]:
 
 
 def export_halim_gold(*, include_learn_cache: bool = True) -> Dict[str, Any]:
-    """Export action + coevolution + dialogue gold (idempotent dedupe)."""
+    """Export all gold sources (action, coevolution, dialogue, outcome) — idempotent."""
     root = _repo_root()
     os.environ.setdefault("HALIM_REPO_ROOT", str(root))
     halim_pkg = root / "halim"
@@ -45,17 +45,23 @@ def export_halim_gold(*, include_learn_cache: bool = True) -> Dict[str, Any]:
         from core.halim_action_learn import export_action_gold
         from core.halim_ppo_coevolution import export_coevolution_gold
         from core.halim_ppo_dialogue import export_dialogue_gold
+        from core.halim_outcome_gold import export_outcome_gold
+        from core.commander_ib_gold import export_commander_gold
         from halim.dataset import count_raw_sources
 
         action = export_action_gold(include_learn_cache=include_learn_cache)
         coev = export_coevolution_gold()
         dialogue = export_dialogue_gold()
+        outcome = export_outcome_gold()
+        commander = export_commander_gold()
         raw = count_raw_sources(root)
         return {
             "ok": True,
             "action_gold": action,
             "coevolution_gold": coev,
             "dialogue_gold": dialogue,
+            "outcome_gold": outcome,
+            "commander_gold": commander,
             "raw_sources": raw,
         }
     except Exception as exc:
@@ -71,6 +77,8 @@ def prepare_halim_sft(*, min_pairs: Optional[int] = None) -> Dict[str, Any]:
     env["PYTHONPATH"] = f"{root / 'halim'}{os.pathsep}{root}{os.pathsep}{env.get('PYTHONPATH', '')}"
     if min_pairs is not None:
         env["HALIM_TODDLER_MIN_PAIRS"] = str(min_pairs)
+    # Always refresh raw gold exports before SFT merge
+    export_halim_gold(include_learn_cache=True)
     try:
         proc = subprocess.run(
             [py, str(root / "halim/scripts/prepare_sft.py")]
@@ -162,6 +170,7 @@ def run_halim_gold_pipeline(
     if raw:
         log.info(
             f"🧠 Halim gold ({trigger}): raw={raw.get('total_raw', 0)} "
-            f"coev={raw.get('coevolution', 0)} dlg={raw.get('dialogue', 0)}"
+            f"coev={raw.get('coevolution', 0)} dlg={raw.get('dialogue', 0)} "
+            f"outcome={raw.get('outcome_gold', 0)}"
         )
     return result

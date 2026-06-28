@@ -45,7 +45,10 @@ log() {
   echo "$msg" >>"$WEEKEND_LOG"
 }
 
+_WEEKEND_CLEANUP_DONE=0
 cleanup() {
+  [[ "$_WEEKEND_CLEANUP_DONE" -eq 1 ]] && return
+  _WEEKEND_CLEANUP_DONE=1
   log "Weekend replay loop stopping…"
   rm -f "$LOOP_PID_FILE"
   unset WEEKEND_REPLAY_LOOP 2>/dev/null || true
@@ -80,7 +83,9 @@ purge_replay_farm(verbose=True, force=True)
   log "Weekend replay loop ended."
 }
 
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
 
 if [[ -d "$ROOT/venv" ]]; then
   # shellcheck disable=SC1091
@@ -100,9 +105,15 @@ export OWNED_BRAIN_GIT_PUSH="$GIT_PUSH"
 export GIT_BATCH_CHECKPOINTS=true
 
 export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
-export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-300}"
-export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-600}"
-export REPLAY_PURGE_DATA_ON_STOP="${REPLAY_PURGE_DATA_ON_STOP:-true}"
+export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-900}"
+export LEARNING_SNAPSHOT_SAVE_PPO="${LEARNING_SNAPSHOT_SAVE_PPO:-false}"
+export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-1200}"
+export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-false}"
+export LEARNING_QUEUE_ONLY="${LEARNING_QUEUE_ONLY:-true}"
+export LEARNING_HEAVY_EVERY_N_TRADES="${LEARNING_HEAVY_EVERY_N_TRADES:-16}"
+export LEARNING_DEFER_FLUSH_EVERY_N_TRADES="${LEARNING_DEFER_FLUSH_EVERY_N_TRADES:-32}"
+export PPO_REWARD_REPLAY_MAX_EPISODES="${PPO_REWARD_REPLAY_MAX_EPISODES:-24}"
+export PERIODIC_CLEANUP_SEC="${PERIODIC_CLEANUP_SEC:-0}"
 export REPLAY_SKIP_CONSUMED="${REPLAY_SKIP_CONSUMED:-true}"
 export REPLAY_TRIM_CONSUMED_ON_STOP="${REPLAY_TRIM_CONSUMED_ON_STOP:-true}"
 export REPLAY_PURGE_ALL_ON_STOP="${REPLAY_PURGE_ALL_ON_STOP:-false}"
@@ -217,6 +228,11 @@ while true; do
     break
   fi
 
+  if [[ -f "$ROOT/runtime/weekend_replay.stop" ]] || [[ -f "$ROOT/runtime/shutdown.request" ]]; then
+    log "Stop requested before epoch $epoch — ending loop."
+    rm -f "$ROOT/runtime/weekend_replay.stop"
+    break
+  fi
   python3 -c "from core.shutdown_control import clear_shutdown_request; clear_shutdown_request()" \
     2>/dev/null || rm -f "$ROOT/runtime/shutdown.request"
 
@@ -242,14 +258,37 @@ print('0' if farm_has_unconsumed_data() else '1')
   fi
 
   set +e
-  "$ROOT/scripts/start_replay_live.sh" "$PACE"
-  rc=$?
+  "$ROOT/scripts/start_replay_live.sh" "$PACE" &
+  _replay_pid=$!
+  rc=0
+  while kill -0 "$_replay_pid" 2>/dev/null; do
+    if [[ -f "$ROOT/runtime/weekend_replay.stop" ]] || [[ -f "$ROOT/runtime/shutdown.request" ]]; then
+      log "Stop requested during epoch $epoch — stopping replay…"
+      WEEKEND_GIT_PUSH=false "$ROOT/scripts/stop_replay.sh" >>"$WEEKEND_LOG" 2>&1 || true
+      wait "$_replay_pid" 2>/dev/null || true
+      rc=130
+      break
+    fi
+    if ! kill -0 "$_replay_pid" 2>/dev/null; then
+      break
+    fi
+    sleep 2
+  done
+  if kill -0 "$_replay_pid" 2>/dev/null; then
+    wait "$_replay_pid" || rc=$?
+  elif [[ "$rc" -eq 0 ]]; then
+    wait "$_replay_pid" 2>/dev/null || rc=$?
+  fi
   set -e
   log "   Epoch $epoch exit code: $rc"
 
   if [[ -f "$ROOT/runtime/weekend_replay.stop" ]]; then
     log "Stop file detected — ending loop."
     rm -f "$ROOT/runtime/weekend_replay.stop"
+    break
+  fi
+  if [[ -f "$ROOT/runtime/shutdown.request" ]]; then
+    log "Shutdown requested — ending loop (not starting next epoch)."
     break
   fi
 
@@ -266,6 +305,13 @@ print('0' if farm_has_unconsumed_data() else '1')
     log "✅ Epoch $epoch complete (evolution at teardown)"
   fi
 
-  log "   Next epoch in ${PAUSE_SEC}s…"
-  sleep "$PAUSE_SEC"
+  log "   Next epoch in ${PAUSE_SEC}s… (stop: ./scripts/stop_weekend_replay.sh)"
+  for _ in $(seq 1 "$PAUSE_SEC"); do
+    if [[ -f "$ROOT/runtime/weekend_replay.stop" ]] || [[ -f "$ROOT/runtime/shutdown.request" ]]; then
+      log "Stop requested during pause — ending loop."
+      rm -f "$ROOT/runtime/weekend_replay.stop"
+      break 2
+    fi
+    sleep 1
+  done
 done

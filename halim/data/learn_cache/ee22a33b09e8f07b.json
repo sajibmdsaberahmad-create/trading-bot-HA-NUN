@@ -1,0 +1,8 @@
+{
+  "url": "local:market_hours",
+  "host": "local",
+  "topic": "local:market_hours",
+  "text": "US equity market clock (America/New_York)\nNow ET: 2026-06-28 09:18:01 EDT\nSession: closed\nUS Market: NO SESSION \u2014 CLOSED | ET 2026-06-28 09:18:01 | RTH 09:30\u201316:00 ET\nAllowed sessions (config): pre-market + regular hours\nCan trade now: False \u2014 closed\n\nRegular hours: Mon\u2013Fri 09:30\u201316:00 ET (US holidays closed).\nPre-market from 04:00 ET; after-hours until 20:00 ET.",
+  "fetched_at": "2026-06-28T13:18:01.827863+00:00",
+  "hash": "ee22a33b09e8f07b"
+}

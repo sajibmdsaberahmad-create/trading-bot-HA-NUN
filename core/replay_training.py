@@ -140,6 +140,16 @@ def run_replay_training_cycle(
     fresh = _replay_buffer_records()
     result["buffer_records"] = len(fresh)
 
+    try:
+        from core.ppo_entry_learning import get_ppo_model
+        from core.ppo_reward_trainer import run_reward_linked_ppo_train
+        model = getattr(runner, "model", None) if runner else get_ppo_model()
+        steps = int(os.getenv("REPLAY_PPO_REWARD_STEPS", os.getenv("REPLAY_PPO_INCREMENTAL_STEPS", "2048")))
+        ok = run_reward_linked_ppo_train(cfg, model=model, steps=steps, force=True)
+        result["steps"]["reward_ppo"] = {"ok": ok, "steps": steps, "records": len(fresh)}
+    except Exception as exc:
+        result["steps"]["reward_ppo"] = {"ok": False, "error": str(exc)[:120]}
+
     if getattr(cfg, "INCREMENTAL_TRAINING_ENABLED", False) and fresh:
         steps = int(os.getenv("REPLAY_PPO_INCREMENTAL_STEPS", "2048"))
         if steps > 0:
@@ -178,6 +188,12 @@ def run_replay_training_cycle(
             result["steps"]["self_train"] = {"ok": True}
         except Exception as exc:
             result["steps"]["self_train"] = {"ok": False, "error": str(exc)[:120]}
+
+    try:
+        from core.promotion_gate import try_promote_ppo_replay
+        result["steps"]["ppo_promotion"] = try_promote_ppo_replay(cfg, runner=runner)
+    except Exception as exc:
+        result["steps"]["ppo_promotion"] = {"ok": False, "error": str(exc)[:120]}
 
     log.info(
         f"🎬 REPLAY TRAINING done — buffer={len(fresh)} records · "

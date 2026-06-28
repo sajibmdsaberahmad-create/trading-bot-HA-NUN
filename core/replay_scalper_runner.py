@@ -83,6 +83,12 @@ class ReplayScalperRunner(ScalperRunner):
         replay_model = os.getenv("REPLAY_MODEL_PATH", "").strip()
         if replay_model:
             self.cfg.MODEL_PATH = replay_model
+        try:
+            from core.ppo_entry_learning import set_ppo_model
+            if getattr(self, "model", None) is not None:
+                set_ppo_model(self.model)
+        except Exception:
+            pass
         # Looser council gates for replay learning volume (live unchanged)
         if os.getenv("REPLAY_RELAX_COUNCIL", "true").lower() in ("1", "true", "yes"):
             self.cfg.MIN_PROFIT_PROBABILITY = float(
@@ -391,17 +397,7 @@ class ReplayScalperRunner(ScalperRunner):
             super()._apply_trade_close_learning(trade_rec, ticker)
         finally:
             exp_buf.append = orig_append
-        try:
-            from core.ppo_teacher_training import maybe_run_ppo_teacher_training
-            maybe_run_ppo_teacher_training(
-                self.cfg,
-                model=self.model,
-                trigger=f"replay_close_{ticker}",
-                autopilot=getattr(self, "autopilot", None),
-                consciousness=getattr(self, "consciousness", None),
-            )
-        except Exception as exc:
-            log.debug(f"PPO teacher hook: {exc}")
+        # schedule_post_close_learning runs in parent _finalize_closed_trade — no duplicate here
 
     def _replay_book_entry_fill(
         self,
@@ -876,6 +872,8 @@ def run_replay_scalper(cfg: BotConfig) -> None:
     log.info(f"  Pace:      {pace}")
     log.info(f"  Council:   {os.getenv('COUNCIL_ENABLED', 'true')}")
     log.info(f"  Model:     {os.getenv('REPLAY_MODEL_PATH', cfg.MODEL_PATH)}")
+    from core.learning_coordinator import learning_mode_label
+    log.info(f"  Learning:  {learning_mode_label(cfg)}")
     if hub.realtime_pace and est_steps > 1000:
         log.info(
             "  Tip: full multi-ticker real-time takes days. "

@@ -130,17 +130,19 @@ def finalize_learn_session(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     result: Dict[str, Any] = {"ok": False, "zip": str(root / "halim_sft.zip")}
 
     try:
-        from core.halim_action_learn import export_action_gold
+        from core.halim_gold_pipeline import export_halim_gold
         prev_retrain = os.environ.get("HALIM_AUTO_LM_RETRAIN")
         os.environ["HALIM_AUTO_LM_RETRAIN"] = "false"
         try:
-            export_result = export_action_gold(include_learn_cache=True)
+            export_result = export_halim_gold(include_learn_cache=True)
         finally:
             if prev_retrain is None:
                 os.environ.pop("HALIM_AUTO_LM_RETRAIN", None)
             else:
                 os.environ["HALIM_AUTO_LM_RETRAIN"] = prev_retrain
         result["export"] = export_result
+        action = export_result.get("action_gold") or {}
+        result["total_gold"] = action.get("total_gold", 0)
     except Exception as exc:
         result["error"] = str(exc)[:120]
         return result

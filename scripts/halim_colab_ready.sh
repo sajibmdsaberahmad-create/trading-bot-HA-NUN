@@ -10,13 +10,21 @@ PY="${PYTHON:-python3}"
 
 echo "== Halim Colab-ready upgrade =="
 
-# 1. Live PPO reflex (copy from replay if missing)
+# 1. Live PPO reflex (promote from replay only if walk-forward gate passes)
 if [[ -f "$ROOT/models/ppo_trader_replay.zip" ]]; then
-  if [[ ! -f "$ROOT/models/ppo_trader.zip" ]] || [[ "$ROOT/models/ppo_trader_replay.zip" -nt "$ROOT/models/ppo_trader.zip" ]]; then
+  PROMOTE=$("$PY" -c "
+from core.promotion_gate import try_promote_ppo_replay
+from core.config import BotConfig
+r = try_promote_ppo_replay(BotConfig())
+print('yes' if r.get('promoted') else 'no')
+" 2>/dev/null || echo "no")
+  if [[ "$PROMOTE" == "yes" ]]; then
+    echo "✓ Live PPO: models/ppo_trader.zip ← replay (gate passed)"
+  elif [[ ! -f "$ROOT/models/ppo_trader.zip" ]]; then
     cp "$ROOT/models/ppo_trader_replay.zip" "$ROOT/models/ppo_trader.zip"
-    echo "✓ Live PPO: models/ppo_trader.zip ← replay"
+    echo "✓ Live PPO: models/ppo_trader.zip ← replay (no incumbent)"
   else
-    echo "✓ Live PPO already current"
+    echo "⏸ Live PPO unchanged — promotion gate blocked (replay metrics below threshold)"
   fi
 else
   echo "⚠ No models/ppo_trader_replay.zip — run replay first for best PPO"

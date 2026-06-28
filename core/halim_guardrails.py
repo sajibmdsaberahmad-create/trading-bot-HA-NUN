@@ -259,6 +259,40 @@ def _today() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+def learn_uncapped_active() -> bool:
+    """True only when HALIM_LEARN_UNCAPPED_DATE matches today (UTC) — auto-off tomorrow."""
+    target = os.getenv("HALIM_LEARN_UNCAPPED_DATE", "").strip()
+    return bool(target) and target == _today()
+
+
+def effective_learn_fetch_daily_cap() -> int:
+    """Normal cap 500; raised cap on uncapped day only (still bounded)."""
+    base = int(os.getenv("HALIM_LEARN_FETCH_DAILY_CAP", "500"))
+    if learn_uncapped_active():
+        return int(os.getenv("HALIM_LEARN_UNCAPPED_MAX_FETCHES", "1200"))
+    return base
+
+
+def learn_gold_budget_remaining() -> int:
+    """Cap new gold exports on uncapped days — dedup still applies; prevents SFT blowout."""
+    if not learn_uncapped_active():
+        return 1_000_000
+    max_g = int(os.getenv("HALIM_LEARN_UNCAPPED_MAX_GOLD", "40"))
+    state = _load_state()
+    used = int((state.get("counts") or {}).get("learn_gold_exported", 0))
+    return max(0, max_g - used)
+
+
+def record_learn_gold_exported(n: int = 1) -> None:
+    if n <= 0 or not learn_uncapped_active():
+        return
+    with _lock:
+        state = _load_state()
+        counts = state.setdefault("counts", {})
+        counts["learn_gold_exported"] = int(counts.get("learn_gold_exported", 0)) + int(n)
+        _save_state(state)
+
+
 def _audit(event: str, domain: str, ok: bool, detail: Dict[str, Any]) -> None:
     row = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -400,7 +434,7 @@ def request_action(
                     return False, url_reason
                 ok, _ = _check_rate(
                     state, "learn_fetches",
-                    int(limits.get("learn_fetches", int(os.getenv("HALIM_LEARN_FETCH_DAILY_CAP", "500")))),
+                    effective_learn_fetch_daily_cap(),
                 )
                 if not ok:
                     _save_state(state)
@@ -641,7 +675,13 @@ def apply_operator_frontier_settings(cfg: Optional[BotConfig] = None) -> Dict[st
 
     limits = constitution.setdefault("rate_limits_daily", {})
     limits["google_ai_searches"] = int(os.getenv("HALIM_GOOGLE_AI_DAILY_CAP", "150"))
-    limits["learn_fetches"] = int(os.getenv("HALIM_LEARN_FETCH_DAILY_CAP", "500"))
+    limits["learn_fetches"] = effective_learn_fetch_daily_cap()
+    if learn_uncapped_active():
+        log.info(
+            f"📚 Halim learn UNCAPPED today ({_today()}) — "
+            f"fetch≤{limits['learn_fetches']} gold≤{os.getenv('HALIM_LEARN_UNCAPPED_MAX_GOLD', '40')} "
+            f"(normal cap {os.getenv('HALIM_LEARN_FETCH_DAILY_CAP', '500')} resumes tomorrow)"
+        )
     limits["web_fetches"] = 0
     constitution["operator_enabled_at"] = datetime.now(timezone.utc).isoformat()
     CONSTITUTION_PATH.write_text(json.dumps(constitution, indent=2))

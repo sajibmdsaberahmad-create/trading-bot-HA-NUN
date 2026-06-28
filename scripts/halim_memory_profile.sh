@@ -21,11 +21,23 @@ fi
 
 export HALIM_LOW_MEMORY_ACTIVE=true
 
-# ── PPO: never block entries with 512-step sync learns ─────────────────────
+# ── PPO: replay = queue-only; live = bounded async micro-PPO ─────────────
 export PPO_ENTRY_MICRO_ASYNC="${PPO_ENTRY_MICRO_ASYNC:-true}"
 export PPO_ENTRY_MICRO_DEBOUNCE_SEC="${PPO_ENTRY_MICRO_DEBOUNCE_SEC:-120}"
-export PPO_ENTRY_MICRO_STEPS="${PPO_ENTRY_MICRO_STEPS:-96}"
+export PPO_ENTRY_MICRO_STEPS="${PPO_ENTRY_MICRO_STEPS:-64}"
 export PPO_LEARN_EVERY_ENTRY="${PPO_LEARN_EVERY_ENTRY:-true}"
+export PPO_REWARD_REPLAY_MAX_EPISODES="${PPO_REWARD_REPLAY_MAX_EPISODES:-24}"
+export PPO_LIVE_MICRO_STEPS_MAX="${PPO_LIVE_MICRO_STEPS_MAX:-64}"
+export LEARNING_ASYNC_PPO_INTERVAL_SEC="${LEARNING_ASYNC_PPO_INTERVAL_SEC:-600}"
+export LEARNING_LIVE_WEIGHT_MIN_SEC="${LEARNING_LIVE_WEIGHT_MIN_SEC:-180}"
+export LEARNING_LIVE_WEIGHT_EVERY_N_TRADES="${LEARNING_LIVE_WEIGHT_EVERY_N_TRADES:-3}"
+if [[ "${REPLAY_LIVE:-}" =~ ^(1|true|yes)$ ]]; then
+  export LEARNING_QUEUE_ONLY="${LEARNING_QUEUE_ONLY:-true}"
+  export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-false}"
+else
+  export LEARNING_QUEUE_ONLY="${LEARNING_QUEUE_ONLY:-false}"
+  export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-true}"
+fi
 export INCREMENTAL_TRAINING_ENABLED="${INCREMENTAL_TRAINING_ENABLED:-false}"
 export INCREMENTAL_TRAIN_EVERY_N_TRADES="${INCREMENTAL_TRAIN_EVERY_N_TRADES:-0}"
 
@@ -44,6 +56,15 @@ export HALIM_ENTRY_MAX_TOKENS="${HALIM_ENTRY_MAX_TOKENS:-72}"
 export HALIM_ENTRY_BLEND_WEIGHT="${HALIM_ENTRY_BLEND_WEIGHT:-0.30}"
 export HALIM_ENTRY_SOFT_VETO="${HALIM_ENTRY_SOFT_VETO:-true}"
 export HALIM_ENTRY_VETO_MIN_CONF="${HALIM_ENTRY_VETO_MIN_CONF:-0.85}"
+export HALIM_EXIT_LM_ENABLED="${HALIM_EXIT_LM_ENABLED:-true}"
+export HALIM_EXIT_LM_TIMEOUT_SEC="${HALIM_EXIT_LM_TIMEOUT_SEC:-6}"
+export HALIM_EXIT_LM_MAX_AGE_SEC="${HALIM_EXIT_LM_MAX_AGE_SEC:-8}"
+export HALIM_EXIT_LM_MIN_RING_SEC="${HALIM_EXIT_LM_MIN_RING_SEC:-30}"
+export HALIM_EXIT_MAX_TOKENS="${HALIM_EXIT_MAX_TOKENS:-72}"
+export HALIM_EXIT_BLEND_WEIGHT="${HALIM_EXIT_BLEND_WEIGHT:-0.30}"
+export HALIM_EXIT_SOFT_VETO="${HALIM_EXIT_SOFT_VETO:-true}"
+export HALIM_EXIT_VETO_MIN_CONF="${HALIM_EXIT_VETO_MIN_CONF:-0.85}"
+export HALIM_OUTCOME_GOLD="${HALIM_OUTCOME_GOLD:-true}"
 export HALIM_PPO_GENERATIVE_REFLECT="${HALIM_PPO_GENERATIVE_REFLECT:-false}"
 export HALIM_PPO_DIALOGUE_THROTTLE_SEC="${HALIM_PPO_DIALOGUE_THROTTLE_SEC:-180}"
 export HALIM_REASONING_TIMEOUT_SEC="${HALIM_REASONING_TIMEOUT_SEC:-20}"
@@ -61,4 +82,9 @@ if pgrep -f "ollama serve" >/dev/null 2>&1; then
   pkill -f "ollama serve" 2>/dev/null || true
 fi
 
-echo "  💾 Halim memory profile ON (${_RAM_MB}MB RAM) — entry LM advisory, async PPO, MLX, dialogue deferred"
+echo "  💾 Halim memory profile ON (${_RAM_MB}MB RAM) — entry+exit LM advisory, async PPO, MLX, dialogue deferred"
+if [[ "${REPLAY_LIVE:-}" =~ ^(1|true|yes)$ ]]; then
+  echo "  Learning: replay queue-only (train at teardown)"
+else
+  echo "  Learning: live bounded async (weights + micro-PPO, heavy deferred RTH)"
+fi

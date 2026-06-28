@@ -1952,5 +1952,12 @@
       }
     },
     "guidelines": "\u2022 \ud83e\udded AI GUIDELINES | generated 2026-06-27T12:19:51.804060\n\u2022 Win rate below 40%: tighten stops, reduce size, increase scan interval\n\u2022 Profit hunting: tune SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO \u2014 exit into momentum spikes, not passive giveback waits\n\u2022 Missed profit hunts (4): lower SPIKE_TOP thresholds, enable faster intra-bar exits"
+  },
+  {
+    "timestamp": "2026-06-28T04:57:34.546002",
+    "mode": "incremental",
+    "new_records": 500,
+    "ppo_trained": true,
+    "steps": 4096
   }
 ]

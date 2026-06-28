@@ -1,7 +1,7 @@
 {
-  "mode": "off_hours",
-  "market_state": "closed",
-  "can_trade": false,
-  "updated_at": "2026-06-27T12:19:15.858872+00:00",
-  "initialized": true
+  "mode": "trade_focus",
+  "market_state": "open",
+  "can_trade": true,
+  "updated_at": "2026-06-28T12:54:52.215958+00:00",
+  "focus": "profit_hunting"
 }

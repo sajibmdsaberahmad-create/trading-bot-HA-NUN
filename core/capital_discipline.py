@@ -143,6 +143,12 @@ def effective_min_profit_probability(
     if capital_discipline_enabled(cfg):
         floor = float(getattr(cfg, "CAPITAL_MIN_PROFIT_PROBABILITY", 0.62))
         base = max(base, floor)
+    try:
+        from core.commander_runtime import commander_entry_floors, commander_runtime_enabled
+        if commander_runtime_enabled(cfg):
+            base = max(base, commander_entry_floors(cfg).get("min_profit_probability", 0.0))
+    except Exception:
+        pass
     if is_strong_spike_setup(cfg, scan_score, spike_ratio):
         strong = float(getattr(cfg, "CAPITAL_STRONG_PROFIT_PROB_FLOOR", 0.48))
         base = min(base, strong)
@@ -157,18 +163,32 @@ def effective_entry_quality_blend(cfg: Optional[BotConfig] = None) -> float:
     return base
 
 
-def min_entry_scan_score(cfg: Optional[BotConfig] = None) -> float:
-    cfg = cfg or BotConfig()
-    if capital_discipline_enabled(cfg):
-        return float(getattr(cfg, "CAPITAL_MIN_ENTRY_SCAN_SCORE", 55))
-    return float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15))
-
-
 def min_entry_spike_ratio(cfg: Optional[BotConfig] = None) -> float:
     cfg = cfg or BotConfig()
+    base = float(getattr(cfg, "AI_SPIKE_FAST_MIN_RATIO", 1.15))
     if capital_discipline_enabled(cfg):
-        return float(getattr(cfg, "CAPITAL_MIN_ENTRY_SPIKE_RATIO", 1.25))
-    return float(getattr(cfg, "AI_SPIKE_FAST_MIN_RATIO", 1.15))
+        base = float(getattr(cfg, "CAPITAL_MIN_ENTRY_SPIKE_RATIO", 1.25))
+    try:
+        from core.commander_runtime import commander_entry_floors, commander_runtime_enabled
+        if commander_runtime_enabled(cfg):
+            base = max(base, commander_entry_floors(cfg).get("min_spike_ratio", 0.0))
+    except Exception:
+        pass
+    return base
+
+
+def min_entry_scan_score(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    base = float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15))
+    if capital_discipline_enabled(cfg):
+        base = float(getattr(cfg, "CAPITAL_MIN_ENTRY_SCAN_SCORE", 55))
+    try:
+        from core.commander_runtime import commander_entry_floors, commander_runtime_enabled
+        if commander_runtime_enabled(cfg):
+            base = max(base, commander_entry_floors(cfg).get("min_scan_score", 0.0))
+    except Exception:
+        pass
+    return base
 
 
 def entry_cooldown_after_skip(cfg: Optional[BotConfig] = None) -> float:

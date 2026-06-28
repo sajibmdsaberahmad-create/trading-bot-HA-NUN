@@ -53,3 +53,15 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-27 12:27 UTC` **brain_evolution** · stage **newborn** — Halim developer off_hours: 0 mutation(s), git=ok
 - `2026-06-28 04:58 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 24%, source heuristic_fallback
 - `2026-06-28 05:40 UTC` **brain_ppo_teacher** — PPO teacher replay_close_MARA: WR 27%, source heuristic_fallback
+- `2026-06-28 05:45 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 27%, source heuristic_fallback
+- `2026-06-28 05:50 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 20%, source heuristic_fallback
+- `2026-06-28 05:56 UTC` **brain_ppo_teacher** — PPO teacher replay_close_COIN: WR 33%, source heuristic_fallback
+- `2026-06-28 06:00 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 29%, source heuristic_fallback
+- `2026-06-28 06:07 UTC` **brain_ppo_teacher** — PPO teacher replay_close_COIN: WR 17%, source heuristic_fallback
+- `2026-06-28 06:13 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 6%, source heuristic_fallback
+- `2026-06-28 06:18 UTC` **brain_ppo_teacher** — PPO teacher replay_close_ASTS: WR 0%, source heuristic_fallback
+- `2026-06-28 09:33 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 19%, source heuristic_fallback
+- `2026-06-28 09:33 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 3658 pairs
+- `2026-06-28 09:34 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 20%, source heuristic_fallback
+- `2026-06-28 09:34 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-06-28 09:34 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 3658 pairs

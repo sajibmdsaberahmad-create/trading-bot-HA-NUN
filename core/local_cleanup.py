@@ -9,6 +9,7 @@ import glob
 import os
 import shutil
 import time
+from collections import deque
 from pathlib import Path
 from typing import Dict, List
 
@@ -57,8 +58,11 @@ def _trim_log(log_path: Path, max_mb: float = 2.0, keep_lines: int = 3000) -> in
         return 0
     before = log_path.stat().st_size
     try:
-        lines = log_path.read_text(errors="replace").splitlines()
-        log_path.write_text("\n".join(lines[-keep_lines:]) + "\n")
+        with open(log_path, "r", encoding="utf-8", errors="replace") as fh:
+            tail = deque(fh, maxlen=keep_lines)
+        if len(tail) < keep_lines and before <= max_mb * 1024 * 1024:
+            return 0
+        log_path.write_text("".join(tail))
         freed = before - log_path.stat().st_size
         log.info(f"Trimmed {log_path.name} ({size_mb:.1f}MB → {log_path.stat().st_size / 1024:.0f}KB)")
         return max(0, freed)
@@ -68,18 +72,44 @@ def _trim_log(log_path: Path, max_mb: float = 2.0, keep_lines: int = 3000) -> in
 
 
 def _trim_jsonl(rel_path: str, max_lines: int) -> int:
+    """Tail-only trim — O(file) read but O(max_lines) RAM, never load whole file."""
     path = ROOT / rel_path
     if not path.exists():
         return 0
     try:
-        lines = path.read_text(errors="replace").splitlines()
-        if len(lines) <= max_lines:
+        with open(path, "r", encoding="utf-8", errors="replace") as fh:
+            tail = deque(fh, maxlen=max_lines + 1)
+        if len(tail) <= max_lines:
             return 0
         before = path.stat().st_size
-        path.write_text("\n".join(lines[-max_lines:]) + "\n")
+        keep = list(tail)[-max_lines:]
+        path.write_text("".join(keep))
         return max(0, before - path.stat().st_size)
     except Exception:
         return 0
+
+
+def _prune_learn_cache(max_files: int = 400) -> int:
+    """Cap halim learn_cache JSON count — oldest removed first."""
+    cache = ROOT / "halim" / "data" / "learn_cache"
+    if not cache.is_dir():
+        return 0
+    try:
+        files = sorted(cache.glob("*.json"), key=lambda p: p.stat().st_mtime)
+    except OSError:
+        return 0
+    if len(files) <= max_files:
+        return 0
+    freed = 0
+    for old in files[: len(files) - max_files]:
+        try:
+            freed += old.stat().st_size
+            old.unlink(missing_ok=True)
+        except OSError:
+            pass
+    if freed:
+        log.info(f"Pruned learn_cache → kept {max_files} newest files")
+    return freed
 
 
 def _prune_old_reports(days: int = 7) -> int:
@@ -302,7 +332,7 @@ def cleanup_device_extras(*, remove_download_dmgs: bool = True) -> Dict[str, int
     return stats
 
 
-def cleanup_local_workspace(aggressive: bool = True) -> dict:
+def cleanup_local_workspace(aggressive: bool = True, *, skip_jsonl_trim: bool = False) -> dict:
     """Clean local workspace — safe while bot is running."""
     stats: Dict[str, int] = {
         "pycache_bytes": 0,
@@ -340,8 +370,17 @@ def cleanup_local_workspace(aggressive: bool = True) -> dict:
         stats["artifacts_bytes"] = _remove_root_artifacts()
         stats["reports_bytes"] = _prune_old_reports(days=7)
         stats["warmup_zip_bytes"] = _prune_duplicate_ppo_warmups(keep=1)
-        for rel, max_lines in _JSONL_TRIM.items():
-            stats["jsonl_bytes"] += _trim_jsonl(rel, max_lines)
+        stats["runtime_bytes"] += _prune_learn_cache(
+            max_files=int(os.getenv("HALIM_LEARN_CACHE_MAX_FILES", "400")),
+        )
+        if not skip_jsonl_trim:
+            protect_buffer = os.getenv("LEARNING_PROTECT_BUFFER", "true").lower() in (
+                "1", "true", "yes",
+            )
+            for rel, max_lines in _JSONL_TRIM.items():
+                if protect_buffer and "experience_buffer.jsonl" in rel:
+                    continue
+                stats["jsonl_bytes"] += _trim_jsonl(rel, max_lines)
 
     _unload_ollama_ram()
 
@@ -354,9 +393,11 @@ def run_periodic_cleanup(cfg=None, *, force: bool = False) -> dict:
     """Called from main loop when market closed or RAM is tight."""
     from core.memory_guard import is_memory_pressured, available_ram_mb
 
-    aggressive = force or is_memory_pressured(
+    ram_tight = is_memory_pressured(
         int(getattr(cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024)) if cfg else 1024
     )
+    aggressive = force or ram_tight
     if not aggressive and not force:
         return {"skipped": True, "available_mb": available_ram_mb()}
-    return cleanup_local_workspace(aggressive=aggressive)
+    # Under RAM pressure skip jsonl sweeps — tail-trim still reads whole files and spikes RAM
+    return cleanup_local_workspace(aggressive=aggressive, skip_jsonl_trim=ram_tight)

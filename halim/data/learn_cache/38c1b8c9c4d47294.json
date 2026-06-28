@@ -1,0 +1,16 @@
+{
+  "url": "local:commander_ib_report/overview",
+  "final_url": "local:commander_ib_report/overview",
+  "host": "local",
+  "topic": "commander:ib_report_overview",
+  "text": "Commander IB PortfolioAnalyst report (2026-02-06 \u2192 2026-04-27)\nAccount: individual US equities scalper | Ending NAV $2,084.55\nCumulative TWR: +35.03% | Sharpe 2.81 | Max DD 7.94%\nTrading P&L (MTM): +$1,108.31 | Fees: \u2212$317.20 (29% of MTM)\nTurnover ~$73,789 bought / $74,900 sold | Ended 100% cash (flat)\n\nKEY DISTINCTION FOR HALIM:\n- Commander's \"lottery\" trades were NOT random gambling \u2014 calculated setups with ~80\u201397% conviction.\n- Failures were human execution errors (hope-hold, no stop, wrong regime) \u2014 algo must avoid those.\n- Bot must beat human: same turnover intent, less fee drag, no tail losses.",
+  "text_excerpt": "Commander IB PortfolioAnalyst report (2026-02-06 \u2192 2026-04-27)\nAccount: individual US equities scalper | Ending NAV $2,084.55\nCumulative TWR: +35.03% | Sharpe 2.81 | Max DD 7.94%\nTrading P&L (MTM): +$1,108.31 | Fees: \u2212$317.20 (29% of MTM)\nTurnover ~$73,789 bought / $74,900 sold | Ended 100% cash (flat)\n\nKEY DISTINCTION FOR HALIM:\n- Commander's \"lottery\" trades were NOT random gambling \u2014 calculated setups with ~80\u201397% conviction.\n- Failures were human execution errors (hope-hold, no stop, wrong regime) \u2014 algo must avoid those.\n- Bot must beat human: same turnover intent, less fee drag, no tail losses.",
+  "text_chars": 607,
+  "content_hash": "38c1b8c9c4d47294",
+  "read_only": true,
+  "source_type": "commander_ib_report",
+  "fetched_at": "2026-06-28T13:31:10.393364+00:00",
+  "report": "Since_Inception_Detailed_11_20260427",
+  "section": "overview",
+  "polarity": "mixed"
+}

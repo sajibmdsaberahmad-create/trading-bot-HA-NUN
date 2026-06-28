@@ -10,6 +10,7 @@ params within bounds, and drives weighted PPO micro-training on corrected reward
 from __future__ import annotations
 
 import json
+import os
 import time
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -140,32 +141,42 @@ def _heuristic_teacher_plan(stats: Dict[str, Any], cfg: BotConfig) -> Dict[str, 
                 "ticker": ticker,
                 "should_have_entered": False,
                 "teacher_action": 0,
-                "teacher_reward": -0.85,
-                "lesson": f"repeat loser {ticker} — skip until pattern changes",
+                "teacher_reward": -0.65,
+                "lesson": (
+                    f"{ticker} repeat losses — require higher profit_probability "
+                    f"+ spike confirmation on re-entry, not a blanket skip"
+                ),
             })
         elif losses:
             labels.append({
                 "ticker": ticker,
                 "should_have_entered": False,
                 "teacher_action": 0,
-                "teacher_reward": -0.5,
-                "lesson": f"loss on {ticker} — require stronger council alignment",
+                "teacher_reward": -0.45,
+                "lesson": f"loss on {ticker} — require stronger council + micro forecast alignment",
             })
 
     conf = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.65))
     min_prob = float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.45))
+    wr_floor = float(os.getenv("PPO_TEACHER_WIN_RATE_FLOOR", "0.38"))
     mutations = []
-    if stats.get("win_rate", 1) < 0.25:
+    if stats.get("win_rate", 1) < wr_floor:
         mutations.append({
             "param": "CONFIDENCE_THRESHOLD",
-            "value": min(0.75, conf + 0.04),
+            "value": min(0.75, conf + 0.03),
             "reason": f"trade WR {stats.get('win_rate', 0):.0%} — tighten PPO entry bar",
         })
         mutations.append({
             "param": "MIN_PROFIT_PROBABILITY",
-            "value": min(0.62, min_prob + 0.05),
-            "reason": "repeat losses — raise profit probability gate",
+            "value": min(0.62, min_prob + 0.04),
+            "reason": "below teacher floor — raise profit probability gate",
         })
+        if not getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
+            mutations.append({
+                "param": "MIN_FAKEOUT_FADE_PROB",
+                "value": min(0.65, float(getattr(cfg, "MIN_FAKEOUT_FADE_PROB", 0.50)) + 0.03),
+                "reason": "below teacher floor — tighten fakeout read on fast entries",
+            })
 
     stop_hits = sum(
         1 for t in trades
@@ -173,7 +184,7 @@ def _heuristic_teacher_plan(stats: Dict[str, Any], cfg: BotConfig) -> Dict[str, 
     )
     diagnosis = (
         f"Local teacher: {stats.get('win_rate', 0):.0%} WR on {stats.get('count', 0)} trades. "
-        f"{stop_hits} stop exits. Repeat tickers: "
+        f"{stop_hits} stop exits. Repeat tickers (adapt entry, do not ban): "
         + ", ".join(
             tk for tk, xs in by_ticker.items()
             if sum(1 for x in xs if float(x.get("pnl_usd", 0) or 0) < 0) >= 2
@@ -181,15 +192,18 @@ def _heuristic_teacher_plan(stats: Dict[str, Any], cfg: BotConfig) -> Dict[str, 
     )
     return {
         "diagnosis": diagnosis,
-        "strategy_shift": "Skip repeat losers; require higher PPO confidence before micro-fast entry",
+        "strategy_shift": (
+            "Adapt entry quality on repeat-loss names — tighter profit_probability, "
+            "spike confirmation, and PPO confidence; do not blanket-skip tickers"
+        ),
         "trade_labels": labels,
         "mutations": mutations[:3],
         "lessons": [
-            "Do not re-enter same ticker after same-bar stop loss",
+            "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
             "Penalize PPO micro-fast when council confidence is neutral (50%)",
-            "Wait for volume spike confirmation before chase entries",
+            "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)",
         ],
-        "ppo_focus": "Penalize entries with instant stop hits (hold_sec=0)",
+        "ppo_focus": "Reward entries with profit_run + spike_lik alignment; penalize chase without volume",
         "_source": "heuristic_fallback",
     }
 
@@ -218,7 +232,8 @@ def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Option
     allowed = ", ".join(tunable_param_names(cfg)[:18])
     prompt = (
         "You are the TEACHER model improving student PPO and Halim reflex agents.\n"
-        "The student PPO picks entries/exits on 1-min scalps. Win rate is falling — diagnose and fix.\n\n"
+        "The student PPO picks entries/exits on 1-min scalps. Win rate is falling — diagnose and fix.\n"
+        "Markets fluctuate — adapt entry quality and stops; do NOT recommend blanket ticker bans.\n\n"
         f"PERFORMANCE SUMMARY:\n{summary}\n\n"
         "Analyze WHY losses cluster (bad entries, slippage, stops too tight, repeat tickers).\n"
         "For each recent trade, say what PPO SHOULD have done instead.\n\n"
@@ -230,14 +245,14 @@ def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Option
         '  "strategy_shift": "one sentence policy change for PPO",\n'
         '  "trade_labels": [\n'
         '    {"ticker": "QS", "should_have_entered": false, "teacher_action": 0, '
-        '"teacher_reward": -0.8, "lesson": "skip low micro on repeat loser"}\n'
+        '"teacher_reward": -0.8, "lesson": "repeat loss — require profit_probability + spike on re-entry"}\n'
         "  ],\n"
         '  "mutations": [{"param": "CONFIDENCE_THRESHOLD", "value": 0.68, "reason": "..."}],\n'
         '  "lessons": ["bullet 1", "bullet 2"],\n'
         '  "ppo_focus": "what feature patterns to penalize/reward"\n'
         "}\n"
         "teacher_action: 0=HOLD/skip, 1=BUY, 2=EXIT. teacher_reward: -1.0 to +1.0.\n"
-        "Penalize repeat losing entries; reward skipped bad setups."
+        "Penalize weak entries on repeat-loss tickers; reward skipped bad setups and strong micro alignment."
     )
     raw = None
     max_attempts = int(getattr(cfg, "PPO_TEACHER_API_RETRIES", 2))
@@ -304,6 +319,7 @@ def _build_teacher_records(
             "source": "teacher_ppo",
             "ticker": trade.get("ticker"),
             "action": action,
+            "teacher_action": action,
             "should_have_entered": should_enter,
             "teacher_reward": reward,
             "reward": reward,
@@ -327,21 +343,27 @@ def _train_ppo_from_teacher(
     if not records:
         return False
     try:
-        from core.ppo_entry_learning import evaluate_and_improve_ppo, get_ppo_model
+        from core.ppo_entry_learning import get_ppo_model
+        from core.ppo_reward_trainer import run_reward_linked_ppo_train
+
         m = model or get_ppo_model()
         if m is None:
             return False
         for rec in records:
             buffer_append(rec)
-        improved = evaluate_and_improve_ppo(cfg, model=m, records=records)
+        try:
+            from core.online_trainer import _update_weights_from_buffer
+            _update_weights_from_buffer()
+        except Exception:
+            pass
         steps = int(getattr(cfg, "PPO_TEACHER_MICRO_STEPS", 1024))
-        from core.ppo_entry_learning import ppo_micro_improve
-        improved = ppo_micro_improve(cfg, m, records) or improved
+        improved = run_reward_linked_ppo_train(
+            cfg, model=m, steps=steps, extra_records=records, force=True,
+        )
         if improved:
-            m.save(cfg.MODEL_PATH)
             log.info(
                 f"  🎓 PPO teacher train: {len(records)} labeled trades | "
-                f"{steps} micro-steps → {cfg.MODEL_PATH}"
+                f"{steps} reward-linked steps → {cfg.MODEL_PATH}"
             )
         return improved
     except Exception as exc:
@@ -395,6 +417,9 @@ def run_ppo_teacher_session(
         n_ok = len(applied.get("applied") or [])
         if n_ok:
             log.info(f"  🎓 Teacher applied {n_ok} param mutation(s)")
+    if wr < floor and not getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
+        setattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", True)
+        log.info("  🎓 Teacher: SPIKE_FAST_REQUIRES_QUALITY on — fast entries need micro forecast")
 
     teacher_recs = _build_teacher_records(cfg, plan, stats.get("trades") or [])
     ppo_ok = _train_ppo_from_teacher(cfg, teacher_recs, model=model)
@@ -479,6 +504,12 @@ def maybe_run_ppo_teacher_training(
     """Rate-limited hook after closed trades when win rate is poor."""
     if not _teacher_enabled(cfg):
         return None
+    try:
+        from core.learning_coordinator import memory_pressure_high
+        if memory_pressure_high(cfg):
+            return None
+    except Exception:
+        pass
 
     state = _load_state()
     min_interval = float(getattr(cfg, "PPO_TEACHER_MIN_INTERVAL_SEC", 180.0))
@@ -497,7 +528,7 @@ def maybe_run_ppo_teacher_training(
     if state["trades_since_teacher"] % every_n != 0:
         return None
 
-    stats = trade_stats(n=200)
+    stats = trade_stats(n=int(getattr(cfg, "PPO_TEACHER_LOOKBACK", 200)))
     floor = float(getattr(cfg, "PPO_TEACHER_WIN_RATE_FLOOR", 0.38))
     if stats["count"] >= 3 and stats["win_rate"] >= floor:
         return None

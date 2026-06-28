@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Train Halim toddler on Google Colab (free T4 GPU).
-SCRIPT_VERSION = halim-toddler-v2  (uses _build_sft_config — NOT raw max_seq_length)
+SCRIPT_VERSION = halim-toddler-v3  (epochs passed into _build_sft_config)
 
 Expects:
   sft/train.jsonl
@@ -73,7 +73,7 @@ def _load_rows(path: Path) -> list:
     return rows
 
 
-def _build_sft_config(SFTConfig, *, adapter_dir: Path) -> object:
+def _build_sft_config(SFTConfig, *, adapter_dir: Path, epochs: float) -> object:
     """TRL API changed: max_seq_length → max_length in v0.16+."""
     import inspect
 
@@ -165,7 +165,7 @@ def main() -> None:
         shutil.rmtree(adapter_dir)
     adapter_dir.mkdir(parents=True, exist_ok=True)
 
-    training_args = _build_sft_config(SFTConfig, adapter_dir=adapter_dir)
+    training_args = _build_sft_config(SFTConfig, adapter_dir=adapter_dir, epochs=epochs)
 
     trainer = SFTTrainer(
         model=model,

@@ -1,11 +1,14 @@
 {
-  "pairs_total": 2580,
-  "train_pairs": 2451,
-  "valid_pairs": 129,
+  "pairs_total": 11457,
+  "train_pairs": 10885,
+  "valid_pairs": 572,
   "by_source": {
-    "council": 952,
-    "action_gold": 513,
-    "coevolution": 1115
+    "council": 1671,
+    "action_gold": 3736,
+    "coevolution": 2761,
+    "dialogue": 3232,
+    "outcome_gold": 1,
+    "commander_gold": 56
   },
   "train_path": "halim/data/training/sft/train.jsonl",
   "valid_path": "halim/data/training/sft/valid.jsonl"

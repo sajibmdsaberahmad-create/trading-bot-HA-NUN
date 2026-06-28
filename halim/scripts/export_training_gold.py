@@ -25,10 +25,14 @@ def export_all(*, include_learn_cache: bool = True) -> dict:
     from core.halim_action_learn import export_action_gold
     from core.halim_ppo_coevolution import export_coevolution_gold
     from core.halim_ppo_dialogue import export_dialogue_gold
+    from core.halim_outcome_gold import export_outcome_gold
+    from core.commander_ib_gold import export_commander_gold
 
     action = export_action_gold(include_learn_cache=include_learn_cache)
     coev = export_coevolution_gold()
     dialogue = export_dialogue_gold()
+    outcome = export_outcome_gold()
+    commander = export_commander_gold()
     raw = count_raw_sources(repo_root())
 
     return {
@@ -36,6 +40,8 @@ def export_all(*, include_learn_cache: bool = True) -> dict:
         "action_gold": action,
         "coevolution_gold": coev,
         "dialogue_gold": dialogue,
+        "outcome_gold": outcome,
+        "commander_gold": commander,
         "raw_sources": raw,
     }
 

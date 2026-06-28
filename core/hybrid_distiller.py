@@ -28,6 +28,8 @@ MODELS_DIR = Path("models")
 DECISION_LOG = MODELS_DIR / "ai_decision_log.jsonl"
 BUFFER_PATH = MODELS_DIR / "experience_buffer.jsonl"
 PROXY_PATH = MODELS_DIR / "teacher_proxy.joblib"
+_proxy_bundle_cache: Optional[Dict[str, Any]] = None
+_proxy_bundle_mtime: float = 0.0
 STATE_PATH = MODELS_DIR / "hybrid_distill_state.json"
 
 # Extra numeric channels beyond flat PPO obs (spike, scan, spread, volume)
@@ -77,24 +79,33 @@ def distillation_status(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     }
 
 
+def _load_buffer_records(max_records: int = 800) -> List[Dict[str, Any]]:
+    from core.experience_buffer import load_recent
+    return load_recent(max_records)
+
+
 def _count_closed_trades() -> int:
+    state = _load_state()
+    cached = state.get("closed_trade_count")
+    if cached is not None:
+        return int(cached)
     if not BUFFER_PATH.exists():
         return 0
     n = 0
-    with open(BUFFER_PATH, "r") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                r = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if r.get("source") in ("live_trade", "replay_live") and r.get("action") in (
-                "SELL", "TRADE", None,
-            ):
-                n += 1
+    for rec in _load_buffer_records(1200):
+        if rec.get("source") in ("live_trade", "replay_live") and rec.get("action") in (
+            "SELL", "TRADE", None,
+        ):
+            n += 1
+    state["closed_trade_count"] = n
+    _save_state(state)
     return n
+
+
+def note_closed_trade_for_distill() -> None:
+    state = _load_state()
+    state["closed_trade_count"] = int(state.get("closed_trade_count", 0)) + 1
+    _save_state(state)
 
 
 def _parse_ts(ts: str) -> float:
@@ -104,23 +115,7 @@ def _parse_ts(ts: str) -> float:
         return 0.0
 
 
-def _load_buffer_records() -> List[Dict[str, Any]]:
-    if not BUFFER_PATH.exists():
-        return []
-    out = []
-    with open(BUFFER_PATH, "r") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                out.append(json.loads(line))
-            except json.JSONDecodeError:
-                continue
-    return out
-
-
-def _load_entry_decisions() -> List[Dict[str, Any]]:
+def _load_entry_decisions(max_records: int = 600) -> List[Dict[str, Any]]:
     if not DECISION_LOG.exists():
         return []
     out = []
@@ -145,7 +140,7 @@ def _load_entry_decisions() -> List[Dict[str, Any]]:
                 "confidence": float(data.get("confidence", 0.5) or 0.5),
                 "reason": str(data.get("reason", ""))[:120],
             })
-    return out
+    return out[-max_records:]
 
 
 def _build_feature_matrix(
@@ -365,6 +360,28 @@ def is_fast_path_enabled(cfg: BotConfig) -> bool:
     return bool(state.get("fast_path"))
 
 
+def _load_proxy_bundle() -> Optional[Dict[str, Any]]:
+    """Load teacher proxy once — reload only when joblib file changes."""
+    global _proxy_bundle_cache, _proxy_bundle_mtime
+    if not PROXY_PATH.exists():
+        _proxy_bundle_cache = None
+        return None
+    try:
+        mtime = PROXY_PATH.stat().st_mtime
+    except OSError:
+        return None
+    if _proxy_bundle_cache is not None and mtime == _proxy_bundle_mtime:
+        return _proxy_bundle_cache
+    try:
+        import joblib
+        bundle = joblib.load(PROXY_PATH)
+    except Exception:
+        return None
+    _proxy_bundle_cache = bundle
+    _proxy_bundle_mtime = mtime
+    return bundle
+
+
 def predict_teacher_proxy(
     obs: np.ndarray,
     spike_ratio: float,
@@ -373,15 +390,8 @@ def predict_teacher_proxy(
     cfg: Optional[BotConfig] = None,
 ) -> Optional[Dict[str, Any]]:
     """Microsecond inference — distilled Ollama entry signal."""
-    if not PROXY_PATH.exists():
-        return None
-    try:
-        import joblib
-    except ImportError:
-        return None
-    try:
-        bundle = joblib.load(PROXY_PATH)
-    except Exception:
+    bundle = _load_proxy_bundle()
+    if bundle is None:
         return None
 
     vec = _obs_to_vector(obs, spike_ratio, scan_score, market_ctx)
@@ -433,9 +443,15 @@ def proxy_entry_decision(
 def maybe_run_hybrid_distillation(cfg: BotConfig) -> Dict[str, Any]:
     """
     Auto-called after closed trades. Trains proxy when thresholds are met.
-  """
+    """
     if not getattr(cfg, "HYBRID_DISTILLATION_ENABLED", True):
         return {"skipped": True, "reason": "disabled"}
+    try:
+        from core.learning_coordinator import should_defer_heavy_learning, memory_pressure_high
+        if should_defer_heavy_learning(cfg) or memory_pressure_high(cfg):
+            return {"skipped": True, "reason": "deferred_or_memory"}
+    except Exception:
+        pass
 
     closed = _count_closed_trades()
     min_trades = int(getattr(cfg, "HYBRID_DISTILL_MIN_TRADES", 100))

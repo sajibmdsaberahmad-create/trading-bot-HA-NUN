@@ -22,9 +22,14 @@ def shaped_reward(
     spike_ratio: float = 1.0,
     late_chase: bool = False,
     slippage_pct: float = 0.0,
+    pnl_pct: float = 0.0,
+    peak_pct: float = 0.0,
+    notional_usd: float = 0.0,
+    fee_usd: float = 0.0,
 ) -> float:
     """
     R = base_reward - λ₁·reject - λ₂·late_chase - λ₃·slippage
+    Commander IB gold: penalize tail losses, fee bleed, and gave-back peaks.
     """
     r = float(base_reward)
     if bracket_rejected or inverted_bracket:
@@ -35,11 +40,45 @@ def shaped_reward(
     max_slip = float(getattr(cfg, "MAX_ACCEPTABLE_SLIPPAGE_PCT", 0.004))
     if abs(slippage_pct) > max_slip * 2:
         r += -0.25
+    tail_pct = float(getattr(cfg, "RL_TAIL_LOSS_PCT", 3.0))
+    if pnl_pct < -tail_pct:
+        r += float(getattr(cfg, "RL_TAIL_LOSS_PENALTY", -0.85))
+    if peak_pct > 0.4 and pnl_pct < peak_pct * 0.35 and pnl_pct < 0:
+        r += float(getattr(cfg, "RL_GAVE_BACK_PEAK_PENALTY", -0.55))
+    if fee_usd > 0 and base_reward > 0 and (base_reward - fee_usd) <= 0:
+        r += float(getattr(cfg, "RL_FEE_BLEED_PENALTY", -0.45))
+    if notional_usd > 0 and base_reward > 0:
+        edge = base_reward / notional_usd
+        min_edge = float(getattr(cfg, "RL_MIN_NET_EDGE_PER_NOTIONAL", 0.0008))
+        if edge < min_edge:
+            r += -0.25
     return round(r, 4)
 
 
-def reward_from_trade(pnl_usd: float, cfg: BotConfig, **kwargs) -> float:
-    return shaped_reward(cfg, pnl_usd, event="trade", **kwargs)
+def reward_from_trade(
+    pnl_usd: float,
+    cfg: BotConfig,
+    *,
+    pnl_pct: float = 0.0,
+    peak_pct: float = 0.0,
+    notional_usd: float = 0.0,
+    entry_fill: float = 0.0,
+    exit_fill: float = 0.0,
+    shares: float = 0.0,
+    **kwargs,
+) -> float:
+    fee_usd = 0.0
+    cost_pct = float(getattr(cfg, "TRANSACTION_COST_PCT", 0.001))
+    if entry_fill > 0 and exit_fill > 0 and shares > 0:
+        fee_usd = shares * (entry_fill + exit_fill) * cost_pct
+    if notional_usd <= 0 and entry_fill > 0 and shares > 0:
+        notional_usd = entry_fill * shares
+    return shaped_reward(
+        cfg, pnl_usd, event="trade",
+        pnl_pct=pnl_pct, peak_pct=peak_pct,
+        notional_usd=notional_usd, fee_usd=fee_usd,
+        **kwargs,
+    )
 
 
 def reward_from_bracket_reject(cfg: BotConfig, spike_ratio: float = 1.0, inverted: bool = False) -> float:

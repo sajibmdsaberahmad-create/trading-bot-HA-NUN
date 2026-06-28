@@ -171,48 +171,15 @@ def _update_weights_from_buffer():
 
 
 def _train_ppo_on_buffer(cfg: BotConfig, steps: int = 20_000):
-    """Train PPO on episodes synthesized from experience buffer when features are available."""
+    """Reward-linked PPO train from experience buffer (real trade / teacher rewards)."""
     try:
-        records = load_recent(n=5000)
-    except Exception as exc:
-        log.debug(f"Buffer load failed: {exc}")
-        records = []
-    if not records:
-        log.warning("No experience buffer records for PPO training")
-        return False
-    trade_recs = [
-        r for r in records
-        if r.get("source") in (
-            "backtest", "live_trade", "live_entry", "scan_pick",
-            "ppo_entry", "ppo_entry_eval", "ppo_led", "deferred_council",
-            "halim_ppo_coevolution",
-            "teacher_ppo", "replay_live",
+        from core.ppo_entry_learning import get_ppo_model
+        from core.ppo_reward_trainer import run_reward_linked_ppo_train
+
+        log.info(f"🧠 PPO buffer training | target steps={steps:,}")
+        return run_reward_linked_ppo_train(
+            cfg, model=get_ppo_model(), steps=steps, force=True,
         )
-        and r.get("features")
-    ]
-    if not trade_recs:
-        log.warning("No feature-rich records for PPO training yet — skipping neural update")
-        return False
-    log.info(f"🧠 PPO training on {len(trade_recs)} experience records | target steps={steps:,}")
-    try:
-        dummy_f = np.zeros((cfg.WINDOW_SIZE + 2, cfg.N_FEATURES), np.float32)
-        dummy_px = np.ones(cfg.WINDOW_SIZE + 2, np.float32) * 100.0
-        dummy_env = TradingEnv(
-            dummy_f,
-            dummy_px,
-            cfg.INITIAL_CASH,
-            cfg.TRANSACTION_COST_PCT,
-            cfg.WINDOW_SIZE,
-            cfg.DEFAULT_MAX_POSITION_PCT,
-        )
-        model = build_ppo_agent(dummy_env, cfg, model_path=cfg.MODEL_PATH)
-        vec_env = model.get_env()
-        if vec_env is not None:
-            model.set_env(vec_env)
-        model.learn(total_timesteps=steps, reset_num_timesteps=False, progress_bar=False)
-        model.save(cfg.MODEL_PATH)
-        log.info(f"💾 PPO model saved -> {cfg.MODEL_PATH}")
-        return True
     except Exception as exc:
         log.error(f"PPO training failed: {exc}")
         return False

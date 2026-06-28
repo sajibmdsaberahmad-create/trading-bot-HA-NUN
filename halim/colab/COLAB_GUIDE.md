@@ -137,6 +137,8 @@ In another Terminal tab:
 | Chat returns empty | Check `./scripts/halim_status.sh` — checkpoint must exist |
 | Out of memory on Colab | Rare on T4; restart runtime and re-run |
 | `unexpected keyword argument 'max_seq_length'` | Colab TRL is new — use latest `train_toddler_colab.py` (uses `max_length`) |
+| `NameError: name 'epochs' is not defined` | Re-upload `halim/colab/train_toddler_colab.py` (v3 fix) from your Mac |
+| `Can't find adapter_config at toddler_v1/lora_adapter` | Train first (`train_toddler_colab.py`); merge only works after LoRA exists locally |
 
 ---
 

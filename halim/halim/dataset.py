@@ -18,6 +18,8 @@ DEFAULT_PATHS = {
     "action_gold": "halim/data/training/action_gold.jsonl",
     "coevolution": "halim/data/training/coevolution_gold.jsonl",
     "dialogue": "halim/data/training/dialogue_gold.jsonl",
+    "outcome_gold": "halim/data/training/outcome_gold.jsonl",
+    "commander_gold": "halim/data/training/commander_gold.jsonl",
 }
 
 
@@ -161,7 +163,7 @@ def iter_source_rows(root: Path) -> Iterator[Tuple[str, Dict[str, Any]]]:
         if row:
             yield "council", row
 
-    for key in ("action_gold", "coevolution", "dialogue"):
+    for key in ("action_gold", "coevolution", "dialogue", "outcome_gold", "commander_gold"):
         path = root / DEFAULT_PATHS[key]
         for raw in _iter_jsonl(path):
             row = standard_gold(raw, default_source=key)

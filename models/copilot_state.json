@@ -1,29 +1,23 @@
 {
-  "narrative": "Local copilot: 28% session WR. Repeat losers: COIN, LCID, MARA, ASTS.",
+  "narrative": "Local copilot: 43% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
   "regime_read": "mixed",
   "risk_posture": "normal",
-  "session_wr": 0.275,
+  "session_wr": 0.42857142857142855,
   "session_pnl": 0.0,
   "ticker_bias": {
-    "COIN": "SKIP",
-    "LCID": "SKIP",
-    "MARA": "SKIP",
-    "ASTS": "SKIP"
+    "LCID": "CAUTION",
+    "ASTS": "CAUTION",
+    "MARA": "CAUTION"
   },
-  "repeat_losers": [
-    "COIN",
-    "LCID",
-    "MARA",
-    "ASTS"
-  ],
+  "repeat_losers": [],
   "ppo_hints": {
     "confidence_boost": 0.0,
-    "skip_repeat_losers": true
+    "require_quality_on_repeat": false,
+    "min_spike_mult": 1.0
   },
   "lessons": [
-    "Skip tickers with 2+ losses this session",
-    "Require PPO+council alignment on entries"
+    "Replay: collect gold on all tickers; copilot skip relaxed"
   ],
-  "updated_at": 1782563970.8444648,
+  "updated_at": 1782651092.941348,
   "source": "heuristic"
 }

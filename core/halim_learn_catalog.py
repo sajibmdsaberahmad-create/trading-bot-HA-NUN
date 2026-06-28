@@ -130,6 +130,7 @@ RSS_FEEDS: List[str] = [
 # Refreshed every batch — live US market session clock (local, not a web fetch)
 LOCAL_TOPICS: List[str] = [
     "local:market_hours",
+    "local:commander_ib_report",
 ]
 
 WIKI_LANGUAGE_MANNERS: List[str] = [

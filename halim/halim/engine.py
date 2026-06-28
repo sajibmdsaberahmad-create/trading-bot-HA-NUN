@@ -161,9 +161,13 @@ def complete_reasoning(prompt: str, purpose: str = "reasoning") -> Dict[str, Any
     """
     max_tokens = int(os.getenv("HALIM_MAX_TOKENS", "512"))
     temperature = float(os.getenv("HALIM_TEMPERATURE", "0.7"))
-    if purpose == "entry_decision":
-        max_tokens = int(os.getenv("HALIM_ENTRY_MAX_TOKENS", "72"))
-        temperature = float(os.getenv("HALIM_ENTRY_TEMPERATURE", "0.12"))
+    if purpose in ("entry_decision", "exit_decision"):
+        if purpose == "entry_decision":
+            max_tokens = int(os.getenv("HALIM_ENTRY_MAX_TOKENS", "72"))
+            temperature = float(os.getenv("HALIM_ENTRY_TEMPERATURE", "0.12"))
+        else:
+            max_tokens = int(os.getenv("HALIM_EXIT_MAX_TOKENS", "72"))
+            temperature = float(os.getenv("HALIM_EXIT_TEMPERATURE", "0.12"))
     if not reasoning_available():
         return {
             "ok": False,
