@@ -2,9 +2,28 @@
   "halim_phase": "toddler",
   "model": "M. A. Halim",
   "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
-  "backend": "hf",
+  "backend": "mlx",
   "merged_path": "merged",
-  "adapter_path": "lora_adapter",
-  "registered_at": "2026-06-27T14:12:28.781955+00:00",
-  "trained_on": "google_colab"
+  "trained_at": "2026-06-28T14:54:20.043221+00:00",
+  "train_pairs": 9039,
+  "valid_pairs": 475,
+  "epochs": 3.5,
+  "by_source": {
+    "council": 1671,
+    "action_gold": 2961,
+    "coevolution": 2258,
+    "dialogue": 2624
+  },
+  "raw_sources": {
+    "council": 3658,
+    "action_gold": 3614,
+    "coevolution": 2258,
+    "dialogue": 2624,
+    "total_raw": 12154
+  },
+  "trained_on": "google_colab",
+  "package_version": 3,
+  "build_id": "f952f242ea6e",
+  "packaged_at": "2026-06-28T09:34:06.270220+00:00",
+  "registered_at": "2026-06-28T15:08:58.223950+00:00"
 }
