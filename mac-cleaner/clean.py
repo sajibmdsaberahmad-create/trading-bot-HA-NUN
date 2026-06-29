@@ -520,6 +520,8 @@ def _clean_hanoon_cruft(dry_run: bool, older_than_days: int = 0) -> int:
         freed += _rm_path(root / "halim" / "data" / "checkpoints" / name, dry_run=dry_run)
 
     for lp in _hanoon_log_paths():
+        if lp.name == "halim_serve.log":
+            continue  # keep crash traces — MLX segfaults are diagnosed from this log
         if not lp.is_file() or lp.stat().st_size <= 500_000:
             continue
         if dry_run:

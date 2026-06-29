@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 from halim.scaffold import SCAFFOLD_HF, SCAFFOLD_MLX_4BIT
 
 _model_cache: Dict[str, Any] = {}
+# MLX/HF generate is not thread-safe — parallel /v1/complete during RTH segfaults serve.
+_inference_lock = threading.Lock()
 
 
 def _load_manifest(checkpoint: Path) -> Dict[str, Any]:
@@ -35,6 +38,10 @@ def _resolve_paths(checkpoint: Path) -> Tuple[str, Optional[str]]:
     return str(base), None
 
 
+def _prefer_adapter_inference() -> bool:
+    return os.getenv("HALIM_SERVE_PREFER_ADAPTER", "true").lower() in ("1", "true", "yes")
+
+
 def mlx_complete(
     prompt: str,
     checkpoint: Path,
@@ -48,37 +55,43 @@ def mlx_complete(
     except ImportError:
         return None, "mlx_lm_not_installed"
 
-    merged = _merged_model_dir(checkpoint)
-    key = str((merged or checkpoint).resolve())
-    if key not in _model_cache:
-        try:
-            if merged:
-                model, tokenizer = load(str(merged))
-            else:
-                base, adapter = _resolve_paths(checkpoint)
-                if adapter:
-                    model, tokenizer = load(base, adapter_path=adapter)
+    merged = None if _prefer_adapter_inference() else _merged_model_dir(checkpoint)
+    adapter_only = _adapter_dir(checkpoint) if _prefer_adapter_inference() else None
+    if merged is None and adapter_only is None:
+        merged = _merged_model_dir(checkpoint)
+    key = str((merged or adapter_only or checkpoint).resolve())
+    with _inference_lock:
+        if key not in _model_cache:
+            try:
+                if merged:
+                    model, tokenizer = load(str(merged))
                 else:
-                    model, tokenizer = load(base)
-            _model_cache[key] = (model, tokenizer)
+                    base, adapter = _resolve_paths(checkpoint)
+                    if adapter_only:
+                        adapter = str(adapter_only)
+                    if adapter:
+                        model, tokenizer = load(base, adapter_path=adapter)
+                    else:
+                        model, tokenizer = load(base)
+                _model_cache[key] = (model, tokenizer)
+            except Exception as exc:
+                return None, f"load_failed:{exc}"[:120]
+
+        model, tokenizer = _model_cache[key]
+        try:
+            from mlx_lm.sample_utils import make_sampler
+
+            text = generate(
+                model,
+                tokenizer,
+                prompt=prompt,
+                max_tokens=max_tokens,
+                sampler=make_sampler(temp=temperature),
+                verbose=False,
+            )
+            return (text or "").strip() or None, "ok"
         except Exception as exc:
-            return None, f"load_failed:{exc}"[:120]
-
-    model, tokenizer = _model_cache[key]
-    try:
-        from mlx_lm.sample_utils import make_sampler
-
-        text = generate(
-            model,
-            tokenizer,
-            prompt=prompt,
-            max_tokens=max_tokens,
-            sampler=make_sampler(temp=temperature),
-            verbose=False,
-        )
-        return (text or "").strip() or None, "ok"
-    except Exception as exc:
-        return None, f"generate_failed:{exc}"[:120]
+            return None, f"generate_failed:{exc}"[:120]
 
 
 def _adapter_dir(checkpoint: Path) -> Optional[Path]:
@@ -132,52 +145,53 @@ def hf_complete(
         tokenizer_source = str(model_dir)
 
     key = f"{checkpoint.resolve()}|{model_dir}|{adapter_dir}|{tokenizer_source}"
-    if key not in _model_cache:
-        try:
-            if torch.backends.mps.is_available():
-                device = "mps"
-                dtype = torch.float16
-            elif torch.cuda.is_available():
-                device = "cuda"
-                dtype = torch.float16
-            else:
-                device = "cpu"
-                dtype = torch.float32
-            tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, trust_remote_code=True)
-            if tokenizer.pad_token is None:
-                tokenizer.pad_token = tokenizer.eos_token
-            if model_dir:
-                model = AutoModelForCausalLM.from_pretrained(
-                    str(model_dir), torch_dtype=dtype, trust_remote_code=True,
-                ).to(device)
-            else:
-                from peft import PeftModel
-                model = AutoModelForCausalLM.from_pretrained(
-                    base_model, torch_dtype=dtype, trust_remote_code=True,
-                ).to(device)
-                model = PeftModel.from_pretrained(model, str(adapter_dir))
-            model.eval()
-            _model_cache[key] = (model, tokenizer, device)
-        except Exception as exc:
-            return None, f"load_failed:{exc}"[:120]
+    with _inference_lock:
+        if key not in _model_cache:
+            try:
+                if torch.backends.mps.is_available():
+                    device = "mps"
+                    dtype = torch.float16
+                elif torch.cuda.is_available():
+                    device = "cuda"
+                    dtype = torch.float16
+                else:
+                    device = "cpu"
+                    dtype = torch.float32
+                tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, trust_remote_code=True)
+                if tokenizer.pad_token is None:
+                    tokenizer.pad_token = tokenizer.eos_token
+                if model_dir:
+                    model = AutoModelForCausalLM.from_pretrained(
+                        str(model_dir), torch_dtype=dtype, trust_remote_code=True,
+                    ).to(device)
+                else:
+                    from peft import PeftModel
+                    model = AutoModelForCausalLM.from_pretrained(
+                        base_model, torch_dtype=dtype, trust_remote_code=True,
+                    ).to(device)
+                    model = PeftModel.from_pretrained(model, str(adapter_dir))
+                model.eval()
+                _model_cache[key] = (model, tokenizer, device)
+            except Exception as exc:
+                return None, f"load_failed:{exc}"[:120]
 
-    model, tokenizer, device = _model_cache[key]
-    try:
-        messages = [{"role": "user", "content": prompt}]
-        text_in = tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True,
-        )
-        inputs = tokenizer(text_in, return_tensors="pt").to(device)
-        with torch.no_grad():
-            out = model.generate(
-                **inputs,
-                max_new_tokens=max_tokens,
-                temperature=max(temperature, 0.01),
-                do_sample=temperature > 0,
-                pad_token_id=tokenizer.eos_token_id,
+        model, tokenizer, device = _model_cache[key]
+        try:
+            messages = [{"role": "user", "content": prompt}]
+            text_in = tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True,
             )
-        new_tokens = out[0][inputs["input_ids"].shape[1]:]
-        text = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-        return text or None, "ok"
-    except Exception as exc:
-        return None, f"generate_failed:{exc}"[:120]
+            inputs = tokenizer(text_in, return_tensors="pt").to(device)
+            with torch.no_grad():
+                out = model.generate(
+                    **inputs,
+                    max_new_tokens=max_tokens,
+                    temperature=max(temperature, 0.01),
+                    do_sample=temperature > 0,
+                    pad_token_id=tokenizer.eos_token_id,
+                )
+            new_tokens = out[0][inputs["input_ids"].shape[1]:]
+            text = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+            return text or None, "ok"
+        except Exception as exc:
+            return None, f"generate_failed:{exc}"[:120]

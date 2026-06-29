@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Spike-top hunt on MARA: spike_top_exit: +0.60% vol=3.6x",
-    "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- LCID: pnl=$-0.48 slip=0",
-    "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- ASTS: pnl=$-4.18 slip=0",
     "Review trade_closed on RIOT",
     "Review trade_closed on RKLB",
     "Review loss_streak on RKLB",
@@ -103,10 +100,13 @@
     "Commander: green_profit_lock:ai_stall quick_scalp +2.19% (peak +2.19%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.13% (peak +2.19%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.13% (peak +2.13%)",
-    "Commander: green_profit_lock:ai_stall quick_scalp +2.08% (peak +2.08%)"
+    "Commander: green_profit_lock:ai_stall quick_scalp +2.08% (peak +2.08%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +2.25% (peak +2.25%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +2.25% (peak +2.30%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +2.36% (peak +2.36%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 14,
-  "updated": "2026-06-29T08:14:48.170720"
+  "trades_observed": 38,
+  "updated": "2026-06-29T08:33:12.343442"
 }

@@ -117,7 +117,13 @@ class HalimHandler(BaseHTTPRequestHandler):
     def handle_one_request(self) -> None:
         try:
             super().handle_one_request()
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
+
+    def handle(self) -> None:
+        try:
+            super().handle()
+        except (BrokenPipeError, ConnectionResetError, OSError):
             pass
 
     def _json(self, code: int, body: Dict[str, Any]) -> None:
@@ -155,6 +161,17 @@ class HalimHandler(BaseHTTPRequestHandler):
             self._json(404, {"ok": False, "error": "not_found"})
 
     def do_POST(self) -> None:
+        try:
+            self._do_post()
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
+        except Exception as exc:
+            try:
+                self._json(500, {"ok": False, "error": str(exc)[:120]})
+            except Exception:
+                pass
+
+    def _do_post(self) -> None:
         try:
             body = self._read_json()
         except Exception:
