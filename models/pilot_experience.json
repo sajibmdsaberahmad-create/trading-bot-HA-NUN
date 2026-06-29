@@ -1,11 +1,11 @@
 {
-  "total_xp": 19025,
+  "total_xp": 19080,
   "level": "Veteran",
-  "flights_completed": 177,
-  "flights_flown": 581,
-  "takeoffs": 581,
-  "landings": 177,
-  "hours_flown": 17.69999999999998,
+  "flights_completed": 178,
+  "flights_flown": 585,
+  "takeoffs": 585,
+  "landings": 178,
+  "hours_flown": 17.799999999999983,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -34,7 +34,7 @@
     "MAR": 22,
     "QS": 2,
     "RIO": 16,
-    "SOF": 49,
+    "SOF": 50,
     "AST": 4,
     "RKL": 4
   },
@@ -42,7 +42,7 @@
   "license_class": "Basic",
   "certifications": {},
   "skill_points": {
-    "entry_timing": 93,
+    "entry_timing": 94,
     "exit_timing": 84,
     "risk_management": 10,
     "regime_recognition": 0,
