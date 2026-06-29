@@ -3,25 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1539,
+  "trades_observed": 1540,
   "scans_performed": 39,
-  "improvements_applied": 2449,
+  "improvements_applied": 2450,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:36:01.375995",
-      "age": "7d 1h 33m 12s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-5.87",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:36:32.409724",
-      "age": "7d 1h 33m 43s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-2.94",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:36:34.818659",
       "age": "7d 1h 33m 46s",
@@ -12121,6 +12107,27 @@
           "Review trade_closed on TZA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:22:35.526798",
+      "age": "8d 3h 19m 46s",
+      "type": "TRADE",
+      "message": "Observed trade: TZA ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:22:35.992244",
+      "age": "8d 3h 19m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2450",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TZA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14285,7 +14292,6 @@
   "mood": "recalibrating",
   "total_pnl": 332255.5300000003,
   "win_history": [
-    -8.08,
     -8.1,
     -12.07,
     -3.1,
@@ -14784,20 +14790,21 @@
     -50.0,
     0.0,
     -100.0,
-    -50.0
+    -50.0,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 7,
+  "consecutive_losses": 8,
   "worst_streak": 86,
-  "veteran_xp": 24165,
+  "veteran_xp": 24175,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 68,
     "entry_timing": 100
   },
-  "flights_completed": 1533,
-  "hours_flown": 153.29999999999558,
+  "flights_completed": 1534,
+  "hours_flown": 153.39999999999557,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14813,7 +14820,7 @@
     "TPT": 3,
     "KUS": 2,
     "XCH": 1,
-    "TZA": 16,
+    "TZA": 17,
     "GDC": 14,
     "SOX": 25,
     "BIT": 13,
@@ -14840,5 +14847,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-685.68 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-735.68 recent). Tightening entries until edge returns."
 }
