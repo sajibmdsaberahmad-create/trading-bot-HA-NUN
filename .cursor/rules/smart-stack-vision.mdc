@@ -1,52 +1,41 @@
 ---
-description: Smart Stack vision — Halim+PPO lead; gates advise; teacher fades; never bypass brains
+description: Life Engine vision — one ship, AI everywhere, RAM-live, maturity ladder
 alwaysApply: true
 ---
 
-# Smart Stack (read before entry-flow changes)
+# HANOON Life Engine (read before any trading-loop change)
 
-Full spec: `docs/VISION_SMART_STACK.md`  
-Hub: `core/smart_stack.py`
+Full spec: `docs/VISION_SMART_STACK.md` · Hub: `core/smart_stack.py`
 
 ## Mission
 
-Real-time reasoning on focus tickers. **Halim + PPO decide.** Cloud API **teaches and fades.** Mechanical gates **advise** (context in prompts). **Hard rails only** at execution (daily loss, kill switch, partial-fill abort, position limits).
+**One powerful ship, not scattered boats.** Smart sensors → PPO reflex → Halim reason → blend → sampled teacher → war posture → HARD survival rails → learn every spike.
 
-Success = decision quality + explanations + learning loop — **not** entry count.
+Entire operation uses AI for better results. Mechanical gates/war/rules **exist** but feed AI as context/posture — never bypass brains silently.
 
-## Pipeline
+## Now vs maturity
 
-```
-SENSE → PPO reflex → Halim reason → blend → teacher API (sampled) → war posture → HARD rails → LEARN (verdicts.jsonl)
-```
+Foundation is wired today; quality improves via `brain_maturity` stages (newborn→adult) + gold data:
+- **Now:** Halim+PPO lead, advisory gates, verdict logging, teacher curriculum, war posture, RAM-live
+- **Matures:** Halim adult entries, PPO beyond HOLD, calibrated thresholds, zero-API sessions, war-per-regime
 
-## Never do (when SMART_STACK=true, default)
+See `maturity_ladder()` in `core/smart_stack.py`.
 
-- Silent `ppo_hold_skip` / skip council on PPO HOLD before Halim
-- Hard-block MTF/regime/quality in spike loop without brain deliberation
-- Blanket war/macro veto before `decide_entry`
-- Teacher API on every spike for all tickers
-- Remove verdict logging from fast paths (`_finalize_entry_decision`)
+## Never do (SMART_STACK=true default)
 
-## Phases (quick map)
+- `ppo_hold_skip` before Halim/council
+- Hard-block gates in spike loop without `decide_entry`
+- Disk cleanup/sweeps during market hours (`RAM_LIVE_ONLY=true`)
+- Teacher API on every ticker every spike
+- New standalone entry bot outside `ai_commander` pipeline
+- Skip `_emit_spike_verdict` on any finalize path
 
-| Phase | What |
-|-------|------|
-| A | PPO HOLD → Halim+council (`should_skip_entry_council_on_ppo_hold` = false) |
-| B | Gates advisory; hourly cap on **fills** (`count_hourly_filled_entry`) |
-| C | `should_ring_teacher_api` + `brain_maturity` curriculum |
-| D | `log_spike_verdict` → `models/smart_stack_verdicts.jsonl` |
-| E | `apply_smart_war_entry` posture; Halim-led sniper flash |
+## RAM-live
 
-## Env vars
+- `RAM_LIVE_ONLY=true` (default with smart stack): no periodic cleanup while market open
+- Off-hours: tail-trim jsonl with bounded RAM (deque), not full-file load
+- One hull: `scalper_runner` — extend organs, don't spawn parallel decision systems
 
-- `SMART_STACK=true` (master, default ON)
-- `SMART_STACK_ADVISORY_GATES=true`
-- `SMART_STACK_WAR_POSTURE=true`
-- `SMART_STACK_HOURLY_FILLS_ONLY=true`
-- `SMART_STACK_FLASH_HALIM_MIN_CONF=0.62`
-- Legacy: `SMART_STACK=false` restores dumb gates
+## Touch together
 
-## Touch these files together
-
-`core/smart_stack.py`, `core/ai_commander.py`, `core/scalper_runner.py`, `core/sniper_execution.py`, `core/entry_quality.py`
+`core/smart_stack.py`, `core/ai_commander.py`, `core/scalper_runner.py`, `core/entry_quality.py`, `core/brain_maturity.py`
