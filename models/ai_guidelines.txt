@@ -1753,3 +1753,11 @@ green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:24:31.672604+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:24:31.672645+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
+
