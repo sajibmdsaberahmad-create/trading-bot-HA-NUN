@@ -1331,3 +1331,15 @@ green_profit_lock:ai_stall quick_scalp +3.16% (peak +3.16%)
 Observed order_timeout — recorded for learning.
 PreSubmitted
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:24:07.903644+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +3.10% (peak +3.10%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:24:09.494893+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:25:04.659724+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
