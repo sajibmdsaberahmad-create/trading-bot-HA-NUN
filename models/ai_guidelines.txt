@@ -1788,3 +1788,15 @@ green_profit_lock:ai_stall quick_scalp +1.52% (peak +1.52%)
 Observed loss_streak — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +1.52% (peak +1.52%)
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:27:52.961286+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:27:59.321685+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:27:59.321886+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
