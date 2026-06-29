@@ -19,8 +19,6 @@ from typing import Dict, Optional
 
 from core.notify import log
 
-logger = logging.getLogger("MARKET_CONTEXT")
-
 # Inverse / bear ETFs — macro hints only (no hard veto).
 INVERSE_ETFS = frozenset({
     "TZA", "SOXS", "SQQQ", "SPXS", "SPXU", "SDOW", "SDS", "QID", "PSQ",
@@ -33,6 +31,8 @@ _CACHE: Dict[str, object] = {
     "lock": threading.Lock(),
 }
 _STATE_PATH = Path(__file__).resolve().parent.parent / "models" / "macro_context.json"
+
+logger = logging.getLogger("MARKET_CONTEXT")
 
 
 def _try_import_yfinance():
@@ -51,7 +51,35 @@ def macro_context_enabled() -> bool:
     return os.getenv("MACRO_CONTEXT_ENABLED", "true").lower() in ("1", "true", "yes")
 
 
-def _fast_snapshot(yf, symbol: str) -> Dict[str, float]:
+def _yahoo_quote_snapshot(symbol: str) -> Dict[str, float]:
+    """Lightweight Yahoo quote — no yfinance dependency."""
+    out = {"price": 0.0, "change_pct": 0.0}
+    try:
+        import urllib.request
+        url = (
+            "https://query1.finance.yahoo.com/v7/finance/quote"
+            f"?symbols={symbol.replace('^', '%5E')}"
+        )
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+        results = (data.get("quoteResponse") or {}).get("result") or []
+        if not results:
+            return out
+        q = results[0]
+        price = q.get("regularMarketPrice") or q.get("postMarketPrice") or 0.0
+        chg = q.get("regularMarketChangePercent")
+        if chg is None and q.get("regularMarketChange") and price:
+            prev = float(price) - float(q.get("regularMarketChange", 0))
+            chg = (float(q.get("regularMarketChange", 0)) / prev * 100.0) if prev else 0.0
+        out["price"] = float(price or 0.0)
+        out["change_pct"] = float(chg or 0.0)
+    except Exception as exc:
+        logger.debug(f"Yahoo quote {symbol}: {exc}")
+    return out
+
+
+def _fast_snapshot_yf(yf, symbol: str) -> Dict[str, float]:
     out = {"price": 0.0, "change_pct": 0.0}
     try:
         t = yf.Ticker(symbol)
@@ -77,6 +105,14 @@ def _fast_snapshot(yf, symbol: str) -> Dict[str, float]:
     except Exception:
         pass
     return out
+
+
+def _symbol_snapshot(symbol: str, yf=None) -> Dict[str, float]:
+    if yf is not None:
+        snap = _fast_snapshot_yf(yf, symbol)
+        if snap["price"] or snap["change_pct"]:
+            return snap
+    return _yahoo_quote_snapshot(symbol)
 
 
 def _risk_tone(spy_pct: float, qqq_pct: float, vix: float) -> str:
@@ -121,13 +157,13 @@ def _fetch_macro_context() -> Dict:
         "source": "yahoo",
     }
     yf = _try_import_yfinance()
-    if yf is None:
-        summary["source"] = "unavailable"
-        return summary
     try:
-        spy = _fast_snapshot(yf, "SPY")
-        qqq = _fast_snapshot(yf, "QQQ")
-        vix = _fast_snapshot(yf, "^VIX")
+        spy = _symbol_snapshot("SPY", yf)
+        qqq = _symbol_snapshot("QQQ", yf)
+        vix = _symbol_snapshot("^VIX", yf)
+        if not any((spy["price"], qqq["price"], vix["price"], spy["change_pct"], qqq["change_pct"])):
+            summary["source"] = "unavailable"
+            return summary
         summary["spy_pct"] = round(spy["change_pct"], 2)
         summary["qqq_pct"] = round(qqq["change_pct"], 2)
         summary["spy_price"] = round(spy["price"], 2)
@@ -143,6 +179,7 @@ def _fetch_macro_context() -> Dict:
         summary["risk_tone"] = _risk_tone(
             summary["spy_pct"], summary["qqq_pct"], summary["vix_level"],
         )
+        summary["source"] = "yahoo" if yf else "yahoo_http"
     except Exception as exc:
         logger.debug(f"Yahoo macro fetch failed: {exc}")
         summary["source"] = "error"
@@ -232,7 +269,7 @@ def tick_macro_context_if_due() -> Optional[Dict]:
 def macro_context_line() -> str:
     """One-line macro block for council/Halim prompts (advisory, no veto)."""
     ctx = get_macro_context()
-    if not ctx or ctx.get("source") == "unavailable":
+    if not ctx or ctx.get("source") in ("unavailable", "error"):
         return ""
     tone = str(ctx.get("risk_tone", "neutral"))
     hints = {
