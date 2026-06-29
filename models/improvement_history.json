@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": "2026-06-29T14:23:38.983918+00:00",
+    "timestamp": "2026-06-29T14:25:38.251478+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
@@ -9,13 +9,29 @@
     ]
   },
   {
-    "timestamp": "2026-06-29T14:24:31.672994+00:00",
-    "source": "runtime_loss_streak",
-    "adjustments": {},
-    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "timestamp": "2026-06-29T14:25:39.354948+00:00",
+    "source": "loss_streak",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.7400000000000001,
+        "reason": "Loss streak \u2014 raise entry bar until pilot regains edge",
+        "ok": true,
+        "msg": "applied"
+      },
+      "VOLUME_SPIKE_MIN_RATIO": {
+        "param": "VOLUME_SPIKE_MIN_RATIO",
+        "value": 1.5500000000000003,
+        "reason": "Loss streak \u2014 require stronger volume confirmation",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
     "lessons": [
-      "Review loss_streak on TZA"
+      "ping - are you there ?",
+      "Hi",
+      "Hi"
     ]
   }
-]}
 ]

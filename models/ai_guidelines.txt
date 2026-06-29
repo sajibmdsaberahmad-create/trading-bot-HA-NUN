@@ -1761,3 +1761,22 @@ green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:25:38.250838+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +1.01% (peak +1.01%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:25:38.250895+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +1.01% (peak +1.01%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:25:39.354820+00:00
+Could not parse AI plan — retained guidance for prompts only.
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- TZA: pnl=$-100.00 slip=
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.7400000000000001 (Loss streak — raise entry bar until pilot regains edge)
+  - VOLUME_SPIKE_MIN_RATIO → 1.5500000000000003 (Loss streak — require stronger volume confirmation)
+
