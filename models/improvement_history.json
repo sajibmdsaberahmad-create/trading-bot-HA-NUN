@@ -1,221 +1,5 @@
 [
   {
-    "timestamp": "2026-06-29T08:27:18.692145+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:27:48.453779+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:28:05.211078+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:29:29.368223+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:30:34.064312+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:31:19.468416+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:31:43.823341+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:32:43.165273+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:46:16.320842+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:46:21.756416+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:47:12.431395+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:47:40.367019+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:48:20.388914+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:48:44.518022+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:48:50.549087+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:49:35.293453+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:49:45.267191+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:50:29.633099+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:50:54.574560+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:51:25.416775+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:51:31.458133+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:51:40.427640+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:52:31.228103+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T08:52:35.548534+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
     "timestamp": "2026-06-29T08:53:27.214101+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
@@ -897,6 +681,222 @@
     "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
     "lessons": [
       "Review order_timeout on MARA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:01:31.657089+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:02:50.350655+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:03:35.401033+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on RIOT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:04:34.260889+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on RIOT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:04:50.026829+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:05:35.557704+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on RIOT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:05:47.391536+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:06:41.747486+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:07:45.351942+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:09:59.498853+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:10:03.310815+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on MARA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:10:31.393143+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:10:37.311791+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:11:12.582896+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:11:53.359267+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:12:34.386400+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:13:15.038581+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:14:05.172103+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:15:08.860109+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:16:00.767674+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on RIOT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:16:08.440369+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on MARA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:16:51.259993+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on RIOT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:16:59.800884+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on MARA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T10:17:40.867384+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on RIOT"
     ]
   }
 ]
