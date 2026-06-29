@@ -2,16 +2,16 @@
   "package": "halim_sft",
   "version": 4,
   "canonical_file": "halim_sft.zip",
-  "build_id": "7095755c8aba",
-  "created_at": "2026-06-29T15:59:19.660048+00:00",
-  "train_pairs": 15639,
-  "valid_pairs": 823,
-  "pairs_total": 16462,
+  "build_id": "d9242a4c1cf7",
+  "created_at": "2026-06-29T16:02:27.782057+00:00",
+  "train_pairs": 15343,
+  "valid_pairs": 807,
+  "pairs_total": 16150,
   "sft_mode": "full",
   "core_pairs": null,
   "delta_pairs": null,
   "by_source": {
-    "council": 1390,
+    "council": 1077,
     "test": 1,
     "learn_cache": 138,
     "groq": 936,
@@ -25,7 +25,7 @@
     "rss_learn": 3,
     "copilot_heuristic": 51,
     "council_teacher": 378,
-    "ppo_teacher:heuristic_fallback": 12,
+    "ppo_teacher:heuristic_fallback": 13,
     "commander_ib_report": 65,
     "ppo:strong_spike": 271,
     "template_fallback": 128,
@@ -40,13 +40,13 @@
     "outcome_gold": 1
   },
   "raw_sources": {
-    "council": 2834,
-    "action_gold": 7466,
+    "council": 2255,
+    "action_gold": 7467,
     "coevolution": 4244,
     "dialogue": 4962,
     "outcome_gold": 1,
-    "commander_gold": 560,
-    "total_raw": 20067
+    "commander_gold": 616,
+    "total_raw": 19545
   },
   "upload_rule": "Upload halim_toddler_v2.zip + THIS halim_sft.zip to My Drive/Halim/. Open halim/colab/halim_toddler_train.ipynb in Colab \u2014 no files.upload(). Train script is bundled inside halim_sft.zip. Rebuild on Mac: halim_prepare_train_incremental.sh or halim_colab_ready.sh. Check build_id in colab_manifest.json."
 }

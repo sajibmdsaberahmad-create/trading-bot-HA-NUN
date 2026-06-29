@@ -70,3 +70,5 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-29 07:48 UTC` **brain_evolution** · stage **toddler** — Halim developer off_hours: 0 mutation(s), git=ok
 - `2026-06-29 08:00 UTC` **brain_evolution** · stage **toddler** — Halim developer off_hours: 0 mutation(s), git=ok
 - `2026-06-29 09:09 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2834 pairs
+- `2026-06-29 16:02 UTC` **brain_ppo_teacher** — PPO teacher live_session_end: WR 0%, source heuristic_fallback
+- `2026-06-29 16:02 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2255 pairs
