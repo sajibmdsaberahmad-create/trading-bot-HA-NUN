@@ -78,7 +78,9 @@ def assess_entry_quality(
         profit_probability += cold_boost
     try:
         from core.sniper_execution import sniper_active, sniper_cold_micro_vol_confirms
-        if sniper_active(cfg) and sniper_cold_micro_vol_confirms(spike_ratio, scan_score, micro):
+        if sniper_active(cfg) and sniper_cold_micro_vol_confirms(
+            spike_ratio, scan_score, micro, live_px=live_px, cfg=cfg,
+        ):
             profit_probability += min(
                 0.28,
                 score_norm * 0.20 + spike_norm * 0.22 + ppo_up * 0.14,

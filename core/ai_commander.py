@@ -1301,6 +1301,7 @@ class AICommander:
         if should_sniper_flash_entry(
             self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
             ticker=ticker, consecutive_losses=consecutive_losses,
+            live_px=float(current_px or 0),
         ):
             fast_out = {
                 "enter": True,
@@ -1325,6 +1326,7 @@ class AICommander:
         if should_sniper_strong_entry(
             self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
             ticker=ticker, consecutive_losses=consecutive_losses,
+            live_px=float(current_px or 0),
         ):
             fast_out = {
                 "enter": True,

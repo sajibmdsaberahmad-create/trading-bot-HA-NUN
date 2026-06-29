@@ -3524,8 +3524,12 @@ class ScalperRunner:
 
         self._locked_targets = []
         for r in penny_results:
+            hit = hits.get(r["ticker"])
+            px = float(r.get("price", 0) or 0)
+            if px <= 0 and hit is not None:
+                px = float(getattr(hit, "price", 0) or 0)
             pick = ScanResult(
-                ticker=r["ticker"], price=r.get("price", 0.0), volume=r.get("volume", 0),
+                ticker=r["ticker"], price=px, volume=r.get("volume", 0),
                 avg_volume=r.get("avg_volume", 0), relative_volume=r.get("rel_vol", 1.0),
                 rank_score=r["total_score"], reason=r.get("reasons", ""),
             )
@@ -4419,7 +4423,7 @@ class ScalperRunner:
 
             is_spike, spike_ratio = apply_micro_spike_boost(
                 is_spike, spike_ratio, forecast,
-                cfg=self.cfg, scan_score=float(target.rank_score),
+                cfg=self.cfg, scan_score=float(target.rank_score), live_px=float(live_px),
             )
 
             if dm and ticker.upper() in priority_names:
@@ -7261,6 +7265,7 @@ class ScalperRunner:
                 is_spike, spike_ratio = True, max(spike_ratio, tick_burst_ratio)
             is_spike, spike_ratio = apply_micro_spike_boost(
                 is_spike, spike_ratio, forecast, cfg=self.cfg, scan_score=scan_score,
+                live_px=float(current_px or 0),
             )
 
             try:
@@ -7297,6 +7302,7 @@ class ScalperRunner:
                 scan_score=scan_score,
                 spike_ratio=spike_ratio,
                 forecast=forecast,
+                live_px=float(current_px or 0),
             )
             if not gate_ok:
                 cd = entry_cooldown_after_skip(self.cfg)
