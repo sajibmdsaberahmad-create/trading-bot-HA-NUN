@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:ai_stall quick_scalp +2.13% (peak +2.13%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.08% (peak +2.08%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.25% (peak +2.25%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.25% (peak +2.30%)",
@@ -103,10 +102,11 @@
     "Missed spike-top exit on TNMG: peak $0.95 left ~$1 on table",
     "Commander: green_profit_lock:giveback +0.66% (peak +1.20% gave back 0.54%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.04% (peak +2.04%)",
-    "Commander: green_profit_lock:ai_stall quick_scalp +306.46% (peak +0.03%)"
+    "Commander: green_profit_lock:ai_stall quick_scalp +306.46% (peak +0.03%)",
+    "Commander: BUY 151 TNMG NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.9994 or a more aggressive price still within you"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 260,
-  "updated": "2026-06-29T14:31:33.471109"
+  "updated": "2026-06-29T14:32:53.750550"
 }

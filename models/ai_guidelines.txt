@@ -1824,3 +1824,10 @@ green_profit_lock:ai_stall quick_scalp +2.04% (peak +2.04%)
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +306.46% (peak +0.03%)
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:32:53.769011+00:00
+Observed ib_failure — recorded for learning.
+BUY 151 TNMG NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.9994 or a more aggressive price still within you
+• Applied mutations:
+  - PENNY_MAX_DEPLOY_USD → 150.0 (IB 2161 regulatory cap — reduce penny deploy)
+  - PENNY_LIMIT_BUFFER_PCT → 0.015 (IB 2161 — tighter limit buffer toward reference price)
+
