@@ -1,20 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 199,
+  "total_awakenings": 200,
   "training_sessions": 39,
   "trades_observed": 1561,
   "scans_performed": 39,
   "improvements_applied": 2496,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:50:44.255165",
-      "age": "7d 1h 47m 55s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+2.24",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:51:25.828323",
       "age": "7d 1h 48m 37s",
@@ -12224,9 +12217,16 @@
           "Review trade_closed on SOAR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:54:29.528051",
+      "age": "8d 3h 51m 40s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #200",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-29T09:16:26.814375",
+  "last_awakening": "2026-06-29T14:54:29.527669",
   "current_version": "v20260629_075355",
   "version_history": [
     {
