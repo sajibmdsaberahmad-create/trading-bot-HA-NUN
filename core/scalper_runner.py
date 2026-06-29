@@ -7173,10 +7173,12 @@ class ScalperRunner:
 
             if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
                 from core.capital_discipline import is_strong_spike_setup
+                from core.sniper_execution import sniper_vol_flash
                 uptrend_ok = _only_uptrend(df_fast, current_px, min_bars=min_bars)
                 if not uptrend_ok and not (
                     should_spike_fast_entry(self.cfg, spike_ratio, scan_score)
                     or is_strong_spike_setup(self.cfg, scan_score, spike_ratio)
+                    or sniper_vol_flash(self.cfg, scan_score, spike_ratio)
                 ):
                     log.debug(f"Entry skip {ticker}: not uptrend")
                     return 'waiting'

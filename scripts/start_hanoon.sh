@@ -476,6 +476,13 @@ try:
             print('   Macro: warming on startup (Yahoo)')
 except Exception as e:
     print(f'   Macro: skipped ({e})')
+try:
+    from core.sniper_execution import sniper_timing_log_line, sniper_active
+    from core.config import BotConfig as _BC
+    if sniper_active(_BC()):
+        print(f'   {sniper_timing_log_line(_BC())}')
+except Exception:
+    pass
 " 2>&1 || echo "   Pre-flight warnings (non-fatal)"
 
 # ── 6a. Halim serve — always active before scalper (toddler LM + PPO distillation) ──

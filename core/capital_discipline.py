@@ -246,8 +246,11 @@ def passes_pre_entry_gate(
     """
     if not capital_discipline_enabled(cfg):
         return True, ""
-    min_sc = min_entry_scan_score(cfg)
-    min_sp = min_entry_spike_ratio(cfg)
+    try:
+        from core.sniper_execution import effective_watch_gates
+    except Exception:
+        effective_watch_gates = lambda c, s, r: (min_entry_scan_score(c), min_entry_spike_ratio(c))
+    min_sc, min_sp = effective_watch_gates(cfg, scan_score, spike_ratio)
     opening_note = ""
     try:
         from core.rth_session import apply_opening_entry_adjustments
@@ -269,7 +272,12 @@ def passes_pre_entry_gate(
     fc = forecast or {}
     if float(fc.get("dir", 0)) < 0 and not fc.get("breakout"):
         sl = float(fc.get("spike_likelihood", 0))
-        if sl < 0.62 and not is_strong_spike_setup(cfg, scan_score, spike_ratio):
+        try:
+            from core.sniper_execution import sniper_vol_flash
+            flash = sniper_vol_flash(cfg, scan_score, spike_ratio)
+        except Exception:
+            flash = False
+        if sl < 0.62 and not is_strong_spike_setup(cfg, scan_score, spike_ratio) and not flash:
             return False, "quality gate: bearish micro — watch only"
     fade = float(fc.get("fade_risk", 0))
     if fade >= 0.52:

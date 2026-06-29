@@ -167,6 +167,37 @@ def should_sniper_flash_entry(
     )
 
 
+def sniper_vol_flash(
+    cfg: Optional[BotConfig],
+    scan_score: float,
+    spike_ratio: float,
+) -> bool:
+    """Vol/score flash — used by watch gate before PPO is consulted."""
+    if not sniper_active(cfg):
+        return False
+    return (
+        float(spike_ratio) >= _env_float("SNIPER_FLASH_SPIKE_RATIO", 1.22)
+        and float(scan_score) >= _env_float("SNIPER_FLASH_MIN_SCORE", 35.0)
+    )
+
+
+def effective_watch_gates(
+    cfg: Optional[BotConfig],
+    scan_score: float,
+    spike_ratio: float,
+) -> Tuple[float, float]:
+    """Score/spike floors for pre-entry watch gate — flash uses sniper lows."""
+    from core.capital_discipline import min_entry_scan_score, min_entry_spike_ratio
+
+    if sniper_vol_flash(cfg, scan_score, spike_ratio):
+        floors = sniper_entry_quality_floors(cfg) or {}
+        return (
+            floors.get("min_scan_score", _env_float("SNIPER_MIN_ENTRY_SCAN_SCORE", 38.0)),
+            floors.get("min_spike_ratio", _env_float("SNIPER_MIN_ENTRY_SPIKE_RATIO", 1.15)),
+        )
+    return min_entry_scan_score(cfg), min_entry_spike_ratio(cfg)
+
+
 def sniper_council_max_wait_sec(cfg: BotConfig) -> Optional[float]:
     if not sniper_active(cfg):
         return None
