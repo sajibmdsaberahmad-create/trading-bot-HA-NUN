@@ -1300,3 +1300,4 @@
 {"timestamp":"2026-06-29T14:06:36.171313+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":50.0,"pnl_pct":0.0023,"primary_goal":true,"reason":"green_profit_lock:giveback +0.23% (peak +0.91% gave back 0.68%)","price":4.39,"ai_stalled":false}
 {"timestamp":"2026-06-29T14:06:38.300054+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":0.0,"source":"buffer","reason":"green_profit_lock:giveback +0.23% (peak +0.91% gave back 0.68%)"}
 {"timestamp":"2026-06-29T14:10:30.556230+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":50.0,"pnl_pct":0.0023,"primary_goal":true,"reason":"green_profit_lock:giveback +0.23% (peak +0.45% gave back 0.23%)","price":4.44,"ai_stalled":false}
+{"timestamp":"2026-06-29T14:10:32.658745+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":50.0,"source":"buffer","reason":"green_profit_lock:giveback +0.23% (peak +0.45% gave back 0.23%)"}

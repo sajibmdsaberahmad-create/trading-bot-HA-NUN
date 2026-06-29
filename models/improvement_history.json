@@ -64,5 +64,14 @@
     "lessons": [
       "Review ib_failure on KNDI"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T14:10:33.070949+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOXS"
+    ]
   }
 ]

@@ -1,16 +1,1 @@
-{
-  "PENNY_MAX_DEPLOY_USD": {
-    "param": "PENNY_MAX_DEPLOY_USD",
-    "value": 150.0,
-    "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
-    "ok": true,
-    "msg": "applied"
-  },
-  "PENNY_LIMIT_BUFFER_PCT": {
-    "param": "PENNY_LIMIT_BUFFER_PCT",
-    "value": 0.015,
-    "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}
