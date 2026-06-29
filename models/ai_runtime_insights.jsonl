@@ -2403,3 +2403,5 @@
 {"timestamp":"2026-06-29T14:15:46.038509+00:00","event":"loss_streak","ticker":"SOAR","reason":"bracket_exit","pnl_usd":-1.89,"consecutive_losses":1,"market_state":"open"}
 {"timestamp":"2026-06-29T14:16:12.489731+00:00","event":"trade_closed","ticker":"TZA","reason":"bracket_exit","pnl_usd":-100.0,"pnl_pct":-0.5,"won":false,"exit_type":"stop_hit","hold_sec":123.0,"regime":"unknown","entry_fill":4.01,"exit_fill":3.99,"entry_slippage_pct":0.0,"exit_slippage_pct":-0.0025,"market_state":"open"}
 {"timestamp":"2026-06-29T14:16:12.489977+00:00","event":"loss_streak","ticker":"TZA","reason":"bracket_exit","pnl_usd":-100.0,"consecutive_losses":2,"market_state":"open"}
+{"timestamp":"2026-06-29T14:17:19.644928+00:00","event":"trade_closed","ticker":"TZA","reason":"bracket_exit","pnl_usd":-50.0,"pnl_pct":-0.25,"won":false,"exit_type":"stop_hit","hold_sec":60.7,"regime":"unknown","entry_fill":3.99,"exit_fill":3.98,"entry_slippage_pct":0.0,"exit_slippage_pct":-0.005,"market_state":"open"}
+{"timestamp":"2026-06-29T14:17:19.645484+00:00","event":"loss_streak","ticker":"TZA","reason":"bracket_exit","pnl_usd":-50.0,"consecutive_losses":3,"market_state":"open"}
