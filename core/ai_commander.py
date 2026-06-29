@@ -1592,14 +1592,30 @@ class AICommander:
         spike_ratio = float(state.get("spike_ratio", 1.0))
         micro = state.get("micro_forecast") or {}
         if status in ("in_flight", "missing", "empty") and max(in_flight_age, age) >= fast_sec:
+            promote_scanner = False
             if scan_score >= fast_score and spike_ratio >= fast_spike:
-                status = "scanner_fast"
-                parsed = {}
+                promote_scanner = True
             elif should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro):
-                status = "scanner_fast"
+                promote_scanner = True
                 spike_ratio = max(spike_ratio, float(micro.get("vol_accel", spike_ratio)))
                 state["spike_ratio"] = spike_ratio
-                parsed = {}
+            if promote_scanner:
+                try:
+                    from core.live_trade_guard import check_fast_entry_bypass
+                    block = check_fast_entry_bypass(
+                        self.cfg,
+                        ticker=ticker,
+                        ppo_action=int(state.get("ppo_action", 0)),
+                        ppo_conf=float(state.get("ppo_conf", 0.5)),
+                        consecutive_losses=int((state.get("account") or {}).get("consecutive_losses", 0)),
+                        pipeline="council:scanner_fast",
+                    )
+                    if not block:
+                        status = "scanner_fast"
+                        parsed = {}
+                except Exception:
+                    status = "scanner_fast"
+                    parsed = {}
         elif status != "fresh" and age > max_wait:
             status = "timeout"
             parsed = {}
@@ -1614,6 +1630,8 @@ class AICommander:
             spike_ratio=float(state.get("spike_ratio", 1.0)),
             quality=(state.get("account") or {}).get("entry_quality"),
             cfg=self.cfg,
+            ticker=ticker,
+            consecutive_losses=int((state.get("account") or {}).get("consecutive_losses", 0)),
         )
         if merged.get("pending"):
             return {

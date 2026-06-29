@@ -202,3 +202,4 @@
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":true,"timestamp":"2026-06-29T14:26:33.456404+00:00"}
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":true,"timestamp":"2026-06-29T14:31:33.529006+00:00"}
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":true,"timestamp":"2026-06-29T14:36:33.641661+00:00"}
+{"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":false,"timestamp":"2026-06-29T14:41:33.665732+00:00"}

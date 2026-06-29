@@ -1119,6 +1119,7 @@ class ScalperRunner:
             "max_positions": self._max_concurrent(),
             "deployed_usd": deployed,
             "held_tickers": list(self._held_tickers()),
+            "consecutive_losses": int(getattr(self.risk, "_consecutive_losses", 0) or 0),
         }
 
     def _sync_all_positions_from_ib(self):
@@ -2049,6 +2050,23 @@ class ScalperRunner:
                 consecutive_losses=int(getattr(self.risk, "_consecutive_losses", 0)),
                 market_state=get_market_state(self.cfg),
             )
+            try:
+                from core.live_trade_guard import on_trade_closed as guard_trade_closed
+                guard_trade_closed(ticker, pnl, self.cfg)
+            except Exception:
+                pass
+        try:
+            from core.ppo_entry_learning import record_ppo_trade_close
+            record_ppo_trade_close(
+                self.cfg,
+                ticker=ticker,
+                pnl_usd=pnl,
+                pnl_pct=float(trade_rec.get("pnl_pct", 0) or 0),
+                result=str(result),
+                exit_reason=reason,
+            )
+        except Exception:
+            pass
         slot = self._position_slots.get(ticker, {})
         combined_slip = abs(entry_slip) + abs(exit_slip)
         try:
@@ -6923,6 +6941,17 @@ class ScalperRunner:
         if now < self._entry_cooldown_until.get(ticker, 0):
             return 'waiting'
 
+        try:
+            from core.live_trade_guard import check_ticker_cooldown
+            cd_block = check_ticker_cooldown(ticker)
+            if cd_block:
+                if now - getattr(self, "_last_quality_watch_log", 0) >= 45.0:
+                    self._last_quality_watch_log = now
+                    log.info(f"  👁 {cd_block}")
+                return "waiting"
+        except Exception:
+            pass
+
         if self.risk.is_halted():
             return 'waiting'
 
@@ -7068,10 +7097,16 @@ class ScalperRunner:
                             spike_ratio=spike_ratio,
                         )
                         and ai_fast_execution(self.cfg)
+                        and int(getattr(self.risk, "_consecutive_losses", 0) or 0)
+                        < int(os.getenv("LOSS_STREAK_BLOCK_BYPASS_AT", "2"))
                         and (
-                            should_spike_fast_entry(self.cfg, spike_ratio, scan_score, ppo_a, ppo_c)
-                            or should_micro_fast_entry(self.cfg, spike_ratio, scan_score, forecast)
-                            or (ppo_a == 1 and ppo_c >= min_c * 0.72)
+                            (ppo_a == 1 and ppo_c >= min_c * 0.72)
+                            or (
+                                ppo_a == 1
+                                and should_spike_fast_entry(
+                                    self.cfg, spike_ratio, scan_score, ppo_a, ppo_c,
+                                )
+                            )
                         )
                     )
                     if ppo_lead:

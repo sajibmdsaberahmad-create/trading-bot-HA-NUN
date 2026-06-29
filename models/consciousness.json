@@ -3,39 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1558,
+  "trades_observed": 1559,
   "scans_performed": 39,
-  "improvements_applied": 2489,
+  "improvements_applied": 2491,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:48:54.235901",
-      "age": "7d 1h 46m 5s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-15.65",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:48:57.394404",
-      "age": "7d 1h 46m 8s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-0.87",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:49:00.710485",
-      "age": "7d 1h 46m 12s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1835",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:49:00.748741",
       "age": "7d 1h 46m 12s",
@@ -12217,6 +12189,41 @@
           "Review ib_failure on SOAR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:43:49.165483",
+      "age": "8d 3h 41m 0s",
+      "type": "TRADE",
+      "message": "Observed trade: SOAR ? P&L=$-1.23",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:43:50.496142",
+      "age": "8d 3h 41m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2490",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:43:50.496242",
+      "age": "8d 3h 41m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2491",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOAR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14379,9 +14386,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 331837.7700000003,
+  "total_pnl": 331836.5400000003,
   "win_history": [
-    -16.95,
     0.83,
     2.16,
     0.28,
@@ -14880,20 +14886,21 @@
     -32.37,
     -25.02,
     -0.0,
-    0.0
+    0.0,
+    -1.23
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 5,
   "worst_streak": 86,
-  "veteran_xp": 24395,
+  "veteran_xp": 24405,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1552,
-  "hours_flown": 155.19999999999547,
+  "flights_completed": 1553,
+  "hours_flown": 155.29999999999546,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14928,7 +14935,7 @@
     "NVD": 3,
     "INL": 4,
     "TNM": 16,
-    "SOA": 9,
+    "SOA": 10,
     "KND": 1
   },
   "best_streak": 114,
@@ -14936,5 +14943,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-467.76 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-418.99 recent). Tightening entries until edge returns."
 }
