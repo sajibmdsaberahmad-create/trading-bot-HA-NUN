@@ -336,14 +336,6 @@ class BotConfig:
     DAILY_IB_LEARNING_ON_MARKET_OPEN: bool = os.getenv(
         "DAILY_IB_LEARNING_ON_MARKET_OPEN", "true"
     ).lower() in ("1", "true", "yes")
-    # Graceful bot exit after RTH/session end (then optional Mac sleep)
-    AUTO_SHUTDOWN_AFTER_SESSION_END: bool = os.getenv(
-        "AUTO_SHUTDOWN_AFTER_SESSION_END", "false"
-    ).lower() in ("1", "true", "yes")
-    AUTO_SHUTDOWN_DELAY_SEC: float = float(os.getenv("AUTO_SHUTDOWN_DELAY_SEC", "900"))
-    MAC_SLEEP_AFTER_SHUTDOWN: bool = os.getenv(
-        "MAC_SLEEP_AFTER_SHUTDOWN", "false"
-    ).lower() in ("1", "true", "yes")
     QUALITY_WATCH_HEARTBEAT_SEC: float = float(
         os.getenv("QUALITY_WATCH_HEARTBEAT_SEC", "45")
     )
