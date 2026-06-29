@@ -175,6 +175,13 @@ def min_entry_spike_ratio(cfg: Optional[BotConfig] = None) -> float:
     base = float(getattr(cfg, "AI_SPIKE_FAST_MIN_RATIO", 1.15))
     if capital_discipline_enabled(cfg):
         base = float(getattr(cfg, "CAPITAL_MIN_ENTRY_SPIKE_RATIO", 1.25))
+        try:
+            from core.sniper_execution import sniper_entry_quality_floors
+            floors = sniper_entry_quality_floors(cfg)
+            if floors:
+                base = min(base, floors["min_spike_ratio"])
+        except Exception:
+            pass
     try:
         from core.commander_runtime import commander_entry_floors, commander_runtime_enabled
         if commander_runtime_enabled(cfg):
@@ -189,6 +196,13 @@ def min_entry_scan_score(cfg: Optional[BotConfig] = None) -> float:
     base = float(getattr(cfg, "AI_SPIKE_FAST_MIN_SCORE", 15))
     if capital_discipline_enabled(cfg):
         base = float(getattr(cfg, "CAPITAL_MIN_ENTRY_SCAN_SCORE", 55))
+        try:
+            from core.sniper_execution import sniper_entry_quality_floors
+            floors = sniper_entry_quality_floors(cfg)
+            if floors:
+                base = min(base, floors["min_scan_score"])
+        except Exception:
+            pass
     try:
         from core.commander_runtime import commander_entry_floors, commander_runtime_enabled
         if commander_runtime_enabled(cfg):
@@ -261,7 +275,13 @@ def passes_pre_entry_gate(
     if fade >= 0.52:
         return False, f"quality gate: fade_risk {fade:.0%} too high"
     loss_p = float(fc.get("loss_pressure", 0))
-    if loss_p >= 0.50:
+    max_lp = 0.50
+    try:
+        from core.sniper_execution import sniper_max_loss_pressure
+        max_lp = sniper_max_loss_pressure(cfg, scan_score, spike_ratio)
+    except Exception:
+        pass
+    if loss_p >= max_lp:
         return False, f"quality gate: loss_pressure {loss_p:.0%}"
     return True, ""
 

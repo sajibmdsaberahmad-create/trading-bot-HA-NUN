@@ -238,6 +238,13 @@ def main_loop_sec(
 
 
 def council_max_wait_sec(cfg: BotConfig) -> float:
+    try:
+        from core.sniper_execution import sniper_council_max_wait_sec
+        sniper_wait = sniper_council_max_wait_sec(cfg)
+        if sniper_wait is not None:
+            return sniper_wait
+    except Exception:
+        pass
     if ai_fast_execution(cfg):
         return float(getattr(cfg, "AI_COUNCIL_MAX_WAIT_SEC", 4.0))
     return float(getattr(cfg, "AI_COUNCIL_MAX_WAIT_SEC", 15.0))

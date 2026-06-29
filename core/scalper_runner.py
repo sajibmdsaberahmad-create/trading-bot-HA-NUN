@@ -2608,6 +2608,13 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"War account: {exc}")
         try:
+            from core.sniper_execution import sniper_timing_log_line
+            sline = sniper_timing_log_line(self.cfg)
+            if sline:
+                log.info(f"  🎯 {sline}")
+        except Exception as exc:
+            log.debug(f"Sniper profile: {exc}")
+        try:
             from core.market_context import warm_macro_context_background
             warm_macro_context_background()
         except Exception as exc:

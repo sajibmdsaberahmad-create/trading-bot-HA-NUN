@@ -1187,14 +1187,22 @@ class AICommander:
         try:
             from core.trading_copilot import copilot_caution_for_ticker
             from core.live_trade_guard import guard_conf_bump, loss_context_for_prompt
-            from core.war_account import sniper_conf_bump, war_context_line
+            from core.war_account import war_context_line
+            from core.sniper_execution import sniper_conf_bump_effective
             caution_bump = copilot_caution_for_ticker(self.cfg, ticker)
             if caution_bump:
                 min_conf = min(0.95, min_conf + caution_bump)
             g_bump = guard_conf_bump(ticker)
             if g_bump:
                 min_conf = min(0.95, min_conf + g_bump)
-            s_bump = sniper_conf_bump(self.cfg)
+            s_bump = sniper_conf_bump_effective(
+                self.cfg,
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                ticker=ticker,
+            )
             if s_bump:
                 min_conf = min(0.95, min_conf + s_bump)
         except Exception:
@@ -1289,6 +1297,31 @@ class AICommander:
             allows_disciplined_spike_fast,
             capital_discipline_enabled,
         )
+        from core.sniper_execution import should_sniper_flash_entry
+        if should_sniper_flash_entry(
+            self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
+            ticker=ticker, consecutive_losses=consecutive_losses,
+        ):
+            fast_out = {
+                "enter": True,
+                "confidence": max(ppo_conf, 0.55, min(scan_score / 70.0, 0.88)),
+                "reason": (
+                    f"🎯 SNIPER flash: vol={spike_ratio:.1f}x score={scan_score:.0f} "
+                    f"PPO {ppo_conf:.0%} — no council wait"
+                )[:200],
+                "journal": f"Sniper flash hunt — {ticker}",
+                "pipeline": "sniper:flash",
+                "pending": False,
+            }
+            decision = self._finalize_entry_decision(
+                fast_out, ticker=ticker, current_px=current_px,
+                spike_ratio=spike_ratio, scan_score=scan_score,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
+                use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
+                df=df, equity=equity, cash=float(account.get("cash", 0)),
+            )
+            return decision
         if allows_disciplined_spike_fast(
             self.cfg, scan_score, spike_ratio,
         ) and should_disciplined_strong_entry(

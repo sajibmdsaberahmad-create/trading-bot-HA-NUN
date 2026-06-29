@@ -89,7 +89,9 @@ def sniper_max_loss_pressure(
     floors = sniper_entry_quality_floors(cfg)
     if not floors:
         return 0.50
-    if is_sniper_flash_spike(cfg, scan_score, spike_ratio, 1, 0.5):
+    min_flash_sp = _env_float("SNIPER_FLASH_SPIKE_RATIO", 1.22)
+    min_flash_sc = _env_float("SNIPER_FLASH_MIN_SCORE", 35.0)
+    if float(spike_ratio) >= min_flash_sp and float(scan_score) >= min_flash_sc:
         return floors["flash_loss_pressure"]
     if is_sniper_strong_spike(cfg, scan_score, spike_ratio):
         return floors["max_loss_pressure"]
