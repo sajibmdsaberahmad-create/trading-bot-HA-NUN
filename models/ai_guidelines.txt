@@ -1370,3 +1370,14 @@ BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a br
   - PENNY_MAX_DEPLOY_USD → 297.5 (IB 2161 regulatory cap — reduce penny deploy)
   - PENNY_LIMIT_BUFFER_PCT → 0.007 (IB 2161 — tighter limit buffer toward reference price)
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:32:23.211208+00:00
+Observed ib_failure — recorded for learning.
+BUY 695 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1617 or a more aggressive price still within your spec
+• Applied mutations:
+  - PENNY_MAX_DEPLOY_USD → 252.875 (IB 2161 regulatory cap — reduce penny deploy)
+  - PENNY_LIMIT_BUFFER_PCT → 0.008 (IB 2161 — tighter limit buffer toward reference price)
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:32:24.277337+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +5.14% (peak +7.00% gave back 1.86%)
+
