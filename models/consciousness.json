@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1524,
   "scans_performed": 39,
-  "improvements_applied": 2419,
+  "improvements_applied": 2420,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:24:04.915086",
-      "age": "7d 1h 21m 16s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+10.24",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:25:35.673157",
       "age": "7d 1h 22m 46s",
@@ -11968,6 +11961,37 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:47:32.784358",
+      "age": "8d 2h 44m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2420",
+      "metadata": {
+        "source": "loss_streak",
+        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.68,
+            "reason": "Loss streak \u2014 raise entry bar until pilot regains edge",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "VOLUME_SPIKE_MIN_RATIO",
+            "value": 1.35,
+            "reason": "Loss streak \u2014 require stronger volume confirmation",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "ping - are you there ?",
+          "Hi",
+          "Hi"
         ]
       }
     }
