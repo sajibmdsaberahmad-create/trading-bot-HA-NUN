@@ -3,39 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1555,
+  "trades_observed": 1556,
   "scans_performed": 39,
-  "improvements_applied": 2481,
+  "improvements_applied": 2483,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:45:33.586737",
-      "age": "7d 1h 42m 44s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1829",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:45:34.373655",
-      "age": "7d 1h 42m 45s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$-9.59",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:46:27.288358",
-      "age": "7d 1h 43m 38s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$-15.66",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:46:30.285102",
       "age": "7d 1h 43m 41s",
@@ -12203,6 +12175,41 @@
           "Review ib_failure on SOAR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:38:58.588022",
+      "age": "8d 3h 36m 9s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$-25.02",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:39:00.092287",
+      "age": "8d 3h 36m 11s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2483",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:39:00.092610",
+      "age": "8d 3h 36m 11s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2483",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on TNMG"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14365,9 +14372,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "defensive",
-  "total_pnl": 331862.7900000003,
+  "total_pnl": 331837.7700000003,
   "win_history": [
-    -13.21,
     4.22,
     -19.54,
     -16.95,
@@ -14866,20 +14872,21 @@
     0.0,
     0.0,
     31.45,
-    -32.37
+    -32.37,
+    -25.02
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 86,
-  "veteran_xp": 24365,
+  "veteran_xp": 24375,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1549,
-  "hours_flown": 154.8999999999955,
+  "flights_completed": 1550,
+  "hours_flown": 154.99999999999548,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14913,7 +14920,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 15,
+    "TNM": 16,
     "SOA": 7,
     "KND": 1
   },
@@ -14922,5 +14929,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 10% \u00b7 $-660.37. Preserving capital over action."
+  "mood_message": "Win rate 10% \u00b7 $-567.76. Preserving capital over action."
 }
