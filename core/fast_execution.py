@@ -404,7 +404,27 @@ def entry_pending_block_sec(cfg: BotConfig) -> float:
 
 def tick_stream_count(cfg: BotConfig) -> int:
     """IB allows ~5 tick-by-tick subs — reserve headroom for open positions."""
+    try:
+        from core.sniper_execution import sniper_tick_stream_count
+        sniper_n = sniper_tick_stream_count(cfg)
+        if sniper_n is not None:
+            return sniper_n
+    except Exception:
+        pass
     return int(getattr(cfg, "AI_TICK_STREAM_COUNT", 4))
+
+
+def _paper_blocks_tick_streams(cfg: BotConfig) -> bool:
+    try:
+        from core.sniper_execution import sniper_tick_streams_enabled
+        if sniper_tick_streams_enabled(cfg):
+            return False
+    except Exception:
+        pass
+    return bool(
+        getattr(cfg, "PAPER_TRADING", False)
+        and getattr(cfg, "PAPER_REALTIME_BARS_ONLY", False)
+    )
 
 
 def max_realtime_bar_streams(cfg: BotConfig) -> int:
@@ -424,10 +444,7 @@ def assign_stream_modes(
     """
     held_u = {str(t).upper() for t in (held or set())}
     denied = {str(t).upper() for t in (tick_denied or set())}
-    paper_rt_only = bool(
-        getattr(cfg, "PAPER_TRADING", False)
-        and getattr(cfg, "PAPER_REALTIME_BARS_ONLY", False)
-    )
+    paper_rt_only = _paper_blocks_tick_streams(cfg)
     tick_budget = 0 if paper_rt_only else tick_stream_count(cfg)
     rt_budget = max_realtime_bar_streams(cfg)
     modes: dict = {}

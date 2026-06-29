@@ -265,6 +265,11 @@ export FLAT_LOOP_LOCKED_SEC="${FLAT_LOOP_LOCKED_SEC:-0.05}"
 export RTH_MONITOR_SEC="${RTH_MONITOR_SEC:-0.05}"
 export RTH_FLAT_LOOP_SEC="${RTH_FLAT_LOOP_SEC:-0.05}"
 export AI_COUNCIL_MAX_WAIT_SEC="${AI_COUNCIL_MAX_WAIT_SEC:-1.5}"
+# Sniper tick sensors — top 2 locked names on tick-by-tick; rest stay 5s (8GB-safe)
+export SNIPER_TICK_STREAMS="${SNIPER_TICK_STREAMS:-true}"
+export SNIPER_TICK_STREAM_COUNT="${SNIPER_TICK_STREAM_COUNT:-2}"
+export AI_TICK_STREAM_COUNT="${AI_TICK_STREAM_COUNT:-2}"
+export PAPER_REALTIME_BARS_ONLY="${PAPER_REALTIME_BARS_ONLY:-false}"
 # Yahoo SPY/QQQ/VIX — cached macro for council/Halim (advisory only, no entry veto)
 export MACRO_CONTEXT_ENABLED="${MACRO_CONTEXT_ENABLED:-true}"
 export MACRO_CONTEXT_REFRESH_SEC="${MACRO_CONTEXT_REFRESH_SEC:-600}"

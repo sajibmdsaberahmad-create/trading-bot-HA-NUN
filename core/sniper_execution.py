@@ -204,13 +204,31 @@ def sniper_council_max_wait_sec(cfg: BotConfig) -> Optional[float]:
     return _env_float("SNIPER_COUNCIL_MAX_WAIT_SEC", 1.5)
 
 
+def sniper_tick_streams_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    """Top-N locked names on tick-by-tick for flash detection (rest stay 5s)."""
+    if os.getenv("SNIPER_TICK_STREAMS", "true").lower() not in ("1", "true", "yes"):
+        return False
+    return sniper_active(cfg)
+
+
+def sniper_tick_stream_count(cfg: Optional[BotConfig] = None) -> Optional[int]:
+    if not sniper_tick_streams_enabled(cfg):
+        return None
+    return max(0, int(os.getenv("SNIPER_TICK_STREAM_COUNT", "2")))
+
+
 def sniper_timing_log_line(cfg: Optional[BotConfig] = None) -> str:
     if not sniper_active(cfg):
         return ""
     min_sc, min_sp = sniper_strong_spike_thresholds(cfg)
+    tick_part = ""
+    n = sniper_tick_stream_count(cfg)
+    if n:
+        tick_part = f" | top-{n} tick sensors (rest 5s)"
     return (
         f"SNIPER FAST: flash≥{_env_float('SNIPER_FLASH_SPIKE_RATIO', 1.22):.2f}x/"
         f"score≥{_env_float('SNIPER_FLASH_MIN_SCORE', 35):.0f} | "
         f"strong≥{min_sp:.2f}x/score≥{min_sc:.0f} | "
         f"council wait≤{_env_float('SNIPER_COUNCIL_MAX_WAIT_SEC', 1.5):.1f}s"
+        f"{tick_part}"
     )

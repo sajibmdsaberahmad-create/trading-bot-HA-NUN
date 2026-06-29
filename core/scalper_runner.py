@@ -2446,7 +2446,15 @@ class ScalperRunner:
         if paper_rt_only:
             mode = "5s bars only (PAPER_REALTIME_BARS_ONLY)"
         elif use_tick:
-            mode = f"tick-by-tick ({tbt})"
+            try:
+                from core.sniper_execution import sniper_tick_stream_count, sniper_tick_streams_enabled
+                if sniper_tick_streams_enabled(self.cfg):
+                    n = sniper_tick_stream_count(self.cfg) or 0
+                    mode = f"sniper top-{n} tick + 5s on rest"
+                else:
+                    mode = f"tick-by-tick ({tbt})"
+            except Exception:
+                mode = f"tick-by-tick ({tbt})"
         else:
             mode = "5s bars (USE_TICK_STREAM=false)"
         n_tick = tick_stream_count(self.cfg)
@@ -3881,6 +3889,16 @@ class ScalperRunner:
                 n_tick += 1
             else:
                 n_rt += 1
+
+        if not quiet:
+            try:
+                from core.sniper_execution import sniper_tick_streams_enabled
+                if sniper_tick_streams_enabled(self.cfg):
+                    tick_names = [t for t, m in modes.items() if m == "tick"]
+                    if tick_names:
+                        log.info(f"  🎯 Sniper tick sensors: {', '.join(tick_names)}")
+            except Exception:
+                pass
 
         if wanted:
             tickers = ",".join(wanted[:8]) + ("…" if len(wanted) > 8 else "")
