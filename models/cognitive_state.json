@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:giveback +0.36% (peak +0.53% gave back 0.17%)",
     "Spike-top hunt on ASTS: spike_top_exit: +0.59% vol=2.4x",
     "Commander: spike_top_exit: +0.59% vol=2.4x",
     "Commander: green_profit_lock:giveback +0.46% (peak +0.87% gave back 0.41%)",
@@ -103,10 +102,11 @@
     "Commander: Submitted",
     "Commander: micro_loss: pressure=0.61 pred\u2193$0.85",
     "Commander: green_profit_lock:ai_stall quick_scalp +0.55% (peak +0.55%)",
-    "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0667 or a more aggressive price still within y"
+    "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0667 or a more aggressive price still within y",
+    "Commander: micro_loss: pressure=0.65 pred\u2193$4.07"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 198,
-  "updated": "2026-06-29T13:42:54.201622"
+  "trades_observed": 200,
+  "updated": "2026-06-29T13:43:03.488051"
 }

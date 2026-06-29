@@ -40,5 +40,71 @@
     "lessons": [
       "Review trade_closed on TNMG"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T13:42:36.422824+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TNMG"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:42:54.217324+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "PENNY_MAX_DEPLOY_USD": {
+        "param": "PENNY_MAX_DEPLOY_USD",
+        "value": 150.0,
+        "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+        "ok": true,
+        "msg": "applied"
+      },
+      "PENNY_LIMIT_BUFFER_PCT": {
+        "param": "PENNY_LIMIT_BUFFER_PCT",
+        "value": 0.015,
+        "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review ib_failure on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:42:58.338586+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOXS"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:43:03.504281+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {
+      "PENNY_MAX_DEPLOY_USD": {
+        "param": "PENNY_MAX_DEPLOY_USD",
+        "value": 150.0,
+        "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+        "ok": true,
+        "msg": "applied"
+      },
+      "PENNY_LIMIT_BUFFER_PCT": {
+        "param": "PENNY_LIMIT_BUFFER_PCT",
+        "value": 0.015,
+        "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on INLF"
+    ]
   }
 ]

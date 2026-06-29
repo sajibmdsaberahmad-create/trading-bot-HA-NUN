@@ -1513,3 +1513,18 @@ BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a br
   - PENNY_MAX_DEPLOY_USD → 150.0 (IB 2161 regulatory cap — reduce penny deploy)
   - PENNY_LIMIT_BUFFER_PCT → 0.015 (IB 2161 — tighter limit buffer toward reference price)
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:42:58.338298+00:00
+Observed trade_closed — recorded for learning.
+micro_loss: pressure=0.65 pred↓$4.07
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:42:58.338267+00:00
+Observed loss_streak — recorded for learning.
+micro_loss: pressure=0.65 pred↓$4.07
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:43:03.504118+00:00
+Observed order_timeout — recorded for learning.
+Submitted
+• Applied mutations:
+  - PENNY_MAX_DEPLOY_USD → 150.0 (IB 2161 regulatory cap — reduce penny deploy)
+  - PENNY_LIMIT_BUFFER_PCT → 0.015 (IB 2161 — tighter limit buffer toward reference price)
+

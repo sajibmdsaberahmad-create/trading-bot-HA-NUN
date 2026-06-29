@@ -3,46 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1520,
+  "trades_observed": 1521,
   "scans_performed": 39,
-  "improvements_applied": 2405,
+  "improvements_applied": 2408,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:20:09.448678",
-      "age": "7d 1h 17m 20s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$+2.81",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:20:36.693523",
-      "age": "7d 1h 17m 48s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$+2.58",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:20:39.251959",
-      "age": "7d 1h 17m 50s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1768",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:21:38.763508",
-      "age": "7d 1h 18m 50s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-13.58",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:21:41.737183",
       "age": "7d 1h 18m 53s",
@@ -11867,6 +11832,70 @@
           "Review ib_failure on INLF"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T13:42:57.682667",
+      "age": "8d 2h 40m 9s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$-200.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:42:58.294356",
+      "age": "8d 2h 40m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2406",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:42:58.294580",
+      "age": "8d 2h 40m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2407",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:43:03.489094",
+      "age": "8d 2h 40m 14s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2408",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 150.0,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.015,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review order_timeout on INLF"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14029,9 +14058,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 332991.21000000037,
+  "total_pnl": 332791.21000000037,
   "win_history": [
-    -13.01,
     -11.27,
     -7.53,
     -7.85,
@@ -14530,20 +14558,21 @@
     -1.94,
     0.0,
     0.0,
-    0.0
+    0.0,
+    -200.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 5,
+  "consecutive_losses": 6,
   "worst_streak": 86,
-  "veteran_xp": 23945,
+  "veteran_xp": 23960,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 58,
+    "risk_management": 60,
     "entry_timing": 100
   },
-  "flights_completed": 1514,
-  "hours_flown": 151.39999999999569,
+  "flights_completed": 1515,
+  "hours_flown": 151.49999999999568,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14561,7 +14590,7 @@
     "XCH": 1,
     "TZA": 12,
     "GDC": 14,
-    "SOX": 18,
+    "SOX": 19,
     "BIT": 13,
     "GPU": 19,
     "PLT": 30,
