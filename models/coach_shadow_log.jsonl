@@ -726,3 +726,7 @@
 {"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":2.905229477374789,"shadow_only":true,"timestamp":"2026-06-29T17:51:01.478447+00:00"}
 {"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:51:07.336288+00:00"}
 {"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:51:37.009903+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:52:07.084879+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":1.0491327283034284,"shadow_only":true,"timestamp":"2026-06-29T17:52:17.468359+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:52:37.509396+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":8.678378432587584,"shadow_only":true,"timestamp":"2026-06-29T17:52:40.958806+00:00"}
