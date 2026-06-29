@@ -2288,3 +2288,4 @@
 {"timestamp":"2026-06-29T12:27:53.253875+00:00","event":"order_timeout","ticker":"RIOT","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T12:28:37.037103+00:00","event":"order_timeout","ticker":"RIOT","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T12:40:08.063158+00:00","event":"order_timeout","ticker":"RIOT","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-29T12:42:54.769751+00:00","event":"trade_closed","ticker":"SOFI","reason":"green_profit_lock:ai_stall quick_scalp +3.04% (peak +3.04%)","pnl_usd":2239.5,"pnl_pct":3.04,"won":true,"exit_type":"stop_hit","hold_sec":24.7,"regime":"bear_trend|late_chase_risk","entry_fill":17.575,"exit_fill":18.11,"entry_slippage_pct":0.0,"exit_slippage_pct":0.0,"market_state":"pre_market"}
