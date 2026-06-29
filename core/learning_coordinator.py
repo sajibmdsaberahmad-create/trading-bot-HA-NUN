@@ -196,7 +196,9 @@ def maybe_update_weights_debounced(cfg: Optional[BotConfig] = None) -> bool:
     cfg = cfg or BotConfig()
     if is_replay_session() or should_queue_only_learning(cfg):
         return False
-    every_n = max(1, int(os.getenv("LEARNING_LIVE_WEIGHT_EVERY_N_TRADES", "3")))
+    every_n = int(os.getenv("LEARNING_LIVE_WEIGHT_EVERY_N_TRADES", "3"))
+    if every_n <= 0:
+        return False
     if _trades_since_coalesce % every_n != 0:
         return False
     min_sec = float(os.getenv("LEARNING_LIVE_WEIGHT_MIN_SEC", "180"))

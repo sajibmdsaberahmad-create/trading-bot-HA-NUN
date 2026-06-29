@@ -175,6 +175,12 @@ def run_loss_streak_learning(
     if plan.get("understanding"):
         confidence = min(0.9, confidence + 0.05)
 
+    try:
+        from core.live_trade_guard import activate_loss_streak_tight_mode
+        activate_loss_streak_tight_mode()
+    except Exception:
+        pass
+
     row = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "streak": streak,

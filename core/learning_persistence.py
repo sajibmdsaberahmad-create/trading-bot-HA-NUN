@@ -322,7 +322,7 @@ class LearningPersistenceGuard:
         self._thread.start()
         log.info(
             f"💾 Learning persistence ON — snapshot every {_interval_sec(self.cfg):.0f}s "
-            f"(crash-safe fsync + PPO save)"
+            f"(crash-safe fsync; PPO zip save deferred during RTH)"
         )
 
     def stop(self, *, trigger: str = "session_end") -> None:
