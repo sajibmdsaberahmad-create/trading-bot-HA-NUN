@@ -294,6 +294,10 @@ class ScalperRunner:
         self._next_best_score: float = 0.0
         self._spike_skip_until: Dict[str, float] = {}
         self._spike_attempt_until: Dict[str, float] = {}
+        self._lock_spike_touch_at: Dict[str, float] = {}
+        self._last_soft_rotate: float = 0.0
+        self._last_merge_scan: float = 0.0
+        self._soft_merge_due: bool = False
         self._mtf_bar_cache: Dict[str, Tuple[float, Any, Any]] = {}
         self._profit_hunt_spike_peak: float = 0.0
         self._profit_hunt_spike_at: float = 0.0
@@ -3083,6 +3087,8 @@ class ScalperRunner:
                         in_position = self._in_any_position()
 
                         if have_targets and not in_position:
+                            self._maybe_soft_rotate_lock(now)
+                            self._maybe_merge_lock_from_scanner(now)
                             if self._maybe_release_stale_lock(now):
                                 have_targets = False
 
@@ -3489,11 +3495,11 @@ class ScalperRunner:
         pool = [r for r in pool if r["ticker"] in tradeable]
         pool_note = ""
         try:
-            from core.scan_lock_pools import build_dual_lock_pool, dual_pool_summary
-            locked = build_dual_lock_pool(
+            from core.scan_lock_pools import build_kill_fit_lock_pool, tier_pool_summary
+            locked = build_kill_fit_lock_pool(
                 self.cfg, pool, self._max_locked(), hits,
             )
-            pool_note = dual_pool_summary(locked, hits, self.cfg)
+            pool_note = tier_pool_summary(locked, hits, self.cfg)
         except Exception:
             locked = pool[: self._max_locked()]
         try:
@@ -3535,7 +3541,10 @@ class ScalperRunner:
             )
             self._locked_targets.append(pick)
         self._locked_targets = prioritize_locked_targets(
-            self._locked_targets, self.cfg, self._locked_targets[0].ticker if self._locked_targets else None,
+            self._locked_targets,
+            self.cfg,
+            self._locked_targets[0].ticker if self._locked_targets else None,
+            hits=hits,
         )
         self.top_pick = self._locked_targets[0] if self._locked_targets else None
         self._targets_locked_at = time.time()
@@ -3823,11 +3832,169 @@ class ScalperRunner:
                 f"{total_ready}/{len(self._locked_targets)} total locked"
             )
 
+    def _locked_target_rows(self) -> List[Dict]:
+        return [
+            {
+                "ticker": t.ticker,
+                "price": t.price,
+                "volume": t.volume,
+                "avg_volume": t.avg_volume,
+                "rel_vol": t.relative_volume,
+                "total_score": t.rank_score,
+                "reasons": t.reason,
+            }
+            for t in self._locked_targets
+        ]
+
+    def _apply_lock_row_merge(
+        self,
+        merged_rows: List[Dict],
+        added: List[str],
+        removed: List[str],
+        tag: str = "MERGE",
+    ) -> bool:
+        if not merged_rows:
+            return False
+        hits = self.scanner.get_scanner_hits()
+        self._locked_targets = []
+        for r in merged_rows:
+            hit = hits.get(r["ticker"])
+            px = float(r.get("price", 0) or 0)
+            if px <= 0 and hit is not None:
+                px = float(getattr(hit, "price", 0) or 0)
+            self._locked_targets.append(
+                ScanResult(
+                    ticker=r["ticker"],
+                    price=px,
+                    volume=r.get("volume", 0),
+                    avg_volume=r.get("avg_volume", 0),
+                    relative_volume=r.get("rel_vol", 1.0),
+                    rank_score=r["total_score"],
+                    reason=r.get("reasons", ""),
+                )
+            )
+        self._locked_targets = prioritize_locked_targets(
+            self._locked_targets, self.cfg, hits=hits,
+        )
+        self.top_pick = self._locked_targets[0] if self._locked_targets else None
+        names = ", ".join(t.ticker for t in self._locked_targets)
+        from core.scan_lock_pools import tier_pool_summary
+        pool_note = tier_pool_summary(merged_rows, hits, self.cfg)
+        change = ""
+        if added or removed:
+            change = f" +{','.join(added)}" if added else ""
+            if removed:
+                change += f" -{','.join(removed)}"
+        log.info(f"🔄 LOCK {tag}: {names}{pool_note}{change}")
+        for tk in removed:
+            if tk in self._target_monitors:
+                self._stop_target_stream(tk)
+        self._ensure_locked_streams(quiet=True)
+        self._schedule_bar_prefetch([p.ticker for p in self._locked_targets])
+        return True
+
+    def _maybe_soft_rotate_lock(self, now: float) -> bool:
+        """Drop weakest stale tail slots — keeps top names; opens room for scanner merge."""
+        rotate_sec = float(os.getenv("SCAN_SOFT_ROTATE_SEC", "180"))
+        if rotate_sec <= 0 or self._in_any_position() or not self._locked_targets:
+            return False
+        if now - self._last_soft_rotate < rotate_sec:
+            return False
+        self._last_soft_rotate = now
+
+        drop_n = int(os.getenv("SCAN_SOFT_ROTATE_DROP", "2"))
+        protect_n = int(os.getenv("SCAN_SOFT_ROTATE_PROTECT", "5"))
+        if drop_n <= 0:
+            return False
+
+        hits = self.scanner.get_scanner_hits()
+        from core.scan_lock_pools import kill_fit_score
+
+        scored: List[Tuple[float, ScanResult, bool]] = []
+        for target in self._locked_targets:
+            row = {
+                "ticker": target.ticker,
+                "price": target.price,
+                "total_score": target.rank_score,
+            }
+            kfs = kill_fit_score(row, hits, self.cfg)
+            last_touch = self._lock_spike_touch_at.get(target.ticker, 0.0)
+            stale = (now - last_touch) > rotate_sec if last_touch > 0 else True
+            scored.append((kfs, target, stale))
+        scored.sort(key=lambda x: x[0], reverse=True)
+
+        dropped: List[ScanResult] = []
+        for kfs, target, stale in scored[protect_n:]:
+            if len(dropped) >= drop_n:
+                break
+            if not stale:
+                continue
+            dropped.append(target)
+        if not dropped:
+            return False
+
+        drop_set = {t.ticker for t in dropped}
+        self._locked_targets = [t for t in self._locked_targets if t.ticker not in drop_set]
+        for t in dropped:
+            self._stop_target_stream(t.ticker)
+        self.top_pick = self._locked_targets[0] if self._locked_targets else None
+        log.info(
+            f"🔄 Soft rotate — dropped [{', '.join(t.ticker for t in dropped)}] | "
+            f"keeping {len(self._locked_targets)}"
+        )
+        self._soft_merge_due = True
+        return True
+
+    def _maybe_merge_lock_from_scanner(self, now: float) -> bool:
+        """Light IB scanner refresh — fill open slots or upgrade weak tail without full rescan."""
+        merge_sec = float(os.getenv("SCAN_MERGE_SEC", "120"))
+        slots_open = len(self._locked_targets) < self._max_locked()
+        if not self._soft_merge_due:
+            if self._in_any_position() or not self._locked_targets:
+                return False
+            if not slots_open and now - self._last_merge_scan < merge_sec:
+                return False
+        if now - self._last_merge_scan < 15.0:
+            return False
+
+        self._last_merge_scan = now
+        self._soft_merge_due = False
+
+        screen_list = self.scanner.get_dynamic_universe(self.conn, force=False)
+        if not screen_list:
+            return False
+
+        hits = self.scanner.get_scanner_hits()
+        fresh: List[Dict] = []
+        for idx, ticker in enumerate(screen_list[:50]):
+            if ticker in self._contract_blacklist:
+                continue
+            hit = hits.get(ticker)
+            if hit is None:
+                hit = ScannerHit(ticker=ticker, rank=idx, scan_code="live")
+            scored = StockScanner.score_scanner_hit(hit, list_index=idx)
+            if scored.get("total_score", 0) > 0:
+                fresh.append(scored)
+        if not fresh:
+            return False
+
+        from core.scan_lock_pools import merge_kill_fit_lock_pool
+        merged, added, removed = merge_kill_fit_lock_pool(
+            self.cfg,
+            self._locked_target_rows(),
+            fresh,
+            self._max_locked(),
+            hits,
+        )
+        if not added and not removed and not slots_open:
+            return False
+        return self._apply_lock_row_merge(merged, added, removed)
+
     def _maybe_release_stale_lock(self, now: float) -> bool:
-        """Drop dead locks after no entry — allows universe rescan."""
+        """Last resort — full clear only after long quiet (soft rotate handles churn)."""
         if not self._locked_targets or self._in_any_position():
             return False
-        stale_sec = float(getattr(self.cfg, "LOCK_STALE_RELEASE_SEC", 600.0))
+        stale_sec = float(getattr(self.cfg, "LOCK_STALE_RELEASE_SEC", 900.0))
         if stale_sec <= 0:
             return False
         locked_for = now - self._targets_locked_at

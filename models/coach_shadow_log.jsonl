@@ -730,3 +730,13 @@
 {"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":1.0491327283034284,"shadow_only":true,"timestamp":"2026-06-29T17:52:17.468359+00:00"}
 {"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:52:37.509396+00:00"}
 {"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":8.678378432587584,"shadow_only":true,"timestamp":"2026-06-29T17:52:40.958806+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":10.407151362689634,"shadow_only":true,"timestamp":"2026-06-29T17:53:00.767630+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:53:07.530462+00:00"}
+{"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":0.3714854932769463,"shadow_only":true,"timestamp":"2026-06-29T17:53:11.403941+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":2.4310172089795494,"shadow_only":true,"timestamp":"2026-06-29T17:53:21.141510+00:00"}
+{"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":0.7691592589258966,"shadow_only":true,"timestamp":"2026-06-29T17:53:31.812090+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:53:37.554902+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":4.000231147117124,"shadow_only":true,"timestamp":"2026-06-29T17:53:41.149736+00:00"}
+{"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":1.0943430698609176,"shadow_only":true,"timestamp":"2026-06-29T17:53:56.044794+00:00"}
+{"ticker":"SOXS","reason":"profit_prob_below_80pct","scan_score":99.8,"spike_ratio":1.0796150291786017,"shadow_only":true,"timestamp":"2026-06-29T17:53:57.403880+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":5.096676721537533,"shadow_only":true,"timestamp":"2026-06-29T17:54:01.294885+00:00"}
