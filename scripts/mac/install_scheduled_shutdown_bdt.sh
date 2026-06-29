@@ -67,31 +67,68 @@ cat > "$STOP_PLIST" <<EOF
 </plist>
 EOF
 
-launchctl bootout "gui/$UID_NUM/$LABEL_USER" 2>/dev/null || \
-  launchctl unload "$USER_PLIST" 2>/dev/null || true
-launchctl bootstrap "gui/$UID_NUM" "$USER_PLIST" 2>/dev/null || \
-  launchctl load "$USER_PLIST"
-launchctl enable "gui/$UID_NUM/$LABEL_USER" 2>/dev/null || true
-echo "✓ User job installed (2:05 AM bot stop)"
+launchctl bootout "gui/$UID_NUM/$LABEL_STOP" 2>/dev/null || \
+  launchctl unload "$STOP_PLIST" 2>/dev/null || true
+launchctl bootstrap "gui/$UID_NUM" "$STOP_PLIST" 2>/dev/null || \
+  launchctl load "$STOP_PLIST"
+launchctl enable "gui/$UID_NUM/$LABEL_STOP" 2>/dev/null || true
+echo "✓ Bot stop job (2:05 AM)"
 
-# ── 2. Root LaunchDaemon: guaranteed power off at 2:12 ──
+# ── 2. User LaunchAgent: power off at 2:12 (screen lock OK, no sudo) ──
+cat > "$POWER_USER_PLIST" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>$LABEL_POWER_USER</string>
+	<key>Comment</key>
+	<string>2:12 AM BDT — Mac shut down (logged in, screen lock OK)</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>$POWER_USER_WRAPPER</string>
+	</array>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>2</integer>
+		<key>Minute</key>
+		<integer>12</integer>
+	</dict>
+	<key>StandardOutPath</key>
+	<string>$HOME/Library/Logs/scheduled-shutdown-bdt.log</string>
+	<key>StandardErrorPath</key>
+	<string>$HOME/Library/Logs/scheduled-shutdown-bdt.log</string>
+	<key>RunAtLoad</key>
+	<false/>
+</dict>
+</plist>
+EOF
+
+launchctl bootout "gui/$UID_NUM/$LABEL_POWER_USER" 2>/dev/null || \
+  launchctl unload "$POWER_USER_PLIST" 2>/dev/null || true
+launchctl bootstrap "gui/$UID_NUM" "$POWER_USER_PLIST" 2>/dev/null || \
+  launchctl load "$POWER_USER_PLIST"
+launchctl enable "gui/$UID_NUM/$LABEL_POWER_USER" 2>/dev/null || true
+echo "✓ Mac power-off job (2:12 AM, screen lock OK)"
+
+# ── 3. Optional root LaunchDaemon: guaranteed power off if sudo available ──
 if sudo -n true 2>/dev/null; then
   SUDO="sudo"
 elif [[ -t 0 ]]; then
   SUDO="sudo"
 else
   echo ""
-  echo "⚠️  Could not install guaranteed power-off (needs one-time sudo password)."
-  echo "   Bot will still stop at 2:05 AM when screen is locked."
-  echo "   Run this in Terminal to finish power-off install:"
-  echo "     $SCRIPT_DIR/install_scheduled_shutdown_bdt.sh"
+  echo "ℹ️  Optional root power-off skipped (no sudo). User 2:12 job is enough for most Macs."
   echo ""
+  echo "Done. Logged in + screen locked is OK."
+  echo "  Log: $HOME/Library/Logs/scheduled-shutdown-bdt.log"
   exit 0
 fi
 
 $SUDO mkdir -p /usr/local/bin
-$SUDO cp "$SCRIPT_DIR/mac_poweroff_bdt.sh" "$POWER_WRAPPER"
-$SUDO chmod 755 "$POWER_WRAPPER"
+$SUDO cp "$SCRIPT_DIR/mac_poweroff_bdt.sh" "$POWER_ROOT_WRAPPER"
+$SUDO chmod 755 "$POWER_ROOT_WRAPPER"
 
 $SUDO tee "$ROOT_PLIST" >/dev/null <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -99,12 +136,12 @@ $SUDO tee "$ROOT_PLIST" >/dev/null <<EOF
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>$LABEL_ROOT</string>
+	<string>$LABEL_POWER_ROOT</string>
 	<key>Comment</key>
 	<string>2:12 AM BDT — Mac power off (root, screen lock OK)</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>$POWER_WRAPPER</string>
+		<string>$POWER_ROOT_WRAPPER</string>
 	</array>
 	<key>StartCalendarInterval</key>
 	<dict>
@@ -125,10 +162,10 @@ EOF
 
 $SUDO chown root:wheel "$ROOT_PLIST"
 $SUDO chmod 644 "$ROOT_PLIST"
-$SUDO launchctl bootout "system/$LABEL_ROOT" 2>/dev/null || true
+$SUDO launchctl bootout "system/$LABEL_POWER_ROOT" 2>/dev/null || true
 $SUDO launchctl bootstrap system "$ROOT_PLIST"
-$SUDO launchctl enable "system/$LABEL_ROOT" 2>/dev/null || true
-echo "✓ Root job installed (2:12 AM Mac power off)"
+$SUDO launchctl enable "system/$LABEL_POWER_ROOT" 2>/dev/null || true
+echo "✓ Optional root power-off backup installed"
 
 echo ""
 echo "Done. Logged in + screen locked is fine."
