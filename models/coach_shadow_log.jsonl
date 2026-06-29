@@ -1433,3 +1433,5 @@
 {"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":1.266216459484636,"shadow_only":true,"timestamp":"2026-06-29T18:55:06.694948+00:00"}
 {"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":1.60309420188976,"shadow_only":true,"timestamp":"2026-06-29T18:55:51.821150+00:00"}
 {"ticker":"MSTU","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.2564880595724033,"shadow_only":true,"timestamp":"2026-06-29T18:55:56.770188+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":0.8608187899329444,"shadow_only":true,"timestamp":"2026-06-29T18:56:41.778405+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":1.4612056545058942,"shadow_only":true,"timestamp":"2026-06-29T18:57:01.797405+00:00"}
