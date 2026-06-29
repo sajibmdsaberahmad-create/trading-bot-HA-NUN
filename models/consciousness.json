@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1470,
   "scans_performed": 39,
-  "improvements_applied": 2274,
+  "improvements_applied": 2275,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:11:30.626563",
-      "age": "6d 22h 8m 41s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1669",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T09:11:30.639566",
       "age": "6d 22h 8m 41s",
@@ -11519,6 +11505,20 @@
       "age": "8d 0h 33m 26s",
       "type": "IMPROVE",
       "message": "Applied improvement #2274",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T11:36:58.592741",
+      "age": "8d 0h 34m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2275",
       "metadata": {
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
