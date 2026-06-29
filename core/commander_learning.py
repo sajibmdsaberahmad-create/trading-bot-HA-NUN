@@ -428,6 +428,16 @@ def apply_commander_plan(
     _append_learning_log(record)
     _append_improvement_history(record)
 
+    try:
+        from core.sniper_execution import cap_sniper_confidence_threshold
+        if cap_sniper_confidence_threshold(cfg):
+            log.info(
+                f"🎯 Sniper cap: CONFIDENCE_THRESHOLD → "
+                f"{float(getattr(cfg, 'CONFIDENCE_THRESHOLD', 0.55)):.2f}"
+            )
+    except Exception:
+        pass
+
     return record
 
 
