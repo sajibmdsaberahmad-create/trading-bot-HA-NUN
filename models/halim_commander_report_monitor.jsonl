@@ -94,3 +94,15 @@
 {"event":"commander_report_learn_ok","section":"human_wins","chars":1416,"hash":"c9100837c1102575","read_only":true,"timestamp":"2026-06-28T15:00:34.455870+00:00"}
 {"event":"commander_report_learn_ok","section":"turnover_fees","chars":672,"hash":"47d5693281ffad59","read_only":true,"timestamp":"2026-06-28T15:00:34.501160+00:00"}
 {"event":"commander_report_learn_ok","section":"trade_cases","chars":1873,"hash":"c9a23e610cbd675d","read_only":true,"timestamp":"2026-06-28T15:00:34.543887+00:00"}
+{"event":"commander_report_learn_ok","section":"overview","chars":736,"hash":"b415878f463002c5","read_only":true,"timestamp":"2026-06-29T06:15:36.715429+00:00"}
+{"event":"commander_report_learn_ok","section":"calculated_lottery","chars":1519,"hash":"23bc519a9ab64f35","read_only":true,"timestamp":"2026-06-29T06:15:36.754248+00:00"}
+{"event":"commander_report_learn_ok","section":"human_failures","chars":2897,"hash":"31aebdd0825131ba","read_only":true,"timestamp":"2026-06-29T06:15:36.791730+00:00"}
+{"event":"commander_report_learn_ok","section":"human_wins","chars":1416,"hash":"c9100837c1102575","read_only":true,"timestamp":"2026-06-29T06:15:36.828830+00:00"}
+{"event":"commander_report_learn_ok","section":"turnover_fees","chars":672,"hash":"47d5693281ffad59","read_only":true,"timestamp":"2026-06-29T06:15:36.869602+00:00"}
+{"event":"commander_report_learn_ok","section":"trade_cases","chars":1873,"hash":"c9a23e610cbd675d","read_only":true,"timestamp":"2026-06-29T06:15:36.908832+00:00"}
+{"event":"commander_report_learn_ok","section":"overview","chars":736,"hash":"b415878f463002c5","read_only":true,"timestamp":"2026-06-29T07:35:56.296158+00:00"}
+{"event":"commander_report_learn_ok","section":"calculated_lottery","chars":1519,"hash":"23bc519a9ab64f35","read_only":true,"timestamp":"2026-06-29T07:35:56.346629+00:00"}
+{"event":"commander_report_learn_ok","section":"human_failures","chars":2897,"hash":"31aebdd0825131ba","read_only":true,"timestamp":"2026-06-29T07:35:56.392228+00:00"}
+{"event":"commander_report_learn_ok","section":"human_wins","chars":1416,"hash":"c9100837c1102575","read_only":true,"timestamp":"2026-06-29T07:35:56.434220+00:00"}
+{"event":"commander_report_learn_ok","section":"turnover_fees","chars":672,"hash":"47d5693281ffad59","read_only":true,"timestamp":"2026-06-29T07:35:56.476048+00:00"}
+{"event":"commander_report_learn_ok","section":"trade_cases","chars":1873,"hash":"c9a23e610cbd675d","read_only":true,"timestamp":"2026-06-29T07:35:56.517180+00:00"}

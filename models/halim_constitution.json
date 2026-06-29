@@ -54,7 +54,7 @@
     "param_mutations": 30,
     "file_writes": 200,
     "agent_steps": 100,
-    "learn_fetches": 1200
+    "learn_fetches": 500
   },
   "web_allowlist_hosts": [
     "www.google.com",
@@ -132,7 +132,7 @@
     "ib_data",
     "web_search"
   ],
-  "operator_enabled_at": "2026-06-28T15:02:46.413875+00:00",
+  "operator_enabled_at": "2026-06-29T07:35:53.775935+00:00",
   "frontier_policy": {
     "schema": "frontier_model_safety_v1",
     "aligned_with": [
