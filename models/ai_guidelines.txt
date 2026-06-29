@@ -1449,3 +1449,15 @@ BUY 172 TNMG NASDAQ.SCM  In accordance with our regulatory obligations as a brok
   - PENNY_MAX_DEPLOY_USD → 150.0 (IB 2161 regulatory cap — reduce penny deploy)
   - PENNY_LIMIT_BUFFER_PCT → 0.012000000000000004 (IB 2161 — tighter limit buffer toward reference price)
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:37:34.091722+00:00
+Observed trade_closed — recorded for learning.
+spike_top_intrabar: +0.73% vol=394742.0x
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:37:34.909858+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +4.06% (peak +4.06%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:38:10.941428+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +1.23% (peak +1.23%)
+
