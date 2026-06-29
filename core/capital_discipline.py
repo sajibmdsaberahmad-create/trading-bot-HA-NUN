@@ -43,6 +43,13 @@ def is_strong_spike_setup(
 ) -> bool:
     """High scanner rank + elevated bar volume — worth PPO-led entry without council wait."""
     cfg = cfg or BotConfig()
+    try:
+        from core.sniper_execution import sniper_active, sniper_strong_spike_thresholds
+        if sniper_active(cfg):
+            min_sc, min_sp = sniper_strong_spike_thresholds(cfg)
+            return float(scan_score) >= min_sc and float(spike_ratio) >= min_sp
+    except Exception:
+        pass
     min_sc = float(getattr(cfg, "CAPITAL_STRONG_SPIKE_SCORE", 78))
     min_sp = float(getattr(cfg, "CAPITAL_STRONG_SPIKE_RATIO", 1.35))
     return float(scan_score) >= min_sc and float(spike_ratio) >= min_sp
