@@ -943,3 +943,5 @@
 {"timestamp":"2026-06-29T12:47:20.055319+00:00","event":"green_profit_lock","ticker":"SOFI","pnl_usd":2239.5,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +3.04% (peak +3.04%)"}
 {"timestamp":"2026-06-29T12:49:05.182688+00:00","event":"green_profit_lock","ticker":"SOFI","pnl_usd":2239.5,"pnl_pct":0.0304,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +3.04% (peak +3.10%)","price":18.11,"ai_stalled":true}
 {"timestamp":"2026-06-29T12:49:16.287643+00:00","event":"green_profit_lock","ticker":"SOFI","pnl_usd":2239.5,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +3.04% (peak +3.10%)"}
+{"timestamp":"2026-06-29T12:51:50.189314+00:00","event":"green_profit_lock","ticker":"SOFI","pnl_usd":2281.36,"pnl_pct":0.031,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +3.10% (peak +3.10%)","price":18.12,"ai_stalled":true}
+{"timestamp":"2026-06-29T12:52:02.159659+00:00","event":"green_profit_lock","ticker":"SOFI","pnl_usd":2281.36,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +3.10% (peak +3.10%)"}
