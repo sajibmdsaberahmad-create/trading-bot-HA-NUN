@@ -1,14 +1,5 @@
 [
   {
-    "timestamp": "2026-06-29T10:56:10.494221+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
     "timestamp": "2026-06-29T10:57:20.774678+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
@@ -892,6 +883,15 @@
   },
   {
     "timestamp": "2026-06-29T12:47:20.605113+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T12:49:16.555876+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
