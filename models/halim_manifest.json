@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-29T15:36:20.922178+00:00",
+  "updated_at": "2026-06-29T15:58:25.031583+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,12 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-29T15:36:20.885539+00:00",
+    "timestamp": "2026-06-29T15:58:24.907796+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
-        "exists": true,
-        "path": "ppo_trader.zip",
-        "size_kb": 28471.6,
-        "modified": "2026-06-29T14:36:33.636570+00:00"
+        "exists": false,
+        "path": "ppo_trader.zip"
       },
       "ppo_replay": {
         "exists": true,
@@ -67,19 +65,19 @@
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-29T15:31:55.599130+00:00"
+        "modified": "2026-06-29T15:56:53.018436+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 45590.8,
-        "modified": "2026-06-29T15:27:51.912458+00:00"
+        "size_kb": 45591.7,
+        "modified": "2026-06-29T15:56:52.718750+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2336.3,
-        "modified": "2026-06-29T15:35:14.456305+00:00"
+        "size_kb": 2337.8,
+        "modified": "2026-06-29T15:58:06.822345+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -110,7 +108,7 @@
       "win_rate": 0.0,
       "avg_pnl": -4.38
     },
-    "buffer_records": 17338,
+    "buffer_records": 17343,
     "dataset_pairs": 2834,
     "maturity": {
       "stage": "adult",
