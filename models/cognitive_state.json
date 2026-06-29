@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:ai_stall quick_scalp +0.66% (peak +0.73%)",
-    "Commander: green_profit_lock:fade_floor +0.04% (peak was +0.76%)",
     "Spike-top hunt on ASTS: spike_top_exit: +0.79% vol=2.2x",
     "Commander: spike_top_exit: +0.79% vol=2.2x",
     "Commander: off_hours_review",
@@ -103,10 +101,12 @@
     "Review ib_failure on KNDI",
     "Commander: BUY 247 KNDI NASDAQ.NMS  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.6574 or a more aggressive price still within you",
     "Commander: BUY 247 KNDI NASDAQ.NMS  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.6648 or a more aggressive price still within you",
-    "Commander: green_profit_lock:giveback +0.23% (peak +0.45% gave back 0.23%)"
+    "Commander: green_profit_lock:giveback +0.23% (peak +0.45% gave back 0.23%)",
+    "Commander: BUY 247 KNDI NASDAQ.NMS  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.6692 or a more aggressive price still within you",
+    "Commander: BUY 964 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1560 or a more aggressive price still within your spec"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 222,
-  "updated": "2026-06-29T14:11:33.139438"
+  "updated": "2026-06-29T14:12:43.332428"
 }
