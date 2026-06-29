@@ -1102,20 +1102,38 @@ class AICommander:
         consecutive_losses = int(account.get("consecutive_losses", 0) or 0)
 
         try:
-            from core.live_trade_guard import check_entry_allowed
-            guard_block = check_entry_allowed(ticker, self.cfg)
-            if guard_block:
-                log.info(f"  🛡️ guard:block {ticker.upper()} — {guard_block}")
+            from core.war_account import (
+                check_entry_allowed as war_entry_block,
+                sniper_conf_bump,
+                war_context_line,
+            )
+            war_block = war_entry_block(self.cfg, ticker=ticker, pipeline="entry")
+            if war_block:
+                log.info(f"  ⚔️ war:block {ticker.upper()} — {war_block}")
                 return {
                     "enter": False,
                     "confidence": ppo_conf,
-                    "reason": guard_block,
-                    "pipeline": "guard:cooldown",
+                    "reason": war_block,
+                    "pipeline": "war:veto",
                     "ppo_action": ppo_action,
                     "ppo_conf": ppo_conf,
                 }
         except Exception:
-            pass
+            try:
+                from core.live_trade_guard import check_entry_allowed
+                guard_block = check_entry_allowed(ticker, self.cfg)
+                if guard_block:
+                    log.info(f"  🛡️ guard:block {ticker.upper()} — {guard_block}")
+                    return {
+                        "enter": False,
+                        "confidence": ppo_conf,
+                        "reason": guard_block,
+                        "pipeline": "guard:cooldown",
+                        "ppo_action": ppo_action,
+                        "ppo_conf": ppo_conf,
+                    }
+            except Exception:
+                pass
 
         try:
             from core.trading_copilot import copilot_blocks_entry, get_copilot_brief, copilot_caution_for_ticker
@@ -1153,18 +1171,27 @@ class AICommander:
         try:
             from core.trading_copilot import copilot_caution_for_ticker
             from core.live_trade_guard import guard_conf_bump, loss_context_for_prompt
+            from core.war_account import sniper_conf_bump, war_context_line
             caution_bump = copilot_caution_for_ticker(self.cfg, ticker)
             if caution_bump:
                 min_conf = min(0.95, min_conf + caution_bump)
             g_bump = guard_conf_bump(ticker)
             if g_bump:
                 min_conf = min(0.95, min_conf + g_bump)
+            s_bump = sniper_conf_bump(self.cfg)
+            if s_bump:
+                min_conf = min(0.95, min_conf + s_bump)
         except Exception:
             pass
         loss_ctx_line = ""
+        war_line = ""
         try:
             from core.live_trade_guard import loss_context_for_prompt
             loss_ctx_line = loss_context_for_prompt(ticker)
+        except Exception:
+            pass
+        try:
+            war_line = war_context_line(self.cfg)
         except Exception:
             pass
         mctx = market_ctx or {}
@@ -1200,6 +1227,8 @@ class AICommander:
         )
         if loss_ctx_line:
             cap_line = f"{cap_line}{loss_ctx_line}\n"
+        if war_line:
+            cap_line = f"{cap_line}{war_line}\n"
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         self._ring_halim_entry(

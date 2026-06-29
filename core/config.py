@@ -217,6 +217,17 @@ class BotConfig:
     TREAT_PAPER_AS_LIVE: bool = os.getenv(
         "TREAT_PAPER_AS_LIVE", "true"
     ).lower() in ("1", "true", "yes")
+    # War account — economic truth layer (paper war $1k + live operating capital)
+    WAR_ACCOUNT_ENABLED: bool = os.getenv(
+        "WAR_ACCOUNT_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    WAR_CAPITAL_USD: float = float(os.getenv("WAR_CAPITAL_USD", "1000"))
+    WAR_LIVE_OPERATING_CAPITAL: float = float(
+        os.getenv("WAR_LIVE_OPERATING_CAPITAL", "0")
+    )
+    WAR_SNIPER_MODE: bool = os.getenv(
+        "WAR_SNIPER_MODE", "true"
+    ).lower() in ("1", "true", "yes")
     CAPITAL_MIN_CONFIDENCE: float = float(os.getenv("CAPITAL_MIN_CONFIDENCE", "0.65"))
     CAPITAL_MIN_PROFIT_PROBABILITY: float = float(
         os.getenv("CAPITAL_MIN_PROFIT_PROBABILITY", "0.62")

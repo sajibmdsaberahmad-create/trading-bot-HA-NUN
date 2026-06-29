@@ -15,13 +15,27 @@ if TYPE_CHECKING:
 
 
 def is_paper_free_learning(cfg: "BotConfig") -> bool:
+    try:
+        from core.war_account import war_account_enabled
+        if war_account_enabled(cfg):
+            return False
+    except Exception:
+        pass
     return bool(getattr(cfg, "PAPER_TRADING", False)) and bool(
         getattr(cfg, "AI_PAPER_FREE_LEARNING", True)
     )
 
 
 def account_equity(cfg: "BotConfig") -> float:
-    """Best available equity — IB live balance preferred."""
+    """Best available equity — war ledger on paper/live war; else IB balance."""
+    try:
+        from core.war_account import war_account_enabled, war_effective_equity
+        if war_account_enabled(cfg):
+            eq = war_effective_equity(cfg)
+            if eq > 0:
+                return eq
+    except Exception:
+        pass
     for attr in ("_latest_account_balance",):
         val = float(getattr(cfg, attr, 0) or 0)
         if val > 0:

@@ -263,7 +263,25 @@ def get_ai_deploy_budget(
     available_cash: float = 0.0,
     open_positions: int = 0,
 ) -> float:
-    """Max USD deployable for one new position — fixed cap or equity-based slots."""
+    """Max USD deployable for one new position — war ledger or equity-based slots."""
+    try:
+        from core.war_account import (
+            war_account_enabled,
+            war_effective_equity,
+            war_settled_cash,
+            bullet_size_usd,
+        )
+        if war_account_enabled(cfg):
+            eq = war_effective_equity(cfg)
+            cash = war_settled_cash(cfg)
+            if eq > 0:
+                account_equity = eq
+            if cash > 0:
+                available_cash = cash
+            bullet = bullet_size_usd(cfg)
+            return max(0.0, min(bullet, available_cash or bullet))
+    except Exception:
+        pass
     if getattr(cfg, "USE_FIXED_DEPLOY_CAP", False):
         budget = get_deploy_usd(cfg, pilot)
         max_trade = float(getattr(cfg, "MAX_TRADE_SIZE_USD", 1000.0))

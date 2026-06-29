@@ -621,6 +621,11 @@ def record_exit(
     return row
 
 
+def bullet_size_usd(cfg: Optional[BotConfig] = None) -> float:
+    state = load_state(cfg)
+    return _bullet_size(state, cfg)
+
+
 def adjust_scan_score(
     cfg: Optional[BotConfig],
     ticker: str,

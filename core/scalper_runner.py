@@ -557,11 +557,28 @@ class ScalperRunner:
         self.bot_nav = self.bot_cash + self.shares * self._latest_price()
 
     def _deployable_cash(self) -> float:
-        """Cash available for new entries — IB live balance when AI has full capital access."""
+        """Cash for new entries — war settled cash when war account enabled."""
+        try:
+            from core.war_account import war_account_enabled, war_settled_cash
+            if war_account_enabled(self.cfg):
+                return max(0.0, war_settled_cash(self.cfg))
+        except Exception:
+            pass
         ib_cash = float(self.available_cash if self.available_cash is not None else self.account_equity)
         if ai_full_capital_access(self.cfg):
             return max(0.0, ib_cash)
         return max(0.0, float(self.bot_cash))
+
+    def _war_account_equity(self) -> float:
+        try:
+            from core.war_account import war_account_enabled, war_effective_equity
+            if war_account_enabled(self.cfg):
+                eq = war_effective_equity(self.cfg)
+                if eq > 0:
+                    return eq
+        except Exception:
+            pass
+        return float(self.account_equity)
 
     def _resolve_live_bars(
         self,
@@ -1111,16 +1128,24 @@ class ScalperRunner:
         for t, s in self._position_slots.items():
             px = self._live_price_for(t, float(s.get("entry_price", 0)))
             deployed += float(s.get("shares", 0)) * px
-        return {
-            "equity": self.account_equity,
-            "cash": self._deployable_cash(),
-            "nav": self.bot_nav,
+        equity = self._war_account_equity()
+        cash = self._deployable_cash()
+        ctx = {
+            "equity": equity,
+            "cash": cash,
+            "nav": equity,
             "open_positions": self._open_position_count(),
             "max_positions": self._max_concurrent(),
             "deployed_usd": deployed,
             "held_tickers": list(self._held_tickers()),
             "consecutive_losses": int(getattr(self.risk, "_consecutive_losses", 0) or 0),
         }
+        try:
+            from core.war_account import war_account_context
+            ctx.update(war_account_context(self.cfg))
+        except Exception:
+            pass
+        return ctx
 
     def _sync_all_positions_from_ib(self):
         if not getattr(self.cfg, "USE_MULTI_POSITION", True):
@@ -2552,6 +2577,11 @@ class ScalperRunner:
             ensure_commander_runtime(self.cfg, replay=replay_mode)
         except Exception as exc:
             log.debug(f"Commander runtime: {exc}")
+        try:
+            from core.war_account import ensure_war_account
+            ensure_war_account(self.cfg)
+        except Exception as exc:
+            log.debug(f"War account: {exc}")
         try:
             from core.lottery_bank import ensure_lottery_bank
             ensure_lottery_bank(self.cfg)

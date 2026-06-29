@@ -30,6 +30,12 @@ REPORT_PATH = _REPO / "models" / "lottery_bank_daily.jsonl"
 
 def lottery_bank_enabled(cfg: Optional[BotConfig] = None) -> bool:
     cfg = cfg or BotConfig()
+    try:
+        from core.war_account import war_account_enabled
+        if war_account_enabled(cfg):
+            return False
+    except Exception:
+        pass
     env = os.getenv("LOTTERY_BANK_ENABLED", "").strip().lower()
     if env in ("0", "false", "no"):
         return False
