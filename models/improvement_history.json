@@ -1,41 +1,5 @@
 [
   {
-    "timestamp": "2026-06-29T11:59:18.275425+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T12:00:02.116811+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T12:01:15.539115+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T12:01:16.388620+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
     "timestamp": "2026-06-29T12:02:12.184934+00:00",
     "source": "runtime_order_timeout",
     "adjustments": {},
@@ -957,6 +921,57 @@
     "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
     "lessons": [
       "Review ib_failure on SOAR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:34:08.580946+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "PENNY_MAX_DEPLOY_USD": {
+        "param": "PENNY_MAX_DEPLOY_USD",
+        "value": 155.29685937499997,
+        "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+        "ok": true,
+        "msg": "applied"
+      },
+      "PENNY_LIMIT_BUFFER_PCT": {
+        "param": "PENNY_LIMIT_BUFFER_PCT",
+        "value": 0.011000000000000003,
+        "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review ib_failure on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:34:20.275040+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TNMG"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:34:34.613410+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:34:56.021702+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TNMG"
     ]
   }
 ]

@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review trade_closed on ASTS",
     "Review loss_streak on ASTS",
     "Commander: replay_target",
     "Commander: green_profit_lock:giveback +1.30% (peak +1.88% gave back 0.58%)",
@@ -103,10 +102,11 @@
     "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0719 or a more aggressive price still within y",
     "Review loss_streak on TNMG",
     "Review trade_closed on TNMG",
-    "Commander: green_profit_lock:ai_stall quick_scalp +1.73% (peak +1.73%)"
+    "Commander: green_profit_lock:ai_stall quick_scalp +1.73% (peak +1.73%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +1.63% (peak +1.63%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 176,
-  "updated": "2026-06-29T13:34:34.597911"
+  "trades_observed": 178,
+  "updated": "2026-06-29T13:34:55.967113"
 }
