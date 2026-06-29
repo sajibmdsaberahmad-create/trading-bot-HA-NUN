@@ -1292,3 +1292,5 @@
 {"timestamp":"2026-06-29T13:49:33.921699+00:00","event":"green_profit_lock","ticker":"TNMG","pnl_usd":0.0,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +0.98% (peak +0.98%)"}
 {"timestamp":"2026-06-29T14:01:29.675505+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":100.0,"pnl_pct":0.0046,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +0.46% (peak +0.46%)","price":4.33,"ai_stalled":true}
 {"timestamp":"2026-06-29T14:01:31.585932+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":-50.0,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +0.46% (peak +0.46%)"}
+{"timestamp":"2026-06-29T14:03:39.285918+00:00","event":"green_profit_lock","ticker":"KNDI","pnl_usd":6.69,"pnl_pct":0.0447,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +4.47% (peak +4.47%)","price":0.6333,"ai_stalled":true}
+{"timestamp":"2026-06-29T14:03:41.417966+00:00","event":"green_profit_lock","ticker":"KNDI","pnl_usd":0.0,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +4.47% (peak +4.47%)"}
