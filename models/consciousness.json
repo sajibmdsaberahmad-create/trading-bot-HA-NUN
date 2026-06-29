@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1531,
   "scans_performed": 39,
-  "improvements_applied": 2430,
+  "improvements_applied": 2431,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:28:53.075869",
-      "age": "7d 1h 26m 4s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1789",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on MARA"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:28:53.077383",
       "age": "7d 1h 26m 4s",
@@ -11986,6 +11972,35 @@
       "age": "8d 3h 4m 49s",
       "type": "IMPROVE",
       "message": "Applied improvement #2430",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 150.0,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.015,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review ib_failure on KNDI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:08:49.592387",
+      "age": "8d 3h 6m 0s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2431",
       "metadata": {
         "source": "runtime_ib_failure",
         "summary": "Observed ib_failure \u2014 recorded for learning.",
