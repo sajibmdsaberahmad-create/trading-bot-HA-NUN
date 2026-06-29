@@ -1,25 +1,25 @@
 {
-  "last_cycle": "2026-06-29T09:09:31.832657+00:00",
+  "last_cycle": "2026-06-29T16:02:28.212305+00:00",
   "trigger": "live_session_end",
   "stats": {
-    "agreements": 220,
-    "disagreements": 2466,
-    "corrections_for_ppo": 3214,
+    "agreements": 1123,
+    "disagreements": 2859,
+    "corrections_for_ppo": 3665,
     "corrections_for_halim": 2,
     "log_path": "halim/data/coevolution/correction_log.jsonl"
   },
   "export": {
     "ok": true,
-    "added": 3462,
-    "total": 3462,
-    "events": 3444,
+    "added": 4244,
+    "total": 4244,
+    "events": 4798,
     "rewritten": true
   },
-  "cycles": 27,
+  "cycles": 28,
   "dialogue_export": {
     "ok": true,
-    "pairs": 4210,
-    "dialogue_lines": 2105,
+    "pairs": 4962,
+    "dialogue_lines": 2481,
     "rewritten": true
   }
 }

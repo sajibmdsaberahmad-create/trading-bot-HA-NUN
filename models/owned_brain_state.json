@@ -1,10 +1,10 @@
 {
-  "last_export": "2026-06-29T09:09:30.503090+00:00",
-  "dataset_pairs": 2834,
-  "last_evolution": "2026-06-29T09:09:31.833095+00:00",
+  "last_export": "2026-06-29T16:02:15.910052+00:00",
+  "dataset_pairs": 2255,
+  "last_evolution": "2026-06-29T16:02:28.212724+00:00",
   "last_trigger": "cli",
   "device_profile": "m2_8gb",
-  "evolution_count": 16,
+  "evolution_count": 17,
   "birth_at": "2026-06-27T06:29:59.402563+00:00",
   "stage": "adult",
   "api_usage_today": {

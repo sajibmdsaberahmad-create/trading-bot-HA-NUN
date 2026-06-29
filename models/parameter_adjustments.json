@@ -1,1 +1,16 @@
-{}
+{
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.7100000000000001,
+    "reason": "trade WR 0% \u2014 tighten PPO entry bar",
+    "ok": true,
+    "msg": "applied"
+  },
+  "MIN_PROFIT_PROBABILITY": {
+    "param": "MIN_PROFIT_PROBABILITY",
+    "value": 0.62,
+    "reason": "below teacher floor \u2014 raise profit probability gate",
+    "ok": true,
+    "msg": "applied"
+  }
+}
