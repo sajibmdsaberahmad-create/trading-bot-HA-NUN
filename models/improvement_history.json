@@ -369,5 +369,16 @@
       }
     },
     "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-06-29T07:53:55.429295\nCombined win rate: 18.5% (buffer=22.8%, returns=14.3%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capital\n\u2022 A"
+  },
+  {
+    "timestamp": "2026-06-29T07:54:07.305481+00:00",
+    "source": "commander_chat",
+    "adjustments": {},
+    "guidelines_summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+    "lessons": [
+      "ping - are you there ?",
+      "Hi",
+      "Hi"
+    ]
   }
 ]
