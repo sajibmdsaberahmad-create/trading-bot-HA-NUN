@@ -1,21 +1,41 @@
-🧭 SELF-IMPROVEMENT GUIDELINES | 2026-06-29T07:41:41.290818
-Combined win rate: 18.9% (buffer=17.2%, returns=20.7%)
-• Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER
-• Reduce SCAN_INTERVAL_SECONDS to avoid overtrading
-• Lower MAX_TRADE_SIZE_USD to preserve capital
-• Add 5-min confirmation before entry to filter noise
-• Commander guidance (recent):
-  - Hi
-  - ping - are you there ?
-  - Hi
-  - Hi
-• Recommended parameter adjustments:
-  - SCALP_STOP_ATR_MULTIPLIER: 0.5760000000000001 -> 0.4608000000000001 (reason: tighten stops when WR low; widen when WR strong)
-  - SCALP_TP_ATR_MULTIPLIER: 1.215 -> 1.0935000000000001 (reason: increase targets when WR strong; reduce when WR weak)
-  - SCAN_INTERVAL_SECONDS: 51 -> 66.3 (reason: reduce frequency when WR low; increase when WR strong)
-  - MAX_TRADE_SIZE_USD: 22277.82942 -> 15594.480593999997 (reason: reduce size when WR poor; increase when WR strong)
-  - MAX_RISK_PER_TRADE_USD: 140625.0 -> 105468.75 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
-  - CONFIDENCE_THRESHOLD: 0.7800000000000001 -> 0.8300000000000002 (reason: raise entry bar when WR low; lower when WR strong)
-🧭 COMMANDER LEARNING | 2026-06-29T07:43:44.176447+00:00
-Halim heuristic dev plan — WR 31%
+• 🧭 AI GUIDELINES | generated 2026-06-29T07:53:03.557210
+• Win rate below 40%: tighten stops, reduce size, increase scan interval
+• Profit hunting: tune SPIKE_TOP_MIN_GAIN_PCT / SPIKE_TOP_MIN_VOL_RATIO — exit into momentum spikes, not passive giveback waits
 
+Generated: 2026-06-29T07:53:03.557341
+Weights: {
+  "momentum": 0.5,
+  "volume": 0.5,
+  "institutional": 0.5,
+  "vwap_slope": 0.5,
+  "atr_bonus": 0.5,
+  "mean_reversion": 0.5,
+  "trend_filter": 0.5,
+  "price_rising": 0.5,
+  "rsi_filter": 0.5,
+  "volatility_gate": 0.5,
+  "_meta": {
+    "train_timestamp": "2026-06-29T07:53:03.534392",
+    "buffer_total": 2000,
+    "buffer_win_rate": 0.228,
+    "trade_win_rate": 0.31,
+    "sources": {
+      "halim_ppo_coevolution": 179,
+      "replay_slippage_abort": 102,
+      "ppo_led": 175,
+      "replay_live": 151,
+      "ppo_entry": 60,
+      "profit_hunt": 47,
+      "runtime_observer": 117,
+      "live_trade": 1091,
+      "ai_council": 3,
+      "scan_pick": 5,
+      "scan_complete": 3,
+      "teacher_ppo": 15,
+      "market_context": 2,
+      "backtest": 50
+    },
+    "missed_profit_hunts": 2,
+    "profit_hunt_events": 47
+  }
+}
