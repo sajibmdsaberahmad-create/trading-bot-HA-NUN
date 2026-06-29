@@ -4,9 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Missed spike-top exit on ASTS: peak $86.33 left ~$4 on table",
-    "Commander: green_profit_lock:ai_stall quick_scalp +0.43% (peak +0.43%)",
-    "Spike-top hunt on LCID: spike_top_exit: +0.57% vol=1.3x",
     "Commander: spike_top_exit: +0.57% vol=1.3x",
     "Commander: green_profit_lock:ai_stall quick_scalp +0.38% (peak +0.38%)",
     "Review trade_closed on MARA",
@@ -103,10 +100,13 @@
     "Commander: off_hours_review",
     "Halim documents every mutation in git \u2014 review improvement_history.json",
     "Session trade WR 31% on 400 round-trips",
-    "Commander: Halim heuristic dev plan \u2014 WR 31%"
+    "Commander: Halim heuristic dev plan \u2014 WR 31%",
+    "Review order_timeout on PLTR",
+    "Commander: PreSubmitted",
+    "Review order_timeout on MARA"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-29T07:57:53.602931"
+  "updated": "2026-06-29T08:01:43.515647"
 }

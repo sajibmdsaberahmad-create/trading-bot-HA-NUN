@@ -390,5 +390,23 @@
       "Halim documents every mutation in git \u2014 review improvement_history.json",
       "Session trade WR 31% on 400 round-trips"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T08:01:42.890504+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T08:01:43.533187+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on MARA"
+    ]
   }
 ]
