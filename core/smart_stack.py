@@ -375,6 +375,162 @@ def count_hourly_filled_entry(cfg: Optional[BotConfig] = None) -> bool:
     return smart_stack_enabled(cfg) and _env_bool("SMART_STACK_HOURLY_FILLS_ONLY", "true")
 
 
+def halim_local_fast_sec(cfg: Optional[BotConfig] = None) -> float:
+    """How long to wait for Halim before quality-led sniper resolve (no cloud)."""
+    if not smart_stack_enabled(cfg):
+        return 3.0
+    return float(os.getenv("SNIPER_HALIM_FAST_SEC", "0.55"))
+
+
+def halim_local_max_wait_sec(cfg: Optional[BotConfig] = None) -> float:
+    """Council slot lifetime when Halim leads — must exceed halim LM latency."""
+    if not smart_stack_enabled(cfg):
+        return 1.5
+    return float(os.getenv("SNIPER_HALIM_LOCAL_WAIT_SEC", "2.8"))
+
+
+def teacher_api_hard_case_only(cfg: Optional[BotConfig] = None) -> bool:
+    """API reserved for curriculum hard cases; Halim handles the rest."""
+    return smart_stack_enabled(cfg) and _env_bool("SMART_STACK_TEACHER_HARD_ONLY", "true")
+
+
+def build_halim_local_entry(
+    cfg: Optional[BotConfig],
+    *,
+    halim_live: Dict[str, Any],
+    quality: Dict[str, Any],
+    ppo_action: int,
+    ppo_conf: float,
+    ppo_reason: str,
+    min_conf: float,
+    scan_score: float,
+    spike_ratio: float,
+    allow_pending_in_flight: bool = True,
+) -> Dict[str, Any]:
+    """
+    Halim-led local entry — no cloud council wait.
+    Keeps sniper speed: brief Halim wait, then quality-led resolve.
+    """
+    from core.capital_discipline import effective_min_profit_probability
+
+    h_status = str(halim_live.get("status", "missing"))
+    h_parsed = halim_live.get("parsed") or {}
+    profit_prob = float(quality.get("profit_probability", 0.5) or 0.5)
+    min_prob = effective_min_profit_probability(cfg) if cfg else 0.62
+    base_conf = float(ppo_conf or 0.5)
+
+    def _out(
+        enter: bool,
+        pipeline: str,
+        reason: str,
+        conf: float,
+        pending: bool = False,
+        **extra: Any,
+    ) -> Dict[str, Any]:
+        row: Dict[str, Any] = {
+            "enter": enter,
+            "pending": pending,
+            "confidence": round(conf, 4),
+            "pipeline": pipeline,
+            "reason": reason[:200],
+            "journal": reason[:300],
+            "ppo_action": int(ppo_action),
+            "ppo_conf": base_conf,
+        }
+        if h_parsed:
+            row["halim_enter"] = bool(h_parsed.get("enter", False))
+            row["halim_conf"] = float(h_parsed.get("confidence", 0) or 0)
+        row.update(extra)
+        return row
+
+    if h_status == "fresh" and h_parsed:
+        h_enter = bool(h_parsed.get("enter", False))
+        h_conf = float(h_parsed.get("confidence", 0) or 0)
+        h_reason = str(h_parsed.get("reason", ""))[:80]
+        veto_conf = float(os.getenv("HALIM_ENTRY_VETO_MIN_CONF", "0.85"))
+        if not h_enter and h_conf >= veto_conf and ppo_action == 1:
+            return _out(
+                False, "halim:local_veto",
+                f"Halim skip {h_conf:.0%}: {h_reason}",
+                max(base_conf, h_conf * 0.5),
+            )
+        enter = h_enter and h_conf >= min_conf * 0.80
+        if not enter and h_enter and scan_score >= 45 and profit_prob >= min_prob * 0.88:
+            enter = True
+        if enter:
+            return _out(
+                True, "halim:local_lead",
+                f"Halim lead {h_conf:.0%}: {h_reason or 'enter'}",
+                max(base_conf, h_conf, profit_prob),
+            )
+        return _out(
+            False, "halim:local_skip",
+            f"Halim pass {h_conf:.0%}: {h_reason or 'wait'}",
+            max(base_conf, h_conf * 0.6),
+        )
+
+    if h_status == "in_flight" and allow_pending_in_flight:
+        return _out(
+            False, "halim:in_flight",
+            f"PPO {base_conf:.0%} — Halim reasoning…",
+            base_conf,
+            pending=True,
+        )
+
+    # Quality-led sniper (cloud off / Halim slow) — preserve hunt speed
+    quality_flash = (
+        scan_score >= 35
+        and spike_ratio >= 1.20
+        and profit_prob >= min_prob * 0.85
+    )
+    quality_strong = (
+        scan_score >= 42
+        and spike_ratio >= 1.15
+        and profit_prob >= min_prob * 0.90
+    )
+    if quality_flash or quality_strong:
+        pipe = "halim:quality_flash" if quality_flash else "halim:quality_lead"
+        return _out(
+            True, pipe,
+            (
+                f"Quality lead (Halim {h_status}): prob={profit_prob:.0%} "
+                f"score={scan_score:.0f} vol={spike_ratio:.1f}x"
+            ),
+            max(base_conf, profit_prob, min_conf * 0.78),
+        )
+
+    if ppo_action == 1 and base_conf >= min_conf:
+        return _out(
+            True, "halim:ppo_lead",
+            f"PPO buy {base_conf:.0%} (Halim {h_status})",
+            base_conf,
+        )
+
+    if (
+        ppo_action == 0
+        and scan_score >= 48
+        and profit_prob >= min_prob
+        and spike_ratio >= 1.18
+    ):
+        return _out(
+            True, "halim:spike_quality",
+            (
+                f"PPO HOLD but quality spike: prob={profit_prob:.0%} "
+                f"score={scan_score:.0f}"
+            ),
+            max(profit_prob, min_conf * 0.82),
+        )
+
+    return _out(
+        False, "halim:local_pass",
+        (
+            f"Local pass (Halim {h_status}): PPO {base_conf:.0%} "
+            f"prob={profit_prob:.0%} score={scan_score:.0f}"
+        ),
+        base_conf,
+    )
+
+
 def live_ram_only(cfg: Optional[BotConfig] = None) -> bool:
     """
     Live session uses RAM only — no disk sweeps/jsonl trims while market is open.

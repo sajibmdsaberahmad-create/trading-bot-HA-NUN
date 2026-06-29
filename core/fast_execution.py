@@ -63,6 +63,13 @@ def focus_rotation_enabled(cfg: BotConfig) -> bool:
 
 
 def council_fast_sec(cfg: BotConfig) -> float:
+    try:
+        from core.smart_stack import smart_stack_enabled, halim_local_fast_sec
+        from core.sniper_execution import sniper_active
+        if smart_stack_enabled(cfg) and sniper_active(cfg):
+            return halim_local_fast_sec(cfg)
+    except Exception:
+        pass
     if ai_fast_execution(cfg):
         return float(getattr(cfg, "COUNCIL_SCANNER_FAST_SEC", 3.0))
     return float(getattr(cfg, "COUNCIL_SCANNER_FAST_SEC", 8.0))

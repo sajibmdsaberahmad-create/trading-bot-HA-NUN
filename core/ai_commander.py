@@ -358,6 +358,33 @@ class AICommander:
             log.debug(f"Halim entry blend: {exc}")
             return decision
 
+    def _resolve_halim_local_entry(
+        self,
+        *,
+        halim_live: Dict[str, Any],
+        quality: Optional[Dict[str, Any]],
+        ppo_action: int,
+        ppo_conf: float,
+        ppo_reason: str,
+        min_conf: float,
+        scan_score: float,
+        spike_ratio: float,
+        allow_pending_in_flight: bool = True,
+    ) -> Dict[str, Any]:
+        from core.smart_stack import build_halim_local_entry
+        return build_halim_local_entry(
+            self.cfg,
+            halim_live=halim_live,
+            quality=quality or {},
+            ppo_action=ppo_action,
+            ppo_conf=ppo_conf,
+            ppo_reason=ppo_reason,
+            min_conf=min_conf,
+            scan_score=scan_score,
+            spike_ratio=spike_ratio,
+            allow_pending_in_flight=allow_pending_in_flight,
+        )
+
     def _ring_halim_exit(
         self,
         ticker: str,
@@ -1547,8 +1574,60 @@ class AICommander:
                     ticker, "entry_decision", full, fp,
                     spike_ratio=spike_ratio, scan_score=scan_score,
                 )
+                log.debug(f"  🧠 teacher ring {ticker}: {teacher_why}")
             else:
-                log.debug(f"  🧠 teacher skip {ticker}: {teacher_why}")
+                log.info(f"  🧠 Halim local {ticker}: {teacher_why}")
+
+            if not ring_teacher:
+                local = self._resolve_halim_local_entry(
+                    halim_live=halim_live_pre,
+                    quality=quality,
+                    ppo_action=ppo_action,
+                    ppo_conf=ppo_conf,
+                    ppo_reason=ppo_reason,
+                    min_conf=min_conf,
+                    scan_score=scan_score,
+                    spike_ratio=spike_ratio,
+                    allow_pending_in_flight=True,
+                )
+                if not local.get("pending"):
+                    out = apply_ai_entry_quality(self.cfg, local, quality)
+                    return self._finalize_entry_decision(
+                        out,
+                        ticker=ticker,
+                        current_px=current_px,
+                        spike_ratio=spike_ratio,
+                        scan_score=scan_score,
+                        ppo_action=ppo_action,
+                        ppo_conf=ppo_conf,
+                        ppo_reason=ppo_reason,
+                        min_conf=min_conf,
+                        deploy_cap=deploy_cap,
+                        max_risk=max_risk,
+                        use_fixed_risk=use_fixed_risk,
+                        is_penny=is_penny,
+                        avg_vol=avg_vol,
+                        df=df,
+                        equity=equity,
+                        cash=float(account.get("cash", 0)),
+                        gate_context=gate_ctx,
+                    )
+                return {
+                    "pending": True,
+                    "enter": False,
+                    "fingerprint": fp,
+                    "ppo_action": ppo_action,
+                    "ppo_conf": ppo_conf,
+                    "ppo_reason": ppo_reason,
+                    "min_conf": min_conf,
+                    "spike_ratio": spike_ratio,
+                    "scan_score": scan_score,
+                    "pipeline": local.get("pipeline", "halim:in_flight"),
+                    "reason": local.get("reason", ""),
+                    "local_only": True,
+                    "teacher_rung": False,
+                }
+
             live = self._live_line.consume(ticker, "entry_decision", fp)
             merged = merge_entry_decision(
                 live.get("parsed") or {},
@@ -1560,6 +1639,41 @@ class AICommander:
             )
             out = merged
             if out.get("pending"):
+                # Hard-case API slow — try Halim/quality before blocking
+                local = self._resolve_halim_local_entry(
+                    halim_live=halim_live_pre,
+                    quality=quality,
+                    ppo_action=ppo_action,
+                    ppo_conf=ppo_conf,
+                    ppo_reason=ppo_reason,
+                    min_conf=min_conf,
+                    scan_score=scan_score,
+                    spike_ratio=spike_ratio,
+                    allow_pending_in_flight=False,
+                )
+                if not local.get("pending") and local.get("enter"):
+                    out = apply_ai_entry_quality(self.cfg, local, quality)
+                    out["pipeline"] = f"{local.get('pipeline', 'halim:local')}+teacher_wait"
+                    return self._finalize_entry_decision(
+                        out,
+                        ticker=ticker,
+                        current_px=current_px,
+                        spike_ratio=spike_ratio,
+                        scan_score=scan_score,
+                        ppo_action=ppo_action,
+                        ppo_conf=ppo_conf,
+                        ppo_reason=ppo_reason,
+                        min_conf=min_conf,
+                        deploy_cap=deploy_cap,
+                        max_risk=max_risk,
+                        use_fixed_risk=use_fixed_risk,
+                        is_penny=is_penny,
+                        avg_vol=avg_vol,
+                        df=df,
+                        equity=equity,
+                        cash=float(account.get("cash", 0)),
+                        gate_context=gate_ctx,
+                    )
                 return {
                     "pending": True,
                     "enter": False,
@@ -1572,6 +1686,8 @@ class AICommander:
                     "scan_score": scan_score,
                     "pipeline": out.get("pipeline", ""),
                     "reason": out.get("reason", ""),
+                    "local_only": False,
+                    "teacher_rung": True,
                 }
             enter = bool(out.get("enter"))
             confidence = float(out.get("confidence", ppo_conf))
@@ -1714,6 +1830,64 @@ class AICommander:
         scan_score = float(state.get("scan_score", 0))
         spike_ratio = float(state.get("spike_ratio", 1.0))
         micro = state.get("micro_forecast") or {}
+        local_only = bool(state.get("local_only", False))
+        teacher_rung = bool(state.get("teacher_rung", True))
+        quality = (state.get("account") or {}).get("entry_quality")
+
+        if local_only or (not teacher_rung and status in ("missing", "empty", "in_flight")):
+            halim_live = self._halim_entry.consume(ticker, fp)
+            wait_halim = age < fast_sec
+            local = self._resolve_halim_local_entry(
+                halim_live=halim_live,
+                quality=quality,
+                ppo_action=int(state.get("ppo_action", 0)),
+                ppo_conf=float(state.get("ppo_conf", 0.5)),
+                ppo_reason=str(state.get("ppo_reason", "")),
+                min_conf=float(state.get("min_conf", 0.5)),
+                scan_score=scan_score,
+                spike_ratio=spike_ratio,
+                allow_pending_in_flight=wait_halim,
+            )
+            if not local.get("pending"):
+                from core.entry_quality import apply_ai_entry_quality
+                local = apply_ai_entry_quality(self.cfg, local, quality)
+                return self._finalize_entry_decision(
+                    local,
+                    ticker=ticker,
+                    current_px=float(state.get("current_px", 0)),
+                    spike_ratio=spike_ratio,
+                    scan_score=scan_score,
+                    ppo_action=int(state.get("ppo_action", 0)),
+                    ppo_conf=float(state.get("ppo_conf", 0.5)),
+                    ppo_reason=str(state.get("ppo_reason", "")),
+                    min_conf=float(state.get("min_conf", 0.5)),
+                    deploy_cap=get_ai_deploy_budget(
+                        self.cfg, state.get("pilot"),
+                        float((state.get("account") or {}).get("equity", 0)),
+                        float((state.get("account") or {}).get("cash", 0)),
+                        int((state.get("account") or {}).get("open_positions", 0)),
+                    ),
+                    max_risk=get_trade_risk_usd(
+                        self.cfg, float((state.get("account") or {}).get("equity", 0)),
+                    ),
+                    use_fixed_risk=bool(getattr(self.cfg, "USE_FIXED_RISK_CAP", False)),
+                    is_penny=float(state.get("current_px", 0)) < float(
+                        getattr(self.cfg, "PENNY_PRICE_THRESHOLD", 1.0),
+                    ),
+                    avg_vol=float((state.get("market_ctx") or {}).get("avg_volume", 0)),
+                    df=df,
+                    equity=float((state.get("account") or {}).get("equity", 0)),
+                    cash=float((state.get("account") or {}).get("cash", 0)),
+                    gate_context=(state.get("account") or {}).get("smart_gate_context"),
+                )
+            if local.get("pending"):
+                return {
+                    "pending": True,
+                    "enter": False,
+                    "reason": local.get("reason", ""),
+                    "pipeline": local.get("pipeline", "halim:in_flight"),
+                }
+
         if status in ("in_flight", "missing", "empty") and max(in_flight_age, age) >= fast_sec:
             promote_scanner = False
             if scan_score >= fast_score and spike_ratio >= fast_spike:

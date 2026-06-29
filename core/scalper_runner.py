@@ -7682,6 +7682,8 @@ class ScalperRunner:
                         "micro_forecast": forecast,
                         "pilot": self.pilot,
                         "started_at": now,
+                        "local_only": bool(ai_dec.get("local_only", False)),
+                        "teacher_rung": bool(ai_dec.get("teacher_rung", True)),
                     })
                     log.info(
                         f"  🧠 COUNCIL {ticker}: {(ai_dec.get('reason') or 'deliberating')[:100]} | "

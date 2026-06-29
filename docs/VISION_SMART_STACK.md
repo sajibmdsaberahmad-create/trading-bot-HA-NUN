@@ -145,6 +145,9 @@ Set `RAM_LIVE_ONLY=false` only for debugging disk issues on a dev machine.
 | `SMART_STACK_HOURLY_FILLS_ONLY` | `true` | Hourly cap = fills |
 | `SMART_STACK_FLASH_HALIM_MIN_CONF` | `0.62` | Halim-led sniper flash |
 | `RAM_LIVE_ONLY` | `true` (with smart stack) | No disk sweep while market open |
+| `SNIPER_HALIM_FAST_SEC` | `0.55` | Halim wait before quality-led resolve |
+| `SNIPER_HALIM_LOCAL_WAIT_SEC` | `2.8` | Council slot lifetime (Halim lead) |
+| `SMART_STACK_TEACHER_HARD_ONLY` | `true` | API only on curriculum hard cases |
 | `SNIPER_SKIP_COUNCIL_ON_PPO_HOLD` | `true` | Legacy only (`SMART_STACK=false`) |
 
 ---

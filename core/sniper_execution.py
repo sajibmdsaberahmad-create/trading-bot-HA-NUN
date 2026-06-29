@@ -342,6 +342,12 @@ def effective_watch_gates(
 def sniper_council_max_wait_sec(cfg: BotConfig) -> Optional[float]:
     if not sniper_active(cfg):
         return None
+    try:
+        from core.smart_stack import smart_stack_enabled, halim_local_max_wait_sec
+        if smart_stack_enabled(cfg):
+            return halim_local_max_wait_sec(cfg)
+    except Exception:
+        pass
     return _env_float("SNIPER_COUNCIL_MAX_WAIT_SEC", 1.5)
 
 
