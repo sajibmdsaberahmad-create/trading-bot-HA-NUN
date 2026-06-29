@@ -18,3 +18,4 @@
 {"timestamp":"2026-06-28T09:27:21.492163+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
 {"timestamp":"2026-06-28T12:02:58.921846+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
 {"timestamp":"2026-06-29T06:16:03.041052+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
+{"timestamp":"2026-06-29T07:41:41.172631+00:00","event":"off_hours_learn","mode":"off_hours","topic":"wiki:Investor_psychology","chars":12000}
