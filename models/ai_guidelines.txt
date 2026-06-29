@@ -1355,3 +1355,11 @@ green_profit_lock:ai_stall quick_scalp +3.10% (peak +3.10%)
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +3.50% (peak +3.50%)
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:30:52.852347+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +3.44% (peak +3.44%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:31:18.803984+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +0.72% (peak +0.96% gave back 0.24%)
+
