@@ -52,30 +52,28 @@ def macro_context_enabled() -> bool:
 
 
 def _yahoo_quote_snapshot(symbol: str) -> Dict[str, float]:
-    """Lightweight Yahoo quote — no yfinance dependency."""
+    """Lightweight Yahoo chart API — no yfinance dependency."""
     out = {"price": 0.0, "change_pct": 0.0}
     try:
         import urllib.request
-        url = (
-            "https://query1.finance.yahoo.com/v7/finance/quote"
-            f"?symbols={symbol.replace('^', '%5E')}"
-        )
+        sym = symbol.replace("^", "%5E")
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=5d"
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=8) as resp:
             data = json.loads(resp.read().decode())
-        results = (data.get("quoteResponse") or {}).get("result") or []
-        if not results:
+        result = (data.get("chart") or {}).get("result") or []
+        if not result:
             return out
-        q = results[0]
-        price = q.get("regularMarketPrice") or q.get("postMarketPrice") or 0.0
-        chg = q.get("regularMarketChangePercent")
-        if chg is None and q.get("regularMarketChange") and price:
-            prev = float(price) - float(q.get("regularMarketChange", 0))
-            chg = (float(q.get("regularMarketChange", 0)) / prev * 100.0) if prev else 0.0
-        out["price"] = float(price or 0.0)
+        meta = result[0].get("meta") or {}
+        price = float(meta.get("regularMarketPrice") or meta.get("previousClose") or 0.0)
+        prev = float(meta.get("chartPreviousClose") or meta.get("previousClose") or 0.0)
+        chg = meta.get("regularMarketChangePercent")
+        if chg is None and prev:
+            chg = (price - prev) / prev * 100.0
+        out["price"] = price
         out["change_pct"] = float(chg or 0.0)
     except Exception as exc:
-        logger.debug(f"Yahoo quote {symbol}: {exc}")
+        logger.debug(f"Yahoo chart {symbol}: {exc}")
     return out
 
 
