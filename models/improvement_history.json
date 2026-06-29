@@ -25,5 +25,15 @@
     "lessons": [
       "Review trade_closed on SOXS"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T14:01:32.137645+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on SOXS"
+    ]
   }
+]}
 ]

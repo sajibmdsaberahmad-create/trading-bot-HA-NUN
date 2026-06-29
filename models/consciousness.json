@@ -3,46 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1528,
+  "trades_observed": 1529,
   "scans_performed": 39,
-  "improvements_applied": 2425,
+  "improvements_applied": 2427,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:28:12.474008",
-      "age": "7d 1h 25m 23s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$-8.36",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:28:13.079923",
-      "age": "7d 1h 25m 24s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1785",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:28:13.087391",
-      "age": "7d 1h 25m 24s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1785",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:28:21.069860",
       "age": "7d 1h 25m 32s",
@@ -11987,6 +11952,41 @@
           "Review trade_closed on SOXS"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:01:31.476195",
+      "age": "8d 2h 58m 42s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$-50.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:01:32.105057",
+      "age": "8d 2h 58m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2427",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:01:32.105113",
+      "age": "8d 2h 58m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2427",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOXS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14149,9 +14149,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 332558.1500000003,
+  "total_pnl": 332508.1500000003,
   "win_history": [
-    -13.35,
     -8.42,
     -9.27,
     2.45,
@@ -14650,20 +14649,21 @@
     -126.89,
     0.0,
     0.0,
-    0.0
+    0.0,
+    -50.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 13,
+  "consecutive_losses": 14,
   "worst_streak": 86,
-  "veteran_xp": 24040,
+  "veteran_xp": 24045,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 64,
     "entry_timing": 100
   },
-  "flights_completed": 1522,
-  "hours_flown": 152.19999999999564,
+  "flights_completed": 1523,
+  "hours_flown": 152.29999999999563,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14681,7 +14681,7 @@
     "XCH": 1,
     "TZA": 12,
     "GDC": 14,
-    "SOX": 22,
+    "SOX": 23,
     "BIT": 13,
     "GPU": 19,
     "PLT": 30,
@@ -14705,5 +14705,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-302.91 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-352.91 recent). Tightening entries until edge returns."
 }
