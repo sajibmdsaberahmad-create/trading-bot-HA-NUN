@@ -1,16 +1,1 @@
-{
-  "CONFIDENCE_THRESHOLD": {
-    "param": "CONFIDENCE_THRESHOLD",
-    "value": 0.68,
-    "reason": "Loss streak \u2014 raise entry bar until pilot regains edge",
-    "ok": true,
-    "msg": "applied"
-  },
-  "VOLUME_SPIKE_MIN_RATIO": {
-    "param": "VOLUME_SPIKE_MIN_RATIO",
-    "value": 1.35,
-    "reason": "Loss streak \u2014 require stronger volume confirmation",
-    "ok": true,
-    "msg": "applied"
-  }
-}
+{}
