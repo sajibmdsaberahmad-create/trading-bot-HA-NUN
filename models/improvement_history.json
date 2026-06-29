@@ -1,59 +1,5 @@
 [
   {
-    "timestamp": "2026-06-29T11:37:42.773923+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T11:38:26.773331+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T11:39:10.803237+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T11:49:11.053683+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T11:54:14.829962+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T11:57:55.198580+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
     "timestamp": "2026-06-29T11:59:18.275425+00:00",
     "source": "runtime_order_timeout",
     "adjustments": {},
@@ -912,6 +858,105 @@
     "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
     "lessons": [
       "Review ib_failure on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:32:23.218482+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "PENNY_MAX_DEPLOY_USD": {
+        "param": "PENNY_MAX_DEPLOY_USD",
+        "value": 252.875,
+        "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+        "ok": true,
+        "msg": "applied"
+      },
+      "PENNY_LIMIT_BUFFER_PCT": {
+        "param": "PENNY_LIMIT_BUFFER_PCT",
+        "value": 0.008,
+        "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review ib_failure on SOAR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:32:24.277562+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:32:53.848291+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOXS"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:32:57.817855+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "PENNY_MAX_DEPLOY_USD": {
+        "param": "PENNY_MAX_DEPLOY_USD",
+        "value": 214.94375,
+        "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+        "ok": true,
+        "msg": "applied"
+      },
+      "PENNY_LIMIT_BUFFER_PCT": {
+        "param": "PENNY_LIMIT_BUFFER_PCT",
+        "value": 0.009000000000000001,
+        "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review ib_failure on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:33:33.282809+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:33:58.384326+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "PENNY_MAX_DEPLOY_USD": {
+        "param": "PENNY_MAX_DEPLOY_USD",
+        "value": 182.70218749999998,
+        "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+        "ok": true,
+        "msg": "applied"
+      },
+      "PENNY_LIMIT_BUFFER_PCT": {
+        "param": "PENNY_LIMIT_BUFFER_PCT",
+        "value": 0.010000000000000002,
+        "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review ib_failure on SOAR"
     ]
   }
 ]

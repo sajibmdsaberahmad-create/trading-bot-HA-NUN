@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1507,
   "scans_performed": 39,
-  "improvements_applied": 2382,
+  "improvements_applied": 2383,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:14:58.305543",
-      "age": "7d 1h 12m 9s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1746",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:14:58.308228",
       "age": "7d 1h 12m 9s",
@@ -11753,6 +11739,35 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:33:58.368801",
+      "age": "8d 2h 31m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2383",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 182.70218749999998,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.010000000000000002,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review ib_failure on SOAR"
         ]
       }
     }
