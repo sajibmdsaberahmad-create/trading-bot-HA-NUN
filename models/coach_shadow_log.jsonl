@@ -1856,3 +1856,7 @@
 {"ticker":"SOXS","reason":"ppo_not_aligned","scan_score":99.8,"spike_ratio":1.4490669513845524,"shadow_only":true,"timestamp":"2026-06-29T19:14:05.923988+00:00"}
 {"ticker":"CMCSA","reason":"ppo_not_aligned","scan_score":84.4,"spike_ratio":0.0,"shadow_only":true,"timestamp":"2026-06-29T19:14:07.179721+00:00"}
 {"ticker":"SOXS","reason":"ppo_not_aligned","scan_score":99.8,"spike_ratio":6.565816262329357,"shadow_only":true,"timestamp":"2026-06-29T19:14:17.497740+00:00"}
+{"ticker":"TNMG","reason":"ppo_not_aligned","scan_score":95.4,"spike_ratio":4.28805476565452,"shadow_only":true,"timestamp":"2026-06-29T19:14:31.446824+00:00"}
+{"ticker":"MSTU","reason":"ppo_not_aligned","scan_score":88.8,"spike_ratio":7.577532984382633,"shadow_only":true,"timestamp":"2026-06-29T19:14:47.264215+00:00"}
+{"ticker":"INLF","reason":"ppo_not_aligned","scan_score":102.0,"spike_ratio":1.4147053198644517,"shadow_only":true,"timestamp":"2026-06-29T19:15:01.872739+00:00"}
+{"ticker":"BITO","reason":"ppo_not_aligned","scan_score":93.2,"spike_ratio":239977.0,"shadow_only":true,"timestamp":"2026-06-29T19:15:21.968473+00:00"}
