@@ -1595,3 +1595,11 @@ Recent losses:
   - CONFIDENCE_THRESHOLD → 0.68 (Loss streak — raise entry bar until pilot regains edge)
   - VOLUME_SPIKE_MIN_RATIO → 1.35 (Loss streak — require stronger volume confirmation)
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:48:32.183219+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T13:48:32.183264+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+

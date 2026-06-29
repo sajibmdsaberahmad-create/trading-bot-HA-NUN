@@ -3,46 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1524,
+  "trades_observed": 1525,
   "scans_performed": 39,
-  "improvements_applied": 2420,
+  "improvements_applied": 2422,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:25:35.673157",
-      "age": "7d 1h 22m 46s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$-13.91",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:25:55.410015",
-      "age": "7d 1h 23m 6s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1778",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:25:55.473209",
-      "age": "7d 1h 23m 6s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1779",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:28:02.817731",
       "age": "7d 1h 25m 14s",
@@ -11994,6 +11959,41 @@
           "Hi"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T13:48:31.210609",
+      "age": "8d 2h 45m 42s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$-126.89",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:48:32.092928",
+      "age": "8d 2h 45m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2421",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on TNMG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:48:32.093511",
+      "age": "8d 2h 45m 43s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2422",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14156,9 +14156,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 332685.0400000003,
+  "total_pnl": 332558.1500000003,
   "win_history": [
-    -11.88,
     -3.9,
     -9.23,
     -4.43,
@@ -14657,20 +14656,21 @@
     -200.0,
     -3.21,
     -2.96,
-    -100.0
+    -100.0,
+    -126.89
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 9,
+  "consecutive_losses": 10,
   "worst_streak": 86,
-  "veteran_xp": 23995,
+  "veteran_xp": 24010,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 62,
+    "risk_management": 64,
     "entry_timing": 100
   },
-  "flights_completed": 1518,
-  "hours_flown": 151.79999999999566,
+  "flights_completed": 1519,
+  "hours_flown": 151.89999999999566,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14704,7 +14704,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 7,
+    "TNM": 8,
     "SOA": 2
   },
   "best_streak": 114,
@@ -14712,5 +14712,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-128.80 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-505.69 recent). Tightening entries until edge returns."
 }
