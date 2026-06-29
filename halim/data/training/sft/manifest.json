@@ -1,6 +1,6 @@
 {
-  "pairs_total": 16150,
-  "train_pairs": 15343,
+  "pairs_total": 16152,
+  "train_pairs": 15345,
   "valid_pairs": 807,
   "by_source": {
     "council": 1077,
@@ -20,7 +20,7 @@
     "ppo_teacher:heuristic_fallback": 13,
     "commander_ib_report": 65,
     "ppo:strong_spike": 271,
-    "template_fallback": 128,
+    "template_fallback": 130,
     "council:scanner_fast": 94,
     "council:ppo_timeout_exit": 1,
     "coevolution_halim": 2253,
