@@ -1498,3 +1498,7 @@ Submitted
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:41:43.621283+00:00
+Observed trade_closed — recorded for learning.
+micro_loss: pressure=0.61 pred↓$0.85
+
