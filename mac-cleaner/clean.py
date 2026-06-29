@@ -283,6 +283,144 @@ def _vscode_cache() -> List[Path]:
     return [base / "Cache", base / "CachedData", base / "Code Cache"]
 
 
+def _cursor_shipit_cache() -> Path:
+    return HOME / "Library" / "Caches" / "com.todesktop.230313mzl4w4u92.ShipIt"
+
+
+def _ide_hog_junk_paths() -> List[Path]:
+    """Leftovers from Amazon Q, CodeWhisperer, Gemini Code Assist, Cloud Code CLI."""
+    cursor_gs = HOME / "Library" / "Application Support" / "Cursor" / "User" / "globalStorage"
+    vscode_gs = HOME / "Library" / "Application Support" / "Code" / "User" / "globalStorage"
+    paths = [
+        HOME / "Library" / "Application Support" / "amazon-q",
+        HOME / "Library" / "Application Support" / "cloud-code",
+        HOME / "Library" / "WebKit" / "com.amazon.codewhisperer",
+        HOME / ".codewhisperer",
+        HOME / ".amazonq",
+        HOME / "Library" / "Preferences" / "com.amazon.codewhisperer.plist",
+        HOME / "Library" / "Preferences" / "com.amazon.aws.codewhisperer.plist",
+        HOME / "Library" / "Caches" / "com.amazon.codewhisperer",
+        HOME / "Library" / "Caches" / "aws.toolkit.kit",
+        cursor_gs / "amazonwebservices.amazon-q-vscode",
+        cursor_gs / "google.geminicodeassist",
+        vscode_gs / "amazonwebservices.amazon-q-vscode",
+        vscode_gs / "google.geminicodeassist",
+    ]
+    for ext_root in (
+        HOME / ".cursor" / "extensions",
+        HOME / ".vscode" / "extensions",
+    ):
+        if ext_root.is_dir():
+            for prefix in (
+                "amazonwebservices.amazon-q-vscode-",
+                "amazonwebservices.codewhisperer-for-command-line-companion-",
+                "google.geminicodeassist-",
+            ):
+                paths.extend(ext_root.glob(f"{prefix}*"))
+    return paths
+
+
+def _scan_ide_hog_junk() -> int:
+    return _scan_paths(_ide_hog_junk_paths())
+
+
+def _clean_ide_hog_junk(dry_run: bool, older_than_days: int = 0) -> int:
+    freed = _clean_paths(_ide_hog_junk_paths(), dry_run=dry_run)
+    for pattern in (
+        "Amazon Q Helper",
+        "cloudcode_cli duet",
+        "geminicodeassist.*/agent/a2a-server",
+        "codewhisperer",
+    ):
+        if dry_run:
+            continue
+        try:
+            subprocess.run(
+                ["pkill", "-KILL", "-f", pattern],
+                capture_output=True, timeout=3, check=False,
+            )
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+    return freed
+
+
+def _cursor_logs_root() -> Path:
+    return HOME / "Library" / "Application Support" / "Cursor" / "logs"
+
+
+def _scan_cursor_ext_logs() -> int:
+    total = 0
+    root = _cursor_logs_root()
+    if not root.is_dir():
+        return 0
+    stale_names = (
+        "amazonwebservices.amazon-q-vscode",
+        "google.geminicodeassist",
+        "amazonwebservices.codewhisperer-for-command-line-companion",
+    )
+    try:
+        for session in root.iterdir():
+            exthost = session / "window1" / "exthost"
+            if not exthost.is_dir():
+                for wh in session.glob("window*"):
+                    exthost = wh / "exthost"
+                    if exthost.is_dir():
+                        for name in stale_names:
+                            total += _dir_size(exthost / name)
+            else:
+                for name in stale_names:
+                    total += _dir_size(exthost / name)
+        cutoff = time.time() - 7 * 86400
+        for session in root.iterdir():
+            try:
+                if session.stat().st_mtime < cutoff:
+                    total += _dir_size(session)
+            except OSError:
+                pass
+    except OSError:
+        pass
+    return total
+
+
+def _clean_cursor_ext_logs(dry_run: bool, older_than_days: int = 0) -> int:
+    freed = 0
+    root = _cursor_logs_root()
+    if not root.is_dir():
+        return 0
+    stale_names = (
+        "amazonwebservices.amazon-q-vscode",
+        "google.geminicodeassist",
+        "amazonwebservices.codewhisperer-for-command-line-companion",
+    )
+    try:
+        for session in root.iterdir():
+            for wh in session.glob("window*"):
+                exthost = wh / "exthost"
+                if not exthost.is_dir():
+                    continue
+                for name in stale_names:
+                    freed += _rm_path(exthost / name, dry_run=dry_run)
+        days = older_than_days or 7
+        cutoff = time.time() - days * 86400
+        for session in sorted(root.iterdir(), key=lambda p: p.stat().st_mtime if p.exists() else 0):
+            try:
+                if session.stat().st_mtime >= cutoff:
+                    continue
+                freed += _rm_path(session, dry_run=dry_run)
+            except OSError:
+                pass
+        keep = sorted(
+            [p for p in root.iterdir() if p.is_dir()],
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        for old in keep[2:]:
+            freed += _rm_path(old, dry_run=dry_run)
+    except OSError:
+        pass
+    return freed
+
+
 def _ollama_models_dir() -> Path:
     return HOME / ".ollama" / "models"
 
@@ -377,10 +515,6 @@ def _purge_memory_hint(*, dry_run: bool) -> None:
         print("  Ran purge (root)")
     else:
         print("  Tip: run `sudo purge` to free inactive RAM (optional)")
-
-
-def _cursor_shipit_cache() -> Path:
-    return HOME / "Library" / "Caches" / "com.todesktop.230313mzl4w4u92.ShipIt"
 
 
 def _hanoon_root() -> Path:
@@ -680,6 +814,18 @@ def build_categories() -> Dict[str, Category]:
             _scan_hanoon_cruft,
             _clean_hanoon_cruft,
         ),
+        "ide_hog_junk": Category(
+            "ide_hog_junk",
+            "Amazon Q / Gemini Code Assist / Cloud Code leftovers + kill sidecars",
+            _scan_ide_hog_junk,
+            _clean_ide_hog_junk,
+        ),
+        "cursor_ext_logs": Category(
+            "cursor_ext_logs",
+            "Cursor stale session logs + removed extension exthost junk",
+            _scan_cursor_ext_logs,
+            _clean_cursor_ext_logs,
+        ),
         "git_gc": Category(
             "git_gc",
             "git gc in tradingbot repo (safe — history stays on remote)",
@@ -695,7 +841,7 @@ DEFAULT_CATEGORIES = [
 ]
 
 HANOON_CATEGORIES = [
-    "hanoon_duplicates", "hanoon_cruft", "git_gc",
+    "ide_hog_junk", "cursor_ext_logs", "hanoon_duplicates", "hanoon_cruft", "git_gc",
 ]
 
 ALL_PRESET = DEFAULT_CATEGORIES + HANOON_CATEGORIES
