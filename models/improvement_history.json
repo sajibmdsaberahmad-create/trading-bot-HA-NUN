@@ -1,23 +1,5 @@
 [
   {
-    "timestamp": "2026-06-29T10:53:35.436672+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T10:54:40.912280+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on SOFI"
-    ]
-  },
-  {
     "timestamp": "2026-06-29T10:56:10.494221+00:00",
     "source": "runtime_order_timeout",
     "adjustments": {},
@@ -892,6 +874,24 @@
   },
   {
     "timestamp": "2026-06-29T12:44:30.963445+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T12:46:10.638671+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T12:47:20.605113+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
