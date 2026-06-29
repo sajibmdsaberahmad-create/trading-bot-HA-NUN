@@ -1894,3 +1894,7 @@ BUY 875 SOAR AMEX  In accordance with our regulatory obligations as a broker, we
 Observed order_timeout — recorded for learning.
 Submitted
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:41:44.088519+00:00
+Observed ib_failure — recorded for learning.
+BUY 871 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1715 or a more aggressive price still within your spec
+
