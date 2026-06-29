@@ -265,3 +265,8 @@
 {"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":1448.0,"shadow_only":true,"timestamp":"2026-06-29T17:05:06.733544+00:00"}
 {"ticker":"SOXS","reason":"profit_prob_below_80pct","scan_score":99.8,"spike_ratio":188917.0,"shadow_only":true,"timestamp":"2026-06-29T17:05:08.831202+00:00"}
 {"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":103600.0,"shadow_only":true,"timestamp":"2026-06-29T17:05:12.504084+00:00"}
+{"ticker":"SOAR","reason":"profit_prob_below_80pct","scan_score":91.0,"spike_ratio":9941.0,"shadow_only":true,"timestamp":"2026-06-29T17:08:06.363363+00:00"}
+{"ticker":"SOXS","reason":"profit_prob_below_80pct","scan_score":99.8,"spike_ratio":396812.0,"shadow_only":true,"timestamp":"2026-06-29T17:08:07.744058+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":26400.0,"shadow_only":true,"timestamp":"2026-06-29T17:08:09.147532+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":49967.0,"shadow_only":true,"timestamp":"2026-06-29T17:08:11.664246+00:00"}
+{"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":10353.0,"shadow_only":true,"timestamp":"2026-06-29T17:08:13.220375+00:00"}
