@@ -779,3 +779,151 @@ PreSubmitted
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +2.25% (peak +2.25%)
 
+🧭 COMMANDER LEARNING | 2026-06-29T10:54:40.910268+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.25% (peak +2.25%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:56:10.492200+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:57:20.774373+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.19% (peak +2.19%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:59:15.109327+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:59:55.574333+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:00:41.411203+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:00:43.785202+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.30% (peak +2.30%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:00:55.791821+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:01:32.618329+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:01:42.234443+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.42% (peak +2.42%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:03:29.461737+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.48% (peak +2.48%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:03:40.452612+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:03:48.976572+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:04:53.749834+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.42% (peak +2.42%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:05:05.076356+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:05:23.996770+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:06:07.807924+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:07:49.735432+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:08:34.096760+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:09:34.638199+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:09:58.015276+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.48% (peak +2.48%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:10:07.826017+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:10:18.691758+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:10:54.163812+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:11:02.750228+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:14:42.059682+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:15:22.643301+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:15:26.155990+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:16:10.175621+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:17:35.667609+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:18:15.232711+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:19:54.920972+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:21:06.136878+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:23:37.633600+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.65% (peak +2.65%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:26:28.510364+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:27:12.616272+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:27:38.583679+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
