@@ -1,11 +1,11 @@
 {
-  "total_xp": 22865,
+  "total_xp": 23060,
   "level": "Veteran",
-  "flights_completed": 247,
-  "flights_flown": 754,
-  "takeoffs": 754,
-  "landings": 247,
-  "hours_flown": 24.70000000000008,
+  "flights_completed": 250,
+  "flights_flown": 760,
+  "takeoffs": 760,
+  "landings": 250,
+  "hours_flown": 25.000000000000085,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -37,8 +37,8 @@
     "SOF": 69,
     "AST": 4,
     "RKL": 4,
-    "SOA": 3,
-    "TNM": 10,
+    "SOA": 5,
+    "TNM": 11,
     "INL": 6,
     "KND": 2
   },

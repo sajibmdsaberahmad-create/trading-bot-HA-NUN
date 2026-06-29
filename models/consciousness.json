@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1557,
   "scans_performed": 39,
-  "improvements_applied": 2484,
+  "improvements_applied": 2486,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:46:36.086402",
-      "age": "7d 1h 43m 47s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$-8.08",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:47:21.022139",
-      "age": "7d 1h 44m 32s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+2.67",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:47:23.306580",
       "age": "7d 1h 44m 34s",
@@ -12201,6 +12187,34 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:40:40.043879",
+      "age": "8d 3h 37m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2485",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:40:49.137802",
+      "age": "8d 3h 38m 0s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2486",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on SOAR"
         ]
       }
     }

@@ -1886,3 +1886,11 @@ tick_micro_loss
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:40:40.061738+00:00
+Observed ib_failure — recorded for learning.
+BUY 875 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1714 or a more aggressive price still within your spec
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:40:49.153409+00:00
+Observed order_timeout — recorded for learning.
+Submitted
+

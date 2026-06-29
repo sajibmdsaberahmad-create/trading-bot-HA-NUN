@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:ai_stall quick_scalp +2.53% (peak +2.59%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.42% (peak +2.48%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.65% (peak +2.65%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.93% (peak +2.99%)",
@@ -103,10 +102,11 @@
     "Review order_timeout on SOAR",
     "Commander: BUY 886 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1688 or a more aggressive price still within your spec",
     "Commander: stop_breach",
-    "Commander: BUY 893 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1679 or a more aggressive price still within your spec"
+    "Commander: BUY 893 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1679 or a more aggressive price still within your spec",
+    "Commander: BUY 875 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1714 or a more aggressive price still within your spec"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 272,
-  "updated": "2026-06-29T14:39:30.093500"
+  "updated": "2026-06-29T14:40:49.137313"
 }
