@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1490,
   "scans_performed": 39,
-  "improvements_applied": 2333,
+  "improvements_applied": 2334,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:28:28.664194",
-      "age": "6d 22h 25m 39s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #192",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:02:38.777618",
       "age": "7d 0h 59m 50s",
@@ -11620,6 +11613,20 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T12:54:08.421198",
+      "age": "8d 1h 51m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2334",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
         ]
       }
     }
