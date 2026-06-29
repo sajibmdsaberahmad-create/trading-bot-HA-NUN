@@ -42,9 +42,11 @@ class HalimRuntime:
         self._last_dev = 0.0
         self._last_evolve = 0.0
         self._last_export = 0.0
+        self._last_serve_watch = 0.0
         self._mode = "trade_focus"
         self._user_task_pending = os.getenv("HALIM_USER_TASK", "").strip()
         self._tick_sec = float(os.getenv("HALIM_RUNTIME_TICK_SEC", "30"))
+        self._serve_watch_sec = float(os.getenv("HALIM_SERVE_WATCHDOG_SEC", "90"))
         self._learn_interval = float(os.getenv("HALIM_OFF_HOURS_LEARN_SEC", "3600"))
         self._dev_interval = float(os.getenv("HALIM_OFF_HOURS_DEV_SEC", "7200"))
         self._export_interval = float(os.getenv("HALIM_OFF_HOURS_EXPORT_SEC", "7200"))
@@ -138,12 +140,39 @@ class HalimRuntime:
     def attach_runner(self, runner: Optional["ScalperRunner"]) -> None:
         self._runner = runner
 
+    def _watchdog_serve(self) -> None:
+        """Restart Halim serve if :8765 health fails (MLX can exit under load)."""
+        if os.getenv("HALIM_SERVE_WATCHDOG", "true").lower() not in ("1", "true", "yes"):
+            return
+        now = time.time()
+        if now - self._last_serve_watch < self._serve_watch_sec:
+            return
+        self._last_serve_watch = now
+        try:
+            from halim.client import health
+            if health(timeout=2.0):
+                return
+        except Exception:
+            pass
+        root = Path(__file__).resolve().parents[1]
+        log.warning("Halim serve down — watchdog restarting…")
+        try:
+            import subprocess
+            subprocess.run(
+                [str(root / "scripts/ensure_halim_active.sh"), "--serve-only", "--restart"],
+                cwd=str(root), capture_output=True, text=True, timeout=180,
+            )
+        except Exception as exc:
+            log.debug(f"Halim serve watchdog: {exc}")
+
     def tick(self, runner: Optional["ScalperRunner"] = None) -> None:
         """Called each main-loop iteration (throttled). Trading always wins."""
         now = time.time()
         if now - self._last_tick < self._tick_sec:
             return
         self._last_tick = now
+
+        self._watchdog_serve()
 
         try:
             from core.halim_guardrails import kill_switch_active

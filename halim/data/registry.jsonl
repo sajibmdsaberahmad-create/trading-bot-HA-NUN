@@ -695,3 +695,26 @@
 {"timestamp":"2026-06-29T08:08:19.610853+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-29T08:08:19.610927+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-29T08:08:19.610980+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:05.234074+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:05.234456+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:05.234568+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:05.234636+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:27.744177+00:00","event":"capability_milestone","capability":"notify","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:27.745031+00:00","event":"capability_milestone","capability":"notify","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:27.745131+00:00","event":"capability_milestone","capability":"notify","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:27.745189+00:00","event":"capability_milestone","capability":"notify","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:34.731118+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:34.731373+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:34.731459+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:34.731562+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:59.941912+00:00","event":"capability_milestone","capability":"decision_text","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:59.942348+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:59.942457+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:19:59.942521+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:26:54.641711+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:26:54.642028+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:26:54.642107+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:26:54.642192+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:33:12.263570+00:00","event":"export_action_gold","added":171,"skipped":8314}
+{"timestamp":"2026-06-29T08:33:12.263807+00:00","event":"export_action_gold","added":171,"skipped":8314}
+{"timestamp": "2026-06-29T08:33:15.191185+00:00", "event": "prepare_sft", "pairs_total": 14564, "by_source": {"council": 2191, "test": 1, "learn_cache": 138, "groq": 589, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1343, "halim_server": 185, "companion_generative": 424, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 50, "council_teacher": 266, "ppo_teacher:heuristic_fallback": 12, "commander_ib_report": 65, "ppo:strong_spike": 45, "template_fallback": 4, "coevolution_halim": 1747, "coevolution_ppo": 1665, "dialogue_pre_action": 16, "dialogue_ppo": 2057, "dialogue_post_trade": 372, "dialogue_synthesized": 1669, "outcome_gold": 1}}
