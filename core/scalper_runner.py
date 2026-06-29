@@ -345,6 +345,7 @@ class ScalperRunner:
         self._day_session_ended: bool = False
         self._rth_open_day: Optional[str] = None
         self._entries_this_hour: int = 0
+        self._smart_gate_context: Dict[str, Dict[str, Any]] = {}
         self._hour_window_start: float = time.time()
         self._last_quality_watch_log: float = 0.0
         self._pending_closes: Dict[str, PendingClose] = {}
@@ -1191,6 +1192,11 @@ class ScalperRunner:
             ctx.update(war_account_context(self.cfg))
         except Exception:
             pass
+        ticker = getattr(self.top_pick, "ticker", "") if self.top_pick else ""
+        if ticker:
+            gate = self._smart_gate_context.get(ticker.upper())
+            if gate:
+                ctx["smart_gate_context"] = gate
         return ctx
 
     def _sync_all_positions_from_ib(self):
@@ -4694,14 +4700,6 @@ class ScalperRunner:
                 log.info(
                     f"  📊 QUALITY advisory {ticker}: {quality.get('reason', '')[:100]}"
                 )
-            if quality_blocks_entry(self.cfg, quality):
-                log.info(
-                    f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}"
-                )
-                self._spike_skip_until[ticker] = time.time() + float(
-                    getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
-                )
-                continue
             spike_regime = "unknown"
             fast_df, _, _, _ = self._resolve_live_bars(ticker, min_bars=10)
             if fast_df is not None and len(fast_df) >= 10:
@@ -4712,14 +4710,6 @@ class ScalperRunner:
                         spike_regime = getattr(raw, "value", str(raw))
                 except Exception:
                     pass
-            if regime_blocks_entry(self.cfg, spike_regime):
-                log.info(
-                    f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry"
-                )
-                self._spike_skip_until[ticker] = time.time() + float(
-                    getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
-                )
-                continue
             df_5m = df_15m = None
             from core.entry_quality import mtf_fetch_skipped
             if not mtf_fetch_skipped(
@@ -4730,16 +4720,88 @@ class ScalperRunner:
                 df_5m, df_15m = self._resolve_mtf_bars(
                     ticker, float(target.rank_score), float(spike_ratio),
                 )
-            if mtf_blocks_entry(
-                self.cfg, df_5m, df_15m,
-                scan_score=float(target.rank_score),
-                spike_ratio=float(spike_ratio),
-            ):
-                log.info(f"  ⏭ MTF block {ticker}: 5m/15m not aligned — skip entry")
-                self._spike_skip_until[ticker] = time.time() + float(
-                    getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+            try:
+                from core.smart_stack import (
+                    collect_spike_gate_advisories,
+                    mechanical_gates_advisory_only,
+                    spike_gates_block_entry,
                 )
-                continue
+                gate_adv = collect_spike_gate_advisories(
+                    self.cfg,
+                    ticker=ticker,
+                    quality=quality,
+                    spike_regime=spike_regime,
+                    df_5m=df_5m,
+                    df_15m=df_15m,
+                    scan_score=float(target.rank_score),
+                    spike_ratio=float(spike_ratio),
+                )
+                self._smart_gate_context[ticker.upper()] = gate_adv
+                if mechanical_gates_advisory_only(self.cfg):
+                    for gkey, gval in gate_adv.items():
+                        if gkey == "ticker" or not isinstance(gval, dict):
+                            continue
+                        if not gval.get("ok", True):
+                            log.info(
+                                f"  📊 GATE advisory {ticker}: {gkey} — {gval.get('reason', '')[:80]}"
+                            )
+                else:
+                    blocked, breason = spike_gates_block_entry(self.cfg, gate_adv)
+                    if blocked:
+                        if not quality_blocks_entry(self.cfg, quality):
+                            pass
+                        elif quality_blocks_entry(self.cfg, quality):
+                            log.info(f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}")
+                            self._spike_skip_until[ticker] = time.time() + float(
+                                getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                            )
+                            continue
+                    if quality_blocks_entry(self.cfg, quality):
+                        log.info(f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}")
+                        self._spike_skip_until[ticker] = time.time() + float(
+                            getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                        )
+                        continue
+                    from core.entry_quality import regime_blocks_entry, mtf_blocks_entry
+                    if regime_blocks_entry(self.cfg, spike_regime):
+                        log.info(f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry")
+                        self._spike_skip_until[ticker] = time.time() + float(
+                            getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                        )
+                        continue
+                    if mtf_blocks_entry(
+                        self.cfg, df_5m, df_15m,
+                        scan_score=float(target.rank_score),
+                        spike_ratio=float(spike_ratio),
+                    ):
+                        log.info(f"  ⏭ MTF block {ticker}: 5m/15m not aligned — skip entry")
+                        self._spike_skip_until[ticker] = time.time() + float(
+                            getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                        )
+                        continue
+            except Exception:
+                if quality_blocks_entry(self.cfg, quality):
+                    log.info(f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}")
+                    self._spike_skip_until[ticker] = time.time() + float(
+                        getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                    )
+                    continue
+                if regime_blocks_entry(self.cfg, spike_regime):
+                    log.info(f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry")
+                    self._spike_skip_until[ticker] = time.time() + float(
+                        getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                    )
+                    continue
+                if mtf_blocks_entry(
+                    self.cfg, df_5m, df_15m,
+                    scan_score=float(target.rank_score),
+                    spike_ratio=float(spike_ratio),
+                ):
+                    log.info(f"  ⏭ MTF block {ticker}: 5m/15m not aligned — skip entry")
+                    self._spike_skip_until[ticker] = time.time() + float(
+                        getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                    )
+                    continue
             result = self._attempt_entry()
             attempted += 1
             if ticker in self._held_tickers():

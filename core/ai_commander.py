@@ -1658,99 +1658,47 @@ class AICommander:
             if parsed_live.get("profit_probability") is not None:
                 out["ollama_profit_probability"] = parsed_live.get("profit_probability")
         out = apply_ai_entry_quality(self.cfg, out, quality)
-        enter = bool(out.get("enter"))
-        confidence = float(out.get("confidence", confidence))
-
-        if not enter:
-            return {
-                "enter": False,
-                "confidence": confidence,
-                "shares": 0,
-                "stop": 0.0,
-                "target": 0.0,
-                "risk_usd": 0.0,
-                "reason": str(out.get("reason", ppo_reason or "AI skip")),
-                "journal": str(out.get("journal", ""))[:300],
-                "pipeline": str(out.get("pipeline", "")),
-                "pending": False,
-            }
-
-        bracket = self._build_entry_bracket(
-            current_px, df,
-            equity=equity,
-            cash=float(account.get("cash", 0)),
+        decision = self._finalize_entry_decision(
+            out,
+            ticker=ticker,
+            current_px=current_px,
+            spike_ratio=spike_ratio,
+            scan_score=scan_score,
+            ppo_action=ppo_action,
+            ppo_conf=ppo_conf,
+            ppo_reason=ppo_reason,
+            min_conf=min_conf,
             deploy_cap=deploy_cap,
+            max_risk=max_risk,
+            use_fixed_risk=use_fixed_risk,
             is_penny=is_penny,
             avg_vol=avg_vol,
+            df=df,
+            equity=equity,
+            cash=float(account.get("cash", 0)),
         )
-        if not bracket.ok:
-            reason = f"bracket rejected: {bracket.reason}"
-            log.warning(f"  🛑 {ticker} {reason}")
-            snap = self.ollama_audit_snapshot(ticker)
-            log_bracket_reject(
-                self.cfg, ticker=ticker, reason=bracket.reason,
-                entry=current_px, stop=bracket.stop, target=bracket.target,
-                shares=bracket.shares, council_decision=out,
-                ollama_raw=snap.get("raw", ""), ollama_parsed=snap.get("parsed"),
-                spike_ratio=spike_ratio, pipeline="atr_reject",
+        try:
+            from core.smart_stack import log_spike_verdict
+            halim_live = self._halim_entry.consume(ticker, fp)
+            log_spike_verdict(
+                self.cfg,
+                ticker=ticker,
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                decision=decision,
+                gate_context=gate_ctx,
+                halim_status=str(halim_live.get("status", "")),
             )
-            return {
-                "enter": False,
-                "confidence": confidence,
-                "shares": 0,
-                "stop": 0.0,
-                "target": 0.0,
-                "risk_usd": 0.0,
-                "reason": reason,
-                "journal": str(out.get("journal", reason))[:300],
-                "pipeline": "atr_reject",
-                "pending": False,
-            }
-
-        reason = str(out.get("reason", ppo_reason or "AI entry"))
-        journal_note = str(out.get("journal", reason))[:300]
-        decision = {
-            "enter": True,
-            "confidence": confidence,
-            "shares": bracket.shares,
-            "stop": bracket.stop,
-            "target": bracket.target,
-            "risk_usd": bracket.risk_usd,
-            "reward_risk": bracket.reward_risk,
-            "reason": f"{reason} | ATR R:R {bracket.reward_risk:.1f}"[:200],
-            "journal": journal_note,
-            "pipeline": str(out.get("pipeline", "council+atr_math")),
-            "pending": False,
-            "council_agreement": out.get("council_agreement"),
-            "ticker": ticker,
-            "entry": current_px,
-        }
-        ok, decision, err = validate_decision_bracket(self.cfg, decision, fallback_entry=current_px)
-        if not ok:
-            snap = self.ollama_audit_snapshot(ticker)
-            log_bracket_reject(
-                self.cfg, ticker=ticker, reason=err,
-                entry=current_px, stop=decision.get("stop", 0),
-                target=decision.get("target", 0), shares=int(decision.get("shares", 0)),
-                council_decision=out,
-                ollama_raw=snap.get("raw", ""), ollama_parsed=snap.get("parsed"),
-                spike_ratio=spike_ratio, pipeline="bracket_validator",
+        except Exception:
+            pass
+        if decision.get("enter"):
+            self._schedule_deferred_entry(
+                ticker=ticker, fingerprint=fp, decision=decision,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                market_ctx=mctx,
             )
-            return {
-                "enter": False,
-                "confidence": confidence,
-                "shares": 0,
-                "stop": 0.0,
-                "target": 0.0,
-                "risk_usd": 0.0,
-                "reason": err,
-                "journal": journal_note,
-                "pipeline": "bracket_validator",
-                "pending": False,
-            }
-        self._record_council_learning(ticker, decision, "entry_decision", ppo_action, ppo_conf)
-        self.journal("ENTRY_DECISION", journal_note, decision)
-        self.ai_log("ENTRY_DECISION", {**decision, "ticker": ticker, "price": current_px})
         return decision
 
     def poll_entry_council(
@@ -1924,19 +1872,29 @@ class AICommander:
 
         if enter:
             try:
-                from core.war_entry_gates import apply_war_entry_veto
-                vetoed = apply_war_entry_veto(
-                    self.cfg,
-                    {
-                        **out,
-                        "enter": enter,
-                        "confidence": confidence,
-                    },
-                    ppo_action=ppo_action,
-                    ppo_conf=ppo_conf,
-                    spike_ratio=spike_ratio,
-                    scan_score=scan_score,
-                )
+                from core.smart_stack import apply_smart_war_entry, smart_war_posture_enabled
+                from core.capital_discipline import effective_min_profit_probability
+                if smart_war_posture_enabled(self.cfg):
+                    vetoed = apply_smart_war_entry(
+                        self.cfg,
+                        {**out, "enter": enter, "confidence": confidence},
+                        ppo_action=ppo_action,
+                        ppo_conf=ppo_conf,
+                        spike_ratio=spike_ratio,
+                        scan_score=scan_score,
+                        min_conf=min_conf,
+                        min_prob=effective_min_profit_probability(self.cfg),
+                    )
+                else:
+                    from core.war_entry_gates import apply_war_entry_veto
+                    vetoed = apply_war_entry_veto(
+                        self.cfg,
+                        {**out, "enter": enter, "confidence": confidence},
+                        ppo_action=ppo_action,
+                        ppo_conf=ppo_conf,
+                        spike_ratio=spike_ratio,
+                        scan_score=scan_score,
+                    )
                 if not vetoed.get("enter"):
                     return {
                         "enter": False,
