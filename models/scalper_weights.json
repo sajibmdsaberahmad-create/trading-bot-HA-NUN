@@ -10,21 +10,22 @@
   "rsi_filter": 50.0,
   "volatility_gate": 50.0,
   "_meta": {
-    "train_timestamp": "2026-06-29T13:29:31.951589",
+    "train_timestamp": "2026-06-29T13:35:19.145247",
     "buffer_total": 2000,
-    "buffer_win_rate": 0.244,
-    "trade_win_rate": 1.0,
+    "buffer_win_rate": 0.23,
+    "trade_win_rate": 0.682,
     "sources": {
-      "live_trade": 163,
-      "ppo_led": 248,
-      "halim_ppo_coevolution": 487,
-      "ppo_entry": 113,
-      "ai_council": 239,
-      "profit_hunt": 248,
+      "ppo_entry": 117,
+      "ppo_led": 244,
+      "halim_ppo_coevolution": 506,
+      "ai_council": 262,
       "runtime_observer": 333,
-      "consciousness": 112,
+      "profit_hunt": 248,
       "scan_pick": 30,
-      "scan_complete": 27
+      "scan_complete": 26,
+      "consciousness": 115,
+      "live_trade": 115,
+      "fill_slippage_abort": 4
     },
     "missed_profit_hunts": 0,
     "profit_hunt_events": 248
