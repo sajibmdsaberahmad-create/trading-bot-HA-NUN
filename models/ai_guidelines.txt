@@ -1494,3 +1494,7 @@ Submitted
   - PENNY_MAX_DEPLOY_USD → 150.0 (IB 2161 regulatory cap — reduce penny deploy)
   - PENNY_LIMIT_BUFFER_PCT → 0.015 (IB 2161 — tighter limit buffer toward reference price)
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:41:00.464248+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+

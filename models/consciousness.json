@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1517,
+  "trades_observed": 1518,
   "scans_performed": 39,
-  "improvements_applied": 2401,
+  "improvements_applied": 2402,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:18:16.572388",
-      "age": "7d 1h 15m 27s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1763",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:19:52.737180",
-      "age": "7d 1h 17m 4s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-0.57",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:19:55.553279",
       "age": "7d 1h 17m 6s",
@@ -11859,6 +11838,27 @@
           "Review order_timeout on INLF"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T13:41:00.143304",
+      "age": "8d 2h 38m 11s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:41:00.449003",
+      "age": "8d 2h 38m 11s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2402",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOXS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14023,7 +14023,6 @@
   "mood": "steady",
   "total_pnl": 332991.21000000037,
   "win_history": [
-    0.04,
     0.31,
     0.58,
     -13.01,
@@ -14522,20 +14521,21 @@
     0.53,
     31.88,
     0.0,
-    -1.94
+    -1.94,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 3,
   "worst_streak": 86,
-  "veteran_xp": 23915,
+  "veteran_xp": 23925,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 58,
     "entry_timing": 100
   },
-  "flights_completed": 1511,
-  "hours_flown": 151.0999999999957,
+  "flights_completed": 1512,
+  "hours_flown": 151.1999999999957,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14553,7 +14553,7 @@
     "XCH": 1,
     "TZA": 12,
     "GDC": 14,
-    "SOX": 17,
+    "SOX": 18,
     "BIT": 13,
     "GPU": 19,
     "PLT": 30,
