@@ -1,11 +1,11 @@
 {
-  "total_xp": 22475,
+  "total_xp": 22825,
   "level": "Veteran",
-  "flights_completed": 240,
-  "flights_flown": 744,
-  "takeoffs": 744,
-  "landings": 240,
-  "hours_flown": 24.00000000000007,
+  "flights_completed": 246,
+  "flights_flown": 753,
+  "takeoffs": 753,
+  "landings": 246,
+  "hours_flown": 24.60000000000008,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -25,7 +25,7 @@
     "GPU": 1,
     "SOX": 8,
     "GDC": 1,
-    "TZA": 6,
+    "TZA": 10,
     "BIT": 2,
     "PLT": 39,
     "RIV": 4,
@@ -38,7 +38,7 @@
     "AST": 4,
     "RKL": 4,
     "SOA": 3,
-    "TNM": 7,
+    "TNM": 9,
     "INL": 6,
     "KND": 2
   },
@@ -48,7 +48,7 @@
   "skill_points": {
     "entry_timing": 100,
     "exit_timing": 100,
-    "risk_management": 14,
+    "risk_management": 16,
     "regime_recognition": 0,
     "pattern_recognition": 100,
     "confidence_judgment": 0
