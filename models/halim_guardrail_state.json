@@ -3,6 +3,7 @@
   "counts": {
     "api_calls": 100,
     "learn_fetches": 1,
-    "git_pushes": 1
+    "git_pushes": 1,
+    "file_writes": 13
   }
 }
