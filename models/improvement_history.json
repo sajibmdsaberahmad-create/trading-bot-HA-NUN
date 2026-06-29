@@ -1,14 +1,5 @@
 [
   {
-    "timestamp": "2026-06-29T09:50:06.637622+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on PLTR"
-    ]
-  },
-  {
     "timestamp": "2026-06-29T09:50:35.482571+00:00",
     "source": "runtime_order_timeout",
     "adjustments": {},
@@ -892,6 +883,15 @@
   },
   {
     "timestamp": "2026-06-29T11:33:05.858842+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on MARA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T11:33:52.004875+00:00",
     "source": "runtime_order_timeout",
     "adjustments": {},
     "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
