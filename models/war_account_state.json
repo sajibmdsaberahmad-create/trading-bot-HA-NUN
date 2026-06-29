@@ -1,34 +1,42 @@
 {
   "operating_capital": 3500.0,
-  "nav": 3480.16852448,
-  "cash": 3826.91852448,
-  "settled_cash": 3480.167296,
+  "nav": 5415.48820896,
+  "cash": 5415.48820896,
+  "settled_cash": 3435.82976224,
   "unsettled": [],
   "deployed_usd": 0.0,
   "bullets_total": 8,
-  "bullets_used_session": 2,
-  "round_trips_today": 2,
-  "entries_today": 2,
-  "fee_drag_today": 1.4,
+  "bullets_used_session": 7,
+  "round_trips_today": 7,
+  "entries_today": 7,
+  "fee_drag_today": 4.8999999999999995,
   "lab_capital": 5000.0,
   "lab_nav": 5000.0,
   "lab_cash": 5000.0,
   "lab_settled": 5000.0,
   "lab_round_trips_today": 0,
-  "mode": "WAR_ACTIVE",
+  "mode": "LAB_ACTIVE",
   "is_live": false,
   "session_date": "2026-06-29",
   "open_war": null,
   "open_lab": null,
-  "session_pnl_war": -19.831475520000044,
+  "session_pnl_war": -2501.8643595199997,
   "session_pnl_lab": 0.0,
   "ticker_session_pnl": {
     "TEST": -15.8,
-    "TNMG": -4.03
+    "TNMG": -2480.5,
+    "SOXS": -3.45,
+    "MSTU": -0.35,
+    "INLF": -0.41,
+    "BITO": -1.35
   },
   "ticker_session_losses": {
     "TEST": 1,
-    "TNMG": 1
+    "TNMG": 2,
+    "SOXS": 1,
+    "MSTU": 1,
+    "INLF": 1,
+    "BITO": 1
   },
-  "updated_at": 1782760397.044798
+  "updated_at": 1782760660.9504561
 }
