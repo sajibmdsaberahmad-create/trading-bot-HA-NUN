@@ -1,15 +1,15 @@
 {
-  "PENNY_MAX_DEPLOY_USD": {
-    "param": "PENNY_MAX_DEPLOY_USD",
-    "value": 150.0,
-    "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+  "CONFIDENCE_THRESHOLD": {
+    "param": "CONFIDENCE_THRESHOLD",
+    "value": 0.7100000000000001,
+    "reason": "Loss streak \u2014 raise entry bar until pilot regains edge",
     "ok": true,
     "msg": "applied"
   },
-  "PENNY_LIMIT_BUFFER_PCT": {
-    "param": "PENNY_LIMIT_BUFFER_PCT",
-    "value": 0.015,
-    "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+  "VOLUME_SPIKE_MIN_RATIO": {
+    "param": "VOLUME_SPIKE_MIN_RATIO",
+    "value": 1.4500000000000002,
+    "reason": "Loss streak \u2014 require stronger volume confirmation",
     "ok": true,
     "msg": "applied"
   }
