@@ -643,3 +643,16 @@
 {"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":1503.0,"shadow_only":true,"timestamp":"2026-06-29T17:39:56.671011+00:00"}
 {"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:40:06.588687+00:00"}
 {"ticker":"SOAR","reason":"profit_prob_below_80pct","scan_score":91.0,"spike_ratio":1.1893063369907295,"shadow_only":true,"timestamp":"2026-06-29T17:40:13.907170+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:40:37.388735+00:00"}
+{"ticker":"SOAR","reason":"profit_prob_below_80pct","scan_score":91.0,"spike_ratio":1.2463949058235777,"shadow_only":true,"timestamp":"2026-06-29T17:40:43.868864+00:00"}
+{"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":0.1061516503776098,"shadow_only":true,"timestamp":"2026-06-29T17:41:01.751401+00:00"}
+{"ticker":"SOAR","reason":"profit_prob_below_80pct","scan_score":91.0,"spike_ratio":1.2787253237623157,"shadow_only":true,"timestamp":"2026-06-29T17:41:03.925240+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:41:06.727427+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":1.101172041288078,"shadow_only":true,"timestamp":"2026-06-29T17:41:21.965480+00:00"}
+{"ticker":"SOAR","reason":"profit_prob_below_80pct","scan_score":91.0,"spike_ratio":1.232933811827825,"shadow_only":true,"timestamp":"2026-06-29T17:41:31.564754+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:41:46.753624+00:00"}
+{"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":0.3521668097635265,"shadow_only":true,"timestamp":"2026-06-29T17:41:48.347059+00:00"}
+{"ticker":"SOXS","reason":"profit_prob_below_80pct","scan_score":99.8,"spike_ratio":0.5776029426790641,"shadow_only":true,"timestamp":"2026-06-29T17:41:51.026193+00:00"}
+{"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":0.26184033833661813,"shadow_only":true,"timestamp":"2026-06-29T17:42:11.724873+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.071157798128529,"shadow_only":true,"timestamp":"2026-06-29T17:42:16.549080+00:00"}
+{"ticker":"TZA","reason":"profit_prob_below_80pct","scan_score":97.6,"spike_ratio":0.34587434179814247,"shadow_only":true,"timestamp":"2026-06-29T17:42:36.501942+00:00"}
