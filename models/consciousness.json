@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1561,
   "scans_performed": 39,
-  "improvements_applied": 2496,
+  "improvements_applied": 2497,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:51:48.083142",
-      "age": "7d 1h 48m 59s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1843",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:52:15.334749",
       "age": "7d 1h 49m 26s",
@@ -12210,6 +12196,28 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #204",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T16:09:23.836337",
+      "age": "8d 5h 6m 35s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2497",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.6900000000000001,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on TNMG"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T16:06:51.637460",
