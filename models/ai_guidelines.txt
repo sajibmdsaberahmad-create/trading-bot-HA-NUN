@@ -20,3 +20,6 @@ Combined win rate: 18.5% (buffer=22.8%, returns=14.3%)
 Could not parse AI plan — retained guidance for prompts only.
 off_hours_review
 
+🧭 COMMANDER LEARNING | 2026-06-29T07:55:59.388152+00:00
+Halim heuristic dev plan — WR 31%
+
