@@ -76,6 +76,15 @@ def assess_entry_quality(
     if micro_weak and scan_score >= 55 and spike_ratio >= 1.25:
         cold_boost = min(0.30, score_norm * 0.24 + spike_norm * 0.20 + ppo_up * 0.08)
         profit_probability += cold_boost
+    try:
+        from core.sniper_execution import sniper_active, sniper_cold_micro_vol_confirms
+        if sniper_active(cfg) and sniper_cold_micro_vol_confirms(spike_ratio, scan_score, micro):
+            profit_probability += min(
+                0.28,
+                score_norm * 0.20 + spike_norm * 0.22 + ppo_up * 0.14,
+            )
+    except Exception:
+        pass
     profit_probability = float(max(0.0, min(1.0, profit_probability)))
 
     fakeout_risk = float(max(0.0, min(1.0, fade * 0.55 + sl * 0.25 + (0.2 if va > 1.8 and mom < 0.05 else 0.0))))

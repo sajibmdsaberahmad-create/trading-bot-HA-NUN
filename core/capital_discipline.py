@@ -118,6 +118,12 @@ def allows_timeout_fallback_entry(
     scan_score: float = 0.0,
     spike_ratio: float = 0.0,
 ) -> bool:
+    try:
+        from core.war_entry_gates import war_blocks_scanner_timeout, war_gates_active
+        if war_gates_active(cfg) and war_blocks_scanner_timeout(cfg):
+            return False
+    except Exception:
+        pass
     if not capital_discipline_enabled(cfg):
         return True
     if bool(getattr(cfg, "CAPITAL_TIMEOUT_FALLBACK_STRONG", True)) and is_strong_spike_setup(
@@ -159,6 +165,12 @@ def effective_min_profit_probability(
     if is_strong_spike_setup(cfg, scan_score, spike_ratio):
         strong = float(getattr(cfg, "CAPITAL_STRONG_PROFIT_PROB_FLOOR", 0.48))
         base = min(base, strong)
+    try:
+        from core.war_entry_gates import war_gates_active, war_min_profit_probability
+        if war_gates_active(cfg):
+            base = max(base, war_min_profit_probability(cfg))
+    except Exception:
+        pass
     return base
 
 

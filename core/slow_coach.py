@@ -159,6 +159,13 @@ def queue_mutation(
     param = str(param).strip()
     if param in FROZEN_PARAMS or param not in SLOW_APPLY_WHITELIST:
         return False
+    try:
+        from core.war_entry_gates import block_confidence_raise_on_war
+        if block_confidence_raise_on_war(param, value, cfg):
+            log.info("🎓 Coach skipped CONFIDENCE_THRESHOLD raise — war sniper cap")
+            return False
+    except Exception:
+        pass
     q = _read_json(QUEUE_PATH, {"items": []})
     items: List[Dict[str, Any]] = list(q.get("items") or [])
     items.append({

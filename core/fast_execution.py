@@ -45,6 +45,12 @@ def min_bars_for_ticker(
     if focus:
         names.add(focus.upper())
     if names and ticker.upper() in names:
+        try:
+            from core.sniper_execution import sniper_active, sniper_min_bars_focus
+            if sniper_active(cfg):
+                return sniper_min_bars_focus(cfg)
+        except Exception:
+            pass
         return int(getattr(cfg, "AI_MIN_BARS_FOCUS", 6))
     return int(getattr(cfg, "AI_MIN_BARS_SCAN", 10))
 
@@ -374,10 +380,21 @@ def apply_micro_spike_boost(
     is_spike: bool,
     spike_ratio: float,
     micro: Optional[dict],
+    *,
+    cfg: Optional[BotConfig] = None,
+    scan_score: float = 0.0,
 ) -> Tuple[bool, float]:
     """Only boost spike when micro + volume agree — prevents 0.8x false entries."""
     if micro_confirms_spike(spike_ratio, micro):
-        return True, max(spike_ratio, float(micro.get("vol_accel", spike_ratio)))
+        return True, max(spike_ratio, float((micro or {}).get("vol_accel", spike_ratio)))
+    try:
+        from core.sniper_execution import sniper_active, sniper_cold_micro_vol_confirms
+        if cfg and sniper_active(cfg) and sniper_cold_micro_vol_confirms(
+            spike_ratio, scan_score, micro,
+        ):
+            return True, spike_ratio
+    except Exception:
+        pass
     return is_spike, spike_ratio
 
 

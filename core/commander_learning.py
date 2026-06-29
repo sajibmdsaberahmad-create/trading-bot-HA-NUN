@@ -294,6 +294,13 @@ def _apply_mutation(
     if not hasattr(cfg, param):
         return False, f"unknown param: {param}"
 
+    try:
+        from core.war_entry_gates import block_confidence_raise_on_war
+        if block_confidence_raise_on_war(param, value, cfg):
+            return False, "war: blocked CONFIDENCE_THRESHOLD raise during sniper war"
+    except Exception:
+        pass
+
     current = getattr(cfg, param)
     clamped, ok, clamp_msg = clamp_param_value(param, value, current=current, cfg=cfg)
     if not ok:

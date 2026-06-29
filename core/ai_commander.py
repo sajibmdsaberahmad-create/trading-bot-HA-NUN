@@ -1297,7 +1297,7 @@ class AICommander:
             allows_disciplined_spike_fast,
             capital_discipline_enabled,
         )
-        from core.sniper_execution import should_sniper_flash_entry
+        from core.sniper_execution import should_sniper_flash_entry, should_sniper_strong_entry
         if should_sniper_flash_entry(
             self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
             ticker=ticker, consecutive_losses=consecutive_losses,
@@ -1311,6 +1311,30 @@ class AICommander:
                 )[:200],
                 "journal": f"Sniper flash hunt — {ticker}",
                 "pipeline": "sniper:flash",
+                "pending": False,
+            }
+            decision = self._finalize_entry_decision(
+                fast_out, ticker=ticker, current_px=current_px,
+                spike_ratio=spike_ratio, scan_score=scan_score,
+                ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
+                use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
+                df=df, equity=equity, cash=float(account.get("cash", 0)),
+            )
+            return decision
+        if should_sniper_strong_entry(
+            self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
+            ticker=ticker, consecutive_losses=consecutive_losses,
+        ):
+            fast_out = {
+                "enter": True,
+                "confidence": max(ppo_conf, 0.58, min(scan_score / 75.0, 0.85)),
+                "reason": (
+                    f"🎯 SNIPER strong: vol={spike_ratio:.1f}x score={scan_score:.0f} "
+                    f"PPO {ppo_conf:.0%} — lottery band"
+                )[:200],
+                "journal": f"Sniper strong hunt — {ticker}",
+                "pipeline": "sniper:strong",
                 "pending": False,
             }
             decision = self._finalize_entry_decision(
@@ -1854,17 +1878,57 @@ class AICommander:
                 out["reason"] = f"{out.get('reason', '')} | {gut_note}".strip(" |")
 
         if not enter and not is_ai_unlimited(self.cfg) and not is_ai_council_mode(self.cfg):
-            if spike_ratio >= 1.5 and scan_score >= 35:
-                enter = True
-                confidence = max(confidence, 0.55)
-                out["reason"] = (
-                    f"Momentum entry: spike={spike_ratio:.1f}x score={scan_score:.0f} | "
-                    f"{out.get('reason', ppo_reason or '')}"
-                )[:200]
-            elif ppo_action == 1 and ppo_conf >= min_conf:
-                enter = True
-                confidence = max(confidence, ppo_conf)
-                out["reason"] = f"PPO buy signal: {ppo_reason or 'ensemble confirmed'}"
+            try:
+                from core.war_entry_gates import war_gates_active
+                war_on = war_gates_active(self.cfg)
+            except Exception:
+                war_on = False
+            if not war_on:
+                if spike_ratio >= 1.5 and scan_score >= 35:
+                    enter = True
+                    confidence = max(confidence, 0.55)
+                    out["reason"] = (
+                        f"Momentum entry: spike={spike_ratio:.1f}x score={scan_score:.0f} | "
+                        f"{out.get('reason', ppo_reason or '')}"
+                    )[:200]
+                elif ppo_action == 1 and ppo_conf >= min_conf:
+                    enter = True
+                    confidence = max(confidence, ppo_conf)
+                    out["reason"] = f"PPO buy signal: {ppo_reason or 'ensemble confirmed'}"
+
+        if enter:
+            try:
+                from core.war_entry_gates import apply_war_entry_veto
+                vetoed = apply_war_entry_veto(
+                    self.cfg,
+                    {
+                        **out,
+                        "enter": enter,
+                        "confidence": confidence,
+                    },
+                    ppo_action=ppo_action,
+                    ppo_conf=ppo_conf,
+                    spike_ratio=spike_ratio,
+                    scan_score=scan_score,
+                )
+                if not vetoed.get("enter"):
+                    return {
+                        "enter": False,
+                        "confidence": float(vetoed.get("confidence", confidence)),
+                        "shares": 0,
+                        "stop": 0.0,
+                        "target": 0.0,
+                        "risk_usd": 0.0,
+                        "reason": str(vetoed.get("reason", "war entry veto"))[:200],
+                        "journal": str(out.get("journal", ""))[:300],
+                        "pipeline": str(vetoed.get("pipeline", "war:entry_veto")),
+                        "pending": False,
+                    }
+                out = vetoed
+                enter = bool(vetoed.get("enter"))
+                confidence = float(vetoed.get("confidence", confidence))
+            except Exception:
+                pass
 
         if not enter:
             return {

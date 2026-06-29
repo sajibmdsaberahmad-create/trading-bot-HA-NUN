@@ -742,7 +742,9 @@ class ScalperRunner:
             return
 
         is_spike, ratio = self._detect_volume_spike(df, min_period=min(20, max(6, min_bars)))
-        is_spike, ratio = apply_micro_spike_boost(is_spike, ratio, forecast)
+        is_spike, ratio = apply_micro_spike_boost(
+            is_spike, ratio, forecast, cfg=self.cfg,
+        )
         if not is_spike and dm:
             burst, br = self._detect_tick_volume_burst(dm, df)
             if burst:
@@ -3660,7 +3662,23 @@ class ScalperRunner:
 
         if skip_historical_prefetch(self.cfg) and self._stream_has_price(ticker):
             return None
-        if bool(getattr(self.cfg, "MD_SOFT_FAIL_HMDS", True)) and ticker in self._target_monitors:
+        soft_skip = (
+            bool(getattr(self.cfg, "MD_SOFT_FAIL_HMDS", True))
+            and ticker in self._target_monitors
+        )
+        try:
+            from core.sniper_execution import sniper_active, sniper_force_bar_prefetch
+            if (
+                soft_skip
+                and sniper_force_bar_prefetch(self.cfg)
+                and sniper_active(self.cfg)
+            ):
+                prio = {n.upper() for n in (self._priority_tickers() or [])}
+                if ticker.upper() in prio:
+                    soft_skip = False
+        except Exception:
+            pass
+        if soft_skip:
             return None
         try:
             from core.rth_session import historical_prefetch_allowed
@@ -4161,7 +4179,10 @@ class ScalperRunner:
         vol_ratio = float(df["volume"].tail(3).mean()) / (float(df["volume"].tail(20).mean()) + 1e-9)
         if not is_spike and vol_ratio >= 1.15:
             is_spike, spike_ratio = True, vol_ratio
-        is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
+        is_spike, spike_ratio = apply_micro_spike_boost(
+            is_spike, spike_ratio, forecast,
+            cfg=self.cfg, scan_score=float(pick.rank_score),
+        )
         if not is_spike:
             return
         self.top_pick = pick
@@ -4388,7 +4409,9 @@ class ScalperRunner:
             if not is_spike and spike_ratio >= min_spike:
                 is_spike, spike_ratio = True, spike_ratio
 
-            is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
+            is_spike, spike_ratio = apply_micro_spike_boost(
+                is_spike, spike_ratio, forecast, cfg=self.cfg, scan_score=scan_score,
+            )
 
             if dm and ticker.upper() in priority_names:
                 burst, burst_ratio = self._detect_tick_volume_burst(dm, work_df)
@@ -7227,7 +7250,9 @@ class ScalperRunner:
                     is_spike, spike_ratio = True, max(spike_ratio, burst_ratio)
             elif tick_burst_ratio > 0:
                 is_spike, spike_ratio = True, max(spike_ratio, tick_burst_ratio)
-            is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
+            is_spike, spike_ratio = apply_micro_spike_boost(
+                is_spike, spike_ratio, forecast, cfg=self.cfg, scan_score=scan_score,
+            )
 
             try:
                 from core.commander_replay import shadow_would_skip_entry

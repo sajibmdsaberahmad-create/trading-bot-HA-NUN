@@ -188,7 +188,11 @@ def sniper_cold_micro_vol_confirms(
         return False
     min_sp = _env_float("SNIPER_COLD_VOL_MIN_SPIKE", 2.0)
     min_sc = _env_float("SNIPER_COLD_VOL_MIN_SCORE", 70.0)
-    return float(spike_ratio) >= min_sp and float(scan_score) >= min_sc
+    if float(spike_ratio) < min_sp:
+        return False
+    if float(scan_score) <= 0:
+        return True
+    return float(scan_score) >= min_sc
 
 
 def should_sniper_flash_entry(
