@@ -1,12 +1,12 @@
 {
   "max_positions": 20,
   "watch_pool": 50,
-  "risk_per_trade_pct": 0.046,
-  "risk_per_trade_usd": 45186.77,
+  "risk_per_trade_pct": 0.04,
+  "risk_per_trade_usd": 40000.0,
   "deploy_pct_per_slot": 0.12,
-  "min_cash_reserve_pct": 0.04,
+  "min_cash_reserve_pct": 0.06,
   "max_shares_per_trade": 100000,
   "min_lock_score": 0.0,
   "source": "ai_heuristic",
-  "equity_basis": 982321.16
+  "equity_basis": 1000000.0
 }
