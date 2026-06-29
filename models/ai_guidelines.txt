@@ -947,3 +947,11 @@ PreSubmitted
 Observed order_timeout — recorded for learning.
 PreSubmitted
 
+🧭 COMMANDER LEARNING | 2026-06-29T11:34:55.871969+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.76% (peak +2.76%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T11:35:03.963194+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
