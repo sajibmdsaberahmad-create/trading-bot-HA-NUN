@@ -361,3 +361,5 @@
 {"timestamp":"2026-06-29T18:11:54.708042+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
 {"timestamp":"2026-06-29T18:13:24.717973+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
 {"timestamp":"2026-06-29T18:14:55.030496+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
+{"timestamp":"2026-06-29T18:16:28.018367+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
+{"timestamp":"2026-06-29T18:17:58.127628+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
