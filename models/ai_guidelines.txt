@@ -1972,3 +1972,11 @@ BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a br
   - PENNY_MAX_DEPLOY_USD → 297.5 (IB 2161 regulatory cap — reduce penny deploy)
   - PENNY_LIMIT_BUFFER_PCT → 0.007 (IB 2161 — tighter limit buffer toward reference price)
 
+🧭 COMMANDER LEARNING | 2026-06-29T19:14:08.942107+00:00
+Observed ib_failure — recorded for learning.
+BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0655 or a more aggressive price still within y
+
+🧭 COMMANDER LEARNING | 2026-06-29T19:14:16.465073+00:00
+Observed order_timeout — recorded for learning.
+Submitted
+

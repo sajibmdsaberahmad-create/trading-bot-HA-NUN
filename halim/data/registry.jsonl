@@ -1068,3 +1068,7 @@
 {"timestamp":"2026-06-29T19:12:05.593666+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-29T19:12:05.593720+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-29T19:12:05.593763+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T19:14:19.887316+00:00","event":"capability_milestone","capability":"text_compose","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T19:14:19.888673+00:00","event":"capability_milestone","capability":"text_compose","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T19:14:19.888760+00:00","event":"capability_milestone","capability":"text_compose","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T19:14:19.888829+00:00","event":"capability_milestone","capability":"text_compose","level_pct":100,"phase":"toddler"}
