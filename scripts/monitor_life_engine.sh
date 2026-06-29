@@ -5,7 +5,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 MINUTES="${1:-30}"
-LOG="${HANOON_LOG:-$ROOT/HANOON.log}"
+LOG="${HANOON_LOG:-$ROOT/logs/HANOON.log}"
+[[ -f "$LOG" ]] || LOG="$ROOT/HANOON.log"
 VERDICTS="$ROOT/models/smart_stack_verdicts.jsonl"
 OUT="$ROOT/runtime/life_engine_monitor_$(date +%Y%m%d_%H%M%S).txt"
 INTERVAL=300

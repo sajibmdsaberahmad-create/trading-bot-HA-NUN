@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-29T18:57:23.849830+00:00",
+  "updated_at": "2026-06-29T19:00:16.966425+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-29T18:57:23.706678+00:00",
+    "timestamp": "2026-06-29T19:00:16.928831+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -78,8 +78,8 @@
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2348.5,
-        "modified": "2026-06-29T18:43:36.857635+00:00"
+        "size_kb": 2345.9,
+        "modified": "2026-06-29T18:57:25.873512+00:00"
       },
       "council_dataset": {
         "exists": true,
