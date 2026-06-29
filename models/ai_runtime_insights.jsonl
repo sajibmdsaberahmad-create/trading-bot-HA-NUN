@@ -2323,3 +2323,4 @@
 {"timestamp":"2026-06-29T13:16:39.776287+00:00","event":"order_timeout","ticker":"MARA","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T13:16:58.472042+00:00","event":"order_timeout","ticker":"PLTR","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T13:18:06.657211+00:00","event":"order_timeout","ticker":"MARA","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-29T13:18:45.113670+00:00","event":"order_timeout","ticker":"RIOT","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}

@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1497,
   "scans_performed": 39,
-  "improvements_applied": 2361,
+  "improvements_applied": 2362,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:08:47.013779",
-      "age": "7d 1h 5m 58s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1730",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:08:55.808614",
       "age": "7d 1h 6m 7s",
@@ -11690,6 +11676,20 @@
         "applied": [],
         "lessons": [
           "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:18:45.382849",
+      "age": "8d 2h 15m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2362",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on RIOT"
         ]
       }
     }
