@@ -383,14 +383,15 @@ def apply_micro_spike_boost(
     *,
     cfg: Optional[BotConfig] = None,
     scan_score: float = 0.0,
+    live_px: float = 0.0,
 ) -> Tuple[bool, float]:
     """Only boost spike when micro + volume agree — prevents 0.8x false entries."""
     if micro_confirms_spike(spike_ratio, micro):
         return True, max(spike_ratio, float((micro or {}).get("vol_accel", spike_ratio)))
     try:
         from core.sniper_execution import sniper_active, sniper_cold_micro_vol_confirms
-        if cfg and sniper_active(cfg) and sniper_cold_micro_vol_confirms(
-            spike_ratio, scan_score, micro,
+        if sniper_active(cfg) and sniper_cold_micro_vol_confirms(
+            spike_ratio, scan_score, micro, live_px=live_px, cfg=cfg,
         ):
             return True, spike_ratio
     except Exception:

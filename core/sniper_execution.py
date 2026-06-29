@@ -78,10 +78,11 @@ def is_sniper_strong_spike(
     cfg: Optional[BotConfig],
     scan_score: float,
     spike_ratio: float,
+    live_px: float = 0.0,
 ) -> bool:
     if not sniper_active(cfg):
         return False
-    min_sc, min_sp = sniper_strong_spike_thresholds(cfg)
+    min_sc, min_sp = sniper_strong_spike_thresholds(cfg, live_px=live_px)
     return float(scan_score) >= min_sc and float(spike_ratio) >= min_sp
 
 
@@ -91,14 +92,14 @@ def is_sniper_flash_spike(
     spike_ratio: float,
     ppo_action: int,
     ppo_conf: float,
+    live_px: float = 0.0,
 ) -> bool:
     """Tick/bar vol green flash — PPO must agree."""
     if not sniper_active(cfg):
         return False
     if int(ppo_action) != 1:
         return False
-    min_sp = _env_float("SNIPER_FLASH_SPIKE_RATIO", 1.22)
-    min_sc = _env_float("SNIPER_FLASH_MIN_SCORE", 35.0)
+    min_sc, min_sp = _sniper_flash_thresholds(cfg, live_px)
     min_conf = _env_float("SNIPER_FLASH_MIN_PPO_CONF", 0.50)
     return (
         float(spike_ratio) >= min_sp
@@ -163,9 +164,10 @@ def should_sniper_strong_entry(
     *,
     ticker: str = "",
     consecutive_losses: int = 0,
+    live_px: float = 0.0,
 ) -> bool:
     """Sniper strong tier — PPO BUY + vol/score; no council wait."""
-    if not is_sniper_strong_spike(cfg, scan_score, spike_ratio):
+    if not is_sniper_strong_spike(cfg, scan_score, spike_ratio, live_px=live_px):
         return False
     if int(ppo_action) != 1:
         return False
@@ -206,14 +208,26 @@ def sniper_cold_micro_vol_confirms(
     spike_ratio: float,
     scan_score: float,
     micro: Optional[dict] = None,
+    *,
+    live_px: float = 0.0,
+    cfg: Optional[BotConfig] = None,
 ) -> bool:
     """Micro=0% but commander-style vol spike — don't treat as no-edge."""
     micro = micro or {}
     sl = float(micro.get("spike_likelihood", 0) or 0)
     if sl >= 0.08:
         return False
-    min_sp = _env_float("SNIPER_COLD_VOL_MIN_SPIKE", 2.0)
-    min_sc = _env_float("SNIPER_COLD_VOL_MIN_SCORE", 70.0)
+    if live_px > 0:
+        try:
+            from core.scan_lock_pools import tiered_min_scan_score, tiered_min_spike_ratio
+            min_sp = tiered_min_spike_ratio(cfg, live_px)
+            min_sc = tiered_min_scan_score(cfg, live_px)
+        except Exception:
+            min_sp = _env_float("SNIPER_COLD_VOL_MIN_SPIKE", 2.0)
+            min_sc = _env_float("SNIPER_COLD_VOL_MIN_SCORE", 70.0)
+    else:
+        min_sp = _env_float("SNIPER_COLD_VOL_MIN_SPIKE", 2.0)
+        min_sc = _env_float("SNIPER_COLD_VOL_MIN_SCORE", 70.0)
     if float(spike_ratio) < min_sp:
         return False
     if float(scan_score) <= 0:
@@ -231,9 +245,12 @@ def should_sniper_flash_entry(
     *,
     ticker: str = "",
     consecutive_losses: int = 0,
+    live_px: float = 0.0,
 ) -> bool:
     """Instant sniper entry on PPO-aligned vol flash."""
-    if not is_sniper_flash_spike(cfg, scan_score, spike_ratio, ppo_action, ppo_conf):
+    if not is_sniper_flash_spike(
+        cfg, scan_score, spike_ratio, ppo_action, ppo_conf, live_px=live_px,
+    ):
         return False
     from core.fast_execution import _passes_entry_quality_gate
     from core.live_trade_guard import check_fast_entry_bypass
@@ -265,25 +282,31 @@ def sniper_vol_flash(
     cfg: Optional[BotConfig],
     scan_score: float,
     spike_ratio: float,
+    live_px: float = 0.0,
 ) -> bool:
     """Vol/score flash — used by watch gate before PPO is consulted."""
     if not sniper_active(cfg):
         return False
-    return (
-        float(spike_ratio) >= _env_float("SNIPER_FLASH_SPIKE_RATIO", 1.22)
-        and float(scan_score) >= _env_float("SNIPER_FLASH_MIN_SCORE", 35.0)
-    )
+    min_sc, min_sp = _sniper_flash_thresholds(cfg, live_px)
+    return float(spike_ratio) >= min_sp and float(scan_score) >= min_sc
 
 
 def effective_watch_gates(
     cfg: Optional[BotConfig],
     scan_score: float,
     spike_ratio: float,
+    live_px: float = 0.0,
 ) -> Tuple[float, float]:
-    """Score/spike floors for pre-entry watch gate — flash uses sniper lows."""
+    """Score/spike floors for pre-entry watch gate — tiered by price when known."""
     from core.capital_discipline import min_entry_scan_score, min_entry_spike_ratio
 
-    if sniper_vol_flash(cfg, scan_score, spike_ratio):
+    if live_px > 0:
+        try:
+            from core.scan_lock_pools import tiered_min_scan_score, tiered_min_spike_ratio
+            return tiered_min_scan_score(cfg, live_px), tiered_min_spike_ratio(cfg, live_px)
+        except Exception:
+            pass
+    if sniper_vol_flash(cfg, scan_score, spike_ratio, live_px=live_px):
         floors = sniper_entry_quality_floors(cfg) or {}
         return (
             floors.get("min_scan_score", _env_float("SNIPER_MIN_ENTRY_SCAN_SCORE", 38.0)),
@@ -343,7 +366,7 @@ def sniper_tick_streams_enabled(cfg: Optional[BotConfig] = None) -> bool:
 def sniper_tick_stream_count(cfg: Optional[BotConfig] = None) -> Optional[int]:
     if not sniper_tick_streams_enabled(cfg):
         return None
-    return max(0, int(os.getenv("SNIPER_TICK_STREAM_COUNT", "2")))
+    return max(0, int(os.getenv("SNIPER_TICK_STREAM_COUNT", "4")))
 
 
 def sniper_timing_log_line(cfg: Optional[BotConfig] = None) -> str:

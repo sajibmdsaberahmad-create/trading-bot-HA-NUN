@@ -3487,7 +3487,15 @@ class ScalperRunner:
         pool.sort(key=lambda x: x.get("total_score", 0), reverse=True)
         tradeable = set(filter_tradeable_tickers(self.cfg, [r["ticker"] for r in pool]))
         pool = [r for r in pool if r["ticker"] in tradeable]
-        locked = pool[: self._max_locked()]
+        pool_note = ""
+        try:
+            from core.scan_lock_pools import build_dual_lock_pool, dual_pool_summary
+            locked = build_dual_lock_pool(
+                self.cfg, pool, self._max_locked(), hits,
+            )
+            pool_note = dual_pool_summary(locked, hits, self.cfg)
+        except Exception:
+            locked = pool[: self._max_locked()]
         try:
             from core.war_account import filter_locked_pool
             locked_objs = [
@@ -3533,7 +3541,7 @@ class ScalperRunner:
         lock_tag = "FAST" if fast_lock else "FULL"
         from core.startup_log import startup_compact, sinfo
         log.info(
-            f"🎯 LOCKED ({len(self._locked_targets)}): {names} | {lock_tag} {elapsed_ms:.0f}ms"
+            f"🎯 LOCKED ({len(self._locked_targets)}): {names} | {lock_tag} {elapsed_ms:.0f}ms{pool_note}"
         )
         self._last_lock_elapsed_ms = elapsed_ms
         if not startup_compact(self.cfg):

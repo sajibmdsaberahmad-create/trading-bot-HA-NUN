@@ -251,6 +251,7 @@ def passes_pre_entry_gate(
     scan_score: float,
     spike_ratio: float,
     forecast: Optional[Dict[str, Any]] = None,
+    live_px: float = 0.0,
 ) -> Tuple[bool, str]:
     """
     Mechanical pre-filter before council — watch-only if edge is weak.
@@ -262,7 +263,7 @@ def passes_pre_entry_gate(
         from core.sniper_execution import effective_watch_gates
     except Exception:
         effective_watch_gates = lambda c, s, r: (min_entry_scan_score(c), min_entry_spike_ratio(c))
-    min_sc, min_sp = effective_watch_gates(cfg, scan_score, spike_ratio)
+    min_sc, min_sp = effective_watch_gates(cfg, scan_score, spike_ratio, live_px=live_px)
     opening_note = ""
     try:
         from core.rth_session import apply_opening_entry_adjustments
