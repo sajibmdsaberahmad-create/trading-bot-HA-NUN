@@ -91,7 +91,8 @@ def _entry_reward_at_fill(
         if scan_score >= 60:
             base += min(scan_score / 500.0, 0.12)
     elif entered and ppo_action != 1:
-        base = 0.04  # mechanical override — mild positive if hunt rules fired
+        # PPO said HOLD but spike/scanner overrode — penalize, do not reinforce
+        base = float(os.getenv("PPO_OVERRIDE_ENTRY_REWARD", "-0.15"))
     elif not entered and ppo_action == 1:
         base = -0.08
     return shaped_reward(

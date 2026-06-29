@@ -112,30 +112,32 @@ def should_disciplined_strong_entry(
     ppo_action: int = 0,
     ppo_conf: float = 0.0,
     micro: Optional[dict] = None,
+    *,
+    ticker: str = "",
+    consecutive_losses: int = 0,
 ) -> bool:
-    """Elite spike under capital discipline — PPO enters, council logs async."""
+    """Elite spike under capital discipline — PPO BUY required; no score-only bypass."""
     from core.capital_discipline import (
         allows_disciplined_spike_fast,
         is_strong_spike_setup,
     )
+    from core.live_trade_guard import strong_spike_allowed
+
     if not allows_disciplined_spike_fast(cfg, scan_score, spike_ratio):
         return False
     if not is_strong_spike_setup(cfg, scan_score, spike_ratio):
         return False
-    min_ppo = float(getattr(cfg, "CAPITAL_STRONG_MIN_PPO_CONF", 0.50))
-    if scan_score >= 88 and spike_ratio >= 1.5:
-        return _passes_entry_quality_gate(
-            cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
-        )
-    if ppo_action == 1 and ppo_conf >= min_ppo:
-        return _passes_entry_quality_gate(
-            cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
-        )
-    if scan_score >= 82 and spike_ratio >= 1.4 and ppo_conf >= 0.48:
-        return _passes_entry_quality_gate(
-            cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
-        )
-    return False
+    ok, _reason = strong_spike_allowed(
+        cfg,
+        ticker=ticker,
+        scan_score=scan_score,
+        spike_ratio=spike_ratio,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        consecutive_losses=consecutive_losses,
+        micro=micro,
+    )
+    return ok
 
 
 def prioritize_locked_targets(
