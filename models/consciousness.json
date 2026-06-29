@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1471,
   "scans_performed": 39,
-  "improvements_applied": 2277,
+  "improvements_applied": 2278,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:13:11.892911",
-      "age": "6d 22h 10m 23s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1672",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T09:13:14.615564",
       "age": "6d 22h 10m 25s",
@@ -11519,6 +11505,20 @@
       "age": "8d 0h 34m 54s",
       "type": "IMPROVE",
       "message": "Applied improvement #2277",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T11:38:26.758806",
+      "age": "8d 0h 35m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2278",
       "metadata": {
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
