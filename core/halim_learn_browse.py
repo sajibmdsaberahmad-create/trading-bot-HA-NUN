@@ -82,6 +82,14 @@ def _flush_deferred_retrain(cfg: BotConfig) -> None:
 
 
 def _trading_blocks_learn(force: bool = False) -> Optional[Dict[str, Any]]:
+    if not force:
+        try:
+            from core.device_trading_focus import learn_blocked_for_device_focus
+            blocked = learn_blocked_for_device_focus()
+            if blocked:
+                return blocked
+        except Exception:
+            pass
     try:
         from core.trading_focus_guard import is_trading_session_active
         if is_trading_session_active() and not force:

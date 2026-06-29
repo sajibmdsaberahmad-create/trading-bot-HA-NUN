@@ -43,6 +43,7 @@ class HalimRuntime:
         self._last_evolve = 0.0
         self._last_export = 0.0
         self._last_serve_watch = 0.0
+        self._last_device_focus = 0.0
         self._mode = "trade_focus"
         self._user_task_pending = os.getenv("HALIM_USER_TASK", "").strip()
         self._tick_sec = float(os.getenv("HALIM_RUNTIME_TICK_SEC", "30"))
@@ -136,9 +137,34 @@ class HalimRuntime:
             f"🧠 Halim runtime — co-located with HANOON algo · mode={self._mode} · "
             f"primary=profit hunting"
         )
+        try:
+            from core.device_trading_focus import enforce_device_trading_focus, market_focus_active
+            if market_focus_active(self.cfg):
+                enforce_device_trading_focus(self.cfg, force=True)
+        except Exception:
+            pass
 
     def attach_runner(self, runner: Optional["ScalperRunner"]) -> None:
         self._runner = runner
+
+    def _device_trading_focus(self) -> None:
+        """Kill IDE RAM hogs + learn loop during market/trading focus."""
+        if os.getenv("DEVICE_TRADING_FOCUS", "true").lower() not in ("1", "true", "yes"):
+            return
+        now = time.time()
+        interval = float(os.getenv("HALIM_DEVICE_FOCUS_SEC", "90"))
+        if now - self._last_device_focus < interval:
+            return
+        self._last_device_focus = now
+        try:
+            from core.device_trading_focus import enforce_device_trading_focus, market_focus_active
+            if not market_focus_active(self.cfg):
+                return
+            r = enforce_device_trading_focus(self.cfg, force=True)
+            if r.get("killed") or r.get("removed_extensions"):
+                self._journal("device_trading_focus", r)
+        except Exception as exc:
+            log.debug(f"Device trading focus: {exc}")
 
     def _watchdog_serve(self) -> None:
         """Restart Halim serve if :8765 health fails (MLX can exit under load)."""
@@ -173,6 +199,7 @@ class HalimRuntime:
         self._last_tick = now
 
         self._watchdog_serve()
+        self._device_trading_focus()
 
         try:
             from core.halim_guardrails import kill_switch_active
