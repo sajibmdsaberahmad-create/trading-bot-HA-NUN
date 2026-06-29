@@ -1550,3 +1550,7 @@ council_exit: PPO exit after council timeout: spike_top_intrabar: +2.32% vol=452
 Observed loss_streak — recorded for learning.
 council_exit: PPO exit after council timeout: spike_top_intrabar: +2.32% vol=452871.0x
 
+🧭 COMMANDER LEARNING | 2026-06-29T13:46:00.081767+00:00
+Observed order_timeout — recorded for learning.
+Submitted
+
