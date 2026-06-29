@@ -32,6 +32,9 @@ _JSONL_TRIM: Dict[str, int] = {
     "models/smart_stack_verdicts.jsonl": 20000,
     "halim/data/trading/experience_buffer.jsonl": 5000,
 }
+
+
+def _rm_glob(patterns: List[str]) -> int:
     freed = 0
     for pat in patterns:
         for p in glob.glob(str(ROOT / pat), recursive=True):

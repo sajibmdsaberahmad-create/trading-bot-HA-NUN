@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """
-core/smart_stack.py — Smart stack: Halim + PPO lead; API teaches; gates advise.
+core/smart_stack.py — Life Engine hub: Halim + PPO lead; API teaches; gates advise.
 
 Vision doc: docs/VISION_SMART_STACK.md
 Cursor rule: .cursor/rules/smart-stack-vision.mdc
 
-Phases A–E:
-  A — PPO HOLD escalates to Halim/council (never silent ppo_hold_skip)
-  B — Mechanical gates advisory → context for brains, not hard blocks
-  C — Teacher API sampled on hard cases (brain_maturity curriculum)
-  D — Every spike verdict logged for gold / learning
-  E — War/sniper posture adjusts confidence bars, not mute pipelines
+One ship (scalper_runner hull) — smart sensors, brains, war, execution, learning.
+Phases A–E foundation live; maturity ladder unlocks full power over time.
 """
 
 from __future__ import annotations
