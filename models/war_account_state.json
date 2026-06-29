@@ -1,20 +1,11 @@
 {
-  "operating_capital": 1000.0,
-  "nav": 980.16852448,
-  "cash": 980.16852448,
-  "settled_cash": 633.417296,
-  "unsettled": [
-    {
-      "amount": 170.69,
-      "settles_at_ts": 1782833575.189039
-    },
-    {
-      "amount": 176.06,
-      "settles_at_ts": 1782835825.194263
-    }
-  ],
+  "operating_capital": 3500.0,
+  "nav": 3480.16852448,
+  "cash": 3826.91852448,
+  "settled_cash": 3480.167296,
+  "unsettled": [],
   "deployed_usd": 0.0,
-  "bullets_total": 5,
+  "bullets_total": 8,
   "bullets_used_session": 2,
   "round_trips_today": 2,
   "entries_today": 2,
@@ -24,7 +15,7 @@
   "lab_cash": 2500.0,
   "lab_settled": 2500.0,
   "lab_round_trips_today": 0,
-  "mode": "LAB_ACTIVE",
+  "mode": "WAR_ACTIVE",
   "is_live": false,
   "session_date": "2026-06-29",
   "open_war": null,
@@ -39,5 +30,5 @@
     "TEST": 1,
     "TNMG": 1
   },
-  "updated_at": 1782753182.9591591
+  "updated_at": 1782753908.325752
 }
