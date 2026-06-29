@@ -29,11 +29,37 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
-def sniper_strong_spike_thresholds(cfg: Optional[BotConfig] = None) -> Tuple[float, float]:
-    """Lower bar than CAPITAL_STRONG_SPIKE_* — tuned for penny flash moves."""
+def sniper_strong_spike_thresholds(
+    cfg: Optional[BotConfig] = None,
+    *,
+    live_px: float = 0.0,
+) -> Tuple[float, float]:
+    """Tiered when live_px known; else legacy sniper defaults."""
+    if live_px > 0:
+        try:
+            from core.scan_lock_pools import tiered_min_scan_score, tiered_min_spike_ratio
+            return tiered_min_scan_score(cfg, live_px), tiered_min_spike_ratio(cfg, live_px)
+        except Exception:
+            pass
     return (
         _env_float("SNIPER_STRONG_SPIKE_SCORE", 45.0),
         _env_float("SNIPER_STRONG_SPIKE_RATIO", 1.18),
+    )
+
+
+def _sniper_flash_thresholds(
+    cfg: Optional[BotConfig],
+    live_px: float = 0.0,
+) -> Tuple[float, float]:
+    if live_px > 0:
+        try:
+            from core.scan_lock_pools import tiered_min_scan_score, tiered_min_spike_ratio
+            return tiered_min_scan_score(cfg, live_px), tiered_min_spike_ratio(cfg, live_px)
+        except Exception:
+            pass
+    return (
+        _env_float("SNIPER_FLASH_MIN_SCORE", 35.0),
+        _env_float("SNIPER_FLASH_SPIKE_RATIO", 1.22),
     )
 
 
