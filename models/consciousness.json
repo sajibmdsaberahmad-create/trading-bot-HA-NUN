@@ -3,39 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1550,
+  "trades_observed": 1551,
   "scans_performed": 39,
-  "improvements_applied": 2469,
+  "improvements_applied": 2470,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:42:43.799693",
-      "age": "7d 1h 39m 55s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1819",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:42:44.128703",
-      "age": "7d 1h 39m 55s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1820",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:42:49.915075",
       "age": "7d 1h 40m 1s",
@@ -12159,6 +12131,27 @@
           "Review loss_streak on TZA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:30:45.964551",
+      "age": "8d 3h 27m 57s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:30:46.365116",
+      "age": "8d 3h 27m 57s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2470",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14323,7 +14316,6 @@
   "mood": "recalibrating",
   "total_pnl": 331863.7100000003,
   "win_history": [
-    7.56,
     -10.87,
     -4.53,
     -8.22,
@@ -14822,20 +14814,21 @@
     -1.65,
     -1.14,
     0.0,
-    -50.0
+    -50.0,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 5,
   "worst_streak": 86,
-  "veteran_xp": 24300,
+  "veteran_xp": 24310,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1544,
-  "hours_flown": 154.39999999999552,
+  "flights_completed": 1545,
+  "hours_flown": 154.4999999999955,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14869,7 +14862,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 12,
+    "TNM": 13,
     "SOA": 5,
     "KND": 1
   },
