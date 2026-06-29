@@ -2052,7 +2052,7 @@ class ScalperRunner:
             )
             try:
                 from core.live_trade_guard import on_trade_closed as guard_trade_closed
-                guard_trade_closed(ticker, pnl, self.cfg)
+                guard_trade_closed(ticker, pnl, self.cfg, exit_reason=reason)
             except Exception:
                 pass
         try:
