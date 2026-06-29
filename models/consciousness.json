@@ -3,81 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 210,
   "training_sessions": 39,
-  "trades_observed": 1565,
+  "trades_observed": 1567,
   "scans_performed": 39,
-  "improvements_applied": 2509,
+  "improvements_applied": 2513,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T06:16:29.914591",
-      "age": "7d 19h 13m 41s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1855",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T06:16:31.740108",
-      "age": "7d 19h 13m 43s",
-      "type": "TRADE",
-      "message": "Observed trade: QS ? P&L=$-6.23",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T06:16:32.060843",
-      "age": "7d 19h 13m 43s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1856",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on QS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T06:16:38.412694",
-      "age": "7d 19h 13m 49s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-1.15",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T06:16:39.055427",
-      "age": "7d 19h 13m 50s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1858",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T06:16:39.056332",
-      "age": "7d 19h 13m 50s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1858",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T06:17:06.453999",
       "age": "7d 19h 14m 17s",
@@ -12248,6 +12178,76 @@
           "Review trade_closed on MSTU"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T19:17:12.848137",
+      "age": "8d 8h 14m 24s",
+      "type": "TRADE",
+      "message": "Observed trade: INLF ? P&L=$-0.06",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T19:17:13.797723",
+      "age": "8d 8h 14m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2511",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T19:17:13.797829",
+      "age": "8d 8h 14m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2511",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T19:17:41.639509",
+      "age": "8d 8h 14m 52s",
+      "type": "TRADE",
+      "message": "Observed trade: BITO ? P&L=$-1.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T19:17:42.314766",
+      "age": "8d 8h 14m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2512",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on BITO"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T19:17:42.315414",
+      "age": "8d 8h 14m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2513",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on BITO"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T19:12:00.703868",
@@ -14410,10 +14410,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 331828.17000000033,
+  "total_pnl": 331827.11000000034,
   "win_history": [
-    10.75,
-    -8.14,
     -12.63,
     1.99,
     3.29,
@@ -14911,20 +14909,22 @@
     -1.76,
     -3.51,
     -3.1,
-    0.0
+    0.0,
+    -0.06,
+    -1.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 11,
+  "consecutive_losses": 13,
   "worst_streak": 86,
-  "veteran_xp": 24465,
+  "veteran_xp": 24485,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1559,
-  "hours_flown": 155.89999999999543,
+  "flights_completed": 1561,
+  "hours_flown": 156.09999999999542,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14943,7 +14943,7 @@
     "TZA": 24,
     "GDC": 14,
     "SOX": 26,
-    "BIT": 13,
+    "BIT": 14,
     "GPU": 19,
     "PLT": 30,
     "LCI": 269,
@@ -14957,7 +14957,7 @@
     "AST": 222,
     "SES": 8,
     "NVD": 3,
-    "INL": 4,
+    "INL": 5,
     "TNM": 18,
     "SOA": 12,
     "KND": 1,
@@ -14968,5 +14968,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-283.33 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-88.39 recent). Tightening entries until edge returns."
 }

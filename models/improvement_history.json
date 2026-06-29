@@ -16,5 +16,23 @@
     "lessons": [
       "Review trade_closed on MSTU"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T19:17:13.830237+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T19:17:42.350037+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on BITO"
+    ]
   }
 ]
