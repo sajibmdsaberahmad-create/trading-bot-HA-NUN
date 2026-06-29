@@ -9,15 +9,19 @@ source "$ROOT/scripts/halim_env.sh"
 ZIP="${1:-$HOME/Downloads/halim_toddler_v1.zip}"
 CKPT="$ROOT/halim/data/checkpoints/toddler_v1"
 
-if [[ ! -d "$CKPT/merged" ]] || [[ ! -f "$CKPT/merged/model.safetensors" ]]; then
-  if [[ ! -f "$ZIP" ]]; then
-    echo "Missing checkpoint and zip: $ZIP"
-    echo "Usage: ./scripts/halim_start_toddler.sh [/path/to/halim_toddler_v1.zip]"
+if [[ "${HALIM_TODDLER_FORCE:-false}" == "true" ]]; then
+  "$ROOT/scripts/halim_install_toddler.sh" --force "${1:-$HOME/Downloads/halim_toddler_v3}"
+elif [[ -n "${1:-}" ]] && { [[ -d "$1" ]] || [[ -f "$1" && "$1" == *.zip ]]; }; then
+  force=()
+  [[ "${2:-}" == "--force" ]] && force=(--force)
+  "$ROOT/scripts/halim_install_toddler.sh" "${force[@]}" "$1"
+elif [[ ! -f "$CKPT/merged/model.safetensors" ]] && [[ ! -f "$CKPT/lora_adapter/adapter_model.safetensors" ]]; then
+  if [[ -f "$ZIP" ]]; then
+    "$ROOT/scripts/halim_install_toddler.sh" "$ZIP"
+  else
+    echo "Missing checkpoint. Run: ./scripts/halim_install_toddler.sh ~/Downloads/halim_toddler_v3"
     exit 1
   fi
-  echo "📦 Extracting $ZIP → halim/data/checkpoints/ (~1 GB, one time)…"
-  mkdir -p "$ROOT/halim/data/checkpoints"
-  unzip -o "$ZIP" -d "$ROOT/halim/data/checkpoints/"
 fi
 
 # Halim metadata (zip may only have merged/config.json)

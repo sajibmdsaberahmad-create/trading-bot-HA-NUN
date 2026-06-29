@@ -71,5 +71,5 @@ echo "== Readiness =="
 "$ROOT/scripts/halim_readiness.sh" || true
 
 echo ""
-echo "Next: upload halim_sft.zip to Colab → train → halim_start_toddler.sh"
+echo "Next: upload halim_toddler_v2.zip + halim_sft.zip to My Drive/Halim/ → open halim/colab/halim_toddler_train.ipynb"
 echo "Guide: halim/colab/COLAB_GUIDE.md"
