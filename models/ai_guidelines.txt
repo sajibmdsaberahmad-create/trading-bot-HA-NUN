@@ -707,3 +707,31 @@ green_profit_lock:ai_stall quick_scalp +2.30% (peak +2.30%)
 Observed order_timeout — recorded for learning.
 PreSubmitted
 
+🧭 COMMANDER LEARNING | 2026-06-29T10:32:02.772339+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.30% (peak +2.30%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:33:04.926606+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.30% (peak +2.30%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:34:05.326157+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.36% (peak +2.36%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:35:13.478480+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.36% (peak +2.36%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:35:42.517387+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:36:32.820938+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.36% (peak +2.36%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T10:38:11.504292+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +2.36% (peak +2.36%)
+
