@@ -1,15 +1,33 @@
 {
-  "pairs_total": 11457,
-  "train_pairs": 10885,
-  "valid_pairs": 572,
+  "pairs_total": 14177,
+  "train_pairs": 13469,
+  "valid_pairs": 708,
   "by_source": {
-    "council": 1671,
-    "action_gold": 3736,
-    "coevolution": 2761,
-    "dialogue": 3232,
-    "outcome_gold": 1,
-    "commander_gold": 56
+    "council": 2191,
+    "test": 1,
+    "learn_cache": 138,
+    "groq": 540,
+    "web_learn": 109,
+    "ppo:micro_fast": 1594,
+    "council:timeout_hold": 1,
+    "halim_lm": 1291,
+    "halim_server": 177,
+    "companion_generative": 410,
+    "market_hours": 17,
+    "rss_learn": 3,
+    "copilot_heuristic": 46,
+    "council_teacher": 260,
+    "ppo_teacher:heuristic_fallback": 12,
+    "commander_ib_report": 65,
+    "coevolution_halim": 1701,
+    "coevolution_ppo": 1620,
+    "dialogue_pre_action": 16,
+    "dialogue_ppo": 2000,
+    "dialogue_post_trade": 360,
+    "dialogue_synthesized": 1624,
+    "outcome_gold": 1
   },
   "train_path": "halim/data/training/sft/train.jsonl",
-  "valid_path": "halim/data/training/sft/valid.jsonl"
+  "valid_path": "halim/data/training/sft/valid.jsonl",
+  "mode": "full"
 }

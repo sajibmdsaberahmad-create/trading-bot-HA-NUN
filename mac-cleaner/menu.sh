@@ -42,6 +42,29 @@ run_clean_and_unload() {
   fi
 }
 
+run_hanoon_clean() {
+  echo ""
+  echo "  HANOON project: duplicate releases, old checkpoints, git gc."
+  echo "  Keeps venv, active Halim model, and git remote history."
+  echo ""
+  if confirm_yes; then
+    "$CLEAN" --clean hanoon --yes
+  else
+    echo "  Cancelled."
+  fi
+}
+
+run_full_clean() {
+  echo ""
+  echo "  Full clean: safe system caches + HANOON project cruft."
+  echo ""
+  if confirm_yes; then
+    "$CLEAN" --clean all --yes
+  else
+    echo "  Cancelled."
+  fi
+}
+
 run_aggressive() {
   echo ""
   echo "  AGGRESSIVE: docker prune, ollama prune, old Downloads (90+ days)."
@@ -64,8 +87,10 @@ show_menu() {
   echo "    2) Clean Safe — caches, logs, trash, temp…"
   echo "    3) Unload RAM — free Ollama from memory"
   echo "    4) Clean + Unload — disk + RAM"
-  echo "    5) Aggressive — docker, ollama prune, old Downloads"
-  echo "    0) Quit"
+    echo "    5) Aggressive — docker, ollama prune, old Downloads"
+    echo "    6) HANOON — duplicate models, old checkpoints, git gc"
+    echo "    7) Full — safe system + HANOON project clean"
+    echo "    0) Quit"
   echo ""
 }
 
@@ -77,16 +102,20 @@ case "$MODE" in
   unload)     run_unload ;;
   both)       run_clean_and_unload ;;
   aggressive) run_aggressive ;;
+  hanoon)     run_hanoon_clean ;;
+  full)       run_full_clean ;;
   "")
     while true; do
       show_menu
-      read -r -p "  Choose [0-5]: " choice
+      read -r -p "  Choose [0-7]: " choice
       case "$choice" in
         1) run_scan; read -r -p "  Press Enter…" _ ;;
         2) run_clean_safe; read -r -p "  Press Enter…" _ ;;
         3) run_unload; read -r -p "  Press Enter…" _ ;;
         4) run_clean_and_unload; read -r -p "  Press Enter…" _ ;;
         5) run_aggressive; read -r -p "  Press Enter…" _ ;;
+        6) run_hanoon_clean; read -r -p "  Press Enter…" _ ;;
+        7) run_full_clean; read -r -p "  Press Enter…" _ ;;
         0|q|Q) echo "  Bye."; exit 0 ;;
         *) echo "  Invalid option."; sleep 1 ;;
       esac

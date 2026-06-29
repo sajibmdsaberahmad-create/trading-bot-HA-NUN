@@ -48,14 +48,18 @@ def mlx_complete(
     except ImportError:
         return None, "mlx_lm_not_installed"
 
-    key = str(checkpoint.resolve())
+    merged = _merged_model_dir(checkpoint)
+    key = str((merged or checkpoint).resolve())
     if key not in _model_cache:
-        base, adapter = _resolve_paths(checkpoint)
         try:
-            if adapter:
-                model, tokenizer = load(base, adapter_path=adapter)
+            if merged:
+                model, tokenizer = load(str(merged))
             else:
-                model, tokenizer = load(base)
+                base, adapter = _resolve_paths(checkpoint)
+                if adapter:
+                    model, tokenizer = load(base, adapter_path=adapter)
+                else:
+                    model, tokenizer = load(base)
             _model_cache[key] = (model, tokenizer)
         except Exception as exc:
             return None, f"load_failed:{exc}"[:120]

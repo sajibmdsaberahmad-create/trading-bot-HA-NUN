@@ -274,6 +274,7 @@ def _cursor_cache() -> List[Path]:
         base / "Code Cache",
         base / "GPUCache",
         HOME / "Library" / "Caches" / "com.todesktop.230313mzl4w4u92",
+        _cursor_shipit_cache(),
     ]
 
 
@@ -286,7 +287,7 @@ def _ollama_models_dir() -> Path:
     return HOME / ".ollama" / "models"
 
 
-def _clean_pip(*, dry_run: bool, _older: int) -> int:
+def _clean_pip(dry_run: bool, older_than_days: int = 0) -> int:
     if dry_run:
         cache = _pip_cache()
         return _dir_size(cache) if cache else 0
@@ -297,7 +298,7 @@ def _clean_pip(*, dry_run: bool, _older: int) -> int:
     return 0
 
 
-def _clean_npm(*, dry_run: bool, _older: int) -> int:
+def _clean_npm(dry_run: bool, older_than_days: int = 0) -> int:
     cache = _npm_cache()
     before = _dir_size(cache) if cache else 0
     if dry_run:
@@ -307,7 +308,7 @@ def _clean_npm(*, dry_run: bool, _older: int) -> int:
     return max(0, before - after)
 
 
-def _clean_homebrew_with_estimate(*, dry_run: bool, _older: int) -> int:
+def _clean_homebrew_with_estimate(dry_run: bool, older_than_days: int = 0) -> int:
     brew = shutil.which("brew")
     if not brew:
         return 0
@@ -325,7 +326,7 @@ def _clean_homebrew_with_estimate(*, dry_run: bool, _older: int) -> int:
     return max(0, before - after)
 
 
-def _clean_docker(*, dry_run: bool, _older: int) -> int:
+def _clean_docker(dry_run: bool, older_than_days: int = 0) -> int:
     if not shutil.which("docker"):
         return 0
     if dry_run:
@@ -376,6 +377,184 @@ def _purge_memory_hint(*, dry_run: bool) -> None:
         print("  Ran purge (root)")
     else:
         print("  Tip: run `sudo purge` to free inactive RAM (optional)")
+
+
+def _cursor_shipit_cache() -> Path:
+    return HOME / "Library" / "Caches" / "com.todesktop.230313mzl4w4u92.ShipIt"
+
+
+def _hanoon_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def _hanoon_log_paths() -> List[Path]:
+    root = _hanoon_root()
+    return [
+        root / "HANOON.log",
+        root / "logs" / "REPLAY_SCALPER.log",
+        root / "logs" / "halim_serve.log",
+        root / "logs" / "WEEKEND_REPLAY.log",
+    ]
+
+
+def _scan_hanoon_duplicates() -> int:
+    total = 0
+    rel = _hanoon_root() / "halim-release"
+    if rel.is_dir():
+        total += _dir_size(rel)
+    dl = HOME / "Downloads"
+    for name in (
+        "halim_toddler_v1.zip",
+        "halim_toddler_v2.zip",
+        "halim_toddler_v3",
+        "halim_toddler_v3.zip",
+    ):
+        p = dl / name
+        if p.exists():
+            total += _dir_size(p)
+    stale = HOME / "Downloads" / "venv"
+    if stale.is_dir() and stale != _hanoon_root() / "venv":
+        total += _dir_size(stale)
+    return total
+
+
+def _scan_hanoon_cruft() -> int:
+    root = _hanoon_root()
+    total = 0
+    try:
+        for p in root.rglob("__pycache__"):
+            total += _dir_size(p)
+        for p in root.rglob("*.pyc"):
+            if p.is_file():
+                total += p.stat().st_size
+    except OSError:
+        pass
+    ckpt = root / "halim" / "data" / "checkpoints" / "toddler_v1" / "lora_adapter"
+    if ckpt.is_dir():
+        for d in ckpt.glob("checkpoint-*"):
+            for name in ("optimizer.pt", "scheduler.pt", "rng_state.pth"):
+                f = d / name
+                if f.is_file():
+                    total += f.stat().st_size
+    for name in ("toddler_v1_test", "toddler_v1_test2"):
+        p = root / "halim" / "data" / "checkpoints" / name
+        if p.is_dir():
+            total += _dir_size(p)
+    for lp in _hanoon_log_paths():
+        if lp.is_file() and lp.stat().st_size > 500_000:
+            total += lp.stat().st_size - 500_000
+    return total
+
+
+def _clean_hanoon_duplicates(dry_run: bool, older_than_days: int = 0) -> int:
+    freed = 0
+    rel = _hanoon_root() / "halim-release"
+    if rel.is_dir():
+        freed += _rm_path(rel, dry_run=dry_run)
+    dl = HOME / "Downloads"
+    for name in (
+        "halim_toddler_v1.zip",
+        "halim_toddler_v2.zip",
+        "halim_toddler_v3",
+        "halim_toddler_v3.zip",
+    ):
+        freed += _rm_path(dl / name, dry_run=dry_run)
+    stale = HOME / "Downloads" / "venv"
+    if stale.is_dir() and stale != _hanoon_root() / "venv":
+        freed += _rm_path(stale, dry_run=dry_run)
+    return freed
+
+
+def _clean_hanoon_cruft(dry_run: bool, older_than_days: int = 0) -> int:
+    root = _hanoon_root()
+    freed = 0
+    try:
+        for p in list(root.rglob("__pycache__")):
+            freed += _rm_path(p, dry_run=dry_run)
+        for p in list(root.rglob("*.pyc")):
+            if p.is_file():
+                try:
+                    sz = p.stat().st_size
+                    if dry_run:
+                        freed += sz
+                    else:
+                        p.unlink(missing_ok=True)
+                        freed += sz
+                except OSError:
+                    pass
+    except OSError:
+        pass
+
+    ckpt = root / "halim" / "data" / "checkpoints" / "toddler_v1" / "lora_adapter"
+    keep_steps: List[int] = []
+    if ckpt.is_dir():
+        steps = []
+        for d in ckpt.glob("checkpoint-*"):
+            try:
+                steps.append(int(d.name.split("-")[-1]))
+            except ValueError:
+                continue
+        steps.sort()
+        keep_steps = steps[-2:] if len(steps) > 2 else steps
+        for d in ckpt.glob("checkpoint-*"):
+            try:
+                step = int(d.name.split("-")[-1])
+            except ValueError:
+                continue
+            if step not in keep_steps:
+                freed += _rm_path(d, dry_run=dry_run)
+            else:
+                for name in ("optimizer.pt", "scheduler.pt", "rng_state.pth"):
+                    f = d / name
+                    if f.is_file():
+                        try:
+                            sz = f.stat().st_size
+                            if dry_run:
+                                freed += sz
+                            else:
+                                f.unlink(missing_ok=True)
+                                freed += sz
+                        except OSError:
+                            pass
+    for name in ("toddler_v1_test", "toddler_v1_test2"):
+        freed += _rm_path(root / "halim" / "data" / "checkpoints" / name, dry_run=dry_run)
+
+    for lp in _hanoon_log_paths():
+        if not lp.is_file() or lp.stat().st_size <= 500_000:
+            continue
+        if dry_run:
+            freed += lp.stat().st_size - 500_000
+        else:
+            try:
+                lines = lp.read_text(encoding="utf-8", errors="replace").splitlines()
+                lp.write_text("\n".join(lines[-2000:]) + "\n", encoding="utf-8")
+                freed += max(0, lp.stat().st_size)
+            except OSError:
+                pass
+    return freed
+
+
+def _clean_git_gc(dry_run: bool, older_than_days: int = 0) -> int:
+    root = _hanoon_root()
+    git = root / ".git"
+    if not git.is_dir():
+        return 0
+    before = _dir_size(git)
+    if dry_run:
+        return max(0, before // 10)
+    try:
+        subprocess.run(
+            ["git", "-C", str(root), "gc", "--prune=now"],
+            capture_output=True, text=True, timeout=120, check=False,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return 0
+    after = _dir_size(git)
+    return max(0, before - after)
+
+
+def _clean_cursor_shipit(dry_run: bool, older_than_days: int = 0) -> int:
+    return _rm_path(_cursor_shipit_cache(), dry_run=dry_run)
 
 
 def build_categories() -> Dict[str, Category]:
@@ -481,13 +660,43 @@ def build_categories() -> Dict[str, Category]:
                 dry_run=dry,
             ),
         ),
+        "cursor_shipit": Category(
+            "cursor_shipit",
+            "Cursor updater ShipIt cache (~1GB)",
+            lambda: _dir_size(_cursor_shipit_cache()),
+            _clean_cursor_shipit,
+        ),
+        "hanoon_duplicates": Category(
+            "hanoon_duplicates",
+            "Regenerable halim-release + duplicate toddler zips in Downloads",
+            _scan_hanoon_duplicates,
+            _clean_hanoon_duplicates,
+        ),
+        "hanoon_cruft": Category(
+            "hanoon_cruft",
+            "HANOON __pycache__, old LoRA checkpoints, trim logs (keeps venv + active model)",
+            _scan_hanoon_cruft,
+            _clean_hanoon_cruft,
+        ),
+        "git_gc": Category(
+            "git_gc",
+            "git gc in tradingbot repo (safe — history stays on remote)",
+            lambda: _dir_size(_hanoon_root() / ".git") // 10,
+            _clean_git_gc,
+        ),
     }
 
 
 DEFAULT_CATEGORIES = [
     "caches", "logs", "trash", "temp", "pip", "npm", "yarn",
-    "homebrew", "xcode", "cursor", "vscode", "ds_store",
+    "homebrew", "xcode", "cursor", "cursor_shipit", "vscode", "ds_store",
 ]
+
+HANOON_CATEGORIES = [
+    "hanoon_duplicates", "hanoon_cruft", "git_gc",
+]
+
+ALL_PRESET = DEFAULT_CATEGORIES + HANOON_CATEGORIES
 
 
 def _clean_ds_store(*, dry_run: bool) -> int:
@@ -520,7 +729,7 @@ def _clean_ds_store(*, dry_run: bool) -> int:
     return freed
 
 
-def _clean_ollama_prune(*, dry_run: bool, _older: int) -> int:
+def _clean_ollama_prune(dry_run: bool, older_than_days: int = 0) -> int:
     ollama = shutil.which("ollama")
     if not ollama:
         return 0
@@ -585,6 +794,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     selected = args.categories
     if not selected or selected == ["all"]:
+        selected = list(ALL_PRESET)
+    elif selected == ["hanoon"]:
+        selected = list(HANOON_CATEGORIES)
+    elif selected == ["safe"]:
         selected = list(DEFAULT_CATEGORIES)
 
     unknown = [c for c in selected if c not in categories]
@@ -616,7 +829,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     for name in selected:
         cat = categories[name]
         try:
-            freed = cat.clean(dry_run=False, older_than_days=args.older_than)
+            freed = cat.clean(False, args.older_than)
         except Exception as exc:
             print(f"  ⚠ {name}: {exc}")
             freed = 0

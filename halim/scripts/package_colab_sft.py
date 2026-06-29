@@ -106,20 +106,24 @@ def package_colab_sft(*, root: Path | None = None) -> Dict[str, Any]:
 
     colab_manifest = {
         "package": "halim_sft",
-        "version": 3,
+        "version": 4,
         "canonical_file": CANONICAL_ZIP,
         "build_id": build_id,
         "created_at": created_at,
         "train_pairs": manifest.get("train_pairs"),
         "valid_pairs": manifest.get("valid_pairs"),
         "pairs_total": manifest.get("pairs_total"),
+        "sft_mode": manifest.get("mode", "full"),
+        "core_pairs": manifest.get("core_pairs"),
+        "delta_pairs": manifest.get("delta_pairs"),
         "by_source": manifest.get("by_source"),
         "raw_sources": raw,
         "upload_rule": (
-            "Always upload THIS halim_sft.zip from your tradingbot folder. "
-            "Do not keep old copies in Downloads — delete them after upload. "
-            "Auto-rebuilt on replay/live stop when HALIM_AUTO_PACKAGE_COLAB=true "
-            "(export all gold → merge SFT → zip). Check build_id in colab_manifest.json."
+            "Upload halim_toddler_v2.zip + THIS halim_sft.zip to My Drive/Halim/. "
+            "Open halim/colab/halim_toddler_train.ipynb in Colab — no files.upload(). "
+            "Train script is bundled inside halim_sft.zip. "
+            "Rebuild on Mac: halim_prepare_train_incremental.sh or halim_colab_ready.sh. "
+            "Check build_id in colab_manifest.json."
         ),
     }
     colab_manifest_path = sft_dir / "colab_manifest.json"
@@ -129,6 +133,7 @@ def package_colab_sft(*, root: Path | None = None) -> Dict[str, Any]:
     zip_path = root / CANONICAL_ZIP
     tmp_zip = root / f".{CANONICAL_ZIP}.tmp"
     train_script = root / "halim/colab/train_toddler_colab.py"
+    drive_setup = root / "halim/colab/colab_drive_setup.py"
 
     if tmp_zip.is_file():
         tmp_zip.unlink()
@@ -140,6 +145,8 @@ def package_colab_sft(*, root: Path | None = None) -> Dict[str, Any]:
                 zf.write(fp, arcname=f"sft/{rel}")
         if train_script.is_file():
             zf.write(train_script, arcname="train_toddler_colab.py")
+        if drive_setup.is_file():
+            zf.write(drive_setup, arcname="colab_drive_setup.py")
 
     tmp_zip.replace(zip_path)
     size_kb = round(zip_path.stat().st_size / 1024, 1)
