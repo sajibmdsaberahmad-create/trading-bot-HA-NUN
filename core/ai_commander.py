@@ -1283,6 +1283,23 @@ class AICommander:
         )
         account = dict(account or {})
         account["entry_quality"] = quality
+        gate_ctx = dict(account.get("smart_gate_context") or {})
+        gate_line = ""
+        try:
+            from core.smart_stack import format_gate_context_for_prompt
+            gate_line = format_gate_context_for_prompt(gate_ctx)
+            if gate_line:
+                cap_line = f"{cap_line}{gate_line}\n"
+        except Exception:
+            pass
+        halim_peek = self._halim_entry.peek(ticker) if hasattr(self, "_halim_entry") else {}
+        halim_parsed = halim_peek.get("parsed") or {}
+        halim_enter_flag = bool(halim_parsed.get("enter", False))
+        halim_conf_flag = float(halim_parsed.get("confidence", 0) or 0)
+        if int(ppo_action) != 1:
+            log.debug(
+                f"  🧠 PPO HOLD {ppo_conf:.0%} {ticker} — escalating to Halim+council"
+            )
         from core.fast_execution import (
             should_spike_fast_entry,
             should_micro_fast_entry,
@@ -1302,6 +1319,7 @@ class AICommander:
             self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
             ticker=ticker, consecutive_losses=consecutive_losses,
             live_px=float(current_px or 0),
+            halim_enter=halim_enter_flag, halim_conf=halim_conf_flag,
         ):
             fast_out = {
                 "enter": True,
@@ -1445,25 +1463,6 @@ class AICommander:
                 )
             return decision
 
-        from core.sniper_execution import should_skip_entry_council_on_ppo_hold
-        if should_skip_entry_council_on_ppo_hold(self.cfg, ppo_action):
-            return {
-                "enter": False,
-                "confidence": ppo_conf,
-                "shares": 0,
-                "stop": 0.0,
-                "target": 0.0,
-                "risk_usd": 0.0,
-                "reason": (
-                    f"🎯 SNIPER watch: PPO HOLD {ppo_conf:.0%} — council skipped"
-                )[:200],
-                "journal": "",
-                "pipeline": "sniper:ppo_hold_skip",
-                "pending": False,
-                "ppo_action": ppo_action,
-                "ppo_conf": ppo_conf,
-            }
-
         if (
             df is not None
             and len(df) >= 20
@@ -1517,10 +1516,35 @@ class AICommander:
             full = enrich_prompt(
                 "entry_decision", {"request": prompt[:2500]}, self.cfg, mood, conf_m, lessons,
             )
-            self._live_line.ring(
-                ticker, "entry_decision", full, fp,
-                spike_ratio=spike_ratio, scan_score=scan_score,
-            )
+            halim_live_pre = self._halim_entry.consume(ticker, fp)
+            halim_st = halim_live_pre.get("status", "")
+            h_parsed = halim_live_pre.get("parsed") or {}
+            ring_teacher, teacher_why = True, "legacy"
+            try:
+                from core.smart_stack import should_ring_teacher_api
+                ring_teacher, teacher_why = should_ring_teacher_api(
+                    self.cfg,
+                    ticker=ticker,
+                    halim_status=halim_st,
+                    halim_conf=float(h_parsed.get("confidence", 0) or 0),
+                    ppo_action=ppo_action,
+                    ppo_conf=ppo_conf,
+                    scan_score=scan_score,
+                    spike_ratio=spike_ratio,
+                    disagreement=(
+                        h_parsed.get("enter") is not None
+                        and bool(h_parsed.get("enter")) != (ppo_action == 1)
+                    ),
+                )
+            except Exception:
+                pass
+            if ring_teacher:
+                self._live_line.ring(
+                    ticker, "entry_decision", full, fp,
+                    spike_ratio=spike_ratio, scan_score=scan_score,
+                )
+            else:
+                log.debug(f"  🧠 teacher skip {ticker}: {teacher_why}")
             live = self._live_line.consume(ticker, "entry_decision", fp)
             merged = merge_entry_decision(
                 live.get("parsed") or {},

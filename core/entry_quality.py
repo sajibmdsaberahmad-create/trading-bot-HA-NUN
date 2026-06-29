@@ -191,6 +191,12 @@ def _pack(
 
 def regime_blocks_entry(cfg: BotConfig, regime: str) -> bool:
     """Block new entries in choppy/low-vol regimes when enabled."""
+    try:
+        from core.smart_stack import mechanical_gates_advisory_only
+        if mechanical_gates_advisory_only(cfg):
+            return False
+    except Exception:
+        pass
     if not getattr(cfg, "REGIME_ENTRY_BLOCK", False):
         return False
     label = (regime or "").strip().lower()
@@ -262,6 +268,12 @@ def mtf_blocks_entry(
     spike_ratio: float = 0.0,
 ) -> bool:
     """Block spike entries when higher timeframes are not in uptrend."""
+    try:
+        from core.smart_stack import mechanical_gates_advisory_only
+        if mechanical_gates_advisory_only(cfg):
+            return False
+    except Exception:
+        pass
     if not getattr(cfg, "MTF_ENTRY_BLOCK", False):
         return False
     try:

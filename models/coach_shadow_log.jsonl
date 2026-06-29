@@ -1289,3 +1289,14 @@
 {"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":0.8201370431603987,"shadow_only":true,"timestamp":"2026-06-29T18:37:56.186966+00:00"}
 {"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":1.8185139919786235,"shadow_only":true,"timestamp":"2026-06-29T18:37:57.293587+00:00"}
 {"ticker":"MSTU","reason":"profit_prob_below_80pct","scan_score":84.4,"spike_ratio":1.507273233033706,"shadow_only":true,"timestamp":"2026-06-29T18:38:16.626038+00:00"}
+{"ticker":"MSTU","reason":"profit_prob_below_80pct","scan_score":84.4,"spike_ratio":2.0046017023914544,"shadow_only":true,"timestamp":"2026-06-29T18:38:36.882611+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":2.308813616025803,"shadow_only":true,"timestamp":"2026-06-29T18:38:45.949099+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":84.4,"spike_ratio":0.9939680948618143,"shadow_only":true,"timestamp":"2026-06-29T18:38:47.356012+00:00"}
+{"ticker":"INLF","reason":"profit_prob_below_80pct","scan_score":102.0,"spike_ratio":0.9088763877619472,"shadow_only":true,"timestamp":"2026-06-29T18:38:50.563385+00:00"}
+{"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":0.5359906481458322,"shadow_only":true,"timestamp":"2026-06-29T18:39:00.942038+00:00"}
+{"ticker":"MSTU","reason":"profit_prob_below_80pct","scan_score":84.4,"spike_ratio":2.0534732123697577,"shadow_only":true,"timestamp":"2026-06-29T18:39:01.959265+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":2.737215057019882,"shadow_only":true,"timestamp":"2026-06-29T18:39:06.033990+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":1.3202658085270642,"shadow_only":true,"timestamp":"2026-06-29T18:39:25.659464+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":1.8749987609841237,"shadow_only":true,"timestamp":"2026-06-29T18:39:50.672698+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":1.5740115204669967,"shadow_only":true,"timestamp":"2026-06-29T18:40:10.749236+00:00"}
+{"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":0.518512080653572,"shadow_only":true,"timestamp":"2026-06-29T18:40:26.786109+00:00"}

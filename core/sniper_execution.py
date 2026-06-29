@@ -93,18 +93,39 @@ def is_sniper_flash_spike(
     ppo_action: int,
     ppo_conf: float,
     live_px: float = 0.0,
+    *,
+    halim_enter: bool = False,
+    halim_conf: float = 0.0,
 ) -> bool:
-    """Tick/bar vol green flash — PPO must agree."""
+    """Tick/bar vol green flash — PPO BUY or Halim flash (smart stack)."""
     if not sniper_active(cfg):
         return False
-    if int(ppo_action) != 1:
-        return False
+    try:
+        from core.smart_stack import smart_stack_enabled, sniper_flash_halim_ok
+        if smart_stack_enabled(cfg) and sniper_flash_halim_ok(
+            cfg, {"enter": halim_enter, "confidence": halim_conf},
+        ):
+            pass  # allow vol/score check below without PPO BUY
+        elif int(ppo_action) != 1:
+            return False
+    except Exception:
+        if int(ppo_action) != 1:
+            return False
     min_sc, min_sp = _sniper_flash_thresholds(cfg, live_px)
     min_conf = _env_float("SNIPER_FLASH_MIN_PPO_CONF", 0.50)
+    halim_flash = False
+    try:
+        from core.smart_stack import smart_stack_enabled, sniper_flash_halim_ok
+        halim_flash = smart_stack_enabled(cfg) and sniper_flash_halim_ok(
+            cfg, {"enter": halim_enter, "confidence": halim_conf},
+        )
+    except Exception:
+        pass
+    conf_ok = float(halim_conf) >= min_conf if halim_flash else float(ppo_conf) >= min_conf
     return (
         float(spike_ratio) >= min_sp
         and float(scan_score) >= min_sc
-        and float(ppo_conf) >= min_conf
+        and conf_ok
     )
 
 
@@ -246,10 +267,13 @@ def should_sniper_flash_entry(
     ticker: str = "",
     consecutive_losses: int = 0,
     live_px: float = 0.0,
+    halim_enter: bool = False,
+    halim_conf: float = 0.0,
 ) -> bool:
-    """Instant sniper entry on PPO-aligned vol flash."""
+    """Instant sniper entry on PPO-aligned or Halim-led vol flash."""
     if not is_sniper_flash_spike(
         cfg, scan_score, spike_ratio, ppo_action, ppo_conf, live_px=live_px,
+        halim_enter=halim_enter, halim_conf=halim_conf,
     ):
         return False
     from core.fast_execution import _passes_entry_quality_gate
@@ -336,7 +360,16 @@ def should_skip_entry_council_on_ppo_hold(
     cfg: Optional[BotConfig],
     ppo_action: int,
 ) -> bool:
-    """Sniper: spikes on PPO HOLD cannot flash-enter — don't wait on council."""
+    """
+    Legacy sniper: skip council on PPO HOLD.
+    Smart stack (default): PPO HOLD escalates to Halim+council — never silent skip.
+    """
+    try:
+        from core.smart_stack import smart_stack_enabled
+        if smart_stack_enabled(cfg):
+            return False
+    except Exception:
+        pass
     if not sniper_active(cfg):
         return False
     if os.getenv("SNIPER_SKIP_COUNCIL_ON_PPO_HOLD", "true").lower() not in ("1", "true", "yes"):
