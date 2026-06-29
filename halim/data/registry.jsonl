@@ -686,3 +686,8 @@
 {"timestamp":"2026-06-29T07:54:07.289228+00:00","event":"capability_milestone","capability":"text_compose","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-29T07:54:07.289277+00:00","event":"capability_milestone","capability":"text_compose","level_pct":100,"phase":"toddler"}
 {"timestamp": "2026-06-29T07:55:59.501524+00:00", "event": "sync_from_tradingbot", "source": "/Users/mdsabersajib/Downloads/tradingbot", "files": ["data/trading/council_training_dataset.jsonl", "data/students/teacher_proxy.joblib", "data/students/scalper_weights.json", "HALIM_IDENTITY.json", "HALIM_MANIFEST.json", "data/trading/owned_brain_manifest.json", "data/trading/experience_buffer.jsonl"]}
+{"timestamp":"2026-06-29T08:00:29.357669+00:00","event":"export_action_gold","added":3,"skipped":8233}
+{"timestamp":"2026-06-29T08:00:36.605982+00:00","event":"capability_milestone","capability":"chat","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:00:36.606409+00:00","event":"capability_milestone","capability":"chat","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:00:36.606495+00:00","event":"capability_milestone","capability":"chat","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T08:00:36.606560+00:00","event":"capability_milestone","capability":"chat","level_pct":100,"phase":"toddler"}

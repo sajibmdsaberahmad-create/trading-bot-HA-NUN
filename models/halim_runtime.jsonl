@@ -22,3 +22,6 @@
 {"timestamp":"2026-06-29T07:48:09.923527+00:00","event":"off_hours_dev","mode":"off_hours","trigger":"scheduled"}
 {"timestamp":"2026-06-29T07:48:10.080021+00:00","event":"export_action_gold","mode":"off_hours","ok":true,"added":4,"skipped":8218,"total_gold":5265}
 {"timestamp":"2026-06-29T07:55:59.340988+00:00","event":"off_hours_learn","mode":"off_hours","topic":"wiki:Scalping_(trading)","chars":6694}
+{"timestamp":"2026-06-29T08:00:29.213065+00:00","event":"off_hours_dev","mode":"off_hours","trigger":"scheduled"}
+{"timestamp":"2026-06-29T08:00:29.374472+00:00","event":"export_action_gold","mode":"off_hours","ok":true,"added":3,"skipped":8233,"total_gold":5272}
+{"timestamp":"2026-06-29T08:00:48.025050+00:00","event":"mode_change","mode":"trade_focus","from":"off_hours","to":"trade_focus"}
