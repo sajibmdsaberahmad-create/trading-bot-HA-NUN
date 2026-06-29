@@ -25,6 +25,10 @@ elif [[ -z "${HALIM_LM_BACKEND:-}" ]]; then
 fi
 export HALIM_LM_BACKEND
 export HALIM_MODEL_PATH="${HALIM_MODEL_PATH:-halim/data/checkpoints/latest}"
+# ≤12GB Mac: LoRA + 4bit base (~500MB) — merged safetensors (~1GB) OOM-kills serve under HANOON
+if [[ "$_RAM_MB" -le 12288 ]]; then
+  export HALIM_SERVE_PREFER_ADAPTER="${HALIM_SERVE_PREFER_ADAPTER:-true}"
+fi
 if [[ "$HALIM_LM_BACKEND" == "mlx" ]]; then
   # Scaffold registry id (HF hub) — not the Halim product name
   export HALIM_BASE_MODEL="${HALIM_BASE_MODEL:-mlx-community/Qwen2.5-0.5B-Instruct-4bit}"
@@ -38,6 +42,17 @@ export HALIM_FORCE_LM="${HALIM_FORCE_LM:-true}"
 export HALIM_INFERENCE_TIMEOUT_SEC="${HALIM_INFERENCE_TIMEOUT_SEC:-90}"
 # Chat off while live/replay trading — full CPU/RAM for algo (see core/trading_focus_guard.py)
 export HALIM_CHAT_DURING_TRADING="${HALIM_CHAT_DURING_TRADING:-false}"
+# Device dedicates RAM to trading during market hours on ≤12GB Macs
+export DEVICE_TRADING_FOCUS="${DEVICE_TRADING_FOCUS:-true}"
+export HALIM_REMOVE_IDE_HOGS="${HALIM_REMOVE_IDE_HOGS:-true}"
+export HALIM_DEVICE_FOCUS_SEC="${HALIM_DEVICE_FOCUS_SEC:-90}"
+if [[ "$_RAM_MB" -le 12288 ]]; then
+  export HALIM_LEARN_OFF_HOURS_ONLY="${HALIM_LEARN_OFF_HOURS_ONLY:-true}"
+  export HALIM_SERVE_WATCHDOG_SEC="${HALIM_SERVE_WATCHDOG_SEC:-30}"
+  export HALIM_WATCHDOG_INTERVAL_SEC="${HALIM_WATCHDOG_INTERVAL_SEC:-30}"
+fi
+export HALIM_SERVE_WATCHDOG="${HALIM_SERVE_WATCHDOG:-true}"
+export HALIM_STANDALONE_WATCHDOG="${HALIM_STANDALONE_WATCHDOG:-true}"
 
 # Off-hours web learn (read-only Wikipedia + allowlist → action gold)
 export HALIM_WEB_LEARN="${HALIM_WEB_LEARN:-true}"

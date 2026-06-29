@@ -16,12 +16,14 @@ HALIM_URL="${HALIM_SERVER_URL:-http://127.0.0.1:8765}"
 
 SERVE_ONLY=false
 WITH_TELEGRAM=false
+FORCE_RESTART=false
 WAIT_SEC="${HALIM_STARTUP_WAIT_SEC:-120}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --serve-only) SERVE_ONLY=true; shift ;;
     --with-telegram) WITH_TELEGRAM=true; shift ;;
+    --restart|--force-restart) FORCE_RESTART=true; shift ;;
     *) shift ;;
   esac
 done
@@ -146,9 +148,15 @@ _ensure_lm_deps() {
 _ensure_checkpoint
 _ensure_lm_deps
 
-if _halim_health; then
+if [[ "$FORCE_RESTART" == "true" ]] && _serve_running; then
+  echo "🔄 Halim serve restart requested — stopping stale process…"
+  "$ROOT/scripts/halim_stop.sh" --serve-only 2>/dev/null || true
+  sleep 1
+fi
+
+if _halim_health && [[ "$FORCE_RESTART" != "true" ]]; then
   echo "✅ Halim already active at $HALIM_URL"
-elif _serve_running; then
+elif _serve_running && [[ "$FORCE_RESTART" != "true" ]]; then
   echo "⏳ Halim serve starting — waiting for /health…"
   _wait_health || true
 else
