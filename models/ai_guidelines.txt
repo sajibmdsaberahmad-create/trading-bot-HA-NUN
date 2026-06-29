@@ -1800,3 +1800,11 @@ bracket_exit
 Observed loss_streak — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:28:43.916712+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +1.85% (peak +1.85%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:28:43.916741+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +1.85% (peak +1.85%)
+
