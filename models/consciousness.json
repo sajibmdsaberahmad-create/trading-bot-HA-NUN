@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1504,
   "scans_performed": 39,
-  "improvements_applied": 2375,
+  "improvements_applied": 2376,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:11:54.859966",
-      "age": "7d 1h 9m 6s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-6.20",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:12:35.082814",
       "age": "7d 1h 9m 46s",
@@ -11711,6 +11704,35 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:32:06.717667",
+      "age": "8d 2h 29m 18s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2376",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 297.5,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.007,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review ib_failure on INLF"
         ]
       }
     }
