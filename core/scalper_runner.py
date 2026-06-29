@@ -2871,6 +2871,11 @@ class ScalperRunner:
                     except Exception:
                         pass
                     try:
+                        from core.market_context import tick_macro_context_if_due
+                        tick_macro_context_if_due()
+                    except Exception:
+                        pass
+                    try:
                         fast_df = self.data.get_fast_bar_dataframe(n=60)
                         if fast_df is not None and len(fast_df) >= 30:
                             self._ai_update_buffers(fast_df, current_px)
@@ -7869,9 +7874,10 @@ class ScalperRunner:
             log.debug(f"Self-train skipped: {exc}")
     
     def _update_market_context(self):
-        """Fetch Yahoo Finance context and update regime detector."""
+        """Refresh Yahoo macro cache and update regime detector."""
         try:
-            ctx = summarize_market_context()
+            from core.market_context import refresh_macro_context
+            ctx = refresh_macro_context(force=True)
             regime = self.regime_detector.classify(
                 self.data.get_bar_dataframe() if hasattr(self.data, 'get_bar_dataframe') else None,
                 vix_df=None,

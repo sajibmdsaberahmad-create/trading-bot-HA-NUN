@@ -1,0 +1,14 @@
+{
+  "spy_trend": "unknown",
+  "qqq_trend": "unknown",
+  "spy_pct": 0.0,
+  "qqq_pct": 0.0,
+  "spy_price": 0.0,
+  "qqq_price": 0.0,
+  "vix_level": 0.0,
+  "vix_regime": "low",
+  "risk_tone": "neutral",
+  "timestamp": "2026-06-29T15:43:50.409512+00:00",
+  "source": "unavailable",
+  "_fetched_at": 1782747830.409506
+}

@@ -178,6 +178,7 @@ def refresh_macro_context(*, force: bool = False) -> Dict:
         if cached and not force and (now - fetched_at) < interval:
             return dict(cached)
     ctx = _fetch_macro_context()
+    ctx["_fetched_at"] = now
     with _CACHE["lock"]:
         _CACHE["ctx"] = ctx
         _CACHE["fetched_at"] = now
@@ -213,8 +214,6 @@ def tick_macro_context_if_due() -> Optional[Dict]:
         return None
     prev = dict(get_macro_context())
     ctx = refresh_macro_context(force=True)
-    ctx["_fetched_at"] = now
-    _save_state(ctx)
     tone = ctx.get("risk_tone", "neutral")
     if (
         not prev
