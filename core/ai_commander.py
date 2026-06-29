@@ -1105,20 +1105,36 @@ class AICommander:
             from core.war_account import (
                 check_entry_allowed as war_entry_block,
                 sniper_conf_bump,
+                war_account_enabled,
                 war_context_line,
             )
-            war_block = war_entry_block(self.cfg, ticker=ticker, pipeline="entry")
-            if war_block:
-                log.info(f"  ⚔️ war:block {ticker.upper()} — {war_block}")
-                return {
-                    "enter": False,
-                    "confidence": ppo_conf,
-                    "reason": war_block,
-                    "pipeline": "war:veto",
-                    "ppo_action": ppo_action,
-                    "ppo_conf": ppo_conf,
-                }
-        except Exception:
+            if war_account_enabled(self.cfg):
+                war_block = war_entry_block(self.cfg, ticker=ticker, pipeline="entry")
+                if war_block:
+                    log.info(f"  ⚔️ war:block {ticker.upper()} — {war_block}")
+                    return {
+                        "enter": False,
+                        "confidence": ppo_conf,
+                        "reason": war_block,
+                        "pipeline": "war:veto",
+                        "ppo_action": ppo_action,
+                        "ppo_conf": ppo_conf,
+                    }
+            else:
+                from core.live_trade_guard import check_entry_allowed
+                guard_block = check_entry_allowed(ticker, self.cfg)
+                if guard_block:
+                    log.info(f"  🛡️ guard:block {ticker.upper()} — {guard_block}")
+                    return {
+                        "enter": False,
+                        "confidence": ppo_conf,
+                        "reason": guard_block,
+                        "pipeline": "guard:cooldown",
+                        "ppo_action": ppo_action,
+                        "ppo_conf": ppo_conf,
+                    }
+        except Exception as exc:
+            log.debug(f"Entry gate war/guard: {exc}")
             try:
                 from core.live_trade_guard import check_entry_allowed
                 guard_block = check_entry_allowed(ticker, self.cfg)

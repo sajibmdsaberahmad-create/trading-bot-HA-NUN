@@ -283,11 +283,13 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     state["is_live"] = is_live_war(cfg)
     if not STATE_PATH.is_file():
         save_state(state)
-        log.info(
-            f"⚔️ War account ready — {'LIVE' if state['is_live'] else 'PAPER'} "
-            f"cap=${state['nav']:,.0f} settled=${state['settled_cash']:,.0f} "
-            f"mode={state['mode']} bullets={state.get('bullets_total', 5)}"
-        )
+    log.info(
+        f"⚔️ War account — {'LIVE' if state['is_live'] else 'PAPER'} "
+        f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f} "
+        f"mode={state['mode']} trips={int(state.get('round_trips_today', 0))}/"
+        f"{_env_int('WAR_MAX_ROUND_TRIPS_PER_DAY', 3)} "
+        f"fees_today=${float(state.get('fee_drag_today', 0)):,.2f}"
+    )
     return {"ok": True, **state}
 
 

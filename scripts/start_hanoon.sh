@@ -434,6 +434,23 @@ print(f'   Telegram listen: {getattr(cfg, \"TELEGRAM_LISTEN_ENABLED\", True)} | 
 from core.git_sync import ensure_github_cli
 gh_ok = ensure_github_cli(cfg)
 print(f'   GitHub CLI: {\"ready\" if gh_ok else \"WARN\"}')
+try:
+    from core.war_account import ensure_war_account, war_account_enabled
+    if war_account_enabled(cfg):
+        st = ensure_war_account(cfg)
+        print(f'   War: nav={float(st.get("nav", 0)):,.0f} settled={float(st.get("settled_cash", 0)):,.0f} mode={st.get("mode", "?")}')
+except Exception as e:
+    print(f'   War: check skipped ({e})')
+try:
+    from core.market_context import refresh_macro_context, macro_context_enabled
+    if macro_context_enabled():
+        m = refresh_macro_context(force=False)
+        if m.get('source') not in ('unavailable', 'error'):
+            print(f'   Macro: SPY {m.get(\"spy_pct\", 0):+.2f}% QQQ {m.get(\"qqq_pct\", 0):+.2f}% VIX {m.get(\"vix_level\", 0):.1f} ({m.get(\"risk_tone\", \"?\")})')
+        else:
+            print('   Macro: warming on startup (Yahoo)')
+except Exception as e:
+    print(f'   Macro: skipped ({e})')
 " 2>&1 || echo "   Pre-flight warnings (non-fatal)"
 
 # ── 6a. Halim serve — always active before scalper (toddler LM + PPO distillation) ──

@@ -264,6 +264,28 @@ def tick_macro_context_if_due() -> Optional[Dict]:
     return ctx
 
 
+def warm_macro_context_background() -> None:
+    """Non-blocking Yahoo warm — macro ready before first council call."""
+    if not macro_context_enabled():
+        return
+
+    def _run() -> None:
+        try:
+            stale = not get_macro_context()
+            ctx = refresh_macro_context(force=stale)
+            if ctx.get("source") in ("unavailable", "error"):
+                return
+            log.info(
+                f"🌍 Macro ready: SPY {ctx.get('spy_pct', 0):+.2f}% | "
+                f"QQQ {ctx.get('qqq_pct', 0):+.2f}% | "
+                f"VIX {ctx.get('vix_level', 0):.1f} ({ctx.get('risk_tone', '?')})"
+            )
+        except Exception as exc:
+            logger.debug(f"Macro warm: {exc}")
+
+    threading.Thread(target=_run, daemon=True, name="macro-warm").start()
+
+
 def macro_context_line() -> str:
     """One-line macro block for council/Halim prompts (advisory, no veto)."""
     ctx = get_macro_context()

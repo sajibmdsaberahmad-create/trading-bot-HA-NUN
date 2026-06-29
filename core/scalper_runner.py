@@ -2608,6 +2608,11 @@ class ScalperRunner:
         except Exception as exc:
             log.debug(f"War account: {exc}")
         try:
+            from core.market_context import warm_macro_context_background
+            warm_macro_context_background()
+        except Exception as exc:
+            log.debug(f"Macro warm: {exc}")
+        try:
             from core.lottery_bank import ensure_lottery_bank
             ensure_lottery_bank(self.cfg)
         except Exception as exc:
