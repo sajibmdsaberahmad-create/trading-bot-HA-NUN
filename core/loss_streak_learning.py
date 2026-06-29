@@ -140,12 +140,28 @@ def run_loss_streak_learning(
         return ""
 
     plan = generate_commander_plan(cfg, ctx, _think)
-    if not (plan.get("mutations") or []):
-        plan["mutations"] = _heuristic_mutations(cfg, losses)
-    if not plan.get("summary"):
+    heuristic = _heuristic_mutations(cfg, losses)
+    streak_muts = []
+    try:
+        from core.live_trade_guard import loss_streak_heuristic_mutations
+        streak_muts = loss_streak_heuristic_mutations(cfg, streak)
+    except Exception:
+        pass
+    merged: List[Dict[str, Any]] = []
+    seen_params: set = set()
+    for mut in streak_muts + heuristic + (plan.get("mutations") or []):
+        p = str(mut.get("param", "")).strip()
+        if not p or p in seen_params:
+            continue
+        seen_params.add(p)
+        merged.append(mut)
+        if len(merged) >= 4:
+            break
+    plan["mutations"] = merged
+    if "Could not parse" in str(plan.get("summary", "")) and merged:
         plan["summary"] = (
-            f"Reviewed {streak} consecutive losses — "
-            f"{'slippage/fill issues detected' if losses else 'tightening entry filters'}"
+            f"Loss streak {streak} — applied {len(merged)} guardrail mutation(s) "
+            f"(deterministic + heuristics)"
         )
 
     applied = apply_commander_plan(

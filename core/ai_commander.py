@@ -1098,6 +1098,7 @@ class AICommander:
         ppo_action, ppo_conf, ppo_reason = (0, 0.5, "")
         if obs is not None:
             ppo_action, ppo_conf, ppo_reason = self.ppo_action(obs, bar_df, for_entry=True)
+        consecutive_losses = int(account.get("consecutive_losses", 0) or 0)
 
         try:
             from core.trading_copilot import copilot_blocks_entry, get_copilot_brief, copilot_caution_for_ticker
@@ -1207,6 +1208,7 @@ class AICommander:
             self.cfg, scan_score, spike_ratio,
         ) and should_disciplined_strong_entry(
             self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
+            ticker=ticker, consecutive_losses=consecutive_losses,
         ):
             fast_out = {
                 "enter": True,
@@ -1363,6 +1365,7 @@ class AICommander:
                 ppo_action, ppo_conf, ppo_reason, min_conf,
                 scan_score=scan_score, spike_ratio=spike_ratio,
                 quality=quality, cfg=self.cfg,
+                ticker=ticker, consecutive_losses=consecutive_losses,
             )
             out = merged
             if out.get("pending"):

@@ -297,6 +297,9 @@ def merge_entry_decision(
     spike_ratio: float = 1.0,
     quality: Optional[Dict[str, Any]] = None,
     cfg: Optional[Any] = None,
+    *,
+    ticker: str = "",
+    consecutive_losses: int = 0,
 ) -> Dict[str, Any]:
     """
     Collaborative cloud council + PPO — non-blocking.
@@ -317,6 +320,31 @@ def merge_entry_decision(
     timeout_min_scan = float(
         getattr(cfg, "COUNCIL_TIMEOUT_MIN_SCAN_SCORE", 40.0),
     ) if cfg else 40.0
+
+    def _fast_blocked(pipeline: str) -> Optional[str]:
+        try:
+            from core.live_trade_guard import check_fast_entry_bypass
+            return check_fast_entry_bypass(
+                cfg,
+                ticker=ticker,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                consecutive_losses=consecutive_losses,
+                pipeline=pipeline,
+            )
+        except Exception:
+            return None
+
+    def _apply_fast_block(base_dict: Dict[str, Any], pipeline: str) -> Dict[str, Any]:
+        block = _fast_blocked(pipeline)
+        if block:
+            base_dict.update({
+                "enter": False,
+                "pending": False,
+                "pipeline": f"{pipeline}_blocked",
+                "reason": block[:200],
+            })
+        return base_dict
     base: Dict[str, Any] = {
         "enter": False,
         "pending": False,
@@ -441,6 +469,7 @@ def merge_entry_decision(
                     f"vol={spike_ratio:.1f}x prob={profit_prob:.0%} | PPO {ppo_conf:.0%}"
                 )[:200],
             })
+            return _apply_fast_block(base, "council:scanner_fast")
         elif profit_prob >= min_prob and scan_score >= min_sc * 0.85:
             base.update({
                 "enter": True,
@@ -452,7 +481,8 @@ def merge_entry_decision(
                     f"score={scan_score:.0f}"
                 )[:200],
             })
-        elif scan_score >= min_sc * 1.5:
+            return _apply_fast_block(base, "council:scanner_fast")
+        elif scan_score >= min_sc * 1.5 and ppo_buy:
             base.update({
                 "enter": True,
                 "pending": False,
@@ -463,6 +493,7 @@ def merge_entry_decision(
                     f"| PPO {ppo_conf:.0%}"
                 )[:200],
             })
+            return _apply_fast_block(base, "council:scanner_fast")
         else:
             base["pipeline"] = "council:scanner_fast_pass"
             base["reason"] = "Scanner fast-path: signal not strong enough"

@@ -140,15 +140,17 @@ def snapshot_learning(
     except Exception as exc:
         result["steps"]["cognitive"] = str(exc)[:60]
 
-    # PPO weights — skip mid-session snapshots (teardown/flush saves)
+    # PPO weights — skip mid-session snapshots (teardown/flush saves); no SSD churn during RTH
     if model is not None and os.getenv("LEARNING_SNAPSHOT_SAVE_PPO", "true").lower() in (
         "1", "true", "yes",
     ):
         try:
-            from core.learning_coordinator import should_queue_only_learning
-            skip_ppo_snap = should_queue_only_learning(cfg)
+            from core.learning_coordinator import should_defer_heavy_learning, should_queue_only_learning
+            skip_ppo_snap = should_queue_only_learning(cfg) or should_defer_heavy_learning(cfg)
         except Exception:
             skip_ppo_snap = False
+        if os.getenv("LEARNING_SNAPSHOT_SAVE_PPO", "true").lower() in ("0", "false", "no"):
+            skip_ppo_snap = True
         if not skip_ppo_snap:
             try:
                 path = getattr(cfg, "MODEL_PATH", "ppo_trader.zip")

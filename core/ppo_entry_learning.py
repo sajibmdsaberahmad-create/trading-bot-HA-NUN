@@ -524,9 +524,74 @@ def on_entry_fill(
             spike_ratio=spike_ratio, scan_score=scan_score, slippage_pct=slippage_pct,
         ),
         "entry_price": entry_price,
+        "ppo_action": ppo_action,
+        "pipeline": str((council_decision or {}).get("pipeline", "")),
     }
-    evaluate_and_improve_ppo(cfg, model=model or get_ppo_model(), records=[rec])
+    # Never micro-train on PPO-override entries during session — queue close reward instead
+    if int(ppo_action) == 1 and float(rec["reward"]) > 0:
+        evaluate_and_improve_ppo(cfg, model=model or get_ppo_model(), records=[rec])
     return entry_id
+
+
+def record_ppo_trade_close(
+    cfg: BotConfig,
+    *,
+    ticker: str,
+    pnl_usd: float,
+    pnl_pct: float = 0.0,
+    result: str = "loss",
+    exit_reason: str = "",
+) -> None:
+    """Link close P&L to pending entry — primary live learning signal."""
+    ticker_u = ticker.upper()
+    entry_rec = None
+    entry_id = None
+    with _lock:
+        for eid, rec in reversed(list(_pending.items())):
+            if rec.get("ticker") == ticker_u and not rec.get("trade_closed"):
+                entry_rec = rec
+                entry_id = eid
+                break
+    if not entry_rec:
+        return
+    prev = float(entry_rec.get("reward", 0.0))
+    from core.reward_shaping import reward_from_trade
+    close_reward = reward_from_trade(
+        float(pnl_usd), cfg,
+        pnl_pct=float(pnl_pct or 0),
+    )
+    reward = round(prev + close_reward, 4)
+    row = {
+        "source": "ppo_entry",
+        "event": "trade_close",
+        "entry_id": entry_id,
+        "ticker": ticker_u,
+        "pnl_usd": round(float(pnl_usd), 2),
+        "pnl_pct": round(float(pnl_pct or 0), 4),
+        "result": result,
+        "exit_reason": str(exit_reason or "")[:200],
+        "reward": reward,
+        "reward_delta": round(close_reward, 4),
+        "reward_stage": "trade_close",
+        "pipeline": entry_rec.get("pipeline", ""),
+        "ppo_action": entry_rec.get("ppo_action", 0),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        from core.experience_buffer import append as buffer_append
+        buffer_append(row)
+    except Exception:
+        pass
+    _append_ledger(row)
+    with _lock:
+        if entry_id and entry_id in _pending:
+            _pending[entry_id]["reward"] = reward
+            _pending[entry_id]["trade_closed"] = True
+    try:
+        from core.ppo_reward_trainer import defer_reward_records
+        defer_reward_records([row])
+    except Exception:
+        pass
 
 
 def on_council_response(
