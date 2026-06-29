@@ -5,30 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1497,
   "scans_performed": 39,
-  "improvements_applied": 2358,
+  "improvements_applied": 2360,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:08:42.454217",
-      "age": "7d 1h 5m 53s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1728",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:08:46.455442",
-      "age": "7d 1h 5m 57s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-11.08",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:08:46.993124",
       "age": "7d 1h 5m 58s",
@@ -11677,6 +11656,34 @@
       "age": "8d 2h 13m 26s",
       "type": "IMPROVE",
       "message": "Applied improvement #2358",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:16:40.046270",
+      "age": "8d 2h 13m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2359",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:16:58.757144",
+      "age": "8d 2h 14m 10s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2360",
       "metadata": {
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
