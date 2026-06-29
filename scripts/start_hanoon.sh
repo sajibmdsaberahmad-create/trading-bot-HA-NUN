@@ -65,8 +65,16 @@ export PAPER_EQUITY_HINT="${PAPER_EQUITY_HINT:-1000000}"
 LOG_DIR="${LOG_DIR:-$ROOT/logs}"
 MAIN_LOG="$LOG_DIR/HANOON.log"
 PID_FILE="$LOG_DIR/hanoon.pid"
+export HANOON_LOG_PATH="$MAIN_LOG"
 
 mkdir -p "$LOG_DIR" "$ROOT/models/daily_reports" "$ROOT/runtime"
+
+# One canonical log: logs/HANOON.log (Python FileHandler — no tee duplicate)
+if [[ -f "$ROOT/HANOON.log" && ! -L "$ROOT/HANOON.log" ]]; then
+  cat "$ROOT/HANOON.log" >>"$MAIN_LOG" 2>/dev/null || true
+  mv "$ROOT/HANOON.log" "$ROOT/HANOON.log.migrated.$(date +%s)" 2>/dev/null || true
+fi
+ln -sf "$MAIN_LOG" "$ROOT/HANOON.log" 2>/dev/null || true
 
 export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/mpl}"
 export CAPITAL_DISCIPLINE="${CAPITAL_DISCIPLINE:-true}"
@@ -445,7 +453,7 @@ echo "  Live tail: tail -f $MAIN_LOG"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Foreground + tee: live terminal output; bot writes logs/hanoon.pid via write_pid()
+# Foreground: StreamHandler → terminal, FileHandler → $MAIN_LOG (see core/notify.py)
 PY="${ROOT}/venv/bin/python3"
 if [[ ! -x "$PY" ]]; then PY="python3"; fi
-"$PY" -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" 2>&1 | tee -a "$MAIN_LOG"
+"$PY" -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID"

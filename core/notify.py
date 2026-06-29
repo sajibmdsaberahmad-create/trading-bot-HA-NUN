@@ -27,6 +27,7 @@ import logging
 import os
 import smtplib
 import sys
+from pathlib import Path
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -53,12 +54,56 @@ class ETFormatter(logging.Formatter):
         return dt.strftime("%Y-%m-%d %H:%M:%S ET")
 
 
-def build_logger(log_path: str = "HANOON.log") -> logging.Logger:
+def resolve_hanoon_log_path() -> str:
+    """
+    Single canonical log file: logs/HANOON.log (override via HANOON_LOG_PATH).
+    Merges legacy ./HANOON.log into logs/ once on first resolve.
+    """
+    env = (os.getenv("HANOON_LOG_PATH") or os.getenv("LOG_PATH") or "").strip()
+    if env:
+        p = Path(env).expanduser()
+        if not p.is_absolute():
+            p = Path.cwd() / p
+        p.parent.mkdir(parents=True, exist_ok=True)
+        return str(p.resolve())
+
+    root = Path.cwd()
+    canonical = root / "logs" / "HANOON.log"
+    legacy = root / "HANOON.log"
+    canonical.parent.mkdir(parents=True, exist_ok=True)
+
+    if legacy.is_file() and not legacy.is_symlink():
+        try:
+            if not canonical.exists() or legacy.stat().st_mtime >= canonical.stat().st_mtime:
+                with open(legacy, "r", encoding="utf-8", errors="replace") as src:
+                    tail = src.read()
+                if tail:
+                    with open(canonical, "a", encoding="utf-8") as dst:
+                        if canonical.stat().st_size > 0 and not tail.startswith("\n"):
+                            dst.write("\n")
+                        dst.write(tail)
+            legacy.rename(legacy.with_name(f"HANOON.log.migrated.{int(legacy.stat().st_mtime)}"))
+        except OSError:
+            pass
+
+    try:
+        link = root / "HANOON.log"
+        if not link.exists() and not link.is_symlink():
+            link.symlink_to(Path("logs") / "HANOON.log")
+    except OSError:
+        pass
+
+    return str(canonical.resolve())
+
+
+def build_logger(log_path: Optional[str] = None) -> logging.Logger:
     """
     Build the project-wide logger. Writes to both stdout and a rotating
     log file. ib_insync's own chatty network logs are suppressed to
     WARNING so they don't drown out the bot's own status lines.
     """
+    if log_path is None:
+        log_path = resolve_hanoon_log_path()
     fmt = ETFormatter(
         fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S ET",

@@ -1321,7 +1321,7 @@ class BotConfig:
     # FILES
     # ════════════════════════════════════════════════════════════════════
     MODEL_PATH:    str = "ppo_trader.zip"
-    LOG_PATH:      str = "HANOON.log"
+    LOG_PATH:      str = "logs/HANOON.log"
     PERF_PATH:     str = "performance.csv"
     STATE_PATH:    str = "bot_state.json"
     AUDIT_PATH:    str = "audit_trail.jsonl"
