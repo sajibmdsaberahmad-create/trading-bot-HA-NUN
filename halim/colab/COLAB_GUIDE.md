@@ -1,129 +1,179 @@
 # Halim Toddler — Google Colab (beginner guide)
 
-Train Halim's first language model **for free** on Google's GPU. Your Mac only prepares data and runs the finished model.
+Train Halim's first language model **for free** on Google's GPU. Your Mac prepares data; Colab trains with **Drive saves + resume**.
 
 ---
 
-## Part A — On your Mac (10 minutes)
+## Quick reference — which mode?
 
-### Step A1 — Prepare data (one command)
+| Situation | Mac command | Colab env |
+|-----------|-------------|-----------|
+| **First train / big jump (v3 + commander)** | `./scripts/halim_colab_ready.sh` | `HALIM_FRESH_TRAIN=true` |
+| **Weekly update / new gold** | `./scripts/halim_prepare_train_incremental.sh` | `HALIM_CONTINUE_LORA=auto` |
+| **Colab crashed mid-run** | (same zip still on Drive) | `HALIM_RESUME=auto` — **do not** set `FRESH_TRAIN` |
+| **After any successful train** | `./scripts/halim_record_train.sh` | (or auto on Colab if repo mounted) |
 
-Open **Terminal** and run:
+---
+
+## Part A — On your Mac
+
+### A1 — Full pack (v3 first time with commander gold)
 
 ```bash
 cd ~/Downloads/tradingbot
-chmod +x scripts/halim_colab_ready.sh
 ./scripts/halim_colab_ready.sh
 ```
 
-This upgrades live PPO, exports **all** training gold, rebuilds `sft/train.jsonl`, and **overwrites** the single canonical **`halim_sft.zip`** (same path every time — never keep old copies).
+Creates **`halim_sft.zip`** (~11k pairs full mode). Check `models/halim_sft_package.meta.json` for `build_id`.
 
-### One zip rule
-
-| Do | Don't |
-|----|-------|
-| Upload `tradingbot/halim_sft.zip` only | Keep `halim_sft_old.zip` or dated copies in Downloads |
-| Run `./scripts/halim_colab_ready.sh` before each Colab train | Re-upload a zip from last week |
-| Check `build_id` in Colab cell output | Guess which zip is newest |
-
-After packaging, see `models/halim_sft_package.meta.json` for `build_id` and `updated_at`.
-
-You should see `"ok": true` and **2,500+** deduped pairs (more after replay sessions).
-
-Manual path (same result):
+### A2 — Incremental pack (after v3 — faster ~45–90 min)
 
 ```bash
-./scripts/halim_readiness.sh
-./scripts/halim_prepare_train.sh
-./scripts/halim_package_colab.sh
+./scripts/halim_record_train.sh          # once, after last successful Colab train
+./scripts/halim_prepare_train_incremental.sh
 ```
 
-### Step A2 — Create upload zip
+Creates a smaller zip: **core curriculum + new gold only** (~1.5–2.5k pairs).
+
+### A3 — Record v2 if you already trained but never recorded
 
 ```bash
-chmod +x scripts/halim_package_colab.sh
-./scripts/halim_package_colab.sh
+# Marks current train.jsonl hashes as "already trained" (use v2 build id)
+HALIM_SFT_MODE=full ./scripts/halim_prepare_train.sh   # if needed
+./scripts/halim_record_train.sh --build-id f952f242ea6e
 ```
-
-This creates **`halim_sft.zip`** in your tradingbot folder (~2–5 MB).
-
-Keep Terminal open — you'll come back here after Colab.
 
 ---
 
-## Part B — Google Colab (30–45 minutes)
+## Part B — Google Colab (automatic)
 
-### Step B1 — Create Colab account
+Open **`halim/colab/halim_toddler_train.ipynb`** → Runtime → GPU → run all 4 cells.
 
-1. Go to [https://colab.research.google.com](https://colab.research.google.com)
-2. Sign in with your Google account (free)
+### Upload to `My Drive/Halim/` (browser)
 
-### Step B2 — Enable free GPU
+| When | File |
+|------|------|
+| **Every train** | `halim_sft.zip` from Mac (`halim_prepare_train_incremental.sh`) |
+| **First time only** | `halim_toddler_v2.zip` if `toddler_v1/` not on Drive yet |
 
-1. **File → Upload notebook**
-2. Upload `halim/colab/Halim_Toddler_Training.ipynb` from this repo
-3. **Runtime → Change runtime type**
-4. Set **Hardware accelerator: T4 GPU**
-5. Click **Save**
+After the first run, weights stay on Drive in `toddler_v1/`. Next runs: **only upload new `halim_sft.zip`**.
 
-### Step B3 — Run cells top to bottom
+Auto logic (`colab_drive_setup.py` inside the SFT zip):
+- picks latest `halim_sft*.zip` and existing `toddler_v1/` on Drive
+- incremental continue LoRA vs crash-resume vs fresh
+- names output `halim_toddler_v4.zip`, `v5`, … on Drive
 
-Click each cell, press **Shift+Enter**.
+Copy-paste cells (legacy): **`halim/colab/COLAB_DRIVE_CELLS.md`**
 
-| Cell | What it does |
-|------|----------------|
-| 1 | Checks GPU — must show `Tesla T4` |
-| 2 | Installs libraries |
-| 3 | **Upload `halim_sft.zip`** from your Mac |
-| 4 | Unzips to `sft/train.jsonl` |
-| 5 | Gets training script (or upload `train_toddler_colab.py` manually) |
-| 6 | **Trains Halim** (~15–30 min) |
-| 7 | Quick test generation |
-| 8 | Downloads **`halim_toddler_v1.zip`** to your Mac |
+### B1 — Mount Drive + env
 
-**If Step 5 curl fails:** drag `halim/colab/train_toddler_colab.py` into Colab's file panel, then run Step 6.
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+
+import os
+WORK = "/content/drive/MyDrive/Halim"
+os.makedirs(WORK, exist_ok=True)
+
+os.environ["HALIM_OUT_DIR"] = f"{WORK}/toddler_v1"
+os.environ["HALIM_CONTINUE_LORA"] = "auto"
+os.environ["HALIM_RESUME"] = "false"          # incremental v3
+os.environ["HALIM_SAVE_TOTAL_LIMIT"] = "3"
+
+!ls -la "$WORK"
+```
+
+### B2 — Unzip v2 + SFT + script from Drive
+
+```python
+import zipfile, shutil, json
+from pathlib import Path
+
+WORK = Path("/content/drive/MyDrive/Halim")
+
+# v2 (skip if adapter already on Drive)
+if (WORK / "halim_toddler_v2.zip").is_file():
+    adp = WORK / "toddler_v1" / "lora_adapter" / "adapter_model.safetensors"
+    if not adp.is_file():
+        with zipfile.ZipFile(WORK / "halim_toddler_v2.zip", "r") as zf:
+            zf.extractall(WORK)
+
+# remove finished v2 checkpoints (incremental v3)
+adp_dir = WORK / "toddler_v1" / "lora_adapter"
+for p in adp_dir.glob("checkpoint-*"):
+    shutil.rmtree(p)
+
+# SFT from Drive (includes train_toddler_colab.py inside zip)
+with zipfile.ZipFile(WORK / "halim_sft.zip", "r") as zf:
+    zf.extractall("/content")
+print(json.dumps(json.load(open("/content/sft/colab_manifest.json")), indent=2))
+```
+
+### B3 — pip + train
+
+```python
+!pip install -q transformers peft trl datasets accelerate bitsandbytes
+%cd /content
+!python train_toddler_colab.py
+```
+
+Expect: `CONTINUE_LORA: True | RESUME_CKPT: none` and a **real** progress bar (~30–90 min).
+
+### B4 — If session dies mid-train
+
+```python
+os.environ["HALIM_RESUME"] = "true"
+os.environ["HALIM_RESUME_MIDRUN"] = "true"
+# do NOT delete checkpoint-* folders — re-run B2 (skip v2 unzip) + B3
+```
+
+### B5 — Zip v3 on Drive
+
+```python
+!cd /content/drive/MyDrive/Halim && zip -r halim_toddler_v3.zip toddler_v1
+```
+
+Download `halim_toddler_v3.zip` from Drive on your Mac (no Colab upload needed).
+
 
 ---
 
-## Part C — Back on your Mac (5 minutes)
-
-### Step C1 — Install the checkpoint
+## Part C — Back on Mac
 
 ```bash
 cd ~/Downloads/tradingbot
-mkdir -p halim/data/checkpoints/toddler_v1
-unzip ~/Downloads/halim_toddler_v1.zip -d halim/data/checkpoints/
+./scripts/halim_start_toddler.sh ~/Downloads/halim_toddler_v3.zip
+./scripts/halim_record_train.sh
+./scripts/ensure_halim_active.sh --serve-only
 ```
 
-You should have:
+---
+
+## Environment variables (train script)
+
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `HALIM_OUT_DIR` | `toddler_v1` | **Use Drive path** for persistence |
+| `HALIM_RESUME` | `auto` | Resume `checkpoint-*` after crash |
+| `HALIM_FRESH_TRAIN` | `false` | Wipe adapter; train from base Qwen |
+| `HALIM_CONTINUE_LORA` | `auto` | Load existing LoRA on new SFT zip |
+| `HALIM_SAVE_STEPS` | `0` | `0` = save each epoch; `200` = every 200 steps |
+| `HALIM_SAVE_TOTAL_LIMIT` | `3` | Keep last N checkpoints |
+| `HALIM_RESUME_CHECKPOINT` | — | Explicit path to one checkpoint folder |
+| `HALIM_CORE_DELTA_EPOCHS` | `2.5` | Fewer epochs for incremental packs |
+
+---
+
+## Your workflow going forward
 
 ```
-halim/data/checkpoints/toddler_v1/
-  config.json
-  merged/          ← the actual model weights
-  lora_adapter/    ← optional, ignore
+Mac: gold grows → incremental pack → halim_sft.zip
+Colab: Drive OUT_DIR + CONTINUE_LORA → train ~45–90 min
+Mac: install zip → record_train → serve
 ```
 
-### Step C2 — Register Halim's brain
-
-```bash
-pip install torch transformers   # if not already installed
-./scripts/halim_register_checkpoint.sh toddler_v1 --backend hf
-```
-
-### Step C3 — Turn on Halim inference
-
-```bash
-export HALIM_LM_BACKEND=hf
-export HALIM_MODEL_PATH=halim/data/checkpoints/latest
-./scripts/halim_serve.sh
-```
-
-In another Terminal tab:
-
-```bash
-./scripts/halim_chat.sh "Halim, summarize today's trading mindset"
-```
+**v3 now:** `halim_colab_ready.sh` + Colab with `HALIM_FRESH_TRAIN=true` + Drive `OUT_DIR`  
+**v4+:** `halim_prepare_train_incremental.sh` + `HALIM_CONTINUE_LORA=auto` (no FRESH_TRAIN)
 
 ---
 
@@ -131,19 +181,8 @@ In another Terminal tab:
 
 | Problem | Fix |
 |---------|-----|
-| Colab says "No GPU" | Runtime → Change runtime type → T4 GPU |
-| Session disconnected | Re-run from Step 3 (upload zip again) |
-| `halim_sft.zip` missing | Run `./scripts/halim_package_colab.sh` on Mac |
-| Chat returns empty | Check `./scripts/halim_status.sh` — checkpoint must exist |
-| Out of memory on Colab | Rare on T4; restart runtime and re-run |
-| `unexpected keyword argument 'max_seq_length'` | Colab TRL is new — use latest `train_toddler_colab.py` (uses `max_length`) |
-| `NameError: name 'epochs' is not defined` | Re-upload `halim/colab/train_toddler_colab.py` (v3 fix) from your Mac |
-| `Can't find adapter_config at toddler_v1/lora_adapter` | Train first (`train_toddler_colab.py`); merge only works after LoRA exists locally |
-
----
-
-## What you own after this
-
-- **`toddler_v1/merged/`** — ~1GB model weights, trained on your trades
-- **No API keys** required for Halim text generation
-- Phase moves from **newborn** → **adult** (checkpoint exists)
+| Colab disconnected | Re-run with same Drive `OUT_DIR`, `HALIM_RESUME=auto` |
+| Training 5+ hours | Use incremental pack, not full 11k |
+| Incremental pack empty | Run `./scripts/halim_record_train.sh` after last train |
+| `Can't find adapter` | First train needs `FRESH_TRAIN=true` once |
+| Chat weak after v2 | v3 full with commander gold still recommended once |

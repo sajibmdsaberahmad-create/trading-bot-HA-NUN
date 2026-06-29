@@ -157,6 +157,16 @@ def format_system_report(status: Dict[str, Any]) -> str:
         if risk.get("halted"):
             lines.append("⛔ Risk circuit HALTED")
 
+    try:
+        from core.lottery_bank import format_status, lottery_bank_enabled
+        from core.config import BotConfig
+        if lottery_bank_enabled(BotConfig()):
+            lb = format_status().replace("\n", "\n")
+            for lb_line in lb.split("\n"):
+                lines.append(lb_line)
+    except Exception:
+        pass
+
     lines.extend([
         "",
         "🧠 AI / Model",

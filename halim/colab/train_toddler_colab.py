@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """
 Train Halim toddler on Google Colab (free T4 GPU).
-SCRIPT_VERSION = halim-toddler-v3  (epochs passed into _build_sft_config)
+SCRIPT_VERSION = halim-toddler-v4  (Drive resume + core_delta + continue LoRA)
 
-Expects:
-  sft/train.jsonl
-  sft/valid.jsonl
-
-Writes:
-  toddler_v1/          merged small model (~1GB)
-  toddler_v1/config.json   Halim metadata for your Mac
+Env (set in Colab before running):
+  HALIM_OUT_DIR          default toddler_v1 — use Drive path to survive disconnects:
+                         /content/drive/MyDrive/Halim/toddler_v1
+  HALIM_RESUME           auto|true|false — resume mid-run checkpoint (default auto)
+  HALIM_FRESH_TRAIN      true — wipe adapter, train from base Qwen (first v3 full)
+  HALIM_CONTINUE_LORA    auto|true|false — load existing LoRA weights on new SFT zip
+  HALIM_SAVE_STEPS       0=epoch only; e.g. 200 for step saves during long runs
+  HALIM_SAVE_TOTAL_LIMIT keep last N checkpoints (default 3)
+  HALIM_RESUME_CHECKPOINT explicit path to checkpoint-N folder
 """
 
 from __future__ import annotations
@@ -21,15 +23,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 BASE_MODEL = os.getenv("HALIM_BASE_MODEL", os.getenv("HALIM_SCAFFOLD_HF", "Qwen/Qwen2.5-0.5B-Instruct"))
-# ^ HALIM_SCAFFOLD_HF / default: HuggingFace registry id for training scaffold only (M. A. Halim = product).
 SFT_DIR = Path(os.getenv("HALIM_SFT_DIR", "sft"))
 OUT_DIR = Path(os.getenv("HALIM_OUT_DIR", "toddler_v1"))
 MAX_SEQ_LENGTH = int(os.getenv("HALIM_MAX_SEQ_LENGTH", "1024"))
-EPOCHS = float(os.getenv("HALIM_EPOCHS", "0"))  # 0 = auto from dataset size
+EPOCHS = float(os.getenv("HALIM_EPOCHS", "0"))
 BATCH_SIZE = int(os.getenv("HALIM_BATCH_SIZE", "2"))
 GRAD_ACCUM = int(os.getenv("HALIM_GRAD_ACCUM", "4"))
 LORA_R = int(os.getenv("HALIM_LORA_R", "16"))
 LORA_ALPHA = int(os.getenv("HALIM_LORA_ALPHA", "32"))
+SAVE_STEPS = int(os.getenv("HALIM_SAVE_STEPS", "0"))
+SAVE_TOTAL_LIMIT = int(os.getenv("HALIM_SAVE_TOTAL_LIMIT", "3"))
+
+
+def _env_bool(name: str, default: str = "false") -> bool:
+    return os.getenv(name, default).lower() in ("1", "true", "yes")
 
 
 def _auto_epochs(train_n: int) -> float:
@@ -73,9 +80,88 @@ def _load_rows(path: Path) -> list:
     return rows
 
 
+def _checkpoint_dirs(adapter_dir: Path) -> list[Path]:
+    out = []
+    for p in adapter_dir.glob("checkpoint-*"):
+        suffix = p.name.split("-")[-1]
+        if suffix.isdigit():
+            out.append(p)
+    return sorted(out, key=lambda p: int(p.name.split("-")[-1]))
+
+
+def _find_resume_checkpoint(adapter_dir: Path, *, target_epochs: float = 0.0) -> str | None:
+    explicit = os.getenv("HALIM_RESUME_CHECKPOINT", "").strip()
+    if explicit:
+        ep = Path(explicit)
+        return str(ep) if ep.is_dir() else None
+
+    mode = os.getenv("HALIM_RESUME", "auto").lower()
+    if mode in ("0", "false", "no"):
+        return None
+    if mode == "auto" and _env_bool("HALIM_FRESH_TRAIN"):
+        return None
+
+    cps = _checkpoint_dirs(adapter_dir)
+    if not cps:
+        return None
+
+    last = cps[-1]
+    # Finished v2 checkpoint-3955 is not a crash — don't resume trainer state on incremental.
+    if _env_bool("HALIM_CONTINUE_LORA", "auto") and not _env_bool("HALIM_RESUME_MIDRUN"):
+        print(
+            f"Skip trainer resume ({last.name}): CONTINUE_LORA uses weights only — "
+            "set HALIM_RESUME_MIDRUN=true only after a disconnect mid-run"
+        )
+        return None
+
+    state_path = last / "trainer_state.json"
+    if state_path.is_file() and target_epochs > 0:
+        try:
+            state = json.loads(state_path.read_text())
+            done_epoch = float(state.get("epoch", 0) or 0)
+            if done_epoch >= target_epochs - 0.01:
+                print(f"Skip resume: {last.name} already at epoch {done_epoch} (target {target_epochs})")
+                return None
+        except Exception:
+            pass
+
+    print(f"Resume: found {last.name} under {adapter_dir}")
+    return str(last)
+
+
+def _should_continue_lora(adapter_dir: Path, *, fresh_train: bool) -> bool:
+    if fresh_train:
+        return False
+    mode = os.getenv("HALIM_CONTINUE_LORA", "auto").lower()
+    if mode in ("0", "false", "no"):
+        return False
+    has_adapter = (adapter_dir / "adapter_model.safetensors").is_file()
+    has_ckpt = bool(_checkpoint_dirs(adapter_dir))
+    if mode in ("1", "true", "yes"):
+        return has_adapter or has_ckpt
+    return has_adapter
+
+
+def _prepare_adapter_dir(adapter_dir: Path, *, fresh_train: bool, resume_ckpt: str | None, continue_lora: bool) -> None:
+    if resume_ckpt:
+        print(f"Keeping adapter dir for resume: {adapter_dir}")
+        adapter_dir.mkdir(parents=True, exist_ok=True)
+        return
+    if continue_lora:
+        print(f"Continue LoRA: keeping existing weights in {adapter_dir}")
+        adapter_dir.mkdir(parents=True, exist_ok=True)
+        return
+    if fresh_train and adapter_dir.exists():
+        print(f"FRESH_TRAIN: removing {adapter_dir}")
+        shutil.rmtree(adapter_dir)
+    adapter_dir.mkdir(parents=True, exist_ok=True)
+
+
 def _build_sft_config(SFTConfig, *, adapter_dir: Path, epochs: float) -> object:
-    """TRL API changed: max_seq_length → max_length in v0.16+."""
     import inspect
+
+    save_strategy = "steps" if SAVE_STEPS > 0 else "epoch"
+    save_steps = SAVE_STEPS if SAVE_STEPS > 0 else 500
 
     kwargs = {
         "output_dir": str(adapter_dir),
@@ -86,7 +172,9 @@ def _build_sft_config(SFTConfig, *, adapter_dir: Path, epochs: float) -> object:
         "learning_rate": 2e-4,
         "logging_steps": 25,
         "eval_strategy": "epoch",
-        "save_strategy": "epoch",
+        "save_strategy": save_strategy,
+        "save_steps": save_steps,
+        "save_total_limit": SAVE_TOTAL_LIMIT,
         "fp16": False,
         "bf16": True,
         "report_to": "none",
@@ -101,6 +189,19 @@ def _build_sft_config(SFTConfig, *, adapter_dir: Path, epochs: float) -> object:
     if "evaluation_strategy" in params and "eval_strategy" not in params:
         kwargs["evaluation_strategy"] = kwargs.pop("eval_strategy")
     return SFTConfig(**{k: v for k, v in kwargs.items() if k in params})
+
+
+def _record_trained_hashes(train_rows: list, build_id: str) -> None:
+    try:
+        import sys
+        repo = Path.cwd()
+        if str(repo / "halim") not in sys.path:
+            sys.path.insert(0, str(repo / "halim"))
+        from halim.dataset import record_trained_from_sft
+        record_trained_from_sft(root=repo, build_id=build_id, train_pairs=len(train_rows))
+        print("Recorded trained hashes → models/halim_sft_trained_hashes.jsonl")
+    except Exception as exc:
+        print(f"Note: could not record trained hashes on Colab ({exc}) — run record_sft_trained.py on Mac")
 
 
 def main() -> None:
@@ -118,15 +219,34 @@ def main() -> None:
     train_rows = _load_rows(SFT_DIR / "train.jsonl")
     valid_rows = _load_rows(SFT_DIR / "valid.jsonl")
     colab_manifest = _load_colab_manifest()
+    sft_mode = "full"
+    manifest_path = SFT_DIR / "manifest.json"
+    if manifest_path.is_file():
+        try:
+            sft_mode = json.loads(manifest_path.read_text()).get("mode", "full")
+        except Exception:
+            pass
+
+    adapter_dir = OUT_DIR / "lora_adapter"
+    fresh_train = _env_bool("HALIM_FRESH_TRAIN")
     epochs = _auto_epochs(len(train_rows))
+    if sft_mode == "core_delta":
+        epochs = min(epochs, float(os.getenv("HALIM_CORE_DELTA_EPOCHS", "2.5")))
+    resume_ckpt = _find_resume_checkpoint(adapter_dir, target_epochs=epochs)
+    continue_lora = _should_continue_lora(adapter_dir, fresh_train=fresh_train)
+
     build_id = colab_manifest.get("build_id", "unknown")
     created = colab_manifest.get("created_at", "")
-    print(f"Train: {len(train_rows)} | Valid: {len(valid_rows)} | Epochs: {epochs}")
+    print(f"OUT_DIR: {OUT_DIR.resolve()}")
+    print(f"Train: {len(train_rows)} | Valid: {len(valid_rows)} | Epochs: {epochs} | SFT mode: {sft_mode}")
     print(f"Halim SFT build_id: {build_id}  packaged_at: {created}")
+    print(f"CONTINUE_LORA: {continue_lora} | RESUME_CKPT: {resume_ckpt or 'none'}")
     if build_id == "unknown":
         print("WARNING: colab_manifest.json missing — re-run ./scripts/halim_colab_ready.sh on your Mac")
     if colab_manifest.get("by_source"):
         print("Source mix:", colab_manifest["by_source"])
+
+    _prepare_adapter_dir(adapter_dir, fresh_train=fresh_train, resume_ckpt=resume_ckpt, continue_lora=continue_lora)
 
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
     if tokenizer.pad_token is None:
@@ -145,6 +265,10 @@ def main() -> None:
         trust_remote_code=True,
     )
 
+    if continue_lora and (adapter_dir / "adapter_model.safetensors").is_file():
+        print("Loading existing LoRA adapter for continued training…")
+        model = PeftModel.from_pretrained(model, str(adapter_dir), is_trainable=True)
+
     def to_text(messages: list) -> str:
         return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
 
@@ -160,24 +284,26 @@ def main() -> None:
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
     )
 
-    adapter_dir = OUT_DIR / "lora_adapter"
-    if adapter_dir.exists():
-        shutil.rmtree(adapter_dir)
-    adapter_dir.mkdir(parents=True, exist_ok=True)
-
     training_args = _build_sft_config(SFTConfig, adapter_dir=adapter_dir, epochs=epochs)
 
-    trainer = SFTTrainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_ds,
-        eval_dataset=valid_ds,
-        peft_config=lora,
-        processing_class=tokenizer,
-    )
+    trainer_kwargs = {
+        "model": model,
+        "args": training_args,
+        "train_dataset": train_ds,
+        "eval_dataset": valid_ds,
+        "processing_class": tokenizer,
+    }
+    if not continue_lora:
+        trainer_kwargs["peft_config"] = lora
 
-    print("Starting Halim toddler training… (~15–30 min on T4)")
-    trainer.train()
+    trainer = SFTTrainer(**trainer_kwargs)
+
+    print("Starting Halim toddler training…")
+    if resume_ckpt:
+        print(f"Resuming from checkpoint: {resume_ckpt}")
+        trainer.train(resume_from_checkpoint=resume_ckpt)
+    else:
+        trainer.train()
     trainer.save_model(str(adapter_dir))
 
     print("Merging LoRA into base model for easy Mac download…")
@@ -211,7 +337,6 @@ def main() -> None:
     peft_model = PeftModel.from_pretrained(base, str(adapter_dir))
     merged = peft_model.merge_and_unload()
     merged.save_pretrained(str(merged_dir), safe_serialization=True)
-    # Always copy full tokenizer from base — merged save can miss files Colab needs
     tok_save = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
     if tok_save.pad_token is None:
         tok_save.pad_token = tok_save.eos_token
@@ -227,17 +352,38 @@ def main() -> None:
         "train_pairs": len(train_rows),
         "valid_pairs": len(valid_rows),
         "epochs": epochs,
+        "sft_mode": sft_mode,
         "by_source": colab_manifest.get("by_source") or {},
         "raw_sources": colab_manifest.get("raw_sources") or {},
         "trained_on": "google_colab",
         "package_version": colab_manifest.get("version", 1),
         "build_id": build_id,
         "packaged_at": colab_manifest.get("created_at"),
+        "resume_checkpoint": resume_ckpt,
+        "continued_lora": continue_lora,
+        "out_dir": str(OUT_DIR),
     }
     (OUT_DIR / "config.json").write_text(json.dumps(cfg, indent=2))
 
+    _record_trained_hashes(train_rows, build_id)
+
+    work = os.getenv("HALIM_WORK", "").strip()
+    if work:
+        try:
+            state_path = Path(work) / "halim_colab_state.json"
+            state = {}
+            if state_path.is_file():
+                state = json.loads(state_path.read_text())
+            state["last_trained_build_id"] = build_id
+            state["last_trained_at"] = datetime.now(timezone.utc).isoformat()
+            state["train_pairs"] = len(train_rows)
+            state_path.write_text(json.dumps(state, indent=2))
+            print(f"Updated Drive state: {state_path}")
+        except Exception as exc:
+            print(f"Note: could not update Drive state ({exc})")
+
     print(f"Done. Download folder: {OUT_DIR.resolve()}")
-    print("  toddler_v1/merged/  ← copy this into halim/data/checkpoints/toddler_v1/merged/")
+    print("  toddler_v1/merged/  ← zip and install on Mac")
 
 
 if __name__ == "__main__":

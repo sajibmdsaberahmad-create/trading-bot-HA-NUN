@@ -337,6 +337,7 @@ class ScalperRunner:
         self._hour_window_start: float = time.time()
         self._last_quality_watch_log: float = 0.0
         self._pending_closes: Dict[str, PendingClose] = {}
+        self._pending_lottery_meta: Dict[str, Dict[str, Any]] = {}
         self._deferred_exits: Dict[str, Dict[str, Any]] = {}
         self._last_off_hours_train: float = 0.0
         self._last_learning_push: float = 0.0
@@ -1840,6 +1841,14 @@ class ScalperRunner:
             )
 
         self._apply_trade_close_learning(trade_rec, ticker)
+        try:
+            from core.lottery_bank import on_trade_closed
+            on_trade_closed(
+                self.cfg, self.notifier, trade_rec,
+                slot=pending.slot if pending else {},
+            )
+        except Exception as exc:
+            log.debug(f"Lottery bank close: {exc}")
         if pending.event == "early_exit" and is_mechanical_profit_exit(pending.reason):
             record_profit_hunt_learning(
                 self.cfg,
@@ -2525,6 +2534,11 @@ class ScalperRunner:
             ensure_commander_runtime(self.cfg, replay=replay_mode)
         except Exception as exc:
             log.debug(f"Commander runtime: {exc}")
+        try:
+            from core.lottery_bank import ensure_lottery_bank
+            ensure_lottery_bank(self.cfg)
+        except Exception as exc:
+            log.debug(f"Lottery bank: {exc}")
         if self._ib_starting_balance:
             try:
                 self.shadow_circuit.reset_daily(self._ib_starting_balance)
@@ -5613,7 +5627,27 @@ class ScalperRunner:
             "last_stagnation_decision": {},
             "vision_read": vision_read[:800],
         }
+        lot_meta = self._pending_lottery_meta.pop(ticker.upper(), {})
+        if lot_meta.get("lottery_bank"):
+            slot.update({
+                k: lot_meta[k] for k in (
+                    "lottery_bank", "lottery_tier", "lottery_conviction", "lottery_reason",
+                ) if k in lot_meta
+            })
         self._position_slots[ticker] = slot
+        if lot_meta.get("lottery_bank"):
+            try:
+                from core.lottery_bank import notify_lottery_event, record_entry
+                row = record_entry(
+                    self.cfg,
+                    ticker=ticker,
+                    shares=float(shares),
+                    fill_px=float(fill_px),
+                    meta=lot_meta,
+                )
+                notify_lottery_event(self.notifier, self.cfg, "lottery_entry", row)
+            except Exception as exc:
+                log.debug(f"Lottery bank entry record: {exc}")
         if fill_bracket:
             self._bracket_by_ticker[ticker] = fill_bracket
         self._load_position_context(ticker)
@@ -6578,6 +6612,38 @@ class ScalperRunner:
         )
         return plan, ai_dec
 
+    def _apply_lottery_bank_sizing(
+        self,
+        ticker: str,
+        decision: Dict[str, Any],
+        entry_px: float,
+        df_fast: Optional[pd.DataFrame] = None,
+    ) -> Dict[str, Any]:
+        """Cap lottery setups to virtual $1k bank; main paper account unchanged."""
+        try:
+            from core.lottery_bank import (
+                assess_lottery_setup,
+                lottery_bank_enabled,
+                rescale_entry_for_lottery_bank,
+            )
+            if not lottery_bank_enabled(self.cfg):
+                return decision
+            forecast = dict(self._last_micro_forecast.get(ticker, {}))
+            assess = assess_lottery_setup(
+                self.cfg,
+                scan_score=float(getattr(self, "_last_scan_score", 0)),
+                spike_ratio=float(getattr(self, "_last_spike_ratio", 0)),
+                forecast=forecast,
+            )
+            if not assess.eligible:
+                return decision
+            out = rescale_entry_for_lottery_bank(self.cfg, decision, entry_px, assess)
+            self._pending_lottery_meta[ticker.upper()] = out
+            return out
+        except Exception as exc:
+            log.debug(f"Lottery bank sizing: {exc}")
+            return decision
+
     def _submit_ai_entry(
         self,
         ticker: str,
@@ -6677,7 +6743,7 @@ class ScalperRunner:
             )
             self._clear_pending_entry(ticker, cooldown_sec=30.0)
             return "waiting"
-        ai_dec = gate_dec
+        ai_dec = self._apply_lottery_bank_sizing(ticker, gate_dec, current_px, df_fast)
         shares = int(ai_dec["shares"])
         shares = self._liquidity_cap_shares(shares, current_px, df_fast)
         shares = self._clamp_entry_shares(shares, current_px)
@@ -7109,6 +7175,8 @@ class ScalperRunner:
                     "target": round(current_px + tp_dist, 4),
                     "risk_usd": stop_usd,
                 }
+
+            ai_dec = self._apply_lottery_bank_sizing(ticker, ai_dec, current_px, df_fast)
 
             shares = int(ai_dec["shares"])
             if shares < 1:

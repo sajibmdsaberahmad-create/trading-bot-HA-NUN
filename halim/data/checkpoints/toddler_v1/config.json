@@ -4,26 +4,35 @@
   "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
   "backend": "mlx",
   "merged_path": "merged",
-  "trained_at": "2026-06-28T14:54:20.043221+00:00",
-  "train_pairs": 9039,
-  "valid_pairs": 475,
-  "epochs": 3.5,
+  "trained_at": "2026-06-29T05:32:53.213875+00:00",
+  "train_pairs": 2375,
+  "valid_pairs": 125,
+  "epochs": 2.5,
+  "sft_mode": "core_delta",
   "by_source": {
-    "council": 1671,
-    "action_gold": 2961,
-    "coevolution": 2258,
-    "dialogue": 2624
+    "commander_ib_report": 56,
+    "coevolution_halim": 469,
+    "coevolution_ppo": 431,
+    "council": 1544
   },
   "raw_sources": {
     "council": 3658,
-    "action_gold": 3614,
-    "coevolution": 2258,
-    "dialogue": 2624,
-    "total_raw": 12154
+    "action_gold": 4393,
+    "coevolution": 2761,
+    "dialogue": 3232,
+    "outcome_gold": 1,
+    "commander_gold": 56,
+    "total_raw": 14101
   },
   "trained_on": "google_colab",
-  "package_version": 3,
-  "build_id": "f952f242ea6e",
-  "packaged_at": "2026-06-28T09:34:06.270220+00:00",
-  "registered_at": "2026-06-28T15:08:58.223950+00:00"
+  "package_version": 4,
+  "build_id": "4411ea0611b0",
+  "packaged_at": "2026-06-29T03:41:11.778060+00:00",
+  "resume_checkpoint": null,
+  "continued_lora": true,
+  "out_dir": "/content/drive/MyDrive/Halim/toddler_v1",
+  "adapter_path": "lora_adapter",
+  "installed_at": "2026-06-29T05:41:35.318012+00:00",
+  "installed_from": "4411ea0611b0",
+  "registered_at": "2026-06-29T05:41:35.378378+00:00"
 }
