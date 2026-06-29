@@ -1,20 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 200,
+  "total_awakenings": 201,
   "training_sessions": 39,
   "trades_observed": 1561,
   "scans_performed": 39,
   "improvements_applied": 2496,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:51:25.828323",
-      "age": "7d 1h 48m 37s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-9.03",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:51:30.360110",
       "age": "7d 1h 48m 41s",
@@ -12224,9 +12217,16 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #200",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T15:07:17.877325",
+      "age": "8d 4h 4m 29s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #201",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-29T14:54:29.527669",
+  "last_awakening": "2026-06-29T15:07:17.877073",
   "current_version": "v20260629_075355",
   "version_history": [
     {

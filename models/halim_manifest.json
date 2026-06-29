@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-29T14:51:35.344182+00:00",
+  "updated_at": "2026-06-29T15:07:19.444094+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-29T14:51:35.200494+00:00",
+    "timestamp": "2026-06-29T15:07:19.407556+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -67,19 +67,19 @@
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-29T14:49:44.356231+00:00"
+        "modified": "2026-06-29T15:03:02.351472+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 45589.4,
-        "modified": "2026-06-29T14:51:28.499558+00:00"
+        "size_kb": 45589.9,
+        "modified": "2026-06-29T15:04:58.354381+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 3249.7,
-        "modified": "2026-06-29T14:50:43.170815+00:00"
+        "size_kb": 2336.5,
+        "modified": "2026-06-29T15:05:00.357966+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -106,11 +106,11 @@
     "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 7,
+      "count": 6,
       "win_rate": 0.0,
-      "avg_pnl": -8.37
+      "avg_pnl": -4.38
     },
-    "buffer_records": 17330,
+    "buffer_records": 17333,
     "dataset_pairs": 2834,
     "maturity": {
       "stage": "adult",
