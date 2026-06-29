@@ -1,0 +1,15 @@
+{
+  "initial_usd": 1000.0,
+  "cash": 1000.0,
+  "nav": 1000.0,
+  "peak_nav": 1000.0,
+  "total_pnl_usd": 0.0,
+  "trades": 0,
+  "wins": 0,
+  "losses": 0,
+  "win_streak": 0,
+  "loss_streak": 0,
+  "open": null,
+  "last_reset": "2026-06-29T07:35:56.526190+00:00",
+  "updated_at": "2026-06-29T07:35:56.526197+00:00"
+}
