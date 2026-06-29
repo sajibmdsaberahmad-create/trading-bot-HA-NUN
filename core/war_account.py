@@ -323,6 +323,32 @@ def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> s
     return "LIVE_WAR" if live else "WAR_ACTIVE"
 
 
+def _sync_paper_war_config(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
+    """Apply env capital/bullet updates on paper restart (same session day)."""
+    cfg = cfg or BotConfig()
+    if is_live_war(cfg) or state.get("open_war") or state.get("open_lab"):
+        return
+    cap = operating_capital_usd(cfg)
+    old_cap = float(state.get("operating_capital", 0) or 0)
+    if cap > old_cap > 0:
+        bump = cap - old_cap
+        state["operating_capital"] = cap
+        state["nav"] = float(state.get("nav", 0)) + bump
+        state["cash"] = float(state.get("cash", 0)) + bump
+        state["settled_cash"] = float(state.get("settled_cash", 0)) + bump
+    lab = lab_capital_usd(cfg) if lab_enabled(cfg) else 0.0
+    old_lab = float(state.get("lab_capital", 0) or 0)
+    if lab > old_lab > 0:
+        lb = lab - old_lab
+        state["lab_capital"] = lab
+        state["lab_nav"] = float(state.get("lab_nav", 0)) + lb
+        state["lab_cash"] = float(state.get("lab_cash", 0)) + lb
+        state["lab_settled"] = float(state.get("lab_settled", 0)) + lb
+    bullets = _env_int("WAR_BULLETS", int(state.get("bullets_total", 5)))
+    if bullets > 0:
+        state["bullets_total"] = bullets
+
+
 def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
     if not war_account_enabled(cfg):
@@ -330,10 +356,10 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     state = load_state(cfg)
     _roll_session(state, cfg)
     _apply_settlement(state, cfg)
+    _sync_paper_war_config(state, cfg)
     state["mode"] = _recompute_mode(state, cfg)
     state["is_live"] = is_live_war(cfg)
-    if not STATE_PATH.is_file():
-        save_state(state)
+    save_state(state)
     log.info(
         f"⚔️ War account — {'LIVE' if state['is_live'] else 'PAPER'} "
         f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f} "
