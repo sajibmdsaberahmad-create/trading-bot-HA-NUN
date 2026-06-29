@@ -1,20 +1,24 @@
 {
   "operating_capital": 1000.0,
-  "nav": 984.1952799999999,
-  "cash": 984.1952799999999,
-  "settled_cash": 813.50272,
+  "nav": 980.16852448,
+  "cash": 980.16852448,
+  "settled_cash": 633.417296,
   "unsettled": [
     {
       "amount": 170.69,
       "settles_at_ts": 1782833575.189039
+    },
+    {
+      "amount": 176.06,
+      "settles_at_ts": 1782835825.194263
     }
   ],
   "deployed_usd": 0.0,
   "bullets_total": 5,
-  "bullets_used_session": 1,
-  "round_trips_today": 1,
-  "entries_today": 1,
-  "fee_drag_today": 0.7,
+  "bullets_used_session": 2,
+  "round_trips_today": 2,
+  "entries_today": 2,
+  "fee_drag_today": 1.4,
   "lab_capital": 2500.0,
   "lab_nav": 2500.0,
   "lab_cash": 2500.0,
@@ -25,13 +29,15 @@
   "session_date": "2026-06-29",
   "open_war": null,
   "open_lab": null,
-  "session_pnl_war": -15.80472000000003,
+  "session_pnl_war": -19.831475520000044,
   "session_pnl_lab": 0.0,
   "ticker_session_pnl": {
-    "TEST": -15.8
+    "TEST": -15.8,
+    "TNMG": -4.03
   },
   "ticker_session_losses": {
-    "TEST": 1
+    "TEST": 1,
+    "TNMG": 1
   },
-  "updated_at": 1782749325.484767
+  "updated_at": 1782749426.6912131
 }

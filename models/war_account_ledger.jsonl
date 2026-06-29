@@ -1,2 +1,4 @@
 {"event":"war_entry","ticker":"TEST","mode":"WAR_ACTIVE","shares":1082,"virtual_fill":0.17204000000000003,"ib_fill":0.17,"slippage_pct":0.012,"commission":0.35,"notional":186.14728000000002,"promotion":true,"pipeline":"","ts":1782747175.1885078}
 {"event":"war_exit","ticker":"TEST","mode":"WAR_ACTIVE","virtual_fill":0.15808,"ib_fill":0.16,"net_pnl":-15.8,"gross_pnl":-15.1,"fees":0.7,"promotion":true,"exit_reason":"","ts":1782747175.189161}
+{"event":"war_entry","ticker":"TNMG","mode":"WAR_ACTIVE","shares":176,"virtual_fill":1.0212240000000001,"ib_fill":1.02,"slippage_pct":0.0012,"commission":0.35,"notional":179.73542400000002,"promotion":true,"pipeline":"","ts":1782749364.610754}
+{"event":"war_exit","ticker":"TNMG","mode":"WAR_ACTIVE","virtual_fill":1.00232198,"ib_fill":1.01,"net_pnl":-4.03,"gross_pnl":-3.33,"fees":0.7,"promotion":true,"exit_reason":"bracket_exit","ts":1782749425.194467}
