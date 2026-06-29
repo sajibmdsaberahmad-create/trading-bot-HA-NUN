@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1516,
   "scans_performed": 39,
-  "improvements_applied": 2395,
+  "improvements_applied": 2396,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:16:25.309534",
-      "age": "7d 1h 13m 36s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1759",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:16:28.913901",
       "age": "7d 1h 13m 40s",
@@ -11800,6 +11786,20 @@
       "type": "TRADE",
       "message": "Observed trade: SOAR ? P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:38:13.796985",
+      "age": "8d 2h 35m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2396",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOAR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
