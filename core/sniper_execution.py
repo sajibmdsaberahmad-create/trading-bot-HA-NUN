@@ -204,6 +204,41 @@ def sniper_council_max_wait_sec(cfg: BotConfig) -> Optional[float]:
     return _env_float("SNIPER_COUNCIL_MAX_WAIT_SEC", 1.5)
 
 
+def sniper_max_confidence_threshold(cfg: Optional[BotConfig] = None) -> Optional[float]:
+    """Cap commander-learned CONFIDENCE_THRESHOLD during sniper RTH."""
+    if not sniper_active(cfg):
+        return None
+    return _env_float("SNIPER_MAX_CONFIDENCE_THRESHOLD", 0.65)
+
+
+def sniper_ppo_hold_skip_sec(cfg: Optional[BotConfig] = None) -> float:
+    return _env_float("SNIPER_PPO_HOLD_SKIP_SEC", 2.0)
+
+
+def should_skip_entry_council_on_ppo_hold(
+    cfg: Optional[BotConfig],
+    ppo_action: int,
+) -> bool:
+    """Sniper: spikes on PPO HOLD cannot flash-enter — don't wait on council."""
+    if not sniper_active(cfg):
+        return False
+    if os.getenv("SNIPER_SKIP_COUNCIL_ON_PPO_HOLD", "true").lower() not in ("1", "true", "yes"):
+        return False
+    return int(ppo_action) != 1
+
+
+def cap_sniper_confidence_threshold(cfg: BotConfig) -> bool:
+    """Clamp cfg.CONFIDENCE_THRESHOLD to sniper cap (e.g. after commander learning)."""
+    cap = sniper_max_confidence_threshold(cfg)
+    if cap is None:
+        return False
+    cur = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.55))
+    if cur <= cap:
+        return False
+    setattr(cfg, "CONFIDENCE_THRESHOLD", cap)
+    return True
+
+
 def sniper_tick_streams_enabled(cfg: Optional[BotConfig] = None) -> bool:
     """Top-N locked names on tick-by-tick for flash detection (rest stay 5s)."""
     if os.getenv("SNIPER_TICK_STREAMS", "true").lower() not in ("1", "true", "yes"):

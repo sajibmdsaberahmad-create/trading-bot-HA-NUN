@@ -233,11 +233,26 @@ def get_effective_confidence_threshold(
 ) -> float:
     """Pilot rank modulates AI gate — veterans trust themselves more."""
     base = float(cfg.CONFIDENCE_THRESHOLD)
+    try:
+        from core.sniper_execution import sniper_max_confidence_threshold
+        cap = sniper_max_confidence_threshold(cfg)
+        if cap is not None:
+            base = min(base, cap)
+    except Exception:
+        pass
     if not getattr(cfg, "PILOT_MODE_ENABLED", True) or pilot is None:
         return base
     pilot_thr = pilot.get_confidence_threshold()
     # Blend: cfg floor + pilot progression (veterans lower threshold)
-    return max(0.38, min(base, pilot_thr))
+    thr = max(0.38, min(base, pilot_thr))
+    try:
+        from core.sniper_execution import sniper_max_confidence_threshold
+        cap = sniper_max_confidence_threshold(cfg)
+        if cap is not None:
+            thr = min(thr, cap)
+    except Exception:
+        pass
+    return thr
 
 
 def get_deploy_usd(cfg: BotConfig, pilot: Optional["PilotExperienceSystem"] = None) -> float:

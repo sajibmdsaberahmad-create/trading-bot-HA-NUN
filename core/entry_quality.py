@@ -210,6 +210,38 @@ def mtf_trend_aligned(df_5m: Any, df_15m: Any) -> tuple[bool, str]:
     return True, "mtf_aligned"
 
 
+def mtf_cache_ttl_sec(cfg: Optional[BotConfig] = None) -> float:
+    try:
+        return float(os.getenv("MTF_BAR_CACHE_SEC", "60"))
+    except (TypeError, ValueError):
+        return 60.0
+
+
+def mtf_fetch_skipped(
+    cfg: BotConfig,
+    *,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> bool:
+    """Skip expensive IB 5m/15m fetches when MTF cannot block this spike."""
+    if not getattr(cfg, "MTF_ENTRY_BLOCK", False):
+        return True
+    try:
+        from core.sniper_execution import (
+            sniper_active,
+            sniper_vol_flash,
+            is_sniper_strong_spike,
+        )
+        if sniper_active(cfg) and (
+            sniper_vol_flash(cfg, scan_score, spike_ratio)
+            or is_sniper_strong_spike(cfg, scan_score, spike_ratio)
+        ):
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def mtf_blocks_entry(
     cfg: BotConfig,
     df_5m: Any,

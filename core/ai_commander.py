@@ -1419,6 +1419,25 @@ class AICommander:
                 )
             return decision
 
+        from core.sniper_execution import should_skip_entry_council_on_ppo_hold
+        if should_skip_entry_council_on_ppo_hold(self.cfg, ppo_action):
+            return {
+                "enter": False,
+                "confidence": ppo_conf,
+                "shares": 0,
+                "stop": 0.0,
+                "target": 0.0,
+                "risk_usd": 0.0,
+                "reason": (
+                    f"🎯 SNIPER watch: PPO HOLD {ppo_conf:.0%} — council skipped"
+                )[:200],
+                "journal": "",
+                "pipeline": "sniper:ppo_hold_skip",
+                "pending": False,
+                "ppo_action": ppo_action,
+                "ppo_conf": ppo_conf,
+            }
+
         if (
             df is not None
             and len(df) >= 20

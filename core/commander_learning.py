@@ -589,4 +589,13 @@ def reload_persisted_params(cfg: BotConfig) -> int:
         ok, _msg = _apply_mutation(cfg, str(param), value, reason, autopilot=None)
         if ok:
             applied += 1
+    try:
+        from core.sniper_execution import cap_sniper_confidence_threshold
+        if cap_sniper_confidence_threshold(cfg):
+            log.info(
+                f"🎯 Sniper cap: CONFIDENCE_THRESHOLD → "
+                f"{float(getattr(cfg, 'CONFIDENCE_THRESHOLD', 0.55)):.2f}"
+            )
+    except Exception:
+        pass
     return applied

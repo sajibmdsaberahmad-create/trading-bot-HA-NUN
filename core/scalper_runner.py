@@ -223,6 +223,12 @@ class ScalperRunner:
             n = reload_persisted_params(cfg)
             if n:
                 log.info(f"🧬 Restored {n} persisted learning param(s) from prior sessions")
+            from core.sniper_execution import cap_sniper_confidence_threshold
+            if cap_sniper_confidence_threshold(cfg):
+                log.info(
+                    f"🎯 Sniper cap: CONFIDENCE_THRESHOLD → "
+                    f"{float(getattr(cfg, 'CONFIDENCE_THRESHOLD', 0.55)):.2f}"
+                )
         except Exception as exc:
             log.debug(f"Persisted param reload: {exc}")
         self.conn.register_market_data_error_handler(self._on_market_data_failure)
@@ -288,6 +294,7 @@ class ScalperRunner:
         self._next_best_score: float = 0.0
         self._spike_skip_until: Dict[str, float] = {}
         self._spike_attempt_until: Dict[str, float] = {}
+        self._mtf_bar_cache: Dict[str, Tuple[float, Any, Any]] = {}
         self._profit_hunt_spike_peak: float = 0.0
         self._profit_hunt_spike_at: float = 0.0
         self._profit_hunt_spike_ctx: Dict[str, Any] = {}
@@ -1115,6 +1122,39 @@ class ScalperRunner:
         if dm is None and self._active_stream_ticker:
             dm = self._target_monitors.get(self._active_stream_ticker)
         return dm
+
+    def _resolve_mtf_bars(
+        self,
+        ticker: str,
+        scan_score: float,
+        spike_ratio: float,
+    ) -> Tuple[Optional[pd.DataFrame], Optional[pd.DataFrame]]:
+        """Cached 5m/15m bars for MTF gate — avoids per-spike IB round-trips."""
+        from core.entry_quality import mtf_cache_ttl_sec, mtf_fetch_skipped
+
+        if mtf_fetch_skipped(self.cfg, scan_score=scan_score, spike_ratio=spike_ratio):
+            return None, None
+
+        ttl = mtf_cache_ttl_sec(self.cfg)
+        now = time.time()
+        cached = self._mtf_bar_cache.get(ticker)
+        if cached and now - float(cached[0]) < ttl:
+            return cached[1], cached[2]
+
+        df_5m = df_15m = None
+        ticker_dm = self._dm_for_ticker(ticker)
+        if ticker_dm is not None:
+            try:
+                df_5m = ticker_dm.fetch_historical(
+                    duration="1 D", bar_size="5 mins", use_rth=False, quiet=True,
+                )
+                df_15m = ticker_dm.fetch_historical(
+                    duration="1 D", bar_size="15 mins", use_rth=False, quiet=True,
+                )
+            except Exception:
+                pass
+        self._mtf_bar_cache[ticker] = (now, df_5m, df_15m)
+        return df_5m, df_15m
 
     def _recalc_bot_nav(self):
         total_pos = 0.0
@@ -4459,19 +4499,15 @@ class ScalperRunner:
                 )
                 continue
             df_5m = df_15m = None
-            fast_df_mtf, _, _, _ = self._resolve_live_bars(ticker, min_bars=20)
-            if fast_df_mtf is not None:
-                ticker_dm = self._dm_for_ticker(ticker)
-                if ticker_dm is not None:
-                    try:
-                        df_5m = ticker_dm.fetch_historical(
-                            duration="1 D", bar_size="5 mins", use_rth=False, quiet=True,
-                        )
-                        df_15m = ticker_dm.fetch_historical(
-                            duration="1 D", bar_size="15 mins", use_rth=False, quiet=True,
-                        )
-                    except Exception:
-                        pass
+            from core.entry_quality import mtf_fetch_skipped
+            if not mtf_fetch_skipped(
+                self.cfg,
+                scan_score=float(target.rank_score),
+                spike_ratio=float(spike_ratio),
+            ):
+                df_5m, df_15m = self._resolve_mtf_bars(
+                    ticker, float(target.rank_score), float(spike_ratio),
+                )
             if mtf_blocks_entry(
                 self.cfg, df_5m, df_15m,
                 scan_score=float(target.rank_score),
@@ -7308,9 +7344,12 @@ class ScalperRunner:
                         + (f" | {pipeline}" if pipeline else "")
                     )
                     if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
-                        self._spike_skip_until[ticker] = time.time() + entry_cooldown_after_skip(
-                            self.cfg
-                        )
+                        if pipeline == "sniper:ppo_hold_skip":
+                            from core.sniper_execution import sniper_ppo_hold_skip_sec
+                            cd = sniper_ppo_hold_skip_sec(self.cfg)
+                        else:
+                            cd = entry_cooldown_after_skip(self.cfg)
+                        self._spike_skip_until[ticker] = time.time() + cd
                     return "waiting"
                 pipeline = str(ai_dec.get("pipeline", ""))
                 if "timeout" in pipeline:
