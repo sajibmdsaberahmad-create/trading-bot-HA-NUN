@@ -132,5 +132,72 @@
       "Penalize PPO micro-fast when council confidence is neutral (50%)",
       "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T16:09:23.885640+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.6900000000000001,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on TNMG"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T16:10:26.729397+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TNMG"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T16:10:28.792963+00:00",
+    "source": "runtime_council_timeout",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.67,
+        "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed council_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review council_timeout on INLF"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T16:10:29.835982+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {
+      "PENNY_MAX_DEPLOY_USD": {
+        "param": "PENNY_MAX_DEPLOY_USD",
+        "value": 297.5,
+        "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+        "ok": true,
+        "msg": "applied"
+      },
+      "PENNY_LIMIT_BUFFER_PCT": {
+        "param": "PENNY_LIMIT_BUFFER_PCT",
+        "value": 0.007,
+        "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review ib_failure on INLF"
+    ]
   }
 ]
