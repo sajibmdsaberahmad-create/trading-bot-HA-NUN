@@ -563,3 +563,90 @@
 {"timestamp":"2026-06-28T15:00:04.058620+00:00","event":"export_action_gold","added":2,"skipped":6966}
 {"timestamp": "2026-06-28T15:02:57.494907+00:00", "event": "prepare_sft", "pairs_total": 11457, "by_source": {"council": 1671, "action_gold": 3736, "coevolution": 2761, "dialogue": 3232, "outcome_gold": 1, "commander_gold": 56}}
 {"timestamp": "2026-06-28T15:08:58.224712+00:00", "event": "register_checkpoint", "name": "toddler_v1", "latest": "/Users/mdsabersajib/Downloads/tradingbot/halim/data/checkpoints/latest"}
+{"timestamp":"2026-06-28T15:14:29.397563+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
+{"timestamp": "2026-06-29T03:38:15.001749+00:00", "event": "prepare_sft", "pairs_total": 2500, "by_source": {"commander_ib_report": 56, "coevolution_halim": 469, "coevolution_ppo": 431, "council": 1544}}
+{"timestamp":"2026-06-29T03:41:11.328730+00:00","event":"export_action_gold","added":4,"skipped":6990}
+{"timestamp": "2026-06-29T03:41:11.685875+00:00", "event": "prepare_sft", "pairs_total": 2500, "by_source": {"commander_ib_report": 56, "coevolution_halim": 469, "coevolution_ppo": 431, "council": 1544}}
+{"timestamp": "2026-06-29T05:41:35.378790+00:00", "event": "register_checkpoint", "name": "toddler_v1", "latest": "/Users/mdsabersajib/Downloads/tradingbot/halim/data/checkpoints/latest"}
+{"timestamp": "2026-06-29T05:42:25.781539+00:00", "event": "prepare_sft", "pairs_total": 2500, "by_source": {"commander_ib_report": 56, "coevolution_halim": 469, "coevolution_ppo": 431, "council": 1544}}
+{"timestamp":"2026-06-29T06:15:36.714581+00:00","event":"capability_milestone","capability":"read_understand","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.715028+00:00","event":"capability_milestone","capability":"read_understand","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.715103+00:00","event":"capability_milestone","capability":"read_understand","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.715181+00:00","event":"capability_milestone","capability":"read_understand","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.754055+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.754147+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.791269+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.791511+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.791605+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.869163+00:00","event":"capability_milestone","capability":"reasoning","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.869341+00:00","event":"capability_milestone","capability":"reasoning","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.869412+00:00","event":"capability_milestone","capability":"reasoning","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.869480+00:00","event":"capability_milestone","capability":"reasoning","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.908404+00:00","event":"capability_milestone","capability":"decision_text","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.908627+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.908691+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:36.908737+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.028324+00:00","event":"capability_milestone","capability":"commander_chat","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.028565+00:00","event":"capability_milestone","capability":"commander_chat","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.028622+00:00","event":"capability_milestone","capability":"commander_chat","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.028673+00:00","event":"capability_milestone","capability":"commander_chat","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.063532+00:00","event":"capability_milestone","capability":"chat","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.063639+00:00","event":"capability_milestone","capability":"chat","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.063694+00:00","event":"capability_milestone","capability":"chat","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:15:51.063756+00:00","event":"capability_milestone","capability":"chat","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:06.358287+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:06.359054+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:06.359140+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:06.359220+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.095416+00:00","event":"capability_milestone","capability":"decision_text","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.095614+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.095930+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.096032+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.736827+00:00","event":"capability_milestone","capability":"notify","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.736952+00:00","event":"capability_milestone","capability":"notify","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.737024+00:00","event":"capability_milestone","capability":"notify","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.737075+00:00","event":"capability_milestone","capability":"notify","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.773623+00:00","event":"capability_milestone","capability":"text_compose","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.773722+00:00","event":"capability_milestone","capability":"text_compose","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.773777+00:00","event":"capability_milestone","capability":"text_compose","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:18.773836+00:00","event":"capability_milestone","capability":"text_compose","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:33.632042+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:33.632456+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:16:33.632536+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T06:27:44.752293+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:04:58.017380+00:00","event":"export_action_gold","added":857,"skipped":7335}
+{"timestamp":"2026-06-29T07:05:02.301395+00:00","event":"export_action_gold","added":1,"skipped":8192}
+{"timestamp": "2026-06-29T07:05:06.536980+00:00", "event": "prepare_sft", "pairs_total": 13647, "by_source": {"council": 1671, "test": 1, "learn_cache": 138, "groq": 539, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1283, "halim_server": 177, "companion_generative": 410, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 46, "council_teacher": 260, "ppo_teacher:heuristic_fallback": 11, "commander_ib_report": 65, "coevolution_halim": 1701, "coevolution_ppo": 1620, "dialogue_pre_action": 16, "dialogue_ppo": 2000, "dialogue_post_trade": 360, "dialogue_synthesized": 1624, "outcome_gold": 1}}
+{"timestamp": "2026-06-29T07:05:09.828080+00:00", "event": "prepare_sft", "pairs_total": 13647, "by_source": {"council": 1671, "test": 1, "learn_cache": 138, "groq": 539, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1283, "halim_server": 177, "companion_generative": 410, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 46, "council_teacher": 260, "ppo_teacher:heuristic_fallback": 11, "commander_ib_report": 65, "coevolution_halim": 1701, "coevolution_ppo": 1620, "dialogue_pre_action": 16, "dialogue_ppo": 2000, "dialogue_post_trade": 360, "dialogue_synthesized": 1624, "outcome_gold": 1}}
+{"timestamp":"2026-06-29T07:05:10.579064+00:00","event":"shutdown_flush","trigger":"session_shutdown","action_gold_added":0,"action_gold_total":5251,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:05:34.053405+00:00","event":"export_action_gold","added":5,"skipped":8198}
+{"timestamp": "2026-06-29T07:05:36.508466+00:00", "event": "prepare_sft", "pairs_total": 13652, "by_source": {"council": 1671, "test": 1, "learn_cache": 138, "groq": 540, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1287, "halim_server": 177, "companion_generative": 410, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 46, "council_teacher": 260, "ppo_teacher:heuristic_fallback": 11, "commander_ib_report": 65, "coevolution_halim": 1701, "coevolution_ppo": 1620, "dialogue_pre_action": 16, "dialogue_ppo": 2000, "dialogue_post_trade": 360, "dialogue_synthesized": 1624, "outcome_gold": 1}}
+{"timestamp":"2026-06-29T07:05:37.638403+00:00","event":"export_action_gold","added":1,"skipped":8203}
+{"timestamp":"2026-06-29T07:05:37.648120+00:00","event":"ppo_halim_coevolution","agreements":173,"disagreements":2362,"corrections_for_ppo":3091,"corrections_for_halim":2,"log_path":"halim/data/coevolution/correction_log.jsonl","export":{"ok":true,"added":3321,"total":3321,"events":3274,"rewritten":true},"trigger":"replay_teardown"}
+{"timestamp":"2026-06-29T07:05:56.742479+00:00","event":"export_action_gold","added":3,"skipped":8206}
+{"timestamp": "2026-06-29T07:05:57.311235+00:00", "event": "prepare_sft", "pairs_total": 13656, "by_source": {"council": 1671, "test": 1, "learn_cache": 138, "groq": 540, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1291, "halim_server": 177, "companion_generative": 410, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 46, "council_teacher": 260, "ppo_teacher:heuristic_fallback": 11, "commander_ib_report": 65, "coevolution_halim": 1701, "coevolution_ppo": 1620, "dialogue_pre_action": 16, "dialogue_ppo": 2000, "dialogue_post_trade": 360, "dialogue_synthesized": 1624, "outcome_gold": 1}}
+{"timestamp":"2026-06-29T07:05:57.576183+00:00","event":"shutdown_flush","trigger":"replay_teardown","action_gold_added":3,"action_gold_total":5260,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:05:57.734546+00:00","event":"ppo_halim_coevolution","agreements":173,"disagreements":2362,"corrections_for_ppo":3091,"corrections_for_halim":2,"log_path":"halim/data/coevolution/correction_log.jsonl","export":{"ok":true,"added":3321,"total":3321,"events":3274,"rewritten":true},"trigger":"replay_teardown"}
+{"timestamp":"2026-06-29T07:06:28.367923+00:00","event":"export_action_gold","added":1,"skipped":8209}
+{"timestamp": "2026-06-29T07:06:29.000750+00:00", "event": "prepare_sft", "pairs_total": 14177, "by_source": {"council": 2191, "test": 1, "learn_cache": 138, "groq": 540, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1291, "halim_server": 177, "companion_generative": 410, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 46, "council_teacher": 260, "ppo_teacher:heuristic_fallback": 12, "commander_ib_report": 65, "coevolution_halim": 1701, "coevolution_ppo": 1620, "dialogue_pre_action": 16, "dialogue_ppo": 2000, "dialogue_post_trade": 360, "dialogue_synthesized": 1624, "outcome_gold": 1}}
+{"timestamp":"2026-06-29T07:06:29.252890+00:00","event":"evolution","trigger":"replay_teardown","phase":"toddler","stage":"adult","dataset_pairs":null,"device_profile":"m2_8gb","steps_ok":{"export_dataset":true,"train_proxy":false,"ppo_teacher":true,"weights":true,"halim_gold_pipeline":true}}
+{"timestamp":"2026-06-29T07:06:29.424038+00:00","event":"ppo_halim_coevolution","agreements":173,"disagreements":2362,"corrections_for_ppo":3091,"corrections_for_halim":2,"log_path":"halim/data/coevolution/correction_log.jsonl","export":{"ok":true,"added":3321,"total":3321,"events":3274,"rewritten":true},"trigger":"replay_teardown"}
+{"timestamp": "2026-06-29T07:06:40.188295+00:00", "event": "prepare_sft", "pairs_total": 14177, "by_source": {"council": 2191, "test": 1, "learn_cache": 138, "groq": 540, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1291, "halim_server": 177, "companion_generative": 410, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 46, "council_teacher": 260, "ppo_teacher:heuristic_fallback": 12, "commander_ib_report": 65, "coevolution_halim": 1701, "coevolution_ppo": 1620, "dialogue_pre_action": 16, "dialogue_ppo": 2000, "dialogue_post_trade": 360, "dialogue_synthesized": 1624, "outcome_gold": 1}}
+{"timestamp":"2026-06-29T07:35:56.294275+00:00","event":"capability_milestone","capability":"read_understand","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.294573+00:00","event":"capability_milestone","capability":"read_understand","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.294780+00:00","event":"capability_milestone","capability":"read_understand","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.294842+00:00","event":"capability_milestone","capability":"read_understand","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.346306+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.346483+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.391892+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.392035+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.392093+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.392136+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.475721+00:00","event":"capability_milestone","capability":"reasoning","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.475833+00:00","event":"capability_milestone","capability":"reasoning","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.475893+00:00","event":"capability_milestone","capability":"reasoning","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.475944+00:00","event":"capability_milestone","capability":"reasoning","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.516872+00:00","event":"capability_milestone","capability":"decision_text","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.516951+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.517015+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:35:56.517067+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
