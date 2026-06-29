@@ -479,7 +479,7 @@ def _run_train_pipeline(cfg: BotConfig, *, trigger: str) -> Dict[str, Any]:
                 timeout=30,
             )
             start = subprocess.run(
-                [str(root / "scripts/ensure_halim_active.sh"), "--serve-only"],
+                [str(root / "scripts/ensure_halim_active.sh"), "--serve-only", "--restart"],
                 cwd=str(root),
                 env=env,
                 capture_output=True,
