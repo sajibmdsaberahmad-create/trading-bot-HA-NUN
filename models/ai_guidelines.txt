@@ -1922,3 +1922,11 @@ BUY 870 SOAR AMEX  In accordance with our regulatory obligations as a broker, we
 Observed order_timeout — recorded for learning.
 Submitted
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:48:45.620612+00:00
+Observed ib_failure — recorded for learning.
+BUY 859 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1754 or a more aggressive price still within your spec
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:49:13.770508+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +0.29% (peak +0.46% gave back 0.17%)
+

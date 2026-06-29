@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:ai_stall quick_scalp +2.87% (peak +2.87%)",
-    "Commander: green_profit_lock:ai_stall quick_scalp +3.04% (peak +3.04%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.93% (peak +2.93%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +3.33% (peak +3.33%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +3.44% (peak +3.44%)",
@@ -103,10 +101,12 @@
     "Commander: BUY 871 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1715 or a more aggressive price still within your spec",
     "Commander: green_profit_lock:ai_stall quick_scalp +1.10% (peak +1.10%)",
     "Commander: BUY 875 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1708 or a more aggressive price still within your spec",
-    "Commander: BUY 870 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1724 or a more aggressive price still within your spec"
+    "Commander: BUY 870 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1724 or a more aggressive price still within your spec",
+    "Commander: BUY 859 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1754 or a more aggressive price still within your spec",
+    "Commander: green_profit_lock:giveback +0.29% (peak +0.46% gave back 0.17%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 276,
-  "updated": "2026-06-29T14:48:08.436948"
+  "trades_observed": 278,
+  "updated": "2026-06-29T14:49:13.731688"
 }
