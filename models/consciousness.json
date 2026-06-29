@@ -3,25 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1536,
+  "trades_observed": 1537,
   "scans_performed": 39,
-  "improvements_applied": 2444,
+  "improvements_applied": 2445,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:33:03.529319",
-      "age": "7d 1h 30m 14s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$+4.79",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:34:12.334255",
-      "age": "7d 1h 31m 23s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-10.65",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:34:16.545502",
       "age": "7d 1h 31m 27s",
@@ -12114,6 +12100,27 @@
           "Hi"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:20:13.458978",
+      "age": "8d 3h 17m 24s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:20:14.798466",
+      "age": "8d 3h 17m 26s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2445",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14278,7 +14285,6 @@
   "mood": "recalibrating",
   "total_pnl": 332405.5300000003,
   "win_history": [
-    -3.14,
     -10.21,
     -4.57,
     -8.08,
@@ -14777,20 +14783,21 @@
     -0.73,
     -1.89,
     -100.0,
-    -50.0
+    -50.0,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 5,
   "worst_streak": 86,
-  "veteran_xp": 24135,
+  "veteran_xp": 24145,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 66,
     "entry_timing": 100
   },
-  "flights_completed": 1530,
-  "hours_flown": 152.9999999999956,
+  "flights_completed": 1531,
+  "hours_flown": 153.0999999999956,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14824,7 +14831,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 9,
+    "TNM": 10,
     "SOA": 4,
     "KND": 1
   },
@@ -14833,5 +14840,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-587.62 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-585.68 recent). Tightening entries until edge returns."
 }
