@@ -380,5 +380,15 @@
       "Hi",
       "Hi"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T07:55:59.388354+00:00",
+    "source": "halim_developer_off_hours",
+    "adjustments": {},
+    "guidelines_summary": "Halim heuristic dev plan \u2014 WR 31%",
+    "lessons": [
+      "Halim documents every mutation in git \u2014 review improvement_history.json",
+      "Session trade WR 31% on 400 round-trips"
+    ]
   }
 ]
