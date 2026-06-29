@@ -36,7 +36,7 @@ if [[ "${REPLAY_LIVE:-}" =~ ^(1|true|yes)$ ]]; then
   export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-false}"
 else
   export LEARNING_QUEUE_ONLY="${LEARNING_QUEUE_ONLY:-false}"
-  export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-true}"
+  export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-false}"
 fi
 export INCREMENTAL_TRAINING_ENABLED="${INCREMENTAL_TRAINING_ENABLED:-false}"
 export INCREMENTAL_TRAIN_EVERY_N_TRADES="${INCREMENTAL_TRAIN_EVERY_N_TRADES:-0}"
@@ -86,5 +86,5 @@ echo "  💾 Halim memory profile ON (${_RAM_MB}MB RAM) — entry+exit LM adviso
 if [[ "${REPLAY_LIVE:-}" =~ ^(1|true|yes)$ ]]; then
   echo "  Learning: replay queue-only (train at teardown)"
 else
-  echo "  Learning: live bounded async (weights + micro-PPO, heavy deferred RTH)"
+  echo "  Learning: live capture only (no micro-PPO / no PPO zip writes during RTH)"
 fi

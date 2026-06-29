@@ -199,8 +199,19 @@ source "$ROOT/scripts/halim_env.sh" 2>/dev/null || true
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_memory_profile.sh" 2>/dev/null || true
 export LEARNING_QUEUE_ONLY="${LEARNING_QUEUE_ONLY:-false}"
-export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-true}"
+export LEARNING_LIVE_MICRO_PPO="${LEARNING_LIVE_MICRO_PPO:-false}"
 export LEARNING_DEFER_DURING_RTH="${LEARNING_DEFER_DURING_RTH:-true}"
+export LEARNING_SNAPSHOT_SAVE_PPO="${LEARNING_SNAPSHOT_SAVE_PPO:-false}"
+export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-900}"
+export LEARNING_PUSH_ON_TRADE="${LEARNING_PUSH_ON_TRADE:-false}"
+export LEARNING_LIVE_WEIGHT_EVERY_N_TRADES="${LEARNING_LIVE_WEIGHT_EVERY_N_TRADES:-0}"
+export PPO_BYPASS_REQUIRES_BUY="${PPO_BYPASS_REQUIRES_BUY:-true}"
+export PPO_OVERRIDE_ENTRY_REWARD="${PPO_OVERRIDE_ENTRY_REWARD:--0.15}"
+export SPIKE_FAST_REQUIRES_QUALITY="${SPIKE_FAST_REQUIRES_QUALITY:-true}"
+export TICKER_LOSS_COOLDOWN_SEC="${TICKER_LOSS_COOLDOWN_SEC:-180}"
+export TICKER_LOSS_COOLDOWN_REPEAT_SEC="${TICKER_LOSS_COOLDOWN_REPEAT_SEC:-600}"
+export LOSS_STREAK_BLOCK_BYPASS_AT="${LOSS_STREAK_BLOCK_BYPASS_AT:-2}"
+export AI_SPIKE_COOLDOWN_FAST_SEC="${AI_SPIKE_COOLDOWN_FAST_SEC:-20}"
 # Live session gold collection (dialogue/copilot LM for training; user chat still off)
 export HALIM_LIVE_GOLD_COLLECT="${HALIM_LIVE_GOLD_COLLECT:-true}"
 export HALIM_PREPARE_SFT_ON_SHUTDOWN="${HALIM_PREPARE_SFT_ON_SHUTDOWN:-true}"
@@ -214,7 +225,6 @@ export HALIM_LEARN_PACKAGE_ON_STOP="${HALIM_LEARN_PACKAGE_ON_STOP:-true}"
 export LIVE_AI_PIPELINE_ENABLED="${LIVE_AI_PIPELINE_ENABLED:-true}"
 export PYTHONUNBUFFERED=1
 export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
-export LEARNING_SNAPSHOT_INTERVAL_SEC="${LEARNING_SNAPSHOT_INTERVAL_SEC:-300}"
 export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-600}"
 
 TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{print int($1/1024/1024)}' || echo 8192)
@@ -223,8 +233,8 @@ echo "════════════════════════�
 echo "  HANOON FULL PILOT LAUNCH"
 echo "  IB: $IB_HOST:$IB_PORT | Client: $CLIENT_ID | Council: ${COUNCIL_BACKEND} (${TOTAL_RAM_MB}MB RAM)"
 if [[ "${HALIM_LOW_MEMORY_ACTIVE:-}" == "true" ]]; then
-  echo "  Halim: M. A. Halim low-RAM profile — async PPO, MLX LM, dialogue deferred"
-  echo "  Learning: bounded live (async micro-PPO + debounced weights, heavy off-hours)"
+  echo "  Halim: M. A. Halim low-RAM profile — MLX LM advisory, no live PPO train"
+  echo "  Learning: capture only live | train off-hours | no mid-session PPO SSD writes"
 fi
 echo "  Clock: US Eastern (TZ=$TZ)"
 echo "═══════════════════════════════════════════════════════════════════════"
