@@ -10,7 +10,7 @@ waiting for slow Ollama council deliberation.
 from __future__ import annotations
 
 import os
-from typing import Any, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from core.config import BotConfig
 
@@ -150,11 +150,25 @@ def prioritize_locked_targets(
     targets: List["ScanResult"],
     cfg: BotConfig,
     focus: Optional[str] = None,
+    hits: Optional[Dict] = None,
 ) -> List["ScanResult"]:
     """AI/score order — best spike candidates warmed and streamed first."""
     if not targets:
         return []
-    ranked = sorted(targets, key=lambda t: float(t.rank_score), reverse=True)
+    try:
+        from core.scan_lock_pools import kill_fit_score
+
+        def _rank_key(t: "ScanResult") -> float:
+            row = {
+                "ticker": t.ticker,
+                "price": t.price,
+                "total_score": t.rank_score,
+            }
+            return kill_fit_score(row, hits, cfg)
+
+        ranked = sorted(targets, key=_rank_key, reverse=True)
+    except Exception:
+        ranked = sorted(targets, key=lambda t: float(t.rank_score), reverse=True)
     if ai_fast_execution(cfg) or not focus:
         return ranked
     focus_u = focus.upper()

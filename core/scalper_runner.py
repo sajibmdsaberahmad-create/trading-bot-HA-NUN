@@ -4104,7 +4104,12 @@ class ScalperRunner:
             return
         watch_all = getattr(self.cfg, "WATCH_ALL_LOCKED_STREAMS", True)
         if watch_all and ai_fast_execution(self.cfg):
-            wanted = stream_ticker_list(self._locked_targets, self.cfg)
+            ordered = prioritize_locked_targets(
+                self._locked_targets,
+                self.cfg,
+                hits=self.scanner.get_scanner_hits(),
+            )
+            wanted = [t.ticker for t in ordered[: self._max_locked()]]
         elif watch_all:
             wanted = [
                 t.ticker for t in self._locked_targets[: self._max_locked()]
@@ -4537,10 +4542,7 @@ class ScalperRunner:
 
         holding = self._held_tickers()
         priority_names = self._priority_ticker_set()
-        scan_targets = [
-            t for t in self._locked_targets[: self._max_locked()]
-            if t.ticker.upper() in priority_names
-        ] or self._locked_targets[: self._max_locked()]
+        scan_targets = self._locked_targets[: self._max_locked()]
 
         for target in scan_targets:
             ticker = target.ticker
@@ -4617,6 +4619,7 @@ class ScalperRunner:
             if not is_spike:
                 continue
 
+            self._lock_spike_touch_at[ticker] = now
             boost = 1.0 + float(forecast.get("spike_likelihood", 0)) * float(
                 getattr(self.cfg, "MICRO_SPIKE_BOOST", 0.35)
             )
