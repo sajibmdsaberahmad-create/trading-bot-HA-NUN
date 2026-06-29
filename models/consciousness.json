@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1449,
   "scans_performed": 39,
-  "improvements_applied": 2208,
+  "improvements_applied": 2209,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T08:55:46.699309",
-      "age": "6d 21h 52m 58s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-13.21",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T08:55:47.233207",
       "age": "6d 21h 52m 58s",
@@ -11378,6 +11371,20 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:30:03.339728",
+      "age": "7d 23h 27m 14s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2209",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
         ]
       }
     }
