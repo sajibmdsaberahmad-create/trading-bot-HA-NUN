@@ -1642,3 +1642,4 @@
 {"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Short_(finance)","chars":12000,"hash":"e7552ed577ecf810","read_only":true,"timestamp":"2026-06-28T15:02:05.185979+00:00"}
 {"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Bid%E2%80%93ask_spread","chars":10032,"hash":"c1eaa0574071333e","read_only":true,"timestamp":"2026-06-28T15:02:06.725772+00:00"}
 {"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Investor_psychology","chars":12000,"hash":"67b02a4392b9df13","read_only":true,"timestamp":"2026-06-29T07:41:41.105550+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Scalping_(trading)","chars":6694,"hash":"bf27ae9adb207493","read_only":true,"timestamp":"2026-06-29T07:55:59.274334+00:00"}
