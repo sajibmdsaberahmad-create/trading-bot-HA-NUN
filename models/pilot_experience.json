@@ -1,11 +1,11 @@
 {
-  "total_xp": 20510,
+  "total_xp": 20565,
   "level": "Veteran",
-  "flights_completed": 204,
-  "flights_flown": 666,
-  "takeoffs": 666,
-  "landings": 204,
-  "hours_flown": 20.40000000000002,
+  "flights_completed": 205,
+  "flights_flown": 672,
+  "takeoffs": 672,
+  "landings": 205,
+  "hours_flown": 20.50000000000002,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -34,7 +34,7 @@
     "MAR": 27,
     "QS": 2,
     "RIO": 18,
-    "SOF": 65,
+    "SOF": 66,
     "AST": 4,
     "RKL": 4
   },
