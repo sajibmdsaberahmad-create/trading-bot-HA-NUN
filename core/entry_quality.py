@@ -210,10 +210,30 @@ def mtf_trend_aligned(df_5m: Any, df_15m: Any) -> tuple[bool, str]:
     return True, "mtf_aligned"
 
 
-def mtf_blocks_entry(cfg: BotConfig, df_5m: Any, df_15m: Any) -> bool:
+def mtf_blocks_entry(
+    cfg: BotConfig,
+    df_5m: Any,
+    df_15m: Any,
+    *,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> bool:
     """Block spike entries when higher timeframes are not in uptrend."""
     if not getattr(cfg, "MTF_ENTRY_BLOCK", False):
         return False
+    try:
+        from core.sniper_execution import (
+            sniper_active,
+            sniper_vol_flash,
+            is_sniper_strong_spike,
+        )
+        if sniper_active(cfg) and (
+            sniper_vol_flash(cfg, scan_score, spike_ratio)
+            or is_sniper_strong_spike(cfg, scan_score, spike_ratio)
+        ):
+            return False
+    except Exception:
+        pass
     ok, _ = mtf_trend_aligned(df_5m, df_15m)
     return not ok
 

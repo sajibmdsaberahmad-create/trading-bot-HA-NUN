@@ -38,8 +38,8 @@ except Exception: pass
   if [[ -f "$LOG_FILE" ]]; then
     echo "  recent trading:"
     tail -400 "$LOG_FILE" 2>/dev/null | grep -v "📡 Streams" | grep -E \
-      "ENTRY|EXIT|WATCH|cooldown|guard:|loss_pressure|bypass|PPO HOLD|Halim soft|COUNCIL|SPIKE|QUALITY|IB connected|Shutdown" \
-      | tail -6 | sed 's/^/    /' || true
+      "ENTRY|EXIT|WATCH|cooldown|guard:|war:|SNIPER|sniper:|loss_pressure|bypass|PPO HOLD|Halim soft|COUNCIL|SPIKE|QUALITY|MACRO|War account|IB connected|Shutdown|2 tick" \
+      | tail -8 | sed 's/^/    /' || true
   else
     echo "  (log not found yet — start HANOON with ./scripts/start_hanoon.sh)"
   fi

@@ -4472,7 +4472,11 @@ class ScalperRunner:
                         )
                     except Exception:
                         pass
-            if mtf_blocks_entry(self.cfg, df_5m, df_15m):
+            if mtf_blocks_entry(
+                self.cfg, df_5m, df_15m,
+                scan_score=float(target.rank_score),
+                spike_ratio=float(spike_ratio),
+            ):
                 log.info(f"  ⏭ MTF block {ticker}: 5m/15m not aligned — skip entry")
                 self._spike_skip_until[ticker] = time.time() + float(
                     getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
