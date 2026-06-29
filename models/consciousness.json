@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1485,
+  "trades_observed": 1486,
   "scans_performed": 39,
-  "improvements_applied": 2327,
+  "improvements_applied": 2328,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:24:24.239182",
-      "age": "6d 22h 21m 35s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1707",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T09:24:27.700932",
-      "age": "6d 22h 21m 39s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-8.17",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T09:24:33.844548",
       "age": "6d 22h 21m 45s",
@@ -11615,6 +11594,27 @@
           "Review trade_closed on SOFI"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T12:44:30.356521",
+      "age": "8d 1h 41m 41s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+2239.50",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T12:44:30.946609",
+      "age": "8d 1h 41m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2328",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -13777,9 +13777,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "in rhythm",
-  "total_pnl": 291139.6400000004,
+  "total_pnl": 293379.1400000004,
   "win_history": [
-    -10.29,
     -8.53,
     -4.65,
     -8.96,
@@ -14278,20 +14277,21 @@
     2406.94,
     2406.94,
     2406.94,
+    2239.5,
     2239.5
   ],
-  "consecutive_wins": 95,
+  "consecutive_wins": 96,
   "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 23150,
+  "veteran_xp": 23180,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 100
   },
-  "flights_completed": 1479,
-  "hours_flown": 147.89999999999588,
+  "flights_completed": 1480,
+  "hours_flown": 147.99999999999588,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14320,15 +14320,15 @@
     "COI": 286,
     "RIV": 19,
     "RKL": 16,
-    "SOF": 113,
+    "SOF": 114,
     "AST": 222,
     "SES": 8,
     "NVD": 3
   },
-  "best_streak": 95,
+  "best_streak": 96,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win streak 95 \u00b7 recent $+45250.46. Riding what works, not forcing size."
+  "mood_message": "Win streak 96 \u00b7 recent $+45710.92. Riding what works, not forcing size."
 }
