@@ -1,0 +1,2 @@
+{"event":"war_entry","ticker":"TEST","mode":"WAR_ACTIVE","shares":1082,"virtual_fill":0.17204000000000003,"ib_fill":0.17,"slippage_pct":0.012,"commission":0.35,"notional":186.14728000000002,"promotion":true,"pipeline":"","ts":1782747175.1885078}
+{"event":"war_exit","ticker":"TEST","mode":"WAR_ACTIVE","virtual_fill":0.15808,"ib_fill":0.16,"net_pnl":-15.8,"gross_pnl":-15.1,"fees":0.7,"promotion":true,"exit_reason":"","ts":1782747175.189161}

@@ -1957,6 +1957,21 @@ class ScalperRunner:
         target_px = float(trade_rec.get("target", 0))
 
         append_fill_ledger({**trade_rec, "event": "round_trip"})
+        try:
+            from core.war_account import record_exit, war_account_enabled
+            if war_account_enabled(self.cfg):
+                record_exit(
+                    self.cfg,
+                    ticker=ticker,
+                    shares=int(shares),
+                    ib_fill=exit_fill,
+                    quote=float(trade_rec.get("quote_exit", exit_fill)),
+                    pnl_usd_ib=pnl,
+                    exit_reason=reason,
+                    spread_pct=abs(exit_slip),
+                )
+        except Exception as exc:
+            log.debug(f"War account exit: {exc}")
         log_round_trip_fills(
             ticker=ticker,
             entry_fill=entry_fill,
@@ -3260,6 +3275,11 @@ class ScalperRunner:
         results.sort(key=lambda x: x.get("total_score", 0), reverse=True)
         if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander:
             results = self.ai_commander.rank_scan_results(results)
+        try:
+            from core.war_account import adjust_scan_results
+            results = adjust_scan_results(self.cfg, results)
+        except Exception:
+            pass
         
         # Debug: log score distribution
         if results:
@@ -3309,6 +3329,11 @@ class ScalperRunner:
 
         if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander and results:
             results = self.ai_commander.rank_scan_results(results)
+        try:
+            from core.war_account import adjust_scan_results
+            results = adjust_scan_results(self.cfg, results)
+        except Exception:
+            pass
 
         min_lock_score = effective_min_lock_score(self.cfg)
         min_candidates = effective_min_lock_candidates(self.cfg)
@@ -3370,6 +3395,21 @@ class ScalperRunner:
         tradeable = set(filter_tradeable_tickers(self.cfg, [r["ticker"] for r in pool]))
         pool = [r for r in pool if r["ticker"] in tradeable]
         locked = pool[: self._max_locked()]
+        try:
+            from core.war_account import filter_locked_pool
+            locked_objs = [
+                ScanResult(
+                    ticker=r["ticker"], price=r.get("price", 0.0), volume=r.get("volume", 0),
+                    avg_volume=r.get("avg_volume", 0), relative_volume=r.get("rel_vol", 1.0),
+                    rank_score=r["total_score"], reason=r.get("reasons", ""),
+                )
+                for r in locked
+            ]
+            locked_objs = filter_locked_pool(self.cfg, locked_objs)
+            locked_tickers = {p.ticker for p in locked_objs}
+            locked = [r for r in locked if r["ticker"] in locked_tickers]
+        except Exception:
+            pass
         if not locked and qualified:
             locked = sorted(qualified, key=lambda x: x.get("total_score", 0), reverse=True)[:3]
 
@@ -5683,6 +5723,20 @@ class ScalperRunner:
                 ) if k in lot_meta
             })
         self._position_slots[ticker] = slot
+        try:
+            from core.war_account import record_entry, war_account_enabled
+            if war_account_enabled(self.cfg):
+                record_entry(
+                    self.cfg,
+                    ticker=ticker,
+                    shares=int(shares),
+                    ib_fill=float(fill_px),
+                    quote=float(fill_px),
+                    pipeline=str(getattr(self, "_last_entry_pipeline", "")),
+                    spread_pct=abs(slippage_pct),
+                )
+        except Exception as exc:
+            log.debug(f"War account entry: {exc}")
         if lot_meta.get("lottery_bank"):
             try:
                 from core.lottery_bank import notify_lottery_event, record_entry
@@ -6660,6 +6714,22 @@ class ScalperRunner:
         )
         return plan, ai_dec
 
+    def _apply_war_sizing(
+        self,
+        ticker: str,
+        decision: Dict[str, Any],
+        entry_px: float,
+    ) -> Dict[str, Any]:
+        try:
+            from core.war_account import rescale_decision_for_war, war_account_enabled
+            if war_account_enabled(self.cfg):
+                return rescale_decision_for_war(
+                    self.cfg, decision, entry_px, ticker=ticker,
+                )
+        except Exception as exc:
+            log.debug(f"War sizing: {exc}")
+        return decision
+
     def _apply_lottery_bank_sizing(
         self,
         ticker: str,
@@ -6791,7 +6861,8 @@ class ScalperRunner:
             )
             self._clear_pending_entry(ticker, cooldown_sec=30.0)
             return "waiting"
-        ai_dec = self._apply_lottery_bank_sizing(ticker, gate_dec, current_px, df_fast)
+        ai_dec = self._apply_war_sizing(ticker, gate_dec, current_px)
+        ai_dec = self._apply_lottery_bank_sizing(ticker, ai_dec, current_px, df_fast)
         shares = int(ai_dec["shares"])
         shares = self._liquidity_cap_shares(shares, current_px, df_fast)
         shares = self._clamp_entry_shares(shares, current_px)
@@ -7241,6 +7312,7 @@ class ScalperRunner:
                     "risk_usd": stop_usd,
                 }
 
+            ai_dec = self._apply_war_sizing(ticker, ai_dec, current_px)
             ai_dec = self._apply_lottery_bank_sizing(ticker, ai_dec, current_px, df_fast)
 
             shares = int(ai_dec["shares"])

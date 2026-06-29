@@ -326,7 +326,18 @@ def get_ai_deploy_budget(
 
 
 def get_trade_risk_usd(cfg: BotConfig, account_equity: float = 0.0) -> float:
-    """Per-trade risk budget — paper free uses full equity %; live uses capped risk."""
+    """Per-trade risk budget — war NAV on sniper mode; else capped risk."""
+    try:
+        from core.war_account import war_account_enabled, war_effective_equity, bullet_size_usd
+        if war_account_enabled(cfg):
+            eq = war_effective_equity(cfg)
+            if eq > 0:
+                account_equity = eq
+            bullet = bullet_size_usd(cfg)
+            if bullet > 0:
+                return min(bullet * 0.35, cfg.risk_amount_usd(account_equity))
+    except Exception:
+        pass
     if getattr(cfg, "USE_FIXED_RISK_CAP", False):
         return float(getattr(cfg, "HARD_STOP_USD", 50.0))
     try:
