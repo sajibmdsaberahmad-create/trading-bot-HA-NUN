@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1471,
   "scans_performed": 39,
-  "improvements_applied": 2280,
+  "improvements_applied": 2281,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:13:17.560202",
-      "age": "6d 22h 10m 28s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1673",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T09:13:18.705830",
       "age": "6d 22h 10m 30s",
@@ -11533,6 +11519,20 @@
       "age": "8d 0h 46m 22s",
       "type": "IMPROVE",
       "message": "Applied improvement #2280",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T11:53:40.331500",
+      "age": "8d 0h 50m 51s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2281",
       "metadata": {
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
