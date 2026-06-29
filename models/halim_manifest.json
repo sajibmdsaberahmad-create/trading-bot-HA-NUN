@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-29T16:05:20.666676+00:00",
+  "updated_at": "2026-06-29T16:46:55.142060+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-29T16:05:20.567965+00:00",
+    "timestamp": "2026-06-29T16:46:55.105159+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -67,19 +67,19 @@
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-29T15:59:38.860340+00:00"
+        "modified": "2026-06-29T16:43:40.098416+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 45633.0,
-        "modified": "2026-06-29T16:02:16.387043+00:00"
+        "size_kb": 45642.5,
+        "modified": "2026-06-29T16:37:34.821287+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2339.6,
-        "modified": "2026-06-29T16:04:23.122113+00:00"
+        "size_kb": 2340.3,
+        "modified": "2026-06-29T16:45:55.032618+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -108,9 +108,9 @@
     "trade_stats": {
       "count": 6,
       "win_rate": 0.0,
-      "avg_pnl": -4.38
+      "avg_pnl": -0.5
     },
-    "buffer_records": 17348,
+    "buffer_records": 17374,
     "dataset_pairs": 2255,
     "maturity": {
       "stage": "adult",
@@ -118,7 +118,7 @@
       "stage_count": 6,
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
-        "closed_trades": 2460,
+        "closed_trades": 2461,
         "dataset_pairs": 2255,
         "evolution_count": 17,
         "proxy_accuracy": 1.0,
