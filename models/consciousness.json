@@ -5,37 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1559,
   "scans_performed": 39,
-  "improvements_applied": 2491,
+  "improvements_applied": 2493,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:49:00.748741",
-      "age": "7d 1h 46m 12s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1836",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:49:00.756293",
-      "age": "7d 1h 46m 12s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1837",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on MARA"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:49:00.901027",
       "age": "7d 1h 46m 12s",
@@ -12222,6 +12194,34 @@
         "applied": [],
         "lessons": [
           "Review loss_streak on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:47:59.825405",
+      "age": "8d 3h 45m 11s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2492",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:48:08.437441",
+      "age": "8d 3h 45m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2493",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on SOAR"
         ]
       }
     }
