@@ -4724,7 +4724,6 @@ class ScalperRunner:
                 from core.smart_stack import (
                     collect_spike_gate_advisories,
                     mechanical_gates_advisory_only,
-                    spike_gates_block_entry,
                 )
                 gate_adv = collect_spike_gate_advisories(
                     self.cfg,
@@ -4743,28 +4742,22 @@ class ScalperRunner:
                             continue
                         if not gval.get("ok", True):
                             log.info(
-                                f"  📊 GATE advisory {ticker}: {gkey} — {gval.get('reason', '')[:80]}"
+                                f"  📊 GATE advisory {ticker}: {gkey} — "
+                                f"{gval.get('reason', '')[:80]}"
                             )
                 else:
-                    blocked, breason = spike_gates_block_entry(self.cfg, gate_adv)
-                    if blocked:
-                        if not quality_blocks_entry(self.cfg, quality):
-                            pass
-                        elif quality_blocks_entry(self.cfg, quality):
-                            log.info(f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}")
-                            self._spike_skip_until[ticker] = time.time() + float(
-                                getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
-                            )
-                            continue
                     if quality_blocks_entry(self.cfg, quality):
-                        log.info(f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}")
+                        log.info(
+                            f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}"
+                        )
                         self._spike_skip_until[ticker] = time.time() + float(
                             getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                         )
                         continue
-                    from core.entry_quality import regime_blocks_entry, mtf_blocks_entry
                     if regime_blocks_entry(self.cfg, spike_regime):
-                        log.info(f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry")
+                        log.info(
+                            f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry"
+                        )
                         self._spike_skip_until[ticker] = time.time() + float(
                             getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                         )
@@ -4774,20 +4767,26 @@ class ScalperRunner:
                         scan_score=float(target.rank_score),
                         spike_ratio=float(spike_ratio),
                     ):
-                        log.info(f"  ⏭ MTF block {ticker}: 5m/15m not aligned — skip entry")
+                        log.info(
+                            f"  ⏭ MTF block {ticker}: 5m/15m not aligned — skip entry"
+                        )
                         self._spike_skip_until[ticker] = time.time() + float(
                             getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                         )
                         continue
             except Exception:
                 if quality_blocks_entry(self.cfg, quality):
-                    log.info(f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}")
+                    log.info(
+                        f"  ⏭ QUALITY veto {ticker}: {quality.get('reason', '')[:100]}"
+                    )
                     self._spike_skip_until[ticker] = time.time() + float(
                         getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                     )
                     continue
                 if regime_blocks_entry(self.cfg, spike_regime):
-                    log.info(f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry")
+                    log.info(
+                        f"  ⏭ REGIME block {ticker}: {spike_regime} — skip new entry"
+                    )
                     self._spike_skip_until[ticker] = time.time() + float(
                         getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                     )
@@ -7529,17 +7528,22 @@ class ScalperRunner:
             except Exception:
                 pass
 
-            gate_ok, gate_msg = passes_pre_entry_gate(
+            gate_ok, gate_msg, gate_adv = evaluate_pre_entry_advisories(
                 self.cfg,
                 scan_score=scan_score,
                 spike_ratio=spike_ratio,
                 forecast=forecast,
                 live_px=float(current_px or 0),
             )
+            if gate_adv:
+                self._smart_gate_context[ticker.upper()] = {
+                    **self._smart_gate_context.get(ticker.upper(), {}),
+                    **gate_adv,
+                }
             if not gate_ok:
                 cd = entry_cooldown_after_skip(self.cfg)
                 self._spike_skip_until[ticker] = now + cd
-                if now - getattr(self, "_last_quality_watch_log", 0) >= float(
+                if gate_msg and now - getattr(self, "_last_quality_watch_log", 0) >= float(
                     getattr(self.cfg, "QUALITY_WATCH_HEARTBEAT_SEC", 45)
                 ):
                     self._last_quality_watch_log = now
