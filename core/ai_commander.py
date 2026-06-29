@@ -1284,6 +1284,7 @@ class AICommander:
         account = dict(account or {})
         account["entry_quality"] = quality
         gate_ctx = dict(account.get("smart_gate_context") or {})
+        self._decide_entry_gate_ctx = gate_ctx
         gate_line = ""
         try:
             from core.smart_stack import format_gate_context_for_prompt

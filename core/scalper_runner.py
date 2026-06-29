@@ -2603,6 +2603,13 @@ class ScalperRunner:
         discipline_log = startup_log_line(self.cfg)
         if discipline_log:
             sinfo(self.cfg, discipline_log, force=True)
+        try:
+            from core.smart_stack import startup_banner_line
+            ss_line = startup_banner_line(self.cfg)
+            if ss_line:
+                sinfo(self.cfg, ss_line, force=True)
+        except Exception:
+            pass
 
     def run(self):
         self._register_shutdown_signals()
@@ -6148,6 +6155,13 @@ class ScalperRunner:
             "target": plan.take_profit_price,
             "entry_time": time.time(),
         })
+        try:
+            from core.capital_discipline import capital_discipline_enabled
+            from core.smart_stack import count_hourly_filled_entry
+            if capital_discipline_enabled(self.cfg) and count_hourly_filled_entry(self.cfg):
+                self._entries_this_hour = getattr(self, "_entries_this_hour", 0) + 1
+        except Exception:
+            pass
         self.trades_today += 1
         self.current_ticker = ticker
         log.info(
@@ -7351,7 +7365,12 @@ class ScalperRunner:
                 symbol=ticker,
             )
             self._pending_brackets_by_ticker[ticker] = bracket
-            if capital_discipline_enabled(self.cfg):
+            try:
+                from core.smart_stack import count_hourly_filled_entry
+                count_on_submit = not count_hourly_filled_entry(self.cfg)
+            except Exception:
+                count_on_submit = True
+            if capital_discipline_enabled(self.cfg) and count_on_submit:
                 self._entries_this_hour = getattr(self, "_entries_this_hour", 0) + 1
             if not self._position_slots:
                 self.bracket_handle = bracket
@@ -7528,6 +7547,7 @@ class ScalperRunner:
             except Exception:
                 pass
 
+            from core.smart_stack import evaluate_pre_entry_advisories
             gate_ok, gate_msg, gate_adv = evaluate_pre_entry_advisories(
                 self.cfg,
                 scan_score=scan_score,
