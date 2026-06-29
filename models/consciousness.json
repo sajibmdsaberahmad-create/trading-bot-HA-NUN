@@ -5,30 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1522,
   "scans_performed": 39,
-  "improvements_applied": 2413,
+  "improvements_applied": 2415,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:22:30.880288",
-      "age": "7d 1h 19m 42s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-0.72",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:22:35.187434",
-      "age": "7d 1h 19m 46s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1774",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:22:35.196772",
       "age": "7d 1h 19m 46s",
@@ -11929,6 +11908,64 @@
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
         "applied": [],
+        "lessons": [
+          "Review order_timeout on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:46:41.749984",
+      "age": "8d 2h 43m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2414",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 150.0,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.015,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review ib_failure on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:46:51.710075",
+      "age": "8d 2h 44m 3s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2415",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 150.0,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.015,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
         "lessons": [
           "Review order_timeout on INLF"
         ]
