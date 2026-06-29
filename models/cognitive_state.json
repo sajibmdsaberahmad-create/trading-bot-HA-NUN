@@ -4,10 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "RTH open \u2014 super alert: opening noise, ride real volume, protect capital.",
-    "Review trade_closed on QS",
-    "Review loss_streak on QS",
-    "Commander: trailing_profit",
     "Commander: green_profit_lock:ai_stall quick_scalp +0.39% (peak +0.39%)",
     "Commander: green_profit_lock:ai_stall_min_green +0.32%",
     "Commander: green_profit_lock:giveback +0.20% (peak +0.26% gave back 0.06%)",
@@ -103,10 +99,14 @@
     "Commander: green_profit_lock:ai_stall quick_scalp +1.23% (peak +1.23%)",
     "Review trade_closed on SOAR",
     "Commander: trailing_stop",
-    "Commander: BUY 937 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1604 or a more aggressive price still within your spec"
+    "Commander: BUY 937 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1604 or a more aggressive price still within your spec",
+    "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0673 or a more aggressive price still within y",
+    "Review loss_streak on SOAR",
+    "Review order_timeout on INLF",
+    "Commander: Submitted"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 190,
-  "updated": "2026-06-29T13:38:50.872920"
+  "trades_observed": 192,
+  "updated": "2026-06-29T13:40:26.953241"
 }

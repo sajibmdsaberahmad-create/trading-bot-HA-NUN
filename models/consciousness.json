@@ -3,67 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1516,
+  "trades_observed": 1517,
   "scans_performed": 39,
-  "improvements_applied": 2397,
+  "improvements_applied": 2401,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:16:29.992494",
-      "age": "7d 1h 13m 41s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1760",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:16:30.489879",
-      "age": "7d 1h 13m 41s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-22.95",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:16:32.700733",
-      "age": "7d 1h 13m 44s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1761",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:18:11.919152",
-      "age": "7d 1h 15m 23s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-8.73",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:18:16.538452",
-      "age": "7d 1h 15m 27s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1763",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:18:16.572388",
       "age": "7d 1h 15m 27s",
@@ -11822,6 +11766,99 @@
           "Review ib_failure on SOAR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T13:40:13.570152",
+      "age": "8d 2h 37m 24s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2398",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 150.0,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.014000000000000005,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review ib_failure on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:40:18.074546",
+      "age": "8d 2h 37m 29s",
+      "type": "TRADE",
+      "message": "Observed trade: SOAR ? P&L=$-1.94",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:40:18.705905",
+      "age": "8d 2h 37m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2400",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:40:18.705945",
+      "age": "8d 2h 37m 30s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2400",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:40:26.953592",
+      "age": "8d 2h 37m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2401",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 150.0,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.015,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review order_timeout on INLF"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -13983,10 +14020,9 @@
     }
   ],
   "last_training": "2026-06-29T07:53:55.457760",
-  "mood": "focused",
-  "total_pnl": 332993.1500000004,
+  "mood": "steady",
+  "total_pnl": 332991.21000000037,
   "win_history": [
-    -0.67,
     0.04,
     0.31,
     0.58,
@@ -14485,20 +14521,21 @@
     100.0,
     0.53,
     31.88,
-    0.0
+    0.0,
+    -1.94
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 86,
-  "veteran_xp": 23905,
+  "veteran_xp": 23915,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 58,
     "entry_timing": 100
   },
-  "flights_completed": 1510,
-  "hours_flown": 150.9999999999957,
+  "flights_completed": 1511,
+  "hours_flown": 151.0999999999957,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14533,12 +14570,12 @@
     "NVD": 3,
     "INL": 4,
     "TNM": 3,
-    "SOA": 1
+    "SOA": 2
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 60% on recent trades \u00b7 $+23863.24. Executing the plan."
+  "mood_message": "Mixed session \u00b7 $+14433.39. Watching for cleaner setups."
 }
