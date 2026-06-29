@@ -1671,3 +1671,10 @@ bracket_exit
 Observed loss_streak — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:14:40.122702+00:00
+Observed ib_failure — recorded for learning.
+BUY 937 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1599 or a more aggressive price still within your spec
+• Applied mutations:
+  - PENNY_MAX_DEPLOY_USD → 150.0 (IB 2161 regulatory cap — reduce penny deploy)
+  - PENNY_LIMIT_BUFFER_PCT → 0.015 (IB 2161 — tighter limit buffer toward reference price)
+
