@@ -3890,16 +3890,6 @@ class ScalperRunner:
             else:
                 n_rt += 1
 
-        if not quiet:
-            try:
-                from core.sniper_execution import sniper_tick_streams_enabled
-                if sniper_tick_streams_enabled(self.cfg):
-                    tick_names = [t for t, m in modes.items() if m == "tick"]
-                    if tick_names:
-                        log.info(f"  🎯 Sniper tick sensors: {', '.join(tick_names)}")
-            except Exception:
-                pass
-
         if wanted:
             tickers = ",".join(wanted[:8]) + ("…" if len(wanted) > 8 else "")
             body = (
@@ -3907,8 +3897,18 @@ class ScalperRunner:
                 + (f" ({n_skip} deferred)" if n_skip else "")
                 + f" [{tickers}]"
             )
-            prefix = "📡 Streams:" if quiet else "  📡 PRIORITY STREAMS:"
-            log.info(f"{prefix} {body}")
+            if body != getattr(self, "_last_stream_log_body", ""):
+                self._last_stream_log_body = body
+                prefix = "📡 Streams:" if quiet else "  📡 PRIORITY STREAMS:"
+                log.info(f"{prefix} {body}")
+                try:
+                    from core.sniper_execution import sniper_tick_streams_enabled
+                    if sniper_tick_streams_enabled(self.cfg):
+                        tick_names = [t for t, m in modes.items() if m == "tick"]
+                        if tick_names:
+                            log.info(f"  🎯 Sniper tick sensors: {', '.join(tick_names)}")
+                except Exception:
+                    pass
 
     def _ensure_target_stream(self, ticker: str, mode: str = "realtime", quiet: bool = False):
         """Start or switch stream mode for one locked ticker."""

@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-29T15:58:25.031583+00:00",
+  "updated_at": "2026-06-29T15:59:19.857387+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,12 +36,14 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-29T15:58:24.907796+00:00",
+    "timestamp": "2026-06-29T15:59:19.820115+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
-        "exists": false,
-        "path": "ppo_trader.zip"
+        "exists": true,
+        "path": "ppo_trader.zip",
+        "size_kb": 28471.6,
+        "modified": "2026-06-29T14:36:33.636570+00:00"
       },
       "ppo_replay": {
         "exists": true,
