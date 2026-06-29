@@ -101,6 +101,8 @@ fi
 
 rm -f "$PID_FILE" "$SHUTDOWN_FILE"
 
+"$ROOT/scripts/stop_halim_watchdog.sh" 2>/dev/null || true
+
 echo "▶ Final Halim gold export + SFT + Colab zip…"
 python3 -c "
 from core.config import BotConfig

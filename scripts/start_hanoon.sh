@@ -34,6 +34,13 @@ CLIENT_ID="${CLIENT_ID:-1}"
 if pgrep -f "main.py.*--client-id[ =]${CLIENT_ID}([ ^]|$)" >/dev/null 2>&1; then
   echo "⚠️  Another process already uses IB client_id=${CLIENT_ID} — stop it first (./stop.sh)"
 fi
+
+# Free RAM before MLX + scalper (kills learn loop, IDE sidecars on ≤12GB Macs)
+if [[ -x "$ROOT/scripts/sweep_device_junk.sh" && "${HALIM_DEVICE_SWEEP_ON_START:-false}" == "true" ]]; then
+  "$ROOT/scripts/sweep_device_junk.sh" || true
+elif [[ -x "$ROOT/scripts/free_ram_for_trading.sh" ]]; then
+  "$ROOT/scripts/free_ram_for_trading.sh" || true
+fi
 # Cloud council — Groq primary, Gemini fallback (set keys in .env)
 export COUNCIL_ENABLED="${COUNCIL_ENABLED:-true}"
 export COUNCIL_BACKEND="${COUNCIL_BACKEND:-groq}"
@@ -389,8 +396,13 @@ if [ "${TRADING_BOT_TELEGRAM_LISTEN:-true}" = "true" ]; then
   "$ROOT/scripts/halim_stop.sh" --telegram-only 2>/dev/null || true
 fi
 echo ""
-echo "🧠 Ensuring Halim serve is active…"
-"$ROOT/scripts/ensure_halim_active.sh" --serve-only || echo "   Halim serve warning (non-fatal — see logs/halim_serve.log)"
+echo "🧠 Ensuring Halim serve is active (fresh code on each HANOON start)…"
+"$ROOT/scripts/ensure_halim_active.sh" --serve-only --restart || echo "   Halim serve warning (non-fatal — see logs/halim_serve.log)"
+
+if [ "${HALIM_STANDALONE_WATCHDOG:-true}" = "true" ]; then
+  echo "🛡️ Starting Halim serve watchdog (keeps :8765 alive during trading)…"
+  "$ROOT/scripts/start_halim_watchdog.sh" || echo "   Halim watchdog warning (see logs/halim_watchdog.log)"
+fi
 
 # ── 6b. Standalone git sync (auto-push any IDE save — separate process) ───
 if [ "${START_GIT_SYNC_WITH_HANOON:-true}" = "true" ]; then
@@ -417,4 +429,6 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Foreground + tee: live terminal output; bot writes logs/hanoon.pid via write_pid()
-python3 -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" 2>&1 | tee -a "$MAIN_LOG"
+PY="${ROOT}/venv/bin/python3"
+if [[ ! -x "$PY" ]]; then PY="python3"; fi
+"$PY" -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID" 2>&1 | tee -a "$MAIN_LOG"

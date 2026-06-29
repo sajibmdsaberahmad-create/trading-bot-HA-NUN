@@ -184,7 +184,10 @@ mkdir -p logs
 "$ROOT/scripts/halim_stop.sh" --telegram-only 2>/dev/null || true
 
 echo "🧠 Ensuring Halim serve is active (chat paused — replay has full focus)…"
-"$ROOT/scripts/ensure_halim_active.sh" --serve-only || echo "   Halim serve warning (non-fatal — see logs/halim_serve.log)"
+"$ROOT/scripts/ensure_halim_active.sh" --serve-only --restart || echo "   Halim serve warning (non-fatal — see logs/halim_serve.log)"
+if [ "${HALIM_STANDALONE_WATCHDOG:-true}" = "true" ]; then
+  "$ROOT/scripts/start_halim_watchdog.sh" || echo "   Halim watchdog warning (see logs/halim_watchdog.log)"
+fi
 
 echo "══════════════════════════════════════════════════════════════"
 echo "  REPLAY SCALPER — full HANOON clone (multi-ticker, council on)"
