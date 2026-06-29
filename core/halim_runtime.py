@@ -47,7 +47,7 @@ class HalimRuntime:
         self._mode = "trade_focus"
         self._user_task_pending = os.getenv("HALIM_USER_TASK", "").strip()
         self._tick_sec = float(os.getenv("HALIM_RUNTIME_TICK_SEC", "30"))
-        self._serve_watch_sec = float(os.getenv("HALIM_SERVE_WATCHDOG_SEC", "90"))
+        self._serve_watch_sec = float(os.getenv("HALIM_SERVE_WATCHDOG_SEC", "30"))
         self._learn_interval = float(os.getenv("HALIM_OFF_HOURS_LEARN_SEC", "3600"))
         self._dev_interval = float(os.getenv("HALIM_OFF_HOURS_DEV_SEC", "7200"))
         self._export_interval = float(os.getenv("HALIM_OFF_HOURS_EXPORT_SEC", "7200"))
@@ -182,6 +182,7 @@ class HalimRuntime:
             pass
         root = Path(__file__).resolve().parents[1]
         log.warning("Halim serve down — watchdog restarting…")
+        self._journal("halim_serve_restart", {"source": "halim_runtime"})
         try:
             import subprocess
             subprocess.run(
@@ -217,6 +218,7 @@ class HalimRuntime:
         can_trade, market_state = can_trade_now(self.cfg)
 
         if self._mode == "trade_focus":
+            self._watchdog_serve()  # extra pass — trading hours need Halim alive
             self._save_state({"focus": "profit_hunting", "market_state": market_state})
             return
 
