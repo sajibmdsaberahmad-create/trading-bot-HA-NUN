@@ -382,3 +382,5 @@
 {"timestamp":"2026-06-29T18:43:38.879096+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
 {"timestamp":"2026-06-29T18:45:09.021190+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
 {"timestamp":"2026-06-29T18:46:40.095499+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
+{"timestamp":"2026-06-29T18:48:10.284573+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
+{"timestamp":"2026-06-29T18:49:40.435272+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}

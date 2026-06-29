@@ -7685,7 +7685,11 @@ class ScalperRunner:
                         + (f" | {pipeline}" if pipeline else "")
                     )
                     if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
-                        if pipeline == "sniper:ppo_hold_skip":
+                        from core.smart_stack import smart_stack_enabled
+                        if (
+                            not smart_stack_enabled(self.cfg)
+                            and pipeline == "sniper:ppo_hold_skip"
+                        ):
                             from core.sniper_execution import sniper_ppo_hold_skip_sec
                             cd = sniper_ppo_hold_skip_sec(self.cfg)
                         else:

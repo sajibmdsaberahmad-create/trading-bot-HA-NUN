@@ -1678,22 +1678,6 @@ class AICommander:
             equity=equity,
             cash=float(account.get("cash", 0)),
         )
-        try:
-            from core.smart_stack import log_spike_verdict
-            halim_live = self._halim_entry.consume(ticker, fp)
-            log_spike_verdict(
-                self.cfg,
-                ticker=ticker,
-                spike_ratio=spike_ratio,
-                scan_score=scan_score,
-                ppo_action=ppo_action,
-                ppo_conf=ppo_conf,
-                decision=decision,
-                gate_context=gate_ctx,
-                halim_status=str(halim_live.get("status", "")),
-            )
-        except Exception:
-            pass
         if decision.get("enter"):
             self._schedule_deferred_entry(
                 ticker=ticker, fingerprint=fp, decision=decision,
@@ -1808,7 +1792,43 @@ class AICommander:
             min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
             use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
             df=df, equity=equity, cash=float(account.get("cash", 0)),
+            gate_context=(account or {}).get("smart_gate_context"),
         )
+
+    def _emit_spike_verdict(
+        self,
+        decision: Dict[str, Any],
+        *,
+        ticker: str,
+        spike_ratio: float,
+        scan_score: float,
+        ppo_action: int,
+        ppo_conf: float,
+        gate_context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Phase D: log every finalized entry deliberation (skip pending)."""
+        if decision.get("pending"):
+            return decision
+        try:
+            from core.smart_stack import log_spike_verdict
+            gate_context = gate_context or getattr(self, "_decide_entry_gate_ctx", None)
+            halim_status = ""
+            if hasattr(self, "_halim_entry"):
+                halim_status = str(self._halim_entry.peek(ticker).get("status", ""))
+            log_spike_verdict(
+                self.cfg,
+                ticker=ticker,
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                decision=decision,
+                gate_context=gate_context,
+                halim_status=halim_status,
+            )
+        except Exception:
+            pass
+        return decision
 
     def _finalize_entry_decision(
         self,
@@ -1830,6 +1850,7 @@ class AICommander:
         df: Optional[pd.DataFrame] = None,
         equity: float = 0.0,
         cash: float = 0.0,
+        gate_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         out = self._blend_halim_entry(
@@ -1897,18 +1918,26 @@ class AICommander:
                         scan_score=scan_score,
                     )
                 if not vetoed.get("enter"):
-                    return {
-                        "enter": False,
-                        "confidence": float(vetoed.get("confidence", confidence)),
-                        "shares": 0,
-                        "stop": 0.0,
-                        "target": 0.0,
-                        "risk_usd": 0.0,
-                        "reason": str(vetoed.get("reason", "war entry veto"))[:200],
-                        "journal": str(out.get("journal", ""))[:300],
-                        "pipeline": str(vetoed.get("pipeline", "war:entry_veto")),
-                        "pending": False,
-                    }
+                    return self._emit_spike_verdict(
+                        {
+                            "enter": False,
+                            "confidence": float(vetoed.get("confidence", confidence)),
+                            "shares": 0,
+                            "stop": 0.0,
+                            "target": 0.0,
+                            "risk_usd": 0.0,
+                            "reason": str(vetoed.get("reason", "war entry veto"))[:200],
+                            "journal": str(out.get("journal", ""))[:300],
+                            "pipeline": str(vetoed.get("pipeline", "war:entry_veto")),
+                            "pending": False,
+                        },
+                        ticker=ticker,
+                        spike_ratio=spike_ratio,
+                        scan_score=scan_score,
+                        ppo_action=ppo_action,
+                        ppo_conf=ppo_conf,
+                        gate_context=gate_context,
+                    )
                 out = vetoed
                 enter = bool(vetoed.get("enter"))
                 confidence = float(vetoed.get("confidence", confidence))
@@ -1916,18 +1945,26 @@ class AICommander:
                 pass
 
         if not enter:
-            return {
-                "enter": False,
-                "confidence": confidence,
-                "shares": 0,
-                "stop": 0.0,
-                "target": 0.0,
-                "risk_usd": 0.0,
-                "reason": str(out.get("reason", ppo_reason or "AI skip")),
-                "journal": str(out.get("journal", ""))[:300],
-                "pipeline": str(out.get("pipeline", "")),
-                "pending": False,
-            }
+            return self._emit_spike_verdict(
+                {
+                    "enter": False,
+                    "confidence": confidence,
+                    "shares": 0,
+                    "stop": 0.0,
+                    "target": 0.0,
+                    "risk_usd": 0.0,
+                    "reason": str(out.get("reason", ppo_reason or "AI skip")),
+                    "journal": str(out.get("journal", ""))[:300],
+                    "pipeline": str(out.get("pipeline", "")),
+                    "pending": False,
+                },
+                ticker=ticker,
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                gate_context=gate_context,
+            )
 
         bracket = self._build_entry_bracket(
             current_px, df,
@@ -1948,18 +1985,26 @@ class AICommander:
                 ollama_raw=snap.get("raw", ""), ollama_parsed=snap.get("parsed"),
                 spike_ratio=spike_ratio, pipeline="atr_reject",
             )
-            return {
-                "enter": False,
-                "confidence": confidence,
-                "shares": 0,
-                "stop": 0.0,
-                "target": 0.0,
-                "risk_usd": 0.0,
-                "reason": reason,
-                "journal": str(out.get("journal", reason))[:300],
-                "pipeline": "atr_reject",
-                "pending": False,
-            }
+            return self._emit_spike_verdict(
+                {
+                    "enter": False,
+                    "confidence": confidence,
+                    "shares": 0,
+                    "stop": 0.0,
+                    "target": 0.0,
+                    "risk_usd": 0.0,
+                    "reason": reason,
+                    "journal": str(out.get("journal", reason))[:300],
+                    "pipeline": "atr_reject",
+                    "pending": False,
+                },
+                ticker=ticker,
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                gate_context=gate_context,
+            )
 
         reason = str(out.get("reason", ppo_reason or "AI entry"))
         journal_note = str(out.get("journal", reason))[:300]
@@ -1990,18 +2035,26 @@ class AICommander:
                 ollama_raw=snap.get("raw", ""), ollama_parsed=snap.get("parsed"),
                 spike_ratio=spike_ratio, pipeline="bracket_validator",
             )
-            return {
-                "enter": False,
-                "confidence": confidence,
-                "shares": 0,
-                "stop": 0.0,
-                "target": 0.0,
-                "risk_usd": 0.0,
-                "reason": err,
-                "journal": journal_note,
-                "pipeline": "bracket_validator",
-                "pending": False,
-            }
+            return self._emit_spike_verdict(
+                {
+                    "enter": False,
+                    "confidence": confidence,
+                    "shares": 0,
+                    "stop": 0.0,
+                    "target": 0.0,
+                    "risk_usd": 0.0,
+                    "reason": err,
+                    "journal": journal_note,
+                    "pipeline": "bracket_validator",
+                    "pending": False,
+                },
+                ticker=ticker,
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                gate_context=gate_context,
+            )
         self._record_council_learning(ticker, decision, "entry_decision", ppo_action, ppo_conf)
         pipeline = str(decision.get("pipeline", ""))
         from core.council_nanny import is_strong_spike_pipeline
@@ -2029,7 +2082,15 @@ class AICommander:
                 )
         self.journal("ENTRY_DECISION", journal_note, decision)
         self.ai_log("ENTRY_DECISION", {**decision, "ticker": ticker, "price": current_px})
-        return decision
+        return self._emit_spike_verdict(
+            decision,
+            ticker=ticker,
+            spike_ratio=spike_ratio,
+            scan_score=scan_score,
+            ppo_action=ppo_action,
+            ppo_conf=ppo_conf,
+            gate_context=gate_context,
+        )
 
     def _resolve_manage_prices(
         self,
