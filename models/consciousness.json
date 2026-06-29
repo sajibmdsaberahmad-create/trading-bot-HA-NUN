@@ -3,25 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1529,
+  "trades_observed": 1530,
   "scans_performed": 39,
-  "improvements_applied": 2427,
+  "improvements_applied": 2428,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:28:21.069860",
-      "age": "7d 1h 25m 32s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-12.14",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:28:43.968408",
-      "age": "7d 1h 25m 55s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-13.95",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:28:47.405475",
       "age": "7d 1h 25m 58s",
@@ -11987,6 +11973,27 @@
           "Review loss_streak on SOXS"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:03:41.390943",
+      "age": "8d 3h 0m 52s",
+      "type": "TRADE",
+      "message": "Observed trade: KNDI ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:03:41.668972",
+      "age": "8d 3h 0m 52s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2428",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on KNDI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14151,7 +14158,6 @@
   "mood": "recalibrating",
   "total_pnl": 332508.1500000003,
   "win_history": [
-    -8.42,
     -9.27,
     2.45,
     5.73,
@@ -14650,20 +14656,21 @@
     0.0,
     0.0,
     0.0,
-    -50.0
+    -50.0,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 14,
+  "consecutive_losses": 15,
   "worst_streak": 86,
-  "veteran_xp": 24045,
+  "veteran_xp": 24055,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 64,
     "entry_timing": 100
   },
-  "flights_completed": 1523,
-  "hours_flown": 152.29999999999563,
+  "flights_completed": 1524,
+  "hours_flown": 152.39999999999563,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14698,7 +14705,8 @@
     "NVD": 3,
     "INL": 4,
     "TNM": 9,
-    "SOA": 2
+    "SOA": 2,
+    "KND": 1
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
