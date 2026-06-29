@@ -329,6 +329,7 @@ class AICommander:
             result = merge_halim_entry_advisory(
                 decision,
                 halim_live,
+                ticker=ticker,
                 ppo_buy=ppo_buy,
                 ppo_conf=ppo_conf,
                 min_conf=min_conf,

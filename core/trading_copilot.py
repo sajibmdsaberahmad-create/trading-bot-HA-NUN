@@ -142,8 +142,13 @@ def _save_brief(brief: CopilotBrief) -> None:
 
 
 def get_copilot_brief() -> CopilotBrief:
-    """Latest session brief — safe to call from hot path (reads cached file)."""
-    return _load_brief()
+    """Latest session brief — merges live guard loss memory (no extra SSD)."""
+    brief = _load_brief()
+    try:
+        from core.live_trade_guard import enrich_brief_from_guard
+        return enrich_brief_from_guard(brief)
+    except Exception:
+        return brief
 
 
 def _build_session_context(runner: Optional["ScalperRunner"], cfg: BotConfig) -> str:

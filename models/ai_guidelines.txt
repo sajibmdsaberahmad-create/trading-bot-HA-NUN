@@ -1930,3 +1930,7 @@ BUY 859 SOAR AMEX  In accordance with our regulatory obligations as a broker, we
 Observed trade_closed — recorded for learning.
 green_profit_lock:giveback +0.29% (peak +0.46% gave back 0.17%)
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:50:44.299022+00:00
+Observed trade_closed — recorded for learning.
+spike_top_intrabar: +1.44% vol=1.2x
+

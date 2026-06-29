@@ -52,14 +52,18 @@ def _build_entry_prompt(
     ppo_buy: bool,
     ppo_conf: float,
     ppo_reason: str = "",
+    loss_context: str = "",
 ) -> str:
+    loss_line = f"\n{loss_context}\n" if loss_context else ""
     return (
         "You are M. A. Halim — owned trading mind. Reply JSON only, no markdown.\n"
         '{"enter":true|false,"confidence":0.0-1.0,"reason":"max 10 words"}\n'
         f"TASK: entry_decision {ticker.upper()}\n"
         f"price={price:.4f} vol_spike={spike:.2f}x scan_score={scan:.0f}\n"
         f"ppo_buy={ppo_buy} ppo_conf={ppo_conf:.2f} ppo_note={ppo_reason[:60]}\n"
-        "enter=true only on clean momentum scalp; false on chop/fakeout."
+        f"{loss_line}"
+        "enter=true only on clean momentum scalp; false on chop/fakeout. "
+        "If session loss memory present, skip unless setup clearly changed."
     )
 
 
@@ -160,6 +164,12 @@ class HalimEntryLine:
                 in_flight=True,
             )
             self._stats["rung"] += 1
+        loss_ctx = ""
+        try:
+            from core.live_trade_guard import loss_context_for_prompt
+            loss_ctx = loss_context_for_prompt(key)
+        except Exception:
+            pass
         prompt = _build_entry_prompt(
             ticker=key,
             price=price,
@@ -168,6 +178,7 @@ class HalimEntryLine:
             ppo_buy=ppo_buy,
             ppo_conf=ppo_conf,
             ppo_reason=ppo_reason,
+            loss_context=loss_ctx,
         )
         threading.Thread(
             target=self._run,
@@ -219,6 +230,7 @@ def merge_halim_entry_advisory(
     base: Dict[str, Any],
     halim_live: Dict[str, Any],
     *,
+    ticker: str = "",
     ppo_buy: bool,
     ppo_conf: float,
     min_conf: float,
@@ -239,6 +251,18 @@ def merge_halim_entry_advisory(
     blend_w = float(os.getenv("HALIM_ENTRY_BLEND_WEIGHT", "0.30"))
     soft_veto = os.getenv("HALIM_ENTRY_SOFT_VETO", "true").lower() in ("1", "true", "yes")
     veto_conf = float(os.getenv("HALIM_ENTRY_VETO_MIN_CONF", "0.85"))
+    try:
+        from core.live_trade_guard import session_loss_count
+        losses = session_loss_count(ticker)
+        if losses >= 2:
+            veto_conf = min(
+                veto_conf,
+                float(os.getenv("HALIM_ENTRY_REPEAT_LOSER_VETO", "0.72")),
+            )
+        if losses >= 4:
+            veto_conf = min(veto_conf, 0.65)
+    except Exception:
+        pass
 
     cur_conf = float(out.get("confidence", ppo_conf) or ppo_conf)
     agree = h_enter == ppo_buy
