@@ -654,3 +654,4 @@
 {"timestamp":"2026-06-29T07:38:10.745368+00:00","event":"capability_milestone","capability":"text_compose","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-29T07:38:10.745466+00:00","event":"capability_milestone","capability":"text_compose","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-29T07:38:10.745530+00:00","event":"capability_milestone","capability":"text_compose","level_pct":100,"phase":"toddler"}
+{"timestamp": "2026-06-29T07:43:44.315989+00:00", "event": "sync_from_tradingbot", "source": "/Users/mdsabersajib/Downloads/tradingbot", "files": ["data/trading/council_training_dataset.jsonl", "data/students/teacher_proxy.joblib", "data/students/scalper_weights.json", "HALIM_IDENTITY.json", "HALIM_MANIFEST.json", "data/trading/owned_brain_manifest.json", "data/trading/experience_buffer.jsonl"]}

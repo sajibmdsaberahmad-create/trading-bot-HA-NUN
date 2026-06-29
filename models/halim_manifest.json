@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-29T07:06:40.467122+00:00",
+  "updated_at": "2026-06-29T07:43:44.231883+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,14 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-29T07:06:40.369870+00:00",
+    "timestamp": "2026-06-29T07:43:44.178982+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
         "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-28T13:31:26.449208+00:00"
+        "modified": "2026-06-29T07:36:15.081776+00:00"
       },
       "ppo_replay": {
         "exists": true,
@@ -60,26 +60,26 @@
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
-        "size_kb": 0.8,
-        "modified": "2026-06-29T07:06:28.174340+00:00"
+        "size_kb": 0.4,
+        "modified": "2026-06-29T07:41:41.290700+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
-        "size_kb": 0.6,
-        "modified": "2026-06-29T07:00:35.235490+00:00"
+        "size_kb": 0.7,
+        "modified": "2026-06-29T07:36:04.095345+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 41003.5,
-        "modified": "2026-06-29T07:06:18.820280+00:00"
+        "size_kb": 41098.3,
+        "modified": "2026-06-29T07:36:04.937426+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 4287.0,
-        "modified": "2026-06-29T07:05:01.622678+00:00"
+        "size_kb": 4288.7,
+        "modified": "2026-06-29T07:36:03.912427+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -106,11 +106,11 @@
     "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 49,
-      "win_rate": 0.347,
-      "avg_pnl": -3.66
+      "count": 500,
+      "win_rate": 0.314,
+      "avg_pnl": -3.74
     },
-    "buffer_records": 11838,
+    "buffer_records": 12369,
     "dataset_pairs": 4706,
     "maturity": {
       "stage": "adult",
@@ -118,7 +118,7 @@
       "stage_count": 6,
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
-        "closed_trades": 1289,
+        "closed_trades": 1789,
         "dataset_pairs": 4706,
         "evolution_count": 15,
         "proxy_accuracy": 1.0,

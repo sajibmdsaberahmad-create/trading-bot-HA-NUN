@@ -16,3 +16,6 @@ Combined win rate: 18.9% (buffer=17.2%, returns=20.7%)
   - MAX_TRADE_SIZE_USD: 22277.82942 -> 15594.480593999997 (reason: reduce size when WR poor; increase when WR strong)
   - MAX_RISK_PER_TRADE_USD: 140625.0 -> 105468.75 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
   - CONFIDENCE_THRESHOLD: 0.7800000000000001 -> 0.8300000000000002 (reason: raise entry bar when WR low; lower when WR strong)
+🧭 COMMANDER LEARNING | 2026-06-29T07:43:44.176447+00:00
+Halim heuristic dev plan — WR 31%
+
