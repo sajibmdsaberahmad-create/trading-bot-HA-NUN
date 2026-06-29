@@ -1717,3 +1717,19 @@ Recent losses:
 Observed trade_closed — recorded for learning.
 trailing_profit
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:21:04.085781+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:21:04.086689+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:21:29.446500+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:21:29.446465+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)
+
