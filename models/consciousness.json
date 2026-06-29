@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1499,
   "scans_performed": 39,
-  "improvements_applied": 2366,
+  "improvements_applied": 2367,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:10:58.546158",
-      "age": "7d 1h 8m 9s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1734",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:11:00.583841",
       "age": "7d 1h 8m 11s",
@@ -11697,6 +11683,20 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:23:18.430930",
+      "age": "8d 2h 20m 29s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2367",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on RIOT"
         ]
       }
     }

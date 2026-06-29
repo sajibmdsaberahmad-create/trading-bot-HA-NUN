@@ -2328,3 +2328,4 @@
 {"timestamp":"2026-06-29T13:21:22.499414+00:00","event":"order_timeout","ticker":"MARA","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T13:22:18.594093+00:00","event":"order_timeout","ticker":"MARA","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T13:22:22.330807+00:00","event":"trade_closed","ticker":"SOFI","reason":"green_profit_lock:ai_stall quick_scalp +3.16% (peak +3.16%)","pnl_usd":2323.22,"pnl_pct":3.16,"won":true,"exit_type":"stop_hit","hold_sec":28.7,"regime":"choppy_consolidation|late_chase_risk","entry_fill":17.575,"exit_fill":18.13,"entry_slippage_pct":0.0,"exit_slippage_pct":0.0,"market_state":"pre_market"}
+{"timestamp":"2026-06-29T13:23:18.174610+00:00","event":"order_timeout","ticker":"RIOT","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}

@@ -1,14 +1,5 @@
 [
   {
-    "timestamp": "2026-06-29T11:31:38.559298+00:00",
-    "source": "runtime_order_timeout",
-    "adjustments": {},
-    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
-    "lessons": [
-      "Review order_timeout on MARA"
-    ]
-  },
-  {
     "timestamp": "2026-06-29T11:31:43.957271+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
@@ -897,6 +888,15 @@
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
       "Review trade_closed on SOFI"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:23:18.446362+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on RIOT"
     ]
   }
 ]
