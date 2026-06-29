@@ -53,16 +53,20 @@ def _build_entry_prompt(
     ppo_conf: float,
     ppo_reason: str = "",
     loss_context: str = "",
+    macro_context: str = "",
 ) -> str:
     loss_line = f"\n{loss_context}\n" if loss_context else ""
+    macro_line = f"\n{macro_context}\n" if macro_context else ""
     return (
         "You are M. A. Halim — owned trading mind. Reply JSON only, no markdown.\n"
         '{"enter":true|false,"confidence":0.0-1.0,"reason":"max 10 words"}\n'
         f"TASK: entry_decision {ticker.upper()}\n"
         f"price={price:.4f} vol_spike={spike:.2f}x scan_score={scan:.0f}\n"
         f"ppo_buy={ppo_buy} ppo_conf={ppo_conf:.2f} ppo_note={ppo_reason[:60]}\n"
+        f"{macro_line}"
         f"{loss_line}"
         "enter=true only on clean momentum scalp; false on chop/fakeout. "
+        "Macro context is advisory only — never skip solely because SPY is up. "
         "If session loss memory present, skip unless setup clearly changed."
     )
 
@@ -165,9 +169,18 @@ class HalimEntryLine:
             )
             self._stats["rung"] += 1
         loss_ctx = ""
+        macro_ctx = ""
         try:
             from core.live_trade_guard import loss_context_for_prompt
             loss_ctx = loss_context_for_prompt(key)
+        except Exception:
+            pass
+        try:
+            from core.market_context import macro_context_line, macro_ticker_hint
+            macro_ctx = macro_context_line()
+            hint = macro_ticker_hint(key)
+            if hint:
+                macro_ctx = f"{macro_ctx}\n{hint}" if macro_ctx else hint
         except Exception:
             pass
         prompt = _build_entry_prompt(
@@ -179,6 +192,7 @@ class HalimEntryLine:
             ppo_conf=ppo_conf,
             ppo_reason=ppo_reason,
             loss_context=loss_ctx,
+            macro_context=macro_ctx,
         )
         threading.Thread(
             target=self._run,

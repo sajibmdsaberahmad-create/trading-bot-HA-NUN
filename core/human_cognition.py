@@ -121,6 +121,15 @@ def enrich_prompt(
     except Exception:
         pass
 
+    macro_line = ""
+    try:
+        from core.market_context import macro_context_line
+        macro_line = macro_context_line()
+        if macro_line:
+            macro_line = f"{macro_line}\n"
+    except Exception:
+        pass
+
     return (
         f"TASK: {task}\n"
         f"Mental state: mood={mood} | self-confidence={confidence:.0%}\n"
@@ -129,6 +138,7 @@ def enrich_prompt(
         f"{commander_line}"
         f"{profit_hunt_line}"
         f"{discipline_line}"
+        f"{macro_line}"
         f"{md_line}"
         f"FULL-TIME PROFIT MISSION: making money is your only main goal — use any tactic "
         f"within guardrails. Reason with math AND gut feel; act decisively.\n"

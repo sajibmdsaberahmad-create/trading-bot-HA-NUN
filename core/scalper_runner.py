@@ -1451,6 +1451,16 @@ class ScalperRunner:
             clear_hmds_transient_blocks()
         except Exception:
             pass
+        try:
+            from core.market_context import refresh_macro_context
+            ctx = refresh_macro_context(force=True)
+            log.info(
+                f"🌍 RTH macro: SPY {ctx.get('spy_pct', 0):+.2f}% | "
+                f"QQQ {ctx.get('qqq_pct', 0):+.2f}% | "
+                f"VIX {ctx.get('vix_level', 0):.1f} ({ctx.get('risk_tone', '?')})"
+            )
+        except Exception:
+            pass
 
         if is_startup:
             sinfo(

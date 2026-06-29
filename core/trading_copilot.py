@@ -215,6 +215,14 @@ def _build_session_context(runner: Optional["ScalperRunner"], cfg: BotConfig) ->
     except Exception:
         pass
 
+    try:
+        from core.market_context import macro_context_line
+        mline = macro_context_line()
+        if mline:
+            lines.append(mline)
+    except Exception:
+        pass
+
     if getattr(runner, "consciousness", None):
         try:
             c = runner.consciousness

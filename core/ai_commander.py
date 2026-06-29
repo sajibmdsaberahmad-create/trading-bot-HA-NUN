@@ -1185,6 +1185,7 @@ class AICommander:
             pass
         loss_ctx_line = ""
         war_line = ""
+        macro_line = ""
         try:
             from core.live_trade_guard import loss_context_for_prompt
             loss_ctx_line = loss_context_for_prompt(ticker)
@@ -1192,6 +1193,14 @@ class AICommander:
             pass
         try:
             war_line = war_context_line(self.cfg)
+        except Exception:
+            pass
+        try:
+            from core.market_context import macro_context_line, macro_ticker_hint
+            macro_line = macro_context_line()
+            hint = macro_ticker_hint(ticker)
+            if hint:
+                macro_line = f"{macro_line}\n{hint}" if macro_line else hint
         except Exception:
             pass
         mctx = market_ctx or {}
@@ -1229,6 +1238,8 @@ class AICommander:
             cap_line = f"{cap_line}{loss_ctx_line}\n"
         if war_line:
             cap_line = f"{cap_line}{war_line}\n"
+        if macro_line:
+            cap_line = f"{cap_line}{macro_line}\n"
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         self._ring_halim_entry(
