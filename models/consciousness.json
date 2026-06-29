@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1531,
+  "trades_observed": 1532,
   "scans_performed": 39,
-  "improvements_applied": 2431,
+  "improvements_applied": 2432,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:28:53.077383",
-      "age": "7d 1h 26m 4s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1789",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:28:58.285838",
-      "age": "7d 1h 26m 9s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-1.73",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:29:00.713279",
       "age": "7d 1h 26m 12s",
@@ -12024,6 +12003,27 @@
           "Review ib_failure on KNDI"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:10:32.634513",
+      "age": "8d 3h 7m 43s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$+50.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:10:33.051006",
+      "age": "8d 3h 7m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2432",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOXS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14185,10 +14185,9 @@
     }
   ],
   "last_training": "2026-06-29T07:53:55.457760",
-  "mood": "recalibrating",
-  "total_pnl": 332508.1500000003,
+  "mood": "defensive",
+  "total_pnl": 332558.1500000003,
   "win_history": [
-    2.45,
     5.73,
     -8.18,
     -3.94,
@@ -14687,20 +14686,21 @@
     0.0,
     -50.0,
     0.0,
-    0.0
+    0.0,
+    50.0
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 16,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 24065,
+  "veteran_xp": 24095,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 64,
     "entry_timing": 100
   },
-  "flights_completed": 1525,
-  "hours_flown": 152.49999999999562,
+  "flights_completed": 1526,
+  "hours_flown": 152.59999999999562,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14718,7 +14718,7 @@
     "XCH": 1,
     "TZA": 12,
     "GDC": 14,
-    "SOX": 24,
+    "SOX": 25,
     "BIT": 13,
     "GPU": 19,
     "PLT": 30,
@@ -14743,5 +14743,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-352.91 recent). Tightening entries until edge returns."
+  "mood_message": "Win rate 20% \u00b7 $-302.59. Preserving capital over action."
 }
