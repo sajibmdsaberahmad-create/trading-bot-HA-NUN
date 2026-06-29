@@ -72,14 +72,14 @@ def _is_hope_hold_case(case: Dict[str, Any]) -> bool:
 
 
 def _is_weak_setup_case(case: Dict[str, Any]) -> bool:
-    if _case_conviction(case) < LOTTERY_MIN_CONVICTION:
-        return True
+    if _is_hope_hold_case(case):
+        return False
     ticker = str(case.get("ticker", "")).upper()
     from core.commander_ib_gold import LOTTERY_FAIL_CASES
     for row in LOTTERY_FAIL_CASES:
         if str(row.get("ticker", "")).upper() == ticker:
             return row.get("failure_mode") == "weak_setup"
-    return False
+    return _case_conviction(case) < LOTTERY_MIN_CONVICTION
 
 
 def _cap_trip_loss(pnl_usd: float, nav: float) -> float:
