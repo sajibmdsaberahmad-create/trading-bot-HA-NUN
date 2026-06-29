@@ -3208,7 +3208,18 @@ class ScalperRunner:
                     self._last_periodic_cleanup = _now
                     try:
                         from core.memory_guard import is_memory_pressured
-                        if is_memory_pressured(
+                        from core.smart_stack import live_ram_only
+                        ram_only_live = live_ram_only(self.cfg) and can_trade
+                        if ram_only_live:
+                            if is_memory_pressured(
+                                int(getattr(self.cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024))
+                            ) and _now - getattr(self, "_last_ram_live_warn", 0) >= 300.0:
+                                self._last_ram_live_warn = _now
+                                log.warning(
+                                    "  ⚠️ RAM pressure during live session — "
+                                    "RAM_LIVE_ONLY: no disk sweep (off-hours cleanup)"
+                                )
+                        elif is_memory_pressured(
                             int(getattr(self.cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024))
                         ):
                             run_periodic_cleanup(self.cfg, force=True)

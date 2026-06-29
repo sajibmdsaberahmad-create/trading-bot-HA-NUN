@@ -379,13 +379,49 @@ def count_hourly_filled_entry(cfg: Optional[BotConfig] = None) -> bool:
     return smart_stack_enabled(cfg) and _env_bool("SMART_STACK_HOURLY_FILLS_ONLY", "true")
 
 
+def live_ram_only(cfg: Optional[BotConfig] = None) -> bool:
+    """
+    Live session uses RAM only — no disk sweeps/jsonl trims while market is open.
+    Cleanup runs off-hours or on shutdown. Default ON with smart stack.
+    """
+    if not smart_stack_enabled(cfg):
+        return _env_bool("RAM_LIVE_ONLY", "false")
+    return _env_bool("RAM_LIVE_ONLY", "true")
+
+
+def maturity_ladder() -> Tuple[Tuple[str, str, str, str], ...]:
+    """
+    (capability, foundation_status, activates_when, mature_when)
+    Foundation = wired now; maturity = data + training + brain stage.
+    """
+    return (
+        ("Halim+PPO lead on every spike", "live", "now", "always"),
+        ("Remove council bypass on PPO HOLD", "live", "now", "always"),
+        ("Gates as features not vetoes", "live", "now", "always"),
+        ("Log all spikes for gold", "live", "now", "always"),
+        ("API as sampled teacher only", "live", "now", "teen→adult fade"),
+        ("Smart war adaptive posture", "live", "now", "adult + war dataset"),
+        ("Smart survival rails at execution", "live", "now", "always"),
+        ("Halim adult-quality entries", "foundation", "toddler+", "adult + 1200 gold rows"),
+        ("PPO varied signals beyond HOLD", "foundation", "infant+", "child+ micro-steps"),
+        ("Calibrated dynamic thresholds", "foundation", "child+", "teen+ proxy calibrated"),
+        ("Large balanced training set", "collecting", "ongoing", "600+ labeled verdicts"),
+        ("Zero API session (adult stage)", "foundation", "adult stage", "350+ trades maturity"),
+        ("War brain tuned per regime", "foundation", "child+", "regime gold + 150 trades"),
+        ("Smart sensors (micro+MTF+tick)", "live", "now", "teen+ sensor fusion weights"),
+        ("Super-fast execution paths", "live", "now", "adult latency budget <200ms"),
+    )
+
+
 def startup_banner_line(cfg: Optional[BotConfig] = None) -> str:
     if not smart_stack_enabled(cfg):
         return ""
-    parts = ["🧠 SMART STACK: Halim+PPO lead"]
+    parts = ["🧠 LIFE ENGINE: Halim+PPO lead"]
     if mechanical_gates_advisory_only(cfg):
         parts.append("advisory gates")
     if smart_war_posture_enabled(cfg):
         parts.append("war posture")
     parts.append("teacher curriculum")
+    if live_ram_only(cfg):
+        parts.append("RAM-live")
     return " | ".join(parts)

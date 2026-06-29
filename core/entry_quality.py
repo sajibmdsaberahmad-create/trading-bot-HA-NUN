@@ -278,14 +278,31 @@ def mtf_blocks_entry(
     spike_ratio: float = 0.0,
 ) -> bool:
     """Block spike entries when higher timeframes are not in uptrend."""
+    caution, _ = mtf_entry_caution(
+        cfg, df_5m, df_15m, scan_score=scan_score, spike_ratio=spike_ratio,
+    )
+    if not caution:
+        return False
     try:
         from core.smart_stack import mechanical_gates_advisory_only
         if mechanical_gates_advisory_only(cfg):
             return False
     except Exception:
         pass
+    return True
+
+
+def mtf_entry_caution(
+    cfg: BotConfig,
+    df_5m: Any,
+    df_15m: Any,
+    *,
+    scan_score: float = 0.0,
+    spike_ratio: float = 0.0,
+) -> tuple[bool, str]:
+    """Signal-only: would MTF filter caution? Ignores advisory mode."""
     if not getattr(cfg, "MTF_ENTRY_BLOCK", False):
-        return False
+        return False, ""
     try:
         from core.sniper_execution import (
             sniper_active,
@@ -296,11 +313,13 @@ def mtf_blocks_entry(
             sniper_vol_flash(cfg, scan_score, spike_ratio)
             or is_sniper_strong_spike(cfg, scan_score, spike_ratio)
         ):
-            return False
+            return False, ""
     except Exception:
         pass
-    ok, _ = mtf_trend_aligned(df_5m, df_15m)
-    return not ok
+    ok, detail = mtf_trend_aligned(df_5m, df_15m)
+    if not ok:
+        return True, detail or "5m/15m not aligned"
+    return False, ""
 
 
 def quality_blocks_entry(cfg: BotConfig, quality: Dict[str, Any]) -> bool:
