@@ -4,13 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:giveback +0.27% (peak +0.44% gave back 0.17%)",
-    "Commander: green_profit_lock:ai_stall quick_scalp +0.37% (peak +0.37%)",
-    "Spike-top hunt on ASTS: spike_top_exit: +0.74% vol=6.3x",
-    "Review loss_streak on COIN",
-    "Review trade_closed on COIN",
-    "Review loss_streak on MARA",
-    "ping - are you there ?",
     "Hi",
     "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- LCID: pnl=$-4.62 slip=0",
     "Commander: green_profit_lock:giveback +1.65% (peak +2.79% gave back 1.14%)",
@@ -103,10 +96,17 @@
     "Commander: green_profit_lock:ai_stall quick_scalp +2.93% (peak +2.99%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.76% (peak +2.76%)",
     "Commander: green_profit_lock:ai_stall quick_scalp +2.87% (peak +2.87%)",
-    "Commander: green_profit_lock:ai_stall quick_scalp +3.04% (peak +3.04%)"
+    "Commander: green_profit_lock:ai_stall quick_scalp +3.04% (peak +3.04%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +2.93% (peak +2.93%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +3.33% (peak +3.33%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +3.44% (peak +3.44%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +3.44% (peak +3.50%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +3.27% (peak +3.33%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +3.27% (peak +3.27%)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +3.16% (peak +3.21%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 102,
-  "updated": "2026-06-29T12:01:30.602106"
+  "trades_observed": 126,
+  "updated": "2026-06-29T12:28:37.309020"
 }
