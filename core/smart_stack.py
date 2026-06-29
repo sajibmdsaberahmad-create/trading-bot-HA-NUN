@@ -95,8 +95,8 @@ def collect_spike_gate_advisories(
     """Collect MTF/regime/quality gate signals for brain context."""
     from core.entry_quality import (
         quality_blocks_entry,
-        regime_blocks_entry,
-        mtf_blocks_entry,
+        regime_entry_caution,
+        mtf_entry_caution,
         mtf_trend_aligned,
     )
 
@@ -108,13 +108,18 @@ def collect_spike_gate_advisories(
             "profit_prob": quality.get("profit_probability"),
             "fakeout_risk": quality.get("fakeout_risk"),
         }
-    mtf_ok, mtf_detail = mtf_trend_aligned(df_5m, df_15m)
-    if mtf_blocks_entry(cfg, df_5m, df_15m, scan_score=scan_score, spike_ratio=spike_ratio):
+    mtf_caution, mtf_detail = mtf_entry_caution(
+        cfg, df_5m, df_15m, scan_score=scan_score, spike_ratio=spike_ratio,
+    )
+    if mtf_caution:
         out["mtf"] = {"ok": False, "reason": "5m/15m not aligned", "detail": mtf_detail}
-    elif not mtf_ok:
-        out["mtf"] = {"ok": False, "reason": "5m/15m weak", "detail": mtf_detail}
-    if regime_blocks_entry(cfg, spike_regime):
-        out["regime"] = {"ok": False, "reason": f"regime={spike_regime}"}
+    else:
+        mtf_ok, mtf_weak = mtf_trend_aligned(df_5m, df_15m)
+        if not mtf_ok and mtf_weak:
+            out["mtf"] = {"ok": False, "reason": "5m/15m weak", "detail": mtf_weak}
+    regime_caution, regime_reason = regime_entry_caution(cfg, spike_regime)
+    if regime_caution:
+        out["regime"] = {"ok": False, "reason": regime_reason or f"regime={spike_regime}"}
     if quality_blocks_entry(cfg, quality):
         out["quality_hard"] = {"ok": False, "reason": str(quality.get("reason", ""))[:120]}
     return out

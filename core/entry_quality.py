@@ -191,24 +191,34 @@ def _pack(
 
 def regime_blocks_entry(cfg: BotConfig, regime: str) -> bool:
     """Block new entries in choppy/low-vol regimes when enabled."""
+    caution, _ = regime_entry_caution(cfg, regime)
+    if not caution:
+        return False
     try:
         from core.smart_stack import mechanical_gates_advisory_only
         if mechanical_gates_advisory_only(cfg):
             return False
     except Exception:
         pass
+    return True
+
+
+def regime_entry_caution(cfg: BotConfig, regime: str) -> tuple[bool, str]:
+    """Signal-only: would regime filter caution? Ignores advisory mode."""
     if not getattr(cfg, "REGIME_ENTRY_BLOCK", False):
-        return False
+        return False, ""
     label = (regime or "").strip().lower()
     if not label or label == "unknown":
-        return False
+        return False, ""
     blocked = getattr(cfg, "REGIME_ENTRY_BLOCK_LIST", None)
     if not blocked:
         raw = os.getenv("REGIME_ENTRY_BLOCK_LIST", "ranging,low_volatility")
         blocked = [x.strip().lower() for x in raw.split(",") if x.strip()]
     else:
         blocked = [str(x).strip().lower() for x in blocked]
-    return label in blocked
+    if label in blocked:
+        return True, f"regime={regime}"
+    return False, ""
 
 
 def mtf_trend_aligned(df_5m: Any, df_15m: Any) -> tuple[bool, str]:

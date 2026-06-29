@@ -29,6 +29,7 @@ docs/
   LAUNCH_GUIDE.md         Setup, IB Gateway, Telegram, Mac -> VPS deployment
   TRAINING_GUIDE.md        PPO, features, fine-tuning, tuning
   ARCHITECTURE.md          This file
+  VISION_SMART_STACK.md    Smart Stack — Halim+PPO lead, phases A–E (read before entry changes)
 ```
 
 Each module has exactly one job. `trader.py` is the only file that

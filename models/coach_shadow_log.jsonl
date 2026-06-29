@@ -1385,3 +1385,16 @@
 {"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":1.1914155306610288,"shadow_only":true,"timestamp":"2026-06-29T18:49:06.062934+00:00"}
 {"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":1.960150542395395,"shadow_only":true,"timestamp":"2026-06-29T18:49:21.626376+00:00"}
 {"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":1.617,"shadow_only":true,"timestamp":"2026-06-29T18:49:26.100623+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":2.1022342848138265,"shadow_only":true,"timestamp":"2026-06-29T18:49:41.637104+00:00"}
+{"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":2.1250870634334107,"shadow_only":true,"timestamp":"2026-06-29T18:49:51.032692+00:00"}
+{"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":1.7178897042974726,"shadow_only":true,"timestamp":"2026-06-29T18:49:52.364077+00:00"}
+{"ticker":"CMCSA","reason":"profit_prob_below_80pct","scan_score":84.4,"spike_ratio":1.3166748847566423,"shadow_only":true,"timestamp":"2026-06-29T18:49:52.840991+00:00"}
+{"ticker":"BITO","reason":"profit_prob_below_80pct","scan_score":93.2,"spike_ratio":2.1746262231638678,"shadow_only":true,"timestamp":"2026-06-29T18:50:02.393711+00:00"}
+{"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":1.750961357882356,"shadow_only":true,"timestamp":"2026-06-29T18:50:11.744623+00:00"}
+{"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":1.228758930685935,"shadow_only":true,"timestamp":"2026-06-29T18:50:31.061674+00:00"}
+{"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":1.8406061095932087,"shadow_only":true,"timestamp":"2026-06-29T18:50:36.925470+00:00"}
+{"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":2.298,"shadow_only":true,"timestamp":"2026-06-29T18:51:00.561247+00:00"}
+{"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":2.066,"shadow_only":true,"timestamp":"2026-06-29T18:51:20.602783+00:00"}
+{"ticker":"TNMG","reason":"profit_prob_below_80pct","scan_score":95.4,"spike_ratio":3.6974748019292294,"shadow_only":true,"timestamp":"2026-06-29T18:51:40.649612+00:00"}
+{"ticker":"SRFM","reason":"profit_prob_below_80pct","scan_score":88.8,"spike_ratio":6.221359644729373,"shadow_only":true,"timestamp":"2026-06-29T18:51:46.616322+00:00"}
+{"ticker":"MSTU","reason":"profit_prob_below_80pct","scan_score":86.6,"spike_ratio":1.384956324252688,"shadow_only":true,"timestamp":"2026-06-29T18:51:51.109593+00:00"}

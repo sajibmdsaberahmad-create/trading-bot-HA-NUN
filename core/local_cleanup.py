@@ -29,8 +29,7 @@ _JSONL_TRIM: Dict[str, int] = {
     "models/trained_record_hashes.jsonl": 3000,
     "models/post_mortem_audit.jsonl": 2000,
     "models/regime_atr_efficiency.jsonl": 2000,
-    "halim/data/trading/experience_buffer.jsonl": 5000,
-}
+    "models/smart_stack_verdicts.jsonl": 20000,
 
 
 def _rm_glob(patterns: List[str]) -> int:

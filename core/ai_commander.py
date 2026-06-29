@@ -1520,23 +1520,26 @@ class AICommander:
             halim_live_pre = self._halim_entry.consume(ticker, fp)
             halim_st = halim_live_pre.get("status", "")
             h_parsed = halim_live_pre.get("parsed") or {}
-            ring_teacher, teacher_why = True, "legacy"
+            ring_teacher, teacher_why = False, "teacher:init"
             try:
-                from core.smart_stack import should_ring_teacher_api
-                ring_teacher, teacher_why = should_ring_teacher_api(
-                    self.cfg,
-                    ticker=ticker,
-                    halim_status=halim_st,
-                    halim_conf=float(h_parsed.get("confidence", 0) or 0),
-                    ppo_action=ppo_action,
-                    ppo_conf=ppo_conf,
-                    scan_score=scan_score,
-                    spike_ratio=spike_ratio,
-                    disagreement=(
-                        h_parsed.get("enter") is not None
-                        and bool(h_parsed.get("enter")) != (ppo_action == 1)
-                    ),
-                )
+                from core.smart_stack import smart_stack_enabled, should_ring_teacher_api
+                if smart_stack_enabled(self.cfg):
+                    ring_teacher, teacher_why = should_ring_teacher_api(
+                        self.cfg,
+                        ticker=ticker,
+                        halim_status=halim_st,
+                        halim_conf=float(h_parsed.get("confidence", 0) or 0),
+                        ppo_action=ppo_action,
+                        ppo_conf=ppo_conf,
+                        scan_score=scan_score,
+                        spike_ratio=spike_ratio,
+                        disagreement=(
+                            h_parsed.get("enter") is not None
+                            and bool(h_parsed.get("enter")) != (ppo_action == 1)
+                        ),
+                    )
+                else:
+                    ring_teacher, teacher_why = True, "legacy_always_ring"
             except Exception:
                 pass
             if ring_teacher:
