@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1553,
   "scans_performed": 39,
-  "improvements_applied": 2474,
+  "improvements_applied": 2476,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:43:23.345665",
-      "age": "7d 1h 40m 34s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$+0.22",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:44:14.812526",
-      "age": "7d 1h 41m 26s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-14.30",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:44:19.642427",
       "age": "7d 1h 41m 30s",
@@ -12187,6 +12173,34 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:36:28.408372",
+      "age": "8d 3h 33m 39s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2475",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on SOAR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:36:39.653949",
+      "age": "8d 3h 33m 50s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2476",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on SOAR"
         ]
       }
     }
