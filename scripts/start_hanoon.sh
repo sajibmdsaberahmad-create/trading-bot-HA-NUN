@@ -416,16 +416,36 @@ export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-AllLast}"
 export HMDS_FETCH_TIMEOUT_SEC="${HMDS_FETCH_TIMEOUT_SEC:-12}"
 echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | paper_md=5s-bars | live_tick=${USE_TICK_STREAM} | boot_scan=live_ib"
 
-# ── 2b. GitHub CLI (releases + artifact sync) ───────────────────────────────
+# ── 2b. GitHub CLI (releases + artifact sync) — never block bot startup on brew ─
 ensure_gh() {
-  if ! command -v gh >/dev/null 2>&1; then
-    if command -v brew >/dev/null 2>&1; then
-      echo "📦 Installing GitHub CLI (gh)..."
-      brew install gh >>"$LOG_DIR/gh.log" 2>&1 || true
+  if command -v gh >/dev/null 2>&1; then
+    :
+  elif [[ "${GH_INSTALL_ON_START:-false}" == "true" ]] && command -v brew >/dev/null 2>&1; then
+    echo "📦 Installing GitHub CLI (gh) — max 90s ($LOG_DIR/gh.log)..."
+    if command -v timeout >/dev/null 2>&1; then
+      timeout 90 brew install gh >>"$LOG_DIR/gh.log" 2>&1 || {
+        echo "⚠️  gh install timed out/failed — bot continues (brew install gh manually later)"
+      }
+    else
+      brew install gh >>"$LOG_DIR/gh.log" 2>&1 &
+      local _gh_pid=$!
+      local _gh_wait=0
+      while kill -0 "$_gh_pid" 2>/dev/null && [[ $_gh_wait -lt 90 ]]; do
+        sleep 2
+        _gh_wait=$((_gh_wait + 2))
+      done
+      if kill -0 "$_gh_pid" 2>/dev/null; then
+        kill "$_gh_pid" 2>/dev/null || true
+        echo "⚠️  gh install still running after 90s — killed; bot continues"
+      fi
+      wait "$_gh_pid" 2>/dev/null || true
     fi
+  else
+    echo "⚠️  gh not installed — skipping (optional). To install: brew install gh"
+    echo "    Or set GH_INSTALL_ON_START=true before START.command"
+    return 0
   fi
   if ! command -v gh >/dev/null 2>&1; then
-    echo "⚠️  gh not installed — GitHub releases disabled (brew install gh)"
     return 0
   fi
   if [ -n "${GITHUB_TOKEN:-}" ]; then
