@@ -132,7 +132,7 @@
     "ib_data",
     "web_search"
   ],
-  "operator_enabled_at": "2026-06-29T15:59:19.888174+00:00",
+  "operator_enabled_at": "2026-06-29T16:06:51.790122+00:00",
   "frontier_policy": {
     "schema": "frontier_model_safety_v1",
     "aligned_with": [
