@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)",
     "Commander: green_profit_lock:ai_stall_min_green +0.26%",
     "Session trade WR 24% on 400 round-trips",
     "Commander: Halim heuristic dev plan \u2014 WR 24%",
@@ -103,10 +102,11 @@
     "Review order_timeout on MARA",
     "Review trade_closed on SOFI",
     "Commander: green_profit_lock:ai_stall quick_scalp +1.79% (peak +1.79%)",
-    "Review order_timeout on RIOT"
+    "Review order_timeout on RIOT",
+    "Commander: green_profit_lock:ai_stall quick_scalp +1.91% (peak +1.91%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-29T08:02:53.728810"
+  "trades_observed": 4,
+  "updated": "2026-06-29T08:06:29.426306"
 }

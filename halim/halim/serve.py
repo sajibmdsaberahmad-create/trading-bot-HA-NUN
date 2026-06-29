@@ -114,6 +114,12 @@ class HalimHandler(BaseHTTPRequestHandler):
         if os.getenv("HALIM_SERVE_QUIET", "true").lower() not in ("1", "true", "yes"):
             super().log_message(fmt, *args)
 
+    def handle_one_request(self) -> None:
+        try:
+            super().handle_one_request()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
     def _json(self, code: int, body: Dict[str, Any]) -> None:
         raw = json.dumps(_with_runtime(body), default=str).encode("utf-8")
         try:
@@ -124,7 +130,7 @@ class HalimHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(raw)))
             self.end_headers()
             self.wfile.write(raw)
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, OSError):
             pass
 
     def _read_json(self) -> Dict[str, Any]:
