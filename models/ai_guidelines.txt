@@ -1686,3 +1686,11 @@ bracket_exit
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:16:13.059278+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:16:13.059325+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+

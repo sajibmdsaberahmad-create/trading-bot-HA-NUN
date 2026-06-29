@@ -22,5 +22,23 @@
     "lessons": [
       "Review ib_failure on SOAR"
     ]
+  },
+  {
+    "timestamp": "2026-06-29T14:15:46.654585+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on SOAR"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T14:16:13.059718+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TZA"
+    ]
   }
 ]
