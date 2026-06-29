@@ -5,37 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1457,
   "scans_performed": 39,
-  "improvements_applied": 2223,
+  "improvements_applied": 2225,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T08:58:46.760774",
-      "age": "6d 21h 55m 58s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1636",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T08:58:46.765258",
-      "age": "6d 21h 55m 58s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1636",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T08:58:49.673832",
       "age": "6d 21h 56m 0s",
@@ -11400,6 +11372,34 @@
       "age": "7d 23h 41m 50s",
       "type": "IMPROVE",
       "message": "Applied improvement #2223",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:45:23.648954",
+      "age": "7d 23h 42m 34s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2224",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:46:07.548885",
+      "age": "7d 23h 43m 18s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2225",
       "metadata": {
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
