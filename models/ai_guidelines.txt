@@ -1858,3 +1858,19 @@ Submitted
 Observed ib_failure — recorded for learning.
 BUY 886 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1688 or a more aggressive price still within your spec
 
+🧭 COMMANDER LEARNING | 2026-06-29T14:37:41.979155+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:37:45.127943+00:00
+Observed trade_closed — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:37:45.128063+00:00
+Observed loss_streak — recorded for learning.
+stop_breach
+
+🧭 COMMANDER LEARNING | 2026-06-29T14:38:29.468214+00:00
+Observed ib_failure — recorded for learning.
+BUY 893 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1679 or a more aggressive price still within your spec
+
