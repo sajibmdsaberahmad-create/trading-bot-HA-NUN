@@ -1,27 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 201,
+  "total_awakenings": 202,
   "training_sessions": 39,
   "trades_observed": 1561,
   "scans_performed": 39,
   "improvements_applied": 2496,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:51:30.360110",
-      "age": "7d 1h 48m 41s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1842",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:51:30.362555",
       "age": "7d 1h 48m 41s",
@@ -12224,9 +12210,16 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #201",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T15:36:19.320862",
+      "age": "8d 4h 33m 30s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #202",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-29T15:07:17.877073",
+  "last_awakening": "2026-06-29T15:36:19.320449",
   "current_version": "v20260629_075355",
   "version_history": [
     {
