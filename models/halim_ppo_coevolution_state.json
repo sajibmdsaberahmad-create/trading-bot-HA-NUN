@@ -1,25 +1,25 @@
 {
-  "last_cycle": "2026-06-28T09:34:06.507146+00:00",
-  "trigger": "standalone_flush",
+  "last_cycle": "2026-06-29T07:06:29.423813+00:00",
+  "trigger": "replay_teardown",
   "stats": {
-    "agreements": 137,
-    "disagreements": 1601,
-    "corrections_for_ppo": 2093,
+    "agreements": 173,
+    "disagreements": 2362,
+    "corrections_for_ppo": 3091,
     "corrections_for_halim": 2,
     "log_path": "halim/data/coevolution/correction_log.jsonl"
   },
   "export": {
     "ok": true,
-    "added": 2258,
-    "total": 2258,
-    "events": 2240,
+    "added": 3321,
+    "total": 3321,
+    "events": 3274,
     "rewritten": true
   },
-  "cycles": 23,
+  "cycles": 26,
   "dialogue_export": {
     "ok": true,
-    "pairs": 2624,
-    "dialogue_lines": 1312,
+    "pairs": 4000,
+    "dialogue_lines": 2000,
     "rewritten": true
   }
 }

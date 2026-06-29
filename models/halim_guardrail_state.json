@@ -1,11 +1,6 @@
 {
-  "day": "2026-06-28",
+  "day": "2026-06-29",
   "counts": {
-    "learn_fetches": 1200,
-    "google_ai_searches": 150,
-    "api_calls": 435,
-    "git_pushes": 1,
-    "file_writes": 13,
-    "learn_gold_exported": 20
+    "api_calls": 100
   }
 }

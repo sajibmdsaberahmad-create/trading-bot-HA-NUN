@@ -2,11 +2,11 @@
   "name": "M. A. Halim",
   "legacy_name": "HANOON Owned Brain",
   "version": 1,
-  "updated_at": "2026-06-28T09:34:05.566032+00:00",
+  "updated_at": "2026-06-29T07:06:28.224250+00:00",
   "device": {
     "profile": "m2_8gb",
     "detected_ram_mb": 8192,
-    "updated_at": "2026-06-28T09:34:05.566078+00:00",
+    "updated_at": "2026-06-29T07:06:28.224263+00:00",
     "ram_mb_max": 10240,
     "ram_tier": "compact",
     "ppo_micro_steps": 512,
@@ -17,31 +17,31 @@
     "notes": "No local LLM. PPO+proxy+copilot on CPU. Groq 8B teacher via API."
   },
   "evolution": {
-    "trigger": "standalone_flush",
+    "trigger": "replay_teardown",
     "device_profile": "m2_8gb",
     "stage": "adult",
     "steps": {
       "export_dataset": {
         "ok": true,
-        "exported": 3658,
+        "exported": 4706,
         "path": "models/council_training_dataset.jsonl"
       },
       "train_proxy": {
         "ok": false,
         "reason": "single_class",
         "error": "This solver needs samples of at least 2 classes in the data, but the data contains only one class: np.int32(1)",
-        "paired": 406,
+        "paired": 400,
         "class_counts": {
-          "enter": 406,
+          "enter": 400,
           "skip": 0
         }
       },
       "ppo_teacher": {
         "ok": true,
-        "trigger": "standalone_flush",
-        "win_rate": 0.2,
-        "trade_count": 35,
-        "diagnosis": "Local teacher: 20% WR on 35 trades. 15 stop exits. Repeat tickers (adapt entry, do not ban): MARA, LCID, COIN, ASTS",
+        "trigger": "replay_teardown",
+        "win_rate": 0.34146341463414637,
+        "trade_count": 41,
+        "diagnosis": "Local teacher: 34% WR on 41 trades. 15 stop exits. Repeat tickers (adapt entry, do not ban): MARA, LCID, ASTS, COIN",
         "strategy_shift": "Adapt entry quality on repeat-loss names \u2014 tighter profit_probability, spike confirmation, and PPO confidence; do not blanket-skip tickers",
         "ppo_focus": "Reward entries with profit_run + spike_lik alignment; penalize chase without volume",
         "teacher_labels": 15,
@@ -53,29 +53,29 @@
           "Penalize PPO micro-fast when council confidence is neutral (50%)",
           "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
         ],
-        "timestamp": "2026-06-28T09:34:05.393127+00:00"
+        "timestamp": "2026-06-29T07:06:28.097764+00:00"
       },
       "weights": {
         "ok": true
       }
     },
-    "timestamp": "2026-06-28T09:33:42.021083+00:00"
+    "timestamp": "2026-06-29T07:06:16.627530+00:00"
   },
   "status": {
-    "timestamp": "2026-06-28T09:34:05.496311+00:00",
+    "timestamp": "2026-06-29T07:06:28.174615+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
-        "path": "ppo_trader.zip",
+        "path": "models/ppo_trader_replay.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-28T09:34:05.128259+00:00"
+        "modified": "2026-06-29T07:06:27.634484+00:00"
       },
       "ppo_replay": {
         "exists": true,
         "path": "models/ppo_trader_replay.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-28T06:21:38.678539+00:00"
+        "modified": "2026-06-29T07:06:27.634484+00:00"
       },
       "teacher_proxy": {
         "exists": true,
@@ -87,37 +87,37 @@
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.8,
-        "modified": "2026-06-28T09:34:05.495677+00:00"
+        "modified": "2026-06-29T07:06:28.174340+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-28T09:28:33.764214+00:00"
+        "modified": "2026-06-29T07:00:35.235490+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 33485.9,
-        "modified": "2026-06-28T09:33:43.652534+00:00"
+        "size_kb": 41003.5,
+        "modified": "2026-06-29T07:06:18.820280+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 3459.1,
-        "modified": "2026-06-28T09:27:45.407933+00:00"
+        "size_kb": 4287.0,
+        "modified": "2026-06-29T07:05:01.622678+00:00"
       },
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
-        "size_kb": 1526.3,
-        "modified": "2026-06-28T09:33:43.285666+00:00"
+        "size_kb": 1989.5,
+        "modified": "2026-06-29T07:06:18.677516+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
         "path": "models/ppo_teacher_sessions.jsonl",
-        "size_kb": 34.0,
-        "modified": "2026-06-28T09:34:05.393301+00:00"
+        "size_kb": 34.9,
+        "modified": "2026-06-29T07:06:28.098382+00:00"
       }
     },
     "phases": {
@@ -132,21 +132,21 @@
     "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 45,
-      "win_rate": 0.267,
-      "avg_pnl": -5.5
+      "count": 49,
+      "win_rate": 0.347,
+      "avg_pnl": -3.66
     },
-    "buffer_records": 8930,
-    "dataset_pairs": 3658,
+    "buffer_records": 11838,
+    "dataset_pairs": 4706,
     "maturity": {
       "stage": "adult",
       "stage_index": 5,
       "stage_count": 6,
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
-        "closed_trades": 773,
-        "dataset_pairs": 3658,
-        "evolution_count": 13,
+        "closed_trades": 1289,
+        "dataset_pairs": 4706,
+        "evolution_count": 14,
         "proxy_accuracy": 1.0,
         "proxy_exists": true
       },
@@ -166,8 +166,8 @@
       },
       "api_budget_multiplier": 0.2,
       "api_usage_today": {
-        "day": "2026-06-28",
-        "decision": 264
+        "day": "2026-06-29",
+        "decision": 48
       },
       "decision_budget_left": 0,
       "copilot_budget_left": 0,
