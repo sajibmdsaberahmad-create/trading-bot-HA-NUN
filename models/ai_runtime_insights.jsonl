@@ -2324,3 +2324,5 @@
 {"timestamp":"2026-06-29T13:16:58.472042+00:00","event":"order_timeout","ticker":"PLTR","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T13:18:06.657211+00:00","event":"order_timeout","ticker":"MARA","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-29T13:18:45.113670+00:00","event":"order_timeout","ticker":"RIOT","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-29T13:21:13.726907+00:00","event":"trade_closed","ticker":"SOFI","reason":"green_profit_lock:ai_stall quick_scalp +3.21% (peak +3.21%)","pnl_usd":2365.08,"pnl_pct":3.21,"won":true,"exit_type":"stop_hit","hold_sec":24.8,"regime":"trend_grind","entry_fill":17.575,"exit_fill":18.14,"entry_slippage_pct":0.0,"exit_slippage_pct":0.0,"market_state":"pre_market"}
+{"timestamp":"2026-06-29T13:21:22.499414+00:00","event":"order_timeout","ticker":"MARA","reason":"PreSubmitted","ib_code":null,"parent_status":"PreSubmitted","market_state":"pre_market"}
