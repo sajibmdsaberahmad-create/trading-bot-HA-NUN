@@ -3,46 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1544,
+  "trades_observed": 1545,
   "scans_performed": 39,
-  "improvements_applied": 2459,
+  "improvements_applied": 2461,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:39:56.259946",
-      "age": "7d 1h 37m 7s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1810",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:40:00.719851",
-      "age": "7d 1h 37m 12s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-8.48",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:40:02.079971",
-      "age": "7d 1h 37m 13s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1811",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:40:02.338276",
       "age": "7d 1h 37m 13s",
@@ -12152,6 +12117,41 @@
           "Hi"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T14:27:05.900812",
+      "age": "8d 3h 24m 17s",
+      "type": "TRADE",
+      "message": "Observed trade: TZA ? P&L=$-100.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T14:27:06.687176",
+      "age": "8d 3h 24m 18s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2461",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on TZA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T14:27:06.687226",
+      "age": "8d 3h 24m 18s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2461",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TZA"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14314,9 +14314,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 332014.6000000003,
+  "total_pnl": 331914.6000000003,
   "win_history": [
-    10.4,
     -10.49,
     -2.74,
     19.74,
@@ -14815,20 +14814,21 @@
     -0.18,
     -40.75,
     -100.0,
+    -100.0,
     -100.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 12,
+  "consecutive_losses": 13,
   "worst_streak": 86,
-  "veteran_xp": 24220,
+  "veteran_xp": 24235,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 72,
+    "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1538,
-  "hours_flown": 153.79999999999555,
+  "flights_completed": 1539,
+  "hours_flown": 153.89999999999554,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14844,7 +14844,7 @@
     "TPT": 3,
     "KUS": 2,
     "XCH": 1,
-    "TZA": 20,
+    "TZA": 21,
     "GDC": 14,
     "SOX": 25,
     "BIT": 13,
@@ -14871,5 +14871,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-670.44 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-643.55 recent). Tightening entries until edge returns."
 }
