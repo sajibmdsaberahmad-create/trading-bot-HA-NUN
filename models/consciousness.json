@@ -3,144 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1450,
+  "trades_observed": 1456,
   "scans_performed": 39,
-  "improvements_applied": 2211,
+  "improvements_applied": 2218,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T08:56:10.548908",
-      "age": "6d 21h 53m 21s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1626",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T08:57:06.116839",
-      "age": "6d 21h 54m 17s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-19.54",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T08:57:06.986875",
-      "age": "6d 21h 54m 18s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1628",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T08:57:06.997788",
-      "age": "6d 21h 54m 18s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1628",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T08:57:10.573443",
-      "age": "6d 21h 54m 21s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-16.95",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T08:57:16.802085",
-      "age": "6d 21h 54m 28s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$+0.83",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T08:57:23.780949",
-      "age": "6d 21h 54m 35s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+2.16",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T08:57:24.936247",
-      "age": "6d 21h 54m 36s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1629",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T08:57:48.748819",
-      "age": "6d 21h 55m 0s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$+0.28",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T08:57:49.850682",
-      "age": "6d 21h 55m 1s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1630",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T08:58:02.340388",
-      "age": "6d 21h 55m 13s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$+1.93",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T08:58:02.883336",
-      "age": "6d 21h 55m 14s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1631",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T08:58:06.606323",
-      "age": "6d 21h 55m 17s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$+5.62",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T08:58:35.098374",
       "age": "6d 21h 55m 46s",
@@ -11387,6 +11254,146 @@
           "Review order_timeout on PLTR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T10:32:02.294319",
+      "age": "7d 23h 29m 13s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+1695.32",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T10:32:02.756504",
+      "age": "7d 23h 29m 14s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2212",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:33:04.408543",
+      "age": "7d 23h 30m 15s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+1695.32",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T10:33:04.912649",
+      "age": "7d 23h 30m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2213",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:34:05.051737",
+      "age": "7d 23h 31m 16s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+1737.18",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T10:34:05.294964",
+      "age": "7d 23h 31m 16s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2214",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:35:13.136925",
+      "age": "7d 23h 32m 24s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+1737.18",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T10:35:13.463169",
+      "age": "7d 23h 32m 24s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2215",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:35:42.503600",
+      "age": "7d 23h 32m 53s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2216",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:36:32.083856",
+      "age": "7d 23h 33m 43s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+1737.18",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T10:36:32.797992",
+      "age": "7d 23h 33m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2217",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:38:11.242628",
+      "age": "7d 23h 35m 22s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+1737.18",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T10:38:11.490452",
+      "age": "7d 23h 35m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2218",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -13549,14 +13556,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "in rhythm",
-  "total_pnl": 220082.64000000036,
+  "total_pnl": 230422.00000000035,
   "win_history": [
-    -12.84,
-    -10.76,
-    0.41,
-    15.57,
-    6.53,
-    3.02,
     0.15,
     5.56,
     -12.97,
@@ -14050,20 +14051,26 @@
     1820.9,
     1653.46,
     1695.32,
-    1695.32
+    1695.32,
+    1695.32,
+    1695.32,
+    1737.18,
+    1737.18,
+    1737.18,
+    1737.18
   ],
-  "consecutive_wins": 60,
+  "consecutive_wins": 66,
   "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 22100,
+  "veteran_xp": 22280,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 100
   },
-  "flights_completed": 1444,
-  "hours_flown": 144.39999999999608,
+  "flights_completed": 1450,
+  "hours_flown": 144.99999999999605,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14092,15 +14099,15 @@
     "COI": 286,
     "RIV": 19,
     "RKL": 16,
-    "SOF": 78,
+    "SOF": 84,
     "AST": 222,
     "SES": 8,
     "NVD": 3
   },
-  "best_streak": 60,
+  "best_streak": 66,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win streak 60 \u00b7 recent $+35957.54. Riding what works, not forcing size."
+  "mood_message": "Win streak 66 \u00b7 recent $+35287.78. Riding what works, not forcing size."
 }
