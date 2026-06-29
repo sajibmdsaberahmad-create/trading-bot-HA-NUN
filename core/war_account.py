@@ -255,7 +255,7 @@ def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> s
     min_bullet = _bullet_size(state, cfg) * 0.85
     settled = float(state.get("settled_cash", 0))
     trips = int(state.get("round_trips_today", 0))
-    max_trips = _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 3)
+    max_trips = _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 2)
     open_war = state.get("open_war")
 
     if open_war:
@@ -287,7 +287,7 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         f"⚔️ War account — {'LIVE' if state['is_live'] else 'PAPER'} "
         f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f} "
         f"mode={state['mode']} trips={int(state.get('round_trips_today', 0))}/"
-        f"{_env_int('WAR_MAX_ROUND_TRIPS_PER_DAY', 3)} "
+        f"{_env_int('WAR_MAX_ROUND_TRIPS_PER_DAY', 2)} "
         f"fees_today=${float(state.get('fee_drag_today', 0)):,.2f}"
     )
     return {"ok": True, **state}
@@ -348,7 +348,7 @@ def war_account_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     mode = _recompute_mode(state, cfg)
     state["mode"] = mode
     bullet = _bullet_size(state, cfg)
-    max_trips = _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 3)
+    max_trips = _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 2)
     ctx = {
         "war_enabled": True,
         "war_mode": mode,
@@ -395,6 +395,15 @@ def check_entry_allowed(
     if not war_account_enabled(cfg):
         return None
 
+    if pipeline:
+        try:
+            from core.war_entry_gates import war_entry_veto
+            veto = war_entry_veto(cfg, pipeline=pipeline)
+            if veto:
+                return veto
+        except Exception:
+            pass
+
     try:
         from core.live_trade_guard import check_entry_allowed as guard_check
         g = guard_check(ticker, cfg)
@@ -435,7 +444,7 @@ def check_entry_allowed(
     trips = int(state.get("lab_round_trips_today" if use_lab else "round_trips_today", 0))
     max_trips = _env_int(
         "WAR_LAB_MAX_ROUND_TRIPS_PER_DAY" if use_lab else "WAR_MAX_ROUND_TRIPS_PER_DAY",
-        2 if use_lab else 3,
+        2 if use_lab else 2,
     )
     if trips >= max_trips:
         return f"war {mode}: round-trip cap {trips}/{max_trips}"

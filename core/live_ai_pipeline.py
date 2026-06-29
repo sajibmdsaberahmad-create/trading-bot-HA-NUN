@@ -345,6 +345,27 @@ def merge_entry_decision(
                 "reason": block[:200],
             })
         return base_dict
+
+    def _maybe_war_veto(d: Dict[str, Any]) -> Dict[str, Any]:
+        if not d.get("enter"):
+            return d
+        try:
+            from core.war_entry_gates import apply_war_entry_veto
+            from core.config import BotConfig
+            prob = float((quality or {}).get("profit_probability", 0) or 0)
+            payload = dict(d)
+            if prob > 0:
+                payload.setdefault("profit_probability", prob)
+            return apply_war_entry_veto(
+                cfg or BotConfig(),
+                payload,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+            )
+        except Exception:
+            return d
     base: Dict[str, Any] = {
         "enter": False,
         "pending": False,
@@ -381,7 +402,7 @@ def merge_entry_decision(
                         f"score={scan_score:.0f} vol={spike_ratio:.1f}x prob={profit_prob:.0%}"
                     )[:200],
                 })
-                return base
+                return _maybe_war_veto(base)
         base.update({
             "pending": True,
             "pipeline": f"council:{ollama_status}",
@@ -439,7 +460,7 @@ def merge_entry_decision(
         else:
             base["pipeline"] = "council:timeout_pass"
             base["reason"] = "Council timeout — no aligned signal"
-        return base
+        return _maybe_war_veto(base)
 
     if ollama_status == "scanner_fast":
         if not allows_scanner_fast_bypass(cfg, scan_score, spike_ratio):
@@ -469,7 +490,7 @@ def merge_entry_decision(
                     f"vol={spike_ratio:.1f}x prob={profit_prob:.0%} | PPO {ppo_conf:.0%}"
                 )[:200],
             })
-            return _apply_fast_block(base, "council:scanner_fast")
+            return _maybe_war_veto(_apply_fast_block(base, "council:scanner_fast"))
         elif profit_prob >= min_prob and scan_score >= min_sc * 0.85:
             base.update({
                 "enter": True,
@@ -481,7 +502,7 @@ def merge_entry_decision(
                     f"score={scan_score:.0f}"
                 )[:200],
             })
-            return _apply_fast_block(base, "council:scanner_fast")
+            return _maybe_war_veto(_apply_fast_block(base, "council:scanner_fast"))
         elif scan_score >= min_sc * 1.5 and ppo_buy:
             base.update({
                 "enter": True,
@@ -493,7 +514,7 @@ def merge_entry_decision(
                     f"| PPO {ppo_conf:.0%}"
                 )[:200],
             })
-            return _apply_fast_block(base, "council:scanner_fast")
+            return _maybe_war_veto(_apply_fast_block(base, "council:scanner_fast"))
         else:
             base["pipeline"] = "council:scanner_fast_pass"
             base["reason"] = "Scanner fast-path: signal not strong enough"

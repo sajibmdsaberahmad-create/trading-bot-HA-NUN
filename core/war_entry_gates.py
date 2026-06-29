@@ -86,7 +86,7 @@ def war_entry_veto(
 ) -> Optional[str]:
     """
     Return veto reason if war/sniper should not take this entry.
-  None = allowed to proceed.
+    None = allowed to proceed.
     """
     if not war_gates_active(cfg):
         return None
