@@ -3,53 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1525,
+  "trades_observed": 1527,
   "scans_performed": 39,
-  "improvements_applied": 2422,
+  "improvements_applied": 2424,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:28:02.817731",
-      "age": "7d 1h 25m 14s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-11.64",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:28:03.790380",
-      "age": "7d 1h 25m 15s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1781",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:28:03.791999",
-      "age": "7d 1h 25m 15s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1781",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:28:10.404951",
-      "age": "7d 1h 25m 21s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-0.92",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T12:28:11.042522",
       "age": "7d 1h 25m 22s",
@@ -11994,6 +11952,48 @@
           "Review trade_closed on TNMG"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T13:49:23.188377",
+      "age": "8d 2h 46m 34s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:49:23.650607",
+      "age": "8d 2h 46m 34s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2423",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:49:33.864728",
+      "age": "8d 2h 46m 45s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:49:34.331116",
+      "age": "8d 2h 46m 45s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2424",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14158,8 +14158,6 @@
   "mood": "recalibrating",
   "total_pnl": 332558.1500000003,
   "win_history": [
-    -3.9,
-    -9.23,
     -4.43,
     -13.35,
     -8.42,
@@ -14657,20 +14655,22 @@
     -3.21,
     -2.96,
     -100.0,
-    -126.89
+    -126.89,
+    0.0,
+    0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 10,
+  "consecutive_losses": 12,
   "worst_streak": 86,
-  "veteran_xp": 24010,
+  "veteran_xp": 24030,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 64,
     "entry_timing": 100
   },
-  "flights_completed": 1519,
-  "hours_flown": 151.89999999999566,
+  "flights_completed": 1521,
+  "hours_flown": 152.09999999999565,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14688,7 +14688,7 @@
     "XCH": 1,
     "TZA": 12,
     "GDC": 14,
-    "SOX": 20,
+    "SOX": 21,
     "BIT": 13,
     "GPU": 19,
     "PLT": 30,
@@ -14704,7 +14704,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 8,
+    "TNM": 9,
     "SOA": 2
   },
   "best_streak": 114,
@@ -14712,5 +14712,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-505.69 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-305.69 recent). Tightening entries until edge returns."
 }

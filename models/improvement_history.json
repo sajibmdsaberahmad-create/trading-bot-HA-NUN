@@ -1,28 +1,20 @@
 [
   {
-    "timestamp": "2026-06-29T13:47:32.800834+00:00",
-    "source": "loss_streak",
-    "adjustments": {
-      "CONFIDENCE_THRESHOLD": {
-        "param": "CONFIDENCE_THRESHOLD",
-        "value": 0.68,
-        "reason": "Loss streak \u2014 raise entry bar until pilot regains edge",
-        "ok": true,
-        "msg": "applied"
-      },
-      "VOLUME_SPIKE_MIN_RATIO": {
-        "param": "VOLUME_SPIKE_MIN_RATIO",
-        "value": 1.35,
-        "reason": "Loss streak \u2014 require stronger volume confirmation",
-        "ok": true,
-        "msg": "applied"
-      }
-    },
-    "guidelines_summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
+    "timestamp": "2026-06-29T13:49:23.666358+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
-      "ping - are you there ?",
-      "Hi",
-      "Hi"
+      "Review trade_closed on SOXS"
+    ]
+  },
+  {
+    "timestamp": "2026-06-29T13:49:34.346638+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on TNMG"
     ]
   }
 ]
