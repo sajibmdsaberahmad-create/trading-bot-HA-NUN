@@ -3,81 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1522,
+  "trades_observed": 1524,
   "scans_performed": 39,
-  "improvements_applied": 2415,
+  "improvements_applied": 2419,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:22:35.196772",
-      "age": "7d 1h 19m 46s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1774",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:23:08.271312",
-      "age": "7d 1h 20m 19s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-0.65",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:23:16.674615",
-      "age": "7d 1h 20m 27s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1776",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:23:16.689353",
-      "age": "7d 1h 20m 28s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1776",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:23:59.226332",
-      "age": "7d 1h 21m 10s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+0.44",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:24:02.911796",
-      "age": "7d 1h 21m 14s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1777",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:24:04.915086",
       "age": "7d 1h 21m 16s",
@@ -11970,6 +11900,76 @@
           "Review order_timeout on INLF"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T13:47:13.978794",
+      "age": "8d 2h 44m 25s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$-2.96",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:47:14.633354",
+      "age": "8d 2h 44m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2416",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on TNMG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:47:14.634130",
+      "age": "8d 2h 44m 25s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2417",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:47:30.948067",
+      "age": "8d 2h 44m 42s",
+      "type": "TRADE",
+      "message": "Observed trade: SOXS ? P&L=$-100.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:47:31.524890",
+      "age": "8d 2h 44m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2418",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on SOXS"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:47:31.525660",
+      "age": "8d 2h 44m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2419",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOXS"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14132,10 +14132,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 332788.00000000035,
+  "total_pnl": 332685.0400000003,
   "win_history": [
-    -7.53,
-    -7.85,
     -11.88,
     -3.9,
     -9.23,
@@ -14633,20 +14631,22 @@
     0.0,
     0.0,
     -200.0,
-    -3.21
+    -3.21,
+    -2.96,
+    -100.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 7,
+  "consecutive_losses": 9,
   "worst_streak": 86,
-  "veteran_xp": 23970,
+  "veteran_xp": 23995,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
-    "risk_management": 60,
+    "risk_management": 62,
     "entry_timing": 100
   },
-  "flights_completed": 1516,
-  "hours_flown": 151.59999999999567,
+  "flights_completed": 1518,
+  "hours_flown": 151.79999999999566,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14664,7 +14664,7 @@
     "XCH": 1,
     "TZA": 12,
     "GDC": 14,
-    "SOX": 19,
+    "SOX": 20,
     "BIT": 13,
     "GPU": 19,
     "PLT": 30,
@@ -14680,7 +14680,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 6,
+    "TNM": 7,
     "SOA": 2
   },
   "best_streak": 114,
@@ -14688,5 +14688,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($+2404.78 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-128.80 recent). Tightening entries until edge returns."
 }
