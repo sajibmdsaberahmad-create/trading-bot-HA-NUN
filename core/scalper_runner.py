@@ -4410,7 +4410,8 @@ class ScalperRunner:
                 is_spike, spike_ratio = True, spike_ratio
 
             is_spike, spike_ratio = apply_micro_spike_boost(
-                is_spike, spike_ratio, forecast, cfg=self.cfg, scan_score=scan_score,
+                is_spike, spike_ratio, forecast,
+                cfg=self.cfg, scan_score=float(target.rank_score),
             )
 
             if dm and ticker.upper() in priority_names:
