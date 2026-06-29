@@ -33,11 +33,25 @@ def war_gates_active(cfg: Optional[BotConfig] = None) -> bool:
 
 
 def war_min_entry_confidence(cfg: Optional[BotConfig] = None) -> float:
+    cfg = cfg or BotConfig()
+    try:
+        from core.war_account import is_live_war
+        if not is_live_war(cfg):
+            return _env_float("WAR_PAPER_MIN_ENTRY_CONFIDENCE", 0.58)
+    except Exception:
+        pass
     return _env_float("WAR_MIN_ENTRY_CONFIDENCE", 0.65)
 
 
 def war_min_profit_probability(cfg: Optional[BotConfig] = None) -> float:
     """Commander calculated lottery floor on war."""
+    cfg = cfg or BotConfig()
+    try:
+        from core.war_account import is_live_war
+        if not is_live_war(cfg):
+            return _env_float("WAR_PAPER_MIN_PROFIT_PROBABILITY", 0.62)
+    except Exception:
+        pass
     return _env_float("WAR_MIN_PROFIT_PROBABILITY", 0.80)
 
 
@@ -56,6 +70,13 @@ def war_blocks_scanner_fast(cfg: Optional[BotConfig] = None) -> bool:
 def macro_risk_off_sniper_only(cfg: Optional[BotConfig] = None) -> bool:
     if not war_gates_active(cfg):
         return False
+    cfg = cfg or BotConfig()
+    try:
+        from core.war_account import is_live_war
+        if not is_live_war(cfg):
+            return _env_bool("WAR_PAPER_MACRO_STAND_ASIDE", "false")
+    except Exception:
+        pass
     return _env_bool("MACRO_RISK_OFF_SNIPER_ONLY", "true")
 
 

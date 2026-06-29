@@ -235,9 +235,9 @@ def entry_cooldown_after_skip(cfg: Optional[BotConfig] = None) -> float:
 def max_entries_per_hour(cfg: Optional[BotConfig] = None) -> int:
     cfg = cfg or BotConfig()
     try:
-        from core.war_account import war_account_enabled, sniper_mode
+        from core.war_account import max_war_entries_per_hour, war_account_enabled, sniper_mode
         if war_account_enabled(cfg) and sniper_mode(cfg):
-            war_cap = int(os.getenv("WAR_MAX_ENTRIES_PER_HOUR", "0") or 0)
+            war_cap = max_war_entries_per_hour(cfg)
             if war_cap > 0:
                 return war_cap
     except Exception:

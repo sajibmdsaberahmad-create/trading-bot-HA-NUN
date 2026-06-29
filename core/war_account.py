@@ -63,6 +63,49 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _settlement_days(cfg: Optional[BotConfig] = None) -> int:
+    """Paper defaults to instant settlement so multiple war round-trips can run same day."""
+    cfg = cfg or BotConfig()
+    if is_live_war(cfg):
+        return _env_int("WAR_SETTLEMENT_DAYS", 1)
+    return _env_int(
+        "WAR_PAPER_SETTLEMENT_DAYS",
+        _env_int("WAR_SETTLEMENT_DAYS", 0),
+    )
+
+
+def max_war_round_trips_per_day(
+    cfg: Optional[BotConfig] = None,
+    *,
+    use_lab: bool = False,
+) -> int:
+    """Live stays tight; paper allows more round-trips for war learning."""
+    cfg = cfg or BotConfig()
+    if use_lab:
+        if is_live_war(cfg):
+            return _env_int("WAR_LAB_MAX_ROUND_TRIPS_PER_DAY", 2)
+        return _env_int(
+            "WAR_PAPER_LAB_MAX_ROUND_TRIPS_PER_DAY",
+            _env_int("WAR_LAB_MAX_ROUND_TRIPS_PER_DAY", 4),
+        )
+    if is_live_war(cfg):
+        return _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 2)
+    return _env_int(
+        "WAR_PAPER_MAX_ROUND_TRIPS_PER_DAY",
+        _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 5),
+    )
+
+
+def max_war_entries_per_hour(cfg: Optional[BotConfig] = None) -> int:
+    cfg = cfg or BotConfig()
+    if is_live_war(cfg):
+        return _env_int("WAR_MAX_ENTRIES_PER_HOUR", 2)
+    return _env_int(
+        "WAR_PAPER_MAX_ENTRIES_PER_HOUR",
+        _env_int("WAR_MAX_ENTRIES_PER_HOUR", 5),
+    )
+
+
 def operating_capital_usd(cfg: Optional[BotConfig] = None) -> float:
     cfg = cfg or BotConfig()
     if is_live_war(cfg):
@@ -183,7 +226,8 @@ def _roll_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> Non
             state["lab_settled"] = lab
 
 
-def _apply_settlement(state: Dict[str, Any]) -> None:
+def _apply_settlement(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
+    cfg = cfg or BotConfig()
     now = time.time()
     pending: List[Dict[str, Any]] = []
     released = 0.0
@@ -197,15 +241,22 @@ def _apply_settlement(state: Dict[str, Any]) -> None:
         state["settled_cash"] = float(state.get("settled_cash", 0)) + released
         state["cash"] = float(state.get("cash", 0)) + released
     state["unsettled"] = pending
+    # Paper instant settlement — release any legacy T+1 holds so more war trips can run same day
+    if not is_live_war(cfg) and _settlement_days(cfg) <= 0 and state.get("unsettled"):
+        extra = sum(float(row.get("amount", 0)) for row in state.get("unsettled") or [])
+        if extra > 0:
+            state["settled_cash"] = float(state.get("settled_cash", 0)) + extra
+            state["cash"] = float(state.get("cash", 0)) + extra
+        state["unsettled"] = []
 
 
 def _schedule_settlement(state: Dict[str, Any], amount: float, cfg: Optional[BotConfig] = None) -> None:
-    days = _env_int("WAR_SETTLEMENT_DAYS", 1)
-    settle_ts = time.time() + max(1, days) * 86400
-    if is_live_war(cfg) and days <= 0:
+    days = _settlement_days(cfg)
+    if days <= 0:
         state["settled_cash"] = float(state.get("settled_cash", 0)) + amount
         state["cash"] = float(state.get("cash", 0)) + amount
         return
+    settle_ts = time.time() + max(1, days) * 86400
     state.setdefault("unsettled", []).append({
         "amount": round(amount, 2),
         "settles_at_ts": settle_ts,
@@ -255,7 +306,7 @@ def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> s
     min_bullet = _bullet_size(state, cfg) * 0.85
     settled = float(state.get("settled_cash", 0))
     trips = int(state.get("round_trips_today", 0))
-    max_trips = _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 2)
+    max_trips = max_war_round_trips_per_day(cfg)
     open_war = state.get("open_war")
 
     if open_war:
@@ -264,7 +315,7 @@ def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> s
     if trips >= max_trips or settled < min_bullet:
         if lab_enabled(cfg) and float(state.get("lab_settled", 0)) >= min_bullet * 0.5:
             lab_trips = int(state.get("lab_round_trips_today", 0))
-            lab_max = _env_int("WAR_LAB_MAX_ROUND_TRIPS_PER_DAY", 2)
+            lab_max = max_war_round_trips_per_day(cfg, use_lab=True)
             if lab_trips < lab_max and not state.get("open_lab"):
                 return "LAB_ACTIVE"
         return "OBSERVE"
@@ -278,7 +329,7 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         return {"ok": False, "reason": "disabled"}
     state = load_state(cfg)
     _roll_session(state, cfg)
-    _apply_settlement(state)
+    _apply_settlement(state, cfg)
     state["mode"] = _recompute_mode(state, cfg)
     state["is_live"] = is_live_war(cfg)
     if not STATE_PATH.is_file():
@@ -287,7 +338,7 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         f"⚔️ War account — {'LIVE' if state['is_live'] else 'PAPER'} "
         f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f} "
         f"mode={state['mode']} trips={int(state.get('round_trips_today', 0))}/"
-        f"{_env_int('WAR_MAX_ROUND_TRIPS_PER_DAY', 2)} "
+        f"{max_war_round_trips_per_day(cfg)} "
         f"fees_today=${float(state.get('fee_drag_today', 0)):,.2f}"
     )
     return {"ok": True, **state}
@@ -296,7 +347,7 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
 def current_mode(cfg: Optional[BotConfig] = None) -> str:
     state = load_state(cfg)
     _roll_session(state, cfg)
-    _apply_settlement(state)
+    _apply_settlement(state, cfg)
     mode = _recompute_mode(state, cfg)
     state["mode"] = mode
     save_state(state)
@@ -316,7 +367,7 @@ def war_settled_cash(cfg: Optional[BotConfig] = None) -> float:
         return 0.0
     state = load_state(cfg)
     _roll_session(state, cfg)
-    _apply_settlement(state)
+    _apply_settlement(state, cfg)
     mode = state.get("mode") or _recompute_mode(state, cfg)
     if mode == "LAB_ACTIVE":
         return float(state.get("lab_settled", 0))
@@ -344,11 +395,11 @@ def war_account_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         return {}
     state = load_state(cfg)
     _roll_session(state, cfg)
-    _apply_settlement(state)
+    _apply_settlement(state, cfg)
     mode = _recompute_mode(state, cfg)
     state["mode"] = mode
     bullet = _bullet_size(state, cfg)
-    max_trips = _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 2)
+    max_trips = max_war_round_trips_per_day(cfg)
     ctx = {
         "war_enabled": True,
         "war_mode": mode,
@@ -414,7 +465,7 @@ def check_entry_allowed(
 
     state = load_state(cfg)
     _roll_session(state, cfg)
-    _apply_settlement(state)
+    _apply_settlement(state, cfg)
     mode = _recompute_mode(state, cfg)
     state["mode"] = mode
     save_state(state)
@@ -442,10 +493,7 @@ def check_entry_allowed(
         )
 
     trips = int(state.get("lab_round_trips_today" if use_lab else "round_trips_today", 0))
-    max_trips = _env_int(
-        "WAR_LAB_MAX_ROUND_TRIPS_PER_DAY" if use_lab else "WAR_MAX_ROUND_TRIPS_PER_DAY",
-        2 if use_lab else 2,
-    )
+    max_trips = max_war_round_trips_per_day(cfg, use_lab=use_lab)
     if trips >= max_trips:
         return f"war {mode}: round-trip cap {trips}/{max_trips}"
 
