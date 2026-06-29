@@ -127,6 +127,70 @@ def sniper_conf_bump_effective(
     return base
 
 
+def should_sniper_strong_entry(
+    cfg: BotConfig,
+    spike_ratio: float,
+    scan_score: float,
+    ppo_action: int,
+    ppo_conf: float,
+    micro: Optional[dict] = None,
+    *,
+    ticker: str = "",
+    consecutive_losses: int = 0,
+) -> bool:
+    """Sniper strong tier — PPO BUY + vol/score; no council wait."""
+    if not is_sniper_strong_spike(cfg, scan_score, spike_ratio):
+        return False
+    if int(ppo_action) != 1:
+        return False
+    min_ppo = _env_float("SNIPER_STRONG_MIN_PPO_CONF", 0.50)
+    if float(ppo_conf) < min_ppo:
+        return False
+    from core.fast_execution import _passes_entry_quality_gate
+    from core.live_trade_guard import check_fast_entry_bypass
+
+    block = check_fast_entry_bypass(
+        cfg,
+        ticker=ticker,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        consecutive_losses=consecutive_losses,
+        pipeline="sniper:strong",
+    )
+    if block:
+        return False
+    return _passes_entry_quality_gate(
+        cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+    )
+
+
+def sniper_min_bars_focus(cfg: Optional[BotConfig] = None) -> int:
+    if not sniper_active(cfg):
+        return 6
+    return int(_env_float("SNIPER_MIN_BARS_FOCUS", 4.0))
+
+
+def sniper_force_bar_prefetch(cfg: Optional[BotConfig] = None) -> bool:
+    if not sniper_active(cfg):
+        return False
+    return os.getenv("SNIPER_FORCE_BAR_PREFETCH", "true").lower() in ("1", "true", "yes")
+
+
+def sniper_cold_micro_vol_confirms(
+    spike_ratio: float,
+    scan_score: float,
+    micro: Optional[dict] = None,
+) -> bool:
+    """Micro=0% but commander-style vol spike — don't treat as no-edge."""
+    micro = micro or {}
+    sl = float(micro.get("spike_likelihood", 0) or 0)
+    if sl >= 0.08:
+        return False
+    min_sp = _env_float("SNIPER_COLD_VOL_MIN_SPIKE", 2.0)
+    min_sc = _env_float("SNIPER_COLD_VOL_MIN_SCORE", 70.0)
+    return float(spike_ratio) >= min_sp and float(scan_score) >= min_sc
+
+
 def should_sniper_flash_entry(
     cfg: BotConfig,
     spike_ratio: float,
@@ -263,7 +327,8 @@ def sniper_timing_log_line(cfg: Optional[BotConfig] = None) -> str:
     return (
         f"SNIPER FAST: flash≥{_env_float('SNIPER_FLASH_SPIKE_RATIO', 1.22):.2f}x/"
         f"score≥{_env_float('SNIPER_FLASH_MIN_SCORE', 35):.0f} | "
-        f"strong≥{min_sp:.2f}x/score≥{min_sc:.0f} | "
+        f"strong≥{min_sp:.2f}x/score≥{min_sc:.0f} "
+        f"(PPO≥{_env_float('SNIPER_STRONG_MIN_PPO_CONF', 0.50):.0%}) | "
         f"council wait≤{_env_float('SNIPER_COUNCIL_MAX_WAIT_SEC', 1.5):.1f}s"
         f"{tick_part}"
     )

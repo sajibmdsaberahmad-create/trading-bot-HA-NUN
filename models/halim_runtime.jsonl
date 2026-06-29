@@ -319,3 +319,5 @@
 {"timestamp":"2026-06-29T16:54:54.461171+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
 {"timestamp":"2026-06-29T16:56:25.568057+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
 {"timestamp":"2026-06-29T16:57:57.199866+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
+{"timestamp":"2026-06-29T16:59:29.196923+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
+{"timestamp":"2026-06-29T17:00:59.478476+00:00","event":"device_trading_focus","mode":"trade_focus","ok":true,"killed":[],"removed_extensions":true}
