@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1471,
   "scans_performed": 39,
-  "improvements_applied": 2279,
+  "improvements_applied": 2280,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:13:16.328352",
-      "age": "6d 22h 10m 27s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+1.49",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T09:13:17.560202",
       "age": "6d 22h 10m 28s",
@@ -11532,6 +11525,20 @@
         "applied": [],
         "lessons": [
           "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T11:49:11.038153",
+      "age": "8d 0h 46m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2280",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on PLTR"
         ]
       }
     }
