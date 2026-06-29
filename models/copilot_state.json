@@ -1,30 +1,20 @@
 {
-  "narrative": "Local copilot: 32% session WR. Adapt entry quality on: MARA, LCID, ASTS, COIN (caution \u2014 tighter setup required).",
+  "narrative": "Local copilot: 100% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
   "regime_read": "mixed",
   "risk_posture": "normal",
-  "session_wr": 0.325,
+  "session_wr": 1.0,
   "session_pnl": 0.0,
-  "ticker_bias": {
-    "MARA": "CAUTION",
-    "LCID": "CAUTION",
-    "ASTS": "CAUTION",
-    "COIN": "CAUTION"
-  },
-  "repeat_losers": [
-    "MARA",
-    "LCID",
-    "ASTS",
-    "COIN"
-  ],
+  "ticker_bias": {},
+  "repeat_losers": [],
   "ppo_hints": {
     "confidence_boost": 0.0,
-    "require_quality_on_repeat": true,
-    "min_spike_mult": 1.15
+    "require_quality_on_repeat": false,
+    "min_spike_mult": 1.0
   },
   "lessons": [
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782720048.149447,
+  "updated_at": 1782720801.0338602,
   "source": "heuristic"
 }
