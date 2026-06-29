@@ -1951,3 +1951,24 @@ Scanner+spike after timeout: score=98 vol=2.9x prob=63% | ATR R:R 2.0
 • Applied mutations:
   - CONFIDENCE_THRESHOLD → 0.6900000000000001 (Scanner timeout entries — slightly lower bar while council catches up)
 
+🧭 COMMANDER LEARNING | 2026-06-29T16:10:26.726270+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T16:10:26.727995+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-29T16:10:28.792803+00:00
+Observed council_timeout — recorded for learning.
+Scanner+spike after timeout: score=102 vol=2.0x prob=59% | ATR R:R 2.0
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.67 (Scanner timeout entries — slightly lower bar while council catches up)
+
+🧭 COMMANDER LEARNING | 2026-06-29T16:10:29.835822+00:00
+Observed ib_failure — recorded for learning.
+BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0642 or a more aggressive price still within y
+• Applied mutations:
+  - PENNY_MAX_DEPLOY_USD → 297.5 (IB 2161 regulatory cap — reduce penny deploy)
+  - PENNY_LIMIT_BUFFER_PCT → 0.007 (IB 2161 — tighter limit buffer toward reference price)
+

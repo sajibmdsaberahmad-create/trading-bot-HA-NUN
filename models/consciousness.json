@@ -3,67 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 204,
   "training_sessions": 39,
-  "trades_observed": 1561,
+  "trades_observed": 1562,
   "scans_performed": 39,
-  "improvements_applied": 2497,
+  "improvements_applied": 2501,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:52:15.334749",
-      "age": "7d 1h 49m 26s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$+3.06",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:52:32.688966",
-      "age": "7d 1h 49m 44s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1844",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:53:57.605005",
-      "age": "7d 1h 51m 8s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-8.83",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:54:07.578067",
-      "age": "7d 1h 51m 18s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1845",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:54:07.797157",
-      "age": "7d 1h 51m 19s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1846",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:54:14.941060",
       "age": "7d 1h 51m 26s",
@@ -12218,6 +12162,92 @@
           "Review council_timeout on TNMG"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T16:10:25.931726",
+      "age": "8d 5h 7m 37s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$-1.76",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T16:10:26.691395",
+      "age": "8d 5h 7m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2499",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T16:10:26.691472",
+      "age": "8d 5h 7m 38s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2499",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on TNMG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T16:10:28.777314",
+      "age": "8d 5h 7m 40s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2500",
+      "metadata": {
+        "source": "runtime_council_timeout",
+        "summary": "Observed council_timeout \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": 0.67,
+            "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review council_timeout on INLF"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T16:10:29.819933",
+      "age": "8d 5h 7m 41s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2501",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 297.5,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.007,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review ib_failure on INLF"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T16:06:51.637460",
@@ -14380,9 +14410,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "recalibrating",
-  "total_pnl": 331836.5400000003,
+  "total_pnl": 331834.7800000003,
   "win_history": [
-    0.28,
     1.93,
     5.62,
     -9.96,
@@ -14881,20 +14910,21 @@
     0.0,
     -1.23,
     0.0,
-    0.0
+    0.0,
+    -1.76
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 7,
+  "consecutive_losses": 8,
   "worst_streak": 86,
-  "veteran_xp": 24425,
+  "veteran_xp": 24435,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1555,
-  "hours_flown": 155.49999999999545,
+  "flights_completed": 1556,
+  "hours_flown": 155.59999999999545,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14928,7 +14958,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 16,
+    "TNM": 17,
     "SOA": 12,
     "KND": 1
   },
@@ -14937,5 +14967,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-418.81 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-379.82 recent). Tightening entries until edge returns."
 }
