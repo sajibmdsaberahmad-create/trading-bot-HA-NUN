@@ -468,7 +468,7 @@ try:
     from core.war_account import ensure_war_account, war_account_enabled
     if war_account_enabled(cfg):
         st = ensure_war_account(cfg)
-        print(f'   War: nav={float(st.get("nav", 0)):,.0f} settled={float(st.get("settled_cash", 0)):,.0f} mode={st.get("mode", "?")}')
+        print(f'   War: nav={float(st.get(\"nav\", 0)):,.0f} settled={float(st.get(\"settled_cash\", 0)):,.0f} mode={st.get(\"mode\", \"?\")}')
 except Exception as e:
     print(f'   War: check skipped ({e})')
 try:
