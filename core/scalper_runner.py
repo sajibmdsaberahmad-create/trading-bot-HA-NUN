@@ -343,6 +343,7 @@ class ScalperRunner:
         self._last_market_state: Optional[str] = None
         self._last_market_closed_log: float = 0.0
         self._day_session_ended: bool = False
+        self._auto_shutdown_at: float = 0.0
         self._rth_open_day: Optional[str] = None
         self._entries_this_hour: int = 0
         self._smart_gate_context: Dict[str, Dict[str, Any]] = {}
@@ -1480,6 +1481,37 @@ class ScalperRunner:
             )
         except Exception as exc:
             log.debug(f"Session-end coach lane: {exc}")
+        self._schedule_auto_shutdown_after_session()
+
+    def _schedule_auto_shutdown_after_session(self) -> None:
+        """Queue graceful exit after session end (allows daily learning + git sync)."""
+        if os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes"):
+            return
+        if not getattr(self.cfg, "AUTO_SHUTDOWN_AFTER_SESSION_END", False):
+            return
+        delay = max(60.0, float(getattr(self.cfg, "AUTO_SHUTDOWN_DELAY_SEC", 900)))
+        self._auto_shutdown_at = time.time() + delay
+        sleep_note = ""
+        if getattr(self.cfg, "MAC_SLEEP_AFTER_SHUTDOWN", False):
+            sleep_note = " | Mac sleep after shutdown"
+        log.info(
+            f"🌙 Auto-shutdown in {delay / 60:.0f}m after session end "
+            f"(daily learning + git sync){sleep_note}"
+        )
+
+    def _maybe_auto_shutdown(self, now: float) -> None:
+        """Exit cleanly once delay elapsed and flat — no open war positions."""
+        due = getattr(self, "_auto_shutdown_at", 0.0)
+        if due <= 0 or now < due:
+            return
+        if self._in_any_position():
+            if now - getattr(self, "_last_auto_shutdown_wait_log", 0) >= 120.0:
+                self._last_auto_shutdown_wait_log = now
+                log.info("🌙 Auto-shutdown waiting — close open position(s) first")
+            return
+        log.info("🌙 Auto-shutdown — session ended, starting graceful exit…")
+        self._auto_shutdown_at = 0.0
+        self._shutdown_requested_flag = True
 
     def _on_rth_open(self, old_state: str) -> None:
         """
