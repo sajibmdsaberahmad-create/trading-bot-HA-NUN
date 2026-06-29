@@ -1460,6 +1460,14 @@ class ScalperRunner:
                 )
             except Exception as exc:
                 log.debug(f"Session-end IB learning schedule: {exc}")
+        try:
+            from core.slow_coach import schedule_post_session_coach
+            from core.market_hours import now_et
+            schedule_post_session_coach(
+                self.cfg, self, day=now_et().strftime("%Y-%m-%d"),
+            )
+        except Exception as exc:
+            log.debug(f"Session-end coach lane: {exc}")
 
     def _on_rth_open(self, old_state: str) -> None:
         """
@@ -2007,6 +2015,14 @@ class ScalperRunner:
         target_px = float(trade_rec.get("target", 0))
 
         append_fill_ledger({**trade_rec, "event": "round_trip"})
+        try:
+            from core.slow_coach import observe_round_trip
+            observe_round_trip(
+                self.cfg, trade_rec,
+                equity=float(self._war_account_equity() or self.bot_nav or 1000),
+            )
+        except Exception:
+            pass
         try:
             from core.war_account import record_exit, war_account_enabled
             if war_account_enabled(self.cfg):
@@ -7212,6 +7228,35 @@ class ScalperRunner:
             elif tick_burst_ratio > 0:
                 is_spike, spike_ratio = True, max(spike_ratio, tick_burst_ratio)
             is_spike, spike_ratio = apply_micro_spike_boost(is_spike, spike_ratio, forecast)
+
+            try:
+                from core.commander_replay import shadow_would_skip_entry
+                from core.slow_coach import coach_lane_enabled, log_shadow_skip
+                if coach_lane_enabled(self.cfg):
+                    prob = float(forecast.get("profit_probability", 0) or 0)
+                    fade = float(
+                        forecast.get("fakeout_risk", 0)
+                        or forecast.get("fade_risk", 0)
+                        or 0
+                    )
+                    would_skip, shadow_reason = shadow_would_skip_entry(
+                        self.cfg,
+                        ticker=ticker,
+                        scan_score=scan_score,
+                        spike_ratio=spike_ratio,
+                        profit_probability=prob,
+                        fakeout_risk=fade,
+                    )
+                    if would_skip:
+                        log_shadow_skip(
+                            self.cfg,
+                            ticker=ticker,
+                            reason=shadow_reason,
+                            scan_score=scan_score,
+                            spike_ratio=spike_ratio,
+                        )
+            except Exception:
+                pass
 
             gate_ok, gate_msg = passes_pre_entry_gate(
                 self.cfg,

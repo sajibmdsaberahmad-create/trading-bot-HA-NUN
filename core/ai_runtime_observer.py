@@ -188,6 +188,15 @@ class AIRuntimeObserver:
 
             self._apply_runtime_heuristics(event, context)
 
+            try:
+                from core.slow_coach import coach_slow_apply_enabled, queue_plan_mutations
+                if coach_slow_apply_enabled(self.cfg):
+                    queued = queue_plan_mutations(self.cfg, plan, source=f"runtime_{event}")
+                    if int(queued.get("queued", 0) or 0) > 0:
+                        return
+            except Exception:
+                pass
+
             if not getattr(self.cfg, "AI_RUNTIME_AUTO_APPLY", True):
                 return
 

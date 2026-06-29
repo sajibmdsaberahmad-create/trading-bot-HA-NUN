@@ -91,6 +91,7 @@ LIVE_PARAM_BOUNDS: Dict[str, Tuple[Union[int, float], Union[int, float]]] = {
     "EXTENDED_PROFIT_GIVEBACK_PCT": (0.10, 0.50),
     "SCAN_INTERVAL_SECONDS": (5, 180),
     "STAGNATION_EXIT_SEC": (45.0, 240.0),
+    "SPIKE_SKIP_SEC": (5.0, 45.0),
     "MIN_POSITION_HOLD_SEC": (20.0, 180.0),
     "ENTRY_LIMIT_BUFFER_PCT": (0.001, 0.012),
     "PENNY_LIMIT_BUFFER_PCT": (0.003, 0.015),

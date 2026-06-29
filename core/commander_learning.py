@@ -332,6 +332,20 @@ def apply_commander_plan(
     """Apply mutations and persist lessons/guidelines."""
     applied: List[Dict[str, Any]] = []
     rejected: List[Dict[str, Any]] = []
+    queued_count = 0
+
+    try:
+        from core.slow_coach import (
+            BYPASS_SLOW_SOURCES,
+            coach_slow_apply_enabled,
+            queue_mutation,
+        )
+        use_slow_queue = (
+            coach_slow_apply_enabled(cfg)
+            and str(source) not in BYPASS_SLOW_SOURCES
+        )
+    except Exception:
+        use_slow_queue = False
 
     for mut in (plan.get("mutations") or [])[:3]:
         param = mut.get("param", "")
@@ -346,12 +360,28 @@ def apply_commander_plan(
                 "reason": reason, "ok": False, "msg": "runtime-blocked param",
             })
             continue
+        if use_slow_queue:
+            if queue_mutation(cfg, str(param), value, str(reason), source=source):
+                queued_count += 1
+                rejected.append({
+                    "param": normalize_param(param), "value": value,
+                    "reason": reason, "ok": True, "msg": "queued for slow coach",
+                })
+            else:
+                rejected.append({
+                    "param": normalize_param(param), "value": value,
+                    "reason": reason, "ok": False, "msg": "not queued (frozen/bounds)",
+                })
+            continue
         ok, msg = _apply_mutation(cfg, param, value, reason, autopilot)
         rec = {"param": normalize_param(param), "value": value, "reason": reason, "ok": ok, "msg": msg}
         if ok:
             applied.append(rec)
         else:
             rejected.append(rec)
+
+    if queued_count:
+        log.info(f"🎓 Coach queued {queued_count} commander mutation(s) — slow drip ({source})")
 
     # Also apply dict-style adjustments for self_improver compatibility
     adj = {}
