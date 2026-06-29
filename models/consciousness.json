@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1469,
   "scans_performed": 39,
-  "improvements_applied": 2268,
+  "improvements_applied": 2269,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:10:40.368520",
-      "age": "6d 22h 7m 51s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1665",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T09:10:40.715204",
       "age": "6d 22h 7m 52s",
@@ -11511,6 +11497,20 @@
         "applied": [],
         "lessons": [
           "Review trade_closed on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T11:32:22.085500",
+      "age": "8d 0h 29m 33s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2269",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
         ]
       }
     }
