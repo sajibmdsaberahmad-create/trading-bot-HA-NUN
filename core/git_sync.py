@@ -1021,6 +1021,14 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
             
             if all_success:
                 result = subprocess.run(push_cmd, cwd=repo_root, capture_output=True, text=True, timeout=60)
+                combined = (result.stderr or "") + (result.stdout or "")
+                if result.returncode != 0 and "rejected" in combined.lower():
+                    log.info("Primary repo push rejected — pull --rebase origin main then retry")
+                    _git_pull_rebase_origin(repo_root, timeout=90)
+                    result = subprocess.run(
+                        ["git", "push", "origin", "HEAD:main"],
+                        cwd=repo_root, capture_output=True, text=True, timeout=60,
+                    )
                 if result.returncode != 0:
                     log.debug(f"Git push failed: {result.stderr.strip()}")
                     all_success = False
@@ -1178,6 +1186,35 @@ def _git_clone(auth_url: str, dest: str, label: str = "repo", timeout: int = 90)
     return False
 
 
+def _git_pull_rebase_origin(cwd: str, timeout: int = 90) -> bool:
+    """Rebase local commits onto remote main (clone temp dirs use origin)."""
+    result = subprocess.run(
+        ["git", "pull", "--rebase", "origin", "main"],
+        cwd=cwd, capture_output=True, text=True, timeout=timeout,
+    )
+    if result.returncode != 0:
+        log.debug(f"git pull --rebase origin main failed: {(result.stderr or result.stdout or '')[:200]}")
+    return result.returncode == 0
+
+
+def _git_push_origin_main(cwd: str, timeout: int = 90) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git", "push", "origin", "HEAD:main"],
+        cwd=cwd, capture_output=True, text=True, timeout=timeout,
+    )
+
+
+def _git_push_with_rebase_retry(cwd: str, timeout: int = 90) -> subprocess.CompletedProcess:
+    """Push to origin/main; on rejection pull --rebase then retry once."""
+    result = _git_push_origin_main(cwd, timeout=timeout)
+    combined = (result.stderr or "") + (result.stdout or "")
+    if result.returncode != 0 and "rejected" in combined.lower():
+        log.info("Push rejected — pulling --rebase origin main then retrying")
+        _git_pull_rebase_origin(cwd, timeout=timeout)
+        result = _git_push_origin_main(cwd, timeout=timeout)
+    return result
+
+
 def _sanitize_github_repos(cfg: BotConfig) -> None:
     """Auto-correct malformed GitHub repo slugs on startup."""
     for attr in ("GITHUB_REPO", "GITHUB_HANOON_REPO", "GITHUB_GRANDMASTER_REPO", "GITHUB_LOGS_REPO"):
@@ -1267,8 +1304,7 @@ def push_weights_to_repo(weight_files: List[str], repo_url: str, message: str) -
         subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True)
         commit_cmd = ["git", "commit", "-m", message, "--allow-empty"]
         subprocess.run(commit_cmd, cwd=tmpdir, capture_output=True)
-        push_cmd = ["git", "push", auth_url, "HEAD:main"]
-        result = subprocess.run(push_cmd, cwd=tmpdir, capture_output=True, text=True, timeout=60)
+        result = _git_push_with_rebase_retry(tmpdir, timeout=60)
         
         shutil.rmtree(tmpdir, ignore_errors=True)
         
@@ -1383,14 +1419,7 @@ def push_to_secondary_repo(repo_key: str, files: List[str], message: str, catego
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
         commit_msg = f"[{repo_key}] {message}\n\nCategory: {category}\nTimestamp: {timestamp}\nAuto-pushed by git_sync.py"
         subprocess.run(["git", "commit", "-m", commit_msg, "--allow-empty"], cwd=tmpdir, capture_output=True)
-        push_cmd = ["git", "push", "-u", auth_url, "HEAD:main"] if auth_url else ["git", "push", "-u", "origin", "main"]
-        result = subprocess.run(push_cmd, cwd=tmpdir, capture_output=True, text=True, timeout=90)
-        if result.returncode != 0 and "rejected" in (result.stderr or result.stdout or "").lower():
-            subprocess.run(
-                ["git", "pull", "--rebase", auth_url or "origin", "main"],
-                cwd=tmpdir, capture_output=True, text=True, timeout=90,
-            )
-            result = subprocess.run(push_cmd, cwd=tmpdir, capture_output=True, text=True, timeout=90)
+        result = _git_push_with_rebase_retry(tmpdir, timeout=90)
         
         shutil.rmtree(tmpdir, ignore_errors=True)
         

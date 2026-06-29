@@ -8,6 +8,7 @@ Outputs human-readable guidelines AND machine-usable parameter adjustments.
 
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
@@ -27,6 +28,11 @@ MODELS_DIR = Path("models")
 GUIDELINES_PATH = MODELS_DIR / "ai_guidelines.txt"
 ADJUSTMENTS_PATH = MODELS_DIR / "parameter_adjustments.json"
 HISTORY_PATH = MODELS_DIR / "improvement_history.json"
+
+# Prevent stacked +0.05 bumps when consciousness + off-hours + developer all fire together
+_LAST_PLAN_TS: float = 0.0
+_PLAN_COOLDOWN_SEC: float = float(os.getenv("SELF_IMPROVEMENT_COOLDOWN_SEC", "1800"))
+_CONFIDENCE_SESSION_CAP: float = float(os.getenv("SELF_IMPROVEMENT_CONFIDENCE_CAP", "0.75"))
 
 
 def _load_backtest_returns() -> List[float]:
@@ -101,6 +107,21 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
     - machine-ready parameter adjustments (safe ranges)
     - improvement history entry
     """
+    global _LAST_PLAN_TS
+    now = datetime.utcnow().timestamp()
+    if _LAST_PLAN_TS and (now - _LAST_PLAN_TS) < _PLAN_COOLDOWN_SEC:
+        log.debug(
+            f"Self-improvement skipped — cooldown "
+            f"({int(_PLAN_COOLDOWN_SEC - (now - _LAST_PLAN_TS))}s left)"
+        )
+        return {
+            "guidelines": generate_guidelines_text(),
+            "adjustments": {},
+            "win_rate": 0.0,
+            "timestamp": datetime.utcnow().isoformat(),
+            "skipped": "cooldown",
+        }
+
     log.info("🧬 Generating self-improvement plan...")
 
     buffer = buffer_stats()
@@ -170,8 +191,11 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
          25, 100, "tighter hard stop when WR weak")
 
     _adj("CONFIDENCE_THRESHOLD", cfg.CONFIDENCE_THRESHOLD,
-         cfg.CONFIDENCE_THRESHOLD + (0.05 if combined_wr < 0.4 else -0.03 if combined_wr > 0.7 else 0),
-         0.35, 0.90, "raise entry bar when WR low; lower when WR strong")
+         min(
+             cfg.CONFIDENCE_THRESHOLD + (0.03 if combined_wr < 0.4 else -0.02 if combined_wr > 0.7 else 0),
+             _CONFIDENCE_SESSION_CAP,
+         ),
+         0.35, 0.90, "raise entry bar when WR low; lower when WR strong (capped per session)")
 
     # Adjust heuristic weights from market regime context
     if weights:
@@ -261,6 +285,7 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
         json.dump(history[-100:], f, indent=2)
 
     log.info("🧬 Self-improvement plan generated and applied.")
+    _LAST_PLAN_TS = now
     return {
         "guidelines": guidelines,
         "adjustments": adjustments,

@@ -116,13 +116,16 @@ class HalimHandler(BaseHTTPRequestHandler):
 
     def _json(self, code: int, body: Dict[str, Any]) -> None:
         raw = json.dumps(_with_runtime(body), default=str).encode("utf-8")
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("X-Halim-Runtime", "active")
-        self.send_header("X-Halim-Inference-Only", "false")
-        self.send_header("Content-Length", str(len(raw)))
-        self.end_headers()
-        self.wfile.write(raw)
+        try:
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("X-Halim-Runtime", "active")
+            self.send_header("X-Halim-Inference-Only", "false")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def _read_json(self) -> Dict[str, Any]:
         n = int(self.headers.get("Content-Length", 0))
