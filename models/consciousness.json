@@ -3,46 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1519,
+  "trades_observed": 1520,
   "scans_performed": 39,
-  "improvements_applied": 2403,
+  "improvements_applied": 2405,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T12:19:59.231209",
-      "age": "7d 1h 17m 10s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-4.66",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T12:20:01.249011",
-      "age": "7d 1h 17m 12s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1766",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T12:20:01.466675",
-      "age": "7d 1h 17m 12s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1767",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-28T12:20:09.448678",
       "age": "7d 1h 17m 20s",
@@ -11852,6 +11817,56 @@
           "Review trade_closed on TNMG"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T13:42:36.101751",
+      "age": "8d 2h 39m 47s",
+      "type": "TRADE",
+      "message": "Observed trade: TNMG ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T13:42:36.406264",
+      "age": "8d 2h 39m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2404",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on TNMG"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T13:42:54.201929",
+      "age": "8d 2h 40m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2405",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [
+          {
+            "param": "PENNY_MAX_DEPLOY_USD",
+            "value": 150.0,
+            "reason": "IB 2161 regulatory cap \u2014 reduce penny deploy",
+            "ok": true,
+            "msg": "applied"
+          },
+          {
+            "param": "PENNY_LIMIT_BUFFER_PCT",
+            "value": 0.015,
+            "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
+            "ok": true,
+            "msg": "applied"
+          }
+        ],
+        "lessons": [
+          "Review ib_failure on INLF"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -14016,7 +14031,6 @@
   "mood": "recalibrating",
   "total_pnl": 332991.21000000037,
   "win_history": [
-    0.58,
     -13.01,
     -11.27,
     -7.53,
@@ -14515,20 +14529,21 @@
     0.0,
     -1.94,
     0.0,
+    0.0,
     0.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 5,
   "worst_streak": 86,
-  "veteran_xp": 23935,
+  "veteran_xp": 23945,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 58,
     "entry_timing": 100
   },
-  "flights_completed": 1513,
-  "hours_flown": 151.2999999999957,
+  "flights_completed": 1514,
+  "hours_flown": 151.39999999999569,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14562,7 +14577,7 @@
     "SES": 8,
     "NVD": 3,
     "INL": 4,
-    "TNM": 4,
+    "TNM": 5,
     "SOA": 2
   },
   "best_streak": 114,
@@ -14570,5 +14585,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($+9745.09 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($+7463.73 recent). Tightening entries until edge returns."
 }
