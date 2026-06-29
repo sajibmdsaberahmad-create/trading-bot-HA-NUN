@@ -5,19 +5,17 @@
 	<key>Label</key>
 	<string>com.local.scheduled-shutdown-bdt</string>
 	<key>Comment</key>
-	<string>Shut down Mac daily at 2:00 AM Asia/Dhaka (independent of HANOON)</string>
+	<string>2:05 AM Asia/Dhaka — graceful HANOON stop, then Mac shutdown</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/sbin/shutdown</string>
-		<string>-h</string>
-		<string>now</string>
+		<string>__WRAPPER_PATH__</string>
 	</array>
 	<key>StartCalendarInterval</key>
 	<dict>
 		<key>Hour</key>
 		<integer>2</integer>
 		<key>Minute</key>
-		<integer>0</integer>
+		<integer>5</integer>
 	</dict>
 	<key>StandardOutPath</key>
 	<string>/var/log/scheduled-shutdown-bdt.log</string>
