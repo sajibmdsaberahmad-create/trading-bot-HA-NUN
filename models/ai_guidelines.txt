@@ -2000,3 +2000,7 @@ bracket_exit
 Observed loss_streak — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-29T19:16:29.668959+00:00
+Observed trade_closed — recorded for learning.
+hard_take_profit
+

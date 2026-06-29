@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: green_profit_lock:ai_stall quick_scalp +3.21% (peak +3.21%)",
-    "Commander: green_profit_lock:ai_stall quick_scalp +3.50% (peak +3.50%)",
     "Review trade_closed on SOXS",
     "Commander: green_profit_lock:giveback +0.72% (peak +0.96% gave back 0.24%)",
     "Review ib_failure on INLF",
@@ -103,10 +101,12 @@
     "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0642 or a more aggressive price still within y",
     "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0655 or a more aggressive price still within y",
     "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0654 or a more aggressive price still within y",
-    "Commander: green_profit_lock:ai_stall quick_scalp +228.70% (peak +228.70%)"
+    "Commander: green_profit_lock:ai_stall quick_scalp +228.70% (peak +228.70%)",
+    "Review trade_closed on MSTU",
+    "Commander: hard_take_profit"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-29T19:16:17.365409"
+  "trades_observed": 6,
+  "updated": "2026-06-29T19:16:29.640668"
 }
