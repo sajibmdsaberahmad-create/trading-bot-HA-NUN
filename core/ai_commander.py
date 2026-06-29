@@ -1105,6 +1105,7 @@ class AICommander:
             from core.live_trade_guard import check_entry_allowed
             guard_block = check_entry_allowed(ticker, self.cfg)
             if guard_block:
+                log.info(f"  🛡️ guard:block {ticker.upper()} — {guard_block}")
                 return {
                     "enter": False,
                     "confidence": ppo_conf,
