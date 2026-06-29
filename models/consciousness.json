@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1470,
   "scans_performed": 39,
-  "improvements_applied": 2273,
+  "improvements_applied": 2274,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T09:11:28.026048",
-      "age": "6d 22h 8m 39s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-12.76",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T09:11:30.626563",
       "age": "6d 22h 8m 41s",
@@ -11512,6 +11505,20 @@
       "age": "8d 0h 32m 15s",
       "type": "IMPROVE",
       "message": "Applied improvement #2273",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on MARA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T11:36:14.822156",
+      "age": "8d 0h 33m 26s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2274",
       "metadata": {
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
