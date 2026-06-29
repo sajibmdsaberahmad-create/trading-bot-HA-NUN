@@ -1,11 +1,11 @@
 {
-  "total_xp": 21360,
+  "total_xp": 21565,
   "level": "Veteran",
-  "flights_completed": 219,
-  "flights_flown": 700,
-  "takeoffs": 700,
-  "landings": 219,
-  "hours_flown": 21.90000000000004,
+  "flights_completed": 223,
+  "flights_flown": 709,
+  "takeoffs": 709,
+  "landings": 223,
+  "hours_flown": 22.300000000000047,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -38,16 +38,16 @@
     "AST": 4,
     "RKL": 4,
     "SOA": 2,
-    "TNM": 2,
-    "INL": 2
+    "TNM": 4,
+    "INL": 4
   },
   "aircraft_type": "PPO-Transformer-LSTM",
   "license_class": "Basic",
   "certifications": {},
   "skill_points": {
     "entry_timing": 100,
-    "exit_timing": 90,
-    "risk_management": 10,
+    "exit_timing": 94,
+    "risk_management": 11,
     "regime_recognition": 0,
     "pattern_recognition": 100,
     "confidence_judgment": 0

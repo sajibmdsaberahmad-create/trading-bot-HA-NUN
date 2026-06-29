@@ -8,7 +8,7 @@
   },
   "PENNY_LIMIT_BUFFER_PCT": {
     "param": "PENNY_LIMIT_BUFFER_PCT",
-    "value": 0.013000000000000005,
+    "value": 0.015,
     "reason": "IB 2161 \u2014 tighter limit buffer toward reference price",
     "ok": true,
     "msg": "applied"

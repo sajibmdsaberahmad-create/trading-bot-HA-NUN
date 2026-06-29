@@ -1018,3 +1018,5 @@
 {"timestamp":"2026-06-29T13:38:08.602132+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":31.88,"pnl_pct":0.0123,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +1.23% (peak +1.23%)","price":4.15,"ai_stalled":true}
 {"timestamp":"2026-06-29T13:38:10.671348+00:00","event":"green_profit_lock","ticker":"SOXS","pnl_usd":31.88,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +1.23% (peak +1.23%)"}
 {"timestamp":"2026-06-29T13:38:11.149271+00:00","event":"trailing_stop","ticker":"SOAR","pnl_usd":0.13,"pnl_pct":0.0012,"primary_goal":true,"reason":"trailing_stop","price":0.1602}
+{"timestamp":"2026-06-29T13:42:34.060943+00:00","event":"green_profit_lock","ticker":"TNMG","pnl_usd":0.82,"pnl_pct":0.0055,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +0.55% (peak +0.55%)","price":0.9105,"ai_stalled":true}
+{"timestamp":"2026-06-29T13:42:36.127437+00:00","event":"green_profit_lock","ticker":"TNMG","pnl_usd":0.0,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +0.55% (peak +0.55%)"}
