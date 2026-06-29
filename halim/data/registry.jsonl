@@ -660,3 +660,5 @@
 {"timestamp":"2026-06-29T07:48:17.767747+00:00","event":"capability_milestone","capability":"chat","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-29T07:48:17.767811+00:00","event":"capability_milestone","capability":"chat","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-29T07:48:17.767857+00:00","event":"capability_milestone","capability":"chat","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-29T07:51:58.550632+00:00","event":"export_action_gold","added":4,"skipped":8222}
+{"timestamp": "2026-06-29T07:52:01.585244+00:00", "event": "prepare_sft", "pairs_total": 14185, "by_source": {"council": 2191, "test": 1, "learn_cache": 138, "groq": 540, "web_learn": 109, "ppo:micro_fast": 1594, "council:timeout_hold": 1, "halim_lm": 1295, "halim_server": 179, "companion_generative": 411, "market_hours": 17, "rss_learn": 3, "copilot_heuristic": 47, "council_teacher": 260, "ppo_teacher:heuristic_fallback": 12, "commander_ib_report": 65, "coevolution_halim": 1701, "coevolution_ppo": 1620, "dialogue_pre_action": 16, "dialogue_ppo": 2000, "dialogue_post_trade": 360, "dialogue_synthesized": 1624, "outcome_gold": 1}}

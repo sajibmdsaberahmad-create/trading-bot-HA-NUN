@@ -267,6 +267,20 @@ class BotConfig:
     COMMANDER_MAX_TRIP_LOSS_PCT: float = float(
         os.getenv("COMMANDER_MAX_TRIP_LOSS_PCT", "3.0")
     )
+
+    # Virtual $1k lottery bank — paper/replay learns calculated-lottery sizing for real cash account
+    LOTTERY_BANK_ENABLED: bool = os.getenv(
+        "LOTTERY_BANK_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    LOTTERY_BANK_INITIAL_USD: float = float(
+        os.getenv("LOTTERY_BANK_INITIAL_USD", "1000")
+    )
+    LOTTERY_BANK_NOTIFY: bool = os.getenv(
+        "LOTTERY_BANK_NOTIFY", "true"
+    ).lower() in ("1", "true", "yes")
+    LOTTERY_BANK_REPORT_ENABLED: bool = os.getenv(
+        "LOTTERY_BANK_REPORT_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
     CAPITAL_STRONG_SPIKE_SCORE: float = float(
         os.getenv("CAPITAL_STRONG_SPIKE_SCORE", "78")
     )
