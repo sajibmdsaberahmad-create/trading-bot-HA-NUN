@@ -3,39 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 199,
   "training_sessions": 39,
-  "trades_observed": 1457,
+  "trades_observed": 1458,
   "scans_performed": 39,
-  "improvements_applied": 2225,
+  "improvements_applied": 2227,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-28T08:58:49.673832",
-      "age": "6d 21h 56m 0s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-12.63",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-28T08:58:52.713556",
-      "age": "6d 21h 56m 4s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #1637",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-28T09:01:00.594145",
-      "age": "6d 21h 58m 11s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$+1.99",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-28T09:01:03.807677",
       "age": "6d 21h 58m 15s",
@@ -11408,6 +11380,41 @@
           "Review order_timeout on MARA"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-29T10:47:44.944308",
+      "age": "7d 23h 44m 56s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2226",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-29T10:47:53.434421",
+      "age": "7d 23h 45m 4s",
+      "type": "TRADE",
+      "message": "Observed trade: SOFI ? P&L=$+1611.60",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-29T10:47:53.692185",
+      "age": "7d 23h 45m 5s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2227",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-29T09:16:26.814375",
@@ -13570,9 +13577,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "in rhythm",
-  "total_pnl": 232117.32000000036,
+  "total_pnl": 233728.92000000036,
   "win_history": [
-    5.56,
     -12.97,
     1.61,
     2.15,
@@ -14071,20 +14077,21 @@
     1737.18,
     1737.18,
     1737.18,
-    1695.32
+    1695.32,
+    1611.6
   ],
-  "consecutive_wins": 67,
+  "consecutive_wins": 68,
   "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 22310,
+  "veteran_xp": 22340,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 56,
     "entry_timing": 100
   },
-  "flights_completed": 1451,
-  "hours_flown": 145.09999999999604,
+  "flights_completed": 1452,
+  "hours_flown": 145.19999999999604,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14113,15 +14120,15 @@
     "COI": 286,
     "RIV": 19,
     "RKL": 16,
-    "SOF": 85,
+    "SOF": 86,
     "AST": 222,
     "SES": 8,
     "NVD": 3
   },
-  "best_streak": 67,
+  "best_streak": 68,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win streak 67 \u00b7 recent $+35120.34. Riding what works, not forcing size."
+  "mood_message": "Win streak 68 \u00b7 recent $+34952.90. Riding what works, not forcing size."
 }
