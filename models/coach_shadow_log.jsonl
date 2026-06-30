@@ -4583,3 +4583,6 @@
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":4.239746113365203,"shadow_only":true,"timestamp":"2026-06-30T11:05:56.077358+00:00"}
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":3901.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:58.211129+00:00"}
 {"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":36741.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:10.747747+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":231541.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:26.292398+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":15817.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:28.542059+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":221638.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:30.967143+00:00"}
