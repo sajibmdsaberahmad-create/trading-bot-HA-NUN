@@ -218,24 +218,134 @@ def _parse_fundamental_xml(xml_text: str) -> Dict[str, Any]:
 
 def fetch_fundamentals(ib, connector: "IBConnector", symbols: List[str]) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
-    report = os.getenv("IB_FUNDAMENTAL_REPORT", "ReportSnapshot")
+    reports = [
+        r.strip()
+        for r in os.getenv("IB_FUNDAMENTAL_REPORTS", "ReportSnapshot,Ratios").split(",")
+        if r.strip()
+    ]
     for sym in symbols[:6]:
         sym = sym.upper()
-        try:
-            contract = _contract_for_symbol(connector, sym)
-            xml_text = ib.reqFundamentalData(contract, report)
-            ib.sleep(0.5)
-            parsed = _parse_fundamental_xml(xml_text or "")
-            if parsed:
-                parsed["report"] = report
-                out[sym] = parsed
+        merged: Dict[str, Any] = {}
+        for report in reports[:2]:
             try:
-                ib.cancelFundamentalData(contract)
+                contract = _contract_for_symbol(connector, sym)
+                xml_text = ib.reqFundamentalData(contract, report)
+                ib.sleep(0.45)
+                parsed = _parse_fundamental_xml(xml_text or "")
+                if parsed:
+                    parsed["report"] = report
+                    merged.update(parsed)
+                try:
+                    ib.cancelFundamentalData(contract)
+                except Exception:
+                    pass
+            except Exception as exc:
+                log.debug(f"reqFundamentalData {sym}/{report}: {exc}")
+        if merged:
+            out[sym] = merged
+    return out
+
+
+def fetch_quote_snapshots(ib, connector: "IBConnector", symbols: List[str]) -> Dict[str, Dict[str, Any]]:
+    """reqTickers one-shot — bid/ask/last/volume from IB for held symbols."""
+    out: Dict[str, Dict[str, Any]] = {}
+    contracts = []
+    sym_order: List[str] = []
+    for sym in symbols[:10]:
+        sym = sym.upper()
+        try:
+            contracts.append(_contract_for_symbol(connector, sym))
+            sym_order.append(sym)
+        except Exception:
+            continue
+    if not contracts:
+        return out
+    try:
+        qualified = ib.qualifyContracts(*contracts)
+        tickers = ib.reqTickers(*qualified)
+        ib.sleep(0.35)
+        for t in tickers:
+            sym = (getattr(getattr(t, "contract", None), "symbol", "") or "").upper()
+            if not sym:
+                continue
+            out[sym] = {
+                "bid": round(float(getattr(t, "bid", 0) or 0), 4),
+                "ask": round(float(getattr(t, "ask", 0) or 0), 4),
+                "last": round(float(getattr(t, "last", 0) or 0), 4),
+                "close": round(float(getattr(t, "close", 0) or 0), 4),
+                "volume": float(getattr(t, "volume", 0) or 0),
+            }
+        for t in tickers:
+            try:
+                ib.cancelMktData(t.contract)
             except Exception:
                 pass
-        except Exception as exc:
-            log.debug(f"reqFundamentalData {sym}: {exc}")
+    except Exception as exc:
+        log.debug(f"reqTickers quotes: {exc}")
     return out
+
+
+def fetch_account_summary(ib, account: str) -> Dict[str, float]:
+    """reqAccountSummary group tags — supplements accountValues."""
+    out: Dict[str, float] = {}
+    if not account:
+        return out
+    req_id = 9001
+    try:
+        ib.reqAccountSummary(req_id, "All", "$LEDGER:ALL")
+        ib.sleep(0.35)
+        for row in ib.accountSummary():
+            if str(getattr(row, "account", "") or "") not in (account, ""):
+                continue
+            tag = str(getattr(row, "tag", "") or "")
+            try:
+                out[tag] = round(float(getattr(row, "value", 0) or 0), 4)
+            except (TypeError, ValueError):
+                pass
+        ib.cancelAccountSummary(req_id)
+    except Exception as exc:
+        log.debug(f"reqAccountSummary: {exc}")
+    return out
+
+
+def fetch_completed_orders(ib, limit: int = 15) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    try:
+        ib.reqCompletedOrders(True)
+        ib.sleep(0.25)
+    except Exception as exc:
+        log.debug(f"reqCompletedOrders: {exc}")
+    try:
+        for t in list(ib.trades())[-limit * 2:]:
+            status = getattr(getattr(t, "orderStatus", None), "status", "") or ""
+            if status not in ("Filled", "Cancelled", "ApiCancelled"):
+                continue
+            sym = (getattr(getattr(t, "contract", None), "symbol", "") or "").upper()
+            order = getattr(t, "order", None)
+            out.append({
+                "symbol": sym,
+                "status": status,
+                "action": str(getattr(order, "action", "") or ""),
+                "qty": float(getattr(order, "totalQuantity", 0) or 0),
+                "avg_fill": float(getattr(getattr(t, "orderStatus", None), "avgFillPrice", 0) or 0),
+            })
+            if len(out) >= limit:
+                break
+    except Exception as exc:
+        log.debug(f"completed orders parse: {exc}")
+    return out
+
+
+def fetch_news_providers_list(ib) -> List[Dict[str, str]]:
+    try:
+        providers = ib.reqNewsProviders()
+        return [
+            {"code": str(getattr(p, "code", "")), "name": str(getattr(p, "name", ""))[:60]}
+            for p in (providers or [])
+        ]
+    except Exception as exc:
+        log.debug(f"reqNewsProviders: {exc}")
+        return []
 
 
 def fetch_news_bulletins(ib) -> List[Dict[str, Any]]:
@@ -498,6 +608,16 @@ def refresh_ib_extended(
     except Exception as exc:
         log.debug(f"market_rules: {exc}")
 
+    try:
+        bundle.quote_snapshots = fetch_quote_snapshots(ib, connector, syms)
+    except Exception as exc:
+        log.debug(f"quote_snapshots: {exc}")
+
+    try:
+        bundle.account_summary = fetch_account_summary(ib, account)
+    except Exception as exc:
+        log.debug(f"account_summary: {exc}")
+
     if full or os.getenv("IB_EXTENDED_RTH_FULL", "false").lower() in ("1", "true", "yes"):
         try:
             bundle.head_timestamps = fetch_head_timestamps(ib, connector, syms)
@@ -519,6 +639,14 @@ def refresh_ib_extended(
             bundle.wsh_events = fetch_wsh_events(ib, connector, syms)
         except Exception as exc:
             log.debug(f"wsh_events: {exc}")
+        try:
+            bundle.completed_orders = fetch_completed_orders(ib)
+        except Exception as exc:
+            log.debug(f"completed_orders: {exc}")
+        try:
+            bundle.news_providers = fetch_news_providers_list(ib)
+        except Exception as exc:
+            log.debug(f"news_providers: {exc}")
 
     data = {
         "refreshed_at": bundle.refreshed_at,
