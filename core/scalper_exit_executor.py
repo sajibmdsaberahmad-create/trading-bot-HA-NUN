@@ -879,6 +879,28 @@ class ScalperExitMixin:
         if live_px <= 0:
             live_px = current_px
 
+        try:
+            from core.green_trade_doctrine import assess_dynamic_exit, multibar_ride_enabled
+            if multibar_ride_enabled(self.cfg) and pnl_pct > 0:
+                opened = getattr(self, "_position_opened_at", 0.0)
+                bars_held = int((time.time() - opened) / 60.0) if opened else 0
+                micro = dict(forecast or {})
+                dx = assess_dynamic_exit(
+                    self.cfg,
+                    ticker=ticker,
+                    current_px=current_px,
+                    entry_px=entry_px,
+                    pnl_pct=pnl_pct,
+                    peak_pct=(self._position_peak / entry_px - 1) if self._position_peak > entry_px else pnl_pct,
+                    micro=micro,
+                    df=fast_df,
+                    bars_held=bars_held,
+                )
+                if dx.get("action") == "ride_multibar" and not dx.get("should_exit"):
+                    return False, ""
+        except Exception:
+            pass
+
         fade_thr = float(getattr(self.cfg, "MICRO_FADE_EXIT", 0.55))
         if (
             getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True)
@@ -996,6 +1018,40 @@ class ScalperExitMixin:
         if ride_at and now - ride_at >= wait:
             return True
 
+        return False
+    def _enforce_doctrine_loss_cut(self, current_px: float) -> bool:
+        """Early loss exit when slippage + loss_pressure predict worse fill."""
+        if self.shares <= 0 or self._entry_price <= 0:
+            return False
+        entry_px = self._entry_price
+        pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
+        if pnl_pct >= 0:
+            return False
+        try:
+            from core.green_trade_doctrine import assess_dynamic_exit, slippage_exit_enabled
+            if not slippage_exit_enabled(self.cfg):
+                return False
+            ticker = self.current_ticker or ""
+            micro = getattr(self, "_last_micro_forecast", {}).get(ticker, {})
+            fast_df, _, _, forecast = self._resolve_live_bars(ticker, min_bars=6)
+            if forecast:
+                micro = {**micro, **forecast}
+            dx = assess_dynamic_exit(
+                self.cfg,
+                ticker=ticker,
+                current_px=current_px,
+                entry_px=entry_px,
+                pnl_pct=pnl_pct,
+                peak_pct=0.0,
+                micro=micro,
+                df=fast_df,
+            )
+            if dx.get("should_exit") and dx.get("action") == "exit_loss":
+                log.info(f"  🛑 LOSS CUT: {dx['reason']}")
+                self._exit_position(current_px, dx["reason"])
+                return True
+        except Exception:
+            pass
         return False
     def _enforce_green_profit_lock(self, current_px: float) -> bool:
         """Mechanical quick green scalp when AI stalls — never let profit bleed to red."""
@@ -1319,6 +1375,9 @@ class ScalperExitMixin:
 
         # Opportunistic profit hunt — AI full power decides exit vs ride
         if trusted:
+            if self._enforce_doctrine_loss_cut(current_px):
+                self._active_stream_ticker = None
+                return
             hunt_exit, hunt_reason = self._evaluate_profit_hunt_exit(current_px)
             if hunt_exit:
                 if self._execute_mechanical_profit_exit(current_px, hunt_reason):
@@ -1721,6 +1780,35 @@ class ScalperExitMixin:
             if fast_df is None and hasattr(self.data, 'get_bar_dataframe'):
                 fast_df = self.data.get_bar_dataframe()
             if fast_df is not None and len(fast_df) >= 10:
+                try:
+                    from core.green_trade_doctrine import assess_dynamic_exit, slippage_exit_enabled
+                    ticker = self.current_ticker or ""
+                    micro = getattr(self, "_last_micro_forecast", {}).get(ticker, {})
+                    _, _, _, forecast = self._resolve_live_bars(ticker, min_bars=6)
+                    if forecast:
+                        micro = {**micro, **forecast}
+                    if slippage_exit_enabled(self.cfg):
+                        dx = assess_dynamic_exit(
+                            self.cfg,
+                            ticker=ticker,
+                            current_px=current_px,
+                            entry_px=entry_px,
+                            pnl_pct=pnl_pct,
+                            peak_pct=peak_pct,
+                            micro=micro,
+                            df=fast_df,
+                        )
+                        if dx.get("should_exit") and "slippage" in str(dx.get("reason", "")):
+                            reason = dx["reason"]
+                            if is_ai_council_mode(self.cfg) and self.ai_commander:
+                                if self._deliberate_exit_council(
+                                    ticker, current_px, True, 0.65, reason,
+                                    {"signal": "slippage", "slippage": dx.get("slippage_risk")},
+                                ):
+                                    return False, "council_deliberating"
+                            return True, reason
+                except Exception:
+                    pass
                 slippage = self._predict_slippage(fast_df, current_px)
                 ticker = self.current_ticker or ""
                 if slippage > 0.75 and pnl_pct > 0.005:
