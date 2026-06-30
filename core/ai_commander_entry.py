@@ -15,6 +15,7 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.ai_commander_mixin_imports import *  # noqa: F403
+from core.pilot_mode import get_ai_deploy_budget  # noqa: F401 — explicit for entry paths
 from core.notify import log
 
 

@@ -453,6 +453,7 @@ class ScalperExitMixin:
                     ib_fill=exit_fill,
                     quote=float(trade_rec.get("quote_exit", exit_fill)),
                     pnl_usd_ib=pnl,
+                    entry_ib_fill=entry_fill,
                     exit_reason=reason,
                     spread_pct=abs(exit_slip),
                 )

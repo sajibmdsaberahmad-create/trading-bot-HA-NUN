@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from core.scalper_mixin_imports import *  # noqa: F403
+from core.pilot_mode import get_ai_deploy_budget  # noqa: F401 — explicit for entry paths
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 

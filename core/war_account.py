@@ -672,7 +672,7 @@ def _maybe_refresh_trips_if_settled(
         return False
     if not _fresh_trips_on_hanoon_start_enabled(cfg):
         return False
-    if state.get("open_war") or state.get("open_lab"):
+    if _has_open_positions(state):
         return False
     trips = int(state.get("round_trips_today", 0))
     max_trips = max_war_round_trips_per_day(cfg)
@@ -694,7 +694,7 @@ def _maybe_refresh_trips_if_settled(
 def _sync_paper_war_config(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
     """Apply env capital/bullet updates on paper restart (same session day)."""
     cfg = cfg or BotConfig()
-    if is_live_war(cfg) or state.get("open_war") or state.get("open_lab"):
+    if is_live_war(cfg) or _has_open_positions(state):
         return
     cap = operating_capital_usd(cfg)
     old_cap = float(state.get("operating_capital", 0) or 0)
@@ -1086,13 +1086,19 @@ def record_entry(
     notional = v_fill * int(shares)
     comm = _commission_usd(cfg, notional)
 
+    t_up = ticker.upper()
+    slot_data = {
+        "ticker": t_up, "shares": shares, "entry": v_fill,
+        "ib_fill": ib_fill, "comm": comm, "ts": time.time(),
+    }
+
     if use_lab:
         state["lab_cash"] = float(state.get("lab_cash", 0)) - notional - comm
         state["lab_settled"] = float(state.get("lab_settled", 0)) - notional - comm
-        state["open_lab"] = {
-            "ticker": ticker.upper(), "shares": shares, "entry": v_fill,
-            "ib_fill": ib_fill, "comm": comm, "ts": time.time(),
-        }
+        _normalize_open_positions(state)
+        labs = state.setdefault("open_labs", {})
+        labs[t_up] = slot_data
+        state["open_lab"] = slot_data
     else:
         state["cash"] = float(state.get("cash", 0)) - notional - comm
         state["settled_cash"] = float(state.get("settled_cash", 0)) - notional - comm
@@ -1100,11 +1106,14 @@ def record_entry(
         state["bullets_used_session"] = int(state.get("bullets_used_session", 0)) + 1
         state["entries_today"] = int(state.get("entries_today", 0)) + 1
         state["fee_drag_today"] = float(state.get("fee_drag_today", 0)) + comm
-        state["open_war"] = {
-            "ticker": ticker.upper(), "shares": shares, "entry": v_fill,
-            "ib_fill": ib_fill, "comm": comm, "pipeline": pipeline,
-            "promotion": promotion_tag_for_mode(mode), "ts": time.time(),
+        _normalize_open_positions(state)
+        wars = state.setdefault("open_wars", {})
+        wars[t_up] = {
+            **slot_data,
+            "pipeline": pipeline,
+            "promotion": promotion_tag_for_mode(mode),
         }
+        state["open_war"] = wars[t_up]
 
     state["mode"] = mode
     save_state(state)
@@ -1131,6 +1140,7 @@ def record_exit(
     ib_fill: float,
     quote: float,
     pnl_usd_ib: float = 0.0,
+    entry_ib_fill: float = 0.0,
     exit_reason: str = "",
     spread_pct: float = 0.0,
 ) -> Dict[str, Any]:
@@ -1139,21 +1149,35 @@ def record_exit(
         return {}
     state = load_state(cfg)
     t = ticker.upper()
-    open_war = state.get("open_war") or {}
-    open_lab = state.get("open_lab") or {}
-    use_lab = open_lab.get("ticker") == t
-    open_slot = open_lab if use_lab else open_war
+    use_lab, open_slot = _resolve_open_slot(state, t)
 
     v_fill, slip = apply_slippage_overlay(
         cfg, side="SELL", quote=ib_fill or quote, shares=shares, ticker=ticker,
         spread_pct=spread_pct,
     )
-    entry_v = float(open_slot.get("entry", 0) or 0)
-    entry_comm = float(open_slot.get("comm", 0) or 0)
     sh = int(shares or open_slot.get("shares", 0) or 0)
     proceeds = v_fill * sh
     exit_comm = _commission_usd(cfg, proceeds)
-    gross = (v_fill - entry_v) * sh if entry_v > 0 else float(pnl_usd_ib)
+
+    if open_slot:
+        entry_v = float(open_slot.get("entry", 0) or 0)
+        entry_comm = float(open_slot.get("comm", 0) or 0)
+        gross = (v_fill - entry_v) * sh if entry_v > 0 else float(pnl_usd_ib)
+    elif entry_ib_fill > 0:
+        entry_v = float(entry_ib_fill)
+        entry_comm = _commission_usd(cfg, entry_v * sh)
+        gross = (v_fill - entry_v) * sh
+        log.warning(
+            f"  ⚠️ WAR EXIT {t}: no open slot — PnL from IB fills "
+            f"entry=${entry_v:.4f} exit=${v_fill:.4f}"
+        )
+    else:
+        entry_v = 0.0
+        entry_comm = 0.0
+        gross = float(pnl_usd_ib)
+        log.warning(
+            f"  ⚠️ WAR EXIT {t}: no open slot — using IB PnL ${pnl_usd_ib:+.2f}"
+        )
     net = gross - entry_comm - exit_comm
 
     if use_lab:
@@ -1161,17 +1185,18 @@ def record_exit(
         state["lab_settled"] = float(state.get("lab_settled", 0)) + proceeds - exit_comm
         state["lab_round_trips_today"] = int(state.get("lab_round_trips_today", 0)) + 1
         state["session_pnl_lab"] = float(state.get("session_pnl_lab", 0)) + net
-        state["open_lab"] = None
+        _clear_open_slot(state, t, use_lab=True)
         state["lab_nav"] = float(state.get("lab_cash", 0))
     else:
         state["cash"] = float(state.get("cash", 0)) + proceeds - exit_comm
-        state["deployed_usd"] = max(0.0, float(state.get("deployed_usd", 0)) - entry_v * sh)
+        if entry_v > 0:
+            state["deployed_usd"] = max(0.0, float(state.get("deployed_usd", 0)) - entry_v * sh)
         _schedule_settlement(state, proceeds - exit_comm, cfg)
         state["round_trips_today"] = int(state.get("round_trips_today", 0)) + 1
         state["fee_drag_today"] = float(state.get("fee_drag_today", 0)) + exit_comm
         state["session_pnl_war"] = float(state.get("session_pnl_war", 0)) + net
         state["nav"] = float(state.get("cash", 0)) + float(state.get("deployed_usd", 0))
-        state["open_war"] = None
+        _clear_open_slot(state, t, use_lab=False)
 
     tp = state.setdefault("ticker_session_pnl", {})
     tp[t] = round(float(tp.get(t, 0)) + net, 2)
