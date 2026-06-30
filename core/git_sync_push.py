@@ -24,6 +24,7 @@ from core import git_sync_state as S
 
 REPO_DIR = S.REPO_DIR
 
+_pending_pushes: list = []
 _pending_lock = Lock()
 def _is_pushable_path(path: str) -> bool:
     """Never auto-push plaintext secrets; encrypted vault is OK."""
