@@ -4200,3 +4200,5 @@
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.2589131718731013,"shadow_only":true,"timestamp":"2026-06-30T10:39:57.563248+00:00"}
 {"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":3.7502155039154426,"shadow_only":true,"timestamp":"2026-06-30T10:39:59.765782+00:00"}
 {"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":2.200547609695233,"shadow_only":true,"timestamp":"2026-06-30T10:40:01.917374+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.2589131718731013,"shadow_only":true,"timestamp":"2026-06-30T10:40:21.431527+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1.732840165714637,"shadow_only":true,"timestamp":"2026-06-30T10:40:23.833596+00:00"}
