@@ -4822,3 +4822,4 @@
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":943155.0,"shadow_only":true,"timestamp":"2026-06-30T11:34:21.795878+00:00"}
 {"ticker":"PYXS","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":62740.0,"shadow_only":true,"timestamp":"2026-06-30T11:34:25.537743+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1855.0,"shadow_only":true,"timestamp":"2026-06-30T11:34:30.773914+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":17509.0,"shadow_only":true,"timestamp":"2026-06-30T11:41:06.379111+00:00"}
