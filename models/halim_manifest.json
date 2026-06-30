@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T20:52:50.318311+00:00",
+  "updated_at": "2026-06-30T21:54:24.681522+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T20:52:50.281335+00:00",
+    "timestamp": "2026-06-30T21:54:24.632816+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -145,7 +145,7 @@
         "day": "2026-06-30",
         "decision": 7
       },
-      "decision_budget_left": 9,
+      "decision_budget_left": 0,
       "copilot_budget_left": 1,
       "ppo_teacher_budget_left": 0,
       "next_stage": "child"
