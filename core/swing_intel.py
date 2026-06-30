@@ -12,6 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
+import pandas as pd
+
 from core.horizon_tags import tag_learning_row
 from core.notify import log
 from core.trade_horizon import HORIZON_SWING

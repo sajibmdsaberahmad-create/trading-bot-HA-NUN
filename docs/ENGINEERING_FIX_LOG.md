@@ -10,6 +10,43 @@
 
 ---
 
+## 2026-07-01 — Unified green doctrine: same tactics war + full balance
+
+### Problem
+Pre-war and post-war full-balance scalping skipped war entry gates and uptrend bypasses; no mandatory green entry/exit across phases. User requires dynamic AI/PPO/Halim decisions with uptrend + green bar everywhere — only sizing differs by capital phase.
+
+### Root cause
+`check_entry_allowed()` returned early in `premarket_full` / `rth_full`; `war_gates_active()` required sniper mode only; uptrend bypasses in spike loop and entry executor allowed entries without green alignment.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/green_trade_doctrine.py` | **New** — `assess_green_entry`, `require_green_entry`, `assess_green_exit`, phase tags |
+| `core/war_entry_gates.py` | `war_gates_active` true when unified doctrine + war account |
+| `core/war_account.py` | Full phases: pipeline/quality gates yes; war pool OBSERVE no |
+| `core/ai_commander_verdict.py` | Green entry veto in `_finalize_entry_decision` |
+| `core/scalper_entry_executor.py` | No uptrend bypass when doctrine on; pre-submit green check |
+| `core/scalper_spike_loop.py` | Same uptrend + green entry gates on spike path |
+| `core/scalper_exit_executor.py` | Dynamic `assess_green_exit` before mechanical lock |
+| `core/swing_intel.py` | Swing entries require green doctrine alignment |
+| `scripts/start_hanoon.sh` | `GREEN_DOCTRINE_*` env defaults |
+| `tests/test_green_trade_doctrine.py` | **New** — doctrine + war gates tests |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `GREEN_DOCTRINE_UNIFIED` | `true` | Same war tactics on all capital phases |
+| `GREEN_DOCTRINE_ENTRY` | `true` | Mandatory uptrend + green bar + AI vote + profit_prob |
+| `GREEN_DOCTRINE_EXIT` | `true` | Dynamic green exit (AI fade / giveback) |
+
+### Verify
+```bash
+python3 -m pytest tests/test_green_trade_doctrine.py tests/test_capital_phase.py -q
+python3 -m py_compile core/green_trade_doctrine.py
+```
+
+---
+
 ## 2026-07-01 — Swing intel: full analysis, web learn, policy training
 
 ### Problem
