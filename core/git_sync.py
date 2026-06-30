@@ -104,7 +104,6 @@ def ensure_github_cli(cfg: Optional[BotConfig] = None, force_auth: bool = True) 
     Install gh if missing (Homebrew) and authenticate with GITHUB_TOKEN.
     Called at startup and before release uploads so artifacts stay synced.
     """
-    , S._gh_missing_logged, S._gh_auth_verified, S._token
 
     token = _resolve_github_token(cfg)
     if token:
@@ -184,7 +183,6 @@ def ensure_github_cli(cfg: Optional[BotConfig] = None, force_auth: bool = True) 
     return True
 def _gh_cli_available() -> bool:
     """True if GitHub CLI is installed (required for release asset uploads)."""
-    
     if S._gh_cli_cached is None:
         S._gh_cli_cached = shutil.which("gh") is not None
     return S._gh_cli_cached
@@ -352,7 +350,6 @@ def init(cfg: BotConfig, ollama_brain: Optional[Any] = None):
         cfg: Bot configuration.
         ollama_brain: Optional LLM brain used to generate AI commit messages.
     """
-    , S._token, S._enabled, S._ollama_brain, S._git_init_done, S._learning_restore_done
     if ollama_brain is not None:
         S._ollama_brain = ollama_brain
     if S._git_init_done:
@@ -406,7 +403,6 @@ def init(cfg: BotConfig, ollama_brain: Optional[Any] = None):
             "(set GIT_PUSH_DURING_SESSION=true to push while trading)"
         )
         with _defer.checkpoint_lock:
-            
             if _defer.checkpoint_flush_timer is not None:
                 _defer.checkpoint_flush_timer.cancel()
                 _defer.checkpoint_flush_timer = None
@@ -433,7 +429,6 @@ def push_change(message: str, files: Optional[List[str]] = None,
         return False
     
     now = time.time()
-    
     if now - S._last_push_ts < MIN_PUSH_INTERVAL_SEC:
         return _queue_push(message, files, category)
     
@@ -483,7 +478,6 @@ def push_change_async(
         threading.Thread(target=_run, name=f"git-push-{category}", daemon=True).start()
 def set_standalone_mode(enabled: bool = True) -> None:
     """Mark this process as the standalone git-sync daemon (not HANOON)."""
-    
     S._standalone_mode = enabled
 def is_standalone_mode() -> bool:
     return S._standalone_mode or os.getenv("GIT_SYNC_STANDALONE", "").lower() in (
@@ -570,8 +564,6 @@ def run_standalone_daemon(cfg: Optional[BotConfig] = None) -> None:
 
     interval = float(getattr(c, "GIT_AUTO_PUSH_INTERVAL_SEC", 12)) if c else 12.0
     log.info(f"Git sync daemon active — polling every {interval:.0f}s (independent of HANOON)")
-
-    
     while not S._watcher_stop.is_set():
         try:
             try:

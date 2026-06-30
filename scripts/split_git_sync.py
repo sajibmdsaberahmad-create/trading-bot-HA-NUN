@@ -192,6 +192,7 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         if mod == "git_sync_push" and "_pending_pushes" not in body:
             body = "_pending_pushes: list = []\n_pending_lock = Lock()\n" + body
         # Rewrite global state refs to S.*
+        body = re.sub(r"^\s*global\s+[^\n]+\n", "", body, flags=re.M)
         body = re.sub(r"\b_enabled\b", "S._enabled", body)
         body = re.sub(r"\b_repo\b", "S._repo", body)
         body = re.sub(r"\b_token\b", "S._token", body)
@@ -304,7 +305,7 @@ _token = S._token
     backup.write_text(text, encoding="utf-8")
 
     kept_text = "".join(keep)
-    # Route legacy state through git_sync_state
+    kept_text = re.sub(r"^\s*global\s+[^\n]+\n", "", kept_text, flags=re.M)
     for name in (
         "_enabled", "_repo", "_token", "_ollama_brain", "_git_init_done",
         "_learning_restore_done", "_last_push_ts", "_gh_cli_cached",
@@ -312,8 +313,6 @@ _token = S._token
         "_last_dirty_fingerprint", "_watcher_stop", "_checkpoint_lock",
         "_checkpoint_flush_timer",
     ):
-        kept_text = re.sub(rf"\bglobal {name}\b", "", kept_text)
-        kept_text = re.sub(rf"\bglobal S\.{name}\b", "", kept_text)
         kept_text = re.sub(rf"\b{name}\b", f"S.{name}", kept_text)
     kept_text = kept_text.replace("S.S.", "S.")
     kept_text = kept_text.replace("S._checkpoint_lock", "_defer.checkpoint_lock")
