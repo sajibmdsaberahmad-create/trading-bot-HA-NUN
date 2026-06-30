@@ -234,13 +234,13 @@ def _parse_entry_lm_response(raw: str) -> Dict[str, Any]:
         except Exception:
             continue
 
-    echo = _parse_training_echo_entry(text)
-    if echo:
-        return _normalize_entry_parsed(echo)
-
     spike_echo = _parse_spike_score_echo(text)
     if spike_echo:
         return _normalize_entry_parsed(spike_echo)
+
+    echo = _parse_training_echo_entry(text)
+    if echo:
+        return _normalize_entry_parsed(echo)
 
     low = text.lower()
     # Instruction-echo (model repeats prompt rules instead of answering)
@@ -292,6 +292,16 @@ def _parse_entry_lm_response(raw: str) -> Dict[str, Any]:
     })
 
 
+def halim_advisory_is_echo(parsed: Optional[Dict[str, Any]]) -> bool:
+    """Toddler LM regurgitation — not an independent Halim skip."""
+    if not parsed:
+        return False
+    if str(parsed.get("advisory_kind", "")).lower() == "echo":
+        return True
+    reason = str(parsed.get("reason", "")).lower()
+    return reason.startswith(("training echo", "score echo", "entry_decision echo", "micro-fast echo"))
+
+
 def _normalize_entry_parsed(parsed: Dict[str, Any]) -> Dict[str, Any]:
     out = dict(parsed)
     out["enter"] = bool(parsed.get("enter", False))
@@ -302,6 +312,9 @@ def _normalize_entry_parsed(parsed: Dict[str, Any]) -> Dict[str, Any]:
         conf /= 100.0
     out["confidence"] = round(min(0.99, max(0.0, conf)), 4)
     out["reason"] = str(parsed.get("reason", ""))[:80]
+    reason_l = out["reason"].lower()
+    if reason_l.startswith(("training echo", "score echo", "entry_decision echo", "micro-fast echo")):
+        out["advisory_kind"] = "echo"
     return out
 
 
@@ -316,17 +329,28 @@ def _build_entry_prompt(
     ppo_reason: str = "",
     loss_context: str = "",
     macro_context: str = "",
+    profit_prob: float = 0.0,
+    enter_ok: bool = True,
+    fakeout_risk: float = 0.0,
+    setup_type: str = "",
 ) -> str:
     loss_line = f"{loss_context.strip()}\n" if loss_context else ""
     macro_line = f"{macro_context.strip()}\n" if macro_context else ""
     ppo_side = "buy" if ppo_buy else "hold"
+    quality_line = ""
+    if profit_prob > 0:
+        quality_line = (
+            f"quality profit_prob={profit_prob:.2f} enter_ok={str(enter_ok).lower()} "
+            f"fakeout={fakeout_risk:.2f} setup={setup_type or 'mixed'}\n"
+        )
     return (
         f"ENTRY {ticker.upper()} price={price:.4f} spike={spike:.2f}x score={scan:.0f}\n"
         f"ppo={ppo_side} conf={ppo_conf:.2f} note={ppo_reason[:50]}\n"
-        f"{macro_line}{loss_line}"
+        f"{quality_line}{macro_line}{loss_line}"
         'Reply ONE json object only. No other text.\n'
+        '{"enter":true,"confidence":0.72,"reason":"clean momentum scalp"}\n'
         '{"enter":false,"confidence":0.55,"reason":"chop fakeout"}\n'
-        "enter=true only on clean momentum scalp; false on chop or fakeout."
+        "enter=true when profit_prob high and momentum clean; false on chop/fakeout."
     )
 
 
