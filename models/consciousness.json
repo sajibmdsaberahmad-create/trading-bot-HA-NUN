@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 226,
   "training_sessions": 39,
-  "trades_observed": 1673,
+  "trades_observed": 1674,
   "scans_performed": 39,
-  "improvements_applied": 2679,
+  "improvements_applied": 2680,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:57.759520",
-      "age": "7d 19h 58m 9s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2019",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T07:00:59.634477",
-      "age": "7d 19h 58m 10s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$+0.37",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:00:59.928557",
       "age": "7d 19h 58m 11s",
@@ -12292,6 +12271,27 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #226",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:03:32.872002",
+      "age": "9d 0h 0m 44s",
+      "type": "TRADE",
+      "message": "Observed trade: CUPR LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:03:33.136990",
+      "age": "9d 0h 0m 44s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2680",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on CUPR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T11:02:27.637581",
@@ -14456,7 +14456,6 @@
   "mood": "steady",
   "total_pnl": 331211.64000000054,
   "win_history": [
-    -8.73,
     -0.57,
     -4.66,
     2.81,
@@ -14955,20 +14954,21 @@
     -7.28,
     0.08,
     4.15,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 86,
-  "veteran_xp": 25900,
+  "veteran_xp": 25910,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1667,
-  "hours_flown": 166.69999999999482,
+  "flights_completed": 1668,
+  "hours_flown": 166.7999999999948,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15007,12 +15007,12 @@
     "KND": 1,
     "MST": 1,
     "TSL": 1,
-    "CUP": 1
+    "CUP": 2
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Mixed session \u00b7 $-66.87. Watching for cleaner setups."
+  "mood_message": "Mixed session \u00b7 $-61.06. Watching for cleaner setups."
 }

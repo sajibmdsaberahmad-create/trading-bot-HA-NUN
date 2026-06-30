@@ -21,3 +21,7 @@ Combined win rate: 8.6% (buffer=2.9%, returns=14.3%)
 🧭 COMMANDER LEARNING | 2026-06-30T11:00:35.682703+00:00
 Halim heuristic dev plan — WR 67%
 
+🧭 COMMANDER LEARNING | 2026-06-30T11:03:33.153990+00:00
+Observed ib_failure — recorded for learning.
+IB closing-only — cannot open new positions
+

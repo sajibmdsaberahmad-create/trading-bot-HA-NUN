@@ -365,5 +365,14 @@
       "Halim documents every mutation in git \u2014 review improvement_history.json",
       "Session trade WR 67% on 3 round-trips"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T11:03:33.154255+00:00",
+    "source": "runtime_ib_failure",
+    "adjustments": {},
+    "guidelines_summary": "Observed ib_failure \u2014 recorded for learning.",
+    "lessons": [
+      "Review ib_failure on CUPR"
+    ]
   }
 ]

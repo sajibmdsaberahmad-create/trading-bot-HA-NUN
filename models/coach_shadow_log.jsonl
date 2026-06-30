@@ -4534,3 +4534,7 @@
 {"ticker":"CUPR","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":174293.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:11.034185+00:00"}
 {"ticker":"CUPR","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":158743.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:16.552921+00:00"}
 {"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":146343.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:19.258671+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":13973.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:29.771289+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":129709.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:41.490939+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":62604.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:44.957342+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":108132.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:47.583203+00:00"}
