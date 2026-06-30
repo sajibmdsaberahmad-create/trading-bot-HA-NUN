@@ -53,3 +53,11 @@ tick_micro_loss
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +0.44% (peak +0.44%)
 
+🧭 COMMANDER LEARNING | 2026-06-30T12:27:35.420094+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-30T12:27:35.420191+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+

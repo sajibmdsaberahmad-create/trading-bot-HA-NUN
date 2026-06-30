@@ -3,38 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 229,
   "training_sessions": 39,
-  "trades_observed": 1683,
+  "trades_observed": 1684,
   "scans_performed": 39,
-  "improvements_applied": 2706,
+  "improvements_applied": 2708,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:53:03.117339",
-      "age": "7d 20h 50m 14s",
-      "type": "TRAIN",
-      "message": "Training session #39",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:53:03.124609",
-      "age": "7d 20h 50m 14s",
-      "type": "CONTEXT",
-      "message": "Fetched market context",
-      "metadata": {
-        "spy_trend": "unknown",
-        "qqq_trend": "unknown",
-        "vix_level": 0.0,
-        "vix_regime": "low",
-        "timestamp": "2026-06-29T07:53:03.124602"
-      }
-    },
-    {
-      "timestamp": "2026-06-29T07:53:03.133290",
-      "age": "7d 20h 50m 14s",
-      "type": "REGIME",
-      "message": "Market regime: unknown (conf=0%)",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:53:55.415336",
       "age": "7d 20h 51m 6s",
@@ -12223,6 +12196,41 @@
           "Review trade_closed on INTZ"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T12:27:34.484536",
+      "age": "9d 1h 24m 45s",
+      "type": "TRADE",
+      "message": "Observed trade: EDBL ? P&L=$-4.55",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T12:27:35.358903",
+      "age": "9d 1h 24m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2708",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on EDBL"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T12:27:35.359371",
+      "age": "9d 1h 24m 46s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2708",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on EDBL"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T12:07:03.642722",
@@ -14385,9 +14393,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "defensive",
-  "total_pnl": 331222.97000000055,
+  "total_pnl": 331218.42000000057,
   "win_history": [
-    0.44,
     10.24,
     -13.91,
     -11.64,
@@ -14886,20 +14893,21 @@
     10.78,
     0,
     -1.0,
-    0.92
+    0.92,
+    -4.55
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 86,
-  "veteran_xp": 26060,
+  "veteran_xp": 26070,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1677,
-  "hours_flown": 167.69999999999476,
+  "flights_completed": 1678,
+  "hours_flown": 167.79999999999475,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14942,12 +14950,13 @@
     "JEM": 3,
     "INT": 3,
     "HXH": 1,
-    "VWA": 1
+    "VWA": 1,
+    "EDB": 1
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 25% \u00b7 $-43.03. Preserving capital over action."
+  "mood_message": "Win rate 25% \u00b7 $-37.18. Preserving capital over action."
 }
