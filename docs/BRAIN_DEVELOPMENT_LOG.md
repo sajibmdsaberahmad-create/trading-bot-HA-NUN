@@ -153,3 +153,6 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 08:36 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, HANOON.log.migrated.1782745557 +2 more | docs=1 other=4 | brain=adult dataset=2462
 - `2026-06-30 08:36 UTC` **git_auto** — sync: 10 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, registry.jsonl +7 more | halim=3 models=2 docs=1 other=4 | brain=adult dataset=24
 - `2026-06-30 08:36 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=95% (303 samples)
+- `2026-06-30 08:37 UTC` **git_auto** — sync: 26 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +23 more | halim=7 models=14 docs=1 other=4 | brain=adult datase
+- `2026-06-30 08:37 UTC` **brain_ppo_teacher** — PPO teacher live_session_end: WR 36%, source heuristic_fallback
+- `2026-06-30 08:37 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2462 pairs

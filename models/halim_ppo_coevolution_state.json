@@ -1,6 +1,6 @@
 {
-  "last_cycle": "2026-06-30T08:01:49.340694+00:00",
-  "trigger": "replay_teardown",
+  "last_cycle": "2026-06-30T08:37:22.914047+00:00",
+  "trigger": "live_session_end",
   "stats": {
     "agreements": 1294,
     "disagreements": 949,
@@ -20,7 +20,7 @@
     "events": 5374,
     "rewritten": true
   },
-  "cycles": 46,
+  "cycles": 47,
   "dialogue_export": {
     "ok": true,
     "pairs": 5166,

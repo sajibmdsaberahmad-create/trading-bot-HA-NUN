@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T08:36:58.435627+00:00",
+  "updated_at": "2026-06-30T08:37:22.563068+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,14 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T08:36:58.417112+00:00",
+    "timestamp": "2026-06-30T08:37:22.533296+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
         "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-30T04:51:44.283881+00:00"
+        "modified": "2026-06-30T08:37:20.539325+00:00"
       },
       "ppo_replay": {
         "exists": true,
@@ -55,13 +55,13 @@
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.6,
-        "modified": "2026-06-30T08:01:37.854727+00:00"
+        "modified": "2026-06-30T08:36:59.514994+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 1.0,
-        "modified": "2026-06-30T08:01:47.644536+00:00"
+        "modified": "2026-06-30T08:37:21.174770+00:00"
       },
       "copilot_state": {
         "exists": true,
@@ -72,8 +72,8 @@
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 8434.4,
-        "modified": "2026-06-30T08:36:56.070968+00:00"
+        "size_kb": 8597.5,
+        "modified": "2026-06-30T08:36:59.559896+00:00"
       },
       "decision_log": {
         "exists": true,
@@ -85,19 +85,19 @@
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
         "size_kb": 899.4,
-        "modified": "2026-06-30T08:01:37.789678+00:00"
+        "modified": "2026-06-30T08:36:58.640791+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
         "path": "models/ppo_teacher_sessions.jsonl",
-        "size_kb": 42.4,
-        "modified": "2026-06-30T08:01:47.535741+00:00"
+        "size_kb": 43.2,
+        "modified": "2026-06-30T08:37:21.064338+00:00"
       }
     },
     "phases": {
       "ppo": "active",
       "teacher_proxy": "fast_path",
-      "proxy_accuracy": 0.9672131147540983,
+      "proxy_accuracy": 0.9508196721311475,
       "fast_path": true,
       "ppo_teacher": "active",
       "copilot": "active",
@@ -106,11 +106,11 @@
     "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 32,
-      "win_rate": 0.281,
-      "avg_pnl": -5.7
+      "count": 31,
+      "win_rate": 0.29,
+      "avg_pnl": -5.34
     },
-    "buffer_records": 6299,
+    "buffer_records": 6314,
     "dataset_pairs": 2462,
     "maturity": {
       "stage": "adult",
@@ -121,7 +121,7 @@
         "closed_trades": 2676,
         "dataset_pairs": 2462,
         "evolution_count": 24,
-        "proxy_accuracy": 0.9672131147540983,
+        "proxy_accuracy": 0.9508196721311475,
         "proxy_exists": true
       },
       "limits": {
