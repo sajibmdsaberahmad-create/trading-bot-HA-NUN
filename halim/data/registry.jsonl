@@ -2911,3 +2911,7 @@
 {"timestamp":"2026-06-30T19:10:29.799671+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:10:29.799763+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:10:29.799819+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:10:43.005297+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:10:43.005516+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:10:43.005772+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:10:43.005824+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
