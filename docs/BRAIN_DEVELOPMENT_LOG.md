@@ -1859,3 +1859,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 20:47 UTC` **git_auto** — sync: 5 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, ENGINEERING_FIX_LOG.md +2 more | docs=2 other=3 | brain=toddler dataset=167 
 - `2026-06-30 20:47 UTC` **git_auto** — sync: 5 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, HORIZON_ROADMAP.md +2 more | docs=2 other=3 | brain=toddler dataset=167 evol
 - `2026-06-30 20:47 UTC` **git_auto** — sync: 5 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, IB_DATA_CATALOG.md +2 more | docs=2 other=3 | brain=toddler dataset=167 evol
+- `2026-06-30 20:50 UTC` **git_auto** — sync: 6 files — account_evaluator.py, scalper_exit_executor.py, BRAIN_DEVELOPMENT_LOG.md +3 more | docs=2 core=1 other=3 | brain=toddler dat
