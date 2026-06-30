@@ -5510,3 +5510,4 @@
 {"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":92838.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:54.621595+00:00"}
 {"ticker":"CELZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":78200.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:55.248669+00:00"}
 {"ticker":"SVRE","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":69337.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:55.951939+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":128725.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:03.923921+00:00"}

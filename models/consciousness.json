@@ -3,40 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 230,
   "training_sessions": 39,
-  "trades_observed": 1685,
+  "trades_observed": 1686,
   "scans_performed": 39,
-  "improvements_applied": 2710,
+  "improvements_applied": 2711,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:55:59.372507",
-      "age": "7d 20h 53m 10s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2040",
-      "metadata": {
-        "source": "halim_developer_off_hours",
-        "summary": "Halim heuristic dev plan \u2014 WR 31%",
-        "applied": [],
-        "lessons": [
-          "Halim documents every mutation in git \u2014 review improvement_history.json",
-          "Session trade WR 31% on 400 round-trips"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T08:01:42.874175",
-      "age": "7d 20h 58m 54s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2041",
-      "metadata": {
-        "source": "runtime_order_timeout",
-        "summary": "Observed order_timeout \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review order_timeout on PLTR"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T08:01:43.516042",
       "age": "7d 20h 58m 54s",
@@ -12119,6 +12090,27 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #230",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T12:43:02.801845",
+      "age": "9d 1h 40m 14s",
+      "type": "TRADE",
+      "message": "Observed trade: INTZ ? P&L=$+1.98",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T12:43:03.822318",
+      "age": "9d 1h 40m 15s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2711",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on INTZ"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T12:36:51.971972",
@@ -14281,9 +14273,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "defensive",
-  "total_pnl": 331214.30000000057,
+  "total_pnl": 331216.28000000055,
   "win_history": [
-    -13.91,
     -11.64,
     -0.92,
     -8.36,
@@ -14782,20 +14773,21 @@
     -1.0,
     0.92,
     -4.55,
-    -4.12
+    -4.12,
+    1.98
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 26080,
+  "veteran_xp": 26110,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1679,
-  "hours_flown": 167.89999999999475,
+  "flights_completed": 1680,
+  "hours_flown": 167.99999999999474,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14836,7 +14828,7 @@
     "TSL": 1,
     "CUP": 3,
     "JEM": 3,
-    "INT": 4,
+    "INT": 5,
     "HXH": 1,
     "VWA": 1,
     "EDB": 1
@@ -14846,5 +14838,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 25% \u00b7 $-36.14. Preserving capital over action."
+  "mood_message": "Win rate 30% \u00b7 $-23.30. Preserving capital over action."
 }
