@@ -1164,10 +1164,11 @@ class ScalperExitMixin:
         stagnant_sec = now - self._last_price_change_at
         frozen_sec = stagnant_sec
 
-        if current_px > self._position_peak:
-            self._position_peak = current_px
-        if self.risk.plan:
-            self.risk.plan.peak_price = max(self.risk.plan.peak_price, current_px)
+        if trusted:
+            if current_px > self._position_peak:
+                self._position_peak = current_px
+            if self.risk.plan:
+                self.risk.plan.peak_price = max(self.risk.plan.peak_price, current_px)
 
         pnl_frac = ((current_px / self._entry_price) - 1) if self._entry_price else 0.0
         if (
@@ -1225,16 +1226,17 @@ class ScalperExitMixin:
             pulse_sec = float(getattr(self.cfg, "POSITION_PULSE_SEC", 5.0))
         if now - self._last_position_pulse >= pulse_sec:
             self._last_position_pulse = now
-            if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander:
-                self.ai_commander.ai_log("LIVE_PULSE", pulse_ctx)
-            else:
-                log.info(
-                    f"📡 LIVE {ticker}: ${current_px:.4f} | "
-                    f"P&L ${pulse_ctx['pnl_usd']:+.2f} ({pulse_ctx['pnl_pct']:+.2f}%) | "
-                    f"Stop ${self._position_stop:.4f} | TP ${self._position_target:.4f} | "
-                    f"Peak ${self._position_peak:.4f}"
-                )
-            self._last_pulse_fingerprint = fingerprint
+            if trusted:
+                if getattr(self.cfg, "AI_FULL_CONTROL", True) and self.ai_commander:
+                    self.ai_commander.ai_log("LIVE_PULSE", pulse_ctx)
+                else:
+                    log.info(
+                        f"📡 LIVE {ticker}: ${current_px:.4f} | "
+                        f"P&L ${pulse_ctx['pnl_usd']:+.2f} ({pulse_ctx['pnl_pct']:+.2f}%) | "
+                        f"Stop ${self._position_stop:.4f} | TP ${self._position_target:.4f} | "
+                        f"Peak ${self._position_peak:.4f}"
+                    )
+                self._last_pulse_fingerprint = fingerprint
 
         ai_sec = float(getattr(self.cfg, "AI_POSITION_MANAGE_SEC", 10.0))
         if pnl_frac > float(getattr(self.cfg, "IN_PROFIT_MANAGE_PNL_PCT", 0.003)):
@@ -1247,21 +1249,23 @@ class ScalperExitMixin:
                 self._ai_manage_position(current_px)
 
         # Opportunistic profit hunt — AI full power decides exit vs ride
-        hunt_exit, hunt_reason = self._evaluate_profit_hunt_exit(current_px)
-        if hunt_exit:
-            if self._execute_mechanical_profit_exit(current_px, hunt_reason):
+        if trusted:
+            hunt_exit, hunt_reason = self._evaluate_profit_hunt_exit(current_px)
+            if hunt_exit:
+                if self._execute_mechanical_profit_exit(current_px, hunt_reason):
+                    self._active_stream_ticker = None
+                    return
+
+            # Green profit lock — quick scalp if AI stalls while in profit
+            if self._enforce_green_profit_lock(current_px):
                 self._active_stream_ticker = None
                 return
 
-        # Green profit lock — quick scalp if AI stalls while in profit
-        if self._enforce_green_profit_lock(current_px):
-            self._active_stream_ticker = None
-            return
-
-        self._update_trailing_stops(current_px)
+        if trusted:
+            self._update_trailing_stops(current_px)
 
         # Risk engine tick exits — AI council on profit; mechanical only on loss
-        if self.risk.plan:
+        if trusted and self.risk.plan:
             ticker = self.current_ticker or ""
             if not self._risk_plan_sane_for_tick(current_px):
                 self._bind_risk_plan_for_ticker(ticker)
@@ -1305,8 +1309,7 @@ class ScalperExitMixin:
                     f"(px=${current_px:.2f} entry=${self._entry_price:.2f})"
                 )
 
-        if self._enforce_green_profit_lock(current_px):
-            self._active_stream_ticker = None
+        if not trusted:
             return
 
         # Hard stop breach — always exit, bypasses min-hold
