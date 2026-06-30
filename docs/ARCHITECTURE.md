@@ -20,7 +20,7 @@ core/
   entry_pipeline.py      IB-confirmed entry fill detection
   config.py              BotConfig — tunable parameters
   broker.py              IB bracket orders
-  git_sync.py            Learning artifact sync (deferred during live session)
+  git_sync.py            Learning artifact sync (delegates defer to git_sync_defer)
   war_account.py         Virtual sizing ledger ($1k war / lab)
   trader.py              LEGACY — single-ticker PPO live trader
 
