@@ -120,6 +120,25 @@ class ScalperExitMixin:
             shares=self.shares,
             current_px=current_px,
         )
+
+    def _detect_all_exits(self):
+        if not getattr(self.cfg, "USE_MULTI_POSITION", True):
+            self._detect_exit(self._latest_price())
+            return
+        for ticker in list(self._position_slots.keys()):
+            loaded = False
+            try:
+                if not self._load_position_context(ticker):
+                    continue
+                loaded = True
+                px, _trusted = self._resolve_monitor_price(ticker, self._entry_price)
+                if px > 0:
+                    self._detect_exit(px)
+            finally:
+                if loaded:
+                    self._save_position_context(ticker)
+        self._refresh_aggregate_position_state()
+
     def _credit_exit_proceeds(self, quantity: float, exit_px: float):
         """Return sale proceeds to bot cash and refresh NAV."""
         proceeds = float(quantity) * exit_px * (1 - self.cfg.TRANSACTION_COST_PCT)
@@ -807,6 +826,8 @@ class ScalperExitMixin:
         """Spike-top + spike-fade opportunistic exits while in profit."""
         if self.shares <= 0 or self._entry_price <= 0:
             return False, ""
+        if not self._risk_plan_sane_for_tick(current_px):
+            return False, ""
 
         ticker = self.current_ticker or ""
         entry_px = self._entry_price
@@ -962,6 +983,8 @@ class ScalperExitMixin:
             return False
         if self.shares <= 0 or self._entry_price <= 0:
             return False
+        if not self._risk_plan_sane_for_tick(current_px):
+            return False
 
         entry_px = self._entry_price
         pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
@@ -1104,7 +1127,7 @@ class ScalperExitMixin:
         self._profit_hunt_missed_logged = False
         self._profit_ride_started_at = 0.0
         self._was_in_profit = False
-    def _live_position_monitor(self, current_px: float):
+    def _live_position_monitor(self, current_px: float, *, price_trusted: bool = True):
         """Continuous post-entry tracking: pulse log, AI manage, trail, exit."""
         if self.shares <= 0 or self._entry_price <= 0:
             return
@@ -1112,6 +1135,7 @@ class ScalperExitMixin:
         ticker = self.current_ticker or getattr(self.cfg, "TICKER", "")
         price_eps = max(self._entry_price * 0.0001, 0.0001)
         now = time.time()
+        trusted = price_trusted and self._risk_plan_sane_for_tick(current_px)
 
         if self._last_pulse_price <= 0:
             self._last_pulse_price = current_px
