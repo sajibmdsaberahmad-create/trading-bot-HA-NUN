@@ -4280,3 +4280,5 @@
 {"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":0.6108304794520548,"shadow_only":true,"timestamp":"2026-06-30T10:45:02.445345+00:00"}
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.1881934086760961,"shadow_only":true,"timestamp":"2026-06-30T10:45:02.916433+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.57834784655213,"shadow_only":true,"timestamp":"2026-06-30T10:45:05.256549+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.9538413840143858,"shadow_only":true,"timestamp":"2026-06-30T10:45:11.667331+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":0.4230055658627087,"shadow_only":true,"timestamp":"2026-06-30T10:45:12.167876+00:00"}
