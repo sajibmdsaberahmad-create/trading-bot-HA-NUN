@@ -1,9 +1,9 @@
 {
-  "pairs_total": 14692,
-  "train_pairs": 13958,
-  "valid_pairs": 734,
+  "pairs_total": 14594,
+  "train_pairs": 13865,
+  "valid_pairs": 729,
   "by_source": {
-    "council": 952,
+    "council": 854,
     "test": 1,
     "learn_cache": 144,
     "groq": 943,

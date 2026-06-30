@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T17:02:43.229484+00:00",
+  "updated_at": "2026-06-30T17:02:50.240290+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T17:02:43.178198+00:00",
+    "timestamp": "2026-06-30T17:02:50.187197+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -60,8 +60,8 @@
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
-        "size_kb": 0.8,
-        "modified": "2026-06-30T17:02:43.122498+00:00"
+        "size_kb": 0.4,
+        "modified": "2026-06-30T17:02:50.166673+00:00"
       },
       "copilot_state": {
         "exists": true,
@@ -120,7 +120,7 @@
       "metrics": {
         "closed_trades": 2700,
         "dataset_pairs": 1885,
-        "evolution_count": 37,
+        "evolution_count": 38,
         "proxy_accuracy": 0.9545,
         "proxy_holdout_accuracy": 0.9545,
         "rolling_win_rate": null,

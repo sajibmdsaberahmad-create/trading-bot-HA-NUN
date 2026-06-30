@@ -1,5 +1,5 @@
 {
-  "last_cycle": "2026-06-30T17:01:57.723116+00:00",
+  "last_cycle": "2026-06-30T17:02:45.115998+00:00",
   "trigger": "standalone_flush",
   "stats": {
     "agreements": 1427,
@@ -20,7 +20,7 @@
     "events": 5906,
     "rewritten": true
   },
-  "cycles": 65,
+  "cycles": 66,
   "dialogue_export": {
     "ok": true,
     "pairs": 5302,

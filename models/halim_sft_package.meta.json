@@ -1,12 +1,12 @@
 {
   "file": "halim_sft.zip",
   "path": "/Users/mdsabersajib/Downloads/tradingbot/halim_sft.zip",
-  "build_id": "8eb4e01d68c3",
-  "updated_at": "2026-06-30T17:01:57.229438+00:00",
-  "pairs_total": 14692,
-  "train_pairs": 13958,
+  "build_id": "3c530665e6a7",
+  "updated_at": "2026-06-30T17:02:44.540326+00:00",
+  "pairs_total": 14594,
+  "train_pairs": 13865,
   "by_source": {
-    "council": 952,
+    "council": 854,
     "test": 1,
     "learn_cache": 144,
     "groq": 943,
