@@ -21,3 +21,7 @@ Combined win rate: 11.1% (buffer=7.8%, returns=14.3%)
 Could not parse AI plan — retained guidance for prompts only.
 off_hours_review
 
+🧭 COMMANDER LEARNING | 2026-06-30T20:00:55.180508+00:00
+Could not parse AI plan — retained guidance for prompts only.
+ib_day_learning:2026-06-30:IB day 2026-06-30: 399 trades, P&L $+46616.14
+
