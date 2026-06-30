@@ -147,3 +147,102 @@ def collect_positions(runner: "ScalperRunner") -> Dict[str, Any]:
         "positions": positions,
         "ib_truth": snap.refreshed_at > 0,
     }
+
+
+def collect_risk(runner: "ScalperRunner") -> Dict[str, Any]:
+    intel = collect_positions(runner)
+    risk = getattr(runner, "risk", None)
+    equity = intel["equity"]
+
+    daily_start = float(getattr(risk, "start_of_day_equity", equity) or equity) if risk else equity
+    weekly_start = float(getattr(risk, "start_of_week_equity", equity) or equity) if risk else equity
+
+    halted = False
+    halt_reason = ""
+    consecutive = 0
+    if risk:
+        try:
+            halted = risk.is_halted()
+            halt_reason = getattr(risk, "_halt_reason", "") or ""
+            consecutive = int(getattr(risk, "_consecutive_losses", 0) or 0)
+        except Exception:
+            pass
+
+    cfg = runner.cfg
+    max_positions = 1
+    try:
+        from core.pilot_mode import effective_max_concurrent_positions
+        max_positions = effective_max_concurrent_positions(cfg)
+    except Exception:
+        max_positions = int(getattr(cfg, "MAX_CONCURRENT_POSITIONS", 1) or 1)
+
+    return {
+        **intel,
+        "halted": halted,
+        "halt_reason": halt_reason,
+        "consecutive_losses": consecutive,
+        "daily_start_equity": round(daily_start, 2),
+        "daily_pnl": round(intel.get("ib_day_pnl", equity - daily_start), 2),
+        "weekly_start_equity": round(weekly_start, 2),
+        "weekly_pnl": round(equity - weekly_start, 2),
+        "max_positions": max_positions,
+        "slots_used": intel["position_count"],
+        "win_rate_pct": round(getattr(risk, "win_rate", 0) * 100, 1) if risk else 0.0,
+        "trades_today": int(getattr(runner, "trades_today", 0) or 0),
+    }
+
+
+def format_positions_report(intel: Dict[str, Any], *, max_positions: int = 12) -> str:
+    lines = [
+        "📊 OPEN POSITIONS",
+        f"IB ${intel.get('equity', 0):,.2f} · Day P&L ${intel.get('ib_day_pnl', 0):+,.2f} · "
+        f"Cash ${intel.get('cash', 0):,.2f}",
+        f"Deployed ${intel.get('total_market_value', 0):,.0f} "
+        f"({intel.get('deployed_pct', 0):.1f}%) · "
+        f"Unrealized ${intel.get('total_unrealized_pnl', 0):+,.2f}",
+        f"Stop risk (booked): ${intel.get('total_stop_risk_usd', 0):,.0f} · "
+        f"{intel.get('position_count', 0)} position(s)",
+        "",
+    ]
+
+    for p in intel.get("positions", [])[:max_positions]:
+        tag = "🤖" if p.get("bot_managed") else "📎"
+        if p.get("ib_only"):
+            tag = "IB"
+        stop_s = f"stop ${p['stop']:.2f}" if p.get("stop") else "no stop"
+        tgt_s = f"tgt ${p['target']:.2f}" if p.get("target") else ""
+        lines.append(
+            f"{tag} {p['ticker']} {p['shares']:,}sh @ ${p['entry']:.2f} → ${p['price']:.2f} "
+            f"({p.get('unrealized_pct', 0):+.1f}% · ${p.get('unrealized_pnl', 0):+,.0f})"
+        )
+        extra = " · ".join(x for x in (stop_s, tgt_s) if x)
+        if extra:
+            lines.append(f"   {extra}")
+
+    extra_n = intel.get("position_count", 0) - max_positions
+    if extra_n > 0:
+        lines.append(f"… +{extra_n} more (use /system for full dump)")
+
+    if not intel.get("positions"):
+        lines.append("Flat — no open long positions.")
+
+    return "\n".join(lines)
+
+
+def format_risk_report(risk: Dict[str, Any]) -> str:
+    status = "⛔ HALTED" if risk.get("halted") else "✅ ACTIVE"
+    lines = [
+        "🛡 ACCOUNT RISK",
+        f"Status: {status}",
+        f"Equity ${risk.get('equity', 0):,.2f} · Daily P&L ${risk.get('daily_pnl', 0):+,.2f} · "
+        f"Weekly ${risk.get('weekly_pnl', 0):+,.2f}",
+        f"Deployed {risk.get('deployed_pct', 0):.1f}% · "
+        f"Unrealized ${risk.get('total_unrealized_pnl', 0):+,.2f} · "
+        f"Stop risk ${risk.get('total_stop_risk_usd', 0):,.0f}",
+        f"Slots {risk.get('slots_used', 0)}/{risk.get('max_positions', 1)} · "
+        f"Trades today {risk.get('trades_today', 0)} · "
+        f"Consecutive losses {risk.get('consecutive_losses', 0)}",
+    ]
+    if risk.get("halted") and risk.get("halt_reason"):
+        lines.append(f"Reason: {risk['halt_reason'][:200]}")
+    return "\n".join(lines)
