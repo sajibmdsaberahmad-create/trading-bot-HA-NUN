@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — IB data catalog A–Z, ib_ai_context for Halim, IB-first macro (SPY/QQQ/VIX) — see [IB_DATA_CATALOG.md](IB_DATA_CATALOG.md)
 - `2026-07-01` **engineering** — IB Truth extended (open orders, IB RealizedPnL primary) + trade horizon scalp/swing shadow — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [HORIZON_ROADMAP.md](HORIZON_ROADMAP.md)
 - `2026-07-01` **engineering** — War ledger multi-position open slots + deploy budget import hardening — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Multi-position monitor isolation: per-ticker risk plan bind, fill-px LIVE_PULSE, profit-hunt import — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -1846,3 +1847,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 20:42 UTC` **git_auto** — sync: 5 files — account_view.py, ib_truth.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=167 evolution
 - `2026-06-30 20:42 UTC` **git_auto** — sync: 6 files — account_view.py, halim_companion.py, ib_truth.py +3 more | docs=1 core=2 other=3 | brain=toddler dataset=167 evolutions=51
 - `2026-06-30 20:42 UTC` **git_auto** — sync: 7 files — account_view.py, halim_companion.py, market_context.py +4 more | docs=1 core=3 other=3 | brain=toddler dataset=167 evolution
+- `2026-06-30 20:43 UTC` **git_auto** — sync: 7 files — account_evaluator.py, account_view.py, scalper_session.py +4 more | docs=1 core=2 other=4 | brain=toddler dataset=167 evolut

@@ -10,6 +10,40 @@
 
 ---
 
+## 2026-07-01 — IB data catalog A–Z + ib_ai_context for all AIs
+
+### Problem
+IB provides dozens of account, order, fill, and market endpoints; bot duplicated fetches (Yahoo macro, local position math) and AIs lacked bracket/margin/PDT context.
+
+### Root cause
+No single inventory of IB capabilities; `ib_truth_context` was minimal; macro used Yahoo when IB was connected.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_data_catalog.py` | **New** — A–Z tag map + API category registry |
+| `core/ib_macro.py` | **New** — SPY/QQQ/VIX via `reqTickers` (one-shot) |
+| `core/ib_truth.py` | Extended account tags, bracket order fields, commissions, server time, `ib_ai_context()` |
+| `core/market_context.py` | IB-first macro when connector live (`MACRO_FROM_IB`) |
+| `core/halim_companion.py` | `live_snapshot` merges `ib_ai_context` |
+| `core/account_evaluator.py` | Positions/orders from `get_snapshot()` not raw IB |
+| `docs/IB_DATA_CATALOG.md` | **New** — human A–Z reference |
+| `scripts/start_hanoon.sh` | `MACRO_FROM_IB`, `IB_MACRO_TTL_SEC` |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `MACRO_FROM_IB` | `true` | SPY/QQQ/VIX from IB; Yahoo only if disconnected |
+| `IB_MACRO_TTL_SEC` | `120` | Macro snapshot cache |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_truth.py tests/test_trade_horizon.py tests/test_ib_data_catalog.py -q
+# Halim /status or companion chat should show ib_maint_margin, ib_day_trades_remaining, bracket stops
+```
+
+---
+
 ## 2026-07-01 — IB Truth extended + trade horizon (scalp live, swing shadow)
 
 ### Problem
