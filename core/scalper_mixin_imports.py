@@ -160,6 +160,7 @@ from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
 from core.risk import TradePlan, compute_atr, compute_momentum_score, safe_vwap
 from core.rth_session import ai_session_context_block, is_rth, rth_status_line, rth_tier
 from core.scalper_filters import only_uptrend
+from core.scalper_filters import only_uptrend as _only_uptrend
 from core.scalper_micro_predict import bars_with_live_tick, micro_forecast
 from core.trade_telemetry import (
     log_bracket_reject,
