@@ -1,0 +1,135 @@
+{
+  "refreshed_at": 1782856516.358604,
+  "refresh_mode": "light",
+  "account_pnl": {
+    "daily_pnl": -12.88,
+    "unrealized_pnl": 0.0,
+    "realized_pnl": -12.88
+  },
+  "position_pnl": {
+    "T": {
+      "con_id": 37018770,
+      "daily_pnl": NaN,
+      "unrealized_pnl": NaN,
+      "realized_pnl": NaN,
+      "value": NaN
+    },
+    "INTC": {
+      "con_id": 270639,
+      "daily_pnl": NaN,
+      "unrealized_pnl": NaN,
+      "realized_pnl": NaN,
+      "value": NaN
+    },
+    "SRXH": {
+      "con_id": 689952242,
+      "daily_pnl": NaN,
+      "unrealized_pnl": NaN,
+      "realized_pnl": NaN,
+      "value": NaN
+    }
+  },
+  "contract_details": {
+    "SPY": {
+      "con_id": 756733,
+      "long_name": "SS SPDR S&P 500 ETF TRUST-US",
+      "exchange": "ARCA",
+      "min_tick": 0.01,
+      "time_zone": "US/Eastern",
+      "trading_hours": "20260630:0400-20260630:2000;20260701:0400-20260701:2000;20260702:0400-20260702:2000",
+      "liquid_hours": "20260630:0930-20260630:1600;20260701:0930-20260701:1600;20260702:0930-20260702:1600",
+      "industry": "",
+      "category": ""
+    },
+    "QQQ": {
+      "con_id": 320227571,
+      "long_name": "INVESCO QQQ TRUST SERIES 1",
+      "exchange": "NASDAQ",
+      "min_tick": 0.01,
+      "time_zone": "US/Eastern",
+      "trading_hours": "20260630:0400-20260630:2000;20260701:0400-20260701:2000;20260702:0400-20260702:2000",
+      "liquid_hours": "20260630:0930-20260630:1600;20260701:0930-20260701:1600;20260702:0930-20260702:1600",
+      "industry": "",
+      "category": ""
+    },
+    "T": {
+      "con_id": 37018770,
+      "long_name": "AT&T INC",
+      "exchange": "NYSE",
+      "min_tick": 0.01,
+      "time_zone": "US/Eastern",
+      "trading_hours": "20260630:0400-20260630:2000;20260701:0400-20260701:2000;20260702:0400-20260702:2000",
+      "liquid_hours": "20260630:0930-20260630:1600;20260701:0930-20260701:1600;20260702:0930-20260702:1600",
+      "industry": "Communications",
+      "category": "Telecommunications"
+    },
+    "INTC": {
+      "con_id": 270639,
+      "long_name": "INTEL CORP",
+      "exchange": "NASDAQ",
+      "min_tick": 0.01,
+      "time_zone": "US/Eastern",
+      "trading_hours": "20260630:0400-20260630:2000;20260701:0400-20260701:2000;20260702:0400-20260702:2000",
+      "liquid_hours": "20260630:0930-20260630:1600;20260701:0930-20260701:1600;20260702:0930-20260702:1600",
+      "industry": "Technology",
+      "category": "Semiconductors"
+    },
+    "SRXH": {
+      "con_id": 689952242,
+      "long_name": "SRX GLOBAL INC",
+      "exchange": "AMEX",
+      "min_tick": 0.0001,
+      "time_zone": "US/Eastern",
+      "trading_hours": "20260630:0400-20260630:2000;20260701:0400-20260701:2000;20260702:0400-20260702:2000",
+      "liquid_hours": "20260630:0930-20260630:1600;20260701:0930-20260701:1600;20260702:0930-20260702:1600",
+      "industry": "Consumer, Non-cyclical",
+      "category": "Pharmaceuticals"
+    }
+  },
+  "fundamentals": {},
+  "news_bulletins": [],
+  "news_historical": {},
+  "wsh_events": [],
+  "head_timestamps": {},
+  "market_rules": {},
+  "quote_snapshots": {
+    "SPY": {
+      "bid": 745.86,
+      "ask": 745.97,
+      "last": 745.97,
+      "close": 741.0,
+      "volume": 54790091.073218
+    },
+    "QQQ": {
+      "bid": 735.44,
+      "ask": 735.5,
+      "last": 735.44,
+      "close": 724.08,
+      "volume": 41795619.329136
+    },
+    "T": {
+      "bid": 20.72,
+      "ask": 20.73,
+      "last": 20.73,
+      "close": 21.82,
+      "volume": NaN
+    },
+    "INTC": {
+      "bid": 138.2,
+      "ask": 138.25,
+      "last": 138.21,
+      "close": 131.72,
+      "volume": NaN
+    },
+    "SRXH": {
+      "bid": -1.0,
+      "ask": -1.0,
+      "last": NaN,
+      "close": 0.0907,
+      "volume": NaN
+    }
+  },
+  "account_summary": {},
+  "completed_orders": [],
+  "news_providers": []
+}
