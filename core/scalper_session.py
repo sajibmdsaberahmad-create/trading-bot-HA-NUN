@@ -373,6 +373,11 @@ class ScalperSessionMixin:
                 pass
             self._shutdown_requested_flag = True
             try:
+                from core.shutdown_control import request_shutdown
+                request_shutdown(f"signal_{signum}")
+            except Exception:
+                pass
+            try:
                 self.ib.sleep(0)
             except Exception:
                 pass
@@ -382,6 +387,18 @@ class ScalperSessionMixin:
 
         signal.signal(signal.SIGTERM, _handler)
         signal.signal(signal.SIGINT, _handler)
+
+    def _interruptible_ib_sleep(self, seconds: float, *, chunk: float = 0.25) -> bool:
+        """Sleep up to `seconds`; return True when shutdown/stop was requested."""
+        if seconds <= 0:
+            return self._shutdown_abort()
+        from core.shutdown_control import interruptible_wait
+        return interruptible_wait(
+            seconds,
+            ib=getattr(self, "ib", None),
+            check_interval=chunk,
+            extra_check=self._shutdown_abort,
+        )
     def _shutdown_abort(self) -> bool:
         """True when stop script or signal requested exit."""
         if getattr(self, "_shutdown_requested_flag", False):
@@ -436,11 +453,15 @@ class ScalperSessionMixin:
         - Prevent memory fragmentation in the long-running trading process
         - Isolate crashes from the main trading loop
         """
+        if self._shutdown_abort():
+            return
         try:
             log.info("🧠 OFF-HOURS TRAINING: Launching isolated training subprocess...")
             
             # Full IB yesterday bundle → Ollama analyze + PPO (beat yesterday goal)
             if getattr(self.cfg, "DAILY_IB_LEARNING_ENABLED", True):
+                if self._shutdown_abort():
+                    return
                 try:
                     from core.daily_ib_learning import run_daily_ib_learning_cycle
                     from core.market_hours import learning_day_for_trigger
@@ -455,6 +476,8 @@ class ScalperSessionMixin:
                 except Exception as exc:
                     log.debug(f"Off-hours IB learning: {exc}")
             
+            if self._shutdown_abort():
+                return
             # Update market regime from broader context (lightweight, stays in-process)
             self._update_market_context()
 
@@ -476,9 +499,13 @@ class ScalperSessionMixin:
             except Exception as exc:
                 log.debug(f"Off-hours IB extended/swing: {exc}")
             
+            if self._shutdown_abort():
+                return
             # Train weights on historical data (lightweight, stays in-process)
             self._daily_self_train()
             
+            if self._shutdown_abort():
+                return
             # Launch heavy training (Transformer + PPO + LSTM) in isolated subprocess
             if getattr(self.cfg, "OFF_HOURS_HEAVY_TRAINING", True):
                 try:
