@@ -4586,3 +4586,5 @@
 {"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":231541.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:26.292398+00:00"}
 {"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":15817.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:28.542059+00:00"}
 {"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":221638.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:30.967143+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":9924.0,"shadow_only":true,"timestamp":"2026-06-30T11:06:56.674847+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":1.693754281088486,"shadow_only":true,"timestamp":"2026-06-30T11:06:58.911649+00:00"}
