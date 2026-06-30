@@ -7493,23 +7493,20 @@ class ScalperRunner:
             mode_label = "MARKET" if entry_parent_px is None else f"LIMIT@${entry_parent_px:.4f}"
             log.info(f"  📥 Entry mode: {entry_mode} ({mode_label}) | {shares} sh @ ~${current_px:.4f}")
             if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
-                self._entry_poll_states[ticker] = {
-                    "ticker": ticker,
-                    "shares": shares,
-                    "plan": plan,
-                    "fill_px": current_px,
-                    "limit_px": entry_parent_px,
-                    "ib_pos_baseline": self._ib_position_shares(ticker),
-                    "polls": 0,
-                    "max_polls": fill_polls,
-                    "min_fill_ratio": min_fill_ratio,
-                    "fail_cd": fail_cd,
-                    "attempt": attempt,
-                    "last_ib_error": last_ib_error,
-                    "bracket": bracket,
-                    "started_at": time.time(),
-                    "last_heartbeat": 0.0,
-                }
+                self._entry_poll_states[ticker] = new_entry_poll_state(
+                    ticker=ticker,
+                    shares=shares,
+                    plan=plan,
+                    current_px=current_px,
+                    entry_parent_px=entry_parent_px,
+                    fill_polls=fill_polls,
+                    min_fill_ratio=min_fill_ratio,
+                    fail_cd=fail_cd,
+                    attempt=attempt,
+                    last_ib_error=last_ib_error,
+                    bracket=bracket,
+                    ib=self.ib,
+                )
                 log.info(
                     f"  ⏳ Awaiting IB fill {ticker}: {shares} sh "
                     f"parent#{bracket.parent_order_id} ({mode_label})"
@@ -7966,23 +7963,20 @@ class ScalperRunner:
                 log.info(f"  📥 Entry mode: {entry_mode} ({mode_label}) | {shares} sh @ ~${current_px:.4f}")
 
                 if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
-                    self._entry_poll_states[ticker] = {
-                        "ticker": ticker,
-                        "shares": shares,
-                        "plan": plan,
-                        "fill_px": current_px,
-                        "limit_px": entry_parent_px,
-                        "ib_pos_baseline": self._ib_position_shares(ticker),
-                        "polls": 0,
-                        "max_polls": fill_polls,
-                        "min_fill_ratio": min_fill_ratio,
-                        "fail_cd": fail_cd,
-                        "attempt": attempt,
-                        "last_ib_error": last_ib_error,
-                        "bracket": bracket,
-                        "started_at": time.time(),
-                        "last_heartbeat": 0.0,
-                    }
+                    self._entry_poll_states[ticker] = new_entry_poll_state(
+                        ticker=ticker,
+                        shares=shares,
+                        plan=plan,
+                        current_px=current_px,
+                        entry_parent_px=entry_parent_px,
+                        fill_polls=fill_polls,
+                        min_fill_ratio=min_fill_ratio,
+                        fail_cd=fail_cd,
+                        attempt=attempt,
+                        last_ib_error=last_ib_error,
+                        bracket=bracket,
+                        ib=self.ib,
+                    )
                     log.info(
                         f"  ⏳ Awaiting IB fill {ticker}: {shares} sh "
                         f"parent#{bracket.parent_order_id} ({mode_label})"
