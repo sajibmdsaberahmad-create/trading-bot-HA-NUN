@@ -2,13 +2,6 @@
   "items": [
     {
       "param": "CONFIDENCE_THRESHOLD",
-      "value": 0.63,
-      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
-      "source": "runtime_council_timeout",
-      "queued_at": "2026-06-30T07:39:16.152782+00:00"
-    },
-    {
-      "param": "CONFIDENCE_THRESHOLD",
       "value": 0.68,
       "reason": "trade WR 36% \u2014 tighten PPO entry bar",
       "source": "ppo_teacher",
@@ -349,7 +342,14 @@
       "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
       "source": "runtime_council_timeout",
       "queued_at": "2026-06-30T10:40:43.049488+00:00"
+    },
+    {
+      "param": "CONFIDENCE_THRESHOLD",
+      "value": 0.63,
+      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+      "source": "runtime_council_timeout",
+      "queued_at": "2026-06-30T10:42:53.543341+00:00"
     }
   ],
-  "updated_at": "2026-06-30T10:40:43.049492+00:00"
+  "updated_at": "2026-06-30T10:42:53.543359+00:00"
 }
