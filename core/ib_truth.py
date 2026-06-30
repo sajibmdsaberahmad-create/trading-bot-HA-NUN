@@ -205,33 +205,53 @@ def _fill_commission(fill) -> float:
 
 def fetch_ib_executions(ib, *, since_ts: float = 0.0) -> List[IBExecution]:
     out: List[IBExecution] = []
+    seen: set = set()
+
+    def _ingest(fill) -> None:
+        contract = getattr(fill, "contract", None)
+        sym = (getattr(contract, "symbol", "") or "").upper()
+        ex = getattr(fill, "execution", None)
+        if not sym or ex is None:
+            return
+        eid = str(getattr(ex, "execId", "") or "")
+        if eid and eid in seen:
+            return
+        px = float(getattr(ex, "price", 0) or 0)
+        qty = float(getattr(ex, "shares", 0) or 0)
+        if px <= 0 or qty <= 0:
+            return
+        ts = _execution_ts(ex)
+        if since_ts and ts < since_ts - 1.0:
+            return
+        if eid:
+            seen.add(eid)
+        out.append(
+            IBExecution(
+                symbol=sym,
+                side=str(getattr(ex, "side", "") or "").upper(),
+                price=px,
+                qty=qty,
+                ts=ts,
+                commission=_fill_commission(fill),
+                exec_id=eid,
+            )
+        )
+
     try:
         for fill in ib.fills():
-            contract = getattr(fill, "contract", None)
-            sym = (getattr(contract, "symbol", "") or "").upper()
-            ex = getattr(fill, "execution", None)
-            if not sym or ex is None:
-                continue
-            px = float(getattr(ex, "price", 0) or 0)
-            qty = float(getattr(ex, "shares", 0) or 0)
-            if px <= 0 or qty <= 0:
-                continue
-            ts = _execution_ts(ex)
-            if since_ts and ts < since_ts - 1.0:
-                continue
-            out.append(
-                IBExecution(
-                    symbol=sym,
-                    side=str(getattr(ex, "side", "") or "").upper(),
-                    price=px,
-                    qty=qty,
-                    ts=ts,
-                    commission=_fill_commission(fill),
-                    exec_id=str(getattr(ex, "execId", "") or ""),
-                )
-            )
+            _ingest(fill)
     except Exception as exc:
-        log.debug(f"ib_truth executions: {exc}")
+        log.debug(f"ib_truth executions fills: {exc}")
+
+    if len(out) < 1:
+        try:
+            ib.reqExecutions()
+            ib.sleep(0.25)
+            for fill in ib.fills():
+                _ingest(fill)
+        except Exception as exc:
+            log.debug(f"ib_truth reqExecutions: {exc}")
+
     out.sort(key=lambda e: e.ts)
     return out
 
@@ -299,7 +319,11 @@ def fetch_ib_account_snapshot(ib, currency: str = "USD") -> IBAccountSnapshot:
             if getattr(v, "currency", "") not in (currency, "BASE", ""):
                 continue
             tag = str(getattr(v, "tag", "") or "")
-            val = float(getattr(v, "value", 0) or 0)
+            raw = getattr(v, "value", "")
+            if tag == "AccountCode":
+                snap.account_code = str(raw or "")
+                continue
+            val = float(raw or 0)
             snap.tags[tag] = val
             attr = ACCOUNT_TAG_FIELD_MAP.get(tag)
             if attr:
@@ -425,6 +449,12 @@ def build_snapshot(
     from core.rth_session import ib_truth_session_start_ts
     since = since_ts if since_ts is not None else ib_truth_session_start_ts(cfg)
     rth_session = os.getenv("IB_TRUTH_RTH_SESSION", "true").lower() not in ("0", "false", "no")
+
+    try:
+        ib.reqPositions()
+        ib.sleep(0.08)
+    except Exception:
+        pass
 
     account = fetch_ib_account_snapshot(ib, currency=currency)
     positions = fetch_ib_positions(ib)
@@ -589,8 +619,11 @@ def ib_truth_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
             }
             for o in snap.open_orders[:20]
         ],
-        "ib_open_order_symbols": [o.symbol for o in snap.open_orders[:12]],
-    }
+        "ib_account_code": snap.account.account_code,
+        "ib_lookahead_init_margin": round(acct.lookahead_init_margin, 2),
+        "ib_lookahead_available_funds": round(acct.lookahead_available_funds, 2),
+        "ib_highest_severity": acct.highest_severity,
+        "ib_account_tags": {k: round(v, 4) for k, v in list(acct.tags.items())[:40]},
 
 
 def ib_ai_context(
