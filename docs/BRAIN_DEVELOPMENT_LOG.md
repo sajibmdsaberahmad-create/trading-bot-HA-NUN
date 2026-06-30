@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — IB replaces local/Yahoo duplicates (macro, positions, session PnL) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Fix exit executor SyntaxError + IB client_id=1 guard — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — IB Truth extended (open orders, IB RealizedPnL primary) + trade horizon scalp/swing shadow — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [HORIZON_ROADMAP.md](HORIZON_ROADMAP.md)
 - `2026-07-01` **engineering** — War ledger multi-position open slots + deploy budget import hardening — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -1893,3 +1894,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:02 UTC` **git_auto** — sync: 6 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, ENGINEERING_FIX_LOG.md +3 more | models=1 docs=2 other=3 | brain=toddler dat
 - `2026-06-30 21:02 UTC` **git_auto** — sync: 5 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, test_account_view.py +2 more | docs=1 other=4 | brain=toddler dataset=167 ev
 - `2026-06-30 21:02 UTC` **git_auto** — sync: 4 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=toddler dataset=167 evolutio
+- `2026-06-30 21:03 UTC` **git_auto** — sync: 6 files — account_evaluator.py, fill_tracker.py, BRAIN_DEVELOPMENT_LOG.md +3 more | docs=1 core=1 other=4 | brain=toddler dataset=167 

@@ -211,12 +211,8 @@ def _ib_position_cost(ib, symbol: str) -> Tuple[float, float]:
     pos = _truth_long_position(sym)
     if pos is not None and pos.avg_cost > 0:
         return float(pos.avg_cost), max(float(pos.multiplier or 1), 1.0)
-    try:
-        from core.ib_truth import ib_truth_enabled
-        if ib_truth_enabled():
-            return 0.0, 1.0
-    except Exception:
-        pass
+    if _truth_snapshot_fresh():
+        return 0.0, 1.0
     try:
         for p in ib.positions():
             if getattr(p.contract, "symbol", "").upper() == sym:
@@ -352,12 +348,8 @@ def ib_position_shares(ib, symbol: str) -> float:
     pos = _truth_long_position(sym)
     if pos is not None:
         return float(pos.qty) if pos.qty > 0 else 0.0
-    try:
-        from core.ib_truth import ib_truth_enabled
-        if ib_truth_enabled():
-            return 0.0
-    except Exception:
-        pass
+    if _truth_snapshot_fresh():
+        return 0.0
     try:
         for p in ib.positions():
             if getattr(p.contract, "symbol", "").upper() == sym:
