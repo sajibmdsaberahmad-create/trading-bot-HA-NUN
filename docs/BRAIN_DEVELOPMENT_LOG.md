@@ -1907,3 +1907,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:30 UTC` **git_auto** — sync: 5 files — trade_horizon.py, BRAIN_DEVELOPMENT_LOG.md, capital_phase.py +2 more | docs=1 core=1 other=3 | brain=toddler dataset=167 evo
 - `2026-06-30 21:30 UTC` **git_auto** — sync: 6 files — broker.py, trade_horizon.py, war_account.py +3 more | docs=1 core=2 other=3 | brain=toddler dataset=167 evolutions=51
 - `2026-06-30 21:30 UTC` **git_auto** — sync: 5 files — broker.py, war_account.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=167 evolutions=5
+- `2026-06-30 21:30 UTC` **git_auto** — sync: 7 files — broker.py, paper_mode.py, pilot_mode.py +4 more | docs=1 core=3 other=3 | brain=toddler dataset=167 evolutions=51

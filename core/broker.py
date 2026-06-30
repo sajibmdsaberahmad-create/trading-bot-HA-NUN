@@ -115,11 +115,28 @@ class BrokerExecutor:
 
     # ── Entry: bracket order (parent + stop child + target child) ───────────
 
-    def _configure_order(self, order):
-        """Apply TIF and extended-hours settings for IB Gateway compatibility."""
-        order.tif = "DAY"
+    def _configure_order(
+        self,
+        order,
+        *,
+        horizon: str = "scalp",
+        capital_phase: str = "",
+        pipeline: str = "",
+        tif: Optional[str] = None,
+    ):
+        """Apply TIF, extended-hours, and HN orderRef tags."""
+        order.tif = tif or ("GTC" if horizon == "swing" else "DAY")
         if should_use_extended_hours_orders(self.cfg):
             order.outsideRth = True
+        try:
+            from core.horizon_tags import build_order_ref
+            order.orderRef = build_order_ref(
+                horizon=horizon,
+                capital_phase=capital_phase,
+                pipeline=pipeline,
+            )
+        except Exception:
+            pass
 
     def _session_allows_orders(self, action: str = "order") -> bool:
         allowed, state = orders_allowed(self.cfg)
@@ -139,6 +156,9 @@ class BrokerExecutor:
         target_price: float,
         *,
         symbol: Optional[str] = None,
+        horizon: str = "scalp",
+        capital_phase: str = "",
+        pipeline: str = "",
     ) -> BracketHandle:
         """
         Submit a bracket BUY: parent entry + stop-loss child + take-profit
@@ -182,23 +202,26 @@ class BrokerExecutor:
 
         parent_id = self.ib.client.getReqId()
 
+        swing_tif = "GTC" if horizon == "swing" else None
+        ocfg = dict(horizon=horizon, capital_phase=capital_phase, pipeline=pipeline, tif=swing_tif)
+
         if limit_or_market_price is None:
             parent = MarketOrder("BUY", quantity)
         else:
             parent = LimitOrder("BUY", quantity, self._round_price(limit_or_market_price))
 
-        self._configure_order(parent)
+        self._configure_order(parent, **ocfg)
         parent.orderId = parent_id
         parent.transmit = False
 
         stop_child = StopOrder("SELL", quantity, self._round_price(stop_price))
-        self._configure_order(stop_child)
+        self._configure_order(stop_child, **ocfg)
         stop_child.orderId = self.ib.client.getReqId()
         stop_child.parentId = parent_id
         stop_child.transmit = False
 
         target_child = LimitOrder("SELL", quantity, self._round_price(target_price))
-        self._configure_order(target_child)
+        self._configure_order(target_child, **ocfg)
         target_child.orderId = self.ib.client.getReqId()
         target_child.parentId = parent_id
         target_child.transmit = True  # last child transmits the whole bracket
