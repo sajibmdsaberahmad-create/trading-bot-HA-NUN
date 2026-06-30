@@ -72,6 +72,8 @@ python3 halim/scripts/register_checkpoint.py toddler_v1
 ### Notes
 `HALIM_PROMOTION_FORCE=true` or `HALIM_PROMOTION_GATE=false` bypasses Halim eval for hotfix only.
 
+**Follow-up:** Added missing `import os` in `hybrid_distiller.py` (`_effective_proxy_accuracy` NameError).
+
 ---
 
 ## 2026-06-30 — War replay ledger isolation (code)
