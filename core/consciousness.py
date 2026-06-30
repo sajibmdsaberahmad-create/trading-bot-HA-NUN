@@ -404,7 +404,10 @@ class AIConsciousness:
             logger.info(f"🌍 SPY: {ctx.get('spy_trend', '?')} | QQQ: {ctx.get('qqq_trend', '?')} | VIX: {ctx.get('vix_regime', '?')} ({ctx.get('vix_level')})")
 
             # 2. Regime classification
-            regime = self.regime_detector.classify(None)
+            from core.market_context import summarize_market_context
+            from core.market_regime import regime_from_macro
+            macro = summarize_market_context()
+            regime = regime_from_macro(macro or {})
             results["steps"]["regime"] = {
                 "regime": regime.regime.value,
                 "confidence": regime.confidence,
