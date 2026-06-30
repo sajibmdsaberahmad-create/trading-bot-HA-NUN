@@ -4570,3 +4570,8 @@
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":5642.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:16.203180+00:00"}
 {"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":3792.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:18.497730+00:00"}
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":7124.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:21.207334+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":6233.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:26.551382+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":6233.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:30.571627+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":1709.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:35.026844+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":18423.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:39.900684+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":7284.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:42.354880+00:00"}

@@ -33,3 +33,7 @@ IB closing-only — cannot open new positions
 Observed order_timeout — recorded for learning.
 PreSubmitted
 
+🧭 COMMANDER LEARNING | 2026-06-30T11:05:39.114801+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
