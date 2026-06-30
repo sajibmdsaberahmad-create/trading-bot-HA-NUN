@@ -328,71 +328,16 @@ class ScalperSessionMixin:
         )
     def _log_startup_banner(self) -> None:
         """One structured boot summary — details at DEBUG when STARTUP_LOG_COMPACT=true."""
-        from core.startup_log import log_block, sinfo, startup_compact
-        from core.data import tick_by_tick_type
-        from core.market_hours import allowed_trading_sessions_label
-        from core.ram_tier import ram_tier_summary
+        from core.startup_log import (
+            build_session_ready_lines,
+            log_block,
+            sinfo,
+            startup_compact,
+        )
         from core.memory_guard import memory_status
-        from core.ai_session_limits import format_limits_log, should_ai_define_limits
+        from core.ram_tier import ram_tier_summary
 
-        acct_vals = []
-        account = "unknown"
-        try:
-            from core.ib_truth import get_snapshot
-            snap = get_snapshot()
-            if snap.refreshed_at > 0 and snap.account.account_code:
-                account = snap.account.account_code
-            elif snap.refreshed_at > 0:
-                account = "IB"
-        except Exception:
-            pass
-        if account == "unknown":
-            acct_vals = self.conn.ib.accountValues()
-            account = acct_vals[0].account if acct_vals else "unknown"
-        mode = "PAPER" if self.cfg.PAPER_TRADING else "LIVE"
-        market_state = get_market_state(self.cfg)
-        can_trade, _ = can_trade_now(self.cfg)
-        sessions = allowed_trading_sessions_label(self.cfg)
-
-        paper_rt = bool(
-            getattr(self.cfg, "PAPER_TRADING", False)
-            and getattr(self.cfg, "PAPER_REALTIME_BARS_ONLY", False)
-        )
-        if paper_rt:
-            md_mode = "5s bars (paper)"
-        elif getattr(self.cfg, "USE_TICK_STREAM", True):
-            md_mode = f"tick ({tick_by_tick_type(self.cfg)})"
-        else:
-            md_mode = "5s bars"
-
-        defer = getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
-        warmup = int(getattr(self.cfg, "IB_SCANNER_WARMUP_SEC", 5))
-        from core.scanner_session import scanner_session_log_line
-        scan_mode = f"deferred curated" if defer else scanner_session_log_line(self.cfg)
-
-        council_on = getattr(self.cfg, "COUNCIL_ENABLED", False)
-        council = (
-            f"{getattr(self.cfg, 'COUNCIL_BACKEND', 'groq')}"
-            if council_on else "off"
-        )
-
-        lines = [
-            f"{mode} | {account} | ${self.account_equity:,.0f}",
-            f"Market: {market_state} | tradable={'yes' if can_trade else 'no'} | sessions: {sessions}",
-            f"Scanner: {scan_mode} | MD: {md_mode} | Council: {council}",
-            f"PPO: {'loaded' if not getattr(self, '_model_fresh', True) else 'fresh'} | "
-            f"tick budget {tick_stream_count(self.cfg)}+{max_realtime_bar_streams(self.cfg)} 5s",
-        ]
-        if hasattr(self, "pilot"):
-            vs = self.pilot.get_veteran_status()
-            lines.append(
-                f"Pilot: {vs.get('level', '?')} XP={vs.get('total_xp', 0)} "
-                f"conf={vs.get('confidence_threshold', 0):.0%}"
-            )
-        if should_ai_define_limits(self.cfg):
-            lines.append(format_limits_log(self.cfg, self.account_equity))
-
-        log_block("HANOON STARTUP", lines)
+        log_block("SESSION READY · scalp + swing", build_session_ready_lines(self))
 
         if startup_compact(self.cfg):
             return
@@ -401,8 +346,8 @@ class ScalperSessionMixin:
         tier_info = ram_tier_summary(self.cfg)
         sinfo(
             self.cfg,
-            f"🧠 Cloud council detail: groq={getattr(self.cfg, 'GROQ_MODEL', '?')} | "
-            f"gemini={getattr(self.cfg, 'GEMINI_MODEL', '?')} | "
+            f"Cloud council: groq={getattr(self.cfg, 'GROQ_MODEL', '?')} · "
+            f"gemini={getattr(self.cfg, 'GEMINI_MODEL', '?')} · "
             f"RAM {mem['total_ram_mb']}MB tier={tier_info['label']}",
             force=True,
         )

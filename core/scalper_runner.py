@@ -1604,13 +1604,13 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             send_dynamic_notification(
                 self.notifier, self.autopilot, "startup",
                 self._notify_context({"ib_balance": self._ib_starting_balance}),
-                "🚀 HANOON STARTED",
+                "🚀 Life engine running (scalp + swing)",
                 ai_commander=self.ai_commander,
                 consciousness=self.consciousness,
                 pilot=self.pilot,
             )
         else:
-            self.notifier.info("🚀 HANOON STARTED")
+            self.notifier.info("🚀 Life engine running (scalp + swing)")
 
         try:
             from core.halim_companion import companion_session_ping

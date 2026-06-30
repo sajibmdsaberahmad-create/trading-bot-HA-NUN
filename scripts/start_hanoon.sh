@@ -651,7 +651,7 @@ echo ""
 # ── 7. Launch HANOON scalper ────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  🚀 HANOON SCALPER — FULL PILOT MODE"
+echo "  🚀 HANOON LIFE ENGINE — scalp + swing · IB Truth"
 echo "  Log: $MAIN_LOG"
 echo "  Graceful stop: ./stop.sh  (Halim gold + evolution + git — not Ctrl+C)"
 echo "  Avoid Ctrl+C — it skips evolution and git sync"

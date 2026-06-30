@@ -34,7 +34,7 @@ from core.git_sync import init as git_sync_init
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="main.py",
-        description="HANOON Single-Focus Institutional Scalper — IB Gateway Edition v3.5",
+        description="HANOON Life Engine — IB Gateway scalp + swing (Smart Stack)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 QUICK START:
@@ -55,7 +55,7 @@ EXAMPLES:
     parser.add_argument("--mode", choices=["warmup", "trade", "evaluate", "scalper",
                                             "advanced-train", "fusion-trade",
                                             "fusion-backtest", "replay-live"], required=True,
-                         help="scalper: HANOON | replay-live: fake-live from CSV | warmup: train PPO | "
+                         help="scalper: Life Engine (scalp+swing) | replay-live: CSV replay | warmup: train PPO | "
                               "trade: PPO live | evaluate: backtest | advanced-train: train all AI models | "
                               "fusion-trade: multi-model AI trade | fusion-backtest: multi-model backtest")
     parser.add_argument("--algo", choices=["ppo", "scalper", "fusion"], default=None,
