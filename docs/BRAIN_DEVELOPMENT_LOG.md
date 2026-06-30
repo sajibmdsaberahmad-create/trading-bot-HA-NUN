@@ -77,6 +77,7 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 06:00 UTC` **engineering** — Companion pipeline + PPO↔Halim coevolution v2 + replay war relax — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30 06:30 UTC` **engineering** — Forced fix journaling (git pre-commit + Cursor hook) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30 07:00 UTC` **engineering** — Halim entry await + proxy skip balance + repeat-loser gates — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+- `2026-06-30 07:30 UTC` **engineering** — Descriptive auto-commit + journal repair — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30 06:17 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 12%, source heuristic_fallback
 - `2026-06-30 06:17 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 2272 pairs
 - `2026-06-30 06:17 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 12%, source heuristic_fallback
