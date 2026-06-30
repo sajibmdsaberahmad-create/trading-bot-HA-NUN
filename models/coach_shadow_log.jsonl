@@ -5428,3 +5428,14 @@
 {"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":16041.0,"shadow_only":true,"timestamp":"2026-06-30T12:25:18.934737+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1397.0,"shadow_only":true,"timestamp":"2026-06-30T12:25:19.696370+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":400.0,"shadow_only":true,"timestamp":"2026-06-30T12:25:21.681823+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":0.7964383561643836,"shadow_only":true,"timestamp":"2026-06-30T12:27:45.450581+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1.281446530207868,"shadow_only":true,"timestamp":"2026-06-30T12:27:48.561486+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1.291917670144252,"shadow_only":true,"timestamp":"2026-06-30T12:27:55.782984+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1.291917670144252,"shadow_only":true,"timestamp":"2026-06-30T12:28:00.125242+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2519.0,"shadow_only":true,"timestamp":"2026-06-30T12:28:24.039900+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1.235628966692735,"shadow_only":true,"timestamp":"2026-06-30T12:28:53.993138+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1.235628966692735,"shadow_only":true,"timestamp":"2026-06-30T12:28:57.450591+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1.235628966692735,"shadow_only":true,"timestamp":"2026-06-30T12:29:00.984296+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1.235628966692735,"shadow_only":true,"timestamp":"2026-06-30T12:29:04.230811+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":12266.0,"shadow_only":true,"timestamp":"2026-06-30T12:29:08.005832+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":10124.0,"shadow_only":true,"timestamp":"2026-06-30T12:29:11.719168+00:00"}
