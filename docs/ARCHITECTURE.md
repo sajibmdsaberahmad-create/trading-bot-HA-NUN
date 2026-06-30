@@ -17,7 +17,9 @@ core/
   smart_stack.py         Life Engine hub — sensors → PPO → Halim → blend → war
   ai_commander.py        Council prompts, spike decisions, learning export
   account_view.py        IB-grounded equity / day P&L display
-  entry_pipeline.py      IB-confirmed entry fill detection
+  entry_pipeline.py      IB entry fill, poll state, ext-hours price mode
+  position_sync.py       Multi-slot IB share/entry sync
+  git_sync_defer.py      Session git push deferral policy
   config.py              BotConfig — tunable parameters
   broker.py              IB bracket orders
   git_sync.py            Learning artifact sync (delegates defer to git_sync_defer)
