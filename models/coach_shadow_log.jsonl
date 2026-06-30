@@ -4505,3 +4505,4 @@
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.757,"shadow_only":true,"timestamp":"2026-06-30T10:55:08.116689+00:00"}
 {"ticker":"GVH","reason":"profit_prob_below_80pct","scan_score":80.2,"spike_ratio":1816.0,"shadow_only":true,"timestamp":"2026-06-30T10:55:10.942022+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":2.621614712558348,"shadow_only":true,"timestamp":"2026-06-30T10:55:11.402002+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.1542084082521546,"shadow_only":true,"timestamp":"2026-06-30T10:55:15.449785+00:00"}
