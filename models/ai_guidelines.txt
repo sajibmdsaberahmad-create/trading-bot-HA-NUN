@@ -24,3 +24,15 @@ Halim heuristic dev plan — WR 0%
   - MIN_PROFIT_PROBABILITY → 0.65 (Halim dev: raise profit probability gate)
   - SCAN_INTERVAL_SECONDS → 49 (Halim dev: slow scan cadence after heavy losses)
 
+🧭 COMMANDER LEARNING | 2026-06-30T18:17:15.712196+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.68 (trade WR 17% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.62 (below teacher floor — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-30 18:17 UTC
+Diagnosis: Local teacher: 17% WR on 6 trades. 0 stop exits. Repeat tickers (adapt entry, do not ban): 
+- Repeat-loss tickers: require micro forecast + profit_probability before re-entry
+- Penalize PPO micro-fast when council confidence is neutral (50%)
+- Widen stops or delay entry when instant stop hits dominate (hold_sec=0)

@@ -1,15 +1,15 @@
 {
-  "last_export": "2026-06-30T17:40:35.211186+00:00",
-  "dataset_pairs": 1885,
-  "last_evolution": "2026-06-30T17:40:37.322853+00:00",
+  "last_export": "2026-06-30T18:17:15.291970+00:00",
+  "dataset_pairs": 1896,
+  "last_evolution": "2026-06-30T18:17:17.159078+00:00",
   "last_trigger": "cli",
   "device_profile": "m2_8gb",
-  "evolution_count": 44,
+  "evolution_count": 45,
   "birth_at": "2026-06-27T06:29:59.402563+00:00",
-  "stage": "adult",
+  "stage": "child",
   "api_usage_today": {
     "day": "2026-06-30",
     "decision": 7
   },
-  "_notify_stage": "adult"
+  "_notify_stage": "child"
 }
