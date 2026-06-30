@@ -4091,3 +4091,12 @@
 {"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":0.8050232685464003,"shadow_only":true,"timestamp":"2026-06-30T10:35:42.390091+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.6677261613691932,"shadow_only":true,"timestamp":"2026-06-30T10:35:44.837313+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.6677261613691932,"shadow_only":true,"timestamp":"2026-06-30T10:35:48.814931+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1.131563171436908,"shadow_only":true,"timestamp":"2026-06-30T10:35:51.104041+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.6677261613691932,"shadow_only":true,"timestamp":"2026-06-30T10:35:53.434332+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1.131563171436908,"shadow_only":true,"timestamp":"2026-06-30T10:35:55.705357+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.6677261613691932,"shadow_only":true,"timestamp":"2026-06-30T10:35:57.831344+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1.4168227273932996,"shadow_only":true,"timestamp":"2026-06-30T10:36:00.097630+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":0.7354453735327602,"shadow_only":true,"timestamp":"2026-06-30T10:36:02.175474+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.6677261613691932,"shadow_only":true,"timestamp":"2026-06-30T10:36:02.674442+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.6393609025880442,"shadow_only":true,"timestamp":"2026-06-30T10:36:04.804398+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.2692278548126033,"shadow_only":true,"timestamp":"2026-06-30T10:36:06.922212+00:00"}
