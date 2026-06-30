@@ -354,8 +354,8 @@ class ScalperEntryMixin:
             })
         self._position_slots[ticker] = slot
         try:
-            from core.war_account import record_entry, war_account_enabled
-            if war_account_enabled(self.cfg):
+            from core.war_account import record_entry, war_ledger_applies
+            if war_ledger_applies(self.cfg):
                 record_entry(
                     self.cfg,
                     ticker=ticker,
@@ -914,8 +914,8 @@ class ScalperEntryMixin:
         entry_px: float,
     ) -> Dict[str, Any]:
         try:
-            from core.war_account import rescale_decision_for_war, war_account_enabled
-            if war_account_enabled(self.cfg):
+            from core.war_account import rescale_decision_for_war, war_ledger_applies
+            if war_ledger_applies(self.cfg):
                 return rescale_decision_for_war(
                     self.cfg, decision, entry_px, ticker=ticker,
                 )
