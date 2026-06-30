@@ -194,15 +194,12 @@ def _merge_proxy_training_decisions(
     return combined
 
 
-def _build_feature_matrix(
+def _build_feature_rows(
     cfg: BotConfig,
     decisions: List[Dict[str, Any]],
     buffer: List[Dict[str, Any]],
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Join Ollama entry decisions with experience-buffer feature snapshots.
-    Returns X, y_enter (0/1), sample_weights.
-    """
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[Dict[str, Any]]]:
+    """Like _build_feature_matrix but returns per-row metadata for holdout splits."""
     entries_by_ticker: Dict[str, List[Dict]] = {}
     trades_by_ticker: Dict[str, List[Dict]] = {}
     all_feats_by_ticker: Dict[str, List[Dict]] = {}
@@ -220,6 +217,7 @@ def _build_feature_matrix(
     rows_x: List[np.ndarray] = []
     rows_y: List[int] = []
     weights: List[float] = []
+    meta: List[Dict[str, Any]] = []
 
     obs_dim = cfg.WINDOW_SIZE * cfg.N_FEATURES + 2 + N_EXTRA
 
@@ -240,7 +238,6 @@ def _build_feature_matrix(
         if feat_rec is None and dec["enter"]:
             continue
         if feat_rec is None:
-            # Skip decisions: use zero base + verdict scan/spike when available
             base = np.zeros(cfg.WINDOW_SIZE * cfg.N_FEATURES, dtype=np.float32)
             cash, pos = 0.9, 0.0
             spike = float(dec.get("spike_ratio", 1.0))
@@ -286,10 +283,86 @@ def _build_feature_matrix(
         rows_x.append(vec)
         rows_y.append(1 if dec["enter"] else 0)
         weights.append(w)
+        meta.append({"ts": ts, "ticker": str(ticker).upper()})
 
     if not rows_x:
-        return np.zeros((0, obs_dim)), np.zeros(0), np.zeros(0)
-    return np.vstack(rows_x), np.array(rows_y, dtype=np.int32), np.array(weights, dtype=np.float32)
+        return np.zeros((0, obs_dim)), np.zeros(0), np.zeros(0), []
+    return np.vstack(rows_x), np.array(rows_y, dtype=np.int32), np.array(weights, dtype=np.float32), meta
+
+
+def _build_feature_matrix(
+    cfg: BotConfig,
+    decisions: List[Dict[str, Any]],
+    buffer: List[Dict[str, Any]],
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Join Ollama entry decisions with experience-buffer feature snapshots.
+    Returns X, y_enter (0/1), sample_weights.
+    """
+    X, y, w, _meta = _build_feature_rows(cfg, decisions, buffer)
+    return X, y, w
+
+
+def _holdout_masks(
+    meta: List[Dict[str, Any]],
+    *,
+    time_frac: float = 0.2,
+    ticker_frac: float = 0.2,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Time-ordered and ticker holdout masks (True = test row)."""
+    n = len(meta)
+    time_mask = np.zeros(n, dtype=bool)
+    ticker_mask = np.zeros(n, dtype=bool)
+    if n < 10:
+        return time_mask, ticker_mask
+
+    order = sorted(range(n), key=lambda i: meta[i].get("ts", 0))
+    n_time = max(1, int(n * time_frac))
+    for i in order[-n_time:]:
+        time_mask[i] = True
+
+    tickers = sorted({m.get("ticker", "") for m in meta if m.get("ticker")})
+    if len(tickers) >= 3:
+        n_hold = max(1, int(len(tickers) * ticker_frac))
+        held = set(tickers[-n_hold:])
+        for i, m in enumerate(meta):
+            if m.get("ticker") in held:
+                ticker_mask[i] = True
+    return time_mask, ticker_mask
+
+
+def _effective_proxy_accuracy(
+    clf: Any,
+    Xs: np.ndarray,
+    y: np.ndarray,
+    meta: List[Dict[str, Any]],
+    random_test_acc: float,
+) -> Dict[str, Any]:
+    time_mask, ticker_mask = _holdout_masks(meta)
+    min_hold = int(os.getenv("HYBRID_DISTILL_HOLDOUT_MIN_SAMPLES", "8"))
+
+    time_acc = None
+    if time_mask.sum() >= min_hold:
+        time_acc = float(clf.score(Xs[time_mask], y[time_mask]))
+
+    ticker_acc = None
+    if ticker_mask.sum() >= min_hold:
+        ticker_acc = float(clf.score(Xs[ticker_mask], y[ticker_mask]))
+
+    holdout_accs = [a for a in (time_acc, ticker_acc) if a is not None]
+    if holdout_accs:
+        effective = min(holdout_accs)
+    else:
+        effective = random_test_acc
+
+    return {
+        "random_test_accuracy": round(random_test_acc, 4),
+        "time_holdout_accuracy": round(time_acc, 4) if time_acc is not None else None,
+        "ticker_holdout_accuracy": round(ticker_acc, 4) if ticker_acc is not None else None,
+        "holdout_accuracy": round(effective, 4),
+        "time_holdout_n": int(time_mask.sum()),
+        "ticker_holdout_n": int(ticker_mask.sum()),
+    }
 
 
 def _obs_to_vector(
