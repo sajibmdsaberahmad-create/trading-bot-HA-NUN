@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from core.scalper_mixin_imports import *  # noqa: F403
 
-import numpy as np
-import pandas as pd
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from core.config import BotConfig
 from core.notify import log
