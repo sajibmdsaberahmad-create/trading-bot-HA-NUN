@@ -238,10 +238,23 @@ def apply_smart_war_entry(
     prob = float(
         out.get("profit_probability")
         or out.get("ollama_profit_probability")
+        or out.get("quality_conf")
         or 0.0
     )
     eff_min_conf = min_conf + float(posture.get("conf_bump", 0))
     eff_min_prob = min_prob + float(posture.get("prob_bump", 0))
+
+    if strict_profit_prob_enabled(cfg):
+        if out.get("quality_enter") is False or (
+            prob > 0 and prob < eff_min_prob
+        ):
+            out["enter"] = False
+            out["reason"] = (
+                f"war:profit_prob {prob:.0%} < {eff_min_prob:.0%} "
+                f"({posture.get('note', '')})"
+            )[:200]
+            out["pipeline"] = "war:profit_prob_veto"
+            return out
 
     pipe = str(out.get("pipeline", ""))
     # Scanner timeout allowed when blend confidence clears war bar
@@ -438,6 +451,10 @@ def build_halim_local_entry(
     profit_prob = float(quality.get("profit_probability", 0.5) or 0.5)
     min_prob = effective_min_profit_probability(cfg) if cfg else 0.62
     base_conf = float(ppo_conf or 0.5)
+    enter_ok = bool(quality.get("enter_ok", True))
+    strict_prob = strict_profit_prob_enabled(cfg)
+    prob_floor = min_prob if strict_prob else min_prob * 0.85
+    prob_strong = min_prob if strict_prob else min_prob * 0.90
 
     def _out(
         enter: bool,
@@ -475,8 +492,12 @@ def build_halim_local_entry(
                 max(base_conf, h_conf * 0.5),
             )
         enter = h_enter and h_conf >= min_conf * 0.80
-        if not enter and h_enter and scan_score >= 45 and profit_prob >= min_prob * 0.88:
+        if not enter and h_enter and scan_score >= 45 and profit_prob >= (
+            min_prob if strict_prob else min_prob * 0.88
+        ):
             enter = True
+        if enter and strict_prob and not enter_ok:
+            enter = False
         if enter:
             return _out(
                 True, "halim:local_lead",
@@ -497,16 +518,18 @@ def build_halim_local_entry(
             pending=True,
         )
 
-    # Quality-led sniper (cloud off / Halim slow) — preserve hunt speed
+  # Quality-led sniper (cloud off / Halim slow) — preserve hunt speed
     quality_flash = (
         scan_score >= 35
         and spike_ratio >= 1.20
-        and profit_prob >= min_prob * 0.85
+        and profit_prob >= prob_floor
+        and (enter_ok or not strict_prob)
     )
     quality_strong = (
         scan_score >= 42
         and spike_ratio >= 1.15
-        and profit_prob >= min_prob * 0.90
+        and profit_prob >= prob_strong
+        and (enter_ok or not strict_prob)
     )
     if quality_flash or quality_strong:
         pipe = "halim:quality_flash" if quality_flash else "halim:quality_lead"
@@ -520,6 +543,15 @@ def build_halim_local_entry(
         )
 
     if ppo_action == 1 and base_conf >= min_conf:
+        if strict_prob and (not enter_ok or profit_prob < min_prob):
+            return _out(
+                False, "halim:ppo_blocked_prob",
+                (
+                    f"PPO buy {base_conf:.0%} blocked: prob={profit_prob:.0%} "
+                    f"(need {min_prob:.0%})"
+                ),
+                base_conf,
+            )
         return _out(
             True, "halim:ppo_lead",
             f"PPO buy {base_conf:.0%} (Halim {h_status})",
@@ -531,6 +563,7 @@ def build_halim_local_entry(
         and scan_score >= 48
         and profit_prob >= min_prob
         and spike_ratio >= 1.18
+        and (enter_ok or not strict_prob)
     ):
         return _out(
             True, "halim:spike_quality",
