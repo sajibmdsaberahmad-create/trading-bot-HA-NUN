@@ -771,6 +771,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             return 0.0
     def _live_price_for(self, ticker: str, fallback: float) -> float:
         """Best available price: live tick stream, then cache, then IB snapshot — never cross-ticker."""
+        from core.fill_tracker import sanitize_quote_price
         from core.position_context import slot_price_sane
 
         t = (ticker or "").upper()
@@ -779,17 +780,26 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         def _ok(px: float) -> bool:
             return px > 0 and (fb <= 0 or slot_price_sane(fb, px))
 
+        def _clean(px: float) -> float:
+            if px <= 0:
+                return 0.0
+            fc = self._last_micro_forecast.get(t, {})
+            pred = float(fc.get("pred_1bar") or 0)
+            return sanitize_quote_price(px, ref_px=fb, pred_px=pred, symbol=t)
+
         dm = self._target_monitors.get(t)
         if dm:
             live = dm.get_latest_price()
-            if live and _ok(float(live)):
-                return float(live)
+            if live:
+                px = _clean(float(live))
+                if _ok(px):
+                    return px
         df = self._scan_data_cache.get(t)
         if df is not None and len(df) > 0:
-            px = float(df["close"].iloc[-1])
+            px = _clean(float(df["close"].iloc[-1]))
             if _ok(px):
                 return px
-        snap = self._force_price_snapshot(t)
+        snap = self._force_price_snapshot(t, ref_px=fb)
         if _ok(snap):
             return snap
         return fb if fb > 0 else 0.0
@@ -806,28 +816,56 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         except Exception as exc:
             log.debug(f"Bid/ask snapshot {ticker}: {exc}")
             return None, None
-    def _force_price_snapshot(self, ticker: str) -> float:
-        """IB market snapshot when tick stream appears frozen."""
+    def _force_price_snapshot(self, ticker: str, *, ref_px: float = 0.0) -> float:
+        """IB market snapshot when tick stream appears frozen — rate-limited per ticker."""
+        t = (ticker or "").upper()
+        if not t:
+            return 0.0
+        now = time.time()
+        cooldown = float(getattr(self.cfg, "PRICE_SNAPSHOT_COOLDOWN_SEC", 8.0))
+        if now < self._snapshot_cooldown_until.get(t, 0):
+            cached = self._last_snapshot_px.get(t, 0.0)
+            if cached > 0:
+                return cached
         try:
-            contract = self.conn.get_contract(ticker)
-            ticks = self.ib.reqMktData(contract, "", False, False)
-            self.ib.sleep(0.12)
-            for attr in ("last", "close", "marketPrice"):
-                raw = getattr(ticks, attr, None)
-                if raw and float(raw) > 0:
-                    px = float(raw)
-                    break
-            else:
-                bid = float(ticks.bid) if ticks.bid and ticks.bid > 0 else 0.0
-                ask = float(ticks.ask) if ticks.ask and ticks.ask > 0 else 0.0
-                px = (bid + ask) / 2 if bid > 0 and ask > 0 else 0.0
-            self.ib.cancelMktData(contract)
+            from core.fill_tracker import sanitize_quote_price, snapshot_market_price
+            raw = snapshot_market_price(self.ib, t)
+            if raw <= 0:
+                contract = self.conn.get_contract(t)
+                ticks = self.ib.reqMktData(contract, "", False, False)
+                self.ib.sleep(0.12)
+                for attr in ("last", "close", "marketPrice"):
+                    val = getattr(ticks, attr, None)
+                    if val and float(val) > 0:
+                        raw = float(val)
+                        break
+                else:
+                    bid = float(ticks.bid) if ticks.bid and ticks.bid > 0 else 0.0
+                    ask = float(ticks.ask) if ticks.ask and ticks.ask > 0 else 0.0
+                    raw = (bid + ask) / 2 if bid > 0 and ask > 0 else 0.0
+                self.ib.cancelMktData(contract)
+            if raw <= 0:
+                return 0.0
+            bar_ref = ref_px
+            if bar_ref <= 0:
+                df = self._scan_data_cache.get(t)
+                if df is not None and len(df) > 0:
+                    bar_ref = float(df["close"].iloc[-1])
+            fc = self._last_micro_forecast.get(t, {})
+            pred = float(fc.get("pred_1bar") or 0)
+            px = sanitize_quote_price(raw, ref_px=bar_ref, pred_px=pred, symbol=t)
+            self._snapshot_cooldown_until[t] = now + cooldown
+            prev = self._last_snapshot_px.get(t, 0.0)
+            self._last_snapshot_px[t] = px
             if px > 0:
-                dm = self._target_monitors.get(ticker)
+                dm = self._target_monitors.get(t)
                 if dm is not None:
                     dm.last_tick_price = px
-                log.info(f"  📡 Price snapshot refresh {ticker}: ${px:.4f}")
-                return px
+                if prev <= 0 or abs(px - prev) / max(prev, 0.01) > 0.002:
+                    log.info(f"  📡 Price snapshot refresh {t}: ${px:.4f}")
+                else:
+                    log.debug(f"  📡 Price snapshot refresh {t}: ${px:.4f} (unchanged)")
+            return px
         except Exception as exc:
             log.debug(f"Price snapshot {ticker}: {exc}")
         return 0.0
