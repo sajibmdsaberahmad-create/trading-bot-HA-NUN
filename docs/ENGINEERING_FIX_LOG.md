@@ -223,6 +223,29 @@ grep -c PPO_LEAD_WHILE scripts/start_hanoon.sh  # expect 1
 
 ---
 
+## 2026-06-30 — Structural module extractions (final org pass)
+
+### Problem
+`scalper_runner.py` and `git_sync.py` still monolithic; entry poll state duplicated; defer policy buried in 2.5k-line git module.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/git_sync_defer.py` | Session defer policy, checkpoint queue, replay batching |
+| `core/git_sync.py` | Re-exports defer API; registers shutdown flush hook |
+| `core/position_sync.py` | `repair_slot_entry_price`, `sync_position_slots_from_ib` |
+| `core/entry_pipeline.py` | `new_entry_poll_state`, `entry_price_mode_for_session`, `stuck_entry_limit_px` |
+| `core/scalper_runner.py` | Delegates to extracted modules (no behavior change) |
+| `docs/CLEANUP_AND_ORGANIZATION_2026-06-30.md` | Complete session cleanup report |
+
+### Verify
+```bash
+venv/bin/pytest tests/ -q
+python3 -c "from core.git_sync_defer import should_defer_git_push; from core.position_sync import sync_position_slots_from_ib"
+```
+
+---
+
 ## 2026-06-30 — War replay ledger isolation (code)
 
 ### Problem
