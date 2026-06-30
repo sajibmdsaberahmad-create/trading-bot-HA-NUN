@@ -449,9 +449,10 @@ def merge_entry_decision(
             except Exception:
                 min_prob_eff = min_prob
                 min_conf_eff = min_conf
+            min_prob_base = min_prob
             if (
                 enter_ok
-                and profit_prob >= min_prob_eff
+                and profit_prob >= min_prob_base
                 and scan_score >= timeout_min_scan * 0.8
                 and spike_ratio >= 1.12
             ):
@@ -467,7 +468,7 @@ def merge_entry_decision(
                         )[:200],
                     })
                 elif (
-                    profit_prob >= min_prob_eff + 0.06
+                    profit_prob >= min_prob_base + 0.05
                     and scan_score >= 48
                     and spike_ratio >= 1.15
                     and ppo_conf >= min_conf_eff * 0.85

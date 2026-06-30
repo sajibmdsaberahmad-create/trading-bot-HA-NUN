@@ -47,7 +47,9 @@ python3 -m pytest tests/test_ai_sure_entry.py tests/test_position_entry_price.py
 # Live: green spike → Halim local teacher:halim_echo_quality OR halim:ai_sure_escalate pending
 # Council force-clear → may enter via council:ai_sure_quality_timeout when prob green
 # INTC spike blocked or priced ~$14 not $140; snapshot log ≤1 per 8s per ticker
+# AI-sure timeout uses base min_prob (not war-bumped) so 90% green passes when war trips elevated floor
 ```
+
 
 ---
 
