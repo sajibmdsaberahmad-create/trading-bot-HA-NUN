@@ -254,6 +254,12 @@ def analyze_swing_web(sym: str, cfg: Optional["BotConfig"] = None) -> Dict[str, 
 
 def _score_analysis(tech: Dict, ib: Dict, macro: Dict, web: Dict) -> Dict[str, Any]:
     """Composite swing score — advisory; execution PnL from IB only."""
+    try:
+        from core.swing_train import apply_policy_to_min_score as apply_policy_min_score
+    except Exception:
+        def apply_policy_min_score() -> float:
+            return float(os.getenv("SWING_INTEL_MIN_SCORE", "28"))
+
     score = 0.0
     reasons: List[str] = []
     bias = str(tech.get("bias", "hold"))
@@ -298,7 +304,7 @@ def _score_analysis(tech: Dict, ib: Dict, macro: Dict, web: Dict) -> Dict[str, A
         reasons.append("healthy_atr")
 
     confidence = min(1.0, max(0.0, (score + 20) / 80.0))
-    enter = bias == "long" and score >= float(os.getenv("SWING_INTEL_MIN_SCORE", "28"))
+    enter = bias == "long" and score >= apply_policy_min_score()
     return {
         "score": round(score, 2),
         "confidence": round(confidence, 3),
