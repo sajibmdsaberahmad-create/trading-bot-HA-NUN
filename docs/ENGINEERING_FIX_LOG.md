@@ -10,6 +10,45 @@
 
 ---
 
+## 2026-07-01 — IB Truth hub: entire bot sources positions/PnL from IB Gateway
+
+### Problem
+War ledger, bot_nav, coach session PnL, and position intel could diverge from IB (ghost exits like TZA -$3,212, stale war slots, $3.5k paper cap vs $1k intent). User required **IB Gateway as single source of truth** for all programs — not war-only.
+
+### Root cause
+Fragmented IB fetches across `account_view`, `position_intel`, `war_account`, `fill_reconciler` with local ledger fiction when slots missing. `record_exit` trusted bogus `pnl_usd_ib` on ghost exits. `WAR_CAPITAL_USD` defaulted to $3,500 in `start_hanoon.sh`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_truth.py` | **New** — central IB snapshot: account, positions, portfolio, FIFO fills, session PnL; `refresh()` + `apply_to_runner()` |
+| `core/war_ib_sync.py` | War virtual $1k pool synced from IB Truth; reconcile report |
+| `core/account_view.py` | Session PnL/equity from IB Truth snapshot |
+| `core/position_intel.py` | Positions/unrealized from IB Truth |
+| `core/scalper_runner.py` | `_refresh_account_balance` → `ib_truth.refresh` + war sync each tick |
+| `core/war_account.py` | Ghost exit PnL cap/skip; `ensure_war_account(ib=)`; $1k default |
+| `core/system_status.py` | IB Truth fields in status dump |
+| `scripts/reconcile_ib_truth.py` | CLI reconcile + `--apply` war sync |
+| `scripts/start_hanoon.sh` | `WAR_CAPITAL_USD=1000`, `WAR_IB_SYNC=true` |
+| `tests/test_ib_truth.py` | FIFO PnL, ghost exit guard, $1k cap |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `REQUIRE_IB_FILL_SYNC` | `true` | Master switch — IB Truth on for entire bot |
+| `WAR_IB_SYNC` | `true` | War ledger positions/session PnL from IB on refresh |
+| `WAR_CAPITAL_USD` | `1000` | Virtual war pool for sizing (not full IB NAV) |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_truth.py tests/test_war_multi_position.py -q
+python3 scripts/reconcile_ib_truth.py          # report only (needs IB Gateway)
+python3 scripts/reconcile_ib_truth.py --apply  # rewrite war state from IB
+# Live: bot_nav == IB NetLiq; positions from IB; war nav ~$1k pool
+```
+
+---
+
 ## 2026-07-01 — Halim echo blocks green spikes + INTC 10x quote + snapshot spam
 
 ### Problem

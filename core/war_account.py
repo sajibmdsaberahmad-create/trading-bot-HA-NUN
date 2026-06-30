@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
-core/war_account.py — Economic truth layer: virtual war ledger for paper + live.
+core/war_account.py — Virtual war ledger for sizing/settlement on a $1k pool.
 
-The bot believes ONLY this ledger for sizing, settlement, fees, and mode — never
-raw IB paper ~$900k. Modes: WAR_ACTIVE | LAB_ACTIVE | OBSERVE | LIVE_WAR.
-
-    Paper: war $1k (WAR_CAPITAL_USD) + optional lab pool when war is T+1 dry.
-    Live: same rules; operating capital from WAR_LIVE_OPERATING_CAPITAL (not full IB NAV).
-    Positions/PnL sync from IB Gateway when WAR_IB_SYNC=true (see core/war_ib_sync.py).
+War pool sizes entries and trip caps — never raw IB paper ~$900k NAV.
+Positions and session PnL sync from IB Gateway via core/ib_truth.py + war_ib_sync.
+Modes: WAR_ACTIVE | LAB_ACTIVE | OBSERVE | LIVE_WAR.
 """
 
 from __future__ import annotations
