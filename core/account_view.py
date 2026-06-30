@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-core/account_view.py — Single source for display equity and session P&L.
+core/account_view.py — Display equity and session P&L from IB Truth.
 
-IB NetLiquidation is economic truth when fill sync is on; war account sizes entries;
-bot_nav is internal bookkeeping only.
+All bots/AI/Telegram read through here. IB Gateway is economic truth when
+REQUIRE_IB_FILL_SYNC=true (default). War virtual $1k pool sizes entries only.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
 
 from core.fill_tracker import require_ib_fill_sync
+from core.ib_truth import day_pnl_from_snapshot, get_snapshot, ib_truth_enabled
 
 if TYPE_CHECKING:
     from core.config import BotConfig
@@ -18,8 +19,15 @@ if TYPE_CHECKING:
 
 
 def day_pnl_ib(runner: "ScalperRunner") -> Tuple[float, float]:
-    """Session P&L from IB NetLiquidation change."""
-    ib_start = float(getattr(runner, "_ib_starting_balance", 0) or runner.account_equity)
+    """Session P&L from IB Truth (RTH FIFO fills, else NetLiq delta since RTH open)."""
+    rth_start = float(getattr(runner, "_rth_starting_balance", 0) or 0)
+    ib_start = rth_start or float(
+        getattr(runner, "_ib_starting_balance", 0) or runner.account_equity
+    )
+    if ib_truth_enabled(getattr(runner, "cfg", None)):
+        snap = get_snapshot()
+        if snap.refreshed_at > 0:
+            return day_pnl_from_snapshot(snap, ib_start)
     equity = float(getattr(runner, "account_equity", 0) or 0)
     change = equity - ib_start
     pct = (change / ib_start * 100.0) if ib_start > 0 else 0.0
@@ -73,6 +81,9 @@ def account_summary(runner: "ScalperRunner") -> Dict[str, Any]:
     cfg = getattr(runner, "cfg", None)
     pnl_usd, pnl_pct = day_pnl(runner, cfg)
     ib_chg, ib_pct = day_pnl_ib(runner)
+    snap = get_snapshot()
+    ib_realized = snap.account.realized_pnl if snap.refreshed_at > 0 else 0.0
+    ib_unrealized = snap.account.unrealized_pnl if snap.refreshed_at > 0 else 0.0
     return {
         "equity": round(display_equity(runner, cfg), 2),
         "sizing_equity": round(sizing_equity(runner, cfg), 2),
@@ -82,8 +93,12 @@ def account_summary(runner: "ScalperRunner") -> Dict[str, Any]:
         "day_pnl_pct": round(pnl_pct, 2),
         "ib_change": round(ib_chg, 2),
         "ib_change_pct": round(ib_pct, 2),
+        "ib_realized_pnl": round(ib_realized, 2),
+        "ib_unrealized_pnl": round(ib_unrealized, 2),
+        "ib_fifo_session_pnl": round(snap.session_pnl_fifo, 2) if snap.refreshed_at > 0 else 0.0,
         "cash": round(
             float(getattr(runner, "available_cash", 0) or getattr(runner, "bot_cash", 0) or 0),
             2,
         ),
+        "ib_truth": snap.refreshed_at > 0,
     }
