@@ -167,7 +167,7 @@ def assess_multi_bar_ride(
         "expected_upside_pct": round(expected, 5),
         "ride_confidence": ride_score,
         "bars_held": bars_held,
-        "max_bars": max_bars,
+        "max_bars": max_bars_n,
         "profit_run": profit_run,
         "pred_3bar": pred_3,
     }
@@ -188,6 +188,11 @@ def assess_dynamic_exit(
     ppo_conf: float = 0.5,
     ai_exit: bool = False,
     ai_stalled: bool = False,
+    slip_profit_thr: Optional[float] = None,
+    slip_loss_thr: Optional[float] = None,
+    slip_any_thr: Optional[float] = None,
+    max_ride_bars: Optional[int] = None,
+    min_profit_run: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     Unified exit: multi-bar ride when profitable path clear; rapid book on slippage/fade;
@@ -207,15 +212,17 @@ def assess_dynamic_exit(
         micro=micro,
         bars_held=bars_held,
         slippage_risk=slippage,
+        max_bars=max_ride_bars,
+        min_profit_run=min_profit_run,
     )
 
     should_exit = False
     reason = ""
     action = "hold"
 
-    slip_profit_thr = _env_float("GREEN_SLIPPAGE_EXIT_PROFIT", 0.62)
-    slip_loss_thr = _env_float("GREEN_SLIPPAGE_EXIT_LOSS", 0.52)
-    slip_any_thr = _env_float("GREEN_SLIPPAGE_EXIT_ANY", 0.78)
+    slip_profit_thr = slip_profit_thr if slip_profit_thr is not None else _env_float("GREEN_SLIPPAGE_EXIT_PROFIT", 0.62)
+    slip_loss_thr = slip_loss_thr if slip_loss_thr is not None else _env_float("GREEN_SLIPPAGE_EXIT_LOSS", 0.52)
+    slip_any_thr = slip_any_thr if slip_any_thr is not None else _env_float("GREEN_SLIPPAGE_EXIT_ANY", 0.78)
 
     # --- Loss side: minimize damage early ---
     if pnl_pct < 0 and slippage_exit_enabled(cfg):

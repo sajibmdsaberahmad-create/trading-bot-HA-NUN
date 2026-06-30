@@ -345,6 +345,20 @@ def analyze_swing(
     web = analyze_swing_web(sym, cfg)
     verdict = _score_analysis(tech, ib, macro, web)
     try:
+        from core.swing_doctrine import assess_swing_entry, swing_doctrine_enabled
+        if swing_doctrine_enabled(cfg):
+            se = assess_swing_entry(cfg, runner, sym, analysis={"technical": tech, "verdict": verdict})
+            verdict = {**verdict, "swing_doctrine": se}
+            if not se.get("enter_ok"):
+                verdict = {
+                    **verdict,
+                    "enter": False,
+                    "reasons": list(verdict.get("reasons", [])) + ["swing_doctrine_block"],
+                }
+            return  # skip legacy green block below when swing doctrine handles it
+    except Exception:
+        pass
+    try:
         from core.green_trade_doctrine import green_entry_mandatory, assess_green_entry
         if green_entry_mandatory(cfg):
             bars_1h = _fetch_bars(runner, sym.upper(), "1 hour", "5 D")
