@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-06-30` **engineering** — Pre-market PreSubmitted fix: ext-hours limit entries + stuck limit retries — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Learning flywheel hardening: outcome PPO teacher, proxy holdout eval, brain stage quality gates, Halim promotion gate, balanced PPO reward sampling — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 
 - `2026-06-27 06:33 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=100% (645 samples)
