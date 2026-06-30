@@ -55,7 +55,17 @@ def is_strong_spike_setup(
     return float(scan_score) >= min_sc and float(spike_ratio) >= min_sp
 
 
+def _ai_sure_blocks_fast_paths(cfg: Optional[BotConfig]) -> bool:
+    try:
+        from core.smart_stack import ai_sure_entry_enabled
+        return ai_sure_entry_enabled(cfg)
+    except Exception:
+        return False
+
+
 def allows_spike_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     if capital_discipline_enabled(cfg):
         return False
     cfg = cfg or BotConfig()
@@ -68,6 +78,8 @@ def allows_disciplined_spike_fast(
     spike_ratio: float = 0.0,
 ) -> bool:
     """PPO-led entry on elite spikes while capital discipline stays on."""
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     cfg = cfg or BotConfig()
     if not capital_discipline_enabled(cfg):
         return allows_spike_fast_entry(cfg)
@@ -77,6 +89,8 @@ def allows_disciplined_spike_fast(
 
 
 def allows_micro_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     if capital_discipline_enabled(cfg):
         return False
     cfg = cfg or BotConfig()
@@ -118,6 +132,8 @@ def allows_timeout_fallback_entry(
     scan_score: float = 0.0,
     spike_ratio: float = 0.0,
 ) -> bool:
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     try:
         from core.war_entry_gates import war_blocks_scanner_timeout, war_gates_active
         if war_gates_active(cfg) and war_blocks_scanner_timeout(cfg):
@@ -134,6 +150,8 @@ def allows_timeout_fallback_entry(
 
 
 def requires_council_alignment(cfg: Optional[BotConfig] = None) -> bool:
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     return capital_discipline_enabled(cfg)
 
 
