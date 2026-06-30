@@ -468,6 +468,11 @@ def save_state(state: Dict[str, Any]) -> None:
 def _append_ledger(row: Dict[str, Any]) -> None:
     if is_replay_session():
         return
+    try:
+        from core.trade_horizon import active_order_horizon, tag_record
+        tag_record(row, row.get("horizon") or active_order_horizon())
+    except Exception:
+        pass
     LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(LEDGER_PATH, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(row, separators=(",", ":"), default=str) + "\n")

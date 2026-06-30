@@ -150,6 +150,26 @@ class BrokerExecutor:
         """
         if not self._session_allows_orders("bracket"):
             raise RuntimeError("Market session closed — bracket entry blocked")
+        sym = (symbol or self.cfg.TICKER or "").upper()
+        try:
+            from core.ib_extended import what_if_margin_allows
+            allowed, preview = what_if_margin_allows(
+                self.ib, self.conn, sym, quantity, limit_px=limit_or_market_price, cfg=self.cfg,
+            )
+            if not allowed:
+                raise RuntimeError(
+                    f"IB what-if margin block {sym}: need ${preview.get('init_margin_change', 0):,.0f} "
+                    f"avail ${preview.get('available_funds', 0):,.0f}"
+                )
+            if preview.get("ok"):
+                log.info(
+                    f"What-if {sym} x{quantity}: marginΔ=${preview.get('init_margin_change', 0):+,.0f} "
+                    f"comm=${preview.get('commission', 0):,.2f}"
+                )
+        except RuntimeError:
+            raise
+        except Exception as exc:
+            log.debug(f"What-if margin check skipped: {exc}")
         if should_defer_bracket_children(self.cfg):
             return self._place_parent_only_buy(
                 quantity=quantity,
