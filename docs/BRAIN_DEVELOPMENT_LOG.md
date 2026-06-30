@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-06-30` **engineering** — Defer git push during live session (default off; flush on shutdown) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — IB fill sync: confirmed entries/exits, IB-grounded P&L (no orphan position phantom profits) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Pre-market PreSubmitted fix: ext-hours limit entries + stuck limit retries — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Learning flywheel hardening: outcome PPO teacher, proxy holdout eval, brain stage quality gates, Halim promotion gate, balanced PPO reward sampling — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -731,3 +732,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 12:01 UTC` **git_auto** — sync: 25 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +22 more | halim=3 models=17 docs=1 other=4 | brain=adult 
 - `2026-06-30 12:01 UTC` **git_auto** — sync: 10 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +7 more | halim=1 models=4 docs=1 other=4 | brain=adult da
 - `2026-06-30 12:02 UTC` **git_auto** — sync: 12 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +9 more | halim=2 models=5 docs=1 other=4 | brain=adult da
+- `2026-06-30 12:02 UTC` **git_auto** — sync: 14 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +11 more | halim=1 models=8 docs=1 other=4 | brain=adult d

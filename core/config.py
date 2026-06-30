@@ -1005,9 +1005,9 @@ class BotConfig:
     LEARNING_PUSH_ON_TRADE: bool = os.getenv(
         "LEARNING_PUSH_ON_TRADE", "true"
     ).lower() in ("1", "true", "yes")
-    # HANOON session: defer git pushes (shutdown hook still syncs). Standalone daemon handles live pushes.
+    # HANOON session: defer git pushes (shutdown hook still syncs). Standalone daemon handles off-hours pushes.
     GIT_PUSH_DURING_SESSION: bool = os.getenv(
-        "GIT_PUSH_DURING_SESSION", "true"
+        "GIT_PUSH_DURING_SESSION", "false"
     ).lower() in ("1", "true", "yes")
     GIT_AUTO_WATCH_IN_BOT: bool = False        # Never watch from HANOON — use start_git_sync.sh
     GIT_AUTO_WATCH_ENABLED: bool = os.getenv(

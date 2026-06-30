@@ -1552,15 +1552,22 @@ def is_replay_live() -> bool:
     return os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
 
 
+def _git_session_push_enabled() -> bool:
+    """True when HANOON may flush batched learning pushes while the scalper is running."""
+    if is_replay_live():
+        return False
+    if cfg_bot is not None:
+        return bool(getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False))
+    return os.getenv("GIT_PUSH_DURING_SESSION", "false").lower() in ("1", "true", "yes")
+
+
 def _batch_checkpoints_enabled() -> bool:
     """Collapse many checkpoint reasons into one debounced push (live) or end flush (replay)."""
     if is_replay_live():
         return True
     if os.getenv("GIT_BATCH_CHECKPOINTS", "true").lower() in ("0", "false", "no"):
         return False
-    if cfg_bot is not None and getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
-        return True
-    return os.getenv("GIT_PUSH_DURING_SESSION", "true").lower() in ("1", "true", "yes")
+    return _git_session_push_enabled()
 
 
 def _should_defer_git_push(category: str = "general") -> bool:
@@ -1578,6 +1585,8 @@ def _should_defer_git_push(category: str = "general") -> bool:
         return True
     if cfg_bot is not None and not getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
         return True
+    if not _git_session_push_enabled():
+        return True
     return False
 
 
@@ -1594,6 +1603,8 @@ def _queue_batched_checkpoint(reason: str) -> None:
 def _schedule_batched_checkpoint_flush() -> None:
     """Live only — reset debounce timer; replay waits for teardown flush."""
     if is_replay_live():
+        return
+    if not _git_session_push_enabled():
         return
     global _checkpoint_flush_timer
     delay = float(os.getenv("GIT_CHECKPOINT_DEBOUNCE_SEC", "180"))
