@@ -33,6 +33,7 @@ Legacy fallbacks ran during RTH even when IB snapshot was fresh; macro tick did 
 | `core/scalper_session.py` | Close/daily reports use `account_view.day_pnl` |
 | `core/daily_self_evaluation.py` | Day PnL from `account_view` |
 | `core/scanner.py` | Held tickers from truth snapshot |
+| `core/account_evaluator.py` | Open/close snapshots use `get_snapshot()` positions + open orders (no `reqPositions`/`reqAllOpenOrders`) |
 
 ### Env vars
 | Var | Default | Effect |

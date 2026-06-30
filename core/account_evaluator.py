@@ -384,42 +384,47 @@ class AccountEvaluator:
         return None
 
     def _ib_positions(self, runner: "ScalperRunner") -> List[Dict]:
-        out = []
         try:
-            runner.ib.reqPositions()
-            runner.ib.sleep(0.3)
-            for p in runner.ib.positions():
-                qty = float(p.position)
-                if abs(qty) < 0.5:
-                    continue
-                out.append({
-                    "symbol": getattr(p.contract, "symbol", "?"),
-                    "shares": qty,
-                    "avg_cost": round(float(getattr(p, "avgCost", 0) or 0), 4),
-                })
+            from core.ib_truth import get_snapshot, refresh
+            ib = getattr(runner, "ib", None)
+            if ib is not None:
+                refresh(ib, getattr(runner, "cfg", None), force=False)
+            snap = get_snapshot()
+            if snap.refreshed_at > 0:
+                return [
+                    {
+                        "symbol": p.symbol,
+                        "shares": p.qty,
+                        "avg_cost": round(p.avg_cost, 4),
+                        "unrealized_pnl": round(p.unrealized_pnl, 2),
+                    }
+                    for p in snap.positions
+                ]
         except Exception as exc:
             log.debug(f"IB positions snapshot: {exc}")
-        return out
+        return []
 
     def _open_orders(self, runner: "ScalperRunner") -> List[Dict]:
-        out = []
         try:
-            runner.ib.reqAllOpenOrders()
-            runner.ib.sleep(0.3)
-            for t in runner.ib.openTrades():
-                st = t.orderStatus.status if t.orderStatus else "?"
-                if st in ("Filled", "Cancelled", "Inactive"):
-                    continue
-                out.append({
-                    "symbol": getattr(t.contract, "symbol", "?"),
-                    "action": getattr(t.order, "action", "?"),
-                    "qty": float(getattr(t.order, "totalQuantity", 0) or 0),
-                    "type": type(t.order).__name__,
-                    "status": st,
-                })
+            from core.ib_truth import get_snapshot
+            snap = get_snapshot()
+            if snap.refreshed_at > 0:
+                return [
+                    {
+                        "symbol": o.symbol,
+                        "action": o.action,
+                        "qty": o.qty,
+                        "type": o.order_type,
+                        "status": o.status,
+                        "lmt": o.lmt_price,
+                        "stop": o.aux_price,
+                    }
+                    for o in snap.open_orders
+                    if o.status not in ("Filled", "Cancelled", "Inactive")
+                ][:15]
         except Exception as exc:
             log.debug(f"Open orders snapshot: {exc}")
-        return out[:15]
+        return []
 
     def _pilot_level(self, runner: "ScalperRunner") -> str:
         try:
