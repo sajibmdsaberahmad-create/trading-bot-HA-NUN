@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
-  "improvements_applied": 2673,
+  "improvements_applied": 2674,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:00.218452",
-      "age": "7d 19h 57m 11s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-2.07",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:00:01.951181",
       "age": "7d 19h 57m 13s",
@@ -12283,6 +12276,20 @@
         "applied": [],
         "lessons": [
           "Review order_timeout on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T09:31:11.380680",
+      "age": "8d 22h 28m 22s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2674",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on PLTR"
         ]
       }
     }
