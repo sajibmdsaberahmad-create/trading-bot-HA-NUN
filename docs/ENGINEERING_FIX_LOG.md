@@ -10,6 +10,36 @@
 
 ---
 
+## 2026-06-30 — Halim live entry ship + replay API budgets
+
+### Problem
+Halim entry line did not participate reliably on live/replay: LM outputs often unparseable, coevolution `halim_signal` null on success paths, decision API cap too low for replay training, health monitor wrong path.
+
+### Root cause
+Missing live await + echo parser; verdict dict dropped blend stamps; `brain_maturity` caps; monitor hit `/health` not `/v1/health`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_entry_line.py` | Live/replay await, JSON prompt, training-echo parser, supersede rings |
+| `core/ai_commander.py` | `_entry_verdict()` stamp merge on all finalize paths; INFO await outcomes |
+| `core/halim_ppo_coevolution.py` | `merge_coevolution_stamps()`, `enrich_decision_halim_peek()` |
+| `core/brain_maturity.py` | `REPLAY_DECISION_API_DAILY=48`, `LIVE_DECISION_API_DAILY=16` |
+| `scripts/halim_env.sh` | `HALIM_ENTRY_AWAIT_SEC`, live await, LM timeout/token limits |
+| `scripts/monitor_replay_health.sh` | `/v1/health` fallback after `/health` |
+
+### Env
+- `HALIM_ENTRY_AWAIT_SEC=4.5`, `HALIM_ENTRY_AWAIT_LIVE=true`
+- `REPLAY_DECISION_API_DAILY=48`, `LIVE_DECISION_API_DAILY=16`
+
+### Verify
+```bash
+rg "Halim entry fresh|\\+halim\\+" logs/REPLAY_SCALPER.log | tail -20
+./scripts/monitor_replay_health.sh
+```
+
+---
+
 ## 2026-06-30 — IB connectivity cleanup + detailed journal
 
 ### Problem
