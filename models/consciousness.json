@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
-  "improvements_applied": 2669,
+  "improvements_applied": 2670,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T06:59:02.363163",
-      "age": "7d 19h 56m 13s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$+4.96",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T06:59:03.588915",
       "age": "7d 19h 56m 14s",
@@ -12269,6 +12262,20 @@
         "applied": [],
         "lessons": [
           "Review order_timeout on SOFI"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T08:49:19.695914",
+      "age": "8d 21h 46m 31s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2670",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on PLTR"
         ]
       }
     }

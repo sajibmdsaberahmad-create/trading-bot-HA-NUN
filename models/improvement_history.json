@@ -153,5 +153,14 @@
     "lessons": [
       "Review order_timeout on SOFI"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T08:49:19.713629+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on PLTR"
+    ]
   }
 ]
