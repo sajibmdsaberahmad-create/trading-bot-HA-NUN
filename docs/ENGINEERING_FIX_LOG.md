@@ -10,6 +10,38 @@
 
 ---
 
+## 2026-07-01 — IB 322 market rules + reqTickers cancel noise at boot
+
+### Problem
+Light IB extended refresh at boot flooded logs: `Error 322 Market rule with id = … is missing`, `reqMarketRuleAsync: Timeout`, and `cancelMktData: No reqId found` for held symbols (SPY, QQQ, …). Logger showed `hanoon` instead of preferred `HANOON`.
+
+### Root cause
+1. `fetch_market_rules()` called `reqMarketRule(conId)` for every held contract — paper Gateway often has no market rules (IB error 322).
+2. `fetch_quote_snapshots()` called `cancelMktData` after `reqTickers` snapshot pulls — snapshots never allocate a streaming reqId.
+3. Connector logged 322 as WARNING on every conId.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_extended.py` | `market_rules_enabled()` — off on paper unless `IB_EXTENDED_MARKET_RULES=true`; skip `fetch_market_rules` when disabled; drop post-`reqTickers` `cancelMktData` |
+| `core/connector.py` | Downgrade IB 322 to DEBUG (early return) |
+| `core/notify.py` | Logger name back to `HANOON` |
+| `tests/test_ib_extended.py` | Paper default + env override tests |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `IB_EXTENDED_MARKET_RULES` | *(unset)* | Paper: skip market rules; live: fetch; `true`/`false` forces |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_extended.py -q
+# Boot paper Gateway — no 322 WARNING spam; extended refresh still logs pnl/contracts
+# Log prefix: `HANOON | INFO` not `hanoon |`
+```
+
+---
+
 ## 2026-07-01 — Startup logs: Life Engine banner (scalp + swing)
 
 ### Problem
@@ -19,7 +51,7 @@ Boot logs showed `HANOON | HANOON | mode=SCALPER | ticker=SPY | capital=$1,000` 
 | File | Change |
 |------|--------|
 | `core/startup_log.py` | `log_launch_banner`, `build_session_ready_lines`, phase-aware `capital_line` |
-| `core/notify.py` | Logger name `hanoon` (no duplicate prefix) |
+| `core/notify.py` | Logger name `HANOON` (no duplicate prefix in message text) |
 | `main.py` | Structured launch block instead of one-line SCALPER log |
 | `core/scalper_session.py` | `SESSION READY · scalp + swing` banner |
 | `scripts/start_hanoon.sh` | Shell banner text |

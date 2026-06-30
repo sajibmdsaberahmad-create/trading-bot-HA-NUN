@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — IB 322 market-rule noise suppressed; logger `HANOON` — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — IB Truth startup checklist (fresh snapshot before loop) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Swing doctrine: maturity-scaled green entry/exit + summary doc — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [GREEN_CAPITAL_SWING_DOCTRINE.md](GREEN_CAPITAL_SWING_DOCTRINE.md)
 - `2026-07-01` **engineering** — Multi-bar ride + slippage-aware exit (book profit / cut loss early) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -1992,3 +1993,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:59 UTC` **git_auto** — sync: 4 files — BRAIN_DEVELOPMENT_LOG.md, halim_constitution.json, hanoon.env.enc +1 more | models=1 other=3 | brain=toddler dataset=106 evo
 - `2026-06-30 22:00 UTC` **git_auto** — sync: 16 files — BRAIN_DEVELOPMENT_LOG.md, ib_report_events.jsonl, 0dbc1fe34c91c315.json +13 more | halim=10 models=3 other=3 | brain=toddle
 - `2026-06-30 22:00 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=106 evolutions=52
+- `2026-06-30 22:01 UTC` **git_auto** — sync: 7 files — connector.py, ib_extended.py, notify.py +4 more | docs=1 core=2 other=4 | brain=toddler dataset=106 evolutions=52
