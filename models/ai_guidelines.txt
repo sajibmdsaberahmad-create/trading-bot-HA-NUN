@@ -133,3 +133,11 @@ bracket_exit
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-30T16:22:53.581096+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:giveback +8.21% (peak +15519.14% gave back 15510.93%)
+
+🧭 COMMANDER LEARNING | 2026-06-30T16:22:53.581065+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +8.21% (peak +15519.14% gave back 15510.93%)
+
