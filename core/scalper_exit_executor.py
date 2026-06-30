@@ -1201,7 +1201,7 @@ class ScalperExitMixin:
         pulse_ctx = {
             "ticker": ticker,
             "price": current_px,
-            "pnl_usd": round((current_px - self._entry_price) * self.shares, 2),
+            "pnl_usd": round((current_px - self._entry_price) * shares, 2),
             "pnl_pct": round(((current_px / self._entry_price) - 1) * 100, 2),
             "stop": self._position_stop,
             "target": self._position_target,
