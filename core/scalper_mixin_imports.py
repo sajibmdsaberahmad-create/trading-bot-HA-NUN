@@ -36,7 +36,7 @@ from core.data import DataManager, coalesce_bars
 from core.deferred_council_learning import deferred_learning_enabled
 from core.config import BotConfig
 from core.entry_pipeline import (
-    confirm_entry_fill_from_ib as _confirm_entry_fill,
+    confirm_entry_fill_from_ib,
     entry_price_mode_for_session,
     new_entry_poll_state,
     stuck_entry_limit_px,
