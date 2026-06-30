@@ -12,13 +12,11 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from core.logger import get_logger
+from core.notify import log
 from core.ib_truth import get_snapshot, ib_truth_context
 
 if TYPE_CHECKING:
     from core.config import BotConfig
-
-log = get_logger(__name__)
 
 HORIZON_SCALP = "scalp"
 HORIZON_SWING = "swing"

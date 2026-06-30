@@ -11,14 +11,12 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from core.logger import get_logger
+from core.notify import log
 from core.ib_truth import get_snapshot, refresh
 from core.trade_horizon import HORIZON_SWING, swing_shadow_enabled, tag_record
 
 if TYPE_CHECKING:
     from core.config import BotConfig
-
-log = get_logger(__name__)
 
 VERDICT_PATH = Path(__file__).resolve().parent.parent / "models" / "swing_shadow_verdicts.jsonl"
 SCAN_INTERVAL_SEC = float(os.getenv("SWING_SHADOW_INTERVAL_SEC", "900"))
