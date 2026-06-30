@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
-  "improvements_applied": 2668,
+  "improvements_applied": 2669,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T06:58:19.341699",
-      "age": "7d 19h 55m 30s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+7.72",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T06:59:02.363163",
       "age": "7d 19h 56m 13s",
@@ -12264,6 +12257,20 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #223",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T08:47:16.292155",
+      "age": "8d 21h 44m 27s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2669",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on SOFI"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T08:43:51.902837",
