@@ -9,6 +9,33 @@
 **Enforced:** `scripts/git-hooks/pre-commit` blocks commits that touch `core/`, `halim/halim/`, `scripts/*.sh`, or `.cursor/rules/` without a new dated section here. Install: `./scripts/install_git_hooks.sh`. Cursor `afterFileEdit` hook reminds agents. Emergency bypass: `SKIP_FIX_JOURNAL=1` (document ASAP).
 
 ---
+
+## 2026-06-30 — Scalper mixin missing imports (require_ib_fill_sync NameError)
+
+### Problem
+HANOON crashed on startup after monolith split: `NameError: name 'require_ib_fill_sync' is not defined` in `scalper_entry_executor._ib_sync_enabled` during `_refresh_account_balance()`.
+
+### Root cause
+Mixin extraction moved methods into separate modules but only copied a minimal header — symbols resolved from `scalper_runner.py` module scope were no longer in scope for mixin method globals.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_mixin_imports.py` | **New** — shared imports for all scalper mixins |
+| `core/scalper_entry_executor.py` | `from core.scalper_mixin_imports import *` |
+| `core/scalper_exit_executor.py` | same |
+| `core/scalper_session.py` | same |
+| `core/scalper_spike_loop.py` | same |
+| `scripts/extract_scalper_mixins.py` | MIXIN_HEADER includes shared imports |
+
+### Verify
+```bash
+python3 -c "from core.scalper_runner import ScalperRunner"
+python3 -m pytest tests/ -q
+```
+
+---
+
 ## 2026-06-30 — War AI sizing (full pool deploy, advisory bullets)
 
 ### Problem
