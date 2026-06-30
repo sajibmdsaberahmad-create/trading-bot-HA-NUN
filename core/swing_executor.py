@@ -72,16 +72,18 @@ def _symbols_for_swing(runner: Any, cfg: Optional["BotConfig"]) -> List[str]:
     return _symbols_for_scan(runner, cfg)
 
 
-def _swing_signal(runner: Any, sym: str) -> Dict[str, Any]:
-    from core.swing_shadow import _simple_swing_signal
-    dm = getattr(runner, "data_manager", None)
-    if dm is None:
-        return {"bias": "hold", "strength": 0.0}
-    try:
-        bars = dm.get_bars(sym, "1 hour", duration="5 D")
-    except Exception:
-        bars = []
-    return _simple_swing_signal(bars or [])
+def _swing_signal(runner: Any, sym: str, cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
+    from core.swing_intel import analyze_swing
+    cfg = cfg or getattr(runner, "cfg", None)
+    analysis = analyze_swing(runner, cfg, sym, log_row=True)
+    return {
+        "bias": analysis.get("bias", "hold"),
+        "strength": float(analysis.get("strength", 0) or 0),
+        "confidence": float(analysis.get("confidence", 0) or 0),
+        "enter": bool(analysis.get("enter")),
+        "reason": analysis.get("reason", "swing_intel"),
+        "analysis": analysis,
+    }
 
 
 def _size_swing_shares(runner: Any, cfg: "BotConfig", px: float) -> int:
@@ -115,6 +117,8 @@ def try_swing_ib_entry(
         return None
     sym = sym.upper()
     if signal.get("bias") != "long":
+        return None
+    if not signal.get("enter") and float(signal.get("confidence", 0) or 0) < _min_signal_strength():
         return None
     if float(signal.get("strength", 0) or 0) < _min_signal_strength():
         return None
@@ -162,8 +166,10 @@ def try_swing_ib_entry(
         "target": tgt_px,
         "opened_at": now,
         "ib_fill_confirmed": False,
-        "swing_signal": signal.get("reason", ""),
-    }
+            "swing_signal": signal.get("reason", ""),
+            "swing_confidence": signal.get("confidence", 0),
+            "swing_analysis_ts": time.time(),
+        }
     runner._position_slots[sym] = slot
 
     row = tag_learning_row(
@@ -208,7 +214,7 @@ def run_swing_ib_cycle(
 
     placed = 0
     for sym in _symbols_for_swing(runner, cfg):
-        signal = _swing_signal(runner, sym)
+        signal = _swing_signal(runner, sym, cfg)
         if try_swing_ib_entry(runner, cfg, sym, signal):
             placed += 1
     return placed
