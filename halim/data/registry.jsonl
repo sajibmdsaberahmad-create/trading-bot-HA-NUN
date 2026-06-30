@@ -1805,3 +1805,4 @@
 {"timestamp":"2026-06-30T10:02:43.830436+00:00","event":"capability_milestone","capability":"chat","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T10:02:43.830553+00:00","event":"capability_milestone","capability":"chat","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T10:02:43.830626+00:00","event":"capability_milestone","capability":"chat","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T10:05:36.339309+00:00","event":"export_action_gold","added":9,"skipped":13382}
