@@ -155,6 +155,19 @@ def _fetch_macro_context() -> Dict:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "source": "unavailable",
         }
+    summary: Dict = {
+        "spy_trend": "unknown",
+        "qqq_trend": "unknown",
+        "spy_pct": 0.0,
+        "qqq_pct": 0.0,
+        "spy_price": 0.0,
+        "qqq_price": 0.0,
+        "vix_level": 0.0,
+        "vix_regime": "low",
+        "risk_tone": "neutral",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "source": "yahoo",
+    }
     yf = _try_import_yfinance()
     try:
         spy = _symbol_snapshot("SPY", yf)

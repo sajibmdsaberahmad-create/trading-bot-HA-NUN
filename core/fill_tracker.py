@@ -178,11 +178,37 @@ def position_avg_cost(ib, symbol: str) -> float:
     return entry
 
 
+def _truth_long_position(symbol: str):
+    """IB Truth position row when snapshot is fresh."""
+    sym = (symbol or "").upper()
+    if not sym:
+        return None
+    try:
+        from core.ib_truth import get_snapshot, ib_truth_enabled
+        if not ib_truth_enabled():
+            return None
+        snap = get_snapshot()
+        if snap.refreshed_at <= 0:
+            return None
+        return snap.long_positions().get(sym)
+    except Exception:
+        return None
+
+
 def _ib_position_cost(ib, symbol: str) -> Tuple[float, float]:
     """Return (raw_avg_cost, contract_multiplier) for a long position."""
     sym = (symbol or "").upper()
     if not sym:
         return 0.0, 1.0
+    pos = _truth_long_position(sym)
+    if pos is not None and pos.avg_cost > 0:
+        return float(pos.avg_cost), max(float(pos.multiplier or 1), 1.0)
+    try:
+        from core.ib_truth import ib_truth_enabled
+        if ib_truth_enabled():
+            return 0.0, 1.0
+    except Exception:
+        pass
     try:
         for p in ib.positions():
             if getattr(p.contract, "symbol", "").upper() == sym:
@@ -315,6 +341,15 @@ def ib_position_shares(ib, symbol: str) -> float:
     sym = (symbol or "").upper()
     if not sym:
         return 0.0
+    pos = _truth_long_position(sym)
+    if pos is not None:
+        return float(pos.qty) if pos.qty > 0 else 0.0
+    try:
+        from core.ib_truth import ib_truth_enabled
+        if ib_truth_enabled():
+            return 0.0
+    except Exception:
+        pass
     try:
         for p in ib.positions():
             if getattr(p.contract, "symbol", "").upper() == sym:
