@@ -1,11 +1,11 @@
 {
-  "total_xp": 24340,
+  "total_xp": 24395,
   "level": "Veteran",
-  "flights_completed": 258,
-  "flights_flown": 775,
-  "takeoffs": 775,
-  "landings": 258,
-  "hours_flown": 25.800000000000097,
+  "flights_completed": 259,
+  "flights_flown": 776,
+  "takeoffs": 776,
+  "landings": 259,
+  "hours_flown": 25.900000000000098,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -41,7 +41,8 @@
     "TNM": 12,
     "INL": 6,
     "KND": 2,
-    "INT": 2
+    "INT": 2,
+    "HXH": 1
   },
   "aircraft_type": "PPO-Transformer-LSTM",
   "license_class": "Basic",
