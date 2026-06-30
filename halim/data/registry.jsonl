@@ -2947,3 +2947,15 @@
 {"timestamp":"2026-06-30T19:24:32.686383+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:24:32.686625+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:24:32.686677+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.287744+00:00","event":"capability_milestone","capability":"notify","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.287853+00:00","event":"capability_milestone","capability":"notify","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.287926+00:00","event":"capability_milestone","capability":"notify","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.287981+00:00","event":"capability_milestone","capability":"notify","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.427551+00:00","event":"capability_milestone","capability":"text_compose","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.427744+00:00","event":"capability_milestone","capability":"text_compose","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.428031+00:00","event":"capability_milestone","capability":"text_compose","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.428120+00:00","event":"capability_milestone","capability":"text_compose","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.541743+00:00","event":"capability_milestone","capability":"chat","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.541932+00:00","event":"capability_milestone","capability":"chat","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.542010+00:00","event":"capability_milestone","capability":"chat","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:39.542077+00:00","event":"capability_milestone","capability":"chat","level_pct":100,"phase":"toddler"}
