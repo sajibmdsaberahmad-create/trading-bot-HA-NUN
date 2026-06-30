@@ -170,19 +170,118 @@ def recent_execution_fill(
 
 
 def position_avg_cost(ib, symbol: str) -> float:
-    """IB position avgCost as entry-fill fallback."""
+    """IB position avgCost as entry-fill fallback (raw — prefer position_entry_price)."""
+    entry, _ = _ib_position_cost(ib, symbol)
+    return entry
+
+
+def _ib_position_cost(ib, symbol: str) -> Tuple[float, float]:
+    """Return (raw_avg_cost, contract_multiplier) for a long position."""
     sym = (symbol or "").upper()
     if not sym:
-        return 0.0
+        return 0.0, 1.0
     try:
         for p in ib.positions():
             if getattr(p.contract, "symbol", "").upper() == sym:
                 avg = float(getattr(p, "avgCost", 0) or 0)
+                mult = float(getattr(p.contract, "multiplier", 1) or 1)
                 if avg > 0:
-                    return avg
+                    return avg, max(mult, 1.0)
     except Exception:
         pass
-    return 0.0
+    return 0.0, 1.0
+
+
+def snapshot_market_price(
+    ib,
+    symbol: str,
+    *,
+    exchange: str = "SMART",
+    currency: str = "USD",
+    wait: float = 0.12,
+) -> float:
+    """One-shot IB quote for entry/avgCost sanity checks."""
+    sym = (symbol or "").upper()
+    if not sym:
+        return 0.0
+    try:
+        from ib_insync import Stock
+
+        qualified = ib.qualifyContracts(Stock(sym, exchange, currency))
+        if not qualified:
+            return 0.0
+        contract = qualified[0]
+        ticks = ib.reqMktData(contract, "", False, False)
+        ib.sleep(wait)
+        px = 0.0
+        for attr in ("last", "close", "marketPrice"):
+            raw = getattr(ticks, attr, None)
+            if raw and float(raw) > 0:
+                px = float(raw)
+                break
+        if px <= 0:
+            bid = float(ticks.bid) if ticks.bid and ticks.bid > 0 else 0.0
+            ask = float(ticks.ask) if ticks.ask and ticks.ask > 0 else 0.0
+            if bid > 0 and ask > 0:
+                px = (bid + ask) / 2
+        ib.cancelMktData(contract)
+        return px if px > 0 else 0.0
+    except Exception as exc:
+        log.debug(f"snapshot_market_price {sym}: {exc}")
+        return 0.0
+
+
+def normalize_ib_avg_cost(
+    raw_avg: float,
+    *,
+    market_px: float = 0.0,
+    multiplier: float = 1.0,
+) -> float:
+    """Reconcile IB avgCost with live quote — fixes 10x paper avgCost drift."""
+    if raw_avg <= 0:
+        return 0.0
+    base = raw_avg / max(float(multiplier or 1), 1.0)
+    if market_px <= 0:
+        return base
+    if 0.85 <= (base / market_px) <= 1.15:
+        return base
+    best = base
+    best_err = abs(base / market_px - 1.0)
+    for factor in (10.0, 0.1, 100.0, 0.01):
+        for candidate in (base * factor, base / factor):
+            if candidate <= 0:
+                continue
+            err = abs(candidate / market_px - 1.0)
+            if err < best_err and 0.5 <= candidate / market_px <= 2.0:
+                best, best_err = candidate, err
+    if best_err > 0.35 and base / market_px > 2.0:
+        log.warning(
+            f"  🔧 IB avgCost ${raw_avg:.4f} vs market ${market_px:.4f} "
+            f"— using market for entry"
+        )
+        return market_px
+    if abs(best - base) > 0.0001:
+        log.warning(
+            f"  🔧 IB avgCost normalized ${raw_avg:.4f} → ${best:.4f} "
+            f"(market ${market_px:.4f})"
+        )
+    return best
+
+
+def position_entry_price(
+    ib,
+    symbol: str,
+    *,
+    market_px: float = 0.0,
+) -> float:
+    """Best entry price for an IB-held symbol — normalized avgCost vs market."""
+    raw, mult = _ib_position_cost(ib, symbol)
+    if raw <= 0:
+        return 0.0
+    mkt = float(market_px or 0)
+    if mkt <= 0:
+        mkt = snapshot_market_price(ib, symbol)
+    return normalize_ib_avg_cost(raw, market_px=mkt, multiplier=mult)
 
 
 def ib_position_shares(ib, symbol: str) -> float:

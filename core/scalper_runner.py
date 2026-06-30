@@ -768,18 +768,29 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         except Exception:
             return 0.0
     def _live_price_for(self, ticker: str, fallback: float) -> float:
-        """Best available price: live tick stream, then cache, then fallback."""
-        dm = self._target_monitors.get(ticker)
+        """Best available price: live tick stream, then cache, then IB snapshot — never cross-ticker."""
+        from core.position_context import slot_price_sane
+
+        t = (ticker or "").upper()
+        fb = float(fallback or 0)
+
+        def _ok(px: float) -> bool:
+            return px > 0 and (fb <= 0 or slot_price_sane(fb, px))
+
+        dm = self._target_monitors.get(t)
         if dm:
             live = dm.get_latest_price()
-            if live and live > 0:
+            if live and _ok(float(live)):
                 return float(live)
-        df = self._scan_data_cache.get(ticker)
+        df = self._scan_data_cache.get(t)
         if df is not None and len(df) > 0:
             px = float(df["close"].iloc[-1])
-            if px > 0:
+            if _ok(px):
                 return px
-        return float(fallback)
+        snap = self._force_price_snapshot(t)
+        if _ok(snap):
+            return snap
+        return fb if fb > 0 else 0.0
     def _get_bid_ask(self, ticker: str) -> Tuple[Optional[float], Optional[float]]:
         """Snapshot bid/ask from IB for smart limit entries."""
         try:

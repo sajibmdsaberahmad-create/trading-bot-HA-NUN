@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 from typing import Any, Callable, Dict, Optional, Set
 
-from core.fill_tracker import position_avg_cost
+from core.fill_tracker import position_avg_cost, position_entry_price
 from core.notify import log
 
 
@@ -35,6 +35,15 @@ def repair_slot_entry_price(
         )
         slot["entry_price"] = avg
         slot["entry_fill_px"] = avg
+        return
+    resolved = position_entry_price(ib, ticker, market_px=live_price)
+    if resolved > 0 and 0.85 <= (resolved / live_price) <= 1.15:
+        log.warning(
+            f"  🔧 Entry price repair {ticker}: ${entry:.4f} → ${resolved:.4f} "
+            f"(live ${live_price:.4f})"
+        )
+        slot["entry_price"] = resolved
+        slot["entry_fill_px"] = resolved
 
 
 def ib_long_position_map(ib) -> Dict[str, float]:
@@ -64,8 +73,8 @@ def adopt_ib_positions_into_slots(
         t = ticker.upper()
         if t in skip:
             continue
-        avg = position_avg_cost(ib, t)
-        entry = avg if avg > 0 else 0.0
+        resolved = position_entry_price(ib, t)
+        entry = resolved if resolved > 0 else 0.0
         slot = position_slots.get(t)
         if slot and float(slot.get("shares", 0) or 0) > 0:
             if entry > 0:
@@ -131,10 +140,10 @@ def sync_position_slots_from_ib(
             session_sh = float(slot.get("session_shares", 0) or slot.get("shares", 0))
             slot["shares"] = min(ib_sh, session_sh) if session_sh > 0 else ib_sh
             if slot.get("ib_fill_confirmed"):
-                avg = position_avg_cost(ib, ticker)
-                if avg > 0:
-                    slot["entry_fill_px"] = avg
-                    slot["entry_price"] = avg
+                resolved = position_entry_price(ib, ticker)
+                if resolved > 0:
+                    slot["entry_fill_px"] = resolved
+                    slot["entry_price"] = resolved
         else:
             opened = float(slot.get("opened_at", 0))
             if opened and (now - opened) < grace_sec:
