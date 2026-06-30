@@ -223,6 +223,36 @@ grep -c PPO_LEAD_WHILE scripts/start_hanoon.sh  # expect 1
 
 ---
 
+## 2026-06-30 — War auto-reset at RTH open (ET)
+
+### Problem
+Premarket exhausted war/lab round-trip caps (5/5 + 4/4); RTH spikes blocked in OBSERVE despite settled cash remaining. User had to manually `reset_live_war_session` each morning.
+
+### Root cause
+`_roll_session` only reset on **calendar day** change (midnight), not at **09:30 ET** RTH open on the same day.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `_roll_rth_session()` — fresh capital + zero trips at first RTH check each ET day |
+| `scripts/start_hanoon.sh` | `WAR_AUTO_RESET_AT_RTH=true` (paper $3.5k; live uses `WAR_LIVE_OPERATING_CAPITAL` $1k) |
+| `tests/test_war_account_rth.py` | Unit tests for RTH roll |
+
+### Env
+```bash
+WAR_AUTO_RESET_AT_RTH=true          # default
+WAR_CAPITAL_USD=3500                # paper (change to 1000 via WAR_LIVE_OPERATING_CAPITAL when live)
+WAR_LIVE_OPERATING_CAPITAL=1000     # set when going live
+```
+
+### Verify
+```bash
+venv/bin/pytest tests/test_war_account_rth.py -q
+# At 09:30 ET log: ⚔️ War account RTH reset (ET) — mode=WAR_ACTIVE nav=$3,500 ...
+```
+
+---
+
 ## 2026-06-30 — Structural module extractions (final org pass)
 
 ### Problem

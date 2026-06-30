@@ -894,3 +894,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 13:10 UTC` **git_auto** — sync: 4 files — BRAIN_DEVELOPMENT_LOG.md, macro_context.json, hanoon.env.enc +1 more | models=1 other=3 | brain=child dataset=2542 evolution
 - `2026-06-30 13:10 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=child dataset=2542 evolutions=36
 - `2026-06-30 13:11 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, correction_log.jsonl +2 more | halim=1 docs=1 other=3 | brain=child dataset=2542 e
+- `2026-06-30 13:11 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, start_hanoon.sh +2 more | docs=1 other=4 | brain=child dataset=2542 evolutions=36
