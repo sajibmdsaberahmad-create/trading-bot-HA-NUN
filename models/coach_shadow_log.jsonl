@@ -4064,3 +4064,13 @@
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3108922916745664,"shadow_only":true,"timestamp":"2026-06-30T10:34:29.125417+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.297210515750438,"shadow_only":true,"timestamp":"2026-06-30T10:34:31.286523+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3108922916745664,"shadow_only":true,"timestamp":"2026-06-30T10:34:33.541735+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.297210515750438,"shadow_only":true,"timestamp":"2026-06-30T10:34:35.647887+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3108922916745664,"shadow_only":true,"timestamp":"2026-06-30T10:34:37.814681+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.297210515750438,"shadow_only":true,"timestamp":"2026-06-30T10:34:39.958969+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3108922916745664,"shadow_only":true,"timestamp":"2026-06-30T10:34:42.086279+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.297210515750438,"shadow_only":true,"timestamp":"2026-06-30T10:34:44.236059+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3108922916745664,"shadow_only":true,"timestamp":"2026-06-30T10:34:46.346752+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":0.633643252220591,"shadow_only":true,"timestamp":"2026-06-30T10:34:48.447909+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.297210515750438,"shadow_only":true,"timestamp":"2026-06-30T10:34:48.915048+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3108922916745664,"shadow_only":true,"timestamp":"2026-06-30T10:34:51.040691+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":2.2204176334106727,"shadow_only":true,"timestamp":"2026-06-30T10:34:53.173294+00:00"}
