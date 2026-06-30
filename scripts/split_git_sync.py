@@ -191,8 +191,6 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             body = "".join(learning_consts) + body
         if mod == "git_sync_push" and "_pending_pushes" not in body:
             body = "_pending_pushes: list = []\n_pending_lock = Lock()\n" + body
-        # Rewrite global state refs to S.*
-        body = re.sub(r"^\s*global\s+[^\n]+\n", "", body, flags=re.M)
         body = re.sub(r"\b_enabled\b", "S._enabled", body)
         body = re.sub(r"\b_repo\b", "S._repo", body)
         body = re.sub(r"\b_token\b", "S._token", body)

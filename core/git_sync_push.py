@@ -116,7 +116,6 @@ def _collect_dirty_files(repo_root: str) -> List[str]:
     return tracked[:max_files]
 def _queue_push(message: str, files: Optional[List[str]], category: str) -> bool:
     """Queue a push for the next batch window (non-blocking)."""
-    global _flush_timer
     with _pending_lock:
         _pending_pushes.append({
             "message": message,
@@ -168,7 +167,6 @@ def _build_combined_message(messages: List[str], categories: List[str]) -> str:
 def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: Optional[str] = None) -> bool:
     """Execute the actual git commit and push."""
     with _push_lock:
-        , S._push_count, S._failed_pushes
         target_repo = repo_url or _remote_url()
         if not target_repo:
             log.warning("No target repo for push")
@@ -417,7 +415,6 @@ def _sanitize_github_repos(cfg: BotConfig) -> None:
         setattr(cfg, attr, fixed)
 def _remote_url() -> Optional[str]:
     """Build authenticated remote URL from global state."""
-    , S._token
     if not S._repo:
         return None
     return _github_clone_url(_normalize_github_slug(S._repo), S._token) or None

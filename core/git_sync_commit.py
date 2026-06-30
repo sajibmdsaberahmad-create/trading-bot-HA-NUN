@@ -126,7 +126,6 @@ def record_git_push_event(
     repo: str = "code",
 ) -> None:
     """Append every push to logs/git_sync_journal.jsonl (no Telegram spam)."""
-    global S._git_session_stats
     os.makedirs(os.path.dirname(_GIT_JOURNAL_PATH), exist_ok=True)
     ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     entry = {

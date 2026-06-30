@@ -176,7 +176,6 @@ def push_to_secondary_repo(repo_key: str, files: List[str], message: str, catego
         return False
 def set_global_config(cfg: Any):
     """Set global config reference for repo routing."""
-    global cfg_bot
     cfg_bot = cfg
     _defer.set_defer_config(cfg)
 def flush_batched_git_sync(
@@ -186,7 +185,6 @@ def flush_batched_git_sync(
     force: bool = True,
 ) -> bool:
     """One consolidated learning push from all queued checkpoint reasons."""
-    global _checkpoint_flush_timer, S._last_checkpoint_ts
     if (
         not is_replay_live()
         and not _shutdown_git_reason(summary_reason)
@@ -226,7 +224,6 @@ def flush_replay_session_git_sync(
     report_path: str = "",
 ) -> bool:
     """Single end-of-replay push (after evolution). Replaces per-event triple-repo spam."""
-    
     n = len(_checkpoint_batched_reasons)
     if n:
         log.info(f"📤 Replay session end — 1 git sync ({n} deferred event(s) batched)")
@@ -323,7 +320,6 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
     On bot close: push ALL artifacts to HANOON, Logs, and Grandmaster repos.
     Blocks until complete (synchronous).
     """
-    
     S._last_push_ts = 0  # bypass debounce for shutdown
 
     tag = f"shutdown_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
