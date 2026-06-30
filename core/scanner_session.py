@@ -3,8 +3,8 @@
 core/scanner_session.py — IB market scanner profiles by US session.
 
 RTH codes (MOST_ACTIVE, TOP_PERC_GAIN) return 0 rows after 16:00 ET.
-After-hours requires snapshot scan codes (MOST_ACTIVE_AVG_USD) and/or
-extendedHours on the ScannerSubscription.
+After-hours requires snapshot scan codes (MOST_ACTIVE_AVG_USD).
+IB rejects extendedHours on reqScannerSubscription (error 10337) — use session codes only.
 """
 
 from __future__ import annotations
@@ -76,15 +76,8 @@ def ib_scanner_profile(cfg: Optional[BotConfig] = None) -> ScannerProfile:
     base_per = float(getattr(cfg, "IB_SCANNER_PER_CODE_SEC", 18))
     ext_per = float(getattr(cfg, "IB_SCANNER_EXTENDED_PER_CODE_SEC", 12))
     min_vol = int(getattr(cfg, "IB_SCANNER_MIN_VOLUME", 50_000))
-    use_ext = bool(getattr(cfg, "IB_SCANNER_EXTENDED_HOURS", True))
     major_only = ("STK.US.MAJOR", "STK.US")
     both_locs = ("STK.US.MAJOR", "STK.US")
-
-    ext_opts: Tuple = ()
-    ext_pairs = ""
-    if use_ext and TagValue is not None:
-        ext_opts = (_tag("extendedHours", "1"),)
-        ext_pairs = "extendedHours=1"
 
     if state == "open":
         codes = tuple(c for c in RTH_SCAN_CODES if c in PROFIT_HUNT_SCAN_CODES)

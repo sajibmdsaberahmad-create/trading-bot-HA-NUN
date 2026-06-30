@@ -179,6 +179,20 @@ def should_use_extended_hours_orders(cfg: Optional[BotConfig] = None) -> bool:
     return False
 
 
+def should_defer_bracket_children(cfg: Optional[BotConfig] = None) -> bool:
+    """
+    Outside RTH, IB paper often stalls full brackets in PreSubmitted.
+    Submit parent entry only; attach stop/target after fill.
+    """
+    cfg = cfg or BotConfig()
+    if not getattr(cfg, "EXTENDED_HOURS_DEFER_BRACKET", True):
+        return False
+    state = get_market_state(cfg)
+    if state == "open":
+        return False
+    return is_extended_session(state) and _session_trading_allowed(cfg, state)
+
+
 def format_et(dt: Optional[datetime] = None, fmt: str = "%Y-%m-%d %H:%M:%S %Z") -> str:
     dt = dt or now_et()
     if dt.tzinfo is None:
