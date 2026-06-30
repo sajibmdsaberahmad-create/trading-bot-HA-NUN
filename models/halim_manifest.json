@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T16:19:07.309573+00:00",
+  "updated_at": "2026-06-30T16:55:14.135071+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T16:19:07.177280+00:00",
+    "timestamp": "2026-06-30T16:55:14.046459+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -67,19 +67,19 @@
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.7,
-        "modified": "2026-06-30T16:15:02.805235+00:00"
+        "modified": "2026-06-30T16:53:06.362917+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 10601.4,
-        "modified": "2026-06-30T16:13:55.432178+00:00"
+        "size_kb": 10844.0,
+        "modified": "2026-06-30T16:40:16.039678+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2427.8,
-        "modified": "2026-06-30T16:13:56.929623+00:00"
+        "size_kb": 2503.5,
+        "modified": "2026-06-30T16:39:27.135447+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -106,11 +106,11 @@
     "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 9,
-      "win_rate": 0.111,
-      "avg_pnl": 4.33
+      "count": 5,
+      "win_rate": 0.0,
+      "avg_pnl": -2.53
     },
-    "buffer_records": 7794,
+    "buffer_records": 8321,
     "dataset_pairs": 2081,
     "maturity": {
       "stage": "adult",
@@ -118,7 +118,7 @@
       "stage_count": 6,
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
-        "closed_trades": 2695,
+        "closed_trades": 2700,
         "dataset_pairs": 2081,
         "evolution_count": 37,
         "proxy_accuracy": 1.0,
