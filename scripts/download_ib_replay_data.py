@@ -9,7 +9,7 @@ Usage:
   PYTHONPATH=. python scripts/download_ib_replay_data.py
   PYTHONPATH=. python scripts/download_ib_replay_data.py --tickers SOFI,PLTR --days 30
 
-Uses CLIENT_ID / IB_CLIENT_ID env (default 1) — same as live HANOON. Disconnects when done.
+Uses REPLAY_IB_CLIENT_ID env (default 97) — never client_id=1 (reserved for live HANOON).
 """
 
 from __future__ import annotations
@@ -136,7 +136,9 @@ def main() -> int:
     parser.add_argument("--days", type=int, default=60, help="Calendar days of 1-min history")
     _os = __import__("os")
     _default_cid = int(
-        _os.getenv("CLIENT_ID") or _os.getenv("IB_CLIENT_ID") or "1"
+        _os.getenv("REPLAY_IB_CLIENT_ID")
+        or _os.getenv("IB_RECONCILE_CLIENT_ID")
+        or "97"
     )
     parser.add_argument("--port", type=int, default=int(_os.getenv("IB_PORT", "4002")))
     parser.add_argument("--client-id", type=int, default=_default_cid, dest="client_id")
