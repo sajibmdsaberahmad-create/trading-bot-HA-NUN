@@ -74,7 +74,9 @@ def distillation_status(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         "min_trades": min_trades,
         "full_trades": full_trades,
         "fast_path": bool(state.get("fast_path")),
-        "proxy_accuracy": state.get("proxy_accuracy"),
+        "proxy_accuracy": state.get("proxy_holdout_accuracy", state.get("proxy_accuracy")),
+        "proxy_holdout_accuracy": state.get("proxy_holdout_accuracy"),
+        "proxy_random_accuracy": state.get("proxy_random_accuracy"),
         "last_train": state.get("last_train"),
         "proxy_exists": PROXY_PATH.exists(),
     }
@@ -397,7 +399,7 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
     skips.extend(_load_skip_verdicts())
     decisions = _merge_proxy_training_decisions(enters, skips)
     buffer = _load_buffer_records()
-    X, y, sample_w = _build_feature_matrix(cfg, decisions, buffer)
+    X, y, sample_w, meta = _build_feature_rows(cfg, decisions, buffer)
 
     min_samples = int(getattr(cfg, "HYBRID_DISTILL_MIN_SAMPLES", 30))
     if len(y) < min_samples:
@@ -427,7 +429,9 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
                 "class_counts": {"enter": int(y.sum()), "skip": int(len(y) - y.sum())},
             }
         raise
-    accuracy = float(clf.score(X_test, y_test))
+    random_acc = float(clf.score(X_test, y_test))
+    holdout = _effective_proxy_accuracy(clf, Xs, y, meta, random_acc)
+    accuracy = float(holdout["holdout_accuracy"])
 
     bundle = {
         "scaler_mean": scaler.mean_.tolist(),
@@ -436,6 +440,9 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
         "intercept": clf.intercept_.tolist(),
         "obs_dim": int(X.shape[1]),
         "accuracy": accuracy,
+        "random_test_accuracy": holdout["random_test_accuracy"],
+        "time_holdout_accuracy": holdout["time_holdout_accuracy"],
+        "ticker_holdout_accuracy": holdout["ticker_holdout_accuracy"],
         "samples": int(len(y)),
         "trained_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -445,21 +452,41 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
     state = _load_state()
     state["last_train"] = bundle["trained_at"]
     state["proxy_accuracy"] = accuracy
+    state["proxy_random_accuracy"] = holdout["random_test_accuracy"]
+    state["proxy_holdout_accuracy"] = holdout["holdout_accuracy"]
+    state["proxy_time_holdout_accuracy"] = holdout["time_holdout_accuracy"]
+    state["proxy_ticker_holdout_accuracy"] = holdout["ticker_holdout_accuracy"]
     state["proxy_samples"] = len(y)
     min_acc = float(getattr(cfg, "HYBRID_DISTILL_MIN_ACCURACY", 0.62))
     full_trades = int(getattr(cfg, "HYBRID_DISTILL_FULL_TRADES", 500))
     closed = _count_closed_trades()
-    auto_fast = getattr(cfg, "HYBRID_DISTILL_AUTO_FAST_PATH", True)
-    if auto_fast and accuracy >= min_acc and closed >= full_trades:
+    auto_fast = getattr(cfg, "HYBRID_DISTILL_AUTO_FAST_PATH", False)
+    require_holdout = os.getenv("HYBRID_DISTILL_REQUIRE_HOLDOUT", "true").lower() in (
+        "1", "true", "yes",
+    )
+    holdout_ok = (
+        not require_holdout
+        or holdout["time_holdout_n"] >= int(os.getenv("HYBRID_DISTILL_HOLDOUT_MIN_SAMPLES", "8"))
+        or holdout["ticker_holdout_n"] >= int(os.getenv("HYBRID_DISTILL_HOLDOUT_MIN_SAMPLES", "8"))
+    )
+    if auto_fast and accuracy >= min_acc and closed >= full_trades and holdout_ok:
         state["fast_path"] = True
         log.info(
-            f"⚡ Hybrid fast path ENABLED — proxy acc={accuracy:.0%} | "
-            f"closed_trades={closed} (Ollama skipped on entry, still used for alerts)"
+            f"⚡ Hybrid fast path ENABLED — holdout acc={accuracy:.0%} "
+            f"(random={holdout['random_test_accuracy']:.0%}) | closed_trades={closed}"
         )
+    else:
+        state["fast_path"] = False
+        if auto_fast and accuracy >= min_acc and not holdout_ok:
+            log.info(
+                f"⏸ Fast path withheld — holdout samples thin "
+                f"(time_n={holdout['time_holdout_n']} ticker_n={holdout['ticker_holdout_n']})"
+            )
     _save_state(state)
 
     log.info(
-        f"🎓 Teacher proxy trained — acc={accuracy:.0%} | samples={len(y)} | "
+        f"🎓 Teacher proxy trained — holdout acc={accuracy:.0%} "
+        f"(random={holdout['random_test_accuracy']:.0%}) | samples={len(y)} | "
         f"phase={distillation_status(cfg)['phase']}"
     )
     try:
@@ -471,10 +498,15 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
             "brain_proxy_trained",
             {
                 "accuracy": accuracy,
+                "holdout_accuracy": holdout["holdout_accuracy"],
+                "random_accuracy": holdout["random_test_accuracy"],
                 "samples": len(y),
                 "stage": snap.get("stage"),
                 "fast_path": bool(state.get("fast_path")),
-                "summary": f"Teacher proxy acc={accuracy:.0%} ({len(y)} samples)",
+                "summary": (
+                    f"Teacher proxy holdout acc={accuracy:.0%} "
+                    f"(random={holdout['random_test_accuracy']:.0%}, {len(y)} samples)"
+                ),
             },
         )
     except Exception:
