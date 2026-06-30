@@ -6,7 +6,7 @@ core/position_sync.py — IB-grounded multi-position slot sync (extracted from s
 from __future__ import annotations
 
 import time
-from typing import Any, Callable, Dict, Set
+from typing import Any, Callable, Dict, Optional, Set
 
 from core.fill_tracker import position_avg_cost
 from core.notify import log
@@ -50,15 +50,20 @@ def ib_long_position_map(ib) -> Dict[str, float]:
 def adopt_ib_positions_into_slots(
     ib,
     position_slots: Dict[str, Dict[str, Any]],
+    *,
+    exclude_tickers: Optional[Set[str]] = None,
 ) -> list[str]:
     """Recover IB long holdings into position_slots so monitor/AI can manage after restart."""
     adopted: list[str] = []
+    skip = {str(t).upper() for t in (exclude_tickers or set())}
     ib_map = ib_long_position_map(ib)
     now = time.time()
     for ticker, sh in ib_map.items():
         if sh <= 0:
             continue
         t = ticker.upper()
+        if t in skip:
+            continue
         avg = position_avg_cost(ib, t)
         entry = avg if avg > 0 else 0.0
         slot = position_slots.get(t)

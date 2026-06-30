@@ -521,7 +521,9 @@ class ScalperExitMixin:
             exit_type = "loss_exit"
         if "stop" in reason.lower():
             exit_type = "stop_hit"
-        atr = float(self._last_entry_telemetry.get("atr", 0) or 0)
+        atr = float((getattr(self, "_last_entry_telemetry", None) or {}).get("atr", 0) or 0)
+        if not atr and trade_rec:
+            atr = float(trade_rec.get("atr_at_entry", 0) or 0)
         noise_sec = float(getattr(self.cfg, "REGIME_ATR_NOISE_STOP_SEC", 120.0))
         noise_stop = exit_type == "stop_hit" and hold_sec < noise_sec
         from core.trade_telemetry import _raw_rr

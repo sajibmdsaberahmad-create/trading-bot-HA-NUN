@@ -358,7 +358,7 @@ def push_learning_checkpoint(
         ok = False
         if hanoon_files:
             learn_title = f"learn: {reason} | {tag}"
-            if brain := _brain_snapshot_line():
+            if brain := _gs()._brain_snapshot_line():
                 learn_title += f" | {brain}"
             ok = _gs().push_change(learn_title, files=hanoon_files, category="training") or ok
         if logs_files and _gs()._get_repo_url("logs"):

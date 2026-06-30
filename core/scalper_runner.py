@@ -284,6 +284,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self._last_price_snapshot_at: float = 0.0
         self._last_pulse_fingerprint: str = ""
         self._last_stagnation_decision: Dict[str, Any] = {}
+        self._last_entry_telemetry: Dict[str, Any] = {}
         self._pending_entry_ticker: Optional[str] = None
         self._pending_brackets_by_ticker: Dict[str, BracketHandle] = {}
         self._pending_entry_until: float = 0.0
@@ -1012,7 +1013,13 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             self._sync_position_from_ib()
             return
         try:
-            adopted = adopt_ib_positions_into_slots(self.ib, self._position_slots)
+            pending = {
+                p.ticker.upper()
+                for p in getattr(self, "_pending_closes", {}).values()
+            }
+            adopted = adopt_ib_positions_into_slots(
+                self.ib, self._position_slots, exclude_tickers=pending,
+            )
             for ticker in adopted:
                 self._bind_risk_plan_for_ticker(ticker)
                 try:
