@@ -397,6 +397,50 @@ def _default_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     }
 
 
+def _war_open_deployed_notional(state: Dict[str, Any]) -> float:
+    _normalize_open_positions(state)
+    total = 0.0
+    for slot in (state.get("open_wars") or {}).values():
+        if not isinstance(slot, dict):
+            continue
+        total += int(slot.get("shares", 0) or 0) * float(slot.get("entry", 0) or 0)
+    return total
+
+
+def _reconcile_war_cash_from_positions(
+    state: Dict[str, Any],
+    cfg: Optional[BotConfig] = None,
+) -> None:
+    """Align deployed/settled with open_wars — never leave settled_cash negative."""
+    cfg = cfg or BotConfig()
+    nav = float(
+        state.get("nav", state.get("operating_capital", 0))
+        or operating_capital_usd(cfg)
+    )
+    deployed = _war_open_deployed_notional(state)
+    state["deployed_usd"] = round(deployed, 2)
+    settled = max(0.0, nav - deployed)
+    state["settled_cash"] = round(settled, 2)
+    state["cash"] = round(settled, 2)
+
+
+def _heal_war_cash_ledger(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> bool:
+    """One-shot repair when IB recover used record_entry and overdrew settled."""
+    cfg = cfg or BotConfig()
+    settled = float(state.get("settled_cash", 0))
+    cash = float(state.get("cash", 0))
+    if settled >= -0.01 and cash >= -0.01:
+        return False
+    before = settled
+    _reconcile_war_cash_from_positions(state, cfg)
+    log.warning(
+        f"  ⚠️ War cash heal: settled ${before:,.0f} → "
+        f"${float(state.get('settled_cash', 0)):,.0f} "
+        f"(deployed=${float(state.get('deployed_usd', 0)):,.0f} nav=${float(state.get('nav', 0)):,.0f})"
+    )
+    return True
+
+
 def load_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
     with _state_lock:
@@ -405,6 +449,8 @@ def load_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
                 data = json.loads(STATE_PATH.read_text(encoding="utf-8"))
                 if isinstance(data, dict) and data.get("nav") is not None:
                     _normalize_open_positions(data)
+                    if _heal_war_cash_ledger(data, cfg):
+                        save_state(data)
                     return data
             except Exception:
                 pass
