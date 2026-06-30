@@ -351,6 +351,22 @@ def mtf_entry_caution(
     return False, ""
 
 
+def profit_prob_blocks_entry(
+    cfg: BotConfig,
+    quality: Optional[Dict[str, Any]],
+) -> bool:
+    """Hard block when calculative profit_probability is red (Smart Stack default)."""
+    try:
+        from core.smart_stack import strict_profit_prob_enabled
+        if not strict_profit_prob_enabled(cfg):
+            return False
+    except Exception:
+        return False
+    if not quality:
+        return True
+    return not bool(quality.get("enter_ok", True))
+
+
 def apply_profit_prob_veto(
     cfg: BotConfig,
     decision: Dict[str, Any],
@@ -373,6 +389,86 @@ def apply_profit_prob_veto(
     pipe = str(out.get("pipeline", "") or "entry")
     if "profit_prob" not in pipe:
         out["pipeline"] = f"{pipe}+profit_prob_veto" if pipe else "profit_prob:veto"
+    return out
+
+
+def apply_ai_sure_veto(
+    cfg: BotConfig,
+    decision: Dict[str, Any],
+    quality: Optional[Dict[str, Any]],
+    *,
+    ppo_action: int = 0,
+    ppo_conf: float = 0.5,
+    scan_score: float = 0.0,
+    spike_ratio: float = 1.0,
+    ticker: str = "",
+) -> Dict[str, Any]:
+    """Block blind spike / fast-path entries when AI-sure mode is on."""
+    try:
+        from core.smart_stack import (
+            ai_sure_entry_enabled,
+            dynamic_entry_surety,
+            fast_entry_pipeline_blocked,
+        )
+        if not ai_sure_entry_enabled(cfg):
+            return decision
+    except Exception:
+        return decision
+
+    out = dict(decision)
+    if not out.get("enter"):
+        return out
+
+    pipe = str(out.get("pipeline", "") or "")
+    if fast_entry_pipeline_blocked(pipe):
+        out["enter"] = False
+        out["pending"] = False
+        out["reason"] = f"AI-sure: blocked fast path ({pipe})"[:200]
+        out["pipeline"] = f"{pipe}+ai_sure_veto" if pipe else "ai_sure:fast_block"
+        return out
+
+    sure = dynamic_entry_surety(
+        cfg, scan_score=scan_score, spike_ratio=spike_ratio, ticker=ticker,
+    )
+    profit_prob = float(
+        (quality or {}).get("profit_probability")
+        or out.get("profit_probability")
+        or 0
+    )
+    enter_ok = bool((quality or {}).get("enter_ok", True))
+    min_conf = float(sure.get("min_conf", 0.65))
+    min_prob = float(sure.get("min_prob", 0.62))
+    halim_enter = out.get("halim_enter")
+    council_ok = "council:" in pipe and bool(out.get("council_agreement"))
+
+    if ppo_action != 1 or float(ppo_conf or 0) < min_conf * 0.92:
+        out["enter"] = False
+        out["pending"] = False
+        out["reason"] = (
+            f"AI-sure: PPO {ppo_conf:.0%} below {min_conf:.0%} floor"
+        )[:200]
+        out["pipeline"] = f"{pipe}+ai_sure_veto" if pipe else "ai_sure:ppo"
+        return out
+
+    if not enter_ok or profit_prob < min_prob:
+        out["enter"] = False
+        out["pending"] = False
+        out["reason"] = (
+            f"AI-sure: prob={profit_prob:.0%} need {min_prob:.0%} enter_ok={enter_ok}"
+        )[:200]
+        out["pipeline"] = f"{pipe}+ai_sure_veto" if pipe else "ai_sure:prob"
+        return out
+
+    allowed_halim = pipe.startswith("halim:ai_sure") or pipe.startswith("halim:local_lead")
+    if allowed_halim or council_ok:
+        return out
+
+    out["enter"] = False
+    out["pending"] = bool(out.get("pending"))
+    out["reason"] = (
+        f"AI-sure: need Halim lead or council alignment (pipe={pipe})"
+    )[:200]
+    out["pipeline"] = f"{pipe}+ai_sure_veto" if pipe else "ai_sure:alignment"
     return out
 
 
