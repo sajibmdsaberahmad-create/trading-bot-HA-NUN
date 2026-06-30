@@ -223,6 +223,22 @@ grep -c PPO_LEAD_WHILE scripts/start_hanoon.sh  # expect 1
 
 ---
 
+## 2026-06-30 — War OBSERVE message + Telegram NAV baseline
+
+### Problem
+War log said "capital dry/settled out" when trip cap was hit ($3,469 settled but 5/5 trips). Telegram/session close used `bot_nav`≈IB $982k and `INITIAL_CASH` was overwritten with IB equity, breaking Day P&L baseline.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `_observe_block_reason()` — trip cap vs settled; RLock on state; clearer startup log |
+| `core/scalper_runner.py` | Stop poisoning `INITIAL_CASH`; `_notify_context` uses `account_view`; session close shows IB + war pool |
+
+### Verify
+Restart — Telegram startup should show IB equity; war veto should say `trip cap 5/5` not `capital dry`.
+
+---
+
 ## 2026-06-30 — Regime always unknown on live spikes
 
 ### Problem

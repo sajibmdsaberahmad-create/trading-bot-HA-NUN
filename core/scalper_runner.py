@@ -8704,19 +8704,29 @@ class ScalperRunner:
         # Write and push full session report
         report_path = self._write_close_report()
         self._refresh_account_balance()
-        baseline = float(self.cfg.INITIAL_CASH)
-        pnl = self.bot_nav - baseline
-        pnl_pct = (pnl / baseline) * 100 if baseline else 0.0
         ib_start = self._ib_starting_balance or self.account_equity
         ib_change = self.account_equity - ib_start
         ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0
+        from core.account_view import day_pnl
+        ib_pnl_usd, ib_pnl_pct = day_pnl(self, self.cfg)
+        try:
+            from core.war_account import war_account_context
+            war_ctx = war_account_context(self.cfg)
+        except Exception:
+            war_ctx = {}
         summary = "📊 HANOON SESSION CLOSE\n"
         summary += f" IB Account:    ${self.account_equity:>12,.2f}  (start: ${ib_start:,.2f})\n"
         summary += f" IB Change:     ${ib_change:>+12,.2f} ({ib_change_pct:+.2f}%)\n"
+        if war_ctx:
+            summary += (
+                f" War pool:      ${float(war_ctx.get('war_nav', 0)):>12,.0f}  "
+                f"settled=${float(war_ctx.get('war_settled_cash', 0)):,.0f}  "
+                f"trips {war_ctx.get('war_round_trips_today', 0)}/"
+                f"{war_ctx.get('war_round_trips_max', '?')}  "
+                f"mode={war_ctx.get('war_mode', '?')}\n"
+            )
         summary += f" Bot Cash:      ${self.bot_cash:>12,.2f}\n"
-        summary += f" Bot NAV:       ${self.bot_nav:>12,.2f}\n"
-        summary += f" Day P&L:       ${pnl:>+12,.2f} ({pnl_pct:+.2f}%)\n"
-        summary += f" Baseline:      ${baseline:>12,.2f}\n"
+        summary += f" Day P&L (IB):  ${ib_pnl_usd:>+12,.2f} ({ib_pnl_pct:+.2f}%)\n"
         summary += f" Trades:        {self.trades_today:>12d}\n"
         if self.shares > 0:
             summary += f" Position:      {self.shares:.0f} {self.current_ticker}\n"
@@ -8727,7 +8737,7 @@ class ScalperRunner:
             send_dynamic_notification(
                 self.notifier, self.autopilot, "session_close",
                 self._notify_context({
-                    "pnl": pnl, "pnl_pct": pnl_pct, "ib_change": ib_change,
+                    "pnl": ib_pnl_usd, "pnl_pct": ib_pnl_pct, "ib_change": ib_change,
                     "trades_today": self.trades_today, "report": str(report_path),
                 }),
                 summary,
