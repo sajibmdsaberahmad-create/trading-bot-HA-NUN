@@ -24,10 +24,11 @@ def test_fifo_round_trip_pnl():
     assert abs(trips[0].pnl_usd - (-23.1)) < 30.0  # ~-$23 not -$3212
 
 
-def test_day_pnl_prefers_fifo():
+def test_day_pnl_prefers_ib_realized():
     snap = IBTruthSnapshot(
-        account=IBAccountSnapshot(net_liquidation=985000),
-        session_pnl_fifo=-27.5,
+        account=IBAccountSnapshot(net_liquidation=985000, realized_pnl=-27.5),
+        session_pnl_ib=-27.5,
+        session_pnl_fifo=-50.0,
         round_trips=[MagicMock()],
         refreshed_at=1.0,
     )
