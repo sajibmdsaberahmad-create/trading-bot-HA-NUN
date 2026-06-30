@@ -29,11 +29,23 @@ _MODES_WAR_ENTRY = frozenset({"WAR_ACTIVE", "LIVE_WAR"})
 _MODES_LAB_ENTRY = frozenset({"LAB_ACTIVE"})
 
 
+def is_replay_session() -> bool:
+    """True when CSV/replay is driving the loop — never the live war ledger."""
+    if os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes"):
+        return True
+    try:
+        from core.replay_clock import replay_now_et
+        if replay_now_et() is not None:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def war_account_enabled(cfg: Optional[BotConfig] = None) -> bool:
     cfg = cfg or BotConfig()
-    if os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes"):
-        if os.getenv("REPLAY_RELAX_WAR", "true").lower() in ("1", "true", "yes"):
-            return False
+    if is_replay_session():
+        return False
     env = os.getenv("WAR_ACCOUNT_ENABLED", "").strip().lower()
     if env in ("0", "false", "no"):
         return False
@@ -188,12 +200,17 @@ def load_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
 
 
 def save_state(state: Dict[str, Any]) -> None:
+    if is_replay_session():
+        log.debug("War state save skipped — replay is not a live account")
+        return
     state["updated_at"] = time.time()
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     STATE_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
 def _append_ledger(row: Dict[str, Any]) -> None:
+    if is_replay_session():
+        return
     LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(LEDGER_PATH, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(row, separators=(",", ":"), default=str) + "\n")
@@ -354,6 +371,9 @@ def _sync_paper_war_config(state: Dict[str, Any], cfg: Optional[BotConfig] = Non
 
 def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
+    if is_replay_session():
+        log.debug("War account init skipped — replay session")
+        return {"ok": False, "reason": "replay"}
     if not war_account_enabled(cfg):
         return {"ok": False, "reason": "disabled"}
     state = load_state(cfg)
@@ -374,6 +394,8 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
 
 
 def current_mode(cfg: Optional[BotConfig] = None) -> str:
+    if is_replay_session():
+        return "OBSERVE"
     state = load_state(cfg)
     _roll_session(state, cfg)
     _apply_settlement(state, cfg)
@@ -537,6 +559,32 @@ def check_entry_allowed(
     return None
 
 
+def reset_live_war_session(
+    cfg: Optional[BotConfig] = None,
+    *,
+    reason: str = "manual_reset",
+) -> Dict[str, Any]:
+    """Fresh war/lab capital and zero session counters for live/paper only."""
+    cfg = cfg or BotConfig()
+    if is_replay_session():
+        return {"ok": False, "reason": "replay"}
+    state = _default_state(cfg)
+    save_state(state)
+    _append_ledger({
+        "event": "session_reset",
+        "reason": reason[:120],
+        "mode": state.get("mode"),
+        "nav": state.get("nav"),
+        "ts": time.time(),
+    })
+    log.info(
+        f"⚔️ War account reset ({reason}) — mode={state['mode']} "
+        f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f} "
+        f"lab=${float(state.get('lab_settled', 0)):,.0f} trips=0"
+    )
+    return {"ok": True, **state}
+
+
 def rescale_decision_for_war(
     cfg: Optional[BotConfig],
     decision: Dict[str, Any],
@@ -581,6 +629,8 @@ def record_entry(
     spread_pct: float = 0.0,
 ) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
+    if not war_account_enabled(cfg):
+        return {}
     state = load_state(cfg)
     _roll_session(state, cfg)
     mode = state.get("mode") or _recompute_mode(state, cfg)
@@ -642,6 +692,8 @@ def record_exit(
     spread_pct: float = 0.0,
 ) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
+    if not war_account_enabled(cfg):
+        return {}
     state = load_state(cfg)
     t = ticker.upper()
     open_war = state.get("open_war") or {}

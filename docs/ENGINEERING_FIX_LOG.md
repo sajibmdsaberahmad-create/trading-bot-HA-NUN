@@ -10,6 +10,23 @@
 
 ---
 
+## 2026-06-30 — War replay ledger isolation (code)
+
+### Problem
+Replay sessions could still increment live `round_trips_today` when `REPLAY_RELAX_WAR=false`; git sync committed the journal before guards shipped.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `is_replay_session()`; replay always disables war; `save_state`/`_append_ledger` no-op; `reset_live_war_session()` |
+
+### Verify
+```bash
+REPLAY_LIVE=true python3 -c "from core.war_account import war_account_enabled; assert not war_account_enabled()"
+```
+
+---
+
 ## 2026-06-30 — Halim live entry ship + replay API budgets
 
 ### Problem
