@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review loss_streak on BITO",
     "RTH open \u2014 super alert: opening noise, ride real volume, protect capital.",
     "Review trade_closed on MARA",
     "Commander: replay_stop",
@@ -103,10 +102,11 @@
     "Spike-top hunt on CELZ: spike_top_intrabar: +0.62% vol=24301.0x",
     "Spike-top hunt on BIYA: spike_top_intrabar: +0.43% vol=221735.0x",
     "Missed spike-top exit on CELZ: peak $1.56 left ~$10 on table",
-    "Spike-top hunt on CELZ: spike_top_intrabar: +1.30% vol=14435.0x"
+    "Spike-top hunt on CELZ: spike_top_intrabar: +1.30% vol=14435.0x",
+    "Commander: off_hours_review"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-30T19:56:42.204257"
+  "updated": "2026-06-30T20:00:10.622169"
 }
