@@ -485,17 +485,26 @@ class ScalperRunner:
     
     def _notify_context(self, extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Rich context for AI Telegram briefings."""
+        from core.account_view import account_summary, day_pnl
+        acct = account_summary(self)
+        pnl_usd, pnl_pct = day_pnl(self, self.cfg)
         ctx: Dict[str, Any] = {
-            "nav": round(self.bot_nav, 2),
+            "nav": acct["equity"],
+            "bot_nav": acct["bot_nav"],
+            "ib_account": acct["ib_equity"],
+            "ib_equity": acct["ib_equity"],
+            "day_pnl": acct["day_pnl"],
+            "ib_change": acct["ib_change"],
+            "session_pnl": pnl_usd,
             "bot_cash": round(self.bot_cash, 2),
-            "equity": round(self.account_equity, 2),
+            "equity": acct["equity"],
             "position": self.current_ticker,
             "shares": self.shares,
             "trades_today": self.trades_today,
             "win_rate": round(getattr(self.risk, "win_rate", 0) * 100, 1),
             "deployed_pct": round(
-                (self.shares * self._latest_price()) / (self.account_equity + 1e-9) * 100, 2
-            ) if self.shares > 0 else 0,
+                (self.shares * self._latest_price()) / (acct["ib_equity"] + 1e-9) * 100, 2
+            ) if self.shares > 0 and acct["ib_equity"] > 0 else 0,
         }
         if self.top_pick:
             ctx["top_pick"] = self.top_pick.ticker
@@ -580,7 +589,7 @@ class ScalperRunner:
             self.cash = self.available_cash
             if self._ib_starting_balance is None and self.account_equity > 0:
                 self._ib_starting_balance = self.account_equity
-                self.cfg.INITIAL_CASH = self.account_equity
+                # Never overwrite INITIAL_CASH with full IB paper NAV — breaks Day P&L / Telegram baseline
                 if ai_full_capital_access(self.cfg):
                     self.bot_cash = float(self.available_cash or self.account_equity)
                     self.bot_nav = self.account_equity

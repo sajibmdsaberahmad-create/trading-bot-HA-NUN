@@ -25,7 +25,7 @@ from core.notify import log
 _REPO = Path(__file__).resolve().parents[1]
 STATE_PATH = _REPO / "models" / "war_account_state.json"
 LEDGER_PATH = _REPO / "models" / "war_account_ledger.jsonl"
-_state_lock = threading.Lock()
+_state_lock = threading.RLock()
 
 _MODES_WAR_ENTRY = frozenset({"WAR_ACTIVE", "LIVE_WAR"})
 _MODES_LAB_ENTRY = frozenset({"LAB_ACTIVE"})
@@ -192,14 +192,15 @@ def _default_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
 
 def load_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
-    if STATE_PATH.is_file():
-        try:
-            data = json.loads(STATE_PATH.read_text(encoding="utf-8"))
-            if isinstance(data, dict) and data.get("nav") is not None:
-                return data
-        except Exception:
-            pass
-    return _default_state(cfg)
+    with _state_lock:
+        if STATE_PATH.is_file():
+            try:
+                data = json.loads(STATE_PATH.read_text(encoding="utf-8"))
+                if isinstance(data, dict) and data.get("nav") is not None:
+                    return data
+            except Exception:
+                pass
+        return _default_state(cfg)
 
 
 def save_state(state: Dict[str, Any]) -> None:
@@ -207,8 +208,9 @@ def save_state(state: Dict[str, Any]) -> None:
         log.debug("War state save skipped — replay is not a live account")
         return
     state["updated_at"] = time.time()
-    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    STATE_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    with _state_lock:
+        STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        STATE_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
 def _append_ledger(row: Dict[str, Any]) -> None:
@@ -467,8 +469,10 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     log.info(
         f"⚔️ War account — {'LIVE' if state['is_live'] else 'PAPER'} "
         f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f} "
-        f"mode={state['mode']} trips={int(state.get('round_trips_today', 0))}/"
-        f"{max_war_round_trips_per_day(cfg)} "
+        f"mode={state['mode']} war_trips={int(state.get('round_trips_today', 0))}/"
+        f"{max_war_round_trips_per_day(cfg)} lab_trips="
+        f"{int(state.get('lab_round_trips_today', 0))}/"
+        f"{max_war_round_trips_per_day(cfg, use_lab=True)} "
         f"fees_today=${float(state.get('fee_drag_today', 0)):,.2f}"
     )
     return {"ok": True, **state}
@@ -567,6 +571,35 @@ def war_context_line(cfg: Optional[BotConfig] = None) -> str:
     )
 
 
+def _observe_block_reason(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> str:
+    """Human-readable OBSERVE veto — trip cap vs settled cash."""
+    cfg = cfg or BotConfig()
+    trips = int(state.get("round_trips_today", 0))
+    max_trips = max_war_round_trips_per_day(cfg)
+    settled = float(state.get("settled_cash", 0))
+    lab_trips = int(state.get("lab_round_trips_today", 0))
+    lab_max = max_war_round_trips_per_day(cfg, use_lab=True)
+    lab_settled = float(state.get("lab_settled", 0))
+    min_bullet = _bullet_size(state, cfg) * 0.85
+
+    if trips >= max_trips:
+        return (
+            f"war OBSERVE — daily war trip cap {trips}/{max_trips} "
+            f"(settled=${settled:,.0f} still available); resets 09:30 ET"
+        )
+    if settled < min_bullet:
+        return (
+            f"war OBSERVE — settled ${settled:,.0f} below min bullet "
+            f"${min_bullet:,.0f} (T+1 dry)"
+        )
+    if lab_trips >= lab_max and lab_settled < min_bullet * 0.5:
+        return (
+            f"war OBSERVE — lab trip cap {lab_trips}/{lab_max} "
+            f"(war settled=${settled:,.0f})"
+        )
+    return f"war OBSERVE — logging only (settled=${settled:,.0f})"
+
+
 def check_entry_allowed(
     cfg: Optional[BotConfig],
     *,
@@ -596,18 +629,15 @@ def check_entry_allowed(
         pass
 
     state = load_state(cfg)
-    _roll_session(state, cfg)
-    _apply_settlement(state, cfg)
-    mode = _recompute_mode(state, cfg)
-    state["mode"] = mode
-    save_state(state)
+    with _state_lock:
+        _roll_session(state, cfg)
+        _apply_settlement(state, cfg)
+        mode = _recompute_mode(state, cfg)
+        state["mode"] = mode
+        save_state(state)
 
     if mode == "OBSERVE":
-        return (
-            f"war OBSERVE — war capital dry/settled out "
-            f"(settled=${float(state.get('settled_cash', 0)):,.0f}); "
-            f"logging only / lab exhausted"
-        )
+        return _observe_block_reason(state, cfg)
 
     use_lab = mode == "LAB_ACTIVE"
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
