@@ -2,11 +2,11 @@
   "name": "M. A. Halim",
   "legacy_name": "HANOON Owned Brain",
   "version": 1,
-  "updated_at": "2026-06-30T12:35:29.344864+00:00",
+  "updated_at": "2026-06-30T13:12:48.085751+00:00",
   "device": {
     "profile": "m2_8gb",
     "detected_ram_mb": 8192,
-    "updated_at": "2026-06-30T12:35:29.344920+00:00",
+    "updated_at": "2026-06-30T13:12:48.085763+00:00",
     "ram_mb_max": 10240,
     "ram_tier": "compact",
     "ppo_micro_steps": 512,
@@ -17,33 +17,33 @@
     "notes": "No local LLM. PPO+proxy+copilot on CPU. Groq 8B teacher via API."
   },
   "evolution": {
-    "trigger": "standalone_flush",
+    "trigger": "live_session_end",
     "device_profile": "m2_8gb",
-    "stage": "adult",
+    "stage": "child",
     "steps": {
       "export_dataset": {
         "ok": true,
-        "exported": 2542,
+        "exported": 2081,
         "path": "models/council_training_dataset.jsonl"
       },
       "train_proxy": {
         "ok": true,
         "accuracy": 1.0,
-        "samples": 346
+        "samples": 328
       },
       "ppo_teacher": {
         "skipped": true,
         "reason": "win_rate_ok",
-        "win_rate": 0.42857142857142855
+        "win_rate": 0.4
       },
       "weights": {
         "ok": true
       }
     },
-    "timestamp": "2026-06-30T12:35:28.287110+00:00"
+    "timestamp": "2026-06-30T13:12:47.075067+00:00"
   },
   "status": {
-    "timestamp": "2026-06-30T12:35:29.270313+00:00",
+    "timestamp": "2026-06-30T13:12:48.058373+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -62,37 +62,37 @@
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.7,
-        "modified": "2026-06-30T12:35:29.094216+00:00"
+        "modified": "2026-06-30T13:12:48.017250+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.9,
-        "modified": "2026-06-30T12:35:29.269862+00:00"
+        "modified": "2026-06-30T13:12:48.058151+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.7,
-        "modified": "2026-06-30T12:28:24.302409+00:00"
+        "modified": "2026-06-30T13:11:57.362369+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 8866.1,
-        "modified": "2026-06-30T12:33:04.277192+00:00"
+        "size_kb": 8884.3,
+        "modified": "2026-06-30T13:11:11.701295+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2767.6,
-        "modified": "2026-06-30T12:33:35.585185+00:00"
+        "size_kb": 2419.1,
+        "modified": "2026-06-30T13:11:11.544412+00:00"
       },
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
-        "size_kb": 930.4,
-        "modified": "2026-06-30T12:35:28.595611+00:00"
+        "size_kb": 781.5,
+        "modified": "2026-06-30T13:12:47.387474+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
@@ -103,49 +103,49 @@
     },
     "phases": {
       "ppo": "active",
-      "teacher_proxy": "distilled",
+      "teacher_proxy": "fast_path",
       "proxy_accuracy": 1.0,
-      "fast_path": false,
+      "fast_path": true,
       "ppo_teacher": "active",
       "copilot": "active",
-      "growth_stage": "adult"
+      "growth_stage": "child"
     },
-    "api_dependency": "high",
+    "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 7,
-      "win_rate": 0.429,
-      "avg_pnl": 0.38
+      "count": 10,
+      "win_rate": 0.4,
+      "avg_pnl": -0.16
     },
-    "buffer_records": 6941,
-    "dataset_pairs": 2542,
+    "buffer_records": 6980,
+    "dataset_pairs": 2081,
     "maturity": {
-      "stage": "adult",
-      "stage_index": 5,
+      "stage": "child",
+      "stage_index": 3,
       "stage_count": 6,
-      "description": "Owned brain \u2014 API polish only; students run the session",
+      "description": "Student proxy assists entries; API still teaches gaps",
       "metrics": {
-        "closed_trades": 2683,
-        "dataset_pairs": 2542,
-        "evolution_count": 35,
+        "closed_trades": 2686,
+        "dataset_pairs": 2081,
+        "evolution_count": 36,
         "proxy_accuracy": 1.0,
         "proxy_holdout_accuracy": 1.0,
-        "rolling_win_rate": null,
+        "rolling_win_rate": 0.2857142857142857,
         "proxy_exists": true
       },
       "limits": {
-        "min_trades": 350,
-        "min_evolutions": 8,
-        "min_dataset": 1200,
-        "decision_api_daily": 8,
-        "copilot_api_daily": 2,
-        "ppo_teacher_api_daily": 0,
-        "council_sample_rate": 0.06,
-        "copilot_refresh_sec": 240.0,
-        "ppo_micro_steps": 768,
-        "proxy_min_trades": 10,
+        "min_trades": 60,
+        "min_evolutions": 2,
+        "min_dataset": 200,
+        "decision_api_daily": 25,
+        "copilot_api_daily": 8,
+        "ppo_teacher_api_daily": 2,
+        "council_sample_rate": 0.35,
+        "copilot_refresh_sec": 120.0,
+        "ppo_micro_steps": 512,
+        "proxy_min_trades": 15,
         "use_proxy_entries": true,
-        "description": "Owned brain \u2014 API polish only; students run the session"
+        "description": "Student proxy assists entries; API still teaches gaps"
       },
       "api_budget_multiplier": 0.2,
       "api_usage_today": {
@@ -153,9 +153,9 @@
         "decision": 7
       },
       "decision_budget_left": 9,
-      "copilot_budget_left": 0,
-      "ppo_teacher_budget_left": 2,
-      "next_stage": null
+      "copilot_budget_left": 1,
+      "ppo_teacher_budget_left": 0,
+      "next_stage": "teen"
     }
   },
   "portable_assets": [
