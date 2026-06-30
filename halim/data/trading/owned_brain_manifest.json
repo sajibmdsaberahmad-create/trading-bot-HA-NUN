@@ -2,11 +2,11 @@
   "name": "M. A. Halim",
   "legacy_name": "HANOON Owned Brain",
   "version": 1,
-  "updated_at": "2026-06-30T11:00:29.758925+00:00",
+  "updated_at": "2026-06-30T11:38:02.032147+00:00",
   "device": {
     "profile": "m2_8gb",
     "detected_ram_mb": 8192,
-    "updated_at": "2026-06-30T11:00:29.758972+00:00",
+    "updated_at": "2026-06-30T11:38:02.032179+00:00",
     "ram_mb_max": 10240,
     "ram_tier": "compact",
     "ppo_micro_steps": 512,
@@ -23,34 +23,34 @@
     "steps": {
       "export_dataset": {
         "ok": true,
-        "exported": 2484,
+        "exported": 2524,
         "path": "models/council_training_dataset.jsonl"
       },
       "train_proxy": {
         "ok": true,
         "accuracy": 1.0,
-        "samples": 387
+        "samples": 380
       },
       "ppo_teacher": {
         "skipped": true,
-        "reason": "win_rate_ok",
-        "win_rate": 0.6666666666666666
+        "reason": "insufficient_trades",
+        "count": 0
       },
       "weights": {
         "ok": true
       }
     },
-    "timestamp": "2026-06-30T11:00:29.053470+00:00"
+    "timestamp": "2026-06-30T11:38:00.930082+00:00"
   },
   "status": {
-    "timestamp": "2026-06-30T11:00:29.709897+00:00",
+    "timestamp": "2026-06-30T11:38:01.945938+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
         "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-30T11:00:28.764544+00:00"
+        "modified": "2026-06-30T11:38:00.494930+00:00"
       },
       "ppo_replay": {
         "exists": true,
@@ -62,37 +62,37 @@
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.7,
-        "modified": "2026-06-30T11:00:29.570349+00:00"
+        "modified": "2026-06-30T11:38:01.771037+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.8,
-        "modified": "2026-06-30T11:00:29.709638+00:00"
+        "modified": "2026-06-30T11:38:01.945534+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-30T10:54:46.526502+00:00"
+        "modified": "2026-06-30T11:34:21.404435+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 8725.5,
-        "modified": "2026-06-30T10:55:35.316080+00:00"
+        "size_kb": 8754.4,
+        "modified": "2026-06-30T11:34:20.061456+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2659.0,
-        "modified": "2026-06-30T10:57:03.707816+00:00"
+        "size_kb": 2699.1,
+        "modified": "2026-06-30T11:34:45.401582+00:00"
       },
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
-        "size_kb": 907.2,
-        "modified": "2026-06-30T11:00:29.244860+00:00"
+        "size_kb": 921.3,
+        "modified": "2026-06-30T11:38:01.241321+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
@@ -113,12 +113,12 @@
     "api_dependency": "high",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 14,
-      "win_rate": 0.286,
-      "avg_pnl": -5.06
+      "count": 6,
+      "win_rate": 0.333,
+      "avg_pnl": -4.66
     },
-    "buffer_records": 6623,
-    "dataset_pairs": 2484,
+    "buffer_records": 6697,
+    "dataset_pairs": 2524,
     "maturity": {
       "stage": "adult",
       "stage_index": 5,
@@ -126,8 +126,8 @@
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
         "closed_trades": 2676,
-        "dataset_pairs": 2484,
-        "evolution_count": 29,
+        "dataset_pairs": 2524,
+        "evolution_count": 32,
         "proxy_accuracy": 1.0,
         "proxy_holdout_accuracy": 1.0,
         "rolling_win_rate": null,

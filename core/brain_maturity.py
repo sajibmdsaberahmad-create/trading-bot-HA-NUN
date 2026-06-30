@@ -156,6 +156,37 @@ def ensure_birth() -> Dict[str, Any]:
     return state
 
 
+def _rolling_trade_win_rate(cfg: Optional[BotConfig] = None, *, lookback: int = 30) -> Optional[float]:
+    """Recent closed-trade win rate from experience buffer."""
+    try:
+        from core.experience_buffer import load_recent
+        recs = load_recent(max(lookback * 3, 80))
+        trades = [
+            r for r in recs
+            if r.get("source") in ("live_trade", "replay_live", "shadow_trade")
+            and (r.get("pnl_usd") is not None or r.get("win") is not None)
+        ][-lookback:]
+        if len(trades) < 5:
+            return None
+        wins = sum(
+            1 for t in trades
+            if t.get("win") or float(t.get("pnl_usd", 0) or 0) > 0
+        )
+        return wins / len(trades)
+    except Exception:
+        return None
+
+
+def _holdout_proxy_accuracy(cfg: Optional[BotConfig] = None) -> Optional[float]:
+    try:
+        from core.hybrid_distiller import distillation_status
+        st = distillation_status(cfg)
+        acc = st.get("proxy_holdout_accuracy") or st.get("proxy_accuracy")
+        return float(acc) if acc is not None else None
+    except Exception:
+        return None
+
+
 def _metrics(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
     closed = 0
@@ -171,16 +202,22 @@ def _metrics(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
             dataset = sum(1 for _ in f)
     state = _load_state()
     proxy_acc = None
+    holdout_acc = None
     try:
         from core.hybrid_distiller import distillation_status
-        proxy_acc = distillation_status(cfg).get("proxy_accuracy")
+        st = distillation_status(cfg)
+        proxy_acc = st.get("proxy_accuracy")
+        holdout_acc = st.get("proxy_holdout_accuracy")
     except Exception:
         pass
+    rolling_wr = _rolling_trade_win_rate(cfg)
     return {
         "closed_trades": closed,
         "dataset_pairs": dataset,
         "evolution_count": int(state.get("evolution_count", 0)),
         "proxy_accuracy": float(proxy_acc) if proxy_acc is not None else None,
+        "proxy_holdout_accuracy": float(holdout_acc) if holdout_acc is not None else None,
+        "rolling_win_rate": float(rolling_wr) if rolling_wr is not None else None,
         "proxy_exists": PROXY_PATH.is_file(),
     }
 
@@ -198,7 +235,7 @@ def _stage_score(name: str, limits: Dict[str, Any], m: Dict[str, Any]) -> float:
 
 
 def compute_stage(cfg: Optional[BotConfig] = None) -> str:
-    """Highest stage whose thresholds are met."""
+    """Highest stage whose thresholds are met (counts + quality gates)."""
     ensure_birth()
     m = _metrics(cfg)
     best = "newborn"
@@ -212,15 +249,37 @@ def compute_stage(cfg: Optional[BotConfig] = None) -> str:
                 if not m["proxy_exists"]:
                     continue
             best = name
-    # Proxy mastery can accelerate to teen/adult
-    acc = m.get("proxy_accuracy")
-    if acc is not None:
-        names = [n for n, _ in STAGES]
-        idx = names.index(best)
-        if acc >= 0.62 and m["closed_trades"] >= 120 and idx < names.index("adult"):
-            best = "adult"
-        elif acc >= 0.55 and m["closed_trades"] >= 80 and idx < names.index("teen"):
+
+    # Quality gates — prevent proxy random-split inflation from jumping stages
+    holdout = m.get("proxy_holdout_accuracy") or m.get("proxy_accuracy")
+    wr = m.get("rolling_win_rate")
+    names = [n for n, _ in STAGES]
+    idx = names.index(best)
+
+    teen_min_wr = float(os.getenv("BRAIN_TEEN_MIN_WIN_RATE", "0.38"))
+    teen_min_holdout = float(os.getenv("BRAIN_TEEN_MIN_HOLDOUT_ACC", "0.55"))
+    adult_min_wr = float(os.getenv("BRAIN_ADULT_MIN_WIN_RATE", "0.40"))
+    adult_min_holdout = float(os.getenv("BRAIN_ADULT_MIN_HOLDOUT_ACC", "0.62"))
+
+    if idx >= names.index("teen"):
+        if wr is not None and wr < teen_min_wr:
+            best = "child"
+            idx = names.index(best)
+        if holdout is not None and holdout < teen_min_holdout:
+            best = "child"
+            idx = names.index(best)
+
+    if idx >= names.index("adult"):
+        if m["closed_trades"] < 350:
             best = "teen"
+            idx = names.index(best)
+        elif wr is not None and wr < adult_min_wr:
+            best = "teen"
+            idx = names.index(best)
+        elif holdout is not None and holdout < adult_min_holdout:
+            best = "teen"
+            idx = names.index(best)
+
     return best
 
 
@@ -232,7 +291,7 @@ def _stage_limits(stage: str) -> Dict[str, Any]:
 
 
 def _api_budget_multiplier(proxy_acc: Optional[float]) -> float:
-    """Students stronger → less teacher API."""
+    """Students stronger → less teacher API. Prefer holdout accuracy when set."""
     if proxy_acc is None:
         return 1.0
     if proxy_acc >= 0.70:
@@ -246,13 +305,21 @@ def _api_budget_multiplier(proxy_acc: Optional[float]) -> float:
     return 1.0
 
 
+def _proxy_acc_for_budget(m: Dict[str, Any]) -> Optional[float]:
+    holdout = m.get("proxy_holdout_accuracy")
+    if holdout is not None:
+        return float(holdout)
+    acc = m.get("proxy_accuracy")
+    return float(acc) if acc is not None else None
+
+
 def maturity_snapshot(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
     ensure_birth()
     stage = compute_stage(cfg)
     limits = _stage_limits(stage)
     m = _metrics(cfg)
-    mult = _api_budget_multiplier(m.get("proxy_accuracy"))
+    mult = _api_budget_multiplier(_proxy_acc_for_budget(m))
     usage = _load_state().get("api_usage_today") or {}
     if usage.get("day") != _today_str():
         usage = {"day": _today_str()}
@@ -267,7 +334,7 @@ def maturity_snapshot(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         "api_usage_today": usage,
         "decision_budget_left": max(
             0,
-            int(limits["decision_api_daily"] * mult)
+            _daily_budget_for("decision", limits, mult, stage=stage)
             - int(usage.get("decision", 0)),
         ),
         "copilot_budget_left": max(
@@ -277,7 +344,7 @@ def maturity_snapshot(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         ),
         "ppo_teacher_budget_left": max(
             0,
-            int(limits["ppo_teacher_api_daily"] * mult)
+            _daily_budget_for("ppo_teacher", limits, mult, stage=stage)
             - int(usage.get("ppo_teacher", 0)),
         ),
         "next_stage": _next_stage_name(stage),
@@ -366,13 +433,26 @@ def _decision_sample_throttle_enabled() -> bool:
     return True
 
 
-def _daily_budget_for(purpose: str, limits: Dict[str, Any], mult: float) -> int:
+def _daily_budget_for(
+    purpose: str,
+    limits: Dict[str, Any],
+    mult: float,
+    *,
+    stage: str = "",
+) -> int:
     key = _PURPOSE_MAP.get(purpose, "decision_api_daily")
     base = max(0, int(limits.get(key, 0) * mult))
     if purpose == "decision":
         floor = _training_session_decision_floor()
         if floor > 0:
             return max(base, floor)
+    if purpose == "ppo_teacher" and base <= 0 and stage == "adult":
+        try:
+            adult_floor = int(os.getenv("BRAIN_ADULT_PPO_TEACHER_DAILY", "2"))
+        except (TypeError, ValueError):
+            adult_floor = 2
+        if adult_floor > 0:
+            return adult_floor
     return base
 
 
@@ -384,7 +464,7 @@ def allow_teacher_api(purpose: str, cfg: Optional[BotConfig] = None) -> Tuple[bo
     snap = maturity_snapshot(cfg)
     limits = snap["limits"]
     mult = snap["api_budget_multiplier"]
-    budget = _daily_budget_for(purpose, limits, mult)
+    budget = _daily_budget_for(purpose, limits, mult, stage=snap["stage"])
     usage = snap["api_usage_today"]
     used_key = {"decision": "decision", "copilot": "copilot", "ppo_teacher": "ppo_teacher"}.get(
         purpose, "decision",

@@ -8579,13 +8579,13 @@ class ScalperRunner:
                 self._daily_self_train()
                 guidelines = self._generate_guidelines()
                 baseline = float(self.cfg.INITIAL_CASH)
-                pnl = self.bot_nav - baseline
-                pnl_pct = (pnl / baseline) * 100 if baseline else 0.0
+                ib_pnl, ib_pnl_pct = self._day_pnl_ib()
+                bot_pnl = self.bot_nav - baseline
                 stmt = (
                     f"portfolio: {today_str} ET | "
-                    f"bot_nav=${self.bot_nav:,.0f} | "
-                    f"baseline=${baseline:,.0f} | "
-                    f"pnl=${pnl:+,.0f} ({pnl_pct:+.2f}%) | "
+                    f"IB=${self.account_equity:,.0f} | "
+                    f"IB P&L=${ib_pnl:+,.0f} ({ib_pnl_pct:+.2f}%) | "
+                    f"bot_nav=${self.bot_nav:,.0f} (internal) | "
                     f"trades={self.trades_today}"
                 )
                 push_daily_summary(self.bot_nav, self.account_equity)
