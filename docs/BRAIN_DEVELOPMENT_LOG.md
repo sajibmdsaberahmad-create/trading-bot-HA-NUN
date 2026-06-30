@@ -1820,3 +1820,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 20:30 UTC` **git_auto** — sync: 5 files — scalper_runner.py, war_ib_sync.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=167 evol
 - `2026-06-30 20:31 UTC` **git_auto** — sync: 13 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, registry.jsonl +10 more | halim=6 models=3 docs=1 other=3 | brain=toddler data
 - `2026-06-30 20:31 UTC` **git_auto** — sync: 5 files — scalper_exit_executor.py, scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler datase
+- `2026-06-30 20:31 UTC` **git_auto** — sync: 6 files — rth_session.py, scalper_exit_executor.py, war_account.py +3 more | docs=1 core=2 other=3 | brain=toddler dataset=167 evoluti

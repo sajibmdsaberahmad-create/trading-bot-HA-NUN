@@ -268,3 +268,43 @@ def ai_session_context_block(cfg: BotConfig) -> str:
             "PRE-MARKET: thin liquidity — prefer stream bars; HMDS may fail until 09:30."
         )
     return " | ".join(lines)
+
+
+def rth_reply_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
+    """Structured market context for Telegram/Halim — RTH-aware, not generic."""
+    cfg = cfg or BotConfig()
+    state = get_market_state(cfg)
+    ctx: Dict[str, Any] = {
+        "market_state": state,
+        "rth_tier": rth_tier(cfg),
+        "is_rth": is_rth(cfg),
+        "time_et": now_et().strftime("%Y-%m-%d %H:%M %Z"),
+        "session_window": "09:30-16:00 ET",
+    }
+    secs_open = seconds_since_rth_open(cfg)
+    if secs_open is not None:
+        ctx["minutes_since_rth_open"] = round(secs_open / 60.0, 1)
+    secs_to = seconds_until_rth_open(cfg)
+    if secs_to is not None and secs_to > 0:
+        ctx["minutes_until_rth_open"] = round(secs_to / 60.0, 1)
+    try:
+        from core.ib_truth import get_snapshot
+        snap = get_snapshot()
+        if snap.refreshed_at > 0:
+            ctx["session_scope"] = snap.session_scope
+            ctx["ib_fifo_session_pnl"] = snap.session_pnl_fifo
+    except Exception:
+        pass
+    if state == "open":
+        ctx["market_note"] = (
+            f"RTH live — PnL is FIFO fills since 09:30 ET today ({ctx.get('session_scope', 'rth')})."
+        )
+    elif state == "after_hours":
+        ctx["market_note"] = (
+            "After hours (RTH closed 16:00 ET). Report today's RTH session PnL only — no new entries."
+        )
+    elif state == "pre_market":
+        ctx["market_note"] = "Pre-market — RTH opens 09:30 ET. Session PnL resets at the bell."
+    else:
+        ctx["market_note"] = "Market closed — cite last RTH session results, not live trading."
+    return ctx

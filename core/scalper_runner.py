@@ -480,7 +480,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             "ib_equity": acct["ib_equity"],
             "day_pnl": acct["day_pnl"],
             "ib_change": acct["ib_change"],
-            "session_pnl": pnl_usd,
+            "ib_fifo_session_pnl": acct.get("ib_fifo_session_pnl", 0),
+            "session_pnl": acct.get("ib_fifo_session_pnl", pnl_usd),
             "bot_cash": round(self.bot_cash, 2),
             "equity": acct["equity"],
             "position": self.current_ticker,
@@ -491,6 +492,11 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 (self.shares * self._latest_price()) / (acct["ib_equity"] + 1e-9) * 100, 2
             ) if self.shares > 0 and acct["ib_equity"] > 0 else 0,
         }
+        try:
+            from core.rth_session import rth_reply_context
+            ctx.update(rth_reply_context(self.cfg))
+        except Exception:
+            pass
         if self.top_pick:
             ctx["top_pick"] = self.top_pick.ticker
             ctx["top_score"] = self.top_pick.rank_score

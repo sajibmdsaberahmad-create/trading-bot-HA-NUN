@@ -550,18 +550,34 @@ class TelegramCommandListener:
         if not r:
             return {}
         try:
-            r._refresh_account_balance()
+            from core.ib_truth import refresh
+            from core.account_view import account_summary
+            refresh(r.ib, self.cfg)
+            acct = account_summary(r)
         except Exception:
-            pass
-        return {
-            "ib_account": round(getattr(r, "account_equity", 0), 2),
-            "bot_nav": round(getattr(r, "bot_nav", 0), 2),
+            acct = {}
+        try:
+            from core.rth_session import rth_reply_context
+            rth = rth_reply_context(self.cfg)
+        except Exception:
+            rth = {"market_state": get_market_state(self.cfg), "time_et": format_et()}
+        ctx = {
+            "ib_account": round(float(acct.get("ib_equity", getattr(r, "account_equity", 0)) or 0), 2),
+            "bot_nav": round(float(acct.get("equity", getattr(r, "bot_nav", 0)) or 0), 2),
+            "day_pnl": round(float(acct.get("ib_fifo_session_pnl", acct.get("day_pnl", 0)) or 0), 2),
+            "ib_fifo_session_pnl": round(float(acct.get("ib_fifo_session_pnl", 0) or 0), 2),
             "trades_today": getattr(r, "trades_today", 0),
             "position": getattr(r, "current_ticker", None),
             "shares": getattr(r, "shares", 0),
-            "market_state": get_market_state(self.cfg),
             "time_et": format_et(),
+            **rth,
         }
+        try:
+            from core.war_account import war_account_context
+            ctx.update(war_account_context(self.cfg))
+        except Exception:
+            pass
+        return ctx
 
     def _cmd_status(self, chat_id: int, reply_id: Optional[int]) -> None:
         ctx = self._runner_ctx()
@@ -580,10 +596,12 @@ class TelegramCommandListener:
         ctx["open_positions"] = pos_n
         ctx["unrealized_pnl"] = unreal
         fallback = (
-            f"LIVE STATUS\nMarket {ctx.get('market_state', '?').upper()} {ctx.get('time_et', '')}\n"
-            f"IB ${ctx.get('ib_account', 0):,.2f} NAV ${ctx.get('bot_nav', 0):,.2f}\n"
+            f"LIVE STATUS · {ctx.get('rth_tier', ctx.get('market_state', '?'))}\n"
+            f"{ctx.get('time_et', '')}\n"
+            f"IB ${ctx.get('ib_account', 0):,.2f} · RTH PnL ${ctx.get('ib_fifo_session_pnl', ctx.get('day_pnl', 0)):+,.2f}\n"
+            f"War nav ${ctx.get('nav', ctx.get('war_nav', 0)):,.0f} · "
             f"Trades {ctx.get('trades_today', 0)} · Open {pos_n} · Unrealized ${unreal:+,.2f}\n"
-            f"Focus {ctx.get('shares', 0):.0f} {ctx.get('position') or 'flat'}"
+            f"{ctx.get('market_note', '')}"
         )
         self.send_ai(chat_id, "status", ctx, fallback, reply_to=reply_id)
 
