@@ -794,10 +794,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
     def _get_bid_ask(self, ticker: str) -> Tuple[Optional[float], Optional[float]]:
         """Snapshot bid/ask from IB for smart limit entries."""
         try:
-            saved = self.cfg.TICKER
-            self.cfg.TICKER = ticker
-            contract = self.conn.get_contract()
-            self.cfg.TICKER = saved
+            contract = self.conn.get_contract(ticker)
             ticks = self.ib.reqMktData(contract, "", False, False)
             self.ib.sleep(0.12)
             bid = float(ticks.bid) if ticks.bid and ticks.bid > 0 else None
@@ -810,10 +807,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
     def _force_price_snapshot(self, ticker: str) -> float:
         """IB market snapshot when tick stream appears frozen."""
         try:
-            saved = self.cfg.TICKER
-            self.cfg.TICKER = ticker
-            contract = self.conn.get_contract()
-            self.cfg.TICKER = saved
+            contract = self.conn.get_contract(ticker)
             ticks = self.ib.reqMktData(contract, "", False, False)
             self.ib.sleep(0.12)
             for attr in ("last", "close", "marketPrice"):
@@ -899,9 +893,9 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 return
             if (self.current_ticker or "").upper() != (ticker or "").upper():
                 return
-            slot_sh = float(slots[ticker].get("shares", 0) or self._ctx_slot_shares)
-            save_shares = self.shares
-            if len(slots) > 1 and save_shares > slot_sh * 1.25:
+            slot_sh = float(slots[ticker].get("shares", 0) or self._ctx_slot_shares or 0)
+            save_shares = float(self._ctx_slot_shares or slot_sh or 0)
+            if save_shares <= 0:
                 save_shares = slot_sh
             slots[ticker].update({
                 "shares": save_shares,
@@ -926,11 +920,18 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             s = self._position_slots.get(ticker)
             if not s:
                 return False
-            self._repair_slot_entry_price(ticker)
-            s = self._position_slots.get(ticker)
-            self.current_ticker = ticker
-            self.shares = float(s.get("shares", 0))
-            self._ctx_slot_shares = self.shares
+            t_up = (ticker or "").upper()
+            self._repair_slot_entry_price(t_up)
+            s = self._position_slots.get(t_up)
+            if not s:
+                return False
+            slot_sh = float(s.get("shares", 0) or 0)
+            if slot_sh <= 0:
+                return False
+            self.risk.close_position()
+            self.current_ticker = t_up
+            self.shares = slot_sh
+            self._ctx_slot_shares = slot_sh
             self._entry_price = self._slot_entry_price(s)
             self._position_stop = float(s.get("stop", 0))
             self._position_target = float(s.get("target", 0))

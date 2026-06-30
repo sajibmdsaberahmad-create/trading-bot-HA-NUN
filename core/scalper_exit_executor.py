@@ -1133,13 +1133,15 @@ class ScalperExitMixin:
         self._was_in_profit = False
     def _live_position_monitor(self, current_px: float, *, price_trusted: bool = True):
         """Continuous post-entry tracking: pulse log, AI manage, trail, exit."""
-        if self.shares <= 0 or self._entry_price <= 0:
+        ticker = (self.current_ticker or getattr(self.cfg, "TICKER", "")).upper()
+        slot = self._position_slots.get(ticker) or {}
+        shares = float(self._ctx_slot_shares or slot.get("shares", 0) or 0)
+        if shares <= 0 or self._entry_price <= 0:
             return
-
-        ticker = self.current_ticker or getattr(self.cfg, "TICKER", "")
         price_eps = max(self._entry_price * 0.0001, 0.0001)
         now = time.time()
         trusted = price_trusted and self._risk_plan_sane_for_tick(current_px)
+        self.shares = shares
 
         if self._last_pulse_price <= 0:
             self._last_pulse_price = current_px
