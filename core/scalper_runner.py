@@ -1236,11 +1236,11 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 pass
             if not found:
                 for p in self.ib.positions():
-                sym = getattr(p.contract, "symbol", "")
-                if sym == self.current_ticker:
-                    ib_shares = float(p.position)
-                    found = True
-                    break
+                    sym = getattr(p.contract, "symbol", "")
+                    if sym == self.current_ticker:
+                        ib_shares = float(p.position)
+                        found = True
+                        break
             if found:
                 if ib_shares < 0:
                     sym = self.current_ticker or ""
@@ -1556,7 +1556,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             log.debug(f"Sniper profile: {exc}")
         try:
             from core.market_context import warm_macro_context_background
-            warm_macro_context_background()
+            warm_macro_context_background(getattr(self, "conn", None))
         except Exception as exc:
             log.debug(f"Macro warm: {exc}")
         try:
@@ -1848,7 +1848,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         pass
                     try:
                         from core.market_context import tick_macro_context_if_due
-                        tick_macro_context_if_due()
+                        tick_macro_context_if_due(getattr(self, "conn", None))
                     except Exception:
                         pass
                     try:

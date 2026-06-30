@@ -31,6 +31,12 @@ def _ib_long_positions(runner: "ScalperRunner") -> Dict[str, Dict[str, float]]:
                 }
             return out
     try:
+        from core.ib_truth import ib_truth_enabled
+        if ib_truth_enabled(getattr(runner, "cfg", None)):
+            return out
+    except Exception:
+        pass
+    try:
         runner.ib.reqPositions()
         runner.ib.sleep(0.3)
         for p in runner.ib.positions():

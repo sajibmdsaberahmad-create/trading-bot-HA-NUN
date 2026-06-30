@@ -54,6 +54,12 @@ def ib_long_position_map(ib) -> Dict[str, float]:
             return {sym: pos.qty for sym, pos in snap.long_positions().items()}
     except Exception:
         pass
+    try:
+        from core.ib_truth import ib_truth_enabled
+        if ib_truth_enabled():
+            return {}
+    except Exception:
+        pass
     out: Dict[str, float] = {}
     for p in ib.positions():
         sym = getattr(p.contract, "symbol", "")
@@ -131,15 +137,22 @@ def sync_position_slots_from_ib(
     if not position_slots:
         return
     ib_map = ib_long_position_map(ib)
-    for p in ib.positions():
-        sym = getattr(p.contract, "symbol", "")
-        pos = float(p.position)
-        if pos < 0 and sym not in short_warned:
-            short_warned.add(sym)
-            log.warning(
-                f"IB short position {pos:.0f} {sym} "
-                f"— long-only scalper ignoring (orphan paper debris)"
-            )
+    truth_fresh = False
+    try:
+        from core.ib_truth import get_snapshot, ib_truth_enabled
+        truth_fresh = ib_truth_enabled() and get_snapshot().refreshed_at > 0
+    except Exception:
+        pass
+    if not truth_fresh:
+        for p in ib.positions():
+            sym = getattr(p.contract, "symbol", "")
+            pos = float(p.position)
+            if pos < 0 and sym not in short_warned:
+                short_warned.add(sym)
+                log.warning(
+                    f"IB short position {pos:.0f} {sym} "
+                    f"— long-only scalper ignoring (orphan paper debris)"
+                )
     now = time.time()
     for ticker, slot in list(position_slots.items()):
         if ticker in ib_map:
