@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — War ledger multi-position open slots + deploy budget import hardening — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Multi-position monitor isolation: per-ticker risk plan bind, fill-px LIVE_PULSE, profit-hunt import — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Monolith split: scalper_runner + ai_commander mixins; git_sync learning module — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Balance-driven war trips: entries limited by settled cash bullets, not fixed daily cap — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -1557,3 +1558,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 18:41 UTC` **git_auto** — sync: 4 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=child dataset=1896 evolu
 - `2026-06-30 18:41 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, war_account.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=child dataset=189
 - `2026-06-30 18:42 UTC` **git_auto** — sync: 8 files — ai_commander_deferred.py, ai_commander_entry.py, scalper_entry_executor.py +5 more | docs=1 core=4 other=3 | brain=child dat
+- `2026-06-30 18:42 UTC` **git_auto** — sync: 4 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=child dataset=1896 evolu

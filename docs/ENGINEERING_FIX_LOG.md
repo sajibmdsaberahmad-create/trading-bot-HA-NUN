@@ -1115,9 +1115,29 @@ pytest tests/test_position_context_isolation.py -q
 ```
 
 ### Notes
-Restart HANOON after deploy. War phantom PnL and `get_ai_deploy_budget` NameError remain open.
-
-### Rollback / risks
-Per-ticker risk plan rebuild may differ slightly from original plan if slot lacks `risk_usd`/`atr_at_entry` (pre-fix slots). Monitor logs for `Risk tick skipped` warnings.
+Restart HANOON after deploy.
 
 ---
+
+## 2026-07-01 — War ledger multi-position + deploy budget import hardening
+
+### Problem
+With 2+ open positions, `open_war` was a single slot — second entry overwrote first. Exiting TZA used BITO's entry → phantom -$3212 war PnL while IB showed ~$0. `get_ai_deploy_budget` NameError on some entry paths after mixin split.
+
+### Root cause
+`record_entry` assigned `state["open_war"] = {...}` (one ticker). `record_exit` used that slot even when `ticker` didn't match. Mixin star-imports weren't always visible to all entry code paths.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `open_wars`/`open_labs` per-ticker dicts; `_resolve_open_slot`; exit uses matching ticker or `entry_ib_fill` fallback |
+| `core/scalper_exit_executor.py` | Pass `entry_ib_fill` to `record_exit` |
+| `core/scalper_entry_executor.py`, `core/ai_commander_entry.py` | Explicit `get_ai_deploy_budget` import |
+
+### Verify
+```bash
+pytest tests/test_war_multi_position.py tests/test_position_context_isolation.py tests/test_war_account_rth.py -q
+```
+
+### Rollback / risks
+Legacy `open_war`/`open_lab` mirrored for old readers; migration runs on `load_state`.
