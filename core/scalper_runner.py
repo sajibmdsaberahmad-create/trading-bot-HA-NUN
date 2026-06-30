@@ -882,53 +882,103 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         )
 
     def _save_position_context(self, ticker: str):
-        slots = getattr(self, "_position_slots", {})
-        if ticker not in slots:
-            return
-        if (self.current_ticker or "").upper() != (ticker or "").upper():
-            return
-        slots[ticker].update({
-            "shares": self.shares,
-            "entry_price": self._entry_price,
-            "stop": self._position_stop,
-            "target": self._position_target,
-            "peak": self._position_peak,
-            "hard_floor": self._hard_stop_floor,
-            "opened_at": self._position_opened_at,
-            "prev_shares": self._prev_shares,
-            "last_pulse_price": self._last_pulse_price,
-            "last_price_change_at": self._last_price_change_at,
-            "last_price_snapshot_at": self._last_price_snapshot_at,
-            "last_pulse_fingerprint": self._last_pulse_fingerprint,
-            "last_position_pulse": self._last_position_pulse,
-            "last_ai_position_manage": self._last_ai_position_manage,
-            "last_stagnation_decision": dict(self._last_stagnation_decision),
-        })
+        with self._position_ctx_lock:
+            slots = getattr(self, "_position_slots", {})
+            if ticker not in slots:
+                return
+            if (self.current_ticker or "").upper() != (ticker or "").upper():
+                return
+            slot_sh = float(slots[ticker].get("shares", 0) or self._ctx_slot_shares)
+            save_shares = self.shares
+            if len(slots) > 1 and save_shares > slot_sh * 1.25:
+                save_shares = slot_sh
+            slots[ticker].update({
+                "shares": save_shares,
+                "entry_price": self._entry_price,
+                "stop": self._position_stop,
+                "target": self._position_target,
+                "peak": self._position_peak,
+                "hard_floor": self._hard_stop_floor,
+                "opened_at": self._position_opened_at,
+                "prev_shares": self._prev_shares,
+                "last_pulse_price": self._last_pulse_price,
+                "last_price_change_at": self._last_price_change_at,
+                "last_price_snapshot_at": self._last_price_snapshot_at,
+                "last_pulse_fingerprint": self._last_pulse_fingerprint,
+                "last_position_pulse": self._last_position_pulse,
+                "last_ai_position_manage": self._last_ai_position_manage,
+                "last_stagnation_decision": dict(self._last_stagnation_decision),
+            })
+            self._ctx_slot_shares = save_shares
     def _load_position_context(self, ticker: str) -> bool:
-        s = self._position_slots.get(ticker)
-        if not s:
-            return False
-        self._repair_slot_entry_price(ticker)
-        s = self._position_slots.get(ticker)
-        self.current_ticker = ticker
-        self.shares = float(s.get("shares", 0))
-        self._entry_price = self._slot_entry_price(s)
-        self._position_stop = float(s.get("stop", 0))
-        self._position_target = float(s.get("target", 0))
-        self._position_peak = float(s.get("peak", 0))
-        self._hard_stop_floor = float(s.get("hard_floor", 0))
-        self._position_opened_at = float(s.get("opened_at", 0))
-        self._prev_shares = float(s.get("prev_shares", self.shares))
-        self._last_pulse_price = float(s.get("last_pulse_price", 0))
-        self._last_price_change_at = float(s.get("last_price_change_at", 0))
-        self._last_price_snapshot_at = float(s.get("last_price_snapshot_at", 0))
-        self._last_pulse_fingerprint = str(s.get("last_pulse_fingerprint", ""))
-        self._last_position_pulse = float(s.get("last_position_pulse", 0))
-        self._last_ai_position_manage = float(s.get("last_ai_position_manage", 0))
-        self._last_stagnation_decision = dict(s.get("last_stagnation_decision", {}))
-        self.bracket_handle = self._bracket_by_ticker.get(ticker)
-        self._bind_risk_plan_for_ticker(ticker)
-        return True
+        with self._position_ctx_lock:
+            s = self._position_slots.get(ticker)
+            if not s:
+                return False
+            self._repair_slot_entry_price(ticker)
+            s = self._position_slots.get(ticker)
+            self.current_ticker = ticker
+            self.shares = float(s.get("shares", 0))
+            self._ctx_slot_shares = self.shares
+            self._entry_price = self._slot_entry_price(s)
+            self._position_stop = float(s.get("stop", 0))
+            self._position_target = float(s.get("target", 0))
+            self._position_peak = float(s.get("peak", 0))
+            self._hard_stop_floor = float(s.get("hard_floor", 0))
+            self._position_opened_at = float(s.get("opened_at", 0))
+            self._prev_shares = float(s.get("prev_shares", self.shares))
+            self._last_pulse_price = float(s.get("last_pulse_price", 0))
+            self._last_price_change_at = float(s.get("last_price_change_at", 0))
+            self._last_price_snapshot_at = float(s.get("last_price_snapshot_at", 0))
+            self._last_pulse_fingerprint = str(s.get("last_pulse_fingerprint", ""))
+            self._last_position_pulse = float(s.get("last_position_pulse", 0))
+            self._last_ai_position_manage = float(s.get("last_ai_position_manage", 0))
+            self._last_stagnation_decision = dict(s.get("last_stagnation_decision", {}))
+            self.bracket_handle = self._bracket_by_ticker.get(ticker)
+            self._bind_risk_plan_for_ticker(ticker)
+            return True
+    def _resolve_monitor_price(self, ticker: str, entry_px: float) -> Tuple[float, bool]:
+        """Per-ticker price for monitor — IB snapshot when stream/cache looks cross-wired."""
+        from core.position_context import slot_price_sane
+
+        fallback = entry_px if entry_px > 0 else 0.0
+        px = self._live_price_for(ticker, fallback)
+        if entry_px <= 0 or px <= 0:
+            return px, px > 0
+        if slot_price_sane(entry_px, px):
+            return px, True
+        snap = self._force_price_snapshot(ticker)
+        if snap > 0 and slot_price_sane(entry_px, snap):
+            return snap, True
+        log.warning(
+            f"  ⚠️ Wrong tick {ticker}: ${px:.4f} vs entry ${entry_px:.4f} — "
+            "mechanical exits paused this pulse"
+        )
+        return px, False
+    def _record_war_adoptions(self, adopted: list[str]) -> None:
+        """Ledger war entries for IB-recovered slots so exits reconcile."""
+        try:
+            from core.war_account import record_entry, war_account_enabled
+            if not war_account_enabled(self.cfg) or not adopted:
+                return
+            for ticker in adopted:
+                slot = self._position_slots.get(ticker)
+                if not slot:
+                    continue
+                sh = int(float(slot.get("shares", 0) or 0))
+                entry = self._slot_entry_price(slot)
+                if sh <= 0 or entry <= 0:
+                    continue
+                record_entry(
+                    self.cfg,
+                    ticker=ticker,
+                    shares=sh,
+                    ib_fill=entry,
+                    quote=entry,
+                    pipeline="ib_recover",
+                )
+        except Exception as exc:
+            log.debug(f"War adopt entry: {exc}")
     def _repair_slot_entry_price(self, ticker: str) -> None:
         slot = self._position_slots.get(ticker)
         if not slot:
@@ -936,11 +986,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         live = self._live_price_for(ticker, float(slot.get("entry_price", 0) or 0))
         repair_slot_entry_price(self.ib, ticker, slot, live)
     def _dm_for_ticker(self, ticker: str) -> Optional[DataManager]:
-        """Live bar stream for a held ticker (position stream, not scan focus)."""
-        dm = self._target_monitors.get(ticker or "")
-        if dm is None and self._active_stream_ticker:
-            dm = self._target_monitors.get(self._active_stream_ticker)
-        return dm
+        """Live bar stream for a held ticker — never borrow another symbol's stream."""
+        return self._target_monitors.get(ticker or "")
     def _resolve_mtf_bars(
         self,
         ticker: str,
@@ -1028,6 +1075,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                     self._ensure_position_stream(ticker)
                 except Exception:
                     pass
+            self._record_war_adoptions(adopted)
             if self._position_slots:
                 sync_position_slots_from_ib(
                     self.ib,
