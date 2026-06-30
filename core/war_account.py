@@ -294,11 +294,9 @@ def lab_enabled(cfg: Optional[BotConfig] = None) -> bool:
 
 
 def _today_key() -> str:
-    try:
-        from core.market_hours import MARKET_TZ
-        return datetime.now(MARKET_TZ).strftime("%Y-%m-%d")
-    except Exception:
-        return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    """US Eastern session date — never device locale or UTC."""
+    from core.market_hours import now_et
+    return now_et().strftime("%Y-%m-%d")
 
 
 def _default_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
