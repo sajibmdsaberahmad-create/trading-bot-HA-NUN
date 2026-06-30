@@ -332,11 +332,17 @@ def resolve_exit_fill(
     return float(quote_px or 0)
 
 
-def round_trip_pnl(entry_fill: float, exit_fill: float, shares: float) -> Tuple[float, float]:
-    """Return (pnl_usd, pnl_pct) from actual fills."""
+def round_trip_pnl(
+    entry_fill: float,
+    exit_fill: float,
+    shares: float,
+    *,
+    commission: float = 0.0,
+) -> Tuple[float, float]:
+    """Return (pnl_usd, pnl_pct) from IB fills, net of commission when provided."""
     if entry_fill <= 0 or shares <= 0:
         return 0.0, 0.0
-    pnl = (exit_fill - entry_fill) * shares
+    pnl = (exit_fill - entry_fill) * shares - float(commission or 0)
     pnl_pct = ((exit_fill / entry_fill) - 1) * 100
     return round(pnl, 4), round(pnl_pct, 4)
 

@@ -603,9 +603,11 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         except Exception as exc:
             log.debug(f"Could not fetch IB account balance: {exc}")
         if getattr(self.cfg, "USE_MULTI_POSITION", True) and self._position_slots:
-            self._recalc_bot_nav()
+            if not self._ib_sync_enabled():
+                self._recalc_bot_nav()
         else:
-            self.bot_nav = self.bot_cash + self.shares * self._latest_price()
+            if not self._ib_sync_enabled():
+                self.bot_nav = self.bot_cash + self.shares * self._latest_price()
         self._sync_bot_nav_from_ib()
     def _deployable_cash(self) -> float:
         """Cash for new entries — war settled cash when war account enabled."""
