@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 226,
   "training_sessions": 39,
-  "trades_observed": 1674,
+  "trades_observed": 1675,
   "scans_performed": 39,
-  "improvements_applied": 2680,
+  "improvements_applied": 2681,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:59.928557",
-      "age": "7d 19h 58m 11s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2020",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T07:01:01.603175",
-      "age": "7d 19h 58m 12s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-2.31",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:01:03.515581",
       "age": "7d 19h 58m 14s",
@@ -12292,6 +12271,27 @@
           "Review ib_failure on CUPR"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T11:04:09.082842",
+      "age": "9d 0h 1m 20s",
+      "type": "TRADE",
+      "message": "Observed trade: JEM LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:04:09.393678",
+      "age": "9d 0h 1m 20s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2681",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on JEM"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T11:02:27.637581",
@@ -14456,7 +14456,6 @@
   "mood": "steady",
   "total_pnl": 331211.64000000054,
   "win_history": [
-    -0.57,
     -4.66,
     2.81,
     2.58,
@@ -14955,20 +14954,21 @@
     0.08,
     4.15,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_losses": 3,
   "worst_streak": 86,
-  "veteran_xp": 25910,
+  "veteran_xp": 25920,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1668,
-  "hours_flown": 166.7999999999948,
+  "flights_completed": 1669,
+  "hours_flown": 166.8999999999948,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15007,7 +15007,8 @@
     "KND": 1,
     "MST": 1,
     "TSL": 1,
-    "CUP": 2
+    "CUP": 2,
+    "JEM": 1
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
