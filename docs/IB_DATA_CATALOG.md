@@ -219,7 +219,10 @@ Wired into: `halim_companion.live_snapshot()`, expandable to council/copilot.
 ```
 MACRO_FROM_IB=true          # SPY/QQQ/VIX from reqTickers, Yahoo fallback
 IB_MACRO_TTL_SEC=120
-REQUIRE_IB_FILL_SYNC=true   # Master IB truth switch
+IB_EXTENDED_ENABLED=true
+IB_WHATIF_MARGIN_GATE=true
+WAR_SWING_PAPER_USD=2000
+SWING_PAPER_ENABLED=false
 ```
 
 ---

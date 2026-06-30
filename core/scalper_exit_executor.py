@@ -475,23 +475,6 @@ class ScalperExitMixin:
             self._maybe_sync_war_from_ib(force=True)
         except Exception:
             pass
-            ticker=ticker,
-            entry_fill=entry_fill,
-            exit_fill=exit_fill,
-            quote_entry=float(trade_rec.get("quote_entry", entry_fill)),
-            quote_exit=float(trade_rec.get("quote_exit", exit_fill)),
-            shares=shares,
-            pnl_usd=pnl,
-            pnl_pct=pnl_pct,
-            result=result,
-            exit_reason=reason,
-            entry_slippage_pct=entry_slip,
-            exit_slippage_pct=exit_slip,
-            regime=regime,
-            hold_sec=hold_sec,
-            entry_mode=str(trade_rec.get("entry_mode", "")),
-            limit_px=trade_rec.get("limit_px"),
-        )
         self.trade_journal.append(trade_rec)
         if len(self.trade_journal) > self._trade_journal_max:
             self.trade_journal = self.trade_journal[-self._trade_journal_max:]
