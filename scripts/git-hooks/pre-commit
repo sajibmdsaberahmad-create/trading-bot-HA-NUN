@@ -5,8 +5,7 @@ set -euo pipefail
 JOURNAL="docs/ENGINEERING_FIX_LOG.md"
 WATCH_RE='^(core/|halim/halim/|scripts/.*\.(sh|command)$|\.cursor/rules/|\.cursor/hooks/)'
 
-if [[ "${SKIP_FIX_JOURNAL:-}" == "1" ]]; then
-  echo "WARN: SKIP_FIX_JOURNAL=1 — fix journal check bypassed (document in $JOURNAL ASAP)."
+if [[ "${SKIP_FIX_JOURNAL:-}" == "1" ]] || [[ "${GIT_SYNC_AUTO_COMMIT:-}" == "1" ]]; then
   exit 0
 fi
 

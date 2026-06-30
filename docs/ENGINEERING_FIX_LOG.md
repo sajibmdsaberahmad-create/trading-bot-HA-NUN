@@ -10,6 +10,42 @@
 
 ---
 
+## 2026-06-30 — Descriptive auto-commit + journal repair
+
+### Problem
+Git sync auto-commits used opaque messages (`auto: 82 change(s) — file.csv`). War-relax fix log entry lost its `##` header. Auto commits could conflict with manual-only journal hook.
+
+### Root cause
+`git_sync` watcher used basename preview only; no brain/session context. Header dropped during insert of Halim participation entry. Hook had no exemption for `git_sync` learning/shutdown pushes.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/git_sync.py` | `_brain_snapshot_line`, `_summarize_changed_files`, `_enrich_commit_message`, `_record_auto_commit_in_brain_log`; descriptive shutdown/learn/auto messages; `GIT_SYNC_AUTO_COMMIT=1` on subprocess commit |
+| `scripts/git-hooks/pre-commit` | Skip journal check when `GIT_SYNC_AUTO_COMMIT=1` |
+| `docs/ENGINEERING_FIX_LOG.md` | Restored war-relax `##` header |
+| `docs/BRAIN_DEVELOPMENT_LOG.md` | Auto-append line on git shutdown/training/auto commits |
+
+### Env vars
+```bash
+GIT_SYNC_AUTO_COMMIT=1   # set by git_sync only — not for manual use
+GIT_BATCH_CHECKPOINTS=true
+OWNED_BRAIN_GIT_PUSH=true
+```
+
+### Verify
+```bash
+# After replay teardown — commit message should include brain= stage, artifact buckets
+tail -3 docs/BRAIN_DEVELOPMENT_LOG.md
+tail -5 logs/git_sync_journal.jsonl
+git log -1 --format=%B
+```
+
+### Notes
+Manual `core/` commits still require fix-log entry. Learning/shutdown auto pushes include `docs/ENGINEERING_FIX_LOG.md` in artifact list when changed.
+
+---
+
 ## 2026-06-30 — Forced fix journaling (git hook + Cursor)
 
 ### Problem
@@ -88,6 +124,8 @@ python3 -c "from core.hybrid_distiller import train_teacher_proxy; from core.con
 Sniper flash/strong paths unchanged (no await). Increase `HALIM_ENTRY_AWAIT_SEC` if still mostly timeout on M2 8GB.
 
 ---
+
+## 2026-06-30 — Replay war relax (entries blocked on $1k replay)
 
 ### Problem
 Replay scanned spikes but **zero trades**: every entry logged `war:veto` — `LAB_ACTIVE: need $3,495 > settled/bullet ($2,500)`. Bracket notional exceeded lab bullet on $1,000 replay cash.

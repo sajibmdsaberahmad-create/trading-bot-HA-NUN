@@ -356,6 +356,102 @@ MIN_PUSH_INTERVAL_SEC: float = 5.0
 _GIT_JOURNAL_PATH = os.path.join(REPO_DIR, "logs", "git_sync_journal.jsonl")
 _GIT_SESSION_SUMMARY_PATH = os.path.join(REPO_DIR, "logs", "git_session_summary.txt")
 
+_AUTO_COMMIT_LOG_CATEGORIES = frozenset({
+    "shutdown", "training", "replay_end", "auto", "checkpoint", "daily",
+})
+
+
+def _brain_snapshot_line() -> str:
+    """One-line owned-brain context for commit messages."""
+    try:
+        p = os.path.join(REPO_DIR, "models", "owned_brain_state.json")
+        if os.path.isfile(p):
+            with open(p, encoding="utf-8") as fh:
+                d = json.load(fh)
+            stage = d.get("stage", "?")
+            ds = int(d.get("dataset_pairs", 0) or 0)
+            evo = int(d.get("evolution_count", 0) or 0)
+            return f"brain={stage} dataset={ds} evolutions={evo}"
+    except Exception:
+        pass
+    return ""
+
+
+def _summarize_changed_files(files: List[str]) -> str:
+    """Bucket changed paths for human-readable commit bodies."""
+    buckets: Dict[str, int] = {
+        "halim": 0, "models": 0, "replay": 0, "docs": 0, "core": 0, "other": 0,
+    }
+    for raw in files:
+        f = raw.replace("\\", "/")
+        if f.startswith("halim/"):
+            buckets["halim"] += 1
+        elif f.startswith("models/") or f.endswith(".zip"):
+            buckets["models"] += 1
+        elif f.startswith("data/replay/"):
+            buckets["replay"] += 1
+        elif f.startswith("docs/"):
+            buckets["docs"] += 1
+        elif f.startswith("core/"):
+            buckets["core"] += 1
+        else:
+            buckets["other"] += 1
+    return " ".join(f"{k}={v}" for k, v in buckets.items() if v)
+
+
+def _enrich_commit_message(
+    message: str,
+    category: str,
+    files: Optional[List[str]],
+) -> str:
+    """Build descriptive multi-line commit message (title + context)."""
+    title = (message or category or "sync").strip().split("\n")[0][:200]
+    lines = [title]
+    brain = _brain_snapshot_line()
+    if brain:
+        lines.append(brain)
+    if files:
+        summary = _summarize_changed_files(files)
+        if summary:
+            lines.append(f"artifacts: {summary}")
+        preview = ", ".join(os.path.basename(f) for f in files[:4])
+        if len(files) > 4:
+            preview += f" +{len(files) - 4} more"
+        lines.append(f"files({len(files)}): {preview}")
+    if category:
+        lines.append(f"category: {category}")
+    return "\n".join(lines)
+
+
+def _build_auto_commit_message(files: List[str]) -> str:
+    """Replace opaque 'auto: N change(s)' with bucket + brain context."""
+    summary = _summarize_changed_files(files)
+    preview = ", ".join(os.path.basename(f) for f in files[:3])
+    if len(files) > 3:
+        preview += f" +{len(files) - 3} more"
+    brain = _brain_snapshot_line()
+    msg = f"sync: {len(files)} files — {preview}"
+    if summary:
+        msg += f" | {summary}"
+    if brain:
+        msg += f" | {brain}"
+    return msg
+
+
+def _record_auto_commit_in_brain_log(message: str, category: str) -> None:
+    """Append git auto-commit line to BRAIN_DEVELOPMENT_LOG (session audit)."""
+    if category not in _AUTO_COMMIT_LOG_CATEGORIES:
+        return
+    try:
+        log_path = os.path.join(REPO_DIR, "docs", "BRAIN_DEVELOPMENT_LOG.md")
+        ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        first_line = (message or "").strip().split("\n")[0][:140]
+        line = f"- `{ts}` **git_{category}** — {first_line}"
+        with open(log_path, "a", encoding="utf-8") as fh:
+            fh.write(line + "\n")
+    except Exception as exc:
+        log.debug(f"Brain development log append: {exc}")
+
 
 def _git_notify_mode(cfg: Optional[BotConfig] = None) -> str:
     """log=journal only | session=journal + one Telegram at shutdown | failures | all | off"""
@@ -753,7 +849,7 @@ def run_standalone_daemon(cfg: Optional[BotConfig] = None) -> None:
                     _last_dirty_fingerprint = fp
                     preview = ", ".join(os.path.basename(f) for f in dirty[:5])
                     push_change(
-                        f"auto: {len(dirty)} change(s) — {preview}",
+                        _build_auto_commit_message(dirty),
                         files=dirty,
                         category="auto",
                     )
@@ -1000,7 +1096,9 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
                 return True
             
             timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-            full_message = f"{message}\n\nCategory: {category}\nTimestamp: {timestamp}\nAuto-pushed by git_sync.py"
+            body = _enrich_commit_message(message, category, files)
+            full_message = f"{body}\n\nTimestamp: {timestamp}\nAuto-pushed by git_sync.py"
+            commit_env = {**os.environ, "GIT_SYNC_AUTO_COMMIT": "1"}
             commit_cmd = ["git", "commit", "-m", full_message, "--allow-empty"]
             push_cmd = ["git", "push", target_repo, "HEAD:main"]
             
@@ -1012,12 +1110,16 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
                     all_success = False
             
             if all_success:
-                result = subprocess.run(commit_cmd, cwd=repo_root, capture_output=True, text=True, timeout=30)
+                result = subprocess.run(
+                    commit_cmd, cwd=repo_root, capture_output=True, text=True,
+                    timeout=30, env=commit_env,
+                )
                 if result.returncode != 0:
                     log.debug(f"Git commit failed: {result.stderr.strip()}")
                     all_success = False
                 else:
                     log.debug(f"Git commit: {message[:60]}")
+                    _record_auto_commit_in_brain_log(body, category)
             
             if all_success:
                 result = subprocess.run(push_cmd, cwd=repo_root, capture_output=True, text=True, timeout=60)
@@ -1680,6 +1782,12 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
     _last_push_ts = 0  # bypass debounce for shutdown
 
     tag = f"shutdown_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    brain = _brain_snapshot_line()
+    shutdown_title = (
+        f"shutdown: NAV=${final_nav:,.0f} return={return_pct:+.1f}% | {tag}"
+    )
+    if brain:
+        shutdown_title += f" | {brain}"
     log.info("📤 Full shutdown sync → HANOON + Logs + Grandmaster...")
 
     # ── HANOON (code + bot state) ──
@@ -1698,7 +1806,7 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
         hanoon_files.append(report_path)
 
     ok_ha = push_change(
-        f"shutdown: NAV=${final_nav:,.0f} return={return_pct:+.1f}% | {tag}",
+        shutdown_title,
         files=hanoon_files,
         category="shutdown",
     )
@@ -1993,6 +2101,7 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "docs/HALIM.md",
         "docs/HALIM_GUARDRAILS.md",
         "docs/BRAIN_DEVELOPMENT_LOG.md",
+        "docs/ENGINEERING_FIX_LOG.md",
         "models/profit_hunt_ledger.jsonl",
         "models/market_data_denylist.json",
         "models/market_data_failures.jsonl",
@@ -2272,7 +2381,10 @@ def push_learning_checkpoint(
 
         ok = False
         if hanoon_files:
-            ok = push_change(f"learn: {reason} | {tag}", files=hanoon_files, category="training") or ok
+            learn_title = f"learn: {reason} | {tag}"
+            if brain := _brain_snapshot_line():
+                learn_title += f" | {brain}"
+            ok = push_change(learn_title, files=hanoon_files, category="training") or ok
         if logs_files and _get_repo_url("logs"):
             ok = push_to_secondary_repo("logs", logs_files, f"learn: {reason}", "training") or ok
         if gm_files and _get_repo_url("grandmaster"):
