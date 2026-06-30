@@ -1239,3 +1239,48 @@ Recovered-position exit crashed: `'ScalperRunner' object has no attribute '_last
 ```bash
 pytest tests/test_git_sync_defer.py tests/test_position_context_isolation.py -q
 ```
+
+---
+
+## 2026-07-01 — Strict profit_probability entry gate (Smart Stack)
+
+### Problem
+Under default Smart Stack, calculative `profit_probability` / `enter_ok` was advisory only. Fast paths (`ppo:micro_fast`, sniper flash, council timeout, momentum override) entered on vol/score/PPO while quality was red — ~106/500 recent verdicts executed with `halim_signal=false`; war posture skipped low prob only when sniper-strong bypass applied. `_passes_entry_quality_gate` used `pred_1bar` as `live_px`, skewing scores.
+
+### Root cause
+`SMART_STACK_ADVISORY_GATES=true` made MTF/regime/quality non-blocking; `quality_blocks_entry()` required `ENTRY_QUALITY_GATE` or hardness ≥0.5 (default 0.45). `SPIKE_FAST_REQUIRES_QUALITY` called `quality_blocks_entry` but still passed. `apply_smart_war_entry` ignored `quality_conf`; strong-spike floor lowered min prob to 48%.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/smart_stack.py` | `strict_profit_prob_enabled()` default ON; tighten `build_halim_local_entry` + `apply_smart_war_entry` |
+| `core/entry_quality.py` | `profit_prob_blocks_entry`, `apply_profit_prob_veto`; wired into `quality_blocks_entry` |
+| `core/fast_execution.py` | Quality gate uses real `live_px`; strict mode always assesses; disciplined strong checks quality |
+| `core/ai_commander_verdict.py` | Stamp `profit_probability`; disable momentum override when strict; finalize backstop veto |
+| `core/scalper_spike_loop.py` | Hard profit-prob veto before `_attempt_entry` even in advisory gate mode |
+| `core/live_ai_pipeline.py` | Council timeout / PPO-lead paths require green `enter_ok` when strict |
+| `core/capital_discipline.py` | No 48% strong-spike prob floor when strict |
+| `core/ai_commander_entry.py` | Pass `live_px` into micro-fast quality assessment |
+
+### Env
+- `SMART_STACK_STRICT_PROFIT_PROB=true` (default with Smart Stack) — hard veto on red calculative quality
+- `SMART_STACK_STRICT_PROFIT_PROB=false` — restore legacy fast-path bypasses
+
+### Verify
+```bash
+pytest tests/test_git_sync_defer.py tests/test_position_context_isolation.py -q
+venv/bin/python -c "
+from core.config import BotConfig
+from core.entry_quality import assess_entry_quality, profit_prob_blocks_entry, apply_profit_prob_veto
+from core.smart_stack import strict_profit_prob_enabled, build_halim_local_entry
+cfg = BotConfig()
+assert strict_profit_prob_enabled(cfg)
+q = {'enter_ok': False, 'profit_probability': 0.12, 'reason': 'profit_prob=12%'}
+assert profit_prob_blocks_entry(cfg, q)
+v = apply_profit_prob_veto(cfg, {'enter': True, 'pipeline': 'ppo:micro_fast'}, q)
+assert not v['enter'] and 'profit_prob' in v['pipeline']
+h = build_halim_local_entry(cfg, halim_live={'status':'missing'}, quality=q, ppo_action=0, ppo_conf=0.5, ppo_reason='', min_conf=0.65, scan_score=57, spike_ratio=1.3)
+assert not h['enter']
+print('ok')
+"
+```
