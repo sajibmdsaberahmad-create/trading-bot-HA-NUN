@@ -34,10 +34,21 @@ def smart_stack_enabled(cfg: Optional[BotConfig] = None) -> bool:
 
 
 def mechanical_gates_advisory_only(cfg: Optional[BotConfig] = None) -> bool:
-    """When true, vol/MTF/regime/quality gates inform Halim+PPO but do not block."""
+    """When true, vol/MTF/regime gates inform Halim+PPO but do not block."""
     if not smart_stack_enabled(cfg):
         return False
     return _env_bool("SMART_STACK_ADVISORY_GATES", "true")
+
+
+def strict_profit_prob_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    """
+    Hard veto on red profit_probability / enter_ok=false.
+    Default ON with Smart Stack — MTF/regime stay advisory; profit prob does not.
+    Set SMART_STACK_STRICT_PROFIT_PROB=false to restore legacy fast-path bypasses.
+    """
+    if not smart_stack_enabled(cfg):
+        return _env_bool("SMART_STACK_STRICT_PROFIT_PROB", "false")
+    return _env_bool("SMART_STACK_STRICT_PROFIT_PROB", "true")
 
 
 def smart_war_posture_enabled(cfg: Optional[BotConfig] = None) -> bool:
