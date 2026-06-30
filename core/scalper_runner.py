@@ -594,6 +594,9 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self.cash = self.available_cash
         if self._ib_starting_balance is None and self.account_equity > 0:
             self._ib_starting_balance = self.account_equity
+            if ai_full_capital_access(self.cfg):
+                self.bot_cash = float(self.available_cash or self.account_equity)
+                self.bot_nav = self.account_equity
         try:
             from core.rth_session import is_rth
             if is_rth(self.cfg) and self.account_equity > 0:
@@ -601,9 +604,6 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                     self._rth_starting_balance = self.account_equity
         except Exception:
             pass
-            if ai_full_capital_access(self.cfg):
-                self.bot_cash = float(self.available_cash or self.account_equity)
-                self.bot_nav = self.account_equity
         self.cfg._latest_account_balance = self.account_equity
         if getattr(self.cfg, "USE_MULTI_POSITION", True) and self._position_slots:
             if not self._ib_sync_enabled():

@@ -102,6 +102,8 @@ def test_filter_rth_executions():
     assert len(filtered) == 1
     assert filtered[0].side == "BOT"
 
+
+def test_war_capital_defaults_1k():
     cfg = BotConfig()
     with patch.dict("os.environ", {"WAR_CAPITAL_USD": "1000"}, clear=False):
         from core.war_account import operating_capital_usd
