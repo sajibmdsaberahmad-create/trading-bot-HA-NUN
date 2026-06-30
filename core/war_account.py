@@ -452,6 +452,7 @@ def _roll_rth_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) ->
 
 
 def _roll_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
+    changed = False
     today = _today_key()
     if state.get("session_date") != today:
         cap = operating_capital_usd(cfg)
@@ -471,7 +472,22 @@ def _roll_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> Non
                 state["lab_nav"] = lab
                 state["lab_cash"] = lab
                 state["lab_settled"] = lab
-    _roll_rth_session(state, cfg)
+        _append_ledger({
+            "event": "calendar_session_roll",
+            "session_date": today,
+            "mode": state.get("mode"),
+            "nav": state.get("nav"),
+            "ts": time.time(),
+        })
+        log.info(
+            f"⚔️ War calendar roll (ET midnight) — session={today} "
+            f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f}"
+        )
+        changed = True
+    if _roll_rth_session(state, cfg):
+        changed = True
+    if changed and not is_replay_session():
+        save_state(state)
 
 
 def _apply_settlement(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:

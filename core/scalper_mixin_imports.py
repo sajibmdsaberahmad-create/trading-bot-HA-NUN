@@ -145,6 +145,7 @@ from core.self_improver import generate_self_improvement_plan
 from core.train_subprocess import launch_training
 from core.position_sync import repair_slot_entry_price, sync_position_slots_from_ib
 from core.profit_hunting import (
+    check_missed_profit_hunt,
     evaluate_spike_top_exit,
     evaluate_wave_end_on_spike_fade,
     is_mechanical_profit_exit,
