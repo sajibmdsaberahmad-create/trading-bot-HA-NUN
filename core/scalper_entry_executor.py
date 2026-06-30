@@ -329,6 +329,8 @@ class ScalperEntryMixin:
             "regime": str(tel.get("regime", getattr(self, "_last_entry_regime", ""))),
             "stop": plan.initial_stop_price,
             "target": plan.take_profit_price,
+            "risk_usd": float(plan.risk_usd or 0),
+            "atr_at_entry": float(plan.atr_at_entry or 0),
             "peak": fill_px,
             "hard_floor": plan.initial_stop_price,
             "opened_at": opened_at,
