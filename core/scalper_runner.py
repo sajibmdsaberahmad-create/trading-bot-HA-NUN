@@ -1089,31 +1089,11 @@ class ScalperRunner:
         return True
 
     def _repair_slot_entry_price(self, ticker: str) -> None:
-        """Fix cross-ticker contamination — refresh entry from IB if price is implausible."""
         slot = self._position_slots.get(ticker)
         if not slot:
             return
-        entry = float(slot.get("entry_price", 0) or 0)
-        if entry <= 0:
-            return
-        live = self._live_price_for(ticker, entry)
-        if live <= 0:
-            return
-        ratio = entry / live
-        if 0.85 <= ratio <= 1.15:
-            return
-        try:
-            from core.fill_tracker import position_avg_cost
-            avg = position_avg_cost(self.ib, ticker)
-        except Exception:
-            avg = 0.0
-        if avg > 0 and 0.85 <= (avg / live) <= 1.15:
-            log.warning(
-                f"  🔧 Entry price repair {ticker}: ${entry:.4f} → ${avg:.4f} "
-                f"(live ${live:.4f})"
-            )
-            slot["entry_price"] = avg
-            slot["entry_fill_px"] = avg
+        live = self._live_price_for(ticker, float(slot.get("entry_price", 0) or 0))
+        repair_slot_entry_price(self.ib, ticker, slot, live)
 
     def _request_deferred_exit(self, ticker: str, price: float, reason: str) -> None:
         """Queue exit for main loop — safe when called from IB tick callbacks."""
@@ -1234,38 +1214,11 @@ class ScalperRunner:
         if not self._position_slots:
             return
         try:
-            from core.fill_tracker import position_avg_cost
-            ib_map: Dict[str, float] = {}
-            for p in self.ib.positions():
-                sym = getattr(p.contract, "symbol", "")
-                pos = float(p.position)
-                if pos > 0:
-                    ib_map[sym] = pos
-                elif pos < 0:
-                    if sym not in self._short_warned:
-                        self._short_warned.add(sym)
-                        log.warning(
-                            f"IB short position {pos:.0f} {sym} "
-                            f"— long-only scalper ignoring (orphan paper debris)"
-                        )
-            for ticker, slot in list(self._position_slots.items()):
-                if ticker in ib_map:
-                    ib_sh = float(ib_map[ticker])
-                    session_sh = float(slot.get("session_shares", 0) or slot.get("shares", 0))
-                    if session_sh > 0:
-                        slot["shares"] = min(ib_sh, session_sh)
-                    else:
-                        slot["shares"] = ib_sh
-                    if slot.get("ib_fill_confirmed"):
-                        avg = position_avg_cost(self.ib, ticker)
-                        if avg > 0:
-                            slot["entry_fill_px"] = avg
-                            slot["entry_price"] = avg
-                else:
-                    opened = float(slot.get("opened_at", 0))
-                    if opened and (time.time() - opened) < 60.0:
-                        continue
-                    slot["shares"] = 0.0
+            sync_position_slots_from_ib(
+                self.ib,
+                self._position_slots,
+                short_warned=self._short_warned,
+            )
             self._refresh_aggregate_position_state()
         except Exception as exc:
             log.debug(f"Multi position sync: {exc}")
@@ -1335,21 +1288,9 @@ class ScalperRunner:
         Paper RTH: MARKET by default. Extended hours: aggressive LIMIT only —
         IB paper parent MARKET orders stall in PreSubmitted outside RTH.
         """
-        if should_defer_bracket_children(self.cfg):
-            limit_px, mode = self.broker.decide_smart_entry(
-                current_px, bid, ask, shares, avg_volume,
-            )
-            if limit_px and limit_px > 0:
-                return limit_px, f"ext_hours_{mode}"
-            ref = ask if ask and ask > 0 else current_px
-            buf = float(getattr(self.cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.003))
-            return self.broker._round_price(ref * (1.0 + buf)), "ext_hours_limit_ask"
-        if (
-            getattr(self.cfg, "PAPER_TRADING", False)
-            and getattr(self.cfg, "PAPER_MARKET_ENTRIES", True)
-        ):
-            return None, "paper_market"
-        return self.broker.decide_smart_entry(current_px, bid, ask, shares, avg_volume)
+        return entry_price_mode_for_session(
+            self.cfg, self.broker, current_px, bid, ask, shares, avg_volume,
+        )
 
     def _stuck_entry_limit_px(
         self,
@@ -1360,14 +1301,7 @@ class ScalperRunner:
         """Limit price for PreSubmitted recovery — never re-submit bare MARKET ext-hours."""
         bid, ask = self._get_bid_ask(ticker)
         live = self._live_price_for(ticker, ref_px)
-        limit_px, mode = self.broker.decide_smart_entry(
-            live, bid, ask, shares, 0.0,
-        )
-        if limit_px and limit_px > 0:
-            return limit_px, mode
-        ref = ask if ask and ask > 0 else live
-        buf = float(getattr(self.cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.004))
-        return self.broker._round_price(ref * (1.0 + buf)), "limit_chase"
+        return stuck_entry_limit_px(self.cfg, self.broker, bid, ask, live, shares)
 
     def _ib_sync_enabled(self) -> bool:
         return require_ib_fill_sync(self.cfg)
