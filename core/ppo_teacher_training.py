@@ -126,6 +126,128 @@ def _summarize_for_teacher(stats: Dict[str, Any], cfg: BotConfig) -> str:
     return "\n".join(lines)
 
 
+def _outcome_teacher_plan(stats: Dict[str, Any], cfg: BotConfig) -> Optional[Dict[str, Any]]:
+    """
+    Label PPO from realized trade outcomes + spike verdict skips — no cloud API.
+    Preferred local teacher when API budget is exhausted at adult stage.
+    """
+    trades = stats.get("trades") or []
+    if not trades:
+        return None
+
+    labels: List[Dict[str, Any]] = []
+    wins = 0
+    losses = 0
+    for t in trades:
+        pnl = float(t.get("pnl_usd", 0) or 0)
+        ticker = str(t.get("ticker", "")).upper()
+        if not ticker:
+            continue
+        if not (t.get("features") or t.get("obs")):
+            continue
+        if pnl > 0:
+            wins += 1
+            reward = min(0.95, 0.35 + min(pnl / 80.0, 0.55))
+            labels.append({
+                "ticker": ticker,
+                "should_have_entered": True,
+                "teacher_action": 1,
+                "teacher_reward": round(reward, 3),
+                "lesson": f"outcome win ${pnl:+.2f} — reinforce similar spike/quality setup",
+            })
+        elif pnl < 0:
+            losses += 1
+            reward = max(-0.95, -0.35 + max(pnl / 60.0, -0.55))
+            labels.append({
+                "ticker": ticker,
+                "should_have_entered": False,
+                "teacher_action": 0,
+                "teacher_reward": round(reward, 3),
+                "lesson": (
+                    f"outcome loss ${pnl:+.2f} — skip or require stronger "
+                    f"profit_probability + spike on {ticker}"
+                ),
+            })
+
+    # Skip verdicts: reinforce good skips (high fakeout / low quality)
+    try:
+        verdict_path = Path("models/smart_stack_verdicts.jsonl")
+        if verdict_path.is_file():
+            skip_rows: List[Dict[str, Any]] = []
+            with open(verdict_path, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        r = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if r.get("event") != "spike_verdict" or bool(r.get("enter")):
+                        continue
+                    skip_rows.append(r)
+            for r in skip_rows[-12:]:
+                ticker = str(r.get("ticker", "")).upper()
+                if not ticker:
+                    continue
+                reason = str(r.get("reason", "")).lower()
+                spike = float(r.get("spike_ratio", 1.0) or 1.0)
+                if "fakeout" in reason or spike < 1.1:
+                    labels.append({
+                        "ticker": ticker,
+                        "should_have_entered": False,
+                        "teacher_action": 0,
+                        "teacher_reward": 0.25,
+                        "lesson": "verdict skip reinforced — weak spike or fakeout read",
+                    })
+    except Exception:
+        pass
+
+    if not labels:
+        return None
+
+    wr = wins / max(wins + losses, 1)
+    diagnosis = (
+        f"Outcome teacher: {wr:.0%} WR on {wins + losses} labeled round-trips "
+        f"({len(labels)} labels incl. skips) — rewards from realized PnL"
+    )
+    mutations: List[Dict[str, Any]] = []
+    wr_floor = float(os.getenv("PPO_TEACHER_WIN_RATE_FLOOR", "0.38"))
+    if wr < wr_floor:
+        conf = float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.65))
+        mutations.append({
+            "param": "CONFIDENCE_THRESHOLD",
+            "value": min(0.75, conf + 0.02),
+            "reason": f"outcome WR {wr:.0%} below floor — tighten entry bar",
+        })
+
+    return {
+        "diagnosis": diagnosis,
+        "strategy_shift": "Train PPO on realized outcomes — reward wins, penalize losses, reinforce skips",
+        "trade_labels": labels,
+        "mutations": mutations[:2],
+        "lessons": [
+            "Outcome-positive entries: repeat when spike + profit_probability align",
+            "Outcome-negative entries: require higher conviction before re-entry",
+            "Good skip verdicts are positive examples for HOLD",
+        ],
+        "ppo_focus": "Shape policy toward net-positive round-trips, not interim spike chase",
+        "_source": "outcome_labels",
+    }
+
+
+def _local_teacher_plan(stats: Dict[str, Any], cfg: BotConfig) -> Dict[str, Any]:
+    """Outcome labels first; heuristic rules only when outcomes are insufficient."""
+    use_outcome = os.getenv("PPO_TEACHER_OUTCOME_LABELS", "true").lower() in (
+        "1", "true", "yes",
+    )
+    if use_outcome:
+        plan = _outcome_teacher_plan(stats, cfg)
+        if plan:
+            return plan
+    return _heuristic_teacher_plan(stats, cfg)
+
+
 def _heuristic_teacher_plan(stats: Dict[str, Any], cfg: BotConfig) -> Dict[str, Any]:
     """Local fallback when cloud API is rate-limited — pattern-based teacher."""
     trades = stats.get("trades") or []
@@ -219,14 +341,14 @@ def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Option
         ok, reason = allow_ppo_teacher_api(cfg)
         if not ok:
             log.info(f"🎓 PPO teacher: local student only ({reason})")
-            return _heuristic_teacher_plan(stats, cfg)
+            return _local_teacher_plan(stats, cfg)
     except Exception:
         pass
 
     client = CouncilClient(cfg)
     if not client.enabled():
-        log.warning("PPO teacher: council API unavailable — using heuristic fallback")
-        return _heuristic_teacher_plan(stats, cfg)
+        log.warning("PPO teacher: council API unavailable — using local outcome/heuristic teacher")
+        return _local_teacher_plan(stats, cfg)
 
     bounds = format_bounds_for_prompt(cfg, 25)
     allowed = ", ".join(tunable_param_names(cfg)[:18])
@@ -271,13 +393,13 @@ def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Option
         time.sleep(wait)
 
     if not raw:
-        log.warning("PPO teacher: cloud API unavailable after retries — heuristic fallback")
-        return _heuristic_teacher_plan(stats, cfg)
+        log.warning("PPO teacher: cloud API unavailable after retries — local outcome/heuristic teacher")
+        return _local_teacher_plan(stats, cfg)
 
     plan = _parse_plan_json(raw)
     if not plan:
-        log.warning("PPO teacher: could not parse council JSON — heuristic fallback")
-        return _heuristic_teacher_plan(stats, cfg)
+        log.warning("PPO teacher: could not parse council JSON — local outcome/heuristic teacher")
+        return _local_teacher_plan(stats, cfg)
     plan["_raw_excerpt"] = raw[:600]
     return plan
 

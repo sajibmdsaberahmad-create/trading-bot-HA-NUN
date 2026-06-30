@@ -120,7 +120,7 @@ def evaluate_halim_checkpoint(
     if json_passed < min_json:
         reasons.append(f"json_score {json_passed} < {min_json}")
 
-  # Compare to incumbent latest if present
+    # Compare to incumbent latest if present
     incumbent_score = None
     state = _load_state()
     if state.get("last_promoted_token_passed") is not None:
