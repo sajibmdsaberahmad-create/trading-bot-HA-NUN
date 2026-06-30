@@ -1025,20 +1025,42 @@ class ScalperExitMixin:
 
         stalled = self._ai_profit_decision_stalled(pnl_pct)
         try:
-            from core.green_trade_doctrine import assess_green_exit, green_exit_mandatory
+            from core.green_trade_doctrine import assess_dynamic_exit, green_exit_mandatory
             if green_exit_mandatory(self.cfg):
-                micro = getattr(self, "_last_micro_forecast", {}).get(self.current_ticker or "", {})
-                ge = assess_green_exit(
+                ticker = self.current_ticker or ""
+                micro = getattr(self, "_last_micro_forecast", {}).get(ticker, {})
+                fast_df, _, _, forecast = self._resolve_live_bars(ticker, min_bars=6)
+                if forecast:
+                    micro = {**micro, **forecast}
+                opened = getattr(self, "_position_opened_at", 0.0)
+                bars_held = int((time.time() - opened) / 60.0) if opened else 0
+                dx = assess_dynamic_exit(
                     self.cfg,
-                    ticker=self.current_ticker or "",
+                    ticker=ticker,
+                    current_px=current_px,
+                    entry_px=entry_px,
                     pnl_pct=pnl_pct,
                     peak_pct=peak_pct,
                     micro=micro,
+                    df=fast_df,
+                    bars_held=bars_held,
                     ai_stalled=stalled,
                 )
-                if ge.get("should_exit") and ge.get("reason"):
-                    log.info(f"  🟢 GREEN EXIT: {ge['reason']}")
-                    self._exit_position(current_px, ge["reason"])
+                if dx.get("action") == "ride_multibar" and dx.get("ride", {}).get("should_ride"):
+                    ride = dx["ride"]
+                    if not getattr(self, "_multibar_ride_logged", False):
+                        self._multibar_ride_logged = True
+                        log.info(
+                            f"  🟢 RIDE {ticker}: +{pnl_pct:.2%} pred_3=${ride.get('pred_3bar', 0):.2f} "
+                            f"upside={ride.get('expected_upside_pct', 0):.2%} "
+                            f"bars={bars_held}/{ride.get('max_bars', 5)}"
+                        )
+                    self._profit_ride_started_at = time.time()
+                    return False
+                self._multibar_ride_logged = False
+                if dx.get("should_exit") and dx.get("reason"):
+                    log.info(f"  🟢 GREEN EXIT: {dx['reason']}")
+                    self._exit_position(current_px, dx["reason"])
                     return True
         except Exception:
             pass

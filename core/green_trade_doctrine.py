@@ -191,8 +191,6 @@ def assess_dynamic_exit(
     Unified exit: multi-bar ride when profitable path clear; rapid book on slippage/fade;
     early loss cut when loss_pressure + slippage spike.
     """
-    import numpy as np  # noqa: F401 — used in predict_exit_slippage via indicators path
-
     micro = dict(micro or {})
     micro.setdefault("live_px", current_px)
     giveback = max(0.0, peak_pct - pnl_pct)
@@ -554,58 +552,30 @@ def assess_green_exit(
     ppo_conf: float = 0.5,
     ai_exit: bool = False,
     ai_stalled: bool = False,
+    current_px: float = 0.0,
+    entry_px: float = 0.0,
+    df: Optional[pd.DataFrame] = None,
+    bars_held: int = 0,
 ) -> Dict[str, Any]:
-    """
-    Dynamic green exit — take profit while green when AI/PPO fade or stall.
-    """
-    from core.green_profit_lock import evaluate_green_lock
-
-    micro = micro or {}
-    pred_down = float(micro.get("dir", 0) or 0) < 0 or (
-        float(micro.get("pred_1bar", 0) or 0) > 0
-        and float(micro.get("pred_1bar", 0)) < float(micro.get("live_px", 0) or 1e9)
-    )
-    fade = float(micro.get("fade_risk", 0) or 0)
-    giveback = max(0.0, peak_pct - pnl_pct)
-
-    should_exit = False
-    reason = ""
-    if pnl_pct <= 0:
-        return {"should_exit": False, "reason": "", "pnl_pct": pnl_pct}
-
-    if green_exit_mandatory(cfg):
-        if ai_exit or (ppo_action == 2 and ppo_conf >= 0.55):
-            should_exit = True
-            reason = "green_exit:ai_ppo_sell"
-        elif ai_stalled and pnl_pct > 0:
-            should_exit = True
-            reason = "green_exit:ai_stall"
-        elif pred_down and fade > 0.45 and pnl_pct >= 0.002:
-            should_exit = True
-            reason = "green_exit:pred_fade"
-        elif peak_pct >= 0.004 and giveback >= peak_pct * 0.35:
-            should_exit = True
-            reason = "green_exit:giveback"
-
-    lock, lock_reason = evaluate_green_lock(
+    """Delegates to assess_dynamic_exit (multi-bar ride + slippage-aware book/cut)."""
+    px = current_px
+    if px <= 0 and entry_px > 0:
+        px = entry_px * (1.0 + pnl_pct)
+    return assess_dynamic_exit(
         cfg,
+        ticker=ticker,
+        current_px=px,
+        entry_px=entry_px,
         pnl_pct=pnl_pct,
         peak_pct=peak_pct,
+        micro=micro,
+        df=df,
+        bars_held=bars_held,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        ai_exit=ai_exit,
         ai_stalled=ai_stalled,
-        giveback_from_peak=giveback,
-        was_green=peak_pct > 0,
     )
-    if lock and not should_exit:
-        should_exit = True
-        reason = lock_reason
-
-    return {
-        "should_exit": should_exit,
-        "reason": reason,
-        "pnl_pct": pnl_pct,
-        "peak_pct": peak_pct,
-        "giveback": giveback,
-    }
 
 
 def doctrine_account_tags(cfg: Optional["BotConfig"], runner: Any = None) -> Dict[str, Any]:
