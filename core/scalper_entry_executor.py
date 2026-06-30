@@ -1400,8 +1400,9 @@ class ScalperEntryMixin:
             if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
                 from core.capital_discipline import is_strong_spike_setup
                 from core.sniper_execution import sniper_vol_flash
+                from core.green_trade_doctrine import green_entry_mandatory
                 uptrend_ok = only_uptrend(df_fast, current_px, min_bars=min_bars)
-                if not uptrend_ok and not (
+                if not uptrend_ok and not green_entry_mandatory(self.cfg) and not (
                     should_spike_fast_entry(self.cfg, spike_ratio, scan_score)
                     or is_strong_spike_setup(self.cfg, scan_score, spike_ratio)
                     or sniper_vol_flash(self.cfg, scan_score, spike_ratio)
@@ -1538,6 +1539,27 @@ class ScalperEntryMixin:
                         market_state=get_market_state(self.cfg),
                     )
                 self._last_ai_confidence = float(ai_dec.get("confidence", 0.5))
+                try:
+                    from core.green_trade_doctrine import require_green_entry, green_entry_mandatory
+                    if green_entry_mandatory(self.cfg) and ai_dec.get("enter"):
+                        block = require_green_entry(
+                            self.cfg,
+                            ticker=ticker,
+                            df=df_fast,
+                            current_px=current_px,
+                            micro=forecast,
+                            spike_ratio=spike_ratio,
+                            scan_score=scan_score,
+                            ppo_action=int(ai_dec.get("ppo_action", 0) or 0),
+                            ppo_conf=float(ai_dec.get("ppo_conf", 0.5) or 0.5),
+                            decision=ai_dec,
+                        )
+                        if block:
+                            log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
+                            self._spike_skip_until[ticker] = time.time() + entry_cooldown_after_skip(self.cfg)
+                            return "waiting"
+                except Exception:
+                    pass
                 return self._submit_ai_entry(ticker, df_fast, ai_dec, market_ctx, current_px)
             else:
                 inst = self.institutional.scan()

@@ -1305,8 +1305,9 @@ class ScalperSpikeMixin:
             spike_fast_ok = should_spike_fast_entry(
                 self.cfg, 1.0, float(target.rank_score),
             )
+            from core.green_trade_doctrine import green_entry_mandatory
             uptrend_ok = only_uptrend(work_df, live_px, min_bars=min_bars)
-            if not uptrend_ok and not (
+            if not uptrend_ok and not green_entry_mandatory(self.cfg) and not (
                 ai_fast_execution(self.cfg)
                 and ticker.upper() in priority_names
                 and spike_fast_ok

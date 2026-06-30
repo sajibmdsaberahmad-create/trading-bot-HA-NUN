@@ -1024,6 +1024,24 @@ class ScalperExitMixin:
             self._was_in_profit = True
 
         stalled = self._ai_profit_decision_stalled(pnl_pct)
+        try:
+            from core.green_trade_doctrine import assess_green_exit, green_exit_mandatory
+            if green_exit_mandatory(self.cfg):
+                micro = getattr(self, "_last_micro_forecast", {}).get(self.current_ticker or "", {})
+                ge = assess_green_exit(
+                    self.cfg,
+                    ticker=self.current_ticker or "",
+                    pnl_pct=pnl_pct,
+                    peak_pct=peak_pct,
+                    micro=micro,
+                    ai_stalled=stalled,
+                )
+                if ge.get("should_exit") and ge.get("reason"):
+                    log.info(f"  🟢 GREEN EXIT: {ge['reason']}")
+                    self._exit_position(current_px, ge["reason"])
+                    return True
+        except Exception:
+            pass
         should_lock, reason = evaluate_green_lock(
             self.cfg,
             pnl_pct=pnl_pct,
