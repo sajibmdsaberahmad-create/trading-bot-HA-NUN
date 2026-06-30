@@ -1,14 +1,14 @@
 {
   "spy_trend": "up",
   "qqq_trend": "up",
-  "spy_pct": 1.78,
-  "qqq_pct": 3.13,
-  "spy_price": 746.61,
-  "qqq_price": 736.01,
-  "vix_level": 16.66,
+  "spy_pct": 1.79,
+  "qqq_pct": 3.15,
+  "spy_price": 746.68,
+  "qqq_price": 736.12,
+  "vix_level": 16.65,
   "vix_regime": "low",
   "risk_tone": "risk_on",
-  "timestamp": "2026-06-30T17:24:35.746911+00:00",
+  "timestamp": "2026-06-30T17:25:21.960541+00:00",
   "source": "yahoo_http",
-  "_fetched_at": 1782840275.746906
+  "_fetched_at": 1782840321.960533
 }
