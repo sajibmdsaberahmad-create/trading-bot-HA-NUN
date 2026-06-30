@@ -46,6 +46,8 @@ class IBPosition:
     unrealized_pnl: float = 0.0
     realized_pnl: float = 0.0
     market_value: float = 0.0
+    cost_basis: float = 0.0
+    con_id: int = 0
     multiplier: float = 1.0
     account: str = ""
 
@@ -61,18 +63,35 @@ class IBOpenOrder:
     filled: float
     avg_fill: float
     remaining: float = 0.0
+    lmt_price: float = 0.0
+    aux_price: float = 0.0
+    parent_id: int = 0
+    tif: str = ""
+    outside_rth: bool = False
+    order_ref: str = ""
 
 
 @dataclass
 class IBAccountSnapshot:
     net_liquidation: float = 0.0
     total_cash: float = 0.0
+    settled_cash: float = 0.0
+    accrued_cash: float = 0.0
     realized_pnl: float = 0.0
     unrealized_pnl: float = 0.0
     gross_position_value: float = 0.0
     buying_power: float = 0.0
     available_funds: float = 0.0
+    excess_liquidity: float = 0.0
+    init_margin_req: float = 0.0
     maint_margin_req: float = 0.0
+    equity_with_loan: float = 0.0
+    prev_day_equity: float = 0.0
+    day_trades_remaining: float = -1.0
+    leverage: float = 0.0
+    cushion: float = 0.0
+    sma: float = 0.0
+    regt_equity: float = 0.0
     currency: str = "USD"
     tags: Dict[str, float] = field(default_factory=dict)
 
@@ -99,11 +118,14 @@ class IBTruthSnapshot:
     round_trips: List[RoundTrip] = field(default_factory=list)
     session_pnl_ib: float = 0.0
     session_pnl_fifo: float = 0.0
+    session_commissions: float = 0.0
     ticker_pnl_fifo: Dict[str, float] = field(default_factory=dict)
     ticker_pnl_ib: Dict[str, float] = field(default_factory=dict)
     refreshed_at: float = 0.0
     session_since_ts: float = 0.0
     session_scope: str = "rth"
+    server_time: str = ""
+    connected: bool = False
 
     def long_positions(self) -> Dict[str, IBPosition]:
         return {p.symbol: p for p in self.positions if p.qty > 0}
@@ -233,7 +255,11 @@ def fetch_ib_positions(ib) -> List[IBPosition]:
             unreal = float(getattr(port, "unrealizedPNL", 0) or 0) if port else 0.0
             real = float(getattr(port, "realizedPNL", 0) or 0) if port else 0.0
             mkt_val = float(getattr(port, "marketValue", 0) or 0) if port else 0.0
+            cost_basis = float(getattr(port, "averageCost", 0) or 0) if port else 0.0
+            if cost_basis <= 0 and port:
+                cost_basis = float(getattr(port, "costBasis", 0) or 0)
             acct = str(getattr(port, "account", "") or "") if port else ""
+            con_id = int(getattr(p.contract, "conId", 0) or 0)
             avg = normalize_ib_avg_cost(raw_avg, market_px=mkt, multiplier=mult)
             if avg <= 0 and mkt > 0:
                 avg = mkt
