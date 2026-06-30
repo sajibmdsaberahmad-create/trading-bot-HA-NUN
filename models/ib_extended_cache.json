@@ -1,5 +1,5 @@
 {
-  "refreshed_at": 1782856763.0204349,
+  "refreshed_at": 1782857090.416598,
   "refresh_mode": "light",
   "account_pnl": {
     "daily_pnl": -12.88,
@@ -23,10 +23,10 @@
     },
     "SRXH": {
       "con_id": 689952242,
-      "daily_pnl": NaN,
-      "unrealized_pnl": NaN,
-      "realized_pnl": NaN,
-      "value": NaN
+      "daily_pnl": -0.0,
+      "unrealized_pnl": 294.24,
+      "realized_pnl": 1.7976931348623157e+308,
+      "value": -691.22
     }
   },
   "contract_details": {
@@ -94,18 +94,18 @@
   "market_rules": {},
   "quote_snapshots": {
     "SPY": {
-      "bid": 745.89,
-      "ask": 745.98,
-      "last": 745.95,
+      "bid": 746.14,
+      "ask": 746.2,
+      "last": 746.22,
       "close": 741.0,
-      "volume": 55461494.52271
+      "volume": 55503234.621954
     },
     "QQQ": {
-      "bid": 735.46,
-      "ask": 735.65,
-      "last": 735.65,
+      "bid": 735.76,
+      "ask": 735.86,
+      "last": 735.82,
       "close": 724.08,
-      "volume": 41804624.948032
+      "volume": 41871809.151561
     },
     "T": {
       "bid": 20.72,
@@ -115,9 +115,9 @@
       "volume": NaN
     },
     "INTC": {
-      "bid": 138.24,
-      "ask": 138.36,
-      "last": 138.3,
+      "bid": 138.3,
+      "ask": 138.38,
+      "last": 138.31,
       "close": 131.72,
       "volume": NaN
     },
