@@ -1133,7 +1133,7 @@ def rescale_decision_for_war(
 ) -> Dict[str, Any]:
     """Clamp shares to war deploy cap + settled cash (full pool when AI sizing)."""
     cfg = cfg or BotConfig()
-    if not war_ledger_applies(cfg):
+    if entry_px <= 0 or not war_ledger_applies(cfg):
         return decision
     state = load_state(cfg)
     mode = state.get("mode") or _recompute_mode(state, cfg)

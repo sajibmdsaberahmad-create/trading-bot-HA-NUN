@@ -451,6 +451,11 @@ def log_spike_verdict(
     if not smart_stack_enabled(cfg):
         return
     from core.trade_horizon import active_order_horizon, tag_record
+    try:
+        from core.capital_phase import capital_phase
+        phase = capital_phase(cfg)
+    except Exception:
+        phase = ""
     row = tag_record({
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "event": "spike_verdict",
@@ -468,6 +473,7 @@ def log_spike_verdict(
         "halim_enter": decision.get("halim_enter"),
         "halim_conf": decision.get("halim_conf"),
         "gate_context": gate_context or {},
+        "capital_phase": phase,
     }, horizon or active_order_horizon(cfg))
     try:
         VERDICT_LOG.parent.mkdir(parents=True, exist_ok=True)

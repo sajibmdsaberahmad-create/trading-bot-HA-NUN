@@ -18,7 +18,8 @@ from core.trade_horizon import (
 
 
 def test_active_order_horizon_is_scalp():
-    assert active_order_horizon(BotConfig()) == HORIZON_SCALP
+    with patch.dict("os.environ", {"CAPITAL_PHASES_ENABLED": "false"}, clear=False):
+        assert active_order_horizon(BotConfig()) == HORIZON_SCALP
 
 
 def test_tag_record_defaults_scalp():
