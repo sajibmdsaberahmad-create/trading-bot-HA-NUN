@@ -3433,3 +3433,6 @@
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.598470363288719,"shadow_only":true,"timestamp":"2026-06-30T09:37:27.711565+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.598470363288719,"shadow_only":true,"timestamp":"2026-06-30T09:37:45.470052+00:00"}
 {"ticker":"COIN","reason":"profit_prob_below_80pct","scan_score":83.2,"spike_ratio":3.130841121422177,"shadow_only":true,"timestamp":"2026-06-30T09:37:47.480004+00:00"}
+{"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.598470363288719,"shadow_only":true,"timestamp":"2026-06-30T09:38:05.379550+00:00"}
+{"ticker":"COIN","reason":"profit_prob_below_80pct","scan_score":83.2,"spike_ratio":3.130841121422177,"shadow_only":true,"timestamp":"2026-06-30T09:38:07.310820+00:00"}
+{"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":2.5526781761841524,"shadow_only":true,"timestamp":"2026-06-30T09:38:12.450994+00:00"}
