@@ -75,6 +75,12 @@ ACCOUNT_TAG_FIELD_MAP: Dict[str, str] = {
   "Cushion": "cushion",
   "SMA": "sma",
   "RegTEquity": "regt_equity",
+  "LookAheadInitMarginReq": "lookahead_init_margin",
+  "LookAheadMaintMarginReq": "lookahead_maint_margin",
+  "LookAheadAvailableFunds": "lookahead_available_funds",
+  "LookAheadExcessLiquidity": "lookahead_excess_liquidity",
+  "HighestSeverity": "highest_severity",
+  "DayTradesRemainingT+1": "day_trades_remaining_t1",
 }
 
 # ── API surface categories (ib_insync / TWS) ───────────────────────────────

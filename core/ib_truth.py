@@ -92,8 +92,15 @@ class IBAccountSnapshot:
     cushion: float = 0.0
     sma: float = 0.0
     regt_equity: float = 0.0
-    currency: str = "USD"
+    lookahead_init_margin: float = 0.0
+    lookahead_maint_margin: float = 0.0
+    lookahead_available_funds: float = 0.0
+    lookahead_excess_liquidity: float = 0.0
+    highest_severity: float = 0.0
+    day_trades_remaining_t1: float = -1.0
+    account_code: str = ""
     tags: Dict[str, float] = field(default_factory=dict)
+    currency: str = "USD"
 
 
 @dataclass
