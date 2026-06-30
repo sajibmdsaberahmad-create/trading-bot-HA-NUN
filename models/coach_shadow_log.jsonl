@@ -4713,3 +4713,8 @@
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":579562.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:24.301989+00:00"}
 {"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":10661.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:28.224710+00:00"}
 {"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":1700.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:28.853940+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":534370.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:32.894612+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":712526.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:36.621841+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":936556.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:42.080751+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":872417.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:45.855941+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":872417.0,"shadow_only":true,"timestamp":"2026-06-30T11:26:50.315745+00:00"}
