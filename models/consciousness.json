@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1673,
   "scans_performed": 39,
-  "improvements_applied": 2677,
+  "improvements_applied": 2678,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:14.372543",
-      "age": "7d 19h 57m 25s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-2.63",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:00:55.722916",
       "age": "7d 19h 58m 7s",
@@ -12285,6 +12278,20 @@
       "type": "TRADE",
       "message": "Observed trade: CUPR LEARN_FAILURE P&L=$+0.00",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T10:29:12.100185",
+      "age": "8d 23h 26m 23s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2678",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on CUPR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T10:09:24.779823",
@@ -14953,15 +14960,15 @@
   "consecutive_wins": 0,
   "consecutive_losses": 1,
   "worst_streak": 86,
-  "veteran_xp": 25890,
+  "veteran_xp": 25900,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1666,
-  "hours_flown": 166.59999999999482,
+  "flights_completed": 1667,
+  "hours_flown": 166.69999999999482,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14999,7 +15006,8 @@
     "SOA": 12,
     "KND": 1,
     "MST": 1,
-    "TSL": 1
+    "TSL": 1,
+    "CUP": 1
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
