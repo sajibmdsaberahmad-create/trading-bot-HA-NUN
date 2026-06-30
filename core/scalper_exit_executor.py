@@ -103,9 +103,9 @@ class ScalperExitMixin:
                 if not self._load_position_context(ticker):
                     continue
                 loaded = True
-                px = self._live_price_for(ticker, self._entry_price)
+                px, trusted = self._resolve_monitor_price(ticker, self._entry_price)
                 if px > 0:
-                    self._live_position_monitor(px)
+                    self._live_position_monitor(px, price_trusted=trusted)
             except Exception as exc:
                 log.error(f"Position monitor failed for {ticker}: {exc}")
             finally:
@@ -120,17 +120,6 @@ class ScalperExitMixin:
             shares=self.shares,
             current_px=current_px,
         )
-    def _detect_all_exits(self):
-        if not getattr(self.cfg, "USE_MULTI_POSITION", True):
-            self._detect_exit(self._latest_price())
-            return
-        for ticker in list(self._position_slots.keys()):
-            if not self._load_position_context(ticker):
-                continue
-            px = self._live_price_for(ticker, self._entry_price)
-            self._detect_exit(px)
-            self._save_position_context(ticker)
-        self._refresh_aggregate_position_state()
     def _credit_exit_proceeds(self, quantity: float, exit_px: float):
         """Return sale proceeds to bot cash and refresh NAV."""
         proceeds = float(quantity) * exit_px * (1 - self.cfg.TRANSACTION_COST_PCT)

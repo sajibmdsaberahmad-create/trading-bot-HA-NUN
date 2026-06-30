@@ -1495,6 +1495,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                     self._ensure_position_stream(ticker)
                 except Exception:
                     pass
+            self._record_war_adoptions(adopted)
             if adopted:
                 self._refresh_aggregate_position_state()
         except Exception:
