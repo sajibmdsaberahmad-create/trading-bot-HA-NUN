@@ -29,6 +29,9 @@ fsync_critical_artifacts()
 snapshot_learning(BotConfig(), trigger='pre_stop_live', halim_export=True)
 " 2>/dev/null || true
 
+CLIENT_ID="${CLIENT_ID:-${IB_CLIENT_ID:-1}}"
+python3 "$ROOT/scripts/guard_ib_client_id.py" --client-id "$CLIENT_ID" --release 2>/dev/null || true
+
 PIDS=()
 if [ -f "$PID_FILE" ]; then
   HPID=$(tr -d '[:space:]' <"$PID_FILE" 2>/dev/null || true)

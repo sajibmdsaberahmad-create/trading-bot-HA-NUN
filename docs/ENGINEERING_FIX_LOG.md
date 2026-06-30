@@ -10,6 +10,39 @@
 
 ---
 
+## 2026-07-01 — SyntaxError exit executor + IB client_id=1 guard
+
+### Problem
+1. HANOON failed to start: `SyntaxError: unmatched ')'` in `scalper_exit_executor.py:494` — orphaned kwargs after war sync `except: pass`.
+2. Other scripts could connect IB Gateway as client_id=1 → market data subscription conflicts (10197).
+
+### Root cause
+Merge corruption left dangling function arguments. `start_hanoon.sh` only warned on duplicate client_id, did not block.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_exit_executor.py` | Remove orphaned lines 478–494 |
+| `core/ib_client_guard.py` | **New** — lock file + process scan for reserved client_id |
+| `scripts/guard_ib_client_id.py` | **New** — CLI check/acquire/release |
+| `scripts/start_hanoon.sh` | Hard-fail start if client_id guard fails |
+| `scripts/stop_hanoon.sh` | Release lock on shutdown |
+| `core/connector.py` | acquire lock on connect, release on disconnect |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `CLIENT_ID` / `IB_CLIENT_ID` | `1` | Reserved HANOON slot — other tools use 97+ |
+
+### Verify
+```bash
+python3 -m py_compile core/scalper_exit_executor.py
+python3 scripts/guard_ib_client_id.py --client-id 1
+./START.command   # should boot main.py
+```
+
+---
+
 ## 2026-07-01 — IB extended A–Z wired (fundamentals, news, WSH, PnL, what-if)
 
 ### Problem

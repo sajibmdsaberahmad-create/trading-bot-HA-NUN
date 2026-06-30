@@ -360,6 +360,11 @@ class IBConnector:
             log.info("Disconnected from IB Gateway (subscriptions cancelled)")
         except Exception:
             pass
+        try:
+            from core.ib_client_guard import release_lock
+            release_lock(int(self.cfg.IB_CLIENT_ID))
+        except Exception:
+            pass
 
     def get_contract(self, symbol: Optional[str] = None):
         """Qualify and cache the contract for symbol (default: cfg.TICKER)."""
@@ -673,6 +678,15 @@ class IBConnector:
         self.touch()
         self._last_event_ts = time.time()
         self._apply_market_data_type()
+        try:
+            from core.ib_client_guard import acquire_lock
+            ok, msg = acquire_lock(int(self.cfg.IB_CLIENT_ID), command="hanoon_scalper")
+            if not ok:
+                log.warning(f"IB client lock: {msg}")
+            else:
+                log.debug(msg)
+        except Exception as exc:
+            log.debug(f"IB client lock: {exc}")
         try:
             from core.fill_reconciler import FillExecutionCache
             self.fill_cache = FillExecutionCache(self.ib)

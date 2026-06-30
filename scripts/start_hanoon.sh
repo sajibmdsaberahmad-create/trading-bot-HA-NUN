@@ -31,8 +31,17 @@ IB_HOST="${IB_HOST:-127.0.0.1}"
 # HANOON uses a single fixed IB client ID (default 1). Do not auto-rotate —
 # extra client IDs leave ghost sessions that block live market data (IB 10197).
 CLIENT_ID="${CLIENT_ID:-1}"
-if pgrep -f "main.py.*--client-id[ =]${CLIENT_ID}([ ^]|$)" >/dev/null 2>&1; then
-  echo "⚠️  Another process already uses IB client_id=${CLIENT_ID} — stop it first (./stop.sh)"
+export CLIENT_ID IB_CLIENT_ID="${IB_CLIENT_ID:-$CLIENT_ID}"
+if [[ -x "$ROOT/scripts/guard_ib_client_id.py" ]]; then
+  PY_GUARD="${PY:-python3}"
+  if ! "$PY_GUARD" "$ROOT/scripts/guard_ib_client_id.py" --client-id "$CLIENT_ID" --port "$IB_PORT"; then
+    echo "❌ IB client_id=${CLIENT_ID} guard failed — free the slot before starting HANOON."
+    echo "   ./stop.sh   or   python3 scripts/guard_ib_client_id.py --client-id ${CLIENT_ID} --release"
+    exit 1
+  fi
+elif pgrep -f "main.py.*--client-id[ =]${CLIENT_ID}([ ^]|$)" >/dev/null 2>&1; then
+  echo "❌ Another process already uses IB client_id=${CLIENT_ID} — stop it first (./stop.sh)"
+  exit 1
 fi
 
 # Free RAM before MLX + scalper (kills learn loop, IDE sidecars on ≤12GB Macs)
