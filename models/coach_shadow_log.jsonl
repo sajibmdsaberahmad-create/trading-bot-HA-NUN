@@ -5199,3 +5199,13 @@
 {"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":1807109.0,"shadow_only":true,"timestamp":"2026-06-30T12:11:56.163511+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1787.0,"shadow_only":true,"timestamp":"2026-06-30T12:12:00.196508+00:00"}
 {"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":29975.0,"shadow_only":true,"timestamp":"2026-06-30T12:12:05.505970+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1092336.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:21.303377+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1996.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:24.826997+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1092336.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:25.533509+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":74034.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:29.087072+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":11244.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:29.723143+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":997957.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:32.956521+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":13560.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:36.293835+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":678872.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:39.796030+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":500.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:43.216011+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":530211.0,"shadow_only":true,"timestamp":"2026-06-30T12:13:44.030994+00:00"}
