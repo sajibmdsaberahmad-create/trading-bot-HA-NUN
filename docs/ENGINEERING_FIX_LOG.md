@@ -10,6 +10,21 @@
 
 ---
 
+## 2026-07-01 — IB 322 connector log downgrade (completes boot noise fix)
+
+### Problem
+After skipping `reqMarketRule` on paper, IB still emitted error 322 through the connector as WARNING.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/connector.py` | Early return on error 322 at DEBUG |
+
+### Verify
+Paper boot — no `IB error 322` WARNING lines during extended refresh.
+
+---
+
 ## 2026-07-01 — IB 322 market rules + reqTickers cancel noise at boot
 
 ### Problem
