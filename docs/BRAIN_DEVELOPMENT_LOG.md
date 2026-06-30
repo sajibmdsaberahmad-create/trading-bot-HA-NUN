@@ -413,3 +413,7 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 10:01 UTC` **git_auto** — sync: 13 files — broker.py, scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md +10 more | halim=2 models=5 docs=1 core=1 other=4 | brain=adult data
 - `2026-06-30 10:02 UTC` **git_auto** — sync: 15 files — broker.py, scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md +12 more | halim=2 models=7 docs=1 core=1 other=4 | brain=adult data
 - `2026-06-30 10:02 UTC` **git_auto** — sync: 10 files — broker.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +7 more | halim=1 models=4 docs=1 other=4 | brain=adult dataset=2462 
+- `2026-06-30 10:02 UTC` **git_auto** — sync: 18 files — broker.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +15 more | halim=6 models=7 docs=1 other=4 | brain=adult dataset=2462
+- `2026-06-30 10:02 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=98% (321 samples)
+- `2026-06-30 10:02 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2476 pairs
+- `2026-06-30 10:02 UTC` **git_training** — learn: pre_shutdown: account_session_shutdown | learn_20260630_100247 | brain=adult dataset=2476 evolutions=27

@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T09:12:49.271087+00:00",
+  "updated_at": "2026-06-30T10:02:42.715402+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T09:12:49.250526+00:00",
+    "timestamp": "2026-06-30T10:02:42.692475+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -55,37 +55,37 @@
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.6,
-        "modified": "2026-06-30T08:40:18.709096+00:00"
+        "modified": "2026-06-30T10:02:41.291825+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
-        "size_kb": 0.5,
-        "modified": "2026-06-30T08:40:24.368781+00:00"
+        "size_kb": 1.0,
+        "modified": "2026-06-30T10:02:41.382493+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-30T09:00:52.587847+00:00"
+        "modified": "2026-06-30T09:59:10.515393+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 8607.6,
-        "modified": "2026-06-30T09:03:23.711242+00:00"
+        "size_kb": 8636.0,
+        "modified": "2026-06-30T10:01:46.359614+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2634.3,
-        "modified": "2026-06-30T09:00:36.599950+00:00"
+        "size_kb": 2643.6,
+        "modified": "2026-06-30T10:01:04.494922+00:00"
       },
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
-        "size_kb": 899.2,
-        "modified": "2026-06-30T08:40:18.403439+00:00"
+        "size_kb": 904.6,
+        "modified": "2026-06-30T10:02:39.958477+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
@@ -97,7 +97,7 @@
     "phases": {
       "ppo": "active",
       "teacher_proxy": "fast_path",
-      "proxy_accuracy": 0.9508196721311475,
+      "proxy_accuracy": 0.9846153846153847,
       "fast_path": true,
       "ppo_teacher": "active",
       "copilot": "active",
@@ -106,12 +106,12 @@
     "api_dependency": "low-medium",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
-      "count": 29,
-      "win_rate": 0.31,
-      "avg_pnl": -5.16
+      "count": 23,
+      "win_rate": 0.391,
+      "avg_pnl": -4.59
     },
-    "buffer_records": 6340,
-    "dataset_pairs": 2462,
+    "buffer_records": 6412,
+    "dataset_pairs": 2476,
     "maturity": {
       "stage": "adult",
       "stage_index": 5,
@@ -119,9 +119,9 @@
       "description": "Owned brain \u2014 API polish only; students run the session",
       "metrics": {
         "closed_trades": 2676,
-        "dataset_pairs": 2462,
+        "dataset_pairs": 2476,
         "evolution_count": 26,
-        "proxy_accuracy": 0.9508196721311475,
+        "proxy_accuracy": 0.9846153846153847,
         "proxy_exists": true
       },
       "limits": {
