@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-06-30` **engineering** — Monolith split: scalper_runner + ai_commander mixins; git_sync learning module — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Balance-driven war trips: entries limited by settled cash bullets, not fixed daily cap — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — War trip cap aligned with bullets + Halim trade Telegram voice — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Regime unknown fix: short-bar classify + spike fallback on live stream — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -1267,3 +1268,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 16:39 UTC` **git_auto** — sync: 12 files — ai_commander.py, commander_entry.py, commander_exit.py +9 more | docs=1 core=8 other=3 | brain=adult dataset=2081 evolution
 - `2026-06-30 16:40 UTC` **git_auto** — sync: 16 files — ai_commander.py, commander_entry.py, commander_exit.py +13 more | models=4 docs=1 core=8 other=3 | brain=adult dataset=2081
 - `2026-06-30 16:40 UTC` **git_auto** — sync: 12 files — ai_commander.py, commander_entry.py, commander_exit.py +9 more | docs=1 core=8 other=3 | brain=adult dataset=2081 evolution
+- `2026-06-30 16:40 UTC` **git_auto** — sync: 14 files — ai_commander.py, commander_entry.py, commander_exit.py +11 more | models=1 docs=1 core=9 other=3 | brain=adult dataset=2081

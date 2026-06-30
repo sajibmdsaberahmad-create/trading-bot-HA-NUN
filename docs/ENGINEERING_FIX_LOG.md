@@ -10,6 +10,34 @@
 
 ---
 
+## 2026-06-30 — Monolith split: scalper_runner, ai_commander, git_sync learning
+
+### Problem
+`scalper_runner.py` (~8.8k), `ai_commander.py` (~3.2k), and `git_sync.py` (~2.5k) were unmaintainable monoliths. An earlier auto-sync pass left broken `git_sync_*` submodules and overwrote `commander_learning.py` (telegram guidance) with an AICommander mixin.
+
+### Root cause
+- AST mixin extraction removed the `class ScalperRunner(...)` line until script was fixed.
+- Mixin module `commander_learning.py` collided with existing `load_commander_guidance()` / `run_commander_learning_cycle()` module used by `telegram_listener`.
+- Full `git_sync` state-module split introduced invalid `global S._repo` and circular imports.
+
+### Files
+- `core/scalper_runner.py` + `core/scalper_exit_executor.py`, `scalper_entry_executor.py`, `scalper_session.py`, `scalper_spike_loop.py`
+- `core/ai_commander.py` + `core/ai_commander_verdict.py`, `ai_commander_deferred.py`, `ai_commander_entry.py`, `ai_commander_exit.py`
+- `core/commander_learning.py` — restored as standalone guidance module (not a mixin)
+- `core/git_sync.py` + `core/git_sync_learning.py` (learning restore/push only; push/commit/routing remain in monolith)
+- `scripts/extract_scalper_mixins.py`, `scripts/extract_ai_commander_mixins.py`
+
+### Env vars
+None.
+
+### Verify
+```bash
+python3 -c "from core.scalper_runner import ScalperRunner; from core.ai_commander import AICommander; from core.commander_learning import GUIDANCE_PATH; from core import git_sync"
+python3 -m pytest tests/ -q
+```
+
+---
+
 ## 2026-06-30 — Balance-driven war trips (settled cash, not fixed cap)
 
 ### Problem
