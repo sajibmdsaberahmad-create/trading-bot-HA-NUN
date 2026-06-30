@@ -3380,3 +3380,5 @@
 {"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":1.4233104409221151,"shadow_only":true,"timestamp":"2026-06-30T09:25:42.907889+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":127.0,"shadow_only":true,"timestamp":"2026-06-30T09:25:58.163277+00:00"}
 {"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":1760.0,"shadow_only":true,"timestamp":"2026-06-30T09:26:13.522452+00:00"}
+{"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":87.6,"spike_ratio":426.0,"shadow_only":true,"timestamp":"2026-06-30T09:26:28.675865+00:00"}
+{"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":180.0,"shadow_only":true,"timestamp":"2026-06-30T09:26:30.716569+00:00"}
