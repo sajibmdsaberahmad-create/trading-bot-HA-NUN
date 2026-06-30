@@ -11,8 +11,9 @@ TAG="v$(date -u +%Y.%m.%d)-$(git rev-parse --short HEAD 2>/dev/null || echo manu
 [ -f ppo_trader.zip ] || { echo "ppo_trader.zip missing"; exit 1; }
 
 if [ -f .env ]; then set -a; source .env; set +a; fi
+REPO="${GITHUB_HANOON_REPO:-sajibmdsaberahmad-create/HANOON}"
 
-echo "Creating release $TAG on $REPO…"
+echo "Creating release $TAG on ${REPO}..."
 gh release create "$TAG" ppo_trader.zip \
   --repo "$REPO" \
   --title "HANOON PPO $TAG" \
