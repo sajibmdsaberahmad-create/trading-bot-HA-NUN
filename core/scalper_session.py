@@ -869,7 +869,7 @@ class ScalperSessionMixin:
                 git_r = flush_git_sync(
                     replay=False,
                     nav=self.bot_nav,
-                    pnl_pct=pnl_pct,
+                    pnl_pct=ib_pnl_pct,
                     report_path=str(report_path or ""),
                 )
                 log.info(f"📤 Live git shutdown complete — {git_r}")
