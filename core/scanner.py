@@ -121,31 +121,39 @@ def emergency_scan_universe(
     position_tickers: List[str] = []
     seen: set = set()
     try:
-        ib = connector.ib
-        ib.reqPositions()
-        ib.sleep(0.25)
-        for p in ib.positions():
-            if abs(float(p.position)) < 0.5:
-                continue
-            c = p.contract
-            sym = (getattr(c, "symbol", "") or "").upper().strip()
-            if not sym or sym in seen:
-                continue
-            currency = (getattr(c, "currency", "") or "USD").upper()
-            if currency != "USD":
-                continue
-            primary = str(
-                getattr(c, "primaryExchange", "")
-                or getattr(c, "primaryExch", "")
-                or ""
-            ).upper()
-            if not primary or primary not in ALLOWED_PRIMARY_EXCHANGES:
-                continue
-            ok, _ = passes_profit_hunt_universe(cfg, sym, primary)
-            if not ok:
-                continue
-            seen.add(sym)
-            position_tickers.append(sym)
+        from core.ib_truth import get_snapshot, ib_truth_enabled
+        snap = get_snapshot()
+        if ib_truth_enabled(cfg) and snap.refreshed_at > 0:
+            for sym, pos in snap.long_positions().items():
+                if sym not in seen:
+                    seen.add(sym)
+                    position_tickers.append(sym)
+        else:
+            ib = connector.ib
+            ib.reqPositions()
+            ib.sleep(0.25)
+            for p in ib.positions():
+                if abs(float(p.position)) < 0.5:
+                    continue
+                c = p.contract
+                sym = (getattr(c, "symbol", "") or "").upper().strip()
+                if not sym or sym in seen:
+                    continue
+                currency = (getattr(c, "currency", "") or "USD").upper()
+                if currency != "USD":
+                    continue
+                primary = str(
+                    getattr(c, "primaryExchange", "")
+                    or getattr(c, "primaryExch", "")
+                    or ""
+                ).upper()
+                if not primary or primary not in ALLOWED_PRIMARY_EXCHANGES:
+                    continue
+                ok, _ = passes_profit_hunt_universe(cfg, sym, primary)
+                if not ok:
+                    continue
+                seen.add(sym)
+                position_tickers.append(sym)
     except Exception:
         pass
 

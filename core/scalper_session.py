@@ -673,15 +673,13 @@ class ScalperSessionMixin:
                 guidelines = self._generate_guidelines()
                 baseline = float(self.cfg.INITIAL_CASH)
                 ib_pnl, ib_pnl_pct = self._day_pnl_ib()
-                bot_pnl = self.bot_nav - baseline
                 stmt = (
                     f"portfolio: {today_str} ET | "
                     f"IB=${self.account_equity:,.0f} | "
                     f"IB P&L=${ib_pnl:+,.0f} ({ib_pnl_pct:+.2f}%) | "
-                    f"bot_nav=${self.bot_nav:,.0f} (internal) | "
                     f"trades={self.trades_today}"
                 )
-                push_daily_summary(self.bot_nav, self.account_equity)
+                push_daily_summary(self.account_equity, self.account_equity)
                 try:
                     weights = self._load_weights()
                     self.cfg._latest_account_balance = self.account_equity
@@ -770,10 +768,10 @@ class ScalperSessionMixin:
         try:
             from datetime import datetime
             import json
+            from core.account_view import day_pnl as account_day_pnl
             os.makedirs("models/daily_reports", exist_ok=True)
             baseline = float(self.cfg.INITIAL_CASH)
-            pnl = self.bot_nav - baseline
-            pnl_pct = (pnl / baseline) * 100 if baseline else 0.0
+            pnl, pnl_pct = account_day_pnl(self, self.cfg)
             ib_start = self._ib_starting_balance or self.account_equity
             ib_change = self.account_equity - ib_start
             ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0

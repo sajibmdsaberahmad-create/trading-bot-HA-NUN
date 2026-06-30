@@ -275,13 +275,15 @@ def collect_self_eval_context(
     account = dict(report.get("account", {}))
     if runner is not None:
         try:
+            from core.account_view import day_pnl as account_day_pnl, display_equity
             runner._refresh_account_balance()
             baseline = float(getattr(cfg, "INITIAL_CASH", 1000))
+            day_pnl_usd, _ = account_day_pnl(runner, cfg)
             account.update({
                 "ib_account": round(getattr(runner, "account_equity", 0), 2),
-                "bot_nav": round(getattr(runner, "bot_nav", 0), 2),
+                "bot_nav": round(display_equity(runner, cfg), 2),
                 "bot_cash": round(getattr(runner, "bot_cash", 0), 2),
-                "day_pnl_usd": round(getattr(runner, "bot_nav", 0) - baseline, 2),
+                "day_pnl_usd": round(day_pnl_usd, 2),
                 "trades_today": getattr(runner, "trades_today", 0),
             })
         except Exception:
