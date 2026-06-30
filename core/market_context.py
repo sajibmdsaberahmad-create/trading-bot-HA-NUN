@@ -201,8 +201,28 @@ def _load_state() -> Optional[Dict]:
     return None
 
 
-def refresh_macro_context(*, force: bool = False) -> Dict:
-    """Refresh cache if stale or forced. Returns latest macro dict."""
+def _ib_macro_to_summary(ib_ctx: Dict) -> Dict:
+    """Normalize ib_macro snapshot into macro_context schema."""
+    vix = float(ib_ctx.get("vix_level", 0) or 0)
+    spy_pct = float(ib_ctx.get("spy_change_pct", 0) or 0)
+    qqq_pct = float(ib_ctx.get("qqq_change_pct", 0) or 0)
+    return {
+        "spy_trend": _trend_label(spy_pct),
+        "qqq_trend": _trend_label(qqq_pct),
+        "spy_pct": spy_pct,
+        "qqq_pct": qqq_pct,
+        "spy_price": float(ib_ctx.get("spy_price", 0) or 0),
+        "qqq_price": float(ib_ctx.get("qqq_price", 0) or 0),
+        "vix_level": vix,
+        "vix_regime": "high" if vix >= 25 else "elevated" if vix >= 18 else "low",
+        "risk_tone": ib_ctx.get("risk_tone", _risk_tone(spy_pct, qqq_pct, vix)),
+        "timestamp": ib_ctx.get("timestamp", datetime.now(timezone.utc).isoformat()),
+        "source": "ib",
+    }
+
+
+def refresh_macro_context(*, force: bool = False, connector=None) -> Dict:
+    """Refresh cache if stale or forced. IB-first when connector live."""
     if not macro_context_enabled():
         return get_macro_context()
     now = time.time()
@@ -212,7 +232,18 @@ def refresh_macro_context(*, force: bool = False) -> Dict:
         fetched_at = float(_CACHE.get("fetched_at") or 0.0)
         if cached and not force and (now - fetched_at) < interval:
             return dict(cached)
-    ctx = _fetch_macro_context()
+    ctx = None
+    if connector is not None:
+        try:
+            from core.ib_macro import get_ib_macro_context, ib_macro_enabled
+            if ib_macro_enabled():
+                ib_snap = get_ib_macro_context(connector, force=force)
+                if float(ib_snap.get("spy_price", 0) or 0) > 0:
+                    ctx = _ib_macro_to_summary(ib_snap)
+        except Exception as exc:
+            logger.debug(f"IB macro refresh: {exc}")
+    if ctx is None:
+        ctx = _fetch_macro_context()
     ctx["_fetched_at"] = now
     with _CACHE["lock"]:
         _CACHE["ctx"] = ctx

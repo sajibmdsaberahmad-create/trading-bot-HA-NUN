@@ -309,11 +309,6 @@ def live_snapshot(
     except Exception:
         pass
     try:
-        from core.trade_horizon import horizon_context
-        snap.update(horizon_context(cfg))
-    except Exception:
-        pass
-    try:
         from core.ib_truth import ib_ai_context
         conn = getattr(runner, "conn", None)
         ib_ctx = ib_ai_context(cfg, connector=conn)

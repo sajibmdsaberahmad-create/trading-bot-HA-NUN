@@ -2433,7 +2433,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         try:
             from core.market_context import refresh_macro_context
             from core.market_regime import regime_from_macro
-            ctx = refresh_macro_context(force=True)
+            ctx = refresh_macro_context(force=True, connector=getattr(self, "conn", None))
             bar_df = (
                 self.data.get_bar_dataframe()
                 if hasattr(self.data, "get_bar_dataframe") else None
