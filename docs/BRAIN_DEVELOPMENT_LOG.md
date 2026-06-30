@@ -2,7 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
-- `2026-06-30` **engineering** — Structural extractions: `git_sync_defer`, `position_sync`, entry poll wiring; full cleanup report in `docs/CLEANUP_AND_ORGANIZATION_2026-06-30.md` — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+- `2026-06-30` **engineering** — War auto-reset at 09:30 ET RTH open (fresh $3.5k paper / $1k live trips) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Codebase organization: AccountView, entry_pipeline, pytest, gitignore runtime journals, OPS docs — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — IB fill sync: confirmed entries/exits, IB-grounded P&L (no orphan position phantom profits) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Pre-market PreSubmitted fix: ext-hours limit entries + stuck limit retries — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -897,3 +897,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 13:11 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, start_hanoon.sh +2 more | docs=1 other=4 | brain=child dataset=2542 evolutions=36
 - `2026-06-30 13:11 UTC` **git_auto** — sync: 6 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, ENGINEERING_FIX_LOG.md +3 more | docs=2 other=4 | brain=child dataset=2542 evoluti
 - `2026-06-30 13:11 UTC` **git_training** — learn: session_batch: account_trade_closed, consciousness, pilot Veteran 24705XP WR=51% | learn_20260630_131152 | brain=child dataset=2542 e
+- `2026-06-30 13:11 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, WAR_ACCOUNT_LIVE.md +2 more | docs=2 other=3 | brain=child dataset=2542 evolutions
