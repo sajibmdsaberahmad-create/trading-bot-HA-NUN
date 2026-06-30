@@ -3663,3 +3663,13 @@
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.526066350692943,"shadow_only":true,"timestamp":"2026-06-30T10:17:12.659893+00:00"}
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":2809.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:14.726582+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":863.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:15.298265+00:00"}
+{"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":463.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:17.423852+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.526066350692943,"shadow_only":true,"timestamp":"2026-06-30T10:17:19.421521+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":407.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:21.647261+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.526066350692943,"shadow_only":true,"timestamp":"2026-06-30T10:17:23.741527+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":500.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:26.994408+00:00"}
+{"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":486.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:27.551855+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":407.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:29.639827+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.526066350692943,"shadow_only":true,"timestamp":"2026-06-30T10:17:31.622346+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":22827.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:33.673290+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":9886.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:34.239322+00:00"}
