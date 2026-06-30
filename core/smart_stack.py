@@ -51,6 +51,52 @@ def strict_profit_prob_enabled(cfg: Optional[BotConfig] = None) -> bool:
     return _env_bool("SMART_STACK_STRICT_PROFIT_PROB", "true")
 
 
+def ai_sure_entry_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    """
+    Entries require dynamic AI alignment — Halim + PPO + green calculative quality.
+    No blind spike / micro-fast / timeout bypasses. Default ON with Smart Stack.
+    """
+    if not smart_stack_enabled(cfg):
+        return _env_bool("SMART_STACK_AI_SURE_ENTRY", "false")
+    return _env_bool("SMART_STACK_AI_SURE_ENTRY", "true")
+
+
+def dynamic_entry_surety(
+    cfg: Optional[BotConfig],
+    *,
+    scan_score: float = 0.0,
+    spike_ratio: float = 1.0,
+    ticker: str = "",
+) -> Dict[str, float]:
+    """Dynamic min confidence / profit-prob floors — war posture + session losses."""
+    from core.capital_discipline import effective_min_confidence, effective_min_profit_probability
+    from core.entry_quality import repeat_loser_prob_bump
+
+    min_conf = effective_min_confidence(cfg)
+    min_prob = effective_min_profit_probability(cfg, scan_score, spike_ratio)
+    posture = war_posture_adjustments(cfg)
+    min_conf += float(posture.get("conf_bump", 0))
+    min_prob += float(posture.get("prob_bump", 0))
+    loss_bump = repeat_loser_prob_bump(cfg, ticker) if ticker else 0.0
+    min_prob += loss_bump
+    return {
+        "min_conf": min(min_conf, 0.92),
+        "min_prob": min(min_prob, 0.95),
+        "min_halim_conf": min(min_conf * 0.88, 0.88),
+        "loss_bump": loss_bump,
+    }
+
+
+def fast_entry_pipeline_blocked(pipeline: str) -> bool:
+    """Pipelines that bypass Halim/council deliberation."""
+    p = (pipeline or "").lower()
+    blocked = (
+        "micro_fast", "spike_fast", "strong_spike", "quality_flash", "quality_lead",
+        "ppo_lead", "spike_quality", "scanner_fast", "ppo_timeout", "ppo_strong_lead",
+        "scanner_timeout", "momentum entry",
+    )
+    return any(b in p for b in blocked)
+
 def smart_war_posture_enabled(cfg: Optional[BotConfig] = None) -> bool:
     """War/sniper adjusts bars instead of hard pipeline vetoes."""
     if not smart_stack_enabled(cfg):
@@ -449,12 +495,18 @@ def build_halim_local_entry(
     h_status = str(halim_live.get("status", "missing"))
     h_parsed = halim_live.get("parsed") or {}
     profit_prob = float(quality.get("profit_probability", 0.5) or 0.5)
-    min_prob = effective_min_profit_probability(cfg) if cfg else 0.62
+    min_prob = effective_min_profit_probability(cfg, scan_score, spike_ratio) if cfg else 0.62
     base_conf = float(ppo_conf or 0.5)
     enter_ok = bool(quality.get("enter_ok", True))
     strict_prob = strict_profit_prob_enabled(cfg)
-    prob_floor = min_prob if strict_prob else min_prob * 0.85
-    prob_strong = min_prob if strict_prob else min_prob * 0.90
+    ai_sure = ai_sure_entry_enabled(cfg)
+    sure = dynamic_entry_surety(
+        cfg, scan_score=scan_score, spike_ratio=spike_ratio,
+    ) if ai_sure else {}
+    min_conf_eff = max(min_conf, sure.get("min_conf", min_conf)) if ai_sure else min_conf
+    min_prob_eff = max(min_prob, sure.get("min_prob", min_prob)) if ai_sure else min_prob
+    prob_floor = min_prob_eff if strict_prob else min_prob * 0.85
+    prob_strong = min_prob_eff if strict_prob else min_prob * 0.90
 
     def _out(
         enter: bool,
