@@ -4020,3 +4020,12 @@
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":4.197967300044189,"shadow_only":true,"timestamp":"2026-06-30T10:32:39.934691+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":3.4511879049676026,"shadow_only":true,"timestamp":"2026-06-30T10:32:42.081285+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":4.197967300044189,"shadow_only":true,"timestamp":"2026-06-30T10:32:44.308029+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":3.4511879049676026,"shadow_only":true,"timestamp":"2026-06-30T10:32:46.487220+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":4.197967300044189,"shadow_only":true,"timestamp":"2026-06-30T10:32:48.617483+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":4.48633909287257,"shadow_only":true,"timestamp":"2026-06-30T10:32:50.773883+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":4.197967300044189,"shadow_only":true,"timestamp":"2026-06-30T10:32:52.983045+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":4.48633909287257,"shadow_only":true,"timestamp":"2026-06-30T10:32:55.119826+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.1634813556108197,"shadow_only":true,"timestamp":"2026-06-30T10:32:57.219935+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":4.197967300044189,"shadow_only":true,"timestamp":"2026-06-30T10:32:59.272133+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":4.48633909287257,"shadow_only":true,"timestamp":"2026-06-30T10:33:01.581874+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.1911945098782808,"shadow_only":true,"timestamp":"2026-06-30T10:33:03.556870+00:00"}
