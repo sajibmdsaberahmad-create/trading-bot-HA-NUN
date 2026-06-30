@@ -39,6 +39,7 @@ IB Truth FIFO session PnL used calendar midnight ET, while war ledger resets at 
 python3 -m pytest tests/test_ib_truth.py -q
 # At 09:30 ET: log shows "RTH session baseline NetLiq=..."
 # Premarket fills excluded from ib_fifo_session_pnl
+# Telegram session_pnl matches ib_fifo_session_pnl (RTH scope)
 ```
 
 ---
