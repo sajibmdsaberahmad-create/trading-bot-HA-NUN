@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from core.scalper_mixin_imports import *  # noqa: F403
+
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import numpy as np

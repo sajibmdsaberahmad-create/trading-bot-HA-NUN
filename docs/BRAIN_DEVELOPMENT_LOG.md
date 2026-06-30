@@ -1305,3 +1305,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 16:56 UTC` **git_auto** — sync: 6 files — fill_reconciler.py, BRAIN_DEVELOPMENT_LOG.md, cognitive_state.json +3 more | models=2 docs=1 other=3 | brain=adult dataset=2
 - `2026-06-30 16:56 UTC` **git_auto** — sync: 4 files — fill_reconciler.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=adult dataset=2081 evolutions=
 - `2026-06-30 16:57 UTC` **git_auto** — sync: 5 files — fill_reconciler.py, BRAIN_DEVELOPMENT_LOG.md, scalper_mixin_imports.py +2 more | docs=1 core=1 other=3 | brain=adult dataset
+- `2026-06-30 16:58 UTC` **git_auto** — sync: 6 files — fill_reconciler.py, scalper_entry_executor.py, scalper_exit_executor.py +3 more | docs=1 core=2 other=3 | brain=adult datase

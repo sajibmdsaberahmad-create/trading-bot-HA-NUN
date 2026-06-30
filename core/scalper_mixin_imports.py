@@ -27,9 +27,12 @@ from core.entry_pipeline import (
     new_entry_poll_state,
     stuck_entry_limit_px,
 )
+from core.experience_buffer import append as buffer_append
 from core.fast_execution import (
     ai_exit_check_sec,
+    ai_fast_execution,
     apply_micro_spike_boost,
+    assign_stream_modes,
     background_watch_sec,
     council_max_wait_sec,
     entry_fill_poll_sec,
@@ -42,11 +45,19 @@ from core.fast_execution import (
     monitor_ticker_list,
     priority_tick_streams,
     should_micro_fast_entry,
+    should_spike_fast_entry,
     skip_historical_prefetch,
     spike_entry_cooldown_sec,
+    stream_priority_count,
+    stream_watch_cap,
     tick_spike_debounce_sec,
     tick_spike_monitor_enabled,
     tick_stream_count,
+)
+from core.market_data_learning import (
+    filter_tradeable_tickers,
+    is_market_data_blocked,
+    record_fetch_failure,
 )
 from core.fill_reconciler import (
     PendingClose,
@@ -82,7 +93,10 @@ from core.pilot_mode import (
     effective_max_shares_per_trade,
     effective_min_cash_reserve_pct,
     effective_min_hold_for_exit,
+    effective_min_lock_candidates,
+    effective_min_lock_score,
     effective_prefetch_top_n,
+    generative_think,
     get_ai_deploy_budget,
     get_deploy_usd,
     get_effective_confidence_threshold,
@@ -94,6 +108,7 @@ from core.pilot_mode import (
     send_dynamic_notification,
     snapshot_features,
 )
+from core.scanner import ScanResult, ScannerHit
 from core.position_sync import repair_slot_entry_price, sync_position_slots_from_ib
 from core.profit_hunting import (
     evaluate_spike_top_exit,
