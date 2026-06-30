@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1677,
   "scans_performed": 39,
-  "improvements_applied": 2694,
+  "improvements_applied": 2695,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:03:46.785965",
-      "age": "7d 20h 0m 58s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2030",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:03:46.788237",
       "age": "7d 20h 0m 58s",
@@ -12319,6 +12305,20 @@
       "age": "9d 0h 22m 42s",
       "type": "IMPROVE",
       "message": "Applied improvement #2694",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on GVH"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:28:18.205144",
+      "age": "9d 0h 25m 29s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2695",
       "metadata": {
         "source": "runtime_order_timeout",
         "summary": "Observed order_timeout \u2014 recorded for learning.",
