@@ -3298,3 +3298,4 @@
 {"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":77.4,"spike_ratio":2.3019034970828804,"shadow_only":true,"timestamp":"2026-06-30T08:32:57.125980+00:00"}
 {"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":1.4396843434336344,"shadow_only":true,"timestamp":"2026-06-30T08:32:57.769282+00:00"}
 {"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T08:33:12.361343+00:00"}
+{"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":133.0,"shadow_only":true,"timestamp":"2026-06-30T08:33:27.647940+00:00"}
