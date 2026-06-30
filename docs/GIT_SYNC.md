@@ -1,7 +1,11 @@
-# Git Sync — Automatic GitHub Push
+# Git Sync — Learning artifact backup
 
-Every significant change is **automatically committed and pushed** to GitHub.  
-You never have to run `git push` manually.
+> **Updated 2026-06-30.** See `docs/OPS.md` for current defaults.
+> Live session: `GIT_PUSH_DURING_SESSION=false` — pushes on `stop_hanoon` only.
+> Log file: `logs/HANOON.log` (not `HA-NUN.log`).
+> Default daemon interval: 8s (`GIT_AUTO_PUSH_INTERVAL_SEC`), max 80 files per batch.
+
+Every significant learning change can be committed and pushed to GitHub.
 
 ## What gets pushed (tracked files)
 
