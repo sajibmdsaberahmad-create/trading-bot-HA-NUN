@@ -2454,3 +2454,11 @@
 {"timestamp":"2026-06-30T17:23:06.900810+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T17:23:06.901060+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T17:23:06.901153+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.205427+00:00","event":"capability_milestone","capability":"notify","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.205570+00:00","event":"capability_milestone","capability":"notify","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.205645+00:00","event":"capability_milestone","capability":"notify","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.205693+00:00","event":"capability_milestone","capability":"notify","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.298440+00:00","event":"capability_milestone","capability":"text_compose","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.298648+00:00","event":"capability_milestone","capability":"text_compose","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.298906+00:00","event":"capability_milestone","capability":"text_compose","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:23:15.298997+00:00","event":"capability_milestone","capability":"text_compose","level_pct":100,"phase":"toddler"}
