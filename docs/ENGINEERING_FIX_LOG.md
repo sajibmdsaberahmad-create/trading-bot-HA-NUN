@@ -223,6 +223,32 @@ grep -c PPO_LEAD_WHILE scripts/start_hanoon.sh  # expect 1
 
 ---
 
+## 2026-06-30 — Regime always unknown on live spikes
+
+### Problem
+Logs and telemetry showed `regime=unknown` on most spikes. `MarketRegimeDetector` required 50 bars but live path only had 10–20 stream bars.
+
+### Root cause
+`classify()` returned `UNKNOWN` when `len(df) < 50`. Scalper spike/entry paths used raw enum value without spike-ratio fallback.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/market_regime.py` | `_classify_short()` for 5–49 bars; `resolve_regime()`; `regime_from_macro()` |
+| `core/trade_telemetry.py` | `regime_tag()` treats UNKNOWN as missing; maps bear/gap labels |
+| `core/scalper_runner.py` | Spike/entry/AI context use `resolve_regime()` |
+| `core/consciousness.py` | Macro SPY/VIX regime instead of `classify(None)` |
+| `core/trading_copilot.py` | `_infer_regime_read()` — no bare unknown in briefs |
+| `tests/test_regime_resolve.py` | Short-bar + spike fallback tests |
+
+### Verify
+```bash
+venv/bin/pytest tests/test_regime_resolve.py -q
+# Spike logs should show momentum_spike / trend_grind / high_vol_spike — not unknown
+```
+
+---
+
 ## 2026-06-30 — War auto-reset at RTH open (ET)
 
 ### Problem
