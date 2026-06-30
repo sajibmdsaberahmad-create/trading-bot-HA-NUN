@@ -779,13 +779,17 @@ def ensure_war_account(cfg: Optional[BotConfig] = None, ib=None) -> Dict[str, An
     state["mode"] = _recompute_mode(state, cfg)
     state["is_live"] = is_live_war(cfg)
     if ib is not None:
+        synced = False
         try:
             from core.war_ib_sync import sync_war_from_ib, war_ib_sync_enabled
             if war_ib_sync_enabled(cfg):
                 sync_war_from_ib(ib, cfg, apply=True)
                 state = load_state(cfg)
+                synced = True
         except Exception as exc:
             log.warning(f"War IB sync at startup: {exc}")
+        if not synced:
+            save_state(state)
     else:
         save_state(state)
     war_trips, war_cap = war_trip_display(state, cfg)
