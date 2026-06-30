@@ -509,5 +509,23 @@
     "lessons": [
       "Review order_timeout on GVH"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T11:33:40.272580+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on INTZ"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T11:33:58.401554+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on AVAV"
+    ]
   }
 ]

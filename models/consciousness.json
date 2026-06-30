@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1677,
   "scans_performed": 39,
-  "improvements_applied": 2696,
+  "improvements_applied": 2697,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:03:47.265164",
-      "age": "7d 20h 0m 58s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$-16.32",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:03:51.233628",
       "age": "7d 20h 1m 2s",
@@ -12325,6 +12318,20 @@
         "applied": [],
         "lessons": [
           "Review order_timeout on INTZ"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:33:58.372889",
+      "age": "9d 0h 31m 9s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2697",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on AVAV"
         ]
       }
     }
