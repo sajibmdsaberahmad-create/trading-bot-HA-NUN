@@ -1,13 +1,13 @@
 {
-  "narrative": "Local copilot: 100% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
+  "narrative": "Local copilot: 0% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
   "regime_read": "mixed",
-  "risk_posture": "normal",
-  "session_wr": 1.0,
+  "risk_posture": "defensive",
+  "session_wr": 0.0,
   "session_pnl": 0.0,
   "ticker_bias": {},
   "repeat_losers": [],
   "ppo_hints": {
-    "confidence_boost": 0.0,
+    "confidence_boost": 0.04,
     "require_quality_on_repeat": false,
     "min_spike_mult": 1.0
   },
@@ -15,6 +15,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782820147.439565,
+  "updated_at": 1782820398.036909,
   "source": "heuristic"
 }
