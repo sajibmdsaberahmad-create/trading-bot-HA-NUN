@@ -26,12 +26,12 @@ for ((i=1; i<=MAX_LOOPS; i++)); do
       echo "$line" | rg -qi "GREEN LOCK" && { echo "LOCK|$line" >> "$OUT"; ((green++)) || true; }
       echo "$line" | rg -qi "WAR EXIT" && { echo "WAR|$line" >> "$OUT"; ((war_exits++)) || true; }
       echo "$line" | rg -qi "Wrong tick|no open slot|146\.[0-9]+%" && { echo "WARN|$line" >> "$OUT"; ((wrong++)) || true; }
-      echo "$line" | rg -qi "session_shutdown|Graceful shutdown|stop_hanoon|day session ended|Market: CLOSED" && echo "END|$line" >> "$OUT"
+      echo "$line" | rg -qi "session_shutdown|Graceful shutdown|Signal 15 received|day session ended|Market: CLOSED" && echo "END|$line" >> "$OUT"
     done <<< "$new_lines"
     line_count=$total
   fi
 
-  if tail -n 30 "$LOG" | rg -qi "session_shutdown|Graceful shutdown|stop_hanoon|day session ended"; then
+  if tail -n 30 "$LOG" | rg -qi "session_shutdown|Graceful shutdown|Signal 15 received|day session ended"; then
     echo "[$(date -u '+%H:%M:%S')] SESSION END DETECTED" >> "$OUT"
     break
   fi
