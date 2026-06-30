@@ -143,7 +143,7 @@ def _scan_conflicting_processes(client_id: int, ib_port: int) -> List[Dict[str, 
         elif lp and not _pid_alive(lp):
             release_lock(client_id)
 
-  return conflicts
+    return conflicts
 
 
 def check_client_id_available(
