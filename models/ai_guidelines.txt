@@ -81,3 +81,19 @@ spike_top_intrabar: +8.94% vol=1.2x
 Observed trade_closed — recorded for learning.
 spike_top_intrabar: +8.94% vol=1.2x
 
+🧭 COMMANDER LEARNING | 2026-06-30T13:49:35.663246+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-30T13:49:35.663182+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-30T13:49:37.787751+00:00
+Loss streak 4 — applied 4 guardrail mutation(s) (deterministic + heuristics)
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- BTCT: pnl=$-2.90 slip=0
+
