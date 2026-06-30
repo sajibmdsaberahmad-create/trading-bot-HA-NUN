@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T21:54:24.681522+00:00",
+  "updated_at": "2026-06-30T21:54:46.471779+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,14 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T21:54:24.632816+00:00",
+    "timestamp": "2026-06-30T21:54:46.403345+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
         "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-30T20:00:54.692612+00:00"
+        "modified": "2026-06-30T21:54:43.394233+00:00"
       },
       "ppo_replay": {
         "exists": true,
@@ -55,13 +55,13 @@
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.7,
-        "modified": "2026-06-30T20:01:26.695627+00:00"
+        "modified": "2026-06-30T21:54:44.302894+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.4,
-        "modified": "2026-06-30T20:28:48.540190+00:00"
+        "modified": "2026-06-30T21:54:46.382629+00:00"
       },
       "copilot_state": {
         "exists": true,
@@ -84,8 +84,8 @@
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
-        "size_kb": 66.6,
-        "modified": "2026-06-30T20:01:26.332872+00:00"
+        "size_kb": 42.2,
+        "modified": "2026-06-30T21:54:43.900306+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
@@ -96,22 +96,22 @@
     },
     "phases": {
       "ppo": "active",
-      "teacher_proxy": "fast_path",
+      "teacher_proxy": "distilled",
       "proxy_accuracy": 0.9231,
-      "fast_path": true,
+      "fast_path": false,
       "ppo_teacher": "active",
       "copilot": "active",
       "growth_stage": "toddler"
     },
-    "api_dependency": "low-medium",
-    "next_milestone": "Export council dataset; fine-tune small LLM student on cheap GPU",
+    "api_dependency": "high",
+    "next_milestone": "Run replay/live to collect 100+ closed trades for first distill",
     "trade_stats": {
       "count": 0,
       "win_rate": 0.0,
       "avg_pnl": 0.0
     },
     "buffer_records": 10177,
-    "dataset_pairs": 167,
+    "dataset_pairs": 106,
     "maturity": {
       "stage": "toddler",
       "stage_index": 2,
@@ -119,8 +119,8 @@
       "description": "Teacher labels entries; proxy training begins",
       "metrics": {
         "closed_trades": 2725,
-        "dataset_pairs": 167,
-        "evolution_count": 51,
+        "dataset_pairs": 106,
+        "evolution_count": 52,
         "proxy_accuracy": 0.9231,
         "proxy_holdout_accuracy": 0.9231,
         "rolling_win_rate": null,
