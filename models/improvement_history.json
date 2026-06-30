@@ -16,5 +16,49 @@
     "lessons": [
       "Review trade_closed on NVDA"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T06:17:18.107744+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {},
+    "guidelines_summary": "",
+    "lessons": [
+      "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T06:17:31.193779+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {},
+    "guidelines_summary": "",
+    "lessons": [
+      "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T06:17:51.617002+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {},
+    "guidelines_summary": "",
+    "lessons": [
+      "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T06:18:43.896044+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {},
+    "guidelines_summary": "",
+    "lessons": [
+      "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
+    ]
   }
 ]
