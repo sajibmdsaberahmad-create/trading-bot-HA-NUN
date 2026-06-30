@@ -25,9 +25,10 @@ LOG_DIR="${LOG_DIR:-$ROOT/logs}"
 LOOP_PID_FILE="${WEEKEND_LOOP_PID_FILE:-$LOG_DIR/weekend_replay.pid}"
 WEEKEND_LOG="${LOG_DIR}/WEEKEND_REPLAY.log"
 
-# Single IB client — same as live HANOON (no client_id=99 ghost sessions)
+# IB replay download uses client 97 — client_id=1 is reserved for live HANOON only
 export IB_PORT="${IB_PORT:-4002}"
-export CLIENT_ID="${CLIENT_ID:-1}"
+export REPLAY_IB_CLIENT_ID="${REPLAY_IB_CLIENT_ID:-97}"
+export CLIENT_ID="${CLIENT_ID:-$REPLAY_IB_CLIENT_ID}"
 export IB_CLIENT_ID="${IB_CLIENT_ID:-$CLIENT_ID}"
 
 IB_DAYS="${WEEKEND_IB_DAYS:-60}"
