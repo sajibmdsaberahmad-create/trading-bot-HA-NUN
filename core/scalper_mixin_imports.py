@@ -144,6 +144,11 @@ from core.scanner import PENNY_STOCK_UNIVERSE, ScanResult, ScannerHit, StockScan
 from core.self_improver import generate_self_improvement_plan
 from core.train_subprocess import launch_training
 from core.position_sync import repair_slot_entry_price, sync_position_slots_from_ib
+from core.position_context import (
+    bind_risk_plan_for_ticker,
+    risk_plan_sane_for_tick,
+    slot_entry_price,
+)
 from core.profit_hunting import (
     check_missed_profit_hunt,
     evaluate_spike_top_exit,
