@@ -2718,3 +2718,4 @@
 {"timestamp":"2026-06-30T11:19:50.005016+00:00","event":"order_timeout","ticker":"KTTA","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T11:19:50.698944+00:00","event":"order_timeout","ticker":"INTZ","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T11:19:54.840553+00:00","event":"order_timeout","ticker":"BTCT","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-30T11:20:59.752995+00:00","event":"order_timeout","ticker":"KTTA","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
