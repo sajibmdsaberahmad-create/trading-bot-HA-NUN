@@ -185,6 +185,91 @@ def position_avg_cost(ib, symbol: str) -> float:
     return 0.0
 
 
+def ib_position_shares(ib, symbol: str) -> float:
+    """Long shares held at IB for symbol (0 if flat)."""
+    sym = (symbol or "").upper()
+    if not sym:
+        return 0.0
+    try:
+        for p in ib.positions():
+            if getattr(p.contract, "symbol", "").upper() == sym:
+                pos = float(p.position)
+                return pos if pos > 0 else 0.0
+    except Exception:
+        pass
+    return 0.0
+
+
+def require_ib_fill_sync(cfg=None) -> bool:
+    import os
+    env = os.getenv("REQUIRE_IB_FILL_SYNC", "true").strip().lower()
+    if env in ("0", "false", "no"):
+        return False
+    if env in ("1", "true", "yes"):
+        return True
+    if cfg is not None:
+        return bool(getattr(cfg, "REQUIRE_IB_FILL_SYNC", True))
+    return True
+
+
+def ib_fill_strict(cfg=None) -> bool:
+    """When true, never book P&L / cash from quote fallbacks — IB execution only."""
+    import os
+    if not require_ib_fill_sync(cfg):
+        return False
+    env = os.getenv("IB_FILL_STRICT", "true").strip().lower()
+    if env in ("0", "false", "no"):
+        return False
+    if cfg is not None:
+        return bool(getattr(cfg, "IB_FILL_STRICT", True))
+    return True
+
+
+def confirm_entry_fill(
+    ib,
+    *,
+    symbol: str,
+    parent_trade=None,
+    cache=None,
+    order_shares: float,
+    min_fill_ratio: float,
+    ib_pos_baseline: float,
+    started_at: float,
+    quote_px: float,
+) -> Tuple[float, float, bool, str]:
+    """
+    Confirm entry fill traceable to this order (not orphan IB holdings).
+    Returns (filled_shares, fill_px, confirmed, source).
+    """
+    sym = (symbol or "").upper()
+    min_qty = max(1.0, float(order_shares) * float(min_fill_ratio))
+
+    px, qty = read_order_fill_instant(parent_trade, 0.0)
+    if qty >= min_qty and px > 0 and _sane_fill_ratio(px, quote_px):
+        return qty, px, True, "order_status"
+
+    if cache is not None:
+        hit = cache.latest(sym, "BOT", since_ts=max(0.0, started_at - 1.0))
+        if hit and hit.qty >= min_qty and _sane_fill_ratio(hit.price, quote_px):
+            return hit.qty, hit.price, True, "exec_cache"
+
+    px, qty = recent_execution_fill(
+        ib, sym, "BOT", since_ts=max(0.0, started_at - 1.0), max_wait=0.0,
+    )
+    if qty >= min_qty and px > 0 and _sane_fill_ratio(px, quote_px):
+        return qty, px, True, "execution"
+
+    current_pos = ib_position_shares(ib, sym)
+    delta = current_pos - float(ib_pos_baseline or 0)
+    if delta >= min_qty:
+        avg = position_avg_cost(ib, sym)
+        if avg > 0 and _sane_fill_ratio(avg, quote_px):
+            use_qty = min(delta, float(order_shares))
+            return use_qty, avg, True, "position_delta"
+
+    return 0.0, 0.0, False, ""
+
+
 def resolve_entry_fill(
     ib,
     *,

@@ -970,6 +970,14 @@ class BotConfig:
         os.getenv("FILL_RECONCILE_FALLBACK_SEC")
         or os.getenv("FILL_RECONCILE_MAX_SEC", "8")
     )
+    # Live/paper: entries, exits, and P&L must trace to IB fills — not quotes or orphan positions.
+    REQUIRE_IB_FILL_SYNC: bool = os.getenv(
+        "REQUIRE_IB_FILL_SYNC", "true",
+    ).lower() in ("1", "true", "yes")
+    IB_FILL_STRICT: bool = os.getenv(
+        "IB_FILL_STRICT", "true",
+    ).lower() in ("1", "true", "yes")
+    IB_FILL_FORCE_SEC: float = float(os.getenv("IB_FILL_FORCE_SEC", "120"))
     AI_TELEGRAM_NOTIFICATIONS: bool = True   # Telegram alerts (templates by default)
     AI_TELEGRAM_ALL_OUTBOUND: bool = os.getenv(
         "TRADING_BOT_AI_TELEGRAM_ALL", "false"

@@ -16,8 +16,10 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from core.fill_tracker import (
     bracket_exit_fill,
     build_round_trip_record,
+    ib_fill_strict,
     read_order_fill_instant,
     recent_execution_fill,
+    require_ib_fill_sync,
 )
 from core.notify import log
 
@@ -172,6 +174,7 @@ def build_close_record(
     cache: Optional[FillExecutionCache],
     *,
     force: bool = False,
+    cfg=None,
 ) -> Optional[Dict[str, Any]]:
     """Build trade record when IB fill is confirmed, or force at deadline."""
     slot = pending.slot or {}
@@ -194,8 +197,10 @@ def build_close_record(
 
     if not confirmed and not force:
         return None
+    if not confirmed and force and ib_fill_strict(cfg):
+        return None
     if not _sane_fill(exit_fill, entry_fill) and entry_fill > 0:
-        if force and entry_fill > 0:
+        if force and entry_fill > 0 and not ib_fill_strict(cfg):
             exit_fill = entry_fill
             confirmed = False
         else:
