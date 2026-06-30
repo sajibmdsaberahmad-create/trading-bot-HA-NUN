@@ -10,7 +10,7 @@
   "rsi_filter": 0.5,
   "volatility_gate": 0.5,
   "_meta": {
-    "train_timestamp": "2026-06-30T12:33:30.784124",
+    "train_timestamp": "2026-06-30T12:35:29.269636",
     "buffer_total": 2000,
     "buffer_win_rate": 0.029,
     "trade_win_rate": 0.429,

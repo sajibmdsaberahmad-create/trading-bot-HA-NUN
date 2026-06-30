@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T12:34:53.794053+00:00",
+  "updated_at": "2026-06-30T12:35:32.431708+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,14 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T12:34:53.737061+00:00",
+    "timestamp": "2026-06-30T12:35:32.365118+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
         "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-30T11:38:00.494930+00:00"
+        "modified": "2026-06-30T12:35:27.874450+00:00"
       },
       "ppo_replay": {
         "exists": true,
@@ -55,13 +55,13 @@
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.7,
-        "modified": "2026-06-30T12:33:30.745507+00:00"
+        "modified": "2026-06-30T12:35:29.094216+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.9,
-        "modified": "2026-06-30T12:33:30.784474+00:00"
+        "modified": "2026-06-30T12:35:29.269862+00:00"
       },
       "copilot_state": {
         "exists": true,
@@ -84,8 +84,8 @@
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
-        "size_kb": 930.6,
-        "modified": "2026-06-30T12:33:30.211171+00:00"
+        "size_kb": 930.4,
+        "modified": "2026-06-30T12:35:28.595611+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
@@ -96,14 +96,14 @@
     },
     "phases": {
       "ppo": "active",
-      "teacher_proxy": "fast_path",
+      "teacher_proxy": "distilled",
       "proxy_accuracy": 1.0,
-      "fast_path": true,
+      "fast_path": false,
       "ppo_teacher": "active",
       "copilot": "active",
       "growth_stage": "adult"
     },
-    "api_dependency": "low-medium",
+    "api_dependency": "high",
     "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
     "trade_stats": {
       "count": 7,
