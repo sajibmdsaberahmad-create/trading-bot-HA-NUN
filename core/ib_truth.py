@@ -272,6 +272,8 @@ def fetch_ib_positions(ib) -> List[IBPosition]:
                     unrealized_pnl=unreal,
                     realized_pnl=real,
                     market_value=mkt_val,
+                    cost_basis=cost_basis,
+                    con_id=con_id,
                     multiplier=max(mult, 1.0),
                     account=acct,
                 )
@@ -282,17 +284,9 @@ def fetch_ib_positions(ib) -> List[IBPosition]:
 
 
 def fetch_ib_account_snapshot(ib, currency: str = "USD") -> IBAccountSnapshot:
+    from core.ib_data_catalog import ACCOUNT_TAG_FIELD_MAP
+
     snap = IBAccountSnapshot(currency=currency)
-    _TAG_MAP = {
-        "NetLiquidation": "net_liquidation",
-        "TotalCashValue": "total_cash",
-        "RealizedPnL": "realized_pnl",
-        "UnrealizedPnL": "unrealized_pnl",
-        "GrossPositionValue": "gross_position_value",
-        "BuyingPower": "buying_power",
-        "AvailableFunds": "available_funds",
-        "MaintMarginReq": "maint_margin_req",
-    }
     try:
         for v in ib.accountValues():
             if getattr(v, "currency", "") not in (currency, "BASE", ""):
@@ -300,12 +294,23 @@ def fetch_ib_account_snapshot(ib, currency: str = "USD") -> IBAccountSnapshot:
             tag = str(getattr(v, "tag", "") or "")
             val = float(getattr(v, "value", 0) or 0)
             snap.tags[tag] = val
-            attr = _TAG_MAP.get(tag)
+            attr = ACCOUNT_TAG_FIELD_MAP.get(tag)
             if attr:
                 setattr(snap, attr, val)
     except Exception as exc:
         log.debug(f"ib_truth account: {exc}")
     return snap
+
+
+def fetch_ib_server_time(ib) -> Tuple[str, bool]:
+    """Gateway clock — also proves connection is alive."""
+    try:
+        dt = ib.reqCurrentTime()
+        if dt is not None:
+            return dt.isoformat(), True
+    except Exception as exc:
+        log.debug(f"ib_truth server_time: {exc}")
+    return "", False
 
 
 def fetch_ib_open_orders(ib) -> List[IBOpenOrder]:
@@ -345,6 +350,12 @@ def fetch_ib_open_orders(ib) -> List[IBOpenOrder]:
                     filled=float(getattr(status, "filled", 0) or 0) if status else 0.0,
                     avg_fill=float(getattr(status, "avgFillPrice", 0) or 0) if status else 0.0,
                     remaining=float(getattr(status, "remaining", 0) or 0) if status else 0.0,
+                    lmt_price=float(getattr(order, "lmtPrice", 0) or 0),
+                    aux_price=float(getattr(order, "auxPrice", 0) or 0),
+                    parent_id=int(getattr(order, "parentId", 0) or 0),
+                    tif=str(getattr(order, "tif", "") or ""),
+                    outside_rth=bool(getattr(order, "outsideRth", False)),
+                    order_ref=str(getattr(order, "orderRef", "") or "")[:40],
                 )
             )
     except Exception as exc:
@@ -414,12 +425,17 @@ def build_snapshot(
     raw_execs = fetch_ib_executions(ib, since_ts=since)
     executions = filter_rth_executions(raw_execs, cfg)
     trips = fifo_round_trips(executions)
+    server_time, connected = fetch_ib_server_time(ib)
 
     ticker_pnl: Dict[str, float] = {}
     total_fifo = 0.0
+    total_comm = 0.0
     for trip in trips:
         ticker_pnl[trip.symbol] = round(ticker_pnl.get(trip.symbol, 0) + trip.pnl_usd, 2)
         total_fifo += trip.pnl_usd
+        total_comm += trip.commission
+    for ex in executions:
+        total_comm += ex.commission
 
     ticker_pnl_ib: Dict[str, float] = {}
     for p in positions:
@@ -436,11 +452,14 @@ def build_snapshot(
         round_trips=trips,
         session_pnl_ib=round(session_pnl_ib, 2),
         session_pnl_fifo=round(total_fifo, 2),
+        session_commissions=round(total_comm, 2),
         ticker_pnl_fifo=ticker_pnl,
         ticker_pnl_ib=ticker_pnl_ib,
         refreshed_at=time.time(),
         session_since_ts=since,
         session_scope="rth" if rth_session else "calendar",
+        server_time=server_time,
+        connected=connected,
     )
 
 
