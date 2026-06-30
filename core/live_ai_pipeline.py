@@ -347,6 +347,14 @@ def merge_entry_decision(
         return base_dict
 
     def _maybe_war_veto(d: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            from core.entry_quality import apply_profit_prob_veto
+            from core.config import BotConfig
+            d = apply_profit_prob_veto(cfg or BotConfig(), d, quality)
+            if not d.get("enter"):
+                return d
+        except Exception:
+            pass
         if not d.get("enter"):
             return d
         try:
@@ -386,11 +394,20 @@ def merge_entry_decision(
             is_strong_spike_setup,
         )
         min_prob = effective_min_profit_probability(cfg, scan_score, spike_ratio) if cfg else min_prob
+        try:
+            from core.smart_stack import strict_profit_prob_enabled
+            strict_prob = strict_profit_prob_enabled(cfg)
+        except Exception:
+            strict_prob = False
         if allows_ppo_lead_while_pending(
             cfg, scan_score=scan_score, spike_ratio=spike_ratio,
         ) and ppo_buy and is_strong_spike_setup(cfg, scan_score, spike_ratio):
-            if profit_prob >= min_prob * 0.90 or (
-                scan_score >= 85 and spike_ratio >= 1.4 and ppo_conf >= min_conf * 0.75
+            prob_ok = profit_prob >= min_prob if strict_prob else profit_prob >= min_prob * 0.90
+            if prob_ok and bool((quality or {}).get("enter_ok", True)) or (
+                not strict_prob
+                and scan_score >= 85
+                and spike_ratio >= 1.4
+                and ppo_conf >= min_conf * 0.75
             ):
                 base.update({
                     "enter": True,
