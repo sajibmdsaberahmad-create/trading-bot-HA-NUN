@@ -3714,3 +3714,7 @@
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":285.0,"shadow_only":true,"timestamp":"2026-06-30T10:18:58.321563+00:00"}
 {"ticker":"DGNX","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":154325.0,"shadow_only":true,"timestamp":"2026-06-30T10:19:00.487873+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1991.0,"shadow_only":true,"timestamp":"2026-06-30T10:19:02.440882+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T10:19:14.222437+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":5218.0,"shadow_only":true,"timestamp":"2026-06-30T10:19:16.362675+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T10:19:18.486241+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":5218.0,"shadow_only":true,"timestamp":"2026-06-30T10:19:20.817596+00:00"}
