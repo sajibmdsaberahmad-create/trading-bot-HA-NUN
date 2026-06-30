@@ -7908,7 +7908,11 @@ class ScalperRunner:
             self._pending_entry_until = now + block_sec
 
             # Start pilot flight tracking
-            regime_result = self.regime_detector.classify(df_fast) if hasattr(self.regime_detector, 'classify') else None
+            regime_result, _ = resolve_regime(
+                self.regime_detector, df_fast,
+                spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0)),
+                vol_ratio=1.0,
+            )
             vix_level = 0.0
             try:
                 ctx = summarize_market_context()
@@ -8078,14 +8082,17 @@ class ScalperRunner:
     
     def _build_ai_context(self, df: pd.DataFrame, current_px: float) -> Dict:
         """Build market context dict for cognitive autopilot decisions."""
-        regime_label = "unknown"
+        regime_label = "slow_grind"
         trend_strength = 0.5
         volatility = 0.5
         try:
-            rr = self.regime_detector.classify(df)
+            _, regime_label = resolve_regime(
+                self.regime_detector, df,
+                spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0)),
+                vol_ratio=1.0,
+            )
+            rr = self.regime_detector.classify(df) if df is not None and len(df) >= 5 else None
             if rr is not None:
-                raw_regime = getattr(rr, "regime", "unknown")
-                regime_label = getattr(raw_regime, "value", str(raw_regime))
                 trend_strength = abs(float(getattr(rr, "trend_strength", 0.0) or 0.0))
                 vol_pct = float(getattr(rr, "volatility_percentile", 50.0) or 50.0)
                 volatility = vol_pct / 100.0 if vol_pct > 1.0 else vol_pct
