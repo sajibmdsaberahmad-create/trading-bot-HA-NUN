@@ -45,7 +45,49 @@ Run `./scripts/install_git_hooks.sh` once per clone (or after fresh clone). Hook
 
 ---
 
-## 2026-06-30 — Replay war relax (entries blocked on $1k replay)
+## 2026-06-30 — Halim participation + proxy balance + repeat-loser quality
+
+### Problem
+PPO `micro_fast` won every entry race before Halim LM returned (`Halim empty`/`in_flight`). Teacher proxy retrain failed `single_class` (all enter labels). Repeat losers (NVDA, PLTR, etc.) kept re-entering on weak micro-fast setups (~12% WR).
+
+### Root cause
+1. No await between `_ring_halim_entry` and fast paths — blend never saw `fresh`.
+2. Proxy training used `ai_decision_log` enters only; skip verdicts not included.
+3. `assess_entry_quality` ignored per-ticker session loss memory on micro-fast.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_entry_line.py` | `halim_entry_await_sec()`, `wait_for_completion()` |
+| `core/ai_commander.py` | `_await_halim_entry_slot()` before `micro_fast`/`spike_fast`; pass `ticker` to quality |
+| `core/fast_execution.py` | `ticker` on `should_micro_fast_entry`; repeat-loser quality gate |
+| `core/entry_quality.py` | `repeat_loser_prob_bump()`, `ticker` param on `assess_entry_quality` |
+| `core/hybrid_distiller.py` | `_load_skip_verdicts()` from `smart_stack_verdicts.jsonl`; merge enter+skip for proxy train |
+| `scripts/halim_env.sh` | `HALIM_ENTRY_AWAIT_*`, `REPEAT_LOSER_*` defaults |
+
+### Env vars
+```bash
+HALIM_ENTRY_AWAIT_SEC=2.5          # replay: wait for Halim JSON before fast path
+HALIM_ENTRY_AWAIT_REPLAY=true
+HALIM_ENTRY_AWAIT_LIVE=false       # keep live snappy
+REPEAT_LOSER_PROB_BUMP=true
+REPEAT_LOSER_MICRO_FAST_GATE=true
+```
+
+### Verify
+```bash
+source scripts/halim_env.sh && ./scripts/start_replay_live.sh
+grep "Halim entry fresh" logs/REPLAY_SCALPER.log
+grep -E 'halim_complement|halim_veto' logs/REPLAY_SCALPER.log
+./scripts/coevolution_status.sh   # v2 rows with halim_signal set
+# After teardown — proxy train should not say single_class:
+python3 -c "from core.hybrid_distiller import train_teacher_proxy; from core.config import BotConfig; print(train_teacher_proxy(BotConfig()))"
+```
+
+### Notes
+Sniper flash/strong paths unchanged (no await). Increase `HALIM_ENTRY_AWAIT_SEC` if still mostly timeout on M2 8GB.
+
+---
 
 ### Problem
 Replay scanned spikes but **zero trades**: every entry logged `war:veto` — `LAB_ACTIVE: need $3,495 > settled/bullet ($2,500)`. Bracket notional exceeded lab bullet on $1,000 replay cash.

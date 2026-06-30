@@ -327,6 +327,7 @@ def should_micro_fast_entry(
     micro: Optional[dict] = None,
     ppo_action: int = 1,
     ppo_conf: float = 0.58,
+    ticker: str = "",
 ) -> bool:
     """Enter without Ollama wait — strong scanner score + micro momentum + profit odds."""
     from core.capital_discipline import allows_micro_fast_entry
@@ -346,8 +347,21 @@ def should_micro_fast_entry(
         raw = True
     if not raw:
         return False
+    if ticker and os.getenv("REPEAT_LOSER_MICRO_FAST_GATE", "true").lower() in ("1", "true", "yes"):
+        from core.entry_quality import assess_entry_quality, repeat_loser_prob_bump
+        if repeat_loser_prob_bump(cfg, ticker) > 0:
+            q = assess_entry_quality(
+                cfg, micro or {},
+                spike_ratio=spike_ratio,
+                scan_score=scan_score,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                ticker=ticker,
+            )
+            if not q.get("enter_ok"):
+                return False
     return _passes_entry_quality_gate(
-        cfg, micro, spike_ratio, scan_score, ppo_action, ppo_conf,
+        cfg, micro, spike_ratio, scan_score, ppo_action, ppo_conf, ticker=ticker,
     )
 
 
@@ -358,6 +372,7 @@ def _passes_entry_quality_gate(
     scan_score: float,
     ppo_action: int,
     ppo_conf: float,
+    ticker: str = "",
 ) -> bool:
     if not getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
         return True
@@ -369,6 +384,7 @@ def _passes_entry_quality_gate(
         ppo_action=ppo_action,
         ppo_conf=ppo_conf,
         live_px=float((micro or {}).get("pred_1bar", 0) or 0),
+        ticker=ticker,
     )
     if micro is not None:
         micro.update({

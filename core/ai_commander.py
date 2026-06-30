@@ -312,6 +312,31 @@ class AICommander:
         except Exception as exc:
             log.debug(f"Halim entry ring: {exc}")
 
+    def _await_halim_entry_slot(self, ticker: str, fingerprint: str) -> str:
+        """Wait for async Halim entry LM before fast paths (replay default)."""
+        try:
+            from core.halim_entry_line import halim_entry_await_sec
+            wait = halim_entry_await_sec(self.cfg)
+            if wait <= 0 or not hasattr(self, "_halim_entry"):
+                return "skip"
+            outcome = self._halim_entry.wait_for_completion(ticker, fingerprint, wait)
+            if outcome == "ready":
+                peek = self._halim_entry.peek(ticker)
+                h_conf = float((peek.get("parsed") or {}).get("confidence", 0) or 0)
+                h_enter = bool((peek.get("parsed") or {}).get("enter", False))
+                log.info(
+                    f"  🧠 Halim entry fresh {ticker.upper()} "
+                    f"enter={h_enter} conf={h_conf:.0%} (await {wait:.1f}s)"
+                )
+            elif outcome == "timeout":
+                log.debug(
+                    f"  🧠 Halim entry await timeout {ticker.upper()} ({wait:.1f}s) — fast path"
+                )
+            return outcome
+        except Exception as exc:
+            log.debug(f"Halim entry await: {exc}")
+            return "error"
+
     def _blend_halim_entry(
         self,
         decision: Dict[str, Any],
@@ -1307,6 +1332,7 @@ class AICommander:
             ppo_action=ppo_action,
             ppo_conf=ppo_conf,
             live_px=current_px,
+            ticker=ticker,
         )
         account = dict(account or {})
         account["entry_quality"] = quality
@@ -1421,8 +1447,10 @@ class AICommander:
                 df=df, equity=equity, cash=float(account.get("cash", 0)),
             )
             return decision
+        self._await_halim_entry_slot(ticker, fp)
         if allows_micro_fast_entry(self.cfg) and should_micro_fast_entry(
             self.cfg, spike_ratio, scan_score, micro, ppo_action, ppo_conf,
+            ticker=ticker,
         ):
             fp = self._ring_entry_council_for_learning(
                 ticker, current_px, spike_ratio, scan_score,
@@ -1456,6 +1484,7 @@ class AICommander:
                     market_ctx=mctx,
                 )
             return decision
+        self._await_halim_entry_slot(ticker, fp)
         if allows_spike_fast_entry(self.cfg) and should_spike_fast_entry(
             self.cfg, spike_ratio, scan_score, ppo_action, ppo_conf, micro,
         ):
@@ -1899,7 +1928,9 @@ class AICommander:
             promote_scanner = False
             if scan_score >= fast_score and spike_ratio >= fast_spike:
                 promote_scanner = True
-            elif should_micro_fast_entry(self.cfg, spike_ratio, scan_score, micro):
+            elif should_micro_fast_entry(
+                self.cfg, spike_ratio, scan_score, micro, ticker=ticker,
+            ):
                 promote_scanner = True
                 spike_ratio = max(spike_ratio, float(micro.get("vol_accel", spike_ratio)))
                 state["spike_ratio"] = spike_ratio

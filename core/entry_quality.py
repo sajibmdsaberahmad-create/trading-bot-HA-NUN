@@ -27,6 +27,29 @@ def _eq_weights(cfg: BotConfig) -> Dict[str, float]:
     }
 
 
+def repeat_loser_prob_bump(cfg: BotConfig, ticker: str = "") -> float:
+    """Raise min profit_probability for tickers with session losses (no blanket ban)."""
+    if os.getenv("REPEAT_LOSER_PROB_BUMP", "true").lower() not in ("1", "true", "yes"):
+        return 0.0
+    t = str(ticker or "").upper()
+    if not t:
+        return 0.0
+    try:
+        from core.live_trade_guard import session_loss_count
+        losses = session_loss_count(t)
+    except Exception:
+        return 0.0
+    if losses >= 4:
+        return float(os.getenv("REPEAT_LOSER_PROB_BUMP_4", "0.18"))
+    if losses >= 3:
+        return float(os.getenv("REPEAT_LOSER_PROB_BUMP_3", "0.12"))
+    if losses >= 2:
+        return float(os.getenv("REPEAT_LOSER_PROB_BUMP_2", "0.08"))
+    if losses >= 1:
+        return float(os.getenv("REPEAT_LOSER_PROB_BUMP_1", "0.04"))
+    return 0.0
+
+
 def assess_entry_quality(
     cfg: BotConfig,
     micro: Optional[Dict[str, Any]],
@@ -36,6 +59,7 @@ def assess_entry_quality(
     ppo_action: int = 0,
     ppo_conf: float = 0.5,
     live_px: float = 0.0,
+    ticker: str = "",
 ) -> Dict[str, Any]:
     """
     Estimate odds of a profitable long scalp and classify setup type.
@@ -122,6 +146,9 @@ def assess_entry_quality(
         )
     except Exception:
         pass
+    loss_bump = repeat_loser_prob_bump(cfg, ticker)
+    if loss_bump > 0:
+        min_prob = min(0.92, min_prob + loss_bump)
     min_fakeout = float(getattr(cfg, "MIN_FAKEOUT_FADE_PROB", 0.50))
     max_fakeout_risk = float(getattr(cfg, "MAX_FAKEOUT_RISK_ENTER", 0.62))
     fakeout_block = float(getattr(cfg, "LIKELY_FAKEOUT_BLOCK_LEVEL", 0.0))
@@ -154,6 +181,8 @@ def assess_entry_quality(
             f"profit_prob={profit_probability:.0%} (target {min_prob:.0%}) "
             f"fakeout_risk={fakeout_risk:.0%} (max {max_fakeout_risk:.0%})"
         )
+    if loss_bump > 0 and not enter_ok:
+        reason = f"{reason} | repeat_loser+{loss_bump:.0%}"
 
     return _pack(
         profit_probability, fakeout_risk, setup_type, enter_ok, reason,

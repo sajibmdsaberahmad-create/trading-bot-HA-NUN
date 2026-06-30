@@ -43,6 +43,23 @@ def _min_ring_sec(cfg: BotConfig) -> float:
     return float(os.getenv("HALIM_ENTRY_LM_MIN_RING_SEC", "2.0"))
 
 
+def halim_entry_await_sec(cfg: Optional[BotConfig] = None) -> float:
+    """Seconds to wait for async Halim entry LM before fast paths (replay default)."""
+    cfg = cfg or BotConfig()
+    try:
+        sec = float(os.getenv("HALIM_ENTRY_AWAIT_SEC", "2.5"))
+    except (TypeError, ValueError):
+        sec = 2.5
+    if sec <= 0:
+        return 0.0
+    replay = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+    if replay and os.getenv("HALIM_ENTRY_AWAIT_REPLAY", "true").lower() in ("1", "true", "yes"):
+        return sec
+    if not replay and os.getenv("HALIM_ENTRY_AWAIT_LIVE", "false").lower() in ("1", "true", "yes"):
+        return sec
+    return 0.0
+
+
 def _build_entry_prompt(
     *,
     ticker: str,
@@ -238,6 +255,37 @@ class HalimEntryLine:
                 "raw": slot.raw,
                 "fingerprint": slot.fingerprint,
             }
+
+    def wait_for_completion(
+        self,
+        ticker: str,
+        fingerprint: str,
+        timeout_sec: float,
+    ) -> str:
+        """
+        Poll until Halim entry slot finishes or timeout.
+        Returns: ready, in_flight, missing, wrong_fp, timeout.
+        """
+        if timeout_sec <= 0:
+            return "timeout"
+        key = ticker.upper()
+        deadline = time.time() + timeout_sec
+        poll = max(0.03, float(os.getenv("HALIM_ENTRY_AWAIT_POLL_SEC", "0.05")))
+        while time.time() < deadline:
+            with self._lock:
+                slot = self._slots.get(key)
+                if not slot or slot.fingerprint != fingerprint:
+                    return "wrong_fp"
+                if slot.in_flight:
+                    st = "in_flight"
+                elif slot.parsed:
+                    st = "ready"
+                else:
+                    st = "empty"
+            if st != "in_flight":
+                return st
+            time.sleep(poll)
+        return "timeout"
 
 
 def merge_halim_entry_advisory(

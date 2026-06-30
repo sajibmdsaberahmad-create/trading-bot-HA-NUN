@@ -27,6 +27,7 @@ from core.notify import log
 MODELS_DIR = Path("models")
 DECISION_LOG = MODELS_DIR / "ai_decision_log.jsonl"
 BUFFER_PATH = MODELS_DIR / "experience_buffer.jsonl"
+VERDICT_LOG = MODELS_DIR / "smart_stack_verdicts.jsonl"
 PROXY_PATH = MODELS_DIR / "teacher_proxy.joblib"
 _proxy_bundle_cache: Optional[Dict[str, Any]] = None
 _proxy_bundle_mtime: float = 0.0
@@ -143,6 +144,56 @@ def _load_entry_decisions(max_records: int = 600) -> List[Dict[str, Any]]:
     return out[-max_records:]
 
 
+def _load_skip_verdicts(max_records: int = 500) -> List[Dict[str, Any]]:
+    """Skip labels from spike verdicts — balances proxy training when enters dominate."""
+    if not VERDICT_LOG.is_file():
+        return []
+    out: List[Dict[str, Any]] = []
+    with open(VERDICT_LOG, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if r.get("event") != "spike_verdict":
+                continue
+            if bool(r.get("enter")):
+                continue
+            ticker = str(r.get("ticker", "")).upper()
+            if not ticker:
+                continue
+            out.append({
+                "ts": _parse_ts(str(r.get("timestamp", ""))),
+                "ticker": ticker,
+                "enter": False,
+                "confidence": float(r.get("confidence", 0.35) or 0.35),
+                "reason": str(r.get("reason", ""))[:120],
+                "scan_score": float(r.get("scan_score", 0) or 0),
+                "spike_ratio": float(r.get("spike_ratio", 1.0) or 1.0),
+            })
+    return out[-max_records:]
+
+
+def _merge_proxy_training_decisions(
+    enters: List[Dict[str, Any]],
+    skips: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Combine enter + skip rows; cap enters so sklearn gets both classes."""
+    if not skips:
+        return enters
+    if not enters:
+        return skips
+    max_enters = max(len(skips) * 3, len(skips))
+    if len(enters) > max_enters:
+        enters = enters[-max_enters:]
+    combined = enters + skips
+    combined.sort(key=lambda d: d.get("ts", 0))
+    return combined
+
+
 def _build_feature_matrix(
     cfg: BotConfig,
     decisions: List[Dict[str, Any]],
@@ -189,9 +240,12 @@ def _build_feature_matrix(
         if feat_rec is None and dec["enter"]:
             continue
         if feat_rec is None:
-            # Skip decisions: use zero base + council confidence channel
+            # Skip decisions: use zero base + verdict scan/spike when available
             base = np.zeros(cfg.WINDOW_SIZE * cfg.N_FEATURES, dtype=np.float32)
-            cash, pos, spike, scan, spread, vol = 0.9, 0.0, 1.0, 0.0, 0.0, 1.0
+            cash, pos = 0.9, 0.0
+            spike = float(dec.get("spike_ratio", 1.0))
+            scan = float(dec.get("scan_score", 0.0))
+            spread, vol = 0.0, 1.0
         else:
             flat = feat_rec.get("features") or []
             if len(flat) < cfg.WINDOW_SIZE * cfg.N_FEATURES:
@@ -265,6 +319,10 @@ def train_teacher_proxy(cfg: BotConfig) -> Dict[str, Any]:
         return {"ok": False, "reason": "missing_sklearn"}
 
     decisions = _load_entry_decisions()
+    enters = [d for d in decisions if d.get("enter")]
+    skips = [d for d in decisions if not d.get("enter")]
+    skips.extend(_load_skip_verdicts())
+    decisions = _merge_proxy_training_decisions(enters, skips)
     buffer = _load_buffer_records()
     X, y, sample_w = _build_feature_matrix(cfg, decisions, buffer)
 
