@@ -10,6 +10,37 @@
 
 ---
 
+## 2026-07-01 — IB Truth startup checklist
+
+### Problem
+No single startup gate confirmed IB snapshot freshness before the trading loop; stale/disconnected Gateway could run with local fiction.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_truth_checklist.py` | **New** — evaluate, wait, log banner, runtime age gate |
+| `core/scalper_runner.py` | Run checklist after balance refresh; halt if blockers |
+| `core/scalper_spike_loop.py` | Skip spike entries when runtime snapshot too stale |
+| `scripts/start_hanoon.sh` | `IB_TRUTH_STARTUP_*` env defaults |
+| `tests/test_ib_truth_checklist.py` | **New** — evaluate fresh/stale |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `IB_TRUTH_STARTUP_CHECK` | `true` | Log checklist at boot |
+| `IB_TRUTH_STARTUP_BLOCK` | `true` | Halt if not ready after wait |
+| `IB_TRUTH_STARTUP_WAIT_SEC` | `20` | Poll IB until fresh |
+| `IB_TRUTH_RUNTIME_MAX_AGE_SEC` | `90` | Block entries if snapshot older |
+
+### Verify
+```bash
+python3 -m py_compile core/ib_truth_checklist.py
+python3 -m pytest tests/test_ib_truth_checklist.py -q
+# Boot HANOON — expect "IB TRUTH CHECKLIST — LIVE FROM GATEWAY ✓"
+```
+
+---
+
 ## 2026-07-01 — account_view sizing uses IB equity outside war phase
 
 ### Problem

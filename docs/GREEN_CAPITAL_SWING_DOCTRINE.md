@@ -188,3 +188,27 @@ As `brain_maturity` advances and `swing_ib_trips.jsonl` grows:
 - PPO swing training prefers IB trips over shadow-only labels  
 
 No manual flip — env caps (`SWING_DOCTRINE_FULL_AT`, `SWING_DOCTRINE_TRIP_MATURE`) tune the ramp.
+
+---
+
+## IB Truth startup checklist
+
+On every HANOON boot (after first IB refresh):
+
+```
+──────────────────────────────────────────────────────────────
+  IB TRUTH CHECKLIST — LIVE FROM GATEWAY ✓
+  Status: READY | server=... scope=rth
+  NetLiq $... | PnL session $... | UPL $...
+  ✓ connected: yes
+  ✓ snapshot_fresh: age=1.2s (max 30s)
+  ✓ account_values: NetLiq=$...
+  ✓ capital_phase: rth_war sizing=war
+  ...
+──────────────────────────────────────────────────────────────
+  ⚡ IB Truth ready — trading from Gateway snapshot (light/fast path)
+```
+
+If Gateway is not ready within `IB_TRUTH_STARTUP_WAIT_SEC` (20s), startup **halts** when `IB_TRUTH_STARTUP_BLOCK=true`.
+
+During the loop, entries pause if snapshot age exceeds `IB_TRUTH_RUNTIME_MAX_AGE_SEC` (90s) until the hub refreshes.

@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — IB Truth startup checklist (fresh snapshot before loop) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Swing doctrine: maturity-scaled green entry/exit + summary doc — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [GREEN_CAPITAL_SWING_DOCTRINE.md](GREEN_CAPITAL_SWING_DOCTRINE.md)
 - `2026-07-01` **engineering** — Multi-bar ride + slippage-aware exit (book profit / cut loss early) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Unified green doctrine: same war tactics on full-balance pre/post war (only sizing differs) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -1957,3 +1958,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:51 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=167 evolutions=51
 - `2026-06-30 21:52 UTC` **git_auto** — sync: 6 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, cognitive_state.json +3 more | models=1 docs=1 core=1 other=3 | brain=toddler d
 - `2026-06-30 21:53 UTC` **git_auto** — sync: 4 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=toddler dataset=167 evolutions=
+- `2026-06-30 21:53 UTC` **git_auto** — sync: 6 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, start_hanoon.sh +3 more | docs=1 other=5 | brain=toddler dataset=167 evolutions

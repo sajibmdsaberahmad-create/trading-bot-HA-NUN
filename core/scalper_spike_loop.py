@@ -1232,6 +1232,12 @@ class ScalperSpikeMixin:
         Scan all locked tickers for spikes.
         scout_only=True: track next_best while holding a position (no new entry).
         """
+        try:
+            from core.ib_truth_checklist import runtime_ib_truth_ok
+            if not runtime_ib_truth_ok(self.cfg, self):
+                return
+        except Exception:
+            pass
         if not self._locked_targets:
             return
         if self._open_position_count() >= self._max_concurrent() and not scout_only:
