@@ -45,3 +45,7 @@ tick_micro_loss
 Could not parse AI plan — retained guidance for prompts only.
 ib_day_learning:2026-06-29:IB day 2026-06-29: 399 trades, P&L $+47100.79
 
+🧭 COMMANDER LEARNING | 2026-06-30T13:33:25.654370+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
