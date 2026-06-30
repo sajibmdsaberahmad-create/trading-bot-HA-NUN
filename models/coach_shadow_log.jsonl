@@ -3255,3 +3255,5 @@
 {"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":85.0,"spike_ratio":0.7974603614402195,"shadow_only":true,"timestamp":"2026-06-30T08:00:48.619777+00:00"}
 {"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":81.0,"spike_ratio":8.13405432430121,"shadow_only":true,"timestamp":"2026-06-30T08:00:48.802663+00:00"}
 {"ticker":"SOFI","reason":"ppo_not_aligned","scan_score":92.0,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T08:21:24.002411+00:00"}
+{"ticker":"LCID","reason":"ppo_not_aligned","scan_score":66.4,"spike_ratio":15664.0,"shadow_only":true,"timestamp":"2026-06-30T08:21:38.961158+00:00"}
+{"ticker":"ASTS","reason":"ppo_not_aligned","scan_score":70.8,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T08:21:39.405092+00:00"}
