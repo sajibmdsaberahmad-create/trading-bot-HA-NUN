@@ -1,8 +1,8 @@
 {
-  "narrative": "Local copilot: 50% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required). Tape: trend grind.",
+  "narrative": "Local copilot: 33% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required). Tape: trend grind.",
   "regime_read": "trend grind",
   "risk_posture": "normal",
-  "session_wr": 0.5,
+  "session_wr": 0.3333333333333333,
   "session_pnl": 0.0,
   "ticker_bias": {
     "BITO": "CAUTION"
@@ -17,6 +17,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782842386.3204281,
+  "updated_at": 1782842644.476566,
   "source": "heuristic"
 }
