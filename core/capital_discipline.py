@@ -163,8 +163,14 @@ def effective_min_profit_probability(
     except Exception:
         pass
     if is_strong_spike_setup(cfg, scan_score, spike_ratio):
-        strong = float(getattr(cfg, "CAPITAL_STRONG_PROFIT_PROB_FLOOR", 0.48))
-        base = min(base, strong)
+        try:
+            from core.smart_stack import strict_profit_prob_enabled
+            if not strict_profit_prob_enabled(cfg):
+                strong = float(getattr(cfg, "CAPITAL_STRONG_PROFIT_PROB_FLOOR", 0.48))
+                base = min(base, strong)
+        except Exception:
+            strong = float(getattr(cfg, "CAPITAL_STRONG_PROFIT_PROB_FLOOR", 0.48))
+            base = min(base, strong)
     try:
         from core.war_entry_gates import war_gates_active, war_min_profit_probability
         if war_gates_active(cfg):

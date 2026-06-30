@@ -210,6 +210,7 @@ def should_sniper_strong_entry(
         return False
     return _passes_entry_quality_gate(
         cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+        ticker=ticker, live_px=live_px,
     )
 
 
@@ -299,6 +300,7 @@ def should_sniper_flash_entry(
         return False
     return _passes_entry_quality_gate(
         cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+        ticker=ticker, live_px=live_px,
     )
 
 

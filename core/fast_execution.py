@@ -334,6 +334,7 @@ def should_micro_fast_entry(
     ppo_action: int = 1,
     ppo_conf: float = 0.58,
     ticker: str = "",
+    live_px: float = 0.0,
 ) -> bool:
     """Enter without Ollama wait — strong scanner score + micro momentum + profit odds."""
     from core.capital_discipline import allows_micro_fast_entry
@@ -368,6 +369,7 @@ def should_micro_fast_entry(
                 return False
     return _passes_entry_quality_gate(
         cfg, micro, spike_ratio, scan_score, ppo_action, ppo_conf, ticker=ticker,
+        live_px=live_px,
     )
 
 
