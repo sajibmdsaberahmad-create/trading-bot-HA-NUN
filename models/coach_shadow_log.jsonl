@@ -3460,3 +3460,4 @@
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":900.0,"shadow_only":true,"timestamp":"2026-06-30T09:47:29.431293+00:00"}
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":12.083333333333334,"shadow_only":true,"timestamp":"2026-06-30T09:47:44.564822+00:00"}
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":12.083333333333334,"shadow_only":true,"timestamp":"2026-06-30T09:47:59.687310+00:00"}
+{"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":87.6,"spike_ratio":1.3134646962233167,"shadow_only":true,"timestamp":"2026-06-30T09:48:14.884817+00:00"}
