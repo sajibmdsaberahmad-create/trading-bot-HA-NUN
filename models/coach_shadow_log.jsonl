@@ -3469,3 +3469,6 @@
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":2.48353096177907,"shadow_only":true,"timestamp":"2026-06-30T09:49:15.982507+00:00"}
 {"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":87.6,"spike_ratio":1.3653750956265729,"shadow_only":true,"timestamp":"2026-06-30T09:49:18.137712+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.2143559488692233,"shadow_only":true,"timestamp":"2026-06-30T09:49:23.494936+00:00"}
+{"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":2.48353096177907,"shadow_only":true,"timestamp":"2026-06-30T09:49:41.195175+00:00"}
+{"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":87.6,"spike_ratio":1.3653750956265729,"shadow_only":true,"timestamp":"2026-06-30T09:49:43.306384+00:00"}
+{"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.2143559488692233,"shadow_only":true,"timestamp":"2026-06-30T09:49:48.846465+00:00"}
