@@ -1023,12 +1023,8 @@ def check_entry_allowed(
         return None
 
     try:
-        from core.capital_phase import capital_phases_enabled, uses_war_sizing, capital_phase
-        phase = capital_phase(cfg)
-        if capital_phases_enabled(cfg) and not uses_war_sizing(cfg, market_state="open" if phase == "rth_war" else None):
-            if phase != "rth_war":
-                return None
-        if capital_phases_enabled(cfg) and phase != "rth_war":
+        from core.capital_phase import capital_phases_enabled, uses_war_sizing
+        if capital_phases_enabled(cfg) and not uses_war_sizing(cfg):
             return None
     except Exception:
         pass
@@ -1132,7 +1128,7 @@ def rescale_decision_for_war(
 ) -> Dict[str, Any]:
     """Clamp shares to war deploy cap + settled cash (full pool when AI sizing)."""
     cfg = cfg or BotConfig()
-    if not war_account_enabled(cfg) or entry_px <= 0:
+    if not war_ledger_applies(cfg):
         return decision
     state = load_state(cfg)
     mode = state.get("mode") or _recompute_mode(state, cfg)
