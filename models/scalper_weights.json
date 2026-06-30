@@ -10,27 +10,10 @@
   "rsi_filter": 0.5,
   "volatility_gate": 0.5,
   "_meta": {
-    "train_timestamp": "2026-06-30T20:01:26.864854",
+    "train_timestamp": "2026-06-30T20:28:42.490877",
     "buffer_total": 2000,
     "buffer_win_rate": 0.079,
-    "trade_win_rate": 0.079,
-    "sources": {
-      "halim_ppo_coevolution": 662,
-      "ai_council": 661,
-      "consciousness": 30,
-      "runtime_observer": 51,
-      "ppo_entry": 96,
-      "live_trade": 26,
-      "scan_pick": 18,
-      "scan_complete": 2,
-      "halim_ppo_outcome": 8,
-      "profit_hunt": 43,
-      "fill_slippage_abort": 2,
-      "ib_failure": 1,
-      "ib_day_trade": 399,
-      "market_context": 1
-    },
-    "missed_profit_hunts": 1,
-    "profit_hunt_events": 43
+    "returns_win_rate": 0.143,
+    "combined_win_rate": 0.111
   }
 }
