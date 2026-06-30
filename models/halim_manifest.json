@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T17:09:32.716861+00:00",
+  "updated_at": "2026-06-30T17:10:30.177584+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,14 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T17:09:32.681767+00:00",
+    "timestamp": "2026-06-30T17:10:30.122378+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
         "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-30T17:05:40.797724+00:00"
+        "modified": "2026-06-30T17:10:22.024439+00:00"
       },
       "ppo_replay": {
         "exists": true,
@@ -55,13 +55,13 @@
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.7,
-        "modified": "2026-06-30T17:05:41.562159+00:00"
+        "modified": "2026-06-30T17:10:22.775952+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.4,
-        "modified": "2026-06-30T17:05:49.477200+00:00"
+        "modified": "2026-06-30T17:10:30.099337+00:00"
       },
       "copilot_state": {
         "exists": true,
@@ -85,7 +85,7 @@
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
         "size_kb": 725.2,
-        "modified": "2026-06-30T17:05:41.263133+00:00"
+        "modified": "2026-06-30T17:10:22.455911+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
@@ -120,7 +120,7 @@
       "metrics": {
         "closed_trades": 2700,
         "dataset_pairs": 1885,
-        "evolution_count": 39,
+        "evolution_count": 40,
         "proxy_accuracy": 0.9545,
         "proxy_holdout_accuracy": 0.9545,
         "rolling_win_rate": null,

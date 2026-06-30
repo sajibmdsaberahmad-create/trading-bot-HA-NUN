@@ -3,7 +3,7 @@
   "version": 4,
   "canonical_file": "halim_sft.zip",
   "build_id": "06ed829b087c",
-  "created_at": "2026-06-30T17:09:32.502679+00:00",
+  "created_at": "2026-06-30T17:10:24.319639+00:00",
   "train_pairs": 13870,
   "valid_pairs": 729,
   "pairs_total": 14599,
