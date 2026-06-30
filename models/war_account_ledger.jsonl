@@ -30,3 +30,4 @@
 {"event":"war_exit","ticker":"MARA","mode":"LAB_ACTIVE","virtual_fill":12.545422086599999,"ib_fill":12.5948,"net_pnl":16.36,"gross_pnl":17.19,"fees":0.83,"promotion":true,"exit_reason":"replay_target","ts":1782797457.006496}
 {"event":"war_exit","ticker":"RKLB","mode":"LAB_ACTIVE","virtual_fill":115.9903847385,"ib_fill":116.6562,"net_pnl":-62.73,"gross_pnl":-61.57,"fees":1.16,"promotion":true,"exit_reason":"replay_stop","ts":1782797470.956922}
 {"event":"war_exit","ticker":"RKLB","mode":"LAB_ACTIVE","virtual_fill":118.08812400000001,"ib_fill":118.23,"net_pnl":-26.55,"gross_pnl":-25.37,"fees":1.18,"promotion":true,"exit_reason":"tick_micro_loss","ts":1782797481.629921}
+{"event":"session_reset","reason":"user_live_session_reset","mode":"WAR_ACTIVE","nav":3500.0,"ts":1782808513.678345}

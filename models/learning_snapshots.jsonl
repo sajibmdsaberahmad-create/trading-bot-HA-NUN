@@ -292,3 +292,4 @@
 {"event":"learning_snapshot","trigger":"pre_stop_replay","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T08:00:49.338568+00:00"}
 {"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T08:00:49.373284+00:00"}
 {"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T08:00:51.061125+00:00"}
+{"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T08:35:19.830928+00:00"}
