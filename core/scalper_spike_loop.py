@@ -1280,6 +1280,23 @@ class ScalperSpikeMixin:
             if live_px <= 0:
                 live_px = float(df["close"].iloc[-1])
 
+            try:
+                from core.fill_tracker import sanitize_quote_price
+                bar_close = float(df["close"].iloc[-1])
+                fc0 = self._last_micro_forecast.get(ticker, {})
+                pred0 = float(fc0.get("pred_1bar") or 0)
+                live_px = sanitize_quote_price(
+                    live_px, ref_px=bar_close, pred_px=pred0, symbol=ticker,
+                )
+            except Exception:
+                bar_close = float(df["close"].iloc[-1])
+
+            if bar_close > 0 and live_px > 0 and abs(live_px / bar_close - 1.0) > 0.35:
+                log.info(
+                    f"  ⏭ QUOTE veto {ticker}: live ${live_px:.2f} vs bar ${bar_close:.2f}"
+                )
+                continue
+
             work_df = df.tail(60).copy()
 
             if forecast.get("dir", 0) < 0 and not forecast.get("breakout"):
