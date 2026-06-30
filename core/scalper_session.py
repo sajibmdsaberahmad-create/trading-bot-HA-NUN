@@ -363,6 +363,45 @@ class ScalperSessionMixin:
             pass
     def _register_shutdown_signals(self):
         import signal
+        import threading
+
+        def _arm_shutdown_watchdog(signum: int) -> None:
+            if getattr(self, "_shutdown_watchdog_armed", False):
+                return
+            self._shutdown_watchdog_armed = True
+            grace = float(os.getenv("SHUTDOWN_FORCE_EXIT_SEC", "25"))
+
+            def _force() -> None:
+                import time
+                deadline = time.time() + grace
+                while time.time() < deadline:
+                    if getattr(self, "_shutdown_done", False):
+                        return
+                    time.sleep(0.25)
+                log.error(
+                    f"Shutdown watchdog: main thread stuck >{grace:.0f}s after "
+                    f"signal {signum} — forcing exit"
+                )
+                try:
+                    from core.learning_persistence import emergency_snapshot
+                    emergency_snapshot(
+                        self.cfg,
+                        model=getattr(self, "model", None),
+                        runner=self,
+                    )
+                except Exception:
+                    pass
+                try:
+                    from core.shutdown_control import remove_pid_file
+                    remove_pid_file()
+                except Exception:
+                    pass
+                import os
+                os._exit(128 + (signum & 0xFF))
+
+            threading.Thread(
+                target=_force, daemon=True, name="shutdown-watchdog",
+            ).start()
 
         def _handler(signum, _frame):
             log.info(f"Signal {signum} received — graceful shutdown...")
@@ -377,6 +416,7 @@ class ScalperSessionMixin:
                 request_shutdown(f"signal_{signum}")
             except Exception:
                 pass
+            _arm_shutdown_watchdog(int(signum))
             try:
                 self.ib.sleep(0)
             except Exception:

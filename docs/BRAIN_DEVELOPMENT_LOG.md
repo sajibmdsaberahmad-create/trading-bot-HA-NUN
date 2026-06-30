@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — stop.sh IB kevent watchdog + faster SIGKILL — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — stop.sh responsive shutdown (interruptible sleep, skip duplicate flush) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — IB 322 market-rule noise suppressed; logger `HANOON` — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — IB Truth startup checklist (fresh snapshot before loop) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -2005,3 +2006,10 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 22:07 UTC` **git_auto** — sync: 5 files — scalper_runner.py, scalper_session.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=106 
 - `2026-06-30 22:07 UTC` **git_auto** — sync: 6 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, stop_hanoon.sh +3 more | docs=1 other=5 | brain=toddler dataset=106 evolutions=
 - `2026-06-30 22:08 UTC` **git_auto** — sync: 5 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, ENGINEERING_FIX_LOG.md +2 more | docs=2 other=3 | brain=toddler dataset=106 evo
+- `2026-06-30 22:08 UTC` **git_auto** — sync: 4 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=toddler dataset=106 evolutions=
+- `2026-06-30 22:12 UTC` **brain_proxy_trained** · stage **toddler** — Teacher proxy holdout acc=92% (random=97%, 335 samples)
+- `2026-06-30 22:12 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 3 mutation(s), git=ok
+- `2026-06-30 22:12 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 106 pairs
+- `2026-06-30 22:12 UTC` **brain_proxy_trained** · stage **toddler** — Teacher proxy holdout acc=92% (random=97%, 335 samples)
+- `2026-06-30 22:12 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 3 mutation(s), git=ok
+- `2026-06-30 22:12 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 106 pairs

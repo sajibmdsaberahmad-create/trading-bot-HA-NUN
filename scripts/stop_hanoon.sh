@@ -5,10 +5,11 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="${LOG_DIR:-$ROOT/logs}"
 PID_FILE="${PID_FILE:-$LOG_DIR/hanoon.pid}"
 SHUTDOWN_FILE="${HANOON_SHUTDOWN_FILE:-$ROOT/runtime/shutdown.request}"
-WAIT_SEC="${SHUTDOWN_WAIT_SEC:-180}"
+WAIT_SEC="${SHUTDOWN_WAIT_SEC:-60}"
+SIGKILL_SEC="${SHUTDOWN_SIGKILL_SEC:-45}"
 export PYTHONPATH="${ROOT}/halim:${ROOT}${PYTHONPATH:+:$PYTHONPATH}"
 
-echo "🛑 Graceful HANOON shutdown (up to ${WAIT_SEC}s for evolution + git sync)…"
+echo "🛑 Graceful HANOON shutdown (SIGTERM up to ${WAIT_SEC}s, SIGKILL after ${SIGKILL_SEC}s)…"
 
 mkdir -p "$(dirname "$SHUTDOWN_FILE")"
 if [ -d "$ROOT/venv" ]; then
@@ -32,6 +33,7 @@ snapshot_learning(BotConfig(), trigger='pre_stop_live', halim_export=True)
 # Stop sidecars first so they cannot respawn or compete during teardown.
 "$ROOT/scripts/stop_git_sync.sh" 2>/dev/null || true
 "$ROOT/scripts/stop_halim_watchdog.sh" 2>/dev/null || true
+pkill -TERM -f "halim_serve_watchdog.py" 2>/dev/null || true
 "$ROOT/scripts/stop_ib_gateway_watchdog.sh" 2>/dev/null || true
 
 PIDS=()
@@ -90,6 +92,9 @@ while [ "$elapsed" -lt "$WAIT_SEC" ]; do
     fi
   done
   [ "$alive" -eq 0 ] && break
+  if [ "$elapsed" -ge "$SIGKILL_SEC" ]; then
+    break
+  fi
   sleep 2
   elapsed=$((elapsed + 2))
   if [ $((elapsed % 15)) -eq 0 ]; then
@@ -106,12 +111,16 @@ done
 
 if [ ${#still_alive[@]} -gt 0 ]; then
   FORCED_KILL=true
-  echo "⚠️  HANOON still running after ${WAIT_SEC}s — SIGKILL ${still_alive[*]}"
+  echo "⚠️  HANOON still running after ${elapsed}s — SIGKILL ${still_alive[*]}"
   for pid in "${still_alive[@]}"; do
     kill -KILL "$pid" 2>/dev/null || true
   done
   sleep 1
   pkill -KILL -f 'main.py.*scalper' 2>/dev/null || true
+  while IFS= read -r spid; do
+    [ -n "$spid" ] || continue
+    kill -TERM "$spid" 2>/dev/null || true
+  done < <(pgrep -f 'start_hanoon.sh' 2>/dev/null || true)
   echo "   Running fallback data flush…"
   python3 -c "
 from core.graceful_shutdown import run_standalone_shutdown_flush

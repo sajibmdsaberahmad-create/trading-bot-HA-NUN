@@ -10,6 +10,37 @@
 
 ---
 
+## 2026-07-01 — stop.sh: watchdog for IB kevent hang
+
+### Problem
+`./stop.sh` logged `Signal 15 received` but process stayed alive indefinitely. Sample showed main thread stuck in `kevent` (ib_insync) — SIGTERM set flags but startup scan / IB sleep never returned to check them.
+
+### Root cause
+Python signal handlers cannot run while the main thread blocks in IB's `kevent` wait; shutdown flag alone is insufficient without a force-exit watchdog or abort checks inside long startup/scan paths.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_session.py` | `shutdown-watchdog` thread force-exits after `SHUTDOWN_FORCE_EXIT_SEC` (default 25s) |
+| `core/scalper_runner.py` | Abort startup (companion ping, IB adopt) on stop; interruptible pre-scan sleep |
+| `core/scalper_spike_loop.py` | Abort `_scan_and_rank` per-ticker when stopping |
+| `scripts/stop_hanoon.sh` | SIGKILL after `SHUTDOWN_SIGKILL_SEC` (45s default); kill `start_hanoon.sh` parent; stale halim watchdog pkill |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `SHUTDOWN_FORCE_EXIT_SEC` | `25` | In-process watchdog force-exit after signal |
+| `SHUTDOWN_SIGKILL_SEC` | `45` | stop script SIGKILL if still alive |
+| `SHUTDOWN_WAIT_SEC` | `60` | Max wait before kill phase |
+
+### Verify
+```bash
+bash -n scripts/stop_hanoon.sh
+# ./stop.sh while HANOON in startup scan — process gone within ~25–45s
+```
+
+---
+
 ## 2026-07-01 — stop.sh: main-loop interruptible sleep (completes stop fix)
 
 ### Problem

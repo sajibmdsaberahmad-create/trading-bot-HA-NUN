@@ -187,6 +187,8 @@ class ScalperSpikeMixin:
                 refined.append(r)
         return refined
     def _scan_and_rank(self, startup: bool = False, skip_ib_scanner: bool = False):
+        if self._shutdown_abort():
+            return
         t0 = time.perf_counter()
         from core.startup_log import sinfo
         sinfo(self.cfg, "🔍 HANOON scan: fetching live IB universe…")
@@ -213,6 +215,9 @@ class ScalperSpikeMixin:
         early_exit_n = int(getattr(self.cfg, "SCAN_EARLY_EXIT_QUALIFIED", 18))
         total = len(screen_list)
         for ticker in screen_list:
+            if self._shutdown_abort():
+                log.info("🔍 Scan aborted — shutdown requested")
+                return
             scan_count += 1
             if scan_count == 1 or scan_count % 10 == 0 or scan_count == total:
                 log.info(f"📊 Scan progress: {scan_count}/{total} tickers ({len(results)} qualified)")

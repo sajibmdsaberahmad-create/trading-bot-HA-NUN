@@ -1614,9 +1614,14 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
 
         try:
             from core.halim_companion import companion_session_ping
-            companion_session_ping(self, self.cfg, trigger="session_startup")
+            if not self._shutdown_abort():
+                companion_session_ping(self, self.cfg, trigger="session_startup")
         except Exception as exc:
             log.debug(f"Halim companion startup ping: {exc}")
+
+        if self._shutdown_abort():
+            self._shutdown()
+            return
 
         # Clear orphaned bracket orders from previous sessions before trading
         try:
@@ -1642,6 +1647,10 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 self._refresh_aggregate_position_state()
         except Exception:
             pass
+
+        if self._shutdown_abort():
+            self._shutdown()
+            return
 
         # Market clock — one line; extended detail only when verbose boot
         market_state = get_market_state(self.cfg)
@@ -1696,7 +1705,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
 
                 if getattr(self, "_needs_initial_scan", False):
                     self._needs_initial_scan = False
-                    self.ib.sleep(0.2)  # drain IB event queue before scan
+                    if self._interruptible_ib_sleep(0.2):
+                        break
                     defer_scan = getattr(self.cfg, "SCAN_DEFER_IB_ON_STARTUP", False)
                     can_boot, boot_state = can_trade_now(self.cfg)
                     use_curated = (
