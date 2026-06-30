@@ -3370,3 +3370,5 @@
 {"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":85.4,"spike_ratio":2.333333333286667,"shadow_only":true,"timestamp":"2026-06-30T09:19:16.923075+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":464.0,"shadow_only":true,"timestamp":"2026-06-30T09:19:18.970724+00:00"}
 {"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":85.4,"spike_ratio":2.333333333286667,"shadow_only":true,"timestamp":"2026-06-30T09:19:36.686369+00:00"}
+{"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":475.0,"shadow_only":true,"timestamp":"2026-06-30T09:19:51.644726+00:00"}
+{"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":85.4,"spike_ratio":2.333333333286667,"shadow_only":true,"timestamp":"2026-06-30T09:19:53.647987+00:00"}
