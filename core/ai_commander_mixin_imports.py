@@ -22,6 +22,18 @@ from core.config import BotConfig
 from core.deferred_council_learning import deferred_learning_enabled
 from core.fast_execution import should_spike_fast_entry
 from core.human_cognition import apply_gut_override, enrich_prompt
+from core.live_ai_pipeline import (
+    entry_fingerprint,
+    exit_fingerprint,
+    merge_entry_decision,
+    merge_exit_decision,
+    merge_position_manage_decision,
+    merge_risk_signal_decision,
+    merge_stagnation_decision,
+    position_fingerprint,
+    risk_signal_fingerprint,
+    stagnation_fingerprint,
+)
 from core.market_hours import min_confidence_for_state
 from core.notify import log
 from core.pilot_mode import (
