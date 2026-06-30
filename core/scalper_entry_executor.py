@@ -12,11 +12,11 @@ from core.config import BotConfig
 from core.notify import log
 
 if TYPE_CHECKING:
-    from core.scalper_runner import ScalperRunner
+    pass
 
 
 class ScalperEntryMixin:
-    """Mixin — use via ScalperRunner multiple inheritance."""
+    """Mixin — composed into ScalperRunner."""
 
     def _entry_parent_price(self, ticker: str, current_px: float) -> Optional[float]:
         """Deprecated — use _smart_entry_plan()."""
