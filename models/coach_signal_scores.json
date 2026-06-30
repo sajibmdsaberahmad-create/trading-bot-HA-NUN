@@ -1,10 +1,10 @@
 {
   "fee_bleed": {
-    "count": 32,
+    "count": 33,
     "sessions": [],
     "pnl_usd": -14.23,
     "last_ticker": "CELZ",
-    "last_at": "2026-06-30T19:05:44.066224+00:00"
+    "last_at": "2026-06-30T19:31:58.727900+00:00"
   },
   "hope_hold": {
     "count": 2,
