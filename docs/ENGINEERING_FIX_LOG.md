@@ -10,6 +10,70 @@
 
 ---
 
+## 2026-06-30 — Learning flywheel hardening (outcome teacher, proxy holdout, Halim gate)
+
+### Problem
+At **adult** stage PPO teacher API budget was 0 → `heuristic_fallback` labels (7–31% WR in brain log). Proxy reported 98–100% on random 80/20 split (overfit). Stage could jump to adult on inflated proxy acc. Halim checkpoints promoted to `latest` without golden probe eval. PPO reward training was tail-only (calm sessions erased volatile-regime memory).
+
+### Root cause
+1. `allow_ppo_teacher_api` → `_heuristic_teacher_plan` when API cap zero.
+2. `hybrid_distiller.train_teacher_proxy` used random split only; `HYBRID_DISTILL_AUTO_FAST_PATH` default true.
+3. `compute_stage` accelerated to teen/adult on raw `proxy_accuracy` alone.
+4. `register_checkpoint.py` symlinked `latest` unconditionally.
+5. `collect_training_records` used recent tail only.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ppo_teacher_training.py` | `_outcome_teacher_plan()` from PnL + skip verdicts; `_local_teacher_plan()` prefers outcome over heuristic |
+| `core/hybrid_distiller.py` | Time + ticker holdout; `holdout_accuracy` drives fast path; auto fast path default off |
+| `core/brain_maturity.py` | Rolling WR + holdout gates for teen/adult; `BRAIN_ADULT_PPO_TEACHER_DAILY` floor; holdout for API multiplier |
+| `core/halim_promotion_gate.py` | **New** — golden `eval_toddler` probes before `latest` symlink |
+| `halim/scripts/register_checkpoint.py` | Routes through promotion gate (force/disable via env) |
+| `core/experience_buffer.py` | `sample_balanced_records()` — 30% high-vol mix |
+| `core/ppo_reward_trainer.py` | Balanced sampling in `collect_training_records` |
+| `core/config.py` | `HALIM_PROMOTION_GATE`, holdout flags, `HYBRID_DISTILL_AUTO_FAST_PATH` default false |
+
+### Env vars
+```bash
+PPO_TEACHER_OUTCOME_LABELS=true          # default — outcome teacher when API off
+BRAIN_ADULT_PPO_TEACHER_DAILY=2          # small cloud PPO teacher budget at adult
+BRAIN_TEEN_MIN_WIN_RATE=0.38
+BRAIN_ADULT_MIN_WIN_RATE=0.40
+BRAIN_ADULT_MIN_HOLDOUT_ACC=0.62
+HYBRID_DISTILL_AUTO_FAST_PATH=false      # default after fix
+HYBRID_DISTILL_REQUIRE_HOLDOUT=true
+HALIM_PROMOTION_GATE=true
+HALIM_PROMOTION_MIN_TOKEN_SCORE=3
+PPO_REWARD_BALANCED_SAMPLE=true
+PPO_REWARD_HIGH_VOL_FRACTION=0.30
+```
+
+### Verify
+```bash
+# Outcome teacher (no API)
+python3 -c "
+from core.ppo_teacher_training import trade_stats, _local_teacher_plan
+from core.config import BotConfig
+s = trade_stats(n=100)
+print(_local_teacher_plan(s, BotConfig()).get('_source'))
+"
+
+# Proxy holdout train
+python3 -c "from core.hybrid_distiller import train_teacher_proxy; from core.config import BotConfig; print(train_teacher_proxy(BotConfig()))"
+
+# Brain stage uses holdout + rolling WR
+PYTHONPATH=. python scripts/owned_brain_status.py
+
+# Halim gate (requires MLX checkpoint + eval)
+python3 halim/scripts/register_checkpoint.py toddler_v1
+```
+
+### Notes
+`HALIM_PROMOTION_FORCE=true` or `HALIM_PROMOTION_GATE=false` bypasses Halim eval for hotfix only.
+
+---
+
 ## 2026-06-30 — War replay ledger isolation (code)
 
 ### Problem

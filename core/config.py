@@ -805,6 +805,9 @@ class BotConfig:
     HYBRID_DISTILL_REQUIRE_HOLDOUT: bool = os.getenv(
         "HYBRID_DISTILL_REQUIRE_HOLDOUT", "true"
     ).lower() in ("1", "true", "yes")
+    HALIM_PROMOTION_GATE: bool = os.getenv(
+        "HALIM_PROMOTION_GATE", "true"
+    ).lower() not in ("0", "false", "no")
     HYBRID_DISTILL_CHECK_EVERY_N_TRADES: int = 5
     HYBRID_DISTILL_RETRAIN_HOURS: float = 24.0
     # Live AI hotline — Ollama always on, never blocks IB loop, no stale cache

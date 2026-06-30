@@ -4471,3 +4471,13 @@
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":3.652,"shadow_only":true,"timestamp":"2026-06-30T10:53:50.217077+00:00"}
 {"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":1680.0,"shadow_only":true,"timestamp":"2026-06-30T10:53:52.399637+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":3.725,"shadow_only":true,"timestamp":"2026-06-30T10:53:54.503249+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":0.3486311947213253,"shadow_only":true,"timestamp":"2026-06-30T10:53:56.677649+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":6.719254056672318,"shadow_only":true,"timestamp":"2026-06-30T10:53:57.111420+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":3.725,"shadow_only":true,"timestamp":"2026-06-30T10:53:59.375751+00:00"}
+{"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":2026.0,"shadow_only":true,"timestamp":"2026-06-30T10:54:01.680224+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":6.765270041172196,"shadow_only":true,"timestamp":"2026-06-30T10:54:03.850439+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":3.725,"shadow_only":true,"timestamp":"2026-06-30T10:54:06.145031+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.4971038743715877,"shadow_only":true,"timestamp":"2026-06-30T10:54:08.366694+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":2.205921343345637,"shadow_only":true,"timestamp":"2026-06-30T10:54:10.613218+00:00"}
+{"ticker":"GVH","reason":"profit_prob_below_80pct","scan_score":80.2,"spike_ratio":1189.0,"shadow_only":true,"timestamp":"2026-06-30T10:54:12.877685+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.4971038743715877,"shadow_only":true,"timestamp":"2026-06-30T10:54:13.362563+00:00"}
