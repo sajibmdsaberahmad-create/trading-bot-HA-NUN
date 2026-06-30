@@ -5,7 +5,6 @@
   "session_wr": 0.0,
   "session_pnl": 0.0,
   "ticker_bias": {
-    "INLF": "CAUTION",
     "SOXS": "CAUTION",
     "CELZ": "CAUTION",
     "BTCT": "CAUTION"
@@ -20,6 +19,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782829273.891443,
+  "updated_at": 1782829399.1559858,
   "source": "heuristic"
 }
