@@ -36,12 +36,18 @@ def halim_auto_push_enabled() -> bool:
 
 
 def enable_halim_developer_mode(cfg: BotConfig) -> BotConfig:
-    """Always-on git push + Halim self-development flags."""
-    cfg.GIT_PUSH_DURING_SESSION = True
-    os.environ["GIT_PUSH_DURING_SESSION"] = "true"
-    os.environ["OWNED_BRAIN_GIT_PUSH"] = "true"
+    """Halim self-development — git push only when GIT_PUSH_DURING_SESSION allows."""
+    os.environ.setdefault("OWNED_BRAIN_GIT_PUSH", "true")
     os.environ.setdefault("HALIM_AUTO_PUSH", "true")
-    ensure_embedded_git_watcher(cfg)
+    session_push = os.getenv("GIT_PUSH_DURING_SESSION", "false").lower() in ("1", "true", "yes")
+    cfg.GIT_PUSH_DURING_SESSION = session_push
+    if session_push:
+        ensure_embedded_git_watcher(cfg)
+    else:
+        log.info(
+            "🧠 Halim developer mode — git deferred until stop_hanoon "
+            "(GIT_PUSH_DURING_SESSION=false)"
+        )
     return cfg
 
 
@@ -52,6 +58,10 @@ def ensure_embedded_git_watcher(cfg: Optional[BotConfig] = None) -> None:
         return
     if os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes"):
         log.info("🧠 Halim git auto-push skipped during REPLAY (1 sync at session end)")
+        return
+    if cfg and not getattr(cfg, "GIT_PUSH_DURING_SESSION", False):
+        return
+    if os.getenv("GIT_PUSH_DURING_SESSION", "false").lower() not in ("1", "true", "yes"):
         return
     try:
         from core.git_sync import (

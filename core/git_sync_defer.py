@@ -57,21 +57,21 @@ def batch_checkpoints_enabled() -> bool:
 def should_defer_git_push(category: str = "general") -> bool:
     from core.git_sync import is_standalone_mode
 
-    if is_standalone_mode() and not is_replay_live():
-        return False
     if category in ("shutdown", "manual_sync", "replay_end"):
         return False
     if is_replay_live():
+        return True
+    if cfg_bot is not None and not getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
+        return True
+    if not git_session_push_enabled():
         return True
     if batch_checkpoints_enabled() and category in (
         "training", "trade", "checkpoint", "auto", "general", "daily",
         "guardrail", "model", "release",
     ):
         return True
-    if cfg_bot is not None and not getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
-        return True
-    if not git_session_push_enabled():
-        return True
+    if is_standalone_mode() and not is_replay_live():
+        return False
     return False
 
 
