@@ -445,11 +445,13 @@ def log_spike_verdict(
     decision: Dict[str, Any],
     gate_context: Optional[Dict[str, Any]] = None,
     halim_status: str = "",
+    horizon: Optional[str] = None,
 ) -> None:
     """Phase D: record every entry deliberation for gold / analytics."""
     if not smart_stack_enabled(cfg):
         return
-    row = {
+    from core.trade_horizon import active_order_horizon, tag_record
+    row = tag_record({
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "event": "spike_verdict",
         "ticker": ticker.upper(),
@@ -466,7 +468,7 @@ def log_spike_verdict(
         "halim_enter": decision.get("halim_enter"),
         "halim_conf": decision.get("halim_conf"),
         "gate_context": gate_context or {},
-    }
+    }, horizon or active_order_horizon(cfg))
     try:
         VERDICT_LOG.parent.mkdir(parents=True, exist_ok=True)
         with open(VERDICT_LOG, "a", encoding="utf-8") as fh:

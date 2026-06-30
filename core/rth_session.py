@@ -292,12 +292,16 @@ def rth_reply_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         snap = get_snapshot()
         if snap.refreshed_at > 0:
             ctx["session_scope"] = snap.session_scope
+            ctx["ib_session_pnl"] = snap.session_pnl_ib
             ctx["ib_fifo_session_pnl"] = snap.session_pnl_fifo
+            ctx["ib_realized_pnl"] = snap.account.realized_pnl
+            ctx["ib_unrealized_pnl"] = snap.account.unrealized_pnl
+            ctx["ib_open_orders"] = len(snap.open_orders)
     except Exception:
         pass
     if state == "open":
         ctx["market_note"] = (
-            f"RTH live — PnL is FIFO fills since 09:30 ET today ({ctx.get('session_scope', 'rth')})."
+            f"RTH live — PnL from IB RealizedPnL tag since 09:30 ET ({ctx.get('session_scope', 'rth')})."
         )
     elif state == "after_hours":
         ctx["market_note"] = (

@@ -281,10 +281,11 @@ def live_snapshot(
             "day_pnl": round(float(acct.get("day_pnl", 0) or 0), 2),
             "ib_change": round(float(acct.get("ib_change", 0) or 0), 2),
             "ib_fifo_session_pnl": round(float(acct.get("ib_fifo_session_pnl", 0) or 0), 2),
+            "ib_session_pnl": round(float(acct.get("day_pnl", 0) or 0), 2),
             "ib_realized_pnl": round(float(acct.get("ib_realized_pnl", 0) or 0), 2),
             "ib_unrealized_pnl": round(float(acct.get("ib_unrealized_pnl", 0) or 0), 2),
             "nav": round(float(acct.get("equity", 0) or 0), 2),
-            "session_pnl": round(float(acct.get("ib_fifo_session_pnl", acct.get("day_pnl", 0)) or 0), 2),
+            "session_pnl": round(float(acct.get("day_pnl", 0) or 0), 2),
             "trades_today": int(getattr(runner, "trades_today", 0) or 0),
             "ticker": getattr(runner, "current_ticker", None),
             "shares": float(getattr(runner, "shares", 0) or 0),
@@ -305,6 +306,11 @@ def live_snapshot(
     try:
         from core.war_account import war_account_context
         snap.update(war_account_context(cfg))
+    except Exception:
+        pass
+    try:
+        from core.trade_horizon import horizon_context
+        snap.update(horizon_context(cfg))
     except Exception:
         pass
     return snap

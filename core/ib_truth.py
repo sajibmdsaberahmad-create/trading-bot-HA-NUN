@@ -44,7 +44,23 @@ class IBPosition:
     avg_cost: float
     market_price: float = 0.0
     unrealized_pnl: float = 0.0
+    realized_pnl: float = 0.0
+    market_value: float = 0.0
     multiplier: float = 1.0
+    account: str = ""
+
+
+@dataclass
+class IBOpenOrder:
+    symbol: str
+    order_id: int
+    action: str
+    order_type: str
+    qty: float
+    status: str
+    filled: float
+    avg_fill: float
+    remaining: float = 0.0
 
 
 @dataclass
@@ -54,7 +70,11 @@ class IBAccountSnapshot:
     realized_pnl: float = 0.0
     unrealized_pnl: float = 0.0
     gross_position_value: float = 0.0
+    buying_power: float = 0.0
+    available_funds: float = 0.0
+    maint_margin_req: float = 0.0
     currency: str = "USD"
+    tags: Dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,10 +94,13 @@ class IBTruthSnapshot:
     """One coherent IB pull — every consumer reads this, not local ledgers."""
     account: IBAccountSnapshot = field(default_factory=IBAccountSnapshot)
     positions: List[IBPosition] = field(default_factory=list)
+    open_orders: List[IBOpenOrder] = field(default_factory=list)
     executions: List[IBExecution] = field(default_factory=list)
     round_trips: List[RoundTrip] = field(default_factory=list)
+    session_pnl_ib: float = 0.0
     session_pnl_fifo: float = 0.0
     ticker_pnl_fifo: Dict[str, float] = field(default_factory=dict)
+    ticker_pnl_ib: Dict[str, float] = field(default_factory=dict)
     refreshed_at: float = 0.0
     session_since_ts: float = 0.0
     session_scope: str = "rth"
@@ -208,6 +231,9 @@ def fetch_ib_positions(ib) -> List[IBPosition]:
             port = portfolio_by_sym.get(sym)
             mkt = float(getattr(port, "marketPrice", 0) or 0) if port else 0.0
             unreal = float(getattr(port, "unrealizedPNL", 0) or 0) if port else 0.0
+            real = float(getattr(port, "realizedPNL", 0) or 0) if port else 0.0
+            mkt_val = float(getattr(port, "marketValue", 0) or 0) if port else 0.0
+            acct = str(getattr(port, "account", "") or "") if port else ""
             avg = normalize_ib_avg_cost(raw_avg, market_px=mkt, multiplier=mult)
             if avg <= 0 and mkt > 0:
                 avg = mkt
@@ -218,7 +244,10 @@ def fetch_ib_positions(ib) -> List[IBPosition]:
                     avg_cost=avg,
                     market_price=mkt,
                     unrealized_pnl=unreal,
+                    realized_pnl=real,
+                    market_value=mkt_val,
                     multiplier=max(mult, 1.0),
+                    account=acct,
                 )
             )
     except Exception as exc:
@@ -228,25 +257,73 @@ def fetch_ib_positions(ib) -> List[IBPosition]:
 
 def fetch_ib_account_snapshot(ib, currency: str = "USD") -> IBAccountSnapshot:
     snap = IBAccountSnapshot(currency=currency)
+    _TAG_MAP = {
+        "NetLiquidation": "net_liquidation",
+        "TotalCashValue": "total_cash",
+        "RealizedPnL": "realized_pnl",
+        "UnrealizedPnL": "unrealized_pnl",
+        "GrossPositionValue": "gross_position_value",
+        "BuyingPower": "buying_power",
+        "AvailableFunds": "available_funds",
+        "MaintMarginReq": "maint_margin_req",
+    }
     try:
         for v in ib.accountValues():
-            if getattr(v, "currency", "") != currency:
+            if getattr(v, "currency", "") not in (currency, "BASE", ""):
                 continue
             tag = str(getattr(v, "tag", "") or "")
             val = float(getattr(v, "value", 0) or 0)
-            if tag == "NetLiquidation":
-                snap.net_liquidation = val
-            elif tag == "TotalCashValue":
-                snap.total_cash = val
-            elif tag == "RealizedPnL":
-                snap.realized_pnl = val
-            elif tag == "UnrealizedPnL":
-                snap.unrealized_pnl = val
-            elif tag == "GrossPositionValue":
-                snap.gross_position_value = val
+            snap.tags[tag] = val
+            attr = _TAG_MAP.get(tag)
+            if attr:
+                setattr(snap, attr, val)
     except Exception as exc:
         log.debug(f"ib_truth account: {exc}")
     return snap
+
+
+def fetch_ib_open_orders(ib) -> List[IBOpenOrder]:
+    """Live IB orders — openTrades + trades (no local order book)."""
+    out: List[IBOpenOrder] = []
+    seen: set = set()
+    try:
+        try:
+            ib.reqAllOpenOrders()
+            ib.sleep(0.15)
+        except Exception:
+            pass
+        sources = list(ib.openTrades()) + list(ib.trades())
+        for t in sources:
+            contract = getattr(t, "contract", None)
+            order = getattr(t, "order", None)
+            status = getattr(t, "orderStatus", None)
+            if contract is None or order is None:
+                continue
+            sym = (getattr(contract, "symbol", "") or "").upper()
+            oid = int(getattr(order, "orderId", 0) or 0)
+            key = (oid, sym)
+            if key in seen:
+                continue
+            seen.add(key)
+            st = str(getattr(status, "status", "") or "") if status else ""
+            if st in ("Cancelled", "Inactive", "ApiCancelled"):
+                continue
+            out.append(
+                IBOpenOrder(
+                    symbol=sym,
+                    order_id=oid,
+                    action=str(getattr(order, "action", "") or ""),
+                    order_type=type(order).__name__,
+                    qty=float(getattr(order, "totalQuantity", 0) or 0),
+                    status=st,
+                    filled=float(getattr(status, "filled", 0) or 0) if status else 0.0,
+                    avg_fill=float(getattr(status, "avgFillPrice", 0) or 0) if status else 0.0,
+                    remaining=float(getattr(status, "remaining", 0) or 0) if status else 0.0,
+                )
+            )
+    except Exception as exc:
+        log.debug(f"ib_truth open_orders: {exc}")
+    return out
 
 
 def fifo_round_trips(executions: List[IBExecution]) -> List[RoundTrip]:
@@ -307,23 +384,34 @@ def build_snapshot(
 
     account = fetch_ib_account_snapshot(ib, currency=currency)
     positions = fetch_ib_positions(ib)
+    open_orders = fetch_ib_open_orders(ib)
     raw_execs = fetch_ib_executions(ib, since_ts=since)
     executions = filter_rth_executions(raw_execs, cfg)
     trips = fifo_round_trips(executions)
 
     ticker_pnl: Dict[str, float] = {}
-    total = 0.0
+    total_fifo = 0.0
     for trip in trips:
         ticker_pnl[trip.symbol] = round(ticker_pnl.get(trip.symbol, 0) + trip.pnl_usd, 2)
-        total += trip.pnl_usd
+        total_fifo += trip.pnl_usd
+
+    ticker_pnl_ib: Dict[str, float] = {}
+    for p in positions:
+        if p.realized_pnl != 0:
+            ticker_pnl_ib[p.symbol] = round(p.realized_pnl, 2)
+
+    session_pnl_ib = float(account.realized_pnl)
 
     return IBTruthSnapshot(
         account=account,
         positions=positions,
+        open_orders=open_orders,
         executions=executions,
         round_trips=trips,
-        session_pnl_fifo=round(total, 2),
+        session_pnl_ib=round(session_pnl_ib, 2),
+        session_pnl_fifo=round(total_fifo, 2),
         ticker_pnl_fifo=ticker_pnl,
+        ticker_pnl_ib=ticker_pnl_ib,
         refreshed_at=time.time(),
         session_since_ts=since,
         session_scope="rth" if rth_session else "calendar",
@@ -381,14 +469,50 @@ def day_pnl_from_snapshot(
     snap: IBTruthSnapshot,
     ib_start: float,
 ) -> Tuple[float, float]:
-    """Session P&L (usd, pct) — FIFO fills first, else NetLiq delta."""
-    if snap.session_pnl_fifo != 0 or snap.round_trips:
-        pct = (snap.session_pnl_fifo / ib_start * 100.0) if ib_start > 0 else 0.0
-        return snap.session_pnl_fifo, pct
-    equity = snap.account.net_liquidation
-    change = equity - ib_start
-    pct = (change / ib_start * 100.0) if ib_start > 0 else 0.0
-    return change, pct
+    """Session P&L — IB account RealizedPnL when snapshot fresh, else FIFO, else NetLiq delta."""
+    if snap.refreshed_at > 0:
+        pnl = snap.session_pnl_ib
+    elif snap.session_pnl_fifo != 0 or snap.round_trips:
+        pnl = snap.session_pnl_fifo
+    else:
+        pnl = snap.account.net_liquidation - ib_start
+    pct = (pnl / ib_start * 100.0) if ib_start > 0 else 0.0
+    return round(pnl, 2), round(pct, 2)
+
+
+def ib_truth_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
+    """Compact IB-native dict for Halim/Telegram/war — no local math."""
+    snap = get_snapshot()
+    if snap.refreshed_at <= 0:
+        return {"ib_truth": False}
+    acct = snap.account
+    return {
+        "ib_truth": True,
+        "session_scope": snap.session_scope,
+        "ib_net_liquidation": round(acct.net_liquidation, 2),
+        "ib_cash": round(acct.total_cash, 2),
+        "ib_realized_pnl": round(acct.realized_pnl, 2),
+        "ib_unrealized_pnl": round(acct.unrealized_pnl, 2),
+        "ib_session_pnl": snap.session_pnl_ib,
+        "ib_fifo_session_pnl": snap.session_pnl_fifo,
+        "ib_buying_power": round(acct.buying_power, 2),
+        "ib_gross_position_value": round(acct.gross_position_value, 2),
+        "ib_open_orders": len(snap.open_orders),
+        "ib_position_count": len(snap.positions),
+        "ib_positions": [
+            {
+                "symbol": p.symbol,
+                "qty": p.qty,
+                "avg_cost": round(p.avg_cost, 4),
+                "market_price": round(p.market_price, 4),
+                "market_value": round(p.market_value, 2),
+                "unrealized_pnl": round(p.unrealized_pnl, 2),
+                "realized_pnl": round(p.realized_pnl, 2),
+            }
+            for p in snap.positions
+        ],
+        "ib_open_order_symbols": [o.symbol for o in snap.open_orders[:12]],
+    }
 
 
 def position_entry_from_truth(
@@ -411,9 +535,10 @@ def format_snapshot_summary(snap: IBTruthSnapshot) -> str:
         "═══ IB Truth (source of truth) ═══",
         f"  NetLiq:        ${snap.account.net_liquidation:,.2f}",
         f"  Cash:          ${snap.account.total_cash:,.2f}",
-        f"  RealizedPnL:   ${snap.account.realized_pnl:+,.2f}",
+        f"  RealizedPnL:   ${snap.account.realized_pnl:+,.2f} (IB tag)",
         f"  UnrealizedPnL: ${snap.account.unrealized_pnl:+,.2f}",
-        f"  FIFO session:  ${snap.session_pnl_fifo:+,.2f} ({len(snap.round_trips)} trips, {snap.session_scope})",
+        f"  Session PnL:   ${snap.session_pnl_ib:+,.2f} IB | ${snap.session_pnl_fifo:+,.2f} FIFO ({len(snap.round_trips)} trips, {snap.session_scope})",
+        f"  Open orders:   {len(snap.open_orders)}",
         "",
         "── Positions ──",
     ]
