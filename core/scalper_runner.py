@@ -6492,19 +6492,19 @@ class ScalperRunner:
         if filled_shares >= shares * min_fill_ratio or parent_status == "Filled":
             self._open_position_from_fill(ticker, int(filled_shares), fill_px, plan)
             return
-        if parent_status == "PendingSubmit":
-            since = st.get("pending_submit_since")
+        if parent_status in ("PendingSubmit", "PreSubmitted"):
+            since = st.get("order_stuck_since")
             if since is None:
-                st["pending_submit_since"] = time.time()
-            max_ps = float(getattr(self.cfg, "PENDING_SUBMIT_MAX_SEC", 4.0))
+                st["order_stuck_since"] = time.time()
+                since = st["order_stuck_since"]
+            max_stuck = float(getattr(self.cfg, "PENDING_SUBMIT_MAX_SEC", 4.0))
             if (
-                since is not None
-                and (time.time() - since) >= max_ps
+                (time.time() - since) >= max_stuck
                 and not st.get("market_retry_done")
             ):
                 st["market_retry_done"] = True
                 log.warning(
-                    f"  ⚡ {ticker} stuck PendingSubmit >{max_ps:.0f}s — cancel + MARKET retry"
+                    f"  ⚡ {ticker} stuck {parent_status} >{max_stuck:.0f}s — cancel + retry"
                 )
                 self.broker.cancel_open_orders_for_symbol(ticker)
                 self.ib.sleep(0.3)
@@ -6526,14 +6526,14 @@ class ScalperRunner:
                     self._pending_brackets_by_ticker[ticker] = new_bracket
                     st["shares"] = retry_sh
                     st["polls"] = 0
-                    st["pending_submit_since"] = None
+                    st["order_stuck_since"] = None
                     st["limit_px"] = None
                 except Exception as exc:
                     log.warning(f"  Market retry failed for {ticker}: {exc}")
                     self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
                 return
         else:
-            st["pending_submit_since"] = None
+            st.pop("order_stuck_since", None)
         st["polls"] = int(st.get("polls", 0)) + 1
         polls = st["polls"]
         max_polls = int(st["max_polls"])
@@ -6542,10 +6542,15 @@ class ScalperRunner:
         if polls == 1 or polls % 5 == 0 or (now_ts - last_hb) >= 3.0:
             st["last_heartbeat"] = now_ts
             live_px = self._live_price_for(ticker, fill_px)
-            limit_px = float(st.get("limit_px") or fill_px)
+            limit_px = st.get("limit_px")
+            px_note = (
+                f"limit ${float(limit_px):.4f}"
+                if limit_px is not None and float(limit_px) > 0
+                else "MARKET"
+            )
             elapsed = now_ts - float(st.get("started_at", now_ts))
             log.info(
-                f"  ⏳ PENDING ENTRY {ticker}: limit ${limit_px:.4f} | "
+                f"  ⏳ PENDING ENTRY {ticker}: {px_note} | "
                 f"market ${live_px:.4f} | poll {polls}/{max_polls} "
                 f"({parent_status}) | {elapsed:.1f}s"
             )
