@@ -1433,6 +1433,26 @@ class ScalperSpikeMixin:
                 log.info(
                     f"  📊 QUALITY advisory {ticker}: {quality.get('reason', '')[:100]}"
                 )
+            try:
+                from core.green_trade_doctrine import require_green_entry, green_entry_mandatory
+                if green_entry_mandatory(self.cfg):
+                    block = require_green_entry(
+                        self.cfg,
+                        ticker=ticker,
+                        df=work_df,
+                        current_px=live_px,
+                        micro=fc,
+                        spike_ratio=spike_ratio,
+                        scan_score=float(target.rank_score),
+                    )
+                    if block:
+                        log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
+                        self._spike_skip_until[ticker] = time.time() + float(
+                            getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                        )
+                        continue
+            except Exception:
+                pass
             spike_regime = "momentum_spike"
             fast_df, _, _, _ = self._resolve_live_bars(ticker, min_bars=10)
             if fast_df is not None and len(fast_df) >= 5:

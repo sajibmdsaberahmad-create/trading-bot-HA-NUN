@@ -342,6 +342,31 @@ def analyze_swing(
     macro = analyze_swing_macro(cfg)
     web = analyze_swing_web(sym, cfg)
     verdict = _score_analysis(tech, ib, macro, web)
+    try:
+        from core.green_trade_doctrine import green_entry_mandatory, assess_green_entry
+        if green_entry_mandatory(cfg):
+            bars_1h = _fetch_bars(runner, sym.upper(), "1 hour", "5 D")
+            live_px = float(bars_1h["close"].iloc[-1]) if bars_1h is not None and len(bars_1h) else 0.0
+            ge = assess_green_entry(
+                cfg,
+                ticker=sym,
+                df=bars_1h if bars_1h is not None else pd.DataFrame(),
+                current_px=live_px,
+                micro={"dir": 1 if tech.get("bias") == "long" else 0},
+                scan_score=float(verdict.get("score", 0) or 0),
+                decision={"enter": verdict.get("enter"), "confidence": verdict.get("confidence")},
+            )
+            if not ge.get("enter_ok"):
+                verdict = {
+                    **verdict,
+                    "enter": False,
+                    "reasons": list(verdict.get("reasons", [])) + ["green_doctrine_block"],
+                    "green_doctrine": ge,
+                }
+            else:
+                verdict = {**verdict, "green_doctrine": ge}
+    except Exception:
+        pass
 
     try:
         from core.capital_phase import capital_phase
