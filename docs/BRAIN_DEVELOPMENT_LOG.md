@@ -1086,3 +1086,5 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 14:50 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, copilot_state.json +2 more | models=1 docs=1 other=3 | brain=child dataset=2081 ev
 - `2026-06-30 14:50 UTC` **git_auto** — sync: 4 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=child dataset=2081 evolutions=37
 - `2026-06-30 14:50 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, macro_context.json +2 more | models=1 docs=1 other=3 | brain=child dataset=2081 ev
+- `2026-06-30 14:51 UTC` **git_auto** — sync: 4 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=child dataset=2081 evolutions=37
+- `2026-06-30 14:52 UTC` **git_training** — learn: session_batch: account_trade_closed, consciousness, periodic, pilot Veteran 25070XP WR=50%, snapshot_periodic | learn_20260630_145206
