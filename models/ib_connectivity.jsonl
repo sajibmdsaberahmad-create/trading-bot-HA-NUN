@@ -9,3 +9,5 @@
 {"ts": 1782828651.166659, "event": "outage_restored", "source": "ib_connector", "duration": "1m 4s", "duration_sec": 64.4, "attempt": 0, "total_reconnects": 0}
 {"ts": 1782831307.650757, "event": "outage_start", "source": "ib_connector", "trigger": "ib_1100", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
 {"ts": 1782831343.178113, "event": "outage_restored", "source": "ib_connector", "duration": "36s", "duration_sec": 35.5, "attempt": 0, "total_reconnects": 0}
+{"ts": 1782832193.7664819, "event": "outage_start", "source": "ib_connector", "trigger": "disconnected_event", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
+{"ts": 1782832194.980194, "event": "retry_scheduled", "source": "ib_connector", "attempt": 1, "max_attempts": "infinite", "wait_sec": 2}
