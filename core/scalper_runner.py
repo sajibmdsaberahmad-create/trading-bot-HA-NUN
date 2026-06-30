@@ -177,6 +177,7 @@ from core.fill_tracker import (
 )
 from core.fill_reconciler import (
     PendingClose, build_close_record, snapshot_slot,
+    resolve_entry_from_ib, resolve_exit_from_ib,
 )
 from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
 from core.account_evaluator import AccountEvaluator

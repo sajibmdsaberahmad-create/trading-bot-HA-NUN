@@ -161,20 +161,29 @@ class ScalperExitMixin:
         """Resolve IB entry/exit fills and build a round-trip trade record."""
         slot = dict(self._position_slots.get(ticker, {}))
         entry_quote = float(slot.get("entry_price") or self._entry_price or 0)
-        entry_fill = float(slot.get("entry_fill_px") or entry_quote)
+        slot_entry = float(slot.get("entry_fill_px") or entry_quote)
         shares = float(slot.get("shares") or self._prev_shares or self.shares or 0)
         opened_at = float(slot.get("opened_at") or getattr(self, "_position_opened_at", 0))
-        exit_fill = resolve_exit_fill(
-            self.ib,
+        cache = self._fill_cache()
+        entry_fill, entry_ok = resolve_entry_from_ib(
+            self.ib, cache,
             symbol=ticker,
-            bracket=bracket or self._bracket_by_ticker.get(ticker) or self.bracket_handle,
+            slot_entry_fill=slot_entry,
+            slot_entry_quote=entry_quote,
+            opened_at=opened_at,
+        )
+        exit_fill, exit_ok = resolve_exit_from_ib(
+            self.ib, cache,
+            symbol=ticker,
             flatten_trade=flatten_trade,
+            bracket=bracket or self._bracket_by_ticker.get(ticker) or self.bracket_handle,
             quote_px=quote_exit_px,
             since_ts=opened_at,
-            max_wait=0.0,
             entry_fill=entry_fill,
         )
-        return build_round_trip_record(
+        if ib_fill_strict(self.cfg) and not exit_ok:
+            return {}
+        rec = build_round_trip_record(
             ticker=ticker,
             entry_fill=entry_fill,
             exit_fill=exit_fill,
@@ -190,6 +199,10 @@ class ScalperExitMixin:
             stop_px=float(slot.get("stop") or self._position_stop or 0),
             target_px=float(slot.get("target") or self._position_target or 0),
         )
+        rec["fill_confirmed"] = exit_ok and (entry_ok or entry_fill > 0)
+        rec["entry_fill_confirmed"] = entry_ok
+        rec["exit_fill_confirmed"] = exit_ok
+        return rec
     def _enqueue_pending_close(
         self,
         ticker: str,
@@ -348,6 +361,11 @@ class ScalperExitMixin:
                 self.pilot.record_pattern_match("loss", False, pnl_usd)
         except Exception:
             pass
+        try:
+            self._refresh_account_balance()
+        except Exception:
+            pass
+        return True
 
         try:
             pilot_experience_to_git(self.pilot)
