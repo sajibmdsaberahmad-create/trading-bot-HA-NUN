@@ -2700,4 +2700,5 @@ replay_target
 Diagnosis: Local teacher: 36% WR on 25 trades. 12 stop exits. Repeat tickers (adapt entry, do not ban): COIN, PLTR, ASTS, NVDA, RKLB
 - Repeat-loss tickers: require micro forecast + profit_probability before re-entry
 - Penalize PPO micro-fast when council confidence is neutral (50%)
-- Widen stops or delay entry when instant stop hits dominate (hold_sec=0)
+- Widen stops or delay entry when instant stop hits dominate (hold_sec=0)🧭 COMMANDER LEARNING | 2026-06-30T08:36:59.553269+00:00
+

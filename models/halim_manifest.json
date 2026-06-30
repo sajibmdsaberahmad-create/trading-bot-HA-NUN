@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T08:01:48.991404+00:00",
+  "updated_at": "2026-06-30T08:36:58.435627+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,14 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T08:01:48.968560+00:00",
+    "timestamp": "2026-06-30T08:36:58.417112+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
         "exists": true,
-        "path": "models/ppo_trader_replay.zip",
+        "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-30T08:01:46.986997+00:00"
+        "modified": "2026-06-30T04:51:44.283881+00:00"
       },
       "ppo_replay": {
         "exists": true,
@@ -66,20 +66,20 @@
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
-        "size_kb": 0.6,
-        "modified": "2026-06-30T08:00:40.589840+00:00"
+        "size_kb": 0.7,
+        "modified": "2026-06-30T08:33:27.317789+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 8433.9,
-        "modified": "2026-06-30T08:01:37.899232+00:00"
+        "size_kb": 8434.4,
+        "modified": "2026-06-30T08:36:56.070968+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 2621.4,
-        "modified": "2026-06-30T07:59:01.003833+00:00"
+        "size_kb": 2623.1,
+        "modified": "2026-06-30T08:21:09.703824+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -110,7 +110,7 @@
       "win_rate": 0.281,
       "avg_pnl": -5.7
     },
-    "buffer_records": 6296,
+    "buffer_records": 6299,
     "dataset_pairs": 2462,
     "maturity": {
       "stage": "adult",
@@ -120,7 +120,7 @@
       "metrics": {
         "closed_trades": 2676,
         "dataset_pairs": 2462,
-        "evolution_count": 23,
+        "evolution_count": 24,
         "proxy_accuracy": 0.9672131147540983,
         "proxy_exists": true
       },

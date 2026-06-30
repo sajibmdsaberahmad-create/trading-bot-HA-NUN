@@ -2,11 +2,11 @@
   "package": "halim_sft",
   "version": 4,
   "canonical_file": "halim_sft.zip",
-  "build_id": "c6377a6dd1e5",
-  "created_at": "2026-06-30T08:01:48.870115+00:00",
-  "train_pairs": 12937,
-  "valid_pairs": 680,
-  "pairs_total": 13617,
+  "build_id": "2e25822325fe",
+  "created_at": "2026-06-30T08:36:58.300814+00:00",
+  "train_pairs": 12942,
+  "valid_pairs": 681,
+  "pairs_total": 13623,
   "sft_mode": "full",
   "core_pairs": null,
   "delta_pairs": null,
@@ -18,8 +18,8 @@
     "web_learn": 109,
     "ppo:micro_fast": 1595,
     "council:timeout_hold": 3,
-    "halim_lm": 1764,
-    "halim_server": 365,
+    "halim_lm": 1768,
+    "halim_server": 367,
     "companion_generative": 554,
     "market_hours": 17,
     "rss_learn": 3,
@@ -53,12 +53,12 @@
   },
   "raw_sources": {
     "council": 2462,
-    "action_gold": 8725,
+    "action_gold": 8731,
     "coevolution": 534,
     "dialogue": 5166,
     "outcome_gold": 1,
-    "commander_gold": 1624,
-    "total_raw": 18512
+    "commander_gold": 1680,
+    "total_raw": 18574
   },
   "upload_rule": "Upload halim_toddler_v2.zip + THIS halim_sft.zip to My Drive/Halim/. Open halim/colab/halim_toddler_train.ipynb in Colab \u2014 no files.upload(). Train script is bundled inside halim_sft.zip. Rebuild on Mac: halim_prepare_train_incremental.sh or halim_colab_ready.sh. Check build_id in colab_manifest.json."
 }

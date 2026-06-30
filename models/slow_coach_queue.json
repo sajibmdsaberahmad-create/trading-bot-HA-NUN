@@ -104,7 +104,14 @@
       "reason": "below teacher floor \u2014 raise profit probability gate",
       "source": "ppo_teacher",
       "queued_at": "2026-06-30T08:01:37.885251+00:00"
+    },
+    {
+      "param": "MIN_PROFIT_PROBABILITY",
+      "value": 0.62,
+      "reason": "below teacher floor \u2014 raise profit probability gate",
+      "source": "ppo_teacher",
+      "queued_at": "2026-06-30T08:36:59.553041+00:00"
     }
   ],
-  "updated_at": "2026-06-30T08:01:37.885254+00:00"
+  "updated_at": "2026-06-30T08:36:59.553046+00:00"
 }

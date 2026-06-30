@@ -72,5 +72,16 @@
       "Penalize PPO micro-fast when council confidence is neutral (50%)",
       "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T08:36:59.553748+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {},
+    "guidelines_summary": "",
+    "lessons": [
+      "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
+    ]
   }
 ]
