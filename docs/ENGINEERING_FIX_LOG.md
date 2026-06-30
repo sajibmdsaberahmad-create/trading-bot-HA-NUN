@@ -1332,3 +1332,31 @@ IB recover showed `INTC @ $140.83` (10× real ~$14) — war ledger, stops, and P
 ```bash
 pytest tests/test_position_entry_price.py tests/test_position_context_isolation.py -q
 ```
+
+## 2026-07-01 — AI-sure entry (dynamic Halim + PPO + council, no blind spikes)
+
+### Problem
+Entries could fire on blind spike fast-paths (`ppo:micro_fast`, `quality_flash`, council timeout) with green calculative `profit_probability` but without Halim/PPO/API alignment — not "mostly sure", felt like reactive spike chasing.
+
+### Root cause
+Static score/vol thresholds on fast paths bypassed deliberation; `build_halim_local_entry` had quality_flash/PPO-lead fallbacks when Halim slow; council timeout/scanner_fast allowed PPO-only entries.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/smart_stack.py` | `ai_sure_entry_enabled()` default ON; `dynamic_entry_surety()`; `build_halim_local_entry` AI-sure Halim lead only |
+| `core/entry_quality.py` | `apply_ai_sure_veto()` — blocks fast pipelines + enforces dynamic floors |
+| `core/capital_discipline.py` | All fast-path allows return False when AI-sure |
+| `core/live_ai_pipeline.py` | Council fresh path uses AI-sure alignment; no PPO-strong-lead while pending |
+| `core/ai_commander_verdict.py` | No momentum override; `apply_ai_sure_veto` in finalize |
+| `core/fast_execution.py` | `should_micro_fast_entry` disabled when AI-sure |
+| `tests/test_ai_sure_entry.py` | Coverage |
+
+### Env
+- `SMART_STACK_AI_SURE_ENTRY=true` (default with Smart Stack) — Halim+PPO+green prob required; no blind fast paths
+- `SMART_STACK_AI_SURE_ENTRY=false` — restore micro-fast / quality-flash bypasses
+
+### Verify
+```bash
+pytest tests/test_ai_sure_entry.py tests/test_position_context_isolation.py -q
+```
