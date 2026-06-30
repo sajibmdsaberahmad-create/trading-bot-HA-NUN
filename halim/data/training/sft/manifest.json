@@ -1,6 +1,6 @@
 {
-  "pairs_total": 14381,
-  "train_pairs": 13662,
+  "pairs_total": 14387,
+  "train_pairs": 13668,
   "valid_pairs": 719,
   "by_source": {
     "council": 1181,
@@ -10,8 +10,8 @@
     "web_learn": 109,
     "ppo:micro_fast": 1595,
     "council:timeout_hold": 3,
-    "halim_lm": 2179,
-    "halim_server": 423,
+    "halim_lm": 2181,
+    "halim_server": 425,
     "companion_generative": 559,
     "market_hours": 17,
     "rss_learn": 3,
@@ -20,7 +20,7 @@
     "ppo_teacher:heuristic_fallback": 21,
     "commander_ib_report": 65,
     "ppo:strong_spike": 271,
-    "template_fallback": 166,
+    "template_fallback": 168,
     "council:scanner_fast": 94,
     "council:ppo_timeout_exit": 1,
     "council:scanner_timeout": 2,
