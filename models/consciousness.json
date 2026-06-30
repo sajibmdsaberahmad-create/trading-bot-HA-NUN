@@ -3,25 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 225,
   "training_sessions": 39,
-  "trades_observed": 1672,
+  "trades_observed": 1673,
   "scans_performed": 39,
   "improvements_applied": 2677,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:07.339744",
-      "age": "7d 19h 57m 18s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2017",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:00:14.372543",
       "age": "7d 19h 57m 25s",
@@ -12292,6 +12278,13 @@
           "Review order_timeout on INTZ"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T10:28:43.814179",
+      "age": "8d 23h 25m 55s",
+      "type": "TRADE",
+      "message": "Observed trade: CUPR LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-30T10:09:24.779823",
@@ -14456,7 +14449,6 @@
   "mood": "steady",
   "total_pnl": 331211.64000000054,
   "win_history": [
-    -22.95,
     -8.73,
     -0.57,
     -4.66,
@@ -14955,10 +14947,11 @@
     -7.05,
     -7.28,
     0.08,
-    4.15
+    4.15,
+    0
   ],
-  "consecutive_wins": 2,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 86,
   "veteran_xp": 25890,
   "veteran_level": "Veteran",
@@ -15013,5 +15006,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Mixed session \u00b7 $-89.03. Watching for cleaner setups."
+  "mood_message": "Mixed session \u00b7 $-66.87. Watching for cleaner setups."
 }
