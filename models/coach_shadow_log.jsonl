@@ -4481,3 +4481,11 @@
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":2.205921343345637,"shadow_only":true,"timestamp":"2026-06-30T10:54:10.613218+00:00"}
 {"ticker":"GVH","reason":"profit_prob_below_80pct","scan_score":80.2,"spike_ratio":1189.0,"shadow_only":true,"timestamp":"2026-06-30T10:54:12.877685+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.4971038743715877,"shadow_only":true,"timestamp":"2026-06-30T10:54:13.362563+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":2.205921343345637,"shadow_only":true,"timestamp":"2026-06-30T10:54:15.698384+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.581757040772504,"shadow_only":true,"timestamp":"2026-06-30T10:54:18.058776+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":2.205921343345637,"shadow_only":true,"timestamp":"2026-06-30T10:54:20.565395+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.5927656006698077,"shadow_only":true,"timestamp":"2026-06-30T10:54:22.890027+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":2.205921343345637,"shadow_only":true,"timestamp":"2026-06-30T10:54:25.170810+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.6479988184896834,"shadow_only":true,"timestamp":"2026-06-30T10:54:27.538383+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":2.295545740592427,"shadow_only":true,"timestamp":"2026-06-30T10:54:29.813265+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2.6479988184896834,"shadow_only":true,"timestamp":"2026-06-30T10:54:32.102431+00:00"}

@@ -2,6 +2,8 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-06-30` **engineering** — Learning flywheel hardening: outcome PPO teacher, proxy holdout eval, brain stage quality gates, Halim promotion gate, balanced PPO reward sampling — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+
 - `2026-06-27 06:33 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=100% (645 samples)
 - `2026-06-27 06:34 UTC` **brain_evolution** · stage **adult** — Evolution cli — stage adult, dataset 2023 pairs
 - `2026-06-27 07:17 UTC` **brain_ppo_teacher** — PPO teacher replay_close_LCID: WR 30%, source heuristic_fallback
@@ -573,3 +575,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 10:53 UTC` **git_auto** — sync: 13 files — brain_maturity.py, experience_buffer.py, ppo_reward_trainer.py +10 more | halim=2 models=4 docs=1 core=2 other=4 | brain=ad
 - `2026-06-30 10:53 UTC` **git_auto** — sync: 11 files — brain_maturity.py, config.py, BRAIN_DEVELOPMENT_LOG.md +8 more | halim=2 models=3 docs=1 core=1 other=4 | brain=adult datas
 - `2026-06-30 10:53 UTC` **git_auto** — sync: 9 files — brain_maturity.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +6 more | halim=2 models=2 docs=1 other=4 | brain=adult datase
+- `2026-06-30 10:54 UTC` **git_auto** — sync: 11 files — brain_maturity.py, config.py, BRAIN_DEVELOPMENT_LOG.md +8 more | halim=1 models=3 docs=2 core=1 other=4 | brain=adult datas
