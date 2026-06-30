@@ -2,7 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
-- `2026-06-30` **engineering** — Defer git push during live session (default off; flush on shutdown) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+- `2026-06-30` **engineering** — Codebase organization: AccountView, entry_pipeline, pytest, gitignore runtime journals, OPS docs — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — IB fill sync: confirmed entries/exits, IB-grounded P&L (no orphan position phantom profits) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Pre-market PreSubmitted fix: ext-hours limit entries + stuck limit retries — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Learning flywheel hardening: outcome PPO teacher, proxy holdout eval, brain stage quality gates, Halim promotion gate, balanced PPO reward sampling — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -834,3 +834,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 12:45 UTC` **git_auto** — sync: 6 files — gitignore, fill_tracker.py, BRAIN_DEVELOPMENT_LOG.md +3 more | docs=1 core=1 other=4 | brain=adult dataset=2542 evolutions=3
 - `2026-06-30 12:46 UTC` **git_training** — learn: session_batch: account_trade_closed, consciousness, pilot Veteran 24625XP WR=52%, profit_hunt:green_profit_lock:INTZ | learn_20260630
 - `2026-06-30 12:46 UTC` **git_auto** — sync: 5 files — gitignore, BRAIN_DEVELOPMENT_LOG.md, copilot_state.json +2 more | models=1 docs=1 other=3 | brain=adult dataset=2542 evoluti
+- `2026-06-30 12:46 UTC` **git_auto** — sync: 6 files — gitignore, fill_tracker.py, BRAIN_DEVELOPMENT_LOG.md +3 more | models=1 docs=1 core=1 other=3 | brain=adult dataset=2542 evo
