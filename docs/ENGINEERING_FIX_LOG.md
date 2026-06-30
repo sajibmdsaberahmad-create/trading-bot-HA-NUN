@@ -27,7 +27,7 @@ War sync had no throttle or change detection; ledger line appended every poll. S
 | `core/scalper_runner.py` | War sync removed from `_refresh_account_balance`; `_maybe_sync_war_from_ib()` on loop + post-exit |
 | `core/scalper_runner.py` | Skip snapshots/stream-heal off-hours unless ticker is held |
 | `core/rth_session.py` | `rth_reply_context()` for AI/Telegram |
-| `core/halim_companion.py` | `live_snapshot` uses RTH context + `ib_fifo_session_pnl` |
+| `core/halim_companion.py` | `live_snapshot` uses RTH context + `ib_fifo_session_pnl` (companion chat) |
 | `core/telegram_listener.py` | `_runner_ctx` uses `ib_truth.refresh` + RTH fallback text |
 
 ### Env vars
