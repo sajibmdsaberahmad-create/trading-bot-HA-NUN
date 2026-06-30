@@ -5065,3 +5065,10 @@
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":1900.0,"shadow_only":true,"timestamp":"2026-06-30T11:55:44.499639+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T11:55:47.903789+00:00"}
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":860859.0,"shadow_only":true,"timestamp":"2026-06-30T11:55:48.470172+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":2.3384747675605952,"shadow_only":true,"timestamp":"2026-06-30T11:56:13.668718+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":2.0967789817426157,"shadow_only":true,"timestamp":"2026-06-30T11:56:17.571806+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1.1970384995064167,"shadow_only":true,"timestamp":"2026-06-30T11:56:21.045195+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":1.3697597666732697,"shadow_only":true,"timestamp":"2026-06-30T11:56:24.181746+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":276027.0,"shadow_only":true,"timestamp":"2026-06-30T11:56:28.088075+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1.1970384995064167,"shadow_only":true,"timestamp":"2026-06-30T11:56:28.604338+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":33988.0,"shadow_only":true,"timestamp":"2026-06-30T11:56:31.893452+00:00"}
