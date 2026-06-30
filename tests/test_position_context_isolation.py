@@ -19,7 +19,7 @@ def test_slot_entry_price_prefers_fill():
 
 
 def test_load_aal_does_not_keep_bito_risk_plan():
-    risk = RiskManager(MagicMock())
+    risk = RiskManager(MagicMock(), initial_equity=10000.0)
     risk_plans = {}
     slots = {}
     bito_plan = TradePlan(
