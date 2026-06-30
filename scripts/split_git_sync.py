@@ -303,7 +303,7 @@ _token = S._token
     backup = SRC.with_suffix(".py.bak")
     backup.write_text(text, encoding="utf-8")
 
-    kept_text = "".join(new_keep)
+    kept_text = "".join(keep)
     # Route legacy state through git_sync_state
     for name in (
         "_enabled", "_repo", "_token", "_ollama_brain", "_git_init_done",
