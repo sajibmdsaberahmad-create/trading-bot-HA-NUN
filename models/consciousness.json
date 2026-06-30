@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1676,
   "scans_performed": 39,
-  "improvements_applied": 2690,
+  "improvements_applied": 2691,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:03:00.524415",
-      "age": "7d 20h 0m 11s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2026",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:03:06.953704",
       "age": "7d 20h 0m 18s",
@@ -12318,6 +12304,20 @@
         "applied": [],
         "lessons": [
           "Review order_timeout on KTTA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:21:28.126495",
+      "age": "9d 0h 18m 39s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2691",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on INTZ"
         ]
       }
     }
