@@ -119,6 +119,16 @@ When war $1k is **settled out** or trip-capped:
 
 IB paper balance is **never** used for war sizing.
 
+### RTH auto-reset (09:30 ET)
+
+Each trading day at **regular hours open**, war/lab pools refresh automatically (`WAR_AUTO_RESET_AT_RTH=true`):
+
+- Premarket trip caps do **not** carry into RTH
+- Paper: `WAR_CAPITAL_USD` (default **$3,500**) + lab pool
+- Live: `WAR_LIVE_OPERATING_CAPITAL` (set **$1,000** when you go live)
+
+Log: `⚔️ War account RTH reset (ET) — mode=WAR_ACTIVE nav=$3,500 ...`
+
 ---
 
 ## Monitor after restart
