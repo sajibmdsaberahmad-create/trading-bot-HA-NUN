@@ -10,6 +10,47 @@
 
 ---
 
+## 2026-07-01 — IB Truth extended + trade horizon (scalp live, swing shadow)
+
+### Problem
+Accounting and AI context still mixed local FIFO math with IB tags. No structured path for swing/position horizons while scalp matures. Duplicate IB fetches in `daily_ib_learning`.
+
+### Root cause
+`ib_truth` lacked open orders and full account tags; `day_pnl_from_snapshot` preferred FIFO over IB `RealizedPnL`. No horizon module or shadow scan. Verdict/fill logs untagged.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_truth.py` | Open orders, portfolio realized/marketValue, account tags; `session_pnl_ib`; `ib_truth_context()` |
+| `core/trade_horizon.py` | **New** — scalp/swing/position gates, maturity, scalp profit gate from IB |
+| `core/swing_shadow.py` | **New** — off-hours 1h shadow verdicts (no orders), IB marks |
+| `core/smart_stack.py` | `horizon` on spike verdicts |
+| `core/fill_tracker.py` | `horizon=scalp` default on fill ledger |
+| `core/scalper_runner.py` | Swing shadow + scalp gate update on off-hours train tick |
+| `core/rth_session.py` | IB session PnL + open order count in reply context |
+| `core/halim_companion.py` | `session_pnl` from IB; `horizon_context()` |
+| `core/account_view.py` | `ib_session_pnl`, `ib_open_orders` |
+| `core/daily_ib_learning.py` | Delegate account snapshot to `ib_truth` |
+| `scripts/start_hanoon.sh` | `SWING_SHADOW_*`, `SWING_PAPER_ENABLED`, `POSITION_HORIZON_ENABLED` |
+| `docs/HORIZON_ROADMAP.md` | **New** — one-hull horizon plan |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `SWING_SHADOW_ENABLED` | `true` | Off-hours 1h shadow scan (child+ maturity) |
+| `SWING_SHADOW_INTERVAL_SEC` | `900` | Min seconds between shadow scans |
+| `SWING_PAPER_ENABLED` | `false` | Swing orders (teen+ + scalp gate) — not wired to orders yet |
+| `SCALP_PROFIT_GATE_FORCE` | — | `pass` / `fail` override for swing paper gate |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_truth.py tests/test_trade_horizon.py -q
+python3 scripts/reconcile_ib_truth.py
+# Off-hours: expect "Swing shadow: N verdict(s)" in logs once per SWING_SHADOW_INTERVAL_SEC
+```
+
+---
+
 ## 2026-07-01 — War IB sync log spam + RTH-aware Telegram/Halim replies
 
 ### Problem
