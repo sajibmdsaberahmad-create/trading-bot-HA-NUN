@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1677,
   "scans_performed": 39,
-  "improvements_applied": 2692,
+  "improvements_applied": 2693,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:03:09.402676",
-      "age": "7d 20h 0m 20s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2028",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:03:45.571169",
       "age": "7d 20h 0m 56s",
@@ -12318,6 +12304,20 @@
         "applied": [],
         "lessons": [
           "Review ib_failure on JEM"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:23:16.484458",
+      "age": "9d 0h 20m 27s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2693",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on BTCT"
         ]
       }
     }
