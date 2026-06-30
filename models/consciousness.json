@@ -3,28 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 228,
   "training_sessions": 39,
-  "trades_observed": 1680,
+  "trades_observed": 1681,
   "scans_performed": 39,
-  "improvements_applied": 2702,
+  "improvements_applied": 2703,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:36:04.853715",
-      "age": "7d 20h 33m 16s",
-      "type": "REGIME",
-      "message": "Market regime: unknown (conf=0%)",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:37:49.895005",
-      "age": "7d 20h 35m 1s",
-      "type": "TRAIN_COMPLETE",
-      "message": "Unified training completed",
-      "metadata": {
-        "weights_updated": true,
-        "ppo_trained": true
-      }
-    },
     {
       "timestamp": "2026-06-29T07:37:49.924373",
       "age": "7d 20h 35m 1s",
@@ -12332,6 +12315,27 @@
           "Review trade_closed on HXHX"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T12:02:07.283445",
+      "age": "9d 0h 59m 18s",
+      "type": "TRADE",
+      "message": "Observed trade: JEM LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T12:02:07.721133",
+      "age": "9d 0h 59m 19s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2703",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on JEM"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T11:40:20.692480",
@@ -14496,7 +14500,6 @@
   "mood": "defensive",
   "total_pnl": 331223.05000000057,
   "win_history": [
-    -12.62,
     -0.72,
     -0.65,
     0.44,
@@ -14995,20 +14998,21 @@
     0,
     2.54,
     -1.91,
-    10.78
+    10.78,
+    0
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 86,
-  "veteran_xp": 26010,
+  "veteran_xp": 26020,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1674,
-  "hours_flown": 167.39999999999478,
+  "flights_completed": 1675,
+  "hours_flown": 167.49999999999477,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15048,7 +15052,7 @@
     "MST": 1,
     "TSL": 1,
     "CUP": 3,
-    "JEM": 2,
+    "JEM": 3,
     "INT": 2,
     "HXH": 1
   },
@@ -15057,5 +15061,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 30% \u00b7 $-54.85. Preserving capital over action."
+  "mood_message": "Win rate 25% \u00b7 $-55.22. Preserving capital over action."
 }
