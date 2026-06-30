@@ -5142,3 +5142,5 @@
 {"ticker":"HXHX","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":226440.0,"shadow_only":true,"timestamp":"2026-06-30T12:03:18.039710+00:00"}
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":2.917730893950919,"shadow_only":true,"timestamp":"2026-06-30T12:03:21.559425+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.6017411024534907,"shadow_only":true,"timestamp":"2026-06-30T12:03:24.827995+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":3.3234316826133954,"shadow_only":true,"timestamp":"2026-06-30T12:03:28.325996+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1.6031314143868625,"shadow_only":true,"timestamp":"2026-06-30T12:03:32.011638+00:00"}
