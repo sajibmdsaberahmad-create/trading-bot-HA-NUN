@@ -10,6 +10,44 @@
 
 ---
 
+## 2026-07-01 — IB extended A–Z wired (fundamentals, news, WSH, PnL, what-if)
+
+### Problem
+Fundamentals, news, WSH, reqPnLSingle, whatIfOrder, contract details, and horizon roadmap items were documented as "planned" only.
+
+### Root cause
+No `ib_extended` module; macro/news used Yahoo; no margin preview; swing paper pool and PPO swing weights missing.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_extended.py` | **New** — reqPnL, reqPnLSingle, contract details, fundamentals, news, WSH, head timestamp, marketRule, whatIfOrder |
+| `core/broker.py` | what-if margin gate before bracket entry |
+| `core/ib_truth.py` | `ib_ai_context` merges extended cache + light refresh |
+| `core/swing_paper.py` | **New** — virtual `WAR_SWING_PAPER_USD` pool, IB marks |
+| `core/ppo_swing_train.py` | **New** — `models/ppo_swing_1h.json` from shadow verdicts |
+| `core/war_account.py` | `horizon` on ledger rows; `swing_paper_capital_usd()` |
+| `core/scalper_session.py` | Off-hours full IB extended + swing paper + PPO swing train |
+| `tests/test_ib_extended.py` | **New** |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `IB_EXTENDED_ENABLED` | `true` | Master switch for extended IB pulls |
+| `IB_EXTENDED_FULL_TTL_SEC` | `3600` | Off-hours full refresh interval |
+| `IB_WHATIF_MARGIN_GATE` | `true` | Block bracket if margin > available funds |
+| `WAR_SWING_PAPER_USD` | `2000` | Virtual swing paper pool |
+| `SWING_PAPER_ENABLED` | `false` | Virtual swing entries from shadow verdicts |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_extended.py tests/test_ib_data_catalog.py -q
+# Off-hours log: "IB extended refresh (full): pnl=... news=... wsh=..."
+# Entry log: "What-if SYMBOL xN: marginΔ=..."
+```
+
+---
+
 ## 2026-07-01 — IB data catalog A–Z + ib_ai_context for all AIs
 
 ### Problem
