@@ -3578,3 +3578,7 @@
 {"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":15027.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:31.614724+00:00"}
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":12834.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:33.697072+00:00"}
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":2762.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:38.846654+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":20411.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:44.376497+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":6304.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:49.453332+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":34625.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:54.517788+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":5274.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:59.459047+00:00"}
