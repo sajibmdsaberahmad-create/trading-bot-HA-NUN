@@ -33,3 +33,11 @@ tick_micro_loss
 Observed trade_closed — recorded for learning.
 tick_micro_loss
 
+🧭 COMMANDER LEARNING | 2026-06-30T13:08:53.228559+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-30T13:08:53.251297+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
