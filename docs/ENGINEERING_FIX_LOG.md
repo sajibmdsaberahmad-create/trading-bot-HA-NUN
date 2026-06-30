@@ -1141,3 +1141,24 @@ pytest tests/test_war_multi_position.py tests/test_position_context_isolation.py
 
 ### Rollback / risks
 Legacy `open_war`/`open_lab` mirrored for old readers; migration runs on `load_state`.
+
+---
+
+## 2026-07-01 — risk_plan_sane_for_tick mixin import
+
+### Problem
+Post-restart monitor spammed `name 'risk_plan_sane_for_tick' is not defined` on BITO+TZA — profit booking still blocked.
+
+### Root cause
+`scalper_exit_executor` calls `risk_plan_sane_for_tick` from `position_context` but `scalper_mixin_imports` did not export it.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_mixin_imports.py` | Export `risk_plan_sane_for_tick`, `bind_risk_plan_for_ticker`, `slot_entry_price` |
+
+### Verify
+```bash
+pytest tests/test_position_context_isolation.py -q
+grep risk_plan_sane logs/HANOON.log  # should not grow after restart
+```
