@@ -4795,3 +4795,8 @@
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":898312.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:41.521078+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2151.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:44.755415+00:00"}
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1010899.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:49.828291+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:53.780485+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1599949.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:59.303994+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T11:32:02.548674+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1049588.0,"shadow_only":true,"timestamp":"2026-06-30T11:32:06.872991+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.836353587662637,"shadow_only":true,"timestamp":"2026-06-30T11:32:11.334308+00:00"}
