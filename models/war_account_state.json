@@ -15,7 +15,7 @@
   "lab_cash": 4855.84870985635,
   "lab_settled": 4855.84870985635,
   "lab_round_trips_today": 2,
-  "mode": "LAB_ACTIVE",
+  "mode": "OBSERVE",
   "is_live": false,
   "session_date": "2026-06-30",
   "open_war": null,
@@ -40,5 +40,5 @@
     "VWAV": 1,
     "EDBL": 1
   },
-  "updated_at": 1782823285.323245
+  "updated_at": 1782823315.957835
 }

@@ -1622,3 +1622,4 @@
 {"timestamp":"2026-06-30T11:59:01.598071+00:00","event":"hard_stop","ticker":"HXHX","pnl_usd":0.07,"pnl_pct":0.0002,"primary_goal":true,"reason":"hard_stop","price":0.4968}
 {"timestamp":"2026-06-30T12:19:53.486515+00:00","event":"green_profit_lock","ticker":"INTZ","pnl_usd":1.52,"pnl_pct":0.0044,"primary_goal":true,"reason":"green_profit_lock:ai_stall quick_scalp +0.44% (peak +0.44%)","price":0.9334,"ai_stalled":true}
 {"timestamp":"2026-06-30T12:19:56.225364+00:00","event":"green_profit_lock","ticker":"INTZ","pnl_usd":0.92,"source":"buffer","reason":"green_profit_lock:ai_stall quick_scalp +0.44% (peak +0.44%)"}
+{"timestamp":"2026-06-30T12:41:56.017621+00:00","event":"green_profit_lock","ticker":"INTZ","pnl_usd":0.82,"pnl_pct":0.0065,"primary_goal":true,"reason":"green_profit_lock:giveback +0.65% (peak +1.00% gave back 0.35%)","price":0.9329,"ai_stalled":false}

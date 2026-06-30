@@ -62,7 +62,10 @@ EXAMPLES:
                          help="Override: ppo (legacy), scalper (HANOON), or fusion (multi-model AI)")
     parser.add_argument("--ticker", default="SPY", help="Ticker symbol (default: SPY)")
     parser.add_argument("--cash", default=1_000.0, type=float, help="Starting capital in USD (default: 1000)")
-    parser.add_argument("--port", default=7497, type=int, help="IB Gateway port: 7497=paper, 7496=live")
+    parser.add_argument(
+        "--port", default=None, type=int,
+        help="IB port override (default from BotConfig: 4002 Gateway paper)",
+    )
     parser.add_argument("--client-id", default=1, type=int, dest="client_id", help="IB API client ID")
     parser.add_argument("--risk-pct", default=None, type=float,
                          help="Override RISK_PER_TRADE_PCT (e.g. 0.05 for 5%%)")
@@ -356,7 +359,8 @@ if __name__ == "__main__":
     cfg.TICKER = args.ticker.upper()
     git_sync_init(cfg)
     cfg.INITIAL_CASH = args.cash
-    cfg.IB_PORT = args.port
+    if args.port is not None:
+        cfg.IB_PORT = args.port
     cfg.IB_CLIENT_ID = args.client_id
     if args.risk_pct is not None:
         cfg.RISK_PER_TRADE_PCT = args.risk_pct

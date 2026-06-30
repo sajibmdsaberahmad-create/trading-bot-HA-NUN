@@ -5506,3 +5506,7 @@
 {"ticker":"CELZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":33450.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:14.651310+00:00"}
 {"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":330119.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:18.274673+00:00"}
 {"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":8722.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:21.563511+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":159203.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:54.022853+00:00"}
+{"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":92838.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:54.621595+00:00"}
+{"ticker":"CELZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":78200.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:55.248669+00:00"}
+{"ticker":"SVRE","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":69337.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:55.951939+00:00"}
