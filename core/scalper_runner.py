@@ -129,7 +129,7 @@ from core.env import TradingEnv
 from core.agent import build_ppo_agent, predict_with_reasoning, initialize_enhanced_system
 from core.experience_buffer import append as buffer_append
 from core.market_context import summarize_market_context
-from core.market_regime import MarketRegimeDetector
+from core.market_regime import MarketRegimeDetector, resolve_regime
 from core.self_improver import generate_self_improvement_plan
 from core.consciousness import AIConsciousness
 from core.pilot_experience import PilotExperienceSystem, pilot_experience_to_git
@@ -4790,14 +4790,15 @@ class ScalperRunner:
                 log.info(
                     f"  📊 QUALITY advisory {ticker}: {quality.get('reason', '')[:100]}"
                 )
-            spike_regime = "unknown"
+            spike_regime = "momentum_spike"
             fast_df, _, _, _ = self._resolve_live_bars(ticker, min_bars=10)
-            if fast_df is not None and len(fast_df) >= 10:
+            if fast_df is not None and len(fast_df) >= 5:
                 try:
-                    rr = self.regime_detector.classify(fast_df)
-                    if rr is not None:
-                        raw = getattr(rr, "regime", "unknown")
-                        spike_regime = getattr(raw, "value", str(raw))
+                    _, spike_regime = resolve_regime(
+                        self.regime_detector, fast_df,
+                        spike_ratio=float(spike_ratio),
+                        vol_ratio=float(spike_ratio),
+                    )
                 except Exception:
                     pass
             df_5m = df_15m = None
@@ -5466,19 +5467,20 @@ class ScalperRunner:
         pnl_pct = ((current_px / entry) - 1) * 100 if entry else 0
 
         vol_ratio = 1.0
-        regime = "unknown"
+        regime = "slow_grind"
         fast_df = None
         ticker_dm = self._dm_for_ticker(self.current_ticker or "")
         fast_df, _, _, forecast = self._resolve_live_bars(self.current_ticker or "", min_bars=6)
         if fast_df is None and ticker_dm is not None:
             fast_df = ticker_dm.get_live_decision_bars(min_bars=6)
-        if fast_df is not None and len(fast_df) >= 10:
+        if fast_df is not None and len(fast_df) >= 5:
             _, vol_ratio = self._detect_volume_spike(fast_df)
             try:
-                rr = self.regime_detector.classify(fast_df)
-                if rr is not None:
-                    raw = getattr(rr, "regime", "unknown")
-                    regime = getattr(raw, "value", str(raw))
+                _, regime = resolve_regime(
+                    self.regime_detector, fast_df,
+                    spike_ratio=float(vol_ratio),
+                    vol_ratio=float(vol_ratio),
+                )
             except Exception:
                 pass
 
@@ -7385,9 +7387,10 @@ class ScalperRunner:
         if ai_fast_execution(self.cfg):
             block_sec = min(block_sec, 20.0)
         self._pending_entry_until = now + block_sec
-        regime_result = (
-            self.regime_detector.classify(df_fast)
-            if hasattr(self.regime_detector, "classify") else None
+        regime_result, regime_label = resolve_regime(
+            self.regime_detector, df_fast,
+            spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0)),
+            vol_ratio=float(market_ctx.get("recent_volume", 0)) / (avg_volume + 1e-9),
         )
         vix_level = 0.0
         try:
@@ -7398,7 +7401,6 @@ class ScalperRunner:
         self.pilot.start_flight(ticker, current_px, regime_result, 0.5, vix_level=vix_level)
         spike = float(getattr(self, "_last_spike_ratio", 1.0))
         vol_ratio = float(market_ctx.get("recent_volume", 0)) / (avg_volume + 1e-9)
-        regime_label = regime_tag(regime_result, spike_ratio=spike, vol_ratio=vol_ratio)
         self._last_entry_regime = regime_label
         snap = (
             self.ai_commander.ollama_audit_snapshot(ticker)
