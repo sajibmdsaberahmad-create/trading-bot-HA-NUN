@@ -91,6 +91,8 @@ def test_green_exit_on_giveback(monkeypatch):
     ge = assess_dynamic_exit(
         cfg,
         ticker="TEST",
+        current_px=10.03,
+        entry_px=10.0,
         pnl_pct=0.003,
         peak_pct=0.008,
         micro={"dir": -1, "fade_risk": 0.6},
