@@ -3483,3 +3483,7 @@
 {"ticker":"COIN","reason":"profit_prob_below_80pct","scan_score":83.2,"spike_ratio":3.784860557768924,"shadow_only":true,"timestamp":"2026-06-30T09:51:18.125664+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.2620027434634513,"shadow_only":true,"timestamp":"2026-06-30T09:51:20.196721+00:00"}
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":650.0,"shadow_only":true,"timestamp":"2026-06-30T09:51:25.656591+00:00"}
+{"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":13.07944055944056,"shadow_only":true,"timestamp":"2026-06-30T09:51:43.480260+00:00"}
+{"ticker":"COIN","reason":"profit_prob_below_80pct","scan_score":83.2,"spike_ratio":3.784860557768924,"shadow_only":true,"timestamp":"2026-06-30T09:51:45.591306+00:00"}
+{"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":87.6,"spike_ratio":2.58856412713624,"shadow_only":true,"timestamp":"2026-06-30T09:51:50.792426+00:00"}
+{"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":3.339920948616601,"shadow_only":true,"timestamp":"2026-06-30T09:51:56.914154+00:00"}
