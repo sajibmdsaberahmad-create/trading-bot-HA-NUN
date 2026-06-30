@@ -253,7 +253,7 @@ def analyze_swing_web(sym: str, cfg: Optional["BotConfig"] = None) -> Dict[str, 
 
 
 def _score_analysis(tech: Dict, ib: Dict, macro: Dict, web: Dict) -> Dict[str, Any]:
-  """Composite swing score — advisory; execution PnL from IB only."""
+    """Composite swing score — advisory; execution PnL from IB only."""
     score = 0.0
     reasons: List[str] = []
     bias = str(tech.get("bias", "hold"))
