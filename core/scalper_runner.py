@@ -6049,7 +6049,26 @@ class ScalperRunner:
                 atr_at_entry=plan.atr_at_entry,
             )
             handle = fill_bracket
-            if handle and adapt.adjusted:
+            if handle and getattr(handle, "children_deferred", False):
+                try:
+                    self.broker.attach_bracket_children(
+                        handle, adapt.stop, adapt.target, shares,
+                    )
+                except Exception as exc:
+                    log.warning(
+                        f"  Bracket attach failed {ticker}: {exc} — flattening"
+                    )
+                    try:
+                        self.broker.flatten_position(
+                            int(shares), handle=handle, urgent=True, symbol=ticker,
+                        )
+                        self.ib.sleep(0.15)
+                    except Exception as flat_exc:
+                        log.warning(f"  Flatten after bracket attach failed: {flat_exc}")
+                    self.broker.cancel_open_orders_for_symbol(ticker)
+                    self._clear_pending_entry(ticker, cooldown_sec=60.0)
+                    return "aborted_slippage"
+            elif handle and adapt.adjusted:
                 try:
                     self.broker.update_stop_price(handle, adapt.stop)
                     self.broker.update_target_price(handle, adapt.target)

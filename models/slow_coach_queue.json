@@ -223,7 +223,14 @@
       "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
       "source": "runtime_council_timeout",
       "queued_at": "2026-06-30T09:54:08.742113+00:00"
+    },
+    {
+      "param": "CONFIDENCE_THRESHOLD",
+      "value": 0.63,
+      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+      "source": "runtime_council_timeout",
+      "queued_at": "2026-06-30T10:01:25.923758+00:00"
     }
   ],
-  "updated_at": "2026-06-30T09:54:08.742116+00:00"
+  "updated_at": "2026-06-30T10:01:25.923762+00:00"
 }
