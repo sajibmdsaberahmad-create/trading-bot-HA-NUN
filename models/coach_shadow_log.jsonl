@@ -5149,3 +5149,7 @@
 {"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":230444.0,"shadow_only":true,"timestamp":"2026-06-30T12:08:03.789050+00:00"}
 {"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":147981.0,"shadow_only":true,"timestamp":"2026-06-30T12:08:06.883529+00:00"}
 {"ticker":"VWAV","reason":"ppo_not_aligned","scan_score":89.0,"spike_ratio":109626.0,"shadow_only":true,"timestamp":"2026-06-30T12:08:10.008594+00:00"}
+{"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":247741.0,"shadow_only":true,"timestamp":"2026-06-30T12:08:14.049779+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":228125.0,"shadow_only":true,"timestamp":"2026-06-30T12:08:17.337738+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":15189.0,"shadow_only":true,"timestamp":"2026-06-30T12:08:20.431527+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":395258.0,"shadow_only":true,"timestamp":"2026-06-30T12:08:34.636070+00:00"}
