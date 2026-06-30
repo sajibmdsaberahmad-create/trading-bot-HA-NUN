@@ -199,18 +199,25 @@ def sync_session_pnl_from_ib(
     state = state if state is not None else load_state(cfg)
     snap = refresh(ib, cfg, force=True, since_ts=since_ts)
 
-    state["session_pnl_war"] = snap.session_pnl_fifo
+    if snap.refreshed_at > 0:
+        session_pnl = snap.session_pnl_ib
+        if session_pnl == 0 and (snap.session_pnl_fifo != 0 or snap.round_trips):
+            session_pnl = snap.session_pnl_fifo
+    else:
+        session_pnl = snap.session_pnl_fifo
+
+    state["session_pnl_war"] = session_pnl
     state["ticker_session_pnl"] = dict(snap.ticker_pnl_fifo)
     cap = float(state.get("operating_capital", 0) or 0)
     if cap > 0:
-        state["nav"] = round(cap + snap.session_pnl_fifo, 2)
+        state["nav"] = round(cap + session_pnl, 2)
         _reconcile_war_cash_from_positions(state, cfg)
 
     return {
         "since_ts": snap.session_since_ts,
         "executions": len(snap.executions),
         "round_trips": len(snap.round_trips),
-        "session_pnl_war": snap.session_pnl_fifo,
+        "session_pnl_war": session_pnl,
         "tickers": snap.ticker_pnl_fifo,
     }
 

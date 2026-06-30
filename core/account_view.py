@@ -35,8 +35,11 @@ def day_pnl_ib(runner: "ScalperRunner") -> Tuple[float, float]:
 
 
 def display_equity(runner: "ScalperRunner", cfg: Optional["BotConfig"] = None) -> float:
-    """Equity shown in risk/Telegram — IB when sync on, else bot_nav."""
+    """Equity shown in risk/Telegram — IB Truth when snapshot fresh."""
     cfg = cfg or getattr(runner, "cfg", None)
+    snap = get_snapshot()
+    if snap.refreshed_at > 0 and snap.account.net_liquidation > 0:
+        return float(snap.account.net_liquidation)
     if require_ib_fill_sync(cfg):
         eq = float(getattr(runner, "account_equity", 0) or 0)
         if eq > 0:
@@ -65,9 +68,10 @@ def day_pnl(
     runner: "ScalperRunner",
     cfg: Optional["BotConfig"] = None,
 ) -> Tuple[float, float]:
-    """Session P&L (usd, pct) — IB change when fill sync on."""
+    """Session P&L (usd, pct) — IB Truth when snapshot fresh."""
     cfg = cfg or getattr(runner, "cfg", None)
-    if require_ib_fill_sync(cfg):
+    snap = get_snapshot()
+    if snap.refreshed_at > 0 or require_ib_fill_sync(cfg):
         return day_pnl_ib(runner)
     baseline = float(getattr(cfg, "INITIAL_CASH", 1000) if cfg else 1000)
     nav = float(getattr(runner, "bot_nav", 0) or baseline)

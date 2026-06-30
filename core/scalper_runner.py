@@ -1133,6 +1133,9 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self._mtf_bar_cache[ticker] = (now, df_5m, df_15m)
         return df_5m, df_15m
     def _recalc_bot_nav(self):
+        if self._ib_sync_enabled():
+            self._sync_bot_nav_from_ib()
+            return
         total_pos = 0.0
         for t, s in self._position_slots.items():
             if not s.get("ib_fill_confirmed", True):
@@ -1221,7 +1224,18 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         try:
             found = False
             ib_shares = 0.0
-            for p in self.ib.positions():
+            try:
+                from core.ib_truth import get_snapshot, ib_truth_enabled
+                snap = get_snapshot()
+                if ib_truth_enabled(self.cfg) and snap.refreshed_at > 0:
+                    pos = snap.long_positions().get(self.current_ticker.upper())
+                    if pos is not None:
+                        ib_shares = float(pos.qty)
+                        found = ib_shares > 0
+            except Exception:
+                pass
+            if not found:
+                for p in self.ib.positions():
                 sym = getattr(p.contract, "symbol", "")
                 if sym == self.current_ticker:
                     ib_shares = float(p.position)
