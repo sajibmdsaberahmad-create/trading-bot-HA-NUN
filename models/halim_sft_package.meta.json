@@ -1,10 +1,10 @@
 {
   "file": "halim_sft.zip",
   "path": "/Users/mdsabersajib/Downloads/tradingbot/halim_sft.zip",
-  "build_id": "30507dff8f47",
-  "updated_at": "2026-06-30T15:56:37.377273+00:00",
-  "pairs_total": 14593,
-  "train_pairs": 13864,
+  "build_id": "9d5078b947f1",
+  "updated_at": "2026-06-30T16:19:07.079390+00:00",
+  "pairs_total": 14594,
+  "train_pairs": 13865,
   "by_source": {
     "council": 952,
     "test": 1,
@@ -18,7 +18,7 @@
     "companion_generative": 561,
     "market_hours": 17,
     "rss_learn": 3,
-    "copilot_heuristic": 55,
+    "copilot_heuristic": 56,
     "council_teacher": 388,
     "ppo_teacher:heuristic_fallback": 21,
     "commander_ib_report": 65,
