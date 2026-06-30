@@ -146,14 +146,17 @@ class CommanderVerdictMixin:
                 out["reason"] = f"{out.get('reason', '')} | {gut_note}".strip(" |")
 
         try:
-            from core.smart_stack import strict_profit_prob_enabled
+            from core.smart_stack import strict_profit_prob_enabled, ai_sure_entry_enabled
             strict_prob = strict_profit_prob_enabled(self.cfg)
+            ai_sure = ai_sure_entry_enabled(self.cfg)
         except Exception:
             strict_prob = False
+            ai_sure = False
 
         if (
             not enter
             and not strict_prob
+            and not ai_sure
             and not is_ai_unlimited(self.cfg)
             and not is_ai_council_mode(self.cfg)
         ):

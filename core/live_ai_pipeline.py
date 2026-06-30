@@ -557,7 +557,7 @@ def merge_entry_decision(
         return base
 
     if ollama_status == "fresh" and ollama:
-        o_enter = bool(ollama.get("enter", ppo_buy))
+        o_enter = bool(ollama.get("enter", ppo_buy if not ai_sure else False))
         o_conf = float(ollama.get("confidence", ppo_conf) or ppo_conf)
         gut = float(ollama.get("gut_feel", 0.5) or 0.5)
         blend_conf = max(o_conf, ppo_conf) if (o_enter and ppo_buy) else (
@@ -566,7 +566,17 @@ def merge_entry_decision(
 
         enter = False
         reason = ""
-        if requires_council_alignment(cfg):
+        if ai_sure or requires_council_alignment(cfg):
+            try:
+                from core.smart_stack import dynamic_entry_surety
+                sure = dynamic_entry_surety(
+                    cfg, scan_score=scan_score, spike_ratio=spike_ratio, ticker=ticker,
+                )
+                min_conf_use = max(min_conf, sure.get("min_conf", min_conf))
+                min_prob_use = max(min_prob, sure.get("min_prob", min_prob))
+            except Exception:
+                min_conf_use = min_conf
+                min_prob_use = min_prob
             o_prob = float(ollama.get("profit_probability", profit_prob) or profit_prob)
             o_fake = float(ollama.get("fakeout_risk", (quality or {}).get("fakeout_risk", 0.5)) or 0.5)
             max_fake = float(getattr(cfg, "MAX_FAKEOUT_RISK_ENTER", 0.48)) if cfg else 0.48
@@ -575,22 +585,24 @@ def merge_entry_decision(
             if (
                 o_enter
                 and ppo_buy
-                and o_conf >= min_conf
-                and ppo_conf >= min_conf
-                and o_prob >= min_prob
+                and o_conf >= min_conf_use
+                and ppo_conf >= min_conf_use
+                and enter_ok
+                and o_prob >= min_prob_use
+                and profit_prob >= min_prob_use
                 and o_fake <= max_fake
                 and scan_score >= min_sc
                 and spike_ratio >= min_sp
             ):
                 enter = True
                 reason = (
-                    f"discipline aligned: Ollama {o_conf:.0%} PPO {ppo_conf:.0%} "
-                    f"prob={o_prob:.0%} score={scan_score:.0f} vol={spike_ratio:.1f}x"
+                    f"AI-sure aligned: council {o_conf:.0%} PPO {ppo_conf:.0%} "
+                    f"prob={profit_prob:.0%} score={scan_score:.0f} vol={spike_ratio:.1f}x"
                 )
             else:
                 reason = (
-                    f"discipline pass: need Ollama+PPO+prob≥{min_prob:.0%} "
-                    f"(got enter={o_enter} ppo={ppo_buy} prob={o_prob:.0%} fake={o_fake:.0%})"
+                    f"AI-sure pass: council enter={o_enter} PPO buy={ppo_buy} "
+                    f"prob={profit_prob:.0%} (need {min_prob_use:.0%})"
                 )[:200]
         elif o_enter and ppo_buy:
             enter = True
