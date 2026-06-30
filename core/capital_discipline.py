@@ -91,7 +91,7 @@ def allows_ppo_lead_while_pending(
 ) -> bool:
     cfg = cfg or BotConfig()
     if not capital_discipline_enabled(cfg):
-        return bool(getattr(cfg, "PPO_LEAD_WHILE_COUNCIL_PENDING", True))
+        return bool(cfg.PPO_LEAD_WHILE_COUNCIL_PENDING)
     if bool(getattr(cfg, "CAPITAL_PPO_LEAD_STRONG_SPIKE", True)) and is_strong_spike_setup(
         cfg, scan_score, spike_ratio,
     ):

@@ -158,10 +158,11 @@ from core.trade_telemetry import (
     log_bracket_reject, log_entry_execution, log_exit_postmortem,
     log_post_fill_adapt, log_regime_atr_outcome, log_round_trip_fills, regime_tag,
 )
+from core.account_view import day_pnl_ib as _day_pnl_ib_view
+from core.entry_pipeline import confirm_entry_fill_from_ib as _confirm_entry_fill
 from core.fill_tracker import (
     append_fill_ledger,
     build_round_trip_record,
-    confirm_entry_fill,
     ib_fill_strict,
     ib_position_shares,
     require_ib_fill_sync,
@@ -1377,41 +1378,20 @@ class ScalperRunner:
         min_fill_ratio: float,
         quote_px: float,
     ) -> Tuple[float, float, bool, str]:
-        """IB-confirmed entry — never treat orphan paper holdings as a new fill."""
-        if not self._ib_sync_enabled():
-            parent_trade = getattr(bracket, "parent_trade", None)
-            filled = 0.0
-            fill_px = quote_px
-            if parent_trade and parent_trade.orderStatus:
-                filled = float(parent_trade.orderStatus.filled or 0)
-                avg = float(parent_trade.orderStatus.avgFillPrice or 0)
-                if avg > 0:
-                    fill_px = avg
-            status = (
-                parent_trade.orderStatus.status
-                if parent_trade and parent_trade.orderStatus else ""
-            )
-            if filled >= shares * min_fill_ratio or status == "Filled":
-                return filled or float(shares), fill_px, True, "legacy"
-            return 0.0, 0.0, False, ""
-        return confirm_entry_fill(
+        return _confirm_entry_fill(
             self.ib,
-            symbol=ticker,
-            parent_trade=getattr(bracket, "parent_trade", None),
-            cache=self._fill_cache(),
-            order_shares=float(shares),
+            ticker=ticker,
+            st=st,
+            bracket=bracket,
+            shares=shares,
             min_fill_ratio=min_fill_ratio,
-            ib_pos_baseline=float(st.get("ib_pos_baseline", 0)),
-            started_at=float(st.get("started_at", 0)),
             quote_px=quote_px,
+            fill_cache=self._fill_cache(),
+            ib_sync_enabled=self._ib_sync_enabled(),
         )
 
     def _day_pnl_ib(self) -> Tuple[float, float]:
-        """Session P&L from IB NetLiquidation — economic truth."""
-        ib_start = float(getattr(self, "_ib_starting_balance", 0) or self.account_equity)
-        change = float(self.account_equity) - ib_start
-        pct = (change / ib_start * 100.0) if ib_start > 0 else 0.0
-        return change, pct
+        return _day_pnl_ib_view(self)
 
     def _sync_bot_nav_from_ib(self) -> None:
         """Keep displayed NAV aligned with IB when fill sync is on."""
