@@ -37,7 +37,7 @@ def test_scalp_gate_force_pass():
 
 
 def test_swing_shadow_child_stage():
-    with patch("core.trade_horizon.compute_stage", return_value="child"):
+    with patch("core.brain_maturity.compute_stage", return_value="child"):
         with patch.dict("os.environ", {"SWING_SHADOW_ENABLED": "true"}):
             assert swing_shadow_enabled(BotConfig()) is True
 

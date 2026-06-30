@@ -280,6 +280,8 @@ def build_reconcile_report(
         ],
         "ib_round_trips_today": len(snap.round_trips),
         "ib_session_pnl_fifo": snap.session_pnl_fifo,
+        "ib_session_pnl": snap.session_pnl_ib,
+        "ib_realized_pnl": snap.account.realized_pnl,
         "ghost_exits": ghost_exits,
         "pnl_outliers": [g for g in ghost_exits if abs(float(g.get("net_pnl", 0) or 0)) > 100],
         "pnl_drift": pnl_drift,
