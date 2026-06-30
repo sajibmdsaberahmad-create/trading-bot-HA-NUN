@@ -1,11 +1,11 @@
 {
-  "total_xp": 25385,
+  "total_xp": 25425,
   "level": "Veteran",
-  "flights_completed": 280,
-  "flights_flown": 808,
-  "takeoffs": 808,
-  "landings": 280,
-  "hours_flown": 28.000000000000128,
+  "flights_completed": 281,
+  "flights_flown": 809,
+  "takeoffs": 809,
+  "landings": 281,
+  "hours_flown": 28.10000000000013,
   "sectors_flown": {
     "HYF": 3,
     "WEN": 1,
@@ -46,7 +46,7 @@
     "VWA": 1,
     "EDB": 1,
     "SVR": 1,
-    "CEL": 2,
+    "CEL": 3,
     "BTC": 2,
     "YHC": 1,
     "BIY": 1
