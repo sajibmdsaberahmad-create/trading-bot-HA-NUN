@@ -1485,3 +1485,8 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 18:15 UTC` **git_auto** — sync: 4 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=adult dataset=1885 evolu
 - `2026-06-30 18:16 UTC` **git_auto** — sync: 6 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, copilot_journal.jsonl +3 more | models=2 docs=1 other=3 | brain=adult da
 - `2026-06-30 18:16 UTC` **git_auto** — sync: 4 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=adult dataset=1885 evolu
+- `2026-06-30 18:17 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, cognitive_state.json +2 more | models=1 docs=1 other=3 | brain=adult dat
+- `2026-06-30 18:17 UTC` **brain_proxy_trained** · stage **child** — Teacher proxy holdout acc=90% (random=98%, 329 samples)
+- `2026-06-30 18:17 UTC` **brain_ppo_teacher** — PPO teacher live_session_end: WR 17%, source heuristic_fallback
+- `2026-06-30 18:17 UTC` **brain_evolution** · stage **child** — Evolution live_session_end — stage child, dataset 1896 pairs
+- `2026-06-30 18:17 UTC` **brain_stage_up** — Brain grew: adult → child
