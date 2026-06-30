@@ -2400,6 +2400,15 @@ def push_learning_checkpoint(
     force: bool = False,
 ) -> bool:
     """Push learning artifacts to HANOON + Logs + Grandmaster (never blocks trading loop if called via async)."""
+    if (
+        force
+        and not is_replay_live()
+        and not _shutdown_git_reason(reason)
+        and not _git_session_push_enabled()
+    ):
+        _queue_batched_checkpoint(reason)
+        log.debug(f"Git checkpoint deferred (force blocked): {reason[:80]}")
+        return True
     if not force and _should_defer_git_push("training"):
         _queue_batched_checkpoint(reason)
         _schedule_batched_checkpoint_flush()

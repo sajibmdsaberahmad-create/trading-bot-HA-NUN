@@ -191,6 +191,9 @@ LEARNING_PUSH_ON_TRADE=true     # still queues; no push until shutdown
 ### Verify
 Live session: no `session_batch` / `pull --rebase` logs during trading. On `stop_hanoon.sh`: `pre_shutdown` + full learning push once.
 
+### Follow-up (same day)
+`force=True` in `flush_batched_git_sync` still bypassed defer; stale debounce timers could fire. Gated `flush_batched_git_sync` + `push_learning_checkpoint(force)`; cancel timers on init; `START_GIT_SYNC_WITH_HANOON` default **false**.
+
 ---
 
 ## 2026-06-30 — War replay ledger isolation (code)

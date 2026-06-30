@@ -571,11 +571,14 @@ if [ "${IB_GATEWAY_WATCHDOG_ENABLED}" = "true" ]; then
   "$ROOT/scripts/start_ib_gateway_watchdog.sh" || echo "   IB Gateway watchdog warning (see logs/ib_gateway_watchdog.log)"
 fi
 
-# ── 6b. Standalone git sync (auto-push any IDE save — separate process) ───
-if [ "${START_GIT_SYNC_WITH_HANOON:-true}" = "true" ]; then
+# ── 6b. Standalone git sync (off by default during live — competes with IB loop) ───
+if [ "${START_GIT_SYNC_WITH_HANOON:-false}" = "true" ]; then
   echo ""
   echo "📤 Starting git sync daemon (auto-pushes all file changes)..."
   "$ROOT/scripts/start_git_sync.sh" || echo "   Git sync start skipped (see logs/git_sync.log)"
+else
+  echo ""
+  echo "📤 Git sync daemon skipped (START_GIT_SYNC_WITH_HANOON=false) — pushes on stop_hanoon only"
 fi
 
 echo ""
