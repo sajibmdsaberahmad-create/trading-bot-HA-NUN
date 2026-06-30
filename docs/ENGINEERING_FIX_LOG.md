@@ -10,6 +10,38 @@
 
 ---
 
+## 2026-06-30 — Multi-position monitor race + false green lock on wrong tick
+
+### Problem
+With several recovered IB positions open, LIVE_PULSE showed cross-ticker PnL (e.g. BITO +146% with SOXS stops) and GREEN LOCK / profit hunt fired on phantom gains (SOXS evaluated at BITO's ~$7.96). War ledger warned "no open slot" on recovered exits.
+
+### Root cause
+1. **Thread race:** IB tick callbacks and main-loop monitor both called `_load_position_context` / `_save_position_context` on shared runner state without a lock — SOXS entry/stops could be saved into BITO's slot mid-pulse.
+2. **Aggregate shares leak:** `_save_position_context` wrote `self.shares` after `_refresh_aggregate_position_state` had summed all slots.
+3. **Wrong stream fallback:** `_dm_for_ticker` borrowed `_active_stream_ticker`'s DataManager for unrelated symbols.
+4. **No price sanity gate:** Green lock and profit hunt did not reject quotes >35% from entry (cross-ticker tick bleed).
+5. **War adopt:** `adopt_ib_positions_into_slots` never called `record_entry`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_runner.py` | `threading.RLock` around load/save; `_ctx_slot_shares`; `_resolve_monitor_price()` with IB snapshot fallback; `_record_war_adoptions()`; `_dm_for_ticker` per-ticker only |
+| `core/scalper_exit_executor.py` | Monitor uses trusted price; profit hunt / green lock / mechanical exits gated; peak/pulse skipped when untrusted |
+| `core/position_context.py` | `slot_price_sane()` helper |
+| `tests/test_position_context_isolation.py` | `slot_price_sane` cross-ticker case |
+
+### Env vars
+None new.
+
+### Verify
+```bash
+python3 -m pytest tests/test_position_context_isolation.py -q
+# Live: no LIVE_PULSE with +100% on unrelated tickers; GREEN LOCK only when px within 35% of entry
+# Recovered adopt: war exits without "no open slot"
+```
+
+---
+
 ## 2026-06-30 — Scalper mixin missing imports (require_ib_fill_sync NameError)
 
 ### Problem
