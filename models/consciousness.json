@@ -3,121 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 229,
   "training_sessions": 39,
-  "trades_observed": 1681,
+  "trades_observed": 1682,
   "scans_performed": 39,
-  "improvements_applied": 2703,
+  "improvements_applied": 2705,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:37:49.940006",
-      "age": "7d 20h 35m 1s",
-      "type": "VERSION",
-      "message": "Created version v20260629_073749",
-      "metadata": {
-        "id": "v20260629_073749",
-        "timestamp": "2026-06-29T07:37:49.939642",
-        "age": "7d 20h 35m 1s",
-        "session": 38,
-        "mood": "recalibrating",
-        "total_awakenings": 195,
-        "trades_observed": 1390,
-        "scans_performed": 38,
-        "improvements_applied": 2035,
-        "total_pnl": 118237.86000000038,
-        "best_streak": 7,
-        "steps": {
-          "market_context": {
-            "spy_trend": "unknown",
-            "qqq_trend": "unknown",
-            "vix_level": 0.0,
-            "vix_regime": "low",
-            "timestamp": "2026-06-29T07:36:04.846389"
-          },
-          "regime": {
-            "regime": "unknown",
-            "confidence": 0.0,
-            "recommendation": "Insufficient data"
-          },
-          "unified_training": {
-            "weights_updated": true,
-            "ppo_trained": true
-          },
-          "self_improvement": {
-            "win_rate": 0.18919827586206897,
-            "adjustments": {
-              "SCALP_STOP_ATR_MULTIPLIER": {
-                "old": 0.9,
-                "new": 0.7200000000000001,
-                "reason": "tighten stops when WR low; widen when WR strong",
-                "confidence": 0.112
-              },
-              "SCALP_TP_ATR_MULTIPLIER": {
-                "old": 1.5,
-                "new": 1.35,
-                "reason": "increase targets when WR strong; reduce when WR weak",
-                "confidence": 0.043
-              },
-              "SCAN_INTERVAL_SECONDS": {
-                "old": 30,
-                "new": 39.0,
-                "reason": "reduce frequency when WR low; increase when WR strong",
-                "confidence": 0.051
-              },
-              "MAX_TRADE_SIZE_USD": {
-                "old": 45464.958000000006,
-                "new": 31825.4706,
-                "reason": "reduce size when WR poor; increase when WR strong",
-                "confidence": 0.016
-              },
-              "MAX_RISK_PER_TRADE_USD": {
-                "old": 250000.0,
-                "new": 187500.0,
-                "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
-                "confidence": 0.275
-              },
-              "CONFIDENCE_THRESHOLD": {
-                "old": 0.68,
-                "new": 0.7300000000000001,
-                "reason": "raise entry bar when WR low; lower when WR strong",
-                "confidence": 0.091
-              }
-            }
-          }
-        },
-        "parent_version": "v20260627_122039"
-      }
-    },
-    {
-      "timestamp": "2026-06-29T07:38:10.749766",
-      "age": "7d 20h 35m 22s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2036",
-      "metadata": {
-        "source": "commander_chat",
-        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
-        "applied": [],
-        "lessons": [
-          "ping - are you there ?",
-          "Hi",
-          "Hi"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T07:41:41.308075",
-      "age": "7d 20h 38m 52s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2037",
-      "metadata": {
-        "source": "halim_developer_off_hours",
-        "summary": "Halim heuristic dev plan \u2014 WR 31%",
-        "applied": [],
-        "lessons": [
-          "Halim documents every mutation in git \u2014 review improvement_history.json",
-          "Session trade WR 31% on 400 round-trips"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:52:53.491936",
       "age": "7d 20h 50m 4s",
@@ -12294,6 +12184,41 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #229",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T12:13:08.610577",
+      "age": "9d 1h 10m 19s",
+      "type": "TRADE",
+      "message": "Observed trade: VWAV ? P&L=$-1.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T12:13:09.390700",
+      "age": "9d 1h 10m 20s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2705",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on VWAV"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T12:13:09.390793",
+      "age": "9d 1h 10m 20s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2705",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on VWAV"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T12:07:03.642722",
@@ -14456,9 +14381,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "defensive",
-  "total_pnl": 331223.05000000057,
+  "total_pnl": 331222.05000000057,
   "win_history": [
-    -0.72,
     -0.65,
     0.44,
     10.24,
@@ -14957,20 +14881,21 @@
     2.54,
     -1.91,
     10.78,
-    0
+    0,
+    -1.0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 86,
-  "veteran_xp": 26020,
+  "veteran_xp": 26030,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1675,
-  "hours_flown": 167.49999999999477,
+  "flights_completed": 1676,
+  "hours_flown": 167.59999999999476,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15012,12 +14937,13 @@
     "CUP": 3,
     "JEM": 3,
     "INT": 2,
-    "HXH": 1
+    "HXH": 1,
+    "VWA": 1
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 25% \u00b7 $-55.22. Preserving capital over action."
+  "mood_message": "Win rate 25% \u00b7 $-43.25. Preserving capital over action."
 }

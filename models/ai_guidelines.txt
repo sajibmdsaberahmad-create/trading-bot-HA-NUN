@@ -41,3 +41,11 @@ hard_stop
 Observed ib_failure — recorded for learning.
 IB closing-only — cannot open new positions
 
+🧭 COMMANDER LEARNING | 2026-06-30T12:13:09.442548+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-30T12:13:09.454808+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
