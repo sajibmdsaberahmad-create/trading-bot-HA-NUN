@@ -150,3 +150,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 08:35 UTC` **git_auto** — sync: 6 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, halim_runtime_state.json +3 more | models=1 docs=1 other=4 | brain=adult dataset=2
 - `2026-06-30 08:35 UTC` **git_auto** — sync: 6 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, coach_shadow_log.jsonl +3 more | models=1 docs=1 other=4 | brain=adult dataset=246
 - `2026-06-30 08:36 UTC` **git_auto** — sync: 12 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +9 more | halim=2 models=5 docs=1 other=4 | brain=adult dataset=
+- `2026-06-30 08:36 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, HANOON.log.migrated.1782745557 +2 more | docs=1 other=4 | brain=adult dataset=2462
