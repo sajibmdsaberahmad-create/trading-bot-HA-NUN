@@ -14,10 +14,10 @@
     "last_at": "2026-06-30T18:02:22.750474+00:00"
   },
   "tail_loss": {
-    "count": 1,
+    "count": 3,
     "sessions": [],
-    "pnl_usd": -184.42,
-    "last_ticker": "EDBL",
-    "last_at": "2026-06-30T18:58:37.431154+00:00"
+    "pnl_usd": -519.02,
+    "last_ticker": "SVRE",
+    "last_at": "2026-06-30T19:02:13.925257+00:00"
   }
 }
