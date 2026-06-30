@@ -257,13 +257,9 @@ def assess_swing_exit(
     micro = build_swing_micro(runner, sym, tech=tech)
     bars_1h = _fetch_bars(runner, sym.upper(), "1 hour", "10 D")
 
-    # Scale slippage thresholds by maturity (looser when learning)
     level = profile["maturity_level"]
     slip_profit = profile["exit_slippage_profit"]
     slip_loss = profile["exit_slippage_loss"]
-
-    os.environ.setdefault("_SWING_DOCTRINE_SLIP_PROFIT", str(slip_profit))
-    os.environ.setdefault("_SWING_DOCTRINE_SLIP_LOSS", str(slip_loss))
 
     dx = assess_dynamic_exit(
         cfg,
@@ -275,6 +271,10 @@ def assess_swing_exit(
         micro=micro,
         df=bars_1h,
         bars_held=int(hold_days),
+        slip_profit_thr=slip_profit,
+        slip_loss_thr=slip_loss,
+        max_ride_bars=int(profile["max_ride_days"]),
+        min_profit_run=profile["min_profit_run"],
     )
 
     max_days = profile["max_ride_days"]
