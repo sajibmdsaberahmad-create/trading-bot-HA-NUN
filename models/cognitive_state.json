@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0654 or a more aggressive price still within y",
-    "Commander: green_profit_lock:ai_stall quick_scalp +228.70% (peak +228.70%)",
     "Review trade_closed on MSTU",
     "Commander: hard_take_profit",
     "Review trade_closed on BITO",
@@ -103,10 +101,12 @@
     "Review trade_closed on BIYA",
     "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- BIYA: pnl=$-0.15 slip=0",
     "RTH session live \u2014 profit hunt on stream bars while cache warms.",
-    "Spike-top hunt on CELZ: spike_top_intrabar: +1.07% vol=39088.0x"
+    "Spike-top hunt on CELZ: spike_top_intrabar: +1.07% vol=39088.0x",
+    "Spike-top hunt on BIYA: spike_top_intrabar: +1.70% vol=77654.0x",
+    "Spike-top hunt on CELZ: spike_top_intrabar: +0.62% vol=24301.0x"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 2,
-  "updated": "2026-06-30T18:58:52.525532"
+  "trades_observed": 16,
+  "updated": "2026-06-30T19:08:55.143510"
 }

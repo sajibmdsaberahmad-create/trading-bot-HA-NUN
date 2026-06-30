@@ -2874,3 +2874,5 @@
 {"timestamp":"2026-06-30T19:02:18.944767+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:02:18.945017+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:02:18.945093+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:08:54.983744+00:00","event":"export_action_gold","added":97,"skipped":18317}
+{"timestamp":"2026-06-30T19:08:55.013874+00:00","event":"export_action_gold","added":97,"skipped":18317}
