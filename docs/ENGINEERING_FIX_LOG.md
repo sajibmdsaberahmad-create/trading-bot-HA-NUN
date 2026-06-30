@@ -29,7 +29,10 @@ Mixin extraction moved methods into separate modules but only copied a minimal h
 | `core/scalper_exit_executor.py` | same |
 | `core/scalper_session.py` | same |
 | `core/scalper_spike_loop.py` | same |
-| `scripts/extract_scalper_mixins.py` | MIXIN_HEADER includes shared imports |
+| `core/scalper_filters.py` | **New** — `only_uptrend()` shared by runner + mixins |
+| `core/ai_commander_mixin_imports.py` | **New** — shared imports for ai_commander mixins (`get_ai_deploy_budget`, brackets, etc.) |
+| `core/ai_commander_entry.py` | `from core.ai_commander_mixin_imports import *` (+ exit/verdict/deferred) |
+| `core/scalper_session.py` | `_shutdown`: `pnl_pct=ib_pnl_pct` (was undefined `pnl_pct`) |
 
 ### Verify
 ```bash

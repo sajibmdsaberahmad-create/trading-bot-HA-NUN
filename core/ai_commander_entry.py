@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from core.config import BotConfig
+from core.ai_commander_mixin_imports import *  # noqa: F403
 from core.notify import log
 
 
