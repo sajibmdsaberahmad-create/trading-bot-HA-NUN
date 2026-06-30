@@ -562,27 +562,41 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 log.error(f"Fresh PPO model also failed: {exc2}")
                 self.model = None
     def _refresh_account_balance(self):
-        """Pull live balance from IB. Bot state changes ONLY via trades."""
+        """Pull live balance from IB Truth — bot state changes ONLY via IB fills."""
         try:
-            values = self.ib.accountValues()
-            for v in values:
-                if v.tag in ("NetLiquidation", "TotalCashValue"):
-                    if v.currency == self.cfg.CURRENCY:
-                        self.account_equity = float(v.value)
-                        if v.tag == "TotalCashValue":
-                            self.available_cash = float(v.value)
-            if self.available_cash is None:
-                self.available_cash = self.account_equity
-            self.cash = self.available_cash
-            if self._ib_starting_balance is None and self.account_equity > 0:
-                self._ib_starting_balance = self.account_equity
-                # Never overwrite INITIAL_CASH with full IB paper NAV — breaks Day P&L / Telegram baseline
-                if ai_full_capital_access(self.cfg):
-                    self.bot_cash = float(self.available_cash or self.account_equity)
-                    self.bot_nav = self.account_equity
-            self.cfg._latest_account_balance = self.account_equity
+            from core.ib_truth import apply_to_runner, ib_truth_enabled, refresh
+            if ib_truth_enabled(self.cfg):
+                snap = refresh(self.ib, self.cfg)
+                apply_to_runner(self, snap)
+            else:
+                values = self.ib.accountValues()
+                for v in values:
+                    if v.tag in ("NetLiquidation", "TotalCashValue"):
+                        if v.currency == self.cfg.CURRENCY:
+                            self.account_equity = float(v.value)
+                            if v.tag == "TotalCashValue":
+                                self.available_cash = float(v.value)
         except Exception as exc:
             log.debug(f"Could not fetch IB account balance: {exc}")
+            try:
+                values = self.ib.accountValues()
+                for v in values:
+                    if v.tag in ("NetLiquidation", "TotalCashValue"):
+                        if v.currency == self.cfg.CURRENCY:
+                            self.account_equity = float(v.value)
+                            if v.tag == "TotalCashValue":
+                                self.available_cash = float(v.value)
+            except Exception:
+                pass
+        if self.available_cash is None:
+            self.available_cash = self.account_equity
+        self.cash = self.available_cash
+        if self._ib_starting_balance is None and self.account_equity > 0:
+            self._ib_starting_balance = self.account_equity
+            if ai_full_capital_access(self.cfg):
+                self.bot_cash = float(self.available_cash or self.account_equity)
+                self.bot_nav = self.account_equity
+        self.cfg._latest_account_balance = self.account_equity
         if getattr(self.cfg, "USE_MULTI_POSITION", True) and self._position_slots:
             if not self._ib_sync_enabled():
                 self._recalc_bot_nav()
@@ -590,6 +604,12 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             if not self._ib_sync_enabled():
                 self.bot_nav = self.bot_cash + self.shares * self._latest_price()
         self._sync_bot_nav_from_ib()
+        try:
+            from core.war_ib_sync import sync_war_from_ib, war_ib_sync_enabled
+            if war_ib_sync_enabled(self.cfg):
+                sync_war_from_ib(self.ib, self.cfg, apply=True)
+        except Exception as exc:
+            log.debug(f"War IB sync on refresh: {exc}")
     def _deployable_cash(self) -> float:
         """Cash for new entries — war settled cash when war account enabled."""
         try:
@@ -1469,7 +1489,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             log.debug(f"Commander runtime: {exc}")
         try:
             from core.war_account import ensure_war_account
-            ensure_war_account(self.cfg)
+            ensure_war_account(self.cfg, ib=self.ib)
         except Exception as exc:
             log.debug(f"War account: {exc}")
         try:
