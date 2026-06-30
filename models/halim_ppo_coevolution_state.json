@@ -1,13 +1,13 @@
 {
-  "last_cycle": "2026-06-30T10:06:06.572227+00:00",
-  "trigger": "standalone_flush",
+  "last_cycle": "2026-06-30T10:57:02.804484+00:00",
+  "trigger": "live_session_end",
   "stats": {
-    "agreements": 1318,
-    "disagreements": 956,
-    "corrections_for_ppo": 954,
+    "agreements": 1394,
+    "disagreements": 960,
+    "corrections_for_ppo": 958,
     "corrections_for_halim": 2,
     "complements": 0,
-    "label_v2_events": 376,
+    "label_v2_events": 456,
     "legacy_mislabeled_skipped": 1984,
     "market_proved_ppo": 4,
     "market_proved_halim": 0,
@@ -15,16 +15,16 @@
   },
   "export": {
     "ok": true,
-    "added": 562,
-    "total": 562,
-    "events": 5405,
+    "added": 587,
+    "total": 587,
+    "events": 5485,
     "rewritten": true
   },
-  "cycles": 52,
+  "cycles": 53,
   "dialogue_export": {
     "ok": true,
-    "pairs": 5190,
-    "dialogue_lines": 2595,
+    "pairs": 5202,
+    "dialogue_lines": 2601,
     "rewritten": true
   }
 }

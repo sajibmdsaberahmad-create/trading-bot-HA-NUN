@@ -1,7 +1,7 @@
 {
   "profile": "m2_8gb",
   "detected_ram_mb": 8192,
-  "updated_at": "2026-06-30T10:06:05.106292+00:00",
+  "updated_at": "2026-06-30T10:57:01.290125+00:00",
   "ram_mb_max": 10240,
   "ram_tier": "compact",
   "ppo_micro_steps": 512,
