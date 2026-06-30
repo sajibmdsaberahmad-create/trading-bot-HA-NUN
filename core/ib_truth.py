@@ -80,6 +80,7 @@ class IBTruthSnapshot:
     ticker_pnl_fifo: Dict[str, float] = field(default_factory=dict)
     refreshed_at: float = 0.0
     session_since_ts: float = 0.0
+    session_scope: str = "rth"
 
     def long_positions(self) -> Dict[str, IBPosition]:
         return {p.symbol: p for p in self.positions if p.qty > 0}
@@ -105,15 +106,25 @@ def ib_truth_enabled(cfg: Optional["BotConfig"] = None) -> bool:
     return require_ib_fill_sync(cfg)
 
 
-def session_start_ts_et() -> float:
-    try:
-        from core.market_hours import now_et
-        et = now_et()
-        start = et.replace(hour=0, minute=0, second=0, microsecond=0)
-        return start.timestamp()
-    except Exception:
-        today = datetime.now(timezone.utc).date()
-        return datetime(today.year, today.month, today.day, tzinfo=timezone.utc).timestamp()
+def session_start_ts_et(cfg: Optional["BotConfig"] = None) -> float:
+    """Deprecated alias — use rth_session.ib_truth_session_start_ts."""
+    from core.rth_session import ib_truth_session_start_ts
+    return ib_truth_session_start_ts(cfg)
+
+
+def _rth_fills_only(cfg: Optional["BotConfig"] = None) -> bool:
+    return os.getenv("IB_TRUTH_RTH_FILLS_ONLY", "true").lower() in ("1", "true", "yes")
+
+
+def filter_rth_executions(
+    executions: List[IBExecution],
+    cfg: Optional["BotConfig"] = None,
+) -> List[IBExecution]:
+    """Keep only fills inside 09:30–16:00 ET when IB_TRUTH_RTH_FILLS_ONLY=true."""
+    if not _rth_fills_only(cfg):
+        return executions
+    from core.rth_session import execution_in_rth_window
+    return [ex for ex in executions if execution_in_rth_window(ex.ts, cfg)]
 
 
 def _execution_ts(ex) -> float:

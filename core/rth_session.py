@@ -24,6 +24,45 @@ def _today_rth_open(cfg: Optional[BotConfig] = None) -> datetime:
     return now.replace(hour=h, minute=m, second=0, microsecond=0)
 
 
+def rth_session_start_ts(cfg: Optional[BotConfig] = None) -> float:
+    """09:30 ET today as unix timestamp — matches war RTH session reset."""
+    return _today_rth_open(cfg).timestamp()
+
+
+def rth_session_end_ts(cfg: Optional[BotConfig] = None) -> float:
+    """16:00 ET today as unix timestamp."""
+    return _today_rth_close(cfg).timestamp()
+
+
+def execution_in_rth_window(ts: float, cfg: Optional[BotConfig] = None) -> bool:
+    """True when IB execution time falls inside 09:30–16:00 ET on that calendar day."""
+    if ts <= 0:
+        return False
+    dt = datetime.fromtimestamp(ts, tz=MARKET_TZ)
+    open_dt = dt.replace(hour=RTH_OPEN_HHMM[0], minute=RTH_OPEN_HHMM[1], second=0, microsecond=0)
+    close_dt = dt.replace(hour=RTH_CLOSE_HHMM[0], minute=RTH_CLOSE_HHMM[1], second=0, microsecond=0)
+    return open_dt <= dt < close_dt
+
+
+def ib_truth_session_start_ts(cfg: Optional[BotConfig] = None) -> float:
+    """
+    Session window for IB Truth FIFO PnL.
+    Default: 09:30 ET (RTH bell) — aligned with war trip reset, not calendar midnight.
+  """
+    import os
+    cfg = cfg or BotConfig()
+    if os.getenv("IB_TRUTH_RTH_SESSION", "true").lower() in ("0", "false", "no"):
+        from datetime import datetime, timezone
+        try:
+            now = now_et()
+            start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            return start.timestamp()
+        except Exception:
+            today = datetime.now(timezone.utc).date()
+            return datetime(today.year, today.month, today.day, tzinfo=timezone.utc).timestamp()
+    return rth_session_start_ts(cfg)
+
+
 def _today_rth_close(cfg: Optional[BotConfig] = None) -> datetime:
     now = now_et()
     h, m = RTH_CLOSE_HHMM
