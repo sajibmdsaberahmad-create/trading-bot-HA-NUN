@@ -62,19 +62,38 @@ def halim_entry_await_sec(cfg: Optional[BotConfig] = None) -> float:
     return 0.0
 
 
+def _safe_confidence_value(raw: str) -> Optional[float]:
+    """Parse confidence token; tolerate toddler trailing punctuation (e.g. 0.54.)."""
+    import re
+
+    s = (raw or "").strip().rstrip(".,;:%)]}")
+    if not s:
+        return None
+    try:
+        v = float(s)
+    except ValueError:
+        m = re.search(r"(\d+(?:\.\d+)?)", s)
+        if not m:
+            return None
+        try:
+            v = float(m.group(1))
+        except ValueError:
+            return None
+    return v / 100.0 if v > 1.0 else v
+
+
 def _extract_echo_confidence(text: str) -> Optional[float]:
     import re
     for pat in (
-        r"ppo_conf\s*=\s*([\d.]+)",
-        r"(?:^|[\s{])conf\s*=\s*([\d.]+)",
-        r"ppo\s*=\s*([\d.]+)",
+        r"ppo_conf\s*=\s*(\d+(?:\.\d+)?)",
+        r"(?:^|[\s{])conf\s*=\s*(\d+(?:\.\d+)?)",
+        r"ppo\s*=\s*(\d+(?:\.\d+)?)",
         r"ppo\s+(\d+(?:\.\d+)?)\s*%",
         r"PPO\s+(\d+(?:\.\d+)?)\s*%",
     ):
         m = re.search(pat, text, re.I)
         if m:
-            v = float(m.group(1))
-            return v / 100.0 if v > 1.0 else v
+            return _safe_confidence_value(m.group(1))
     return None
 
 
@@ -259,11 +278,9 @@ def _parse_entry_lm_response(raw: str) -> Dict[str, Any]:
         elif re.search(r'"enter"\s*:\s*false\b', text, re.I):
             enter = False
     conf = None
-    m = re.search(r'confidence["\s:=]+([0-9.]+)', text, re.I)
+    m = re.search(r'confidence["\s:=]+(\d+(?:\.\d+)?)', text, re.I)
     if m:
-        conf = float(m.group(1))
-        if conf > 1.0:
-            conf /= 100.0
+        conf = _safe_confidence_value(m.group(1))
     if enter is None and conf is not None:
         enter = conf >= 0.55
     if enter is None:
@@ -352,8 +369,13 @@ class HalimEntryLine:
 
     def _run(self, key: str, seq: int, prompt: str) -> None:
         t0 = time.time()
-        raw = self._halim_complete(prompt)
-        parsed = _parse_entry_lm_response(raw)
+        try:
+            raw = self._halim_complete(prompt)
+            parsed = _parse_entry_lm_response(raw)
+        except Exception as exc:
+            log.warning(f"  🧠 Halim entry LM error {key}: {exc}")
+            raw = ""
+            parsed = {}
         elapsed_ms = (time.time() - t0) * 1000
         with self._lock:
             slot = self._slots.get(key)

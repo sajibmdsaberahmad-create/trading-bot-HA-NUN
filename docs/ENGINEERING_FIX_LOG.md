@@ -76,6 +76,33 @@ python3 halim/scripts/register_checkpoint.py toddler_v1
 
 ---
 
+## 2026-06-30 — Halim echo confidence parse crash (`0.54.`)
+
+### Problem
+`halim-entry-*` thread died on `ValueError: could not convert string to float: '0.54.'` in `_extract_echo_confidence`. KTTA then logged repeated await timeouts and `Halim empty` / `in_flight`.
+
+### Root cause
+Toddler LM echoed training lines with trailing punctuation after numeric confidence (`ppo_conf=0.54.`). Regex `[\d.]+` captured the extra dot; bare `float()` raised uncaught in `_run`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_entry_line.py` | `_safe_confidence_value()`; tighter numeric regex; try/except in `_run` |
+
+### Verify
+```bash
+python3 -c "
+from core.halim_entry_line import _parse_entry_lm_response
+r = _parse_entry_lm_response('ppo_conf=0.54. ppo=hold entry_decision: skip')
+print(r.get('confidence'), r.get('enter'))
+"
+```
+
+### Notes
+IB Error **201 closing-only** on CUPR is account/risk restriction — existing `parse_ib_order_block` + `_ai_skip_ticker_permanent` path applies on structural rejects; not a Halim bug.
+
+---
+
 ## 2026-06-30 — War replay ledger isolation (code)
 
 ### Problem
