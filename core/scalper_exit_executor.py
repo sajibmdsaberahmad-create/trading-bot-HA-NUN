@@ -354,6 +354,23 @@ class ScalperExitMixin:
 
         self._apply_trade_close_learning(trade_rec, ticker)
         try:
+            slot = pending.slot if pending else (getattr(self, "_position_slots", {}) or {}).get(ticker, {})
+            if str(slot.get("horizon", "scalp")) == "swing":
+                from core.swing_learning import record_swing_ib_close
+                record_swing_ib_close(
+                    self.cfg,
+                    symbol=ticker,
+                    shares=qty,
+                    entry_px=float(trade_rec.get("entry_fill") or slot.get("entry_fill_px") or 0),
+                    exit_px=exit_fill,
+                    pnl_usd=pnl,
+                    opened_at=float(slot.get("opened_at", 0) or 0),
+                    capital_phase=str(slot.get("capital_phase", "")),
+                    exit_reason=str(pending.reason or "")[:80],
+                )
+        except Exception as exc:
+            log.debug(f"swing close learn: {exc}")
+        try:
             from core.lottery_bank import on_trade_closed
             on_trade_closed(
                 self.cfg, self.notifier, trade_rec,

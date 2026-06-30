@@ -344,7 +344,14 @@ class ScalperEntryMixin:
             "last_ai_position_manage": 0.0,
             "last_stagnation_decision": {},
             "vision_read": vision_read[:800],
+            "horizon": "scalp",
+            "capital_phase": "",
         }
+        try:
+            from core.capital_phase import capital_phase
+            slot["capital_phase"] = capital_phase(self.cfg, self)
+        except Exception:
+            pass
         lot_meta = self._pending_lottery_meta.pop(ticker.upper(), {})
         if lot_meta.get("lottery_bank"):
             slot.update({
@@ -962,6 +969,13 @@ class ScalperEntryMixin:
         current_px: float,
     ) -> str:
         """Place bracket entry from an AI/council decision (non-blocking poll path)."""
+        try:
+            from core.swing_executor import scalp_blocked_by_swing
+            if scalp_blocked_by_swing(self, ticker):
+                log.debug(f"  Scalp skip {ticker}: swing line open on IB")
+                return "swing_block"
+        except Exception:
+            pass
         bid = market_ctx.get("bid")
         ask = market_ctx.get("ask")
         avg_volume = float(market_ctx.get("avg_volume", 0))

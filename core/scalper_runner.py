@@ -1852,6 +1852,12 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                     except Exception:
                         pass
                     try:
+                        from core.swing_executor import monitor_swing_ib_slots, run_swing_ib_cycle
+                        monitor_swing_ib_slots(self, self.cfg)
+                        run_swing_ib_cycle(self, self.cfg)
+                    except Exception:
+                        pass
+                    try:
                         fast_df = self.data.get_fast_bar_dataframe(n=60)
                         if fast_df is not None and len(fast_df) >= 30:
                             self._ai_update_buffers(fast_df, current_px)
@@ -2071,8 +2077,10 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                             from core.ib_extended import ib_extended_enabled
                             from core.swing_paper import sync_swing_paper_from_shadow_verdicts
                             from core.ppo_swing_train import train_ppo_swing_from_shadow
+                            from core.swing_learning import ingest_ib_swing_round_trips
 
                             run_swing_shadow_scan(self, self.cfg)
+                            ingest_ib_swing_round_trips(self.cfg)
                             update_scalp_gate_from_ib(self.cfg)
                             if ib_extended_enabled():
                                 refresh_all_ib_services(

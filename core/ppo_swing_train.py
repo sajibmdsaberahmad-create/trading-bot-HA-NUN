@@ -23,7 +23,32 @@ VERDICT_PATH = MODELS_DIR / "swing_shadow_verdicts.jsonl"
 
 
 def train_ppo_swing_from_shadow(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
-    """Aggregate swing shadow verdicts into a simple bias policy file."""
+    """Aggregate swing IB trips (preferred) or shadow verdicts into policy file."""
+    try:
+        from core.swing_learning import read_swing_trips
+        trips = read_swing_trips()
+        if len(trips) >= int(os.getenv("PPO_SWING_MIN_TRIPS", "5")):
+            wins = sum(1 for t in trips if float(t.get("pnl_usd", 0) or 0) > 0)
+            multi = sum(1 for t in trips if t.get("multi_day"))
+            out = {
+                "version": 2,
+                "horizon": "swing",
+                "source": "ib_trips",
+                "trip_rows": len(trips),
+                "win_rate_pct": round(wins / max(len(trips), 1) * 100, 1),
+                "multi_day_trips": multi,
+                "avg_hold_days": round(
+                    sum(float(t.get("hold_days", 0) or 0) for t in trips) / len(trips), 2,
+                ),
+                "symbols": sorted({str(t.get("symbol", "")).upper() for t in trips if t.get("symbol")}),
+            }
+            MODELS_DIR.mkdir(parents=True, exist_ok=True)
+            WEIGHTS_PATH.write_text(json.dumps(out, indent=2), encoding="utf-8")
+            log.info(f"PPO swing weights (IB trips) → {WEIGHTS_PATH.name} ({len(trips)} trips)")
+            return {"ok": True, "path": str(WEIGHTS_PATH), **out}
+    except Exception as exc:
+        log.debug(f"ppo swing ib trips: {exc}")
+
     if not VERDICT_PATH.exists():
         return {"ok": False, "reason": "no_verdicts"}
     bias_counts: Counter = Counter()
