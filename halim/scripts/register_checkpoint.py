@@ -50,9 +50,10 @@ def main() -> int:
     gate_force = os.getenv("HALIM_PROMOTION_FORCE", "").lower() in ("1", "true", "yes")
     gate_disabled = os.getenv("HALIM_PROMOTION_GATE", "true").lower() in ("0", "false", "no")
 
-    if not gate_disabled and not gate_force:
-        if str(ROOT) not in sys.path:
-            sys.path.insert(0, str(ROOT))
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+
+    if not gate_disabled:
         try:
             from core.halim_promotion_gate import try_promote_halim_checkpoint
             from core.config import BotConfig
@@ -60,8 +61,24 @@ def main() -> int:
             promo = try_promote_halim_checkpoint(
                 args.name,
                 cfg=BotConfig(),
-                force=False,
+                force=gate_force,
             )
+            if promo.get("promoted"):
+                registry = ROOT / "halim/data/registry.jsonl"
+                row = {
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "event": "register_checkpoint",
+                    "name": args.name,
+                    "latest": str(latest),
+                    "gate": "pass" if not gate_force else "force",
+                }
+                with open(registry, "a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(row) + "\n")
+                try:
+                    from core.halim_identity import write_halim_manifest
+                    write_halim_manifest()
+                except Exception:
+                    pass
             print(json.dumps({
                 "ok": promo.get("ok", False),
                 "promoted": promo.get("promoted", False),
