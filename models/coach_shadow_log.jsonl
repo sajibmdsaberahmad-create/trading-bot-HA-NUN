@@ -4969,3 +4969,14 @@
 {"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1038233.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:08.119092+00:00"}
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":194777.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:13.689600+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.7382211423934486,"shadow_only":true,"timestamp":"2026-06-30T11:50:17.032262+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":823819.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:22.833833+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":624.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:25.950286+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":7495.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:30.147096+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":432325.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:33.095630+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:36.288262+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":582842.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:42.469221+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:45.980446+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":104770.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:49.942588+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":805360.0,"shadow_only":true,"timestamp":"2026-06-30T11:50:55.325831+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.8110627244241764,"shadow_only":true,"timestamp":"2026-06-30T11:50:58.592845+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":149601.0,"shadow_only":true,"timestamp":"2026-06-30T11:51:02.641634+00:00"}
