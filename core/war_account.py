@@ -177,6 +177,7 @@ def _default_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         "mode": "LIVE_WAR" if live else "WAR_ACTIVE",
         "is_live": live,
         "session_date": _today_key(),
+        "rth_rolled_date": None,
         "open_war": None,
         "open_lab": None,
         "session_pnl_war": 0.0,
@@ -216,14 +217,8 @@ def _append_ledger(row: Dict[str, Any]) -> None:
         fh.write(json.dumps(row, separators=(",", ":"), default=str) + "\n")
 
 
-def _roll_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
-    today = _today_key()
-    if state.get("session_date") == today:
-        return
-    cap = operating_capital_usd(cfg)
-    lab = lab_capital_usd(cfg) if lab_enabled(cfg) else 0.0
+def _reset_session_counters(state: Dict[str, Any]) -> None:
     state.update({
-        "session_date": today,
         "round_trips_today": 0,
         "entries_today": 0,
         "fee_drag_today": 0.0,
@@ -234,16 +229,100 @@ def _roll_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> Non
         "ticker_session_pnl": {},
         "ticker_session_losses": {},
     })
-    if not is_live_war(cfg):
-        state["nav"] = cap
-        state["cash"] = cap
-        state["settled_cash"] = cap
-        state["unsettled"] = []
-        state["deployed_usd"] = 0.0
-        if lab > 0:
-            state["lab_nav"] = lab
-            state["lab_cash"] = lab
-            state["lab_settled"] = lab
+
+
+def _apply_fresh_session_capital(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
+    """Restore war/lab pools to configured operating capital (paper $3.5k / live $1k)."""
+    cfg = cfg or BotConfig()
+    cap = operating_capital_usd(cfg)
+    lab = lab_capital_usd(cfg) if lab_enabled(cfg) else 0.0
+    state["operating_capital"] = cap
+    state["nav"] = cap
+    state["cash"] = cap
+    state["settled_cash"] = cap
+    state["unsettled"] = []
+    state["deployed_usd"] = 0.0
+    state["bullets_total"] = _env_int("WAR_BULLETS", int(state.get("bullets_total", 5)))
+    if lab > 0:
+        state["lab_capital"] = lab
+        state["lab_nav"] = lab
+        state["lab_cash"] = lab
+        state["lab_settled"] = lab
+
+
+def _war_auto_reset_at_rth_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    return os.getenv("WAR_AUTO_RESET_AT_RTH", "true").lower() in ("1", "true", "yes")
+
+
+def _roll_rth_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> bool:
+    """
+    Fresh war/lab budget + zero trip counters at 09:30 ET each session day.
+
+    Premarket exhausts round-trip caps; RTH open gets a clean pool without manual reset.
+    Paper uses WAR_CAPITAL_USD (default $3.5k); live uses WAR_LIVE_OPERATING_CAPITAL ($1k).
+    """
+    cfg = cfg or BotConfig()
+    if not _war_auto_reset_at_rth_enabled(cfg):
+        return False
+    if is_replay_session():
+        return False
+    try:
+        from core.rth_session import is_rth
+        if not is_rth(cfg):
+            return False
+    except Exception:
+        return False
+    today = _today_key()
+    if state.get("rth_rolled_date") == today:
+        return False
+    if state.get("open_war") or state.get("open_lab"):
+        log.info(
+            "⚔️ War RTH reset skipped — open position carried from extended hours"
+        )
+        state["rth_rolled_date"] = today
+        return False
+
+    _reset_session_counters(state)
+    _apply_fresh_session_capital(state, cfg)
+    state["rth_rolled_date"] = today
+    state["mode"] = "LIVE_WAR" if is_live_war(cfg) else "WAR_ACTIVE"
+    _append_ledger({
+        "event": "rth_session_reset",
+        "session_date": today,
+        "mode": state.get("mode"),
+        "nav": state.get("nav"),
+        "lab_settled": state.get("lab_settled"),
+        "ts": time.time(),
+    })
+    log.info(
+        f"⚔️ War account RTH reset (ET) — mode={state['mode']} "
+        f"nav=${float(state.get('nav', 0)):,.0f} settled=${float(state.get('settled_cash', 0)):,.0f} "
+        f"lab=${float(state.get('lab_settled', 0)):,.0f} trips=0"
+    )
+    return True
+
+
+def _roll_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
+    today = _today_key()
+    if state.get("session_date") != today:
+        cap = operating_capital_usd(cfg)
+        lab = lab_capital_usd(cfg) if lab_enabled(cfg) else 0.0
+        state.update({
+            "session_date": today,
+            "rth_rolled_date": None,
+        })
+        _reset_session_counters(state)
+        if not is_live_war(cfg):
+            state["nav"] = cap
+            state["cash"] = cap
+            state["settled_cash"] = cap
+            state["unsettled"] = []
+            state["deployed_usd"] = 0.0
+            if lab > 0:
+                state["lab_nav"] = lab
+                state["lab_cash"] = lab
+                state["lab_settled"] = lab
+    _roll_rth_session(state, cfg)
 
 
 def _apply_settlement(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
