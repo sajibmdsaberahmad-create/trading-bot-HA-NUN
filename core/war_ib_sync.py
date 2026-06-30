@@ -27,6 +27,30 @@ from core.notify import log
 _REPO = Path(__file__).resolve().parents[1]
 LEDGER_PATH = _REPO / "models" / "war_account_ledger.jsonl"
 
+_last_war_sync_ts: float = 0.0
+_last_war_sync_sig: tuple = ()
+
+
+def _war_sync_interval_sec(cfg: Optional[BotConfig] = None) -> float:
+    import os
+    try:
+        return max(15.0, float(os.getenv("WAR_IB_SYNC_INTERVAL_SEC", "90")))
+    except (TypeError, ValueError):
+        return 90.0
+
+
+def _war_sync_signature(state: Dict[str, Any], pos_result: Dict[str, Any]) -> tuple:
+    wars = state.get("open_wars") or {}
+    keys = tuple(sorted(wars.keys()))
+    shares = tuple(sorted((k, int(v.get("shares", 0) or 0)) for k, v in wars.items()))
+    return (
+        round(float(state.get("nav", 0) or 0), 2),
+        round(float(state.get("session_pnl_war", 0) or 0), 2),
+        int(pos_result.get("war_slots", 0) or 0),
+        keys,
+        shares,
+    )
+
 # Re-export for scripts/tests
 __all__ = [
     "sync_war_from_ib",
@@ -270,12 +294,20 @@ def sync_war_from_ib(
     cfg: Optional[BotConfig] = None,
     *,
     apply: bool = False,
+    force: bool = False,
 ) -> Dict[str, Any]:
     from core.war_account import _append_ledger, load_state, save_state, war_account_enabled
+
+    global _last_war_sync_ts, _last_war_sync_sig
 
     cfg = cfg or BotConfig()
     if not war_account_enabled(cfg) or not war_ib_sync_enabled(cfg):
         return {"ok": False, "reason": "disabled"}
+
+    now = time.time()
+    interval = _war_sync_interval_sec(cfg)
+    if apply and not force and (now - _last_war_sync_ts) < interval:
+        return {"ok": True, "skipped": "throttle", "next_in_sec": round(interval - (now - _last_war_sync_ts), 1)}
 
     state = load_state(cfg)
     cap_changed = _align_operating_capital(state, cfg)
@@ -293,21 +325,40 @@ def sync_war_from_ib(
     }
 
     if apply:
-        save_state(state)
-        _append_ledger({
-            "event": "war_ib_sync",
-            "capital_aligned": cap_changed,
-            "war_slots": pos_result.get("war_slots", 0),
-            "session_pnl_war": pnl_result.get("session_pnl_war", 0),
-            "monitor_only": pos_result.get("monitor_only", []),
-            "dropped": pos_result.get("dropped", []),
-            "ts": time.time(),
-        })
-        log.info(
-            f"⚔️ War IB sync applied — nav=${float(state.get('nav', 0)):,.0f} "
-            f"session_pnl=${float(state.get('session_pnl_war', 0)):+.2f} "
-            f"slots={pos_result.get('war_slots', 0)}"
+        sig = _war_sync_signature(state, pos_result)
+        changed = sig != _last_war_sync_sig
+        material = (
+            changed
+            or cap_changed
+            or pos_result.get("adopted")
+            or pos_result.get("dropped")
         )
+        if material or force:
+            save_state(state)
+            _last_war_sync_ts = now
+            _last_war_sync_sig = sig
+            if material:
+                _append_ledger({
+                    "event": "war_ib_sync",
+                    "capital_aligned": cap_changed,
+                    "war_slots": pos_result.get("war_slots", 0),
+                    "session_pnl_war": pnl_result.get("session_pnl_war", 0),
+                    "monitor_only": pos_result.get("monitor_only", []),
+                    "dropped": pos_result.get("dropped", []),
+                    "ts": now,
+                })
+                log.info(
+                    f"⚔️ War IB sync — nav=${float(state.get('nav', 0)):,.0f} "
+                    f"session_pnl=${float(state.get('session_pnl_war', 0)):+.2f} "
+                    f"slots={pos_result.get('war_slots', 0)}"
+                )
+            else:
+                log.debug(
+                    f"War IB sync unchanged — nav=${float(state.get('nav', 0)):,.0f} "
+                    f"slots={pos_result.get('war_slots', 0)}"
+                )
+        else:
+            result["skipped"] = "unchanged"
 
     return result
 
