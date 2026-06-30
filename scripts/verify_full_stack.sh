@@ -170,6 +170,7 @@ log ""
 log "▶ Post-session artifacts"
 check "action log" test -f "$ROOT/halim/data/actions/action_log.jsonl"
 check "coevolution log" test -f "$ROOT/halim/data/coevolution/correction_log.jsonl"
+check "coevolution status" ./scripts/coevolution_status.sh >/dev/null
 check "halim identity" test -f "$ROOT/models/halim_identity.json"
 check "experience buffer" test -f "$ROOT/models/experience_buffer.jsonl"
 grep -q "Halim git auto-push skipped during REPLAY\|Replay git\|co-evolution\|Graceful shutdown" \

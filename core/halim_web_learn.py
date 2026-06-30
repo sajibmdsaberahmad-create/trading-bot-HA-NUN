@@ -104,13 +104,9 @@ def validate_learn_url(url: str, cfg: Optional[BotConfig] = None) -> Tuple[bool,
 
 
 def _html_to_text(html: str, max_chars: int = 12000) -> str:
-    html = re.sub(r"(?is)<script[^>]*>.*?</script>", " ", html)
-    html = re.sub(r"(?is)<style[^>]*>.*?</style>", " ", html)
-    html = re.sub(r"(?is)<nav[^>]*>.*?</nav>", " ", html)
-    html = re.sub(r"(?is)<footer[^>]*>.*?</footer>", " ", html)
-    text = re.sub(r"<[^>]+>", " ", html)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text[:max_chars]
+    from core.halim_learn_rag import sanitize_learn_text
+
+    return sanitize_learn_text(html, max_chars=max_chars)
 
 
 def _fetch_read_only(url: str, timeout: float = 20.0) -> Tuple[str, str]:

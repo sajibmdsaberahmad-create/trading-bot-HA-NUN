@@ -156,9 +156,13 @@ def filter_unconsumed_bars(
     return out, skipped
 
 
+def _min_steps_for_trim() -> int:
+    return max(1, int(os.getenv("REPLAY_MIN_STEPS_FOR_TRIM", "50")))
+
+
 def walked_ticker_ranges(hub: "ReplayMarketHub") -> Dict[str, Tuple[pd.Timestamp, pd.Timestamp]]:
     """Per-ticker min/max timestamps actually walked this session."""
-    end_i = len(hub._timeline) if hub.finished else max(0, hub._idx)
+    end_i = max(0, hub._idx)
     out: Dict[str, Tuple[pd.Timestamp, pd.Timestamp]] = {}
     for ticker in hub.tickers:
         times: List[pd.Timestamp] = []
@@ -195,8 +199,8 @@ def record_replay_session_consumed(
             "start": start.isoformat(),
             "end": end.isoformat(),
             "file_fp": fp,
-            "complete": bool(hub.finished),
-            "steps": hub._idx if not hub.finished else len(hub._timeline),
+            "complete": bool(getattr(hub, "timeline_complete", hub.finished)),
+            "steps": hub._idx,
         }
         _append_ledger(row)
         recorded.append(ticker.upper())
@@ -205,12 +209,14 @@ def record_replay_session_consumed(
         "ok": True,
         "session_id": session_id,
         "tickers": recorded,
-        "complete": bool(hub.finished),
+        "complete": bool(getattr(hub, "timeline_complete", hub.finished)),
+        "steps_walked": hub._idx,
         "trigger": trigger,
     }
+    complete = bool(getattr(hub, "timeline_complete", hub.finished))
     log.info(
         f"📒 Replay consumption recorded — {len(recorded)} tickers "
-        f"({'full timeline' if hub.finished else 'partial'})"
+        f"({hub._idx:,} steps · {'full timeline' if complete else 'partial'})"
     )
     return result
 
@@ -352,20 +358,41 @@ def finalize_replay_session(
     """
     result: Dict[str, Any] = {"trigger": trigger, "steps": {}}
 
-    if hub is not None:
+    steps_walked = hub._idx if hub is not None else 0
+    min_trim = _min_steps_for_trim()
+    skip_trim = hub is not None and steps_walked < min_trim and not getattr(
+        hub, "timeline_complete", hub.finished
+    )
+
+    if hub is not None and not skip_trim:
         try:
             result["steps"]["record"] = record_replay_session_consumed(hub, trigger=trigger)
         except Exception as exc:
             result["steps"]["record"] = {"ok": False, "error": str(exc)[:120]}
+    elif skip_trim:
+        result["steps"]["record"] = {
+            "ok": False,
+            "skipped": True,
+            "reason": f"only {steps_walked} steps (< {min_trim}) — CSVs kept for retry",
+        }
+        if verbose:
+            print(
+                f"⏭  Replay too short ({steps_walked} steps) — skipping trim/purge "
+                f"(need ≥{min_trim} or full timeline)",
+                flush=True,
+            )
 
-    try:
-        result["steps"]["trim"] = trim_consumed_replay_bars(verbose=verbose)
-    except Exception as exc:
-        result["steps"]["trim"] = {"ok": False, "error": str(exc)[:120]}
+    if skip_trim:
+        result["steps"]["trim"] = {"ok": True, "skipped": True, "reason": "session_too_short"}
+    else:
+        try:
+            result["steps"]["trim"] = trim_consumed_replay_bars(verbose=verbose)
+        except Exception as exc:
+            result["steps"]["trim"] = {"ok": False, "error": str(exc)[:120]}
 
     result["steps"]["unconsumed"] = farm_unconsumed_stats()
 
-    if purge_all_on_stop() or farm_fully_consumed():
+    if not skip_trim and (purge_all_on_stop() or farm_fully_consumed()):
         try:
             from core.replay_data_housekeeping import purge_replay_farm
             result["steps"]["purge"] = purge_replay_farm(verbose=verbose, force=True)

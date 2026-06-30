@@ -155,13 +155,25 @@ def _capability_summary() -> Dict[str, Any]:
     return {"action_counts": counts, "action_gold_pairs": gold_n}
 
 
+_CHAT_PURPOSES = frozenset({
+    "chat", "commander_chat", "dialogue", "companion", "copilot",
+})
+_NOTIFY_PURPOSES = frozenset({"notify"})
+
+
 def complete_reasoning(prompt: str, purpose: str = "reasoning") -> Dict[str, Any]:
     """
     Slow path — Halim LM inference. Returns structured result; never raises.
     """
     max_tokens = int(os.getenv("HALIM_MAX_TOKENS", "512"))
     temperature = float(os.getenv("HALIM_TEMPERATURE", "0.7"))
-    if purpose in ("entry_decision", "exit_decision"):
+    if purpose in _CHAT_PURPOSES:
+        max_tokens = int(os.getenv("HALIM_CHAT_MAX_TOKENS", "72"))
+        temperature = float(os.getenv("HALIM_CHAT_TEMPERATURE", "0.28"))
+    elif purpose in _NOTIFY_PURPOSES:
+        max_tokens = int(os.getenv("HALIM_NOTIFY_MAX_TOKENS", "120"))
+        temperature = float(os.getenv("HALIM_NOTIFY_TEMPERATURE", "0.35"))
+    elif purpose in ("entry_decision", "exit_decision"):
         if purpose == "entry_decision":
             max_tokens = int(os.getenv("HALIM_ENTRY_MAX_TOKENS", "72"))
             temperature = float(os.getenv("HALIM_ENTRY_TEMPERATURE", "0.12"))

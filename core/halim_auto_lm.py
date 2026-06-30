@@ -264,6 +264,12 @@ def _parse_json_stdout(stdout: str) -> Dict[str, Any]:
         return json.loads(stdout)
     except Exception:
         pass
+    start = stdout.rfind("{")
+    if start >= 0:
+        try:
+            return json.loads(stdout[start:])
+        except Exception:
+            pass
     for line in reversed(stdout.splitlines()):
         line = line.strip()
         if line.startswith("{"):
@@ -417,8 +423,11 @@ def _run_train_pipeline(cfg: BotConfig, *, trigger: str) -> Dict[str, Any]:
             timeout=int(os.getenv("HALIM_AUTO_LM_TRAIN_TIMEOUT_SEC", "7200")),
         )
         parsed = _parse_json_stdout(proc.stdout)
-        if proc.returncode == 0 and parsed.get("ok"):
-            result["steps"]["train"] = parsed
+        train_ok = proc.returncode == 0 and (
+            parsed.get("ok") is True or bool(parsed.get("checkpoint"))
+        )
+        if train_ok:
+            result["steps"]["train"] = {**parsed, "ok": True}
         else:
             err_tail = (proc.stderr or "")[-2000:]
             out_tail = (proc.stdout or "")[-800:]

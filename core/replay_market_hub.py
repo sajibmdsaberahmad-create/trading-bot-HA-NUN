@@ -60,6 +60,7 @@ class ReplayMarketHub:
         self._current_time: Optional[pd.Timestamp] = None
         self._idx = 0
         self._finished = False
+        self._stopped = False
         self._feeding = False
         self._prev_ts: Optional[pd.Timestamp] = None
         self._lock = threading.Lock()
@@ -72,6 +73,14 @@ class ReplayMarketHub:
     @property
     def finished(self) -> bool:
         return self._finished
+
+    @property
+    def steps_walked(self) -> int:
+        return self._idx
+
+    @property
+    def timeline_complete(self) -> bool:
+        return self._finished and not self._stopped
 
     def _load_all(self) -> None:
         if self.root is None:
@@ -216,4 +225,5 @@ class ReplayMarketHub:
         return sub.iloc[-1]
 
     def stop(self) -> None:
-        self._finished = True
+        """Session ending — do not mark timeline finished (consumption uses _idx only)."""
+        self._stopped = True

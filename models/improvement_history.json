@@ -1,38 +1,20 @@
 [
   {
-    "timestamp": "2026-06-29T19:16:17.429844+00:00",
+    "timestamp": "2026-06-30T06:13:32.718345+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
-      "Review trade_closed on SOXS"
+      "Review trade_closed on NVDA"
     ]
   },
   {
-    "timestamp": "2026-06-29T19:16:29.669990+00:00",
+    "timestamp": "2026-06-30T06:14:38.193432+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
-      "Review trade_closed on MSTU"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T19:17:13.830237+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on INLF"
-    ]
-  },
-  {
-    "timestamp": "2026-06-29T19:17:42.350037+00:00",
-    "source": "runtime_trade_closed",
-    "adjustments": {},
-    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
-    "lessons": [
-      "Review trade_closed on BITO"
+      "Review trade_closed on NVDA"
     ]
   }
 ]

@@ -1,9 +1,9 @@
 {
   "fee_bleed": {
-    "count": 2,
+    "count": 5,
     "sessions": [],
-    "pnl_usd": -1.06,
-    "last_ticker": "BITO",
-    "last_at": "2026-06-29T19:17:40.950043+00:00"
+    "pnl_usd": -2.72,
+    "last_ticker": "NVDA",
+    "last_at": "2026-06-30T06:13:26.428834+00:00"
   }
 }

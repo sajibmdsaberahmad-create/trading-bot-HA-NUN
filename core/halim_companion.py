@@ -48,6 +48,21 @@ STATUS_PATTERNS = (
 THANKS_PATTERNS = (r"^(thanks|thank\s+you|thx|ty|appreciate)\b",)
 GOODBYE_PATTERNS = (r"^(bye|goodbye|see\s+you|later|gn|good\s+night)\b",)
 
+_DEGENERATE_MARKERS = (
+    "COMPANIONITY",
+    "LIVE SNAPSHOT",
+    "PERSONALITY:",
+    "TASK:",
+    "Commander message:",
+    "shorterish",
+    "(halim voice)",
+)
+
+_TRAIN_FORMAT_LEAK = re.compile(
+    r"(trade condition:|profit hunting is mission|session_pnl\s*=|strategy\s*=\s*stop)",
+    re.I,
+)
+
 
 def companion_system_prompt(cfg: Optional[BotConfig] = None) -> str:
     """Halim persona — shapes generation; never emitted as fixed output."""
@@ -66,6 +81,48 @@ def companion_system_prompt(cfg: Optional[BotConfig] = None) -> str:
         "• Never sound like a syslog or JSON dump\n"
         "• Generate fresh language — do not reuse canned greeting templates\n"
     )
+
+
+def companion_max_chars() -> int:
+    return int(os.getenv("HALIM_COMPANION_MAX_CHARS", "400"))
+
+
+def _has_excessive_repetition(text: str) -> bool:
+    """Detect phrase loops common in small-LM degeneration."""
+    if re.search(r"(.)\1{6,}", text):
+        return True
+    n = len(text)
+    for size in range(12, min(36, n // 2 + 1)):
+        for start in range(0, n - size * 2 + 1):
+            chunk = text[start : start + size].strip()
+            if len(chunk) < 8:
+                continue
+            if text.count(chunk) >= 3:
+                return True
+    return False
+
+
+def companion_output_ok(text: str) -> bool:
+    """Reject degenerate / prompt-echo companion output before send or gold."""
+    t = (text or "").strip()
+    if len(t) < 8:
+        return False
+    if len(t) > companion_max_chars():
+        return False
+    lower = t.lower()
+    for marker in _DEGENERATE_MARKERS:
+        if marker.lower() in lower:
+            return False
+    if _TRAIN_FORMAT_LEAK.search(t):
+        return False
+    if _has_excessive_repetition(t):
+        return False
+    return True
+
+
+def companion_gold_journalable(reply: str, source: str = "") -> bool:
+    """Only record high-quality companion replies as training gold."""
+    return companion_output_ok(reply)
 
 
 def classify_chat_intent(message: str) -> str:
@@ -165,6 +222,10 @@ def _journal_companion(
 ) -> None:
     if os.getenv("HALIM_COMPANION_LEARN", "true").lower() not in ("1", "true", "yes"):
         return
+    source = str((meta or {}).get("source") or "")
+    if not companion_gold_journalable(reply, source):
+        log.debug(f"Companion gold skipped ({source or 'unknown'}): degenerate output")
+        return
     try:
         p = Path(COMPANION_JOURNAL)
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -235,7 +296,6 @@ def build_companion_context(
         pass
     rag_section = f"\n\n{rag_block}\n" if rag_block else ""
     return (
-        f"{companion_system_prompt(cfg)}\n\n"
         f"TASK: {directive}\n\n"
         f"LIVE SNAPSHOT: {json.dumps(snap, default=str)}\n"
         f"{extra}{rag_section}\n"
@@ -249,7 +309,7 @@ def _companion_generate(
     cfg: BotConfig,
     purpose: str = "commander_chat",
 ) -> tuple[Optional[str], str]:
-    """Halim brain chain — native LM first, council teacher second."""
+    """Halim brain chain — native LM first, council teacher on reject/failure."""
     text: Optional[str] = None
     source = "unavailable"
 
@@ -261,8 +321,13 @@ def _companion_generate(
             system=companion_system_prompt(cfg),
             cfg=cfg,
         )
-        if text:
+        if text and companion_output_ok(text):
             return text.strip(), source
+        if text:
+            log.debug(
+                f"Companion native rejected ({source}): {(text or '')[:80]}…"
+            )
+            text = None
     except Exception as exc:
         log.debug(f"Halim companion native: {exc}")
 
@@ -276,7 +341,7 @@ def _companion_generate(
                 purpose="commander_chat",
                 copilot=True,
             )
-            if text and len(text.strip()) >= 8:
+            if text and len(text.strip()) >= 8 and companion_output_ok(text):
                 try:
                     from core.halim_capabilities import record_teacher_action
                     record_teacher_action(
@@ -286,6 +351,10 @@ def _companion_generate(
                 except Exception:
                     pass
                 return text.strip(), "council_teacher"
+            if text:
+                log.debug(
+                    f"Companion council rejected: {(text or '')[:80]}…"
+                )
     except Exception as exc:
         log.debug(f"Halim companion council: {exc}")
 
@@ -321,7 +390,7 @@ def companion_speak(
         intent=resolved_intent,
     )
     text, source = _companion_generate(prompt, cfg=cfg, purpose=purpose)
-    if text:
+    if text and companion_output_ok(text):
         snap = live_snapshot(runner, cfg)
         _journal_companion(
             resolved_intent,

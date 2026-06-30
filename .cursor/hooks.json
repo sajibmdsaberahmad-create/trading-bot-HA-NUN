@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/require_fix_journal.sh",
+        "matcher": "Write|StrReplace|EditNotebook"
+      }
+    ]
+  }
+}

@@ -101,7 +101,7 @@ def halim_chat(
         msg = locked_message(cap, cfg)
         return {"ok": True, "text": msg, "mode": mode, "source": "halim_locked", "capability": cap}
 
-    # Generative companion path — native LM → council teacher
+    # Generative companion path — native LM → council teacher (with output guard)
     if use_companion:
         try:
             from core.halim_companion import companion_speak
@@ -116,7 +116,7 @@ def halim_chat(
             cr = companion_speak(
                 message, cfg=cfg, runner=runner, extra=context, purpose=purpose,
             )
-            if cr.get("text"):
+            if cr.get("ok") and cr.get("text"):
                 return {
                     "ok": True,
                     "text": cr["text"],
@@ -126,7 +126,7 @@ def halim_chat(
                 }
         except Exception as exc:
             log.debug(f"Halim companion speak: {exc}")
-        # Fall through — server/council may still answer (LM cold start, timeout, etc.)
+        # Fall through — council may still answer if companion guard rejected LM output
 
     if mode == "collecting":
         use_teacher = os.getenv("HALIM_CHAT_COLLECTING_USE_TEACHER", "true").lower() in ("1", "true", "yes")
@@ -179,6 +179,14 @@ def halim_chat(
                     record_teacher_action(purpose, full_prompt, text, source=source, cfg=cfg)
         except Exception as exc:
             log.debug(f"Halim chat teacher: {exc}")
+
+    if text and use_companion:
+        try:
+            from core.halim_companion import companion_output_ok
+            if not companion_output_ok(text):
+                text = None
+        except Exception:
+            pass
 
     if text:
         try:

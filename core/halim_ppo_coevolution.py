@@ -65,6 +65,66 @@ def _bool_signal(val: Any, *, task: str) -> Optional[bool]:
     return None
 
 
+def extract_coevolution_halim_signals(
+    decision: Dict[str, Any],
+    task: str,
+) -> Tuple[str, Optional[bool], float, str]:
+    """
+    Independent Halim/student signal for PPO↔Halim compare.
+    Never use the final executed enter/exit — that conflates merge + war gates with Halim.
+    """
+    pipeline = str(decision.get("pipeline", ""))
+
+    if task == "entry_decision" and decision.get("halim_enter") is not None:
+        return (
+            "halim_lm",
+            bool(decision["halim_enter"]),
+            float(decision.get("halim_conf", 0.5) or 0.5),
+            str(decision.get("halim_reason", ""))[:300],
+        )
+    if task != "entry_decision" and decision.get("halim_exit") is not None:
+        return (
+            "halim_lm",
+            bool(decision["halim_exit"]),
+            float(decision.get("halim_conf", 0.5) or 0.5),
+            str(decision.get("halim_reason", ""))[:300],
+        )
+
+    if task != "entry_decision" and decision.get("council_exit") is not None:
+        return (
+            "council",
+            bool(decision["council_exit"]),
+            float(decision.get("council_conf", 0.5) or 0.5),
+            str(decision.get("council_reason", ""))[:300],
+        )
+
+    if decision.get("proxy_enter") is not None:
+        return (
+            "proxy",
+            bool(decision["proxy_enter"]),
+            float(decision.get("proxy_conf", 0.5) or 0.5),
+            str(decision.get("proxy_reason", ""))[:300],
+        )
+
+    if "council" in pipeline and decision.get("council_enter") is not None:
+        return (
+            "council",
+            bool(decision["council_enter"]),
+            float(decision.get("council_conf", 0.5) or 0.5),
+            str(decision.get("council_reason", decision.get("reason", "")))[:300],
+        )
+
+    if decision.get("quality_enter") is not None:
+        return (
+            "quality",
+            bool(decision["quality_enter"]),
+            float(decision.get("quality_conf", 0.5) or 0.5),
+            str(decision.get("quality_reason", ""))[:300],
+        )
+
+    return ("unknown", None, 0.0, "")
+
+
 def compare_ppo_halim(
     *,
     task: str,
@@ -141,7 +201,7 @@ def record_coevolution(
         task=task,
         ppo_signal=ppo_signal,
         ppo_conf=ppo_conf,
-        halim_signal=halim_signal if halim_signal is not None else executed,
+        halim_signal=halim_signal,
         halim_conf=halim_conf,
         executed=executed,
     )
@@ -157,6 +217,7 @@ def record_coevolution(
         "comparison": cmp,
         "outcome": None,
         "outcome_pnl": None,
+        "label_version": 2,
         **(extra or {}),
     }
     _append(COEVOLUTION_LOG, row)
@@ -322,18 +383,40 @@ def attach_trade_outcome(
         })
     _append(COEVOLUTION_LOG, outcome_row)
 
-    # Label recent correction rows with trade outcome
+    # Label recent correction rows with trade outcome + feed experience buffer
     if recent_cmp:
         cf = recent_cmp.get("correction_for")
         if cf in ("ppo", "halim"):
+            proved = "halim" if (cf == "ppo" and win) else (
+                "ppo" if (cf == "ppo" and not win) else (
+                    "ppo" if (cf == "halim" and win) else "halim"
+                )
+            )
             _append(COEVOLUTION_LOG, {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "event": "outcome_labels_correction",
                 "ticker": ticker.upper(),
                 "post_trade_correction_for": cf,
-                "market_proved": "win" if win else "loss",
+                "market_proved": proved,
+                "outcome": "win" if win else "loss",
                 "outcome_pnl": round(float(pnl), 2),
             })
+            try:
+                from core.experience_buffer import append as buffer_append
+                weight = 1.35 if proved == "ppo" else 1.25
+                buffer_append({
+                    "source": "halim_ppo_outcome",
+                    "ticker": ticker.upper(),
+                    "task": recent_cmp.get("task") or "entry_decision",
+                    "comparison": recent_cmp,
+                    "market_proved": proved,
+                    "outcome_pnl": round(float(pnl), 2),
+                    "win": win,
+                    "training_weight": weight,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                })
+            except Exception:
+                pass
 
     try:
         from core.halim_ppo_dialogue import schedule_trade_outcome_dialogue
@@ -368,8 +451,24 @@ def _coevolution_row_key(row: Dict[str, Any]) -> str:
     )
 
 
+def _legacy_mislabeled(ev: Dict[str, Any], cmp: Dict[str, Any]) -> bool:
+    """Pre-v2 rows that treated final execute bit as Halim signal."""
+    if int(ev.get("label_version", 1)) >= 2:
+        return False
+    src = str(ev.get("halim_source") or "")
+    if src == "halim" and cmp.get("correction_for") == "ppo":
+        return True
+    if src == "halim" and cmp.get("halim_signal") is not None and cmp.get("ppo_halim_agree") is False:
+        return True
+    return False
+
+
 def _coevolution_quality_ok(ev: Dict[str, Any], cmp: Dict[str, Any]) -> bool:
     """Skip empty/noise rows that waste SFT capacity."""
+    if ev.get("event") in ("trade_outcome", "outcome_labels_correction"):
+        return False
+    if _legacy_mislabeled(ev, cmp):
+        return False
     halim_reason = str(ev.get("halim_reason") or "").strip()
     ppo_reason = str(ev.get("ppo_reason") or "").strip()
     task = str(ev.get("task") or "")
@@ -378,6 +477,8 @@ def _coevolution_quality_ok(ev: Dict[str, Any], cmp: Dict[str, Any]) -> bool:
     if len(halim_reason) < 4 and not ppo_reason and ev.get("outcome") is None:
         return False
     if cmp.get("ppo_signal") is None and cmp.get("halim_signal") is None:
+        return False
+    if cmp.get("halim_signal") is None and int(ev.get("label_version", 1)) >= 2:
         return False
     return True
 
@@ -420,18 +521,31 @@ def _rows_from_coevolution_event(ev: Dict[str, Any]) -> List[Dict[str, Any]]:
     }]
 
     correction_for = ev.get("post_trade_correction_for") or cmp.get("correction_for")
-    if correction_for == "ppo" or (
-        cmp.get("ppo_halim_agree") is False and cmp.get("halim_exec_agree") is True
-    ):
+    halim_sig = cmp.get("halim_signal")
+    if correction_for == "ppo" and halim_sig is not None:
         rows.append({
             "capability": "trade_reflex",
             "instruction": "PPO reflex — learn from Halim correction after trade context.",
             "input": user_input,
             "output": (
-                f"Better action: {cmp.get('halim_signal')} — "
+                f"Better action: {halim_sig} — "
                 f"{str(ev.get('halim_reason') or '')[:240]}{outcome_bit}"
             ),
             "source": "coevolution_ppo",
+            "timestamp": ev.get("timestamp"),
+            "ticker": ticker,
+            "task": task,
+        })
+    elif correction_for == "halim" and cmp.get("ppo_signal") is not None:
+        rows.append({
+            "capability": "decision_text",
+            "instruction": "Halim mind — learn from PPO correction after trade context.",
+            "input": user_input,
+            "output": (
+                f"Better action: {cmp.get('ppo_signal')} — "
+                f"{str(ev.get('ppo_reason') or '')[:240]}{outcome_bit}"
+            ),
+            "source": "coevolution_halim_corrected",
             "timestamp": ev.get("timestamp"),
             "ticker": ticker,
             "task": task,
@@ -489,15 +603,37 @@ def export_coevolution_gold(*, max_records: int = 20_000) -> Dict[str, Any]:
     }
 
 
-def coevolution_stats() -> Dict[str, Any]:
+def coevolution_stats(*, label_version_min: int = 0) -> Dict[str, Any]:
     agree = disagree = corrections_ppo = corrections_halim = 0
+    complements = 0
+    v2_events = 0
+    legacy_skipped = 0
+    market_proved_ppo = market_proved_halim = 0
     if COEVOLUTION_LOG.is_file():
         try:
             with open(COEVOLUTION_LOG, encoding="utf-8") as fh:
                 for line in fh:
                     try:
                         ev = json.loads(line)
+                        if ev.get("event") == "outcome_labels_correction":
+                            proved = str(ev.get("market_proved") or "")
+                            if proved == "ppo":
+                                market_proved_ppo += 1
+                            elif proved == "halim":
+                                market_proved_halim += 1
+                            continue
                         cmp = ev.get("comparison") or {}
+                        lv = int(ev.get("label_version", 1))
+                        if lv >= 2:
+                            v2_events += 1
+                        if label_version_min >= 2 and lv < 2:
+                            continue
+                        if _legacy_mislabeled(ev, cmp):
+                            legacy_skipped += 1
+                            continue
+                        pipe = str(ev.get("pipeline") or "")
+                        if "halim_complement" in pipe:
+                            complements += 1
                         if cmp.get("ppo_halim_agree") is True:
                             agree += 1
                         elif cmp.get("ppo_halim_agree") is False:
@@ -516,7 +652,77 @@ def coevolution_stats() -> Dict[str, Any]:
         "disagreements": disagree,
         "corrections_for_ppo": corrections_ppo,
         "corrections_for_halim": corrections_halim,
+        "complements": complements,
+        "label_v2_events": v2_events,
+        "legacy_mislabeled_skipped": legacy_skipped,
+        "market_proved_ppo": market_proved_ppo,
+        "market_proved_halim": market_proved_halim,
         "log_path": str(COEVOLUTION_LOG),
+    }
+
+
+def coevolution_status_report(*, recent: int = 10) -> Dict[str, Any]:
+    """Human-readable coevolution health — v2 labels vs legacy noise."""
+    state: Dict[str, Any] = {}
+    try:
+        if STATE_PATH.is_file():
+            state = json.loads(STATE_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+
+    all_stats = coevolution_stats(label_version_min=0)
+    v2_stats = coevolution_stats(label_version_min=2)
+    recent_rows: List[Dict[str, Any]] = []
+    if COEVOLUTION_LOG.is_file():
+        try:
+            lines = COEVOLUTION_LOG.read_text(encoding="utf-8").strip().splitlines()
+            for line in reversed(lines[-max(recent * 4, 40):]):
+                try:
+                    ev = json.loads(line)
+                except Exception:
+                    continue
+                if ev.get("event") in ("trade_outcome", "outcome_labels_correction"):
+                    recent_rows.append({
+                        "kind": ev.get("event"),
+                        "ticker": ev.get("ticker"),
+                        "market_proved": ev.get("market_proved"),
+                        "outcome": ev.get("outcome"),
+                        "pnl": ev.get("outcome_pnl"),
+                        "time": ev.get("timestamp"),
+                    })
+                elif ev.get("comparison"):
+                    cmp = ev.get("comparison") or {}
+                    if len(recent_rows) >= recent:
+                        break
+                    recent_rows.append({
+                        "kind": "decision",
+                        "ticker": ev.get("ticker"),
+                        "task": ev.get("task"),
+                        "halim_source": ev.get("halim_source"),
+                        "pipeline": ev.get("pipeline"),
+                        "ppo": cmp.get("ppo_signal"),
+                        "halim": cmp.get("halim_signal"),
+                        "agree": cmp.get("ppo_halim_agree"),
+                        "correction_for": cmp.get("correction_for"),
+                        "label_version": ev.get("label_version", 1),
+                        "time": ev.get("timestamp"),
+                    })
+        except Exception:
+            pass
+
+    total_cmp = all_stats["agreements"] + all_stats["disagreements"]
+    v2_cmp = v2_stats["agreements"] + v2_stats["disagreements"]
+    return {
+        "ok": True,
+        "last_cycle": state.get("last_cycle"),
+        "cycles": state.get("cycles", 0),
+        "all_time": all_stats,
+        "since_label_v2": v2_stats,
+        "agree_ratio_all": round(all_stats["agreements"] / total_cmp, 3) if total_cmp else None,
+        "agree_ratio_v2": round(v2_stats["agreements"] / v2_cmp, 3) if v2_cmp else None,
+        "recent": recent_rows[:recent],
+        "gold_export": state.get("export"),
+        "dialogue_pairs": (state.get("dialogue_export") or {}).get("pairs"),
     }
 
 

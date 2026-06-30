@@ -280,6 +280,27 @@ def merge_halim_entry_advisory(
 
     cur_conf = float(out.get("confidence", ppo_conf) or ppo_conf)
     agree = h_enter == ppo_buy
+    complement = os.getenv("HALIM_PPO_COMPLEMENT", "true").lower() in ("1", "true", "yes")
+
+    # PPO HOLD + Halim enter — mind complements reflex (quality-led override)
+    if (
+        complement
+        and not ppo_buy
+        and h_enter
+        and h_conf >= min_conf * 0.80
+        and not out.get("enter")
+    ):
+        out["enter"] = True
+        out["reason"] = (
+            f"Halim complements PPO HOLD {h_conf:.0%}: {h_reason}"
+        )[:200]
+        out["pipeline"] = f"{out.get('pipeline', 'council')}:halim_complement"
+        out["confidence"] = max(cur_conf, h_conf, min_conf * 0.78)
+        out["halim_enter"] = h_enter
+        out["halim_conf"] = round(h_conf, 4)
+        out["halim_agree"] = agree
+        out["halim_reason"] = h_reason
+        return out
 
     if agree and h_enter:
         cur_conf = min(0.99, cur_conf + blend_w * h_conf * 0.2)

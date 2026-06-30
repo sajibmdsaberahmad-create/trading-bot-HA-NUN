@@ -72,3 +72,7 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-29 09:09 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2834 pairs
 - `2026-06-29 16:02 UTC` **brain_ppo_teacher** — PPO teacher live_session_end: WR 0%, source heuristic_fallback
 - `2026-06-29 16:02 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2255 pairs
+- `2026-06-30 04:52 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 0%, source heuristic_fallback
+- `2026-06-30 04:52 UTC` **brain_evolution** · stage **adult** — Evolution replay_teardown — stage adult, dataset 2180 pairs
+- `2026-06-30 06:00 UTC` **engineering** — Companion pipeline + PPO↔Halim coevolution v2 + replay war relax — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+- `2026-06-30 06:30 UTC` **engineering** — Forced fix journaling (git pre-commit + Cursor hook) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)

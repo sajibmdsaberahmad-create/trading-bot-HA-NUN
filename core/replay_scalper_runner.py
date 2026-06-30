@@ -40,6 +40,8 @@ class ReplayScalperRunner(ScalperRunner):
         self._orig_get_universe = None
         self._replay_fills: Optional[ReplayFillSimulator] = None
         self._replay_meta: Dict[str, Dict[str, Any]] = {}
+        self._replay_session_start = time.time()
+        self._replay_session_cap_logged = False
         super().__init__(connector, cfg, notifier)
 
     def _setup_replay_mode(self) -> None:
@@ -825,11 +827,39 @@ class ReplayScalperRunner(ScalperRunner):
         self._clear_pending_entry(ticker, cooldown_sec=15.0)
         return result if result != "entered" else "shadow"
 
+    def _maybe_merge_lock_from_scanner(self, now: float) -> bool:
+        return False
+
+    def _replay_session_cap_reached(self) -> bool:
+        """Wall-clock session limit — stop gracefully; next start resumes unconsumed bars."""
+        raw = os.getenv("REPLAY_SESSION_MAX_MINUTES", "0").strip()
+        try:
+            max_min = float(raw)
+        except ValueError:
+            max_min = 0.0
+        if max_min <= 0:
+            return False
+        elapsed_min = (time.time() - getattr(self, "_replay_session_start", time.time())) / 60.0
+        if elapsed_min < max_min:
+            return False
+        if not getattr(self, "_replay_session_cap_logged", False):
+            walked = getattr(self.replay_hub, "steps_walked", self.replay_hub._idx)
+            total = len(self.replay_hub._timeline)
+            log.info(
+                f"⏱ Replay session cap ({max_min:.0f} min wall clock) — "
+                f"stopping at step {walked:,}/{total:,}. "
+                f"Start again to resume (trained bars trimmed on stop)."
+            )
+            self._replay_session_cap_logged = True
+        return True
+
     def _shutdown_abort(self) -> bool:
         if self.replay_hub.finished:
             if not getattr(self, "_replay_done_logged", False):
                 log.info("Replay timeline complete — shutting down ScalperRunner gracefully")
                 self._replay_done_logged = True
+            return True
+        if self._replay_session_cap_reached():
             return True
         if super()._shutdown_abort():
             log.info("🛑 Replay stop requested (shutdown.request or signal)")

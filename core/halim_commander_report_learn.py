@@ -72,6 +72,9 @@ def _write_learn_cache(
     meta: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Same shape as halim_web_learn cache docs — picked up by RAG + export_action_gold."""
+    from core.halim_learn_rag import sanitize_learn_text
+
+    text = sanitize_learn_text(text, max_chars=50000)
     content_hash = _cache_hash(f"{topic}|{text[:500]}")
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     safe = re.sub(r"[^a-zA-Z0-9_-]", "_", content_hash)

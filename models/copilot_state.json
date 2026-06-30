@@ -5,9 +5,11 @@
   "session_wr": 0.0,
   "session_pnl": 0.0,
   "ticker_bias": {
-    "SOXS": "CAUTION",
-    "INLF": "CAUTION",
-    "BITO": "CAUTION"
+    "RKLB": "CAUTION",
+    "NVDA": "CAUTION",
+    "ASTS": "CAUTION",
+    "PLTR": "CAUTION",
+    "COIN": "CAUTION"
   },
   "repeat_losers": [],
   "ppo_hints": {
@@ -16,9 +18,8 @@
     "min_spike_mult": 1.0
   },
   "lessons": [
-    "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
-    "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
+    "Replay: collect gold on all tickers; copilot skip relaxed"
   ],
-  "updated_at": 1782762776.899104,
+  "updated_at": 1782799918.403031,
   "source": "heuristic"
 }

@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "param": "MIN_PROFIT_PROBABILITY",
+      "value": 0.49,
+      "reason": "below teacher floor \u2014 raise profit probability gate",
+      "source": "ppo_teacher",
+      "queued_at": "2026-06-30T04:52:16.076163+00:00"
+    }
+  ],
+  "updated_at": "2026-06-30T04:52:16.076168+00:00"
+}

@@ -39,3 +39,13 @@ See `maturity_ladder()` in `core/smart_stack.py`.
 ## Touch together
 
 `core/smart_stack.py`, `core/ai_commander.py`, `core/scalper_runner.py`, `core/entry_quality.py`, `core/brain_maturity.py`
+
+## Fix journal
+
+**Mandatory.** After any intentional bugfix or behavior change in the trading loop / Halim / PPO / replay stack:
+
+1. Append a full entry to `docs/ENGINEERING_FIX_LOG.md` (new `## YYYY-MM-DD` section: problem, root cause, files, env vars, verify).
+2. Stage the journal with code changes — **pre-commit blocks otherwise** (`./scripts/install_git_hooks.sh`).
+3. Optional one-liner in `docs/BRAIN_DEVELOPMENT_LOG.md`.
+
+Never use `SKIP_FIX_JOURNAL=1` except hotfix; document in the log immediately after.

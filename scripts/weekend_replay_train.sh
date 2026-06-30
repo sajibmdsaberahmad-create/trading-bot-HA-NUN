@@ -166,15 +166,11 @@ log "═════════════════════════
 
 if [[ "$SKIP_DOWNLOAD" != "true" ]]; then
   ensure_ib_free_for_download
-  log "▶ IB HMDS download (Gateway ${IB_HOST:-127.0.0.1}:$IB_PORT client_id=$CLIENT_ID)…"
-  log "   (disconnects before replay — replay never opens IB)"
-  if PYTHONPATH=. IB_PORT="$IB_PORT" CLIENT_ID="$CLIENT_ID" \
-      python3 -u "$ROOT/scripts/download_ib_replay_data.py" \
-      --days "$IB_DAYS" --client-id "$CLIENT_ID" --port "$IB_PORT" --merge \
-      2>&1 | tee -a "$WEEKEND_LOG"; then
-    log "  ✅ IB download pass complete — Gateway released"
-  else
-    log "  ⚠️  IB download failed or partial — continuing with existing CSVs"
+  log "▶ Ensuring IB replay farm (auto-download if missing or consumed)…"
+  if ! REPLAY_IB_DAYS="$IB_DAYS" REPLAY_DATA_DIR="$REPLAY_DATA_DIR" IB_PORT="$IB_PORT" CLIENT_ID="$CLIENT_ID" \
+      "$ROOT/scripts/replay_ensure_ib_farm.sh" 2>&1 | tee -a "$WEEKEND_LOG"; then
+    log "❌ Replay farm setup failed — check IB Gateway"
+    exit 1
   fi
   ensure_ib_free_for_download
   log "▶ Refresh thin tickers (<85% of fullest CSV)…"
@@ -241,12 +237,10 @@ from core.replay_consumption import farm_has_unconsumed_data
 print('0' if farm_has_unconsumed_data() else '1')
 " 2>/dev/null || echo 0)"
   if [[ "$NEED_DL" == "1" ]] && [[ "$SKIP_DOWNLOAD" != "true" ]]; then
-    log "▶ All replay bars already trained — re-downloading fresh IB farm…"
+    log "▶ All replay bars trained — auto re-downloading fresh IB farm…"
     ensure_ib_free_for_download
-    if PYTHONPATH=. IB_PORT="$IB_PORT" CLIENT_ID="$CLIENT_ID" \
-        python3 -u "$ROOT/scripts/download_ib_replay_data.py" \
-        --days "$IB_DAYS" --client-id "$CLIENT_ID" --port "$IB_PORT" --merge \
-        2>&1 | tee -a "$WEEKEND_LOG"; then
+    if REPLAY_IB_DAYS="$IB_DAYS" REPLAY_DATA_DIR="$REPLAY_DATA_DIR" IB_PORT="$IB_PORT" CLIENT_ID="$CLIENT_ID" \
+        "$ROOT/scripts/replay_ensure_ib_farm.sh" 2>&1 | tee -a "$WEEKEND_LOG"; then
       log "  ✅ Fresh IB farm ready for epoch $epoch"
     else
       log "  ⚠️  Re-download failed — skipping epoch $epoch"

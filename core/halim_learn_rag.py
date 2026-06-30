@@ -24,6 +24,33 @@ _STOP = frozenset(
     "and or but not no yes hi hello hey".split()
 )
 
+# Residual markup / SVG path noise in older cache files
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+_SVG_PATH_RE = re.compile(r"\b[MLCQZmlhvcsqtaz][\d.\s,\-]{40,}")
+_FILL_URL_RE = re.compile(r'fill="url\([^)]+\)"', re.I)
+
+
+def sanitize_learn_text(text: str, *, max_chars: int = 12000) -> str:
+    """Plaintext for learn_cache storage and RAG — strips HTML/SVG noise."""
+    if not text:
+        return ""
+    t = re.sub(r"(?is)<script[^>]*>.*?</script>", " ", text)
+    t = re.sub(r"(?is)<style[^>]*>.*?</style>", " ", t)
+    t = re.sub(r"(?is)<nav[^>]*>.*?</nav>", " ", t)
+    t = re.sub(r"(?is)<footer[^>]*>.*?</footer>", " ", t)
+    t = _HTML_TAG_RE.sub(" ", t)
+    t = _FILL_URL_RE.sub(" ", t)
+    t = _SVG_PATH_RE.sub(" ", t)
+    t = re.sub(r"\s+", " ", t).strip()
+    return t[:max_chars]
+
+
+def _default_rag_max_chars() -> int:
+    env = os.getenv("HALIM_LEARN_RAG_MAX_CHARS")
+    if env:
+        return int(env)
+    return 1200
+
 
 def rag_enabled(cfg: Optional[BotConfig] = None) -> bool:
     return os.getenv("HALIM_LEARN_RAG", "true").lower() in ("1", "true", "yes")
@@ -59,7 +86,9 @@ def _score_doc(query_terms: List[str], doc: Dict[str, Any]) -> int:
     if not query_terms:
         return 0
     topic = str(doc.get("topic") or doc.get("url") or "").lower()
-    body = str(doc.get("text") or doc.get("text_excerpt") or "")[:12000].lower()
+    body = sanitize_learn_text(
+        str(doc.get("text") or doc.get("text_excerpt") or ""),
+    )[:12000].lower()
     hay = f"{topic} {body}"
     score = 0
     for term in query_terms:
@@ -91,7 +120,7 @@ def retrieve_learn_context(
     if not rag_enabled(cfg):
         return []
     if max_chars <= 0:
-        max_chars = int(os.getenv("HALIM_LEARN_RAG_MAX_CHARS", "2200"))
+        max_chars = _default_rag_max_chars()
     if max_docs <= 0:
         max_docs = int(os.getenv("HALIM_LEARN_RAG_MAX_DOCS", "2"))
 
@@ -109,7 +138,9 @@ def retrieve_learn_context(
     hits: List[Dict[str, Any]] = []
     used = 0
     for score, doc in ranked[:max_docs]:
-        text = str(doc.get("text") or doc.get("text_excerpt") or "").strip()
+        text = sanitize_learn_text(
+            str(doc.get("text") or doc.get("text_excerpt") or "").strip(),
+        )
         if len(text) < 60:
             continue
         excerpt = text[: max(200, max_chars // max(1, max_docs))]

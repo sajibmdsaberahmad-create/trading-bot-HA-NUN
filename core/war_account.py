@@ -31,6 +31,9 @@ _MODES_LAB_ENTRY = frozenset({"LAB_ACTIVE"})
 
 def war_account_enabled(cfg: Optional[BotConfig] = None) -> bool:
     cfg = cfg or BotConfig()
+    if os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes"):
+        if os.getenv("REPLAY_RELAX_WAR", "true").lower() in ("1", "true", "yes"):
+            return False
     env = os.getenv("WAR_ACCOUNT_ENABLED", "").strip().lower()
     if env in ("0", "false", "no"):
         return False

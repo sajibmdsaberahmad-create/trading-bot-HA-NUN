@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Require docs/ENGINEERING_FIX_LOG.md when trading-stack paths change.
+set -euo pipefail
+
+JOURNAL="docs/ENGINEERING_FIX_LOG.md"
+WATCH_RE='^(core/|halim/halim/|scripts/.*\.(sh|command)$|\.cursor/rules/|\.cursor/hooks/)'
+
+if [[ "${SKIP_FIX_JOURNAL:-}" == "1" ]]; then
+  echo "WARN: SKIP_FIX_JOURNAL=1 — fix journal check bypassed (document in $JOURNAL ASAP)."
+  exit 0
+fi
+
+staged=()
+while IFS= read -r line; do
+  [[ -n "$line" ]] && staged+=("$line")
+done < <(git diff --cached --name-only)
+if ((${#staged[@]} == 0)); then
+  exit 0
+fi
+
+needs_journal=false
+for f in "${staged[@]}"; do
+  if [[ "$f" =~ $WATCH_RE ]] \
+    && [[ "$f" != "$JOURNAL" ]] \
+    && [[ "$f" != "scripts/install_git_hooks.sh" ]] \
+    && [[ "$f" != "scripts/git-hooks/pre-commit" ]]; then
+    needs_journal=true
+    break
+  fi
+done
+
+if [[ "$needs_journal" != true ]]; then
+  exit 0
+fi
+
+journal_staged=false
+for f in "${staged[@]}"; do
+  if [[ "$f" == "$JOURNAL" ]]; then
+    journal_staged=true
+    break
+  fi
+done
+
+if [[ "$journal_staged" != true ]]; then
+  echo ""
+  echo "COMMIT BLOCKED: trading-stack files changed without $JOURNAL"
+  echo ""
+  echo "  1. Append a new '## YYYY-MM-DD — title' section (use template at bottom of log)"
+  echo "  2. git add $JOURNAL"
+  echo "  3. git commit again"
+  echo ""
+  echo "Emergency only: SKIP_FIX_JOURNAL=1 git commit ..."
+  exit 1
+fi
+
+if ! git diff --cached -- "$JOURNAL" | grep -qE '^\+## [0-9]{4}-[0-9]{2}-[0-9]{2}'; then
+  echo ""
+  echo "COMMIT BLOCKED: $JOURNAL is staged but no new dated section (+## YYYY-MM-DD) in this commit."
+  echo "Add problem / root cause / fix / verify before committing stack changes."
+  echo ""
+  exit 1
+fi
+
+exit 0

@@ -1310,6 +1310,7 @@ class AICommander:
         )
         account = dict(account or {})
         account["entry_quality"] = quality
+        self._entry_quality_snapshot = quality
         gate_ctx = dict(account.get("smart_gate_context") or {})
         self._decide_entry_gate_ctx = gate_ctx
         gate_line = ""
@@ -1515,6 +1516,11 @@ class AICommander:
                         proxy_dec.setdefault("pipeline", "student:proxy")
                         proxy_dec["ppo_action"] = ppo_action
                         proxy_dec["ppo_conf"] = ppo_conf
+                        proxy_dec["proxy_enter"] = bool(proxy_dec.get("enter"))
+                        proxy_dec["proxy_conf"] = float(
+                            proxy_dec.get("confidence", 0.5) or 0.5,
+                        )
+                        proxy_dec["proxy_reason"] = str(proxy_dec.get("reason", ""))[:200]
                         decision = self._finalize_entry_decision(
                             proxy_dec, ticker=ticker, current_px=current_px,
                             spike_ratio=spike_ratio, scan_score=scan_score,
@@ -1637,7 +1643,7 @@ class AICommander:
                 quality=quality, cfg=self.cfg,
                 ticker=ticker, consecutive_losses=consecutive_losses,
             )
-            out = merged
+            out = self._stamp_council_signals(merged, live.get("parsed") or {})
             if out.get("pending"):
                 # Hard-case API slow — try Halim/quality before blocking
                 local = self._resolve_halim_local_entry(
@@ -1717,6 +1723,7 @@ class AICommander:
             else:
                 enter = bool(out.get("enter", ppo_action == 1))
                 confidence = float(out.get("confidence", ppo_conf) or ppo_conf)
+                out = self._stamp_council_signals(out, out)
                 gut_feel = float(out.get("gut_feel", 0.5) or 0.5)
                 intuition = str(out.get("intuition", ""))[:120]
                 enter, gut_note = apply_gut_override(enter, gut_feel, ppo_action, ppo_conf, min_conf)
@@ -1972,6 +1979,23 @@ class AICommander:
             gate_context=(account or {}).get("smart_gate_context"),
         )
 
+    def _stamp_council_signals(
+        self, out: Dict[str, Any], council_parsed: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Preserve independent council vote for coevolution (not the merged execute bit)."""
+        if not council_parsed:
+            return out
+        row = dict(out)
+        if "enter" in council_parsed:
+            row["council_enter"] = bool(council_parsed.get("enter"))
+            row["council_conf"] = float(council_parsed.get("confidence", 0) or 0)
+            row["council_reason"] = str(council_parsed.get("reason", ""))[:200]
+        elif "exit" in council_parsed:
+            row["council_exit"] = bool(council_parsed.get("exit"))
+            row["council_conf"] = float(council_parsed.get("confidence", 0) or 0)
+            row["council_reason"] = str(council_parsed.get("reason", ""))[:200]
+        return row
+
     def _emit_spike_verdict(
         self,
         decision: Dict[str, Any],
@@ -1981,11 +2005,23 @@ class AICommander:
         scan_score: float,
         ppo_action: int,
         ppo_conf: float,
+        ppo_reason: str = "",
         gate_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Phase D: log every finalized entry deliberation (skip pending)."""
         if decision.get("pending"):
             return decision
+        dec = {**decision}
+        dec.setdefault("ppo_action", ppo_action)
+        dec.setdefault("ppo_conf", ppo_conf)
+        if ppo_reason:
+            dec.setdefault("ppo_reason", ppo_reason)
+        try:
+            self._record_council_learning(
+                ticker, dec, "entry_decision", ppo_action, ppo_conf,
+            )
+        except Exception:
+            pass
         try:
             from core.smart_stack import log_spike_verdict
             gate_context = gate_context or getattr(self, "_decide_entry_gate_ctx", None)
@@ -2030,6 +2066,12 @@ class AICommander:
         gate_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        eq = getattr(self, "_entry_quality_snapshot", None) or out.get("entry_quality")
+        if isinstance(eq, dict):
+            out = dict(out)
+            out["quality_enter"] = bool(eq.get("enter_ok"))
+            out["quality_conf"] = float(eq.get("profit_probability", 0) or 0)
+            out["quality_reason"] = str(eq.get("reason", eq.get("setup_type", "")))[:200]
         out = self._blend_halim_entry(
             out,
             ticker=ticker,
@@ -2113,6 +2155,7 @@ class AICommander:
                         scan_score=scan_score,
                         ppo_action=ppo_action,
                         ppo_conf=ppo_conf,
+                        ppo_reason=ppo_reason,
                         gate_context=gate_context,
                     )
                 out = vetoed
@@ -2140,6 +2183,7 @@ class AICommander:
                 scan_score=scan_score,
                 ppo_action=ppo_action,
                 ppo_conf=ppo_conf,
+                ppo_reason=ppo_reason,
                 gate_context=gate_context,
             )
 
@@ -2180,6 +2224,7 @@ class AICommander:
                 scan_score=scan_score,
                 ppo_action=ppo_action,
                 ppo_conf=ppo_conf,
+                ppo_reason=ppo_reason,
                 gate_context=gate_context,
             )
 
@@ -2230,9 +2275,9 @@ class AICommander:
                 scan_score=scan_score,
                 ppo_action=ppo_action,
                 ppo_conf=ppo_conf,
+                ppo_reason=ppo_reason,
                 gate_context=gate_context,
             )
-        self._record_council_learning(ticker, decision, "entry_decision", ppo_action, ppo_conf)
         pipeline = str(decision.get("pipeline", ""))
         from core.council_nanny import is_strong_spike_pipeline
         if (
@@ -2266,6 +2311,7 @@ class AICommander:
             scan_score=scan_score,
             ppo_action=ppo_action,
             ppo_conf=ppo_conf,
+            ppo_reason=ppo_reason,
             gate_context=gate_context,
         )
 
@@ -2359,25 +2405,14 @@ class AICommander:
         except Exception:
             pass
         try:
-            from core.halim_ppo_coevolution import record_coevolution
+            from core.halim_ppo_coevolution import (
+                extract_coevolution_halim_signals,
+                record_coevolution,
+            )
+            halim_src, halim_sig, halim_conf, halim_reason = extract_coevolution_halim_signals(
+                decision, task,
+            )
             pipeline = str(decision.get("pipeline", ""))
-            if decision.get("halim_exit") is not None:
-                halim_src = "halim_lm"
-                halim_sig = bool(decision.get("halim_exit"))
-                halim_conf = float(decision.get("halim_conf", decision.get("confidence", 0.5)) or 0.5)
-                halim_reason = str(decision.get("halim_reason", decision.get("reason", "")))[:300]
-            elif decision.get("halim_enter") is not None:
-                halim_src = "halim_lm"
-                halim_sig = bool(decision.get("halim_enter"))
-                halim_conf = float(decision.get("halim_conf", decision.get("confidence", 0.5)) or 0.5)
-                halim_reason = str(decision.get("halim_reason", decision.get("reason", "")))[:300]
-            else:
-                halim_src = "proxy" if "proxy" in pipeline else "council" if "council" in pipeline else "halim"
-                halim_sig = decision.get("enter") if task == "entry_decision" else decision.get("exit")
-                if task == "position_manage":
-                    halim_sig = str(decision.get("action", "")).upper() == "EXIT"
-                halim_conf = float(decision.get("confidence", 0.5) or 0.5)
-                halim_reason = str(decision.get("reason", ""))[:300]
             record_coevolution(
                 self.cfg,
                 ticker=ticker,

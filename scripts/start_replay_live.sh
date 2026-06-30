@@ -6,12 +6,17 @@
 # Does NOT touch live START.command or IB orders.
 #
 # Usage:
-#   ./scripts/start_replay_live.sh              # all downloaded tickers, train pace
-#   ./scripts/start_replay_live.sh train        # same
+#   ./scripts/start_replay_live.sh              # chunked sessions (default 90 min, then auto-stop)
+#   ./scripts/start_replay_live.sh chunk        # same — stop anytime or wait for session cap
+#   ./scripts/start_replay_live.sh chunk 120    # 120-minute wall-clock session
+#   ./scripts/start_replay_live.sh train        # no time cap (run until farm done or manual stop)
 #   ./scripts/start_replay_live.sh realtime     # 1 timestamp step ≈ real elapsed gap
 #   ./scripts/start_replay_live.sh turbo        # no pacing
-#   REPLAY_START=2026-06-25 REPLAY_END=2026-06-26 ./scripts/start_replay_live.sh
-#   ./scripts/start_replay_live.sh day   # one RTH day (auto-detected from CSVs)
+#   ./scripts/start_replay_live.sh day          # one RTH day (auto-detected from CSVs)
+#   ./scripts/stop_replay.sh                    # graceful stop — trims trained bars, resume next start
+#
+# Multi-session: IB download once (~60d). Stop/restart anytime — only walked bars are consumed.
+# Re-download happens automatically only when the whole farm is trained.
 # ═══════════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
@@ -24,37 +29,42 @@ source "$ROOT/scripts/halim_memory_profile.sh" 2>/dev/null || true
 export TZ="America/New_York"
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
-PACE="${1:-train}"
+PACE="${1:-chunk}"
+CHUNK_MIN="${2:-}"
 REPLAY_ROOT="${REPLAY_DATA_DIR:-$ROOT/data/replay}"
 
 export REPLAY_LIVE=true
 export REPLAY_BLOCK_IB=true
 export REPLAY_DATA_DIR="$REPLAY_ROOT"
-# Git: all pushes deferred during replay → 1 consolidated sync at session end
 export GIT_BATCH_CHECKPOINTS=true
-# Stochastic fills — slippage, partials, latency (see core/replay_fill_simulator.py)
 export REPLAY_SLIPPAGE_MODEL="${REPLAY_SLIPPAGE_MODEL:-adaptive}"
 export REPLAY_FILL_PROB="${REPLAY_FILL_PROB:-0.93}"
 export REPLAY_PARTIAL_FILL_PROB="${REPLAY_PARTIAL_FILL_PROB:-0.14}"
 export REPLAY_RELAX_COUNCIL="${REPLAY_RELAX_COUNCIL:-true}"
 export REPLAY_RELAX_COPILOT="${REPLAY_RELAX_COPILOT:-true}"
+export REPLAY_RELAX_WAR="${REPLAY_RELAX_WAR:-true}"
 export REPLAY_MIN_PROFIT_PROB="${REPLAY_MIN_PROFIT_PROB:-0.45}"
-# Teacher–student PPO (Groq/Gemini critiques PPO → distills into Halim + PPO)
 export PPO_TEACHER_ENABLED="${PPO_TEACHER_ENABLED:-true}"
 export PPO_TEACHER_WIN_RATE_FLOOR="${PPO_TEACHER_WIN_RATE_FLOOR:-0.38}"
 export PPO_TEACHER_EVERY_N_TRADES="${PPO_TEACHER_EVERY_N_TRADES:-4}"
 export PPO_TEACHER_MIN_INTERVAL_SEC="${PPO_TEACHER_MIN_INTERVAL_SEC:-180}"
 export TRADING_COPILOT_ENABLED="${TRADING_COPILOT_ENABLED:-true}"
 export COPILOT_REFRESH_SEC="${COPILOT_REFRESH_SEC:-90}"
-# Owned brain — device-aware evolution at session end (M2 8GB default)
 export OWNED_BRAIN_DEVICE="${OWNED_BRAIN_DEVICE:-m2_8gb}"
 export OWNED_BRAIN_GIT_PUSH="${OWNED_BRAIN_GIT_PUSH:-true}"
 export PPO_ENTRY_MICRO_STEPS="${PPO_ENTRY_MICRO_STEPS:-512}"
 export GROQ_MODEL="${GROQ_MODEL:-llama-3.1-8b-instant}"
-# All intraday tickers unless narrowed: REPLAY_TICKERS=SOFI,PLTR,MARA
 unset REPLAY_TICKER 2>/dev/null || true
 
 case "$PACE" in
+  chunk)
+    export REPLAY_REALTIME_PACE=false
+    export REPLAY_TIME_DILATION_MS="${REPLAY_TIME_DILATION_MS:-50}"
+    if [[ -n "$CHUNK_MIN" ]]; then
+      export REPLAY_SESSION_MAX_MINUTES="$CHUNK_MIN"
+    fi
+    export REPLAY_SESSION_MAX_MINUTES="${REPLAY_SESSION_MAX_MINUTES:-90}"
+    ;;
   day)
     export REPLAY_REALTIME_PACE="${REPLAY_REALTIME_PACE:-false}"
     export REPLAY_TIME_DILATION_MS="${REPLAY_TIME_DILATION_MS:-50}"
@@ -75,10 +85,18 @@ case "$PACE" in
   turbo)
     export REPLAY_REALTIME_PACE=false
     export REPLAY_TIME_DILATION_MS=0
+    export REPLAY_SESSION_MAX_MINUTES=0
     ;;
-  train|*)
+  train)
     export REPLAY_REALTIME_PACE=false
     export REPLAY_TIME_DILATION_MS="${REPLAY_TIME_DILATION_MS:-50}"
+    export REPLAY_SESSION_MAX_MINUTES=0
+    ;;
+  *)
+    export REPLAY_REALTIME_PACE=false
+    export REPLAY_TIME_DILATION_MS="${REPLAY_TIME_DILATION_MS:-50}"
+    export REPLAY_SESSION_MAX_MINUTES="${REPLAY_SESSION_MAX_MINUTES:-90}"
+    PACE="chunk"
     ;;
 esac
 
@@ -147,13 +165,21 @@ export REPLAY_SKIP_CONSUMED="${REPLAY_SKIP_CONSUMED:-true}"
 export REPLAY_TRIM_CONSUMED_ON_STOP="${REPLAY_TRIM_CONSUMED_ON_STOP:-true}"
 export REPLAY_PURGE_ALL_ON_STOP="${REPLAY_PURGE_ALL_ON_STOP:-false}"
 export REPLAY_PURGE_DATA_ON_STOP="${REPLAY_PURGE_DATA_ON_STOP:-true}"
+export REPLAY_AUTO_DOWNLOAD="${REPLAY_AUTO_DOWNLOAD:-true}"
+
+if [[ -d venv ]]; then
+  # shellcheck disable=SC1091
+  source venv/bin/activate
+fi
+
+python3 -c "from core.shutdown_control import clear_shutdown_request; clear_shutdown_request()" \
+  2>/dev/null || rm -f "$ROOT/runtime/shutdown.request"
+
+# Auto-download IB CSV farm when missing or all bars already trained
+"$ROOT/scripts/replay_ensure_ib_farm.sh"
 
 if [[ ! -d "$REPLAY_ROOT/intraday" ]] || [[ -z "$(find "$REPLAY_ROOT/intraday" -maxdepth 1 -name '*_1min.csv' -print -quit 2>/dev/null)" ]]; then
-  echo ""
-  echo "⚠️  No intraday CSVs in $REPLAY_ROOT/intraday"
-  echo "    Download replay data first (IB Gateway must be running):"
-  echo "    cd \"$ROOT\" && PYTHONPATH=. python scripts/download_ib_replay_data.py --days 60"
-  echo ""
+  echo "❌ No replay CSVs after auto-download — check IB Gateway and logs above."
   exit 1
 fi
 
@@ -174,11 +200,6 @@ if [[ -z "$TICKER_LIST" ]]; then
   exit 1
 fi
 
-if [[ -d venv ]]; then
-  # shellcheck disable=SC1091
-  source venv/bin/activate
-fi
-
 mkdir -p logs
 
 "$ROOT/scripts/halim_stop.sh" --telegram-only 2>/dev/null || true
@@ -194,6 +215,11 @@ echo "  REPLAY SCALPER — full HANOON clone (multi-ticker, council on)"
 echo "  Universe: ${REPLAY_TICKERS:-$TICKER_LIST}"
 echo "  Data: $REPLAY_ROOT"
 echo "  Pace: $PACE (dilation=${REPLAY_TIME_DILATION_MS}ms realtime=$REPLAY_REALTIME_PACE)"
+if [[ "${REPLAY_SESSION_MAX_MINUTES:-0}" != "0" ]]; then
+  echo "  Session: ${REPLAY_SESSION_MAX_MINUTES} min wall clock — then auto-stop (resume next start)"
+else
+  echo "  Session: no time cap — stop with REPLAY_STOP.command when you want"
+fi
 echo "  Council: $COUNCIL_ENABLED (relax=$REPLAY_RELAX_COUNCIL) | Model: $REPLAY_MODEL_PATH"
   echo "  Training: queue-only=${LEARNING_QUEUE_ONLY:-true} teardown=${REPLAY_TRAINING_ENABLED} snapshot_ppo=${LEARNING_SNAPSHOT_SAVE_PPO:-false}"
   echo "  Halim: M. A. Halim (${HALIM_LM_BACKEND:-?}) coevolution=$HALIM_PPO_COEVOLUTION dialogue=$HALIM_PPO_DIALOGUE gold=$HALIM_ACTION_LEARN"
@@ -201,10 +227,29 @@ echo "  Council: $COUNCIL_ENABLED (relax=$REPLAY_RELAX_COUNCIL) | Model: $REPLAY
     echo "  Memory: low-RAM profile ON — dialogue deferred, async PPO, MLX backend"
   fi
 echo "  Fills: stochastic ($REPLAY_SLIPPAGE_MODEL slip, partial=${REPLAY_PARTIAL_FILL_PROB})"
+echo "  Data: auto-download ON | resume multi-session | trim trained bars on stop"
 echo "  Git: deferred during replay → 1 sync at session end"
-echo "  Stop: ./stop_replay.sh  (graceful — Halim gold + evolution + git)
+echo "  Stop: ./stop_replay.sh  (graceful — Halim gold + trim CSVs + evolution)
   Or double-click: REPLAY_STOP.command"
 echo "══════════════════════════════════════════════════════════════"
+
+# Preflight: refuse start if ledger thinks all bars are already trained
+if ! PYTHONPATH=. python3 - <<'PY'
+import sys
+from core.replay_consumption import farm_has_unconsumed_data, farm_unconsumed_stats
+st = farm_unconsumed_stats()
+if not farm_has_unconsumed_data():
+    print(f"❌ No fresh replay bars ({st.get('unconsumed_bars', 0):,} unconsumed).")
+    print("   Re-run start — auto-download will fetch new IB data.")
+    sys.exit(1)
+print(
+    f"✓ Resume ready: {st.get('unconsumed_bars', 0):,} fresh bars · "
+    f"{st.get('tickers', 0)} tickers (stop anytime — picks up here next start)"
+)
+PY
+then
+  exit 1
+fi
 
 export HANOON_PID_FILE="${REPLAY_PID_FILE:-logs/replay.pid}"
 PYTHONPATH=. "${ROOT}/venv/bin/python3" main.py --mode replay-live --ticker SPY --cash "${CASH:-1000}" \

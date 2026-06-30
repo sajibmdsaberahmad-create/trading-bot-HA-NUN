@@ -252,3 +252,15 @@
 {"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-29T19:10:55.749359+00:00"}
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":false,"timestamp":"2026-06-29T19:27:00.828036+00:00"}
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":false,"timestamp":"2026-06-29T19:42:00.877017+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_live","fsync_files":21,"ppo":false,"timestamp":"2026-06-29T19:54:07.182852+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-29T19:54:07.213584+00:00"}
+{"event":"learning_snapshot","trigger":"crash_recovery","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T04:51:03.752642+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T04:51:17.047420+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T04:52:27.338891+00:00"}
+{"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T05:33:52.030160+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T05:40:09.449435+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_replay","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T05:40:09.588304+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T05:40:09.614914+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:07:02.653491+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_replay","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:07:02.698164+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:07:02.726693+00:00"}

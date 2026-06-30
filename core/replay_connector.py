@@ -38,8 +38,14 @@ class _FakeIB:
     def __init__(self, cfg: BotConfig, hub: Optional["ReplayMarketHub"] = None):
         self._cfg = cfg
         self._hub = hub
-        self._connected = False
+        self._connected = True
         self.client = _FakeClient()
+
+    def isConnected(self) -> bool:
+        return self._connected
+
+    def disconnect(self) -> None:
+        self._connected = False
 
     def set_hub(self, hub: "ReplayMarketHub") -> None:
         self._hub = hub
