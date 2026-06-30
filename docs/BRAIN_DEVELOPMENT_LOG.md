@@ -1671,6 +1671,7 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 19:21 UTC` **git_auto** — sync: 8 files — ai_commander_deferred.py, live_ai_pipeline.py, BRAIN_DEVELOPMENT_LOG.md +5 more | halim=1 models=2 docs=1 core=1 other=3 | b
 - `2026-06-30 19:21 UTC` **git_auto** — sync: 8 files — ai_commander_deferred.py, capital_discipline.py, fast_execution.py +5 more | halim=1 docs=1 core=3 other=3 | brain=child dat
 - `2026-07-01` **strict_profit_prob** — Smart Stack now hard-vetoes red calculative `profit_probability` on all entry paths; MTF/regime stay advisory (`SMART_STACK_STRICT_PROFIT_PROB=true` default).
+- `2026-07-01` **ib_recover_ledger** — IB position recovery no longer debits war settled cash; oversized adopts are monitor-only; negative settled auto-heals on load.
 - `2026-06-30 19:21 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, ai_commander_entry.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=child data
 - `2026-06-30 19:21 UTC` **git_auto** — sync: 6 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, ENGINEERING_FIX_LOG.md +3 more | halim=1 docs=2 other=3 | brain=child da
 - `2026-06-30 19:21 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, correction_log.jsonl +2 more | halim=1 docs=1 other=3 | brain=child data
@@ -1695,3 +1696,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 19:28 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, war_account.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=child dataset=315
 - `2026-06-30 19:28 UTC` **git_auto** — sync: 7 files — ai_commander_deferred.py, scalper_runner.py, war_account.py +4 more | docs=1 core=2 other=4 | brain=child dataset=315 evolut
 - `2026-06-30 19:28 UTC` **git_auto** — sync: 4 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=child dataset=315 evolut
+- `2026-06-30 19:28 UTC` **git_auto** — sync: 6 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, ENGINEERING_FIX_LOG.md +3 more | docs=2 other=4 | brain=child dataset=31

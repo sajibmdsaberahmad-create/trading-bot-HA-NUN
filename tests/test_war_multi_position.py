@@ -129,7 +129,7 @@ def test_adopt_ib_recovery_does_not_overdraw_settled():
     assert row.get("event") == "war_ib_recover"
     assert float(state["settled_cash"]) >= 0
     assert "INTC" in state["open_wars"]
-    assert float(state["deployed_usd"]) == 20.0
+    assert float(state["deployed_usd"]) == 28.0
 
 
 def test_adopt_ib_recovery_skips_oversized_position():
