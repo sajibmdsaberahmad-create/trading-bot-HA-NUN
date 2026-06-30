@@ -1230,3 +1230,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 16:31 UTC` **git_auto** — sync: 4 files — BRAIN_DEVELOPMENT_LOG.md, correction_log.jsonl, hanoon.env.enc +1 more | halim=1 other=3 | brain=adult dataset=2081 evolutio
 - `2026-06-30 16:31 UTC` **git_auto** — sync: 5 files — BRAIN_DEVELOPMENT_LOG.md, correction_log.jsonl, release_hanoon.sh +2 more | halim=1 other=4 | brain=adult dataset=2081 evolu
 - `2026-06-30 16:32 UTC` **git_auto** — sync: 5 files — BRAIN_DEVELOPMENT_LOG.md, correction_log.jsonl, extract_scalper_mixins.py +2 more | halim=1 other=4 | brain=adult dataset=20
+- `2026-06-30 16:32 UTC` **git_auto** — sync: 9 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, correction_log.jsonl +6 more | halim=1 docs=1 core=4 other=3 | brain=adult data
