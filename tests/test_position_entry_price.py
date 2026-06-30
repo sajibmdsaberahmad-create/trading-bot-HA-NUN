@@ -35,3 +35,9 @@ def test_position_entry_price_normalizes_with_market():
 def test_slot_price_sane_rejects_bito_price_on_soxs_entry():
     assert not slot_price_sane(3.22, 20.69)
     assert slot_price_sane(20.69, 20.74)
+
+
+def test_sanitize_quote_price_fixes_10x_live_quote():
+    from core.fill_tracker import sanitize_quote_price
+    fixed = sanitize_quote_price(140.21, ref_px=14.02, pred_px=14.05, symbol="INTC")
+    assert fixed == pytest.approx(14.021, rel=0.02)

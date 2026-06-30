@@ -10,6 +10,47 @@
 
 ---
 
+## 2026-07-01 — Halim echo blocks green spikes + INTC 10x quote + snapshot spam
+
+### Problem
+1. Green `profit_prob=91%` spikes (BIYA, YHC, INLF) never entered: Halim toddler LM echoed training `ppo=hold` → `enter=False conf≈50%`; AI-sure treated echo as real skip (`halim:ai_sure_wait`).
+2. Council `in_flight` then `force-clear` with no resolution — timeout fallback blocked under AI-sure (`allows_timeout_fallback_entry=false`).
+3. INTC entered at ~$140 (10× real ~$14) on `halim:quality_flash`; position monitor spammed `Price snapshot refresh INTC` every 1–2s.
+
+### Root cause
+1. Halim prompt lacked calculative quality (`profit_prob`, `enter_ok`); parser preferred training echo over score echo.
+2. `_service_stale_councils` dropped pending councils without running timeout merge; no AI-sure quality timeout path.
+3. IB paper quotes not sanitized at spike/snapshot time; `_force_price_snapshot` had no per-ticker cooldown and always logged INFO.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_entry_line.py` | Quality in prompt; `halim_advisory_is_echo()`; score echo before training echo; `advisory_kind=echo` |
+| `core/smart_stack.py` | `halim:ai_sure_escalate` pending on echo+green quality; teacher rings on echo+quality |
+| `core/ai_commander_entry.py` | Pass quality to Halim ring; `force_timeout` in poll |
+| `core/live_ai_pipeline.py` | `council:ai_sure_quality_timeout` when council times out with green quality |
+| `core/entry_quality.py` | Allow `ai_sure_quality_timeout` through veto |
+| `core/scalper_runner.py` | Force-clear resolves entry council; snapshot cooldown + sanitize |
+| `core/fill_tracker.py` | `sanitize_quote_price()` |
+| `core/scalper_spike_loop.py` | Sanitize live_px; QUOTE veto when >35% from bar |
+| `tests/test_ai_sure_entry.py`, `tests/test_position_entry_price.py` | Echo escalate + quote sanitize |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `PRICE_SNAPSHOT_COOLDOWN_SEC` | `8` | Min seconds between IB snapshots per ticker |
+| `SMART_STACK_AI_SURE_ENTRY` | `true` | Unchanged — now escalates echo to council |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ai_sure_entry.py tests/test_position_entry_price.py -q
+# Live: green spike → Halim local teacher:halim_echo_quality OR halim:ai_sure_escalate pending
+# Council force-clear → may enter via council:ai_sure_quality_timeout when prob green
+# INTC spike blocked or priced ~$14 not $140; snapshot log ≤1 per 8s per ticker
+```
+
+---
+
 ## 2026-06-30 — Multi-position monitor race + false green lock on wrong tick
 
 ### Problem

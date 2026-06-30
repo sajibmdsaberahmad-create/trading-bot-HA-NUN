@@ -51,6 +51,36 @@ def test_build_halim_ai_sure_requires_halim_enter():
     assert "ai_sure" in out["pipeline"]
 
 
+def test_build_halim_ai_sure_echo_escalates_to_council():
+    cfg = BotConfig()
+    quality = {"profit_probability": 0.91, "enter_ok": True, "reason": "ok"}
+    halim = {
+        "status": "fresh",
+        "parsed": {
+            "enter": False,
+            "confidence": 0.48,
+            "reason": "training echo",
+            "advisory_kind": "echo",
+        },
+    }
+    with patch("core.smart_stack.smart_stack_enabled", return_value=True):
+        with patch("core.smart_stack.ai_sure_entry_enabled", return_value=True):
+            out = build_halim_local_entry(
+                cfg,
+                halim_live=halim,
+                quality=quality,
+                ppo_action=0,
+                ppo_conf=0.50,
+                ppo_reason="hold",
+                min_conf=0.55,
+                scan_score=90,
+                spike_ratio=1.5,
+            )
+    assert not out["enter"]
+    assert out.get("pending")
+    assert out["pipeline"] == "halim:ai_sure_escalate"
+
+
 def test_build_halim_ai_sure_lead_when_aligned():
     cfg = BotConfig()
     quality = {"profit_probability": 0.91, "enter_ok": True, "reason": "ok"}
