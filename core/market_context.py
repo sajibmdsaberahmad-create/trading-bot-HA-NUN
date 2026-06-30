@@ -405,62 +405,29 @@ def summarize_market_context() -> dict:
 
 
 def get_ib_market_snapshot(ib_connector) -> Dict:
-    """
-    Fetch real-time market context from IB Gateway.
-    Uses IB contract details for SPY, QQQ, VIX, and sector ETFs.
-    """
-    snapshot = {
-        "spy_price": None,
-        "qqq_price": None,
-        "vix_level": 0.0,
-        "sector_etfs": {},
-        "market_status": "unknown",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
-
-    if not ib_connector or not hasattr(ib_connector, "ib"):
-        return snapshot
-
+    """Legacy alias — delegates to core.ib_macro (reqTickers one-shot)."""
     try:
-        try:
-            from ib_insync import Stock
-            spy = Stock("SPY", "ARCA")
-            ib_connector.ib.qualifyContracts(spy)
-            spy_ticker = ib_connector.ib.reqMktData(spy, "", False, False)
-            if spy_ticker and hasattr(spy_ticker, "last"):
-                snapshot["spy_price"] = float(spy_ticker.last)
-        except Exception:
-            pass
-
-        try:
-            from ib_insync import Stock
-            qqq = Stock("QQQ", "NASDAQ")
-            ib_connector.ib.qualifyContracts(qqq)
-            qqq_ticker = ib_connector.ib.reqMktData(qqq, "", False, False)
-            if qqq_ticker and hasattr(qqq_ticker, "last"):
-                snapshot["qqq_price"] = float(qqq_ticker.last)
-        except Exception:
-            pass
-
-        try:
-            from ib_insync import Index
-            vix = Index("VIX", "CBOE")
-            ib_connector.ib.qualifyContracts(vix)
-            vix_ticker = ib_connector.ib.reqMktData(vix, "", False, False)
-            if vix_ticker and hasattr(vix_ticker, "last"):
-                snapshot["vix_level"] = max(0.0, float(vix_ticker.last))
-        except Exception:
-            yf = _try_import_yfinance()
-            if yf:
-                try:
-                    vix_hist = yf.Ticker("^VIX").history(period="1d")
-                    if not vix_hist.empty and "close" in vix_hist.columns:
-                        snapshot["vix_level"] = float(vix_hist["close"].iloc[-1])
-                except Exception:
-                    pass
-
-        snapshot["market_status"] = "open"
+        from core.ib_macro import get_ib_macro_context
+        ib_ctx = get_ib_macro_context(ib_connector, force=False)
+        return {
+            "spy_price": ib_ctx.get("spy_price"),
+            "qqq_price": ib_ctx.get("qqq_price"),
+            "vix_level": float(ib_ctx.get("vix_level", 0) or 0),
+            "spy_change_pct": float(ib_ctx.get("spy_change_pct", 0) or 0),
+            "qqq_change_pct": float(ib_ctx.get("qqq_change_pct", 0) or 0),
+            "risk_tone": ib_ctx.get("risk_tone", "neutral"),
+            "sector_etfs": {},
+            "market_status": "open" if ib_ctx.get("spy_price") else "unknown",
+            "timestamp": ib_ctx.get("timestamp", datetime.now(timezone.utc).isoformat()),
+            "source": ib_ctx.get("source", "ib"),
+        }
     except Exception as exc:
-        logger.debug(f"IB market snapshot error: {exc}")
-
-    return snapshot
+        logger.debug(f"IB market snapshot: {exc}")
+        return {
+            "spy_price": None,
+            "qqq_price": None,
+            "vix_level": 0.0,
+            "sector_etfs": {},
+            "market_status": "unknown",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }

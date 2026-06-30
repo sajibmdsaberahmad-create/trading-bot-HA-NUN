@@ -756,14 +756,16 @@ class ScalperExitMixin:
             entry = 0.0
         if qty <= 0:
             try:
-                self.ib.reqPositions()
-                self.ib.sleep(0.3)
-                for p in self.ib.positions():
-                    sym = (getattr(p.contract, "symbol", "") or "").upper()
-                    if sym == ticker:
-                        qty = int(float(p.position))
-                        entry = float(getattr(p, "avgCost", 0) or 0)
-                        break
+                from core.ib_truth import ib_truth_enabled
+                if not ib_truth_enabled(self.cfg):
+                    self.ib.reqPositions()
+                    self.ib.sleep(0.3)
+                    for p in self.ib.positions():
+                        sym = (getattr(p.contract, "symbol", "") or "").upper()
+                        if sym == ticker:
+                            qty = int(float(p.position))
+                            entry = float(getattr(p, "avgCost", 0) or 0)
+                            break
             except Exception as exc:
                 return {"ok": False, "error": str(exc)}
 
