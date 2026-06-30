@@ -29,3 +29,7 @@ IB closing-only — cannot open new positions
 Observed ib_failure — recorded for learning.
 IB closing-only — cannot open new positions
 
+🧭 COMMANDER LEARNING | 2026-06-30T11:05:13.278087+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+

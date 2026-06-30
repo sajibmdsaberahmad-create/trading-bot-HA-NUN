@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1675,
   "scans_performed": 39,
-  "improvements_applied": 2681,
+  "improvements_applied": 2682,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:01:03.515581",
-      "age": "7d 19h 58m 14s",
-      "type": "TRADE",
-      "message": "Observed trade: ASTS ? P&L=$-8.74",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:01:04.053740",
       "age": "7d 19h 58m 15s",
@@ -12290,6 +12283,20 @@
         "applied": [],
         "lessons": [
           "Review ib_failure on JEM"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:05:13.262444",
+      "age": "9d 0h 2m 24s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2682",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on KTTA"
         ]
       }
     }
