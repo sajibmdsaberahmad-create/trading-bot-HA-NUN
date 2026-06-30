@@ -35,17 +35,17 @@ EXIT_METHODS = {
 }
 
 GROUPS: Dict[str, Tuple[str, Set[str]]] = {
-    "commander_verdict": ("CommanderVerdictMixin", VERDICT_METHODS),
-    "commander_learning": ("CommanderLearningMixin", LEARNING_METHODS),
-    "commander_entry": ("CommanderEntryMixin", ENTRY_METHODS),
-    "commander_exit": ("CommanderExitMixin", EXIT_METHODS),
+    "ai_commander_verdict": ("CommanderVerdictMixin", VERDICT_METHODS),
+    "ai_commander_deferred": ("CommanderLearningMixin", LEARNING_METHODS),
+    "ai_commander_entry": ("CommanderEntryMixin", ENTRY_METHODS),
+    "ai_commander_exit": ("CommanderExitMixin", EXIT_METHODS),
 }
 
 MIXIN_IMPORTS = """
-from core.commander_verdict import CommanderVerdictMixin
-from core.commander_learning import CommanderLearningMixin
-from core.commander_entry import CommanderEntryMixin
-from core.commander_exit import CommanderExitMixin
+from core.ai_commander_verdict import CommanderVerdictMixin
+from core.ai_commander_deferred import CommanderLearningMixin
+from core.ai_commander_entry import CommanderEntryMixin
+from core.ai_commander_exit import CommanderExitMixin
 """
 
 HEADER = '''#!/usr/bin/env python3
