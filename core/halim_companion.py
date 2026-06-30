@@ -309,13 +309,20 @@ def live_snapshot(
     except Exception:
         pass
     try:
-        from core.ib_truth import ib_ai_context
+        from core.ib_hub import get_hub_context
         conn = getattr(runner, "conn", None)
-        ib_ctx = ib_ai_context(cfg, connector=conn)
-        if ib_ctx.get("ib_truth"):
-            snap.update(ib_ctx)
+        hub = get_hub_context(cfg, connector=conn, runner=runner)
+        if hub.get("ib_truth"):
+            snap.update(hub)
     except Exception:
-        pass
+        try:
+            from core.ib_truth import ib_ai_context
+            conn = getattr(runner, "conn", None)
+            ib_ctx = ib_ai_context(cfg, connector=conn)
+            if ib_ctx.get("ib_truth"):
+                snap.update(ib_ctx)
+        except Exception:
+            pass
     return snap
 
 

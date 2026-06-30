@@ -660,6 +660,10 @@ def refresh_ib_extended(
         "wsh_events": bundle.wsh_events,
         "head_timestamps": bundle.head_timestamps,
         "market_rules": bundle.market_rules,
+        "quote_snapshots": bundle.quote_snapshots,
+        "account_summary": bundle.account_summary,
+        "completed_orders": bundle.completed_orders,
+        "news_providers": bundle.news_providers,
     }
     with _lock:
         _save_cache(data)
@@ -690,4 +694,8 @@ def extended_ai_context() -> Dict[str, Any]:
         "ib_wsh_events": (c.get("wsh_events") or [])[:12],
         "ib_head_timestamps": c.get("head_timestamps", {}),
         "ib_market_rules": c.get("market_rules", {}),
+        "ib_quote_snapshots": c.get("quote_snapshots", {}),
+        "ib_account_summary": c.get("account_summary", {}),
+        "ib_completed_orders": (c.get("completed_orders") or [])[:10],
+        "ib_news_providers": c.get("news_providers", []),
     }

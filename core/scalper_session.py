@@ -335,8 +335,20 @@ class ScalperSessionMixin:
         from core.memory_guard import memory_status
         from core.ai_session_limits import format_limits_log, should_ai_define_limits
 
-        acct_vals = self.conn.ib.accountValues()
-        account = acct_vals[0].account if acct_vals else "unknown"
+        acct_vals = []
+        account = "unknown"
+        try:
+            from core.ib_truth import get_snapshot
+            snap = get_snapshot()
+            if snap.refreshed_at > 0 and snap.account.account_code:
+                account = snap.account.account_code
+            elif snap.refreshed_at > 0:
+                account = "IB"
+        except Exception:
+            pass
+        if account == "unknown":
+            acct_vals = self.conn.ib.accountValues()
+            account = acct_vals[0].account if acct_vals else "unknown"
         mode = "PAPER" if self.cfg.PAPER_TRADING else "LIVE"
         market_state = get_market_state(self.cfg)
         can_trade, _ = can_trade_now(self.cfg)

@@ -569,10 +569,15 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 log.error(f"Fresh PPO model also failed: {exc2}")
                 self.model = None
     def _refresh_account_balance(self):
-        """Pull live balance from IB Truth — bot state changes ONLY via IB fills."""
+        """Pull live balance from IB Hub — truth + extended + macro in one pass."""
         try:
-            from core.ib_truth import apply_to_runner, ib_truth_enabled, refresh
-            if ib_truth_enabled(self.cfg):
+            from core.ib_hub import ib_hub_enabled, refresh_services_for_runner
+            from core.ib_truth import ib_truth_enabled
+
+            if ib_hub_enabled() and ib_truth_enabled(self.cfg):
+                refresh_services_for_runner(self)
+            elif ib_truth_enabled(self.cfg):
+                from core.ib_truth import apply_to_runner, refresh
                 snap = refresh(self.ib, self.cfg)
                 apply_to_runner(self, snap)
             else:

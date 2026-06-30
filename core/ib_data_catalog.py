@@ -89,7 +89,7 @@ IB_API_CATEGORIES: List[Tuple[str, str, str, str]] = [
   # (category, ib_call, used_by_hanoon, notes)
   ("Account", "accountValues()", "ib_truth", "All tags in ACCOUNT_TAGS"),
   ("Account", "reqAccountUpdates()", "—", "Streaming account — use tags above"),
-  ("Account", "reqAccountSummary()", "—", "Group summary — redundant with values"),
+  ("Account", "reqAccountSummary()", "ib_extended", "Group summary tags"),
   ("Positions", "positions()", "ib_truth, position_sync", "Qty + avgCost per contract"),
   ("Positions", "portfolio()", "ib_truth", "Mark, unrealized, realized, marketValue"),
   ("Positions", "reqPositions()", "broker, exit", "Force refresh before positions()"),
@@ -100,7 +100,8 @@ IB_API_CATEGORIES: List[Tuple[str, str, str, str]] = [
   ("Orders", "reqAllOpenOrders()", "ib_truth", "Include TWS manual orders"),
   ("Orders", "whatIfOrder()", "ib_extended, broker", "Margin preview before bracket entry"),
   ("Fills", "fills()", "ib_truth, fill_tracker", "Executions + commissionReport"),
-  ("Fills", "reqExecutions()", "fill_tracker", "Historical execution filter"),
+  ("Fills", "reqExecutions()", "ib_truth, fill_tracker", "Historical execution filter"),
+  ("Orders", "reqCompletedOrders()", "ib_extended", "Recent completed/cancelled"),
   ("Market", "reqMktData()", "scalper_runner, market_context", "L1 quote stream"),
   ("Market", "reqTickers()", "trader, ib_macro", "One-shot snapshot — preferred"),
   ("Market", "reqTickByTickData()", "data.py", "Every trade print — spike/stops"),
@@ -123,7 +124,7 @@ IB_API_CATEGORIES: List[Tuple[str, str, str, str]] = [
 
 # Consumption status for AI context builder
 USED_NOW = frozenset({
-  "ib_truth", "ib_extended", "position_sync", "broker", "fill_tracker", "scalper_runner",
+  "ib_truth", "ib_extended", "ib_hub", "position_sync", "broker", "fill_tracker", "scalper_runner",
   "market_context", "data.py", "scanner.py", "connector", "trader",
   "ib_macro", "daily_ib_learning", "account_view", "war_ib_sync",
   "swing_paper", "ppo_swing_train",
