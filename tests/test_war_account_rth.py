@@ -159,8 +159,37 @@ def test_balance_driven_ignores_fixed_trip_count():
     }
     with _paper_balance_env():
         assert balance_driven_trips_enabled(cfg) is True
-        assert war_bullets_remaining(state, cfg) >= 5
         assert _recompute_mode(state, cfg) == "WAR_ACTIVE"
+        # Mechanical slice mode (WAR_AI_SIZING off)
+        with patch.dict("os.environ", {"WAR_AI_SIZING": "false"}, clear=False):
+            assert war_bullets_remaining(state, cfg) >= 5
+
+
+def test_ai_sizing_full_pool_deploy_cap():
+    from core.war_account import (
+        _entry_deploy_cap,
+        _trip_cap_blocks,
+        war_ai_sizing_enabled,
+    )
+
+    cfg = BotConfig()
+    state = {
+        "settled_cash": 3500.0,
+        "nav": 3500.0,
+        "bullets_total": 8,
+        "bullets_used_session": 5,
+        "round_trips_today": 5,
+        "operating_capital": 3500.0,
+        "open_war": None,
+    }
+    with _paper_balance_env():
+        with patch.dict("os.environ", {"WAR_AI_SIZING": "true", "WAR_CASH_RESERVE_PCT": "0.05"}, clear=False):
+            assert war_ai_sizing_enabled(cfg) is True
+            cap = _entry_deploy_cap(state, cfg)
+            assert cap > 3000.0
+            assert _trip_cap_blocks(state, cfg) is False
+            assert _recompute_mode(state, cfg) == "WAR_ACTIVE"
+            assert war_bullets_remaining(state, cfg) == 3
 
 
 def test_balance_driven_observe_when_settled_dry():

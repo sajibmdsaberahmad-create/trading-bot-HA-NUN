@@ -9,6 +9,36 @@
 **Enforced:** `scripts/git-hooks/pre-commit` blocks commits that touch `core/`, `halim/halim/`, `scripts/*.sh`, or `.cursor/rules/` without a new dated section here. Install: `./scripts/install_git_hooks.sh`. Cursor `afterFileEdit` hook reminds agents. Emergency bypass: `SKIP_FIX_JOURNAL=1` (document ASAP).
 
 ---
+## 2026-06-30 — War AI sizing (full pool deploy, advisory bullets)
+
+### Problem
+With `AI_UNLIMITED_MODE` / full AI control, war entries were still capped to mechanical bullet slices (~$437 = $3500/8). AI could not deploy the full war pool for profit hunting; `bullets_left` blocked entries even when settled cash remained.
+
+### Root cause
+`_entry_deploy_cap`, `rescale_decision_for_war`, and `get_ai_deploy_budget` used `min(bullet, settled)`; `war_bullets_remaining` counted settled//bullet slices as hard trip limits.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `war_ai_sizing_enabled()`; full settled deploy cap; trip block = pool dry only |
+| `core/pilot_mode.py` | War deploy budget = full settled (minus reserve) under AI sizing |
+| `core/smart_stack.py` | Skip mechanical bullet-left posture bumps when AI sizing |
+| `scripts/start_hanoon.sh` | `WAR_AI_SIZING=true`, `WAR_CASH_RESERVE_PCT=0.05` |
+
+### Env vars
+```bash
+WAR_AI_SIZING=true          # default on with AI_UNLIMITED / AI_FULL_CAPITAL_ACCESS
+WAR_CASH_RESERVE_PCT=0.05   # small cash buffer; rest deployable per AI decision
+WAR_BULLETS=8               # advisory session budget for AI context, not slice size
+```
+
+### Verify
+```bash
+python3 -m pytest tests/test_war_account_rth.py -q
+# war_context_line shows deploy_cap=$3,325 bullets_advisory=8/8
+```
+
+---
 
 ## 2026-06-30 — IB fill sync hardening (entry+exit P&L from broker)
 
