@@ -47,6 +47,13 @@ def repair_slot_entry_price(
 
 
 def ib_long_position_map(ib) -> Dict[str, float]:
+    try:
+        from core.ib_truth import get_snapshot, ib_truth_enabled
+        snap = get_snapshot()
+        if ib_truth_enabled() and snap.refreshed_at > 0:
+            return {sym: pos.qty for sym, pos in snap.long_positions().items()}
+    except Exception:
+        pass
     out: Dict[str, float] = {}
     for p in ib.positions():
         sym = getattr(p.contract, "symbol", "")
