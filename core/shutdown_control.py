@@ -65,3 +65,41 @@ def clear_shutdown_request() -> None:
 
 def shutdown_requested() -> bool:
     return shutdown_file().is_file()
+
+
+def interruptible_wait(
+    seconds: float,
+    *,
+    ib=None,
+    check_interval: float = 0.25,
+    extra_check=None,
+) -> bool:
+    """Wait up to `seconds`. Return True if shutdown (or extra_check) requested."""
+    end = time.time() + max(0.0, seconds)
+    while time.time() < end:
+        if shutdown_requested():
+            return True
+        if extra_check is not None:
+            try:
+                if extra_check():
+                    return True
+            except Exception:
+                pass
+        chunk = min(check_interval, end - time.time())
+        if chunk <= 0:
+            break
+        if ib is not None:
+            try:
+                ib.sleep(chunk)
+                continue
+            except Exception:
+                pass
+        time.sleep(chunk)
+    if shutdown_requested():
+        return True
+    if extra_check is not None:
+        try:
+            return bool(extra_check())
+        except Exception:
+            pass
+    return False
