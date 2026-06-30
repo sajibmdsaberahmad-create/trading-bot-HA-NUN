@@ -1,15 +1,15 @@
 {
   "operating_capital": 3500.0,
-  "nav": 4547.564127138784,
-  "cash": 4021.271765538784,
-  "settled_cash": 2969.809166948885,
+  "nav": 5055.008799138784,
+  "cash": 5051.332405538784,
+  "settled_cash": 3484.8394869488848,
   "unsettled": [],
-  "deployed_usd": 525.9423616000001,
+  "deployed_usd": 3.6763936000000967,
   "bullets_total": 8,
   "bullets_used_session": 4,
-  "round_trips_today": 3,
+  "round_trips_today": 4,
   "entries_today": 4,
-  "fee_drag_today": 2.45,
+  "fee_drag_today": 2.8000000000000003,
   "lab_capital": 5000.0,
   "lab_nav": 5000.0,
   "lab_cash": 5000.0,
@@ -18,25 +18,18 @@
   "mode": "WAR_ACTIVE",
   "is_live": false,
   "session_date": "2026-06-30",
-  "open_war": {
-    "ticker": "VWAV",
-    "shares": 69,
-    "entry": 7.569072,
-    "ib_fill": 7.56,
-    "comm": 0.35,
-    "pipeline": "",
-    "promotion": true,
-    "ts": 1782821303.200175
-  },
+  "open_war": null,
   "open_lab": null,
-  "session_pnl_war": -3.8984714511157166,
+  "session_pnl_war": -11.484119451115768,
   "session_pnl_lab": 0.0,
   "ticker_session_pnl": {
     "INTZ": -5.5,
-    "HXHX": 1.61
+    "HXHX": 1.61,
+    "VWAV": -7.59
   },
   "ticker_session_losses": {
-    "INTZ": 2
+    "INTZ": 2,
+    "VWAV": 1
   },
-  "updated_at": 1782821516.1656919
+  "updated_at": 1782821530.397838
 }

@@ -5197,3 +5197,5 @@
 {"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":67788.0,"shadow_only":true,"timestamp":"2026-06-30T12:11:46.545385+00:00"}
 {"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":13269.0,"shadow_only":true,"timestamp":"2026-06-30T12:11:52.121485+00:00"}
 {"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":1807109.0,"shadow_only":true,"timestamp":"2026-06-30T12:11:56.163511+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1787.0,"shadow_only":true,"timestamp":"2026-06-30T12:12:00.196508+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":29975.0,"shadow_only":true,"timestamp":"2026-06-30T12:12:05.505970+00:00"}
