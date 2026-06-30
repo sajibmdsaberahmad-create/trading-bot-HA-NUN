@@ -39,6 +39,7 @@ from threading import Lock, Timer
 
 from core.config import BotConfig
 from core.notify import log
+from core import git_sync_defer as _defer
 
 # Repository directory (project root)
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -61,13 +62,12 @@ _gh_missing_logged: bool = False
 _gh_auth_verified: bool = False
 _git_init_done: bool = False
 _learning_restore_done: bool = False
-_checkpoint_lock = Lock()
+_checkpoint_lock = _defer.checkpoint_lock
 _checkpoint_pending: Set[str] = set()  # legacy — use _checkpoint_batched_reasons
-_checkpoint_batched_reasons: Set[str] = set()
-_checkpoint_flush_timer: Optional[Timer] = None
+_checkpoint_batched_reasons = _defer.checkpoint_batched_reasons
+_checkpoint_flush_timer = _defer.checkpoint_flush_timer  # noqa: F841 — mutated via _defer
 _last_checkpoint_ts: float = 0.0
 _CHECKPOINT_MIN_INTERVAL_SEC: float = 45.0
-_deferred_push_count: int = 0
 
 # Auto-push watcher (standalone daemon only)
 _standalone_mode: bool = False
