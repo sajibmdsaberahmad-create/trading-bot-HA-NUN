@@ -796,9 +796,15 @@ class BotConfig:
     HYBRID_DISTILL_MIN_ACCURACY: float = 0.62
     HYBRID_DISTILL_ENTER_THRESHOLD: float = 0.45
     HYBRID_DISTILL_AUTO_FAST_PATH: bool = os.getenv(
-        "HYBRID_DISTILL_AUTO_FAST_PATH", "true"
+        "HYBRID_DISTILL_AUTO_FAST_PATH", "false"
     ).lower() in ("1", "true", "yes")
     HYBRID_DISTILL_FAST_PATH: bool = False       # Manual override — skip Ollama on entry
+    HYBRID_DISTILL_HOLDOUT_MIN_SAMPLES: int = int(
+        os.getenv("HYBRID_DISTILL_HOLDOUT_MIN_SAMPLES", "8")
+    )
+    HYBRID_DISTILL_REQUIRE_HOLDOUT: bool = os.getenv(
+        "HYBRID_DISTILL_REQUIRE_HOLDOUT", "true"
+    ).lower() in ("1", "true", "yes")
     HYBRID_DISTILL_CHECK_EVERY_N_TRADES: int = 5
     HYBRID_DISTILL_RETRAIN_HOURS: float = 24.0
     # Live AI hotline — Ollama always on, never blocks IB loop, no stale cache
