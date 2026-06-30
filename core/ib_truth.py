@@ -625,6 +625,22 @@ def ib_ai_context(
     except Exception:
         pass
 
+    try:
+        from core.ib_extended import extended_ai_context, ib_extended_enabled, refresh_ib_extended
+
+        if connector is not None and ib_extended_enabled():
+            refresh_ib_extended(
+                getattr(connector, "ib", None),
+                cfg,
+                connector,
+                symbols=[p.get("symbol", "") for p in ctx.get("ib_positions", []) if p.get("symbol")],
+                full=False,
+                force=False,
+            )
+        ctx.update(extended_ai_context())
+    except Exception as exc:
+        log.debug(f"ib_ai_context extended: {exc}")
+
     return ctx
 
 
