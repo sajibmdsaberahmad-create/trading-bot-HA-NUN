@@ -471,7 +471,10 @@ class ScalperExitMixin:
                 )
         except Exception as exc:
             log.debug(f"War account exit: {exc}")
-        log_round_trip_fills(
+        try:
+            self._maybe_sync_war_from_ib(force=True)
+        except Exception:
+            pass
             ticker=ticker,
             entry_fill=entry_fill,
             exit_fill=exit_fill,

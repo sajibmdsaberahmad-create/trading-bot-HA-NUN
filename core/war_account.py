@@ -780,7 +780,7 @@ def ensure_war_account(cfg: Optional[BotConfig] = None, ib=None) -> Dict[str, An
         try:
             from core.war_ib_sync import sync_war_from_ib, war_ib_sync_enabled
             if war_ib_sync_enabled(cfg):
-                sync_war_from_ib(ib, cfg, apply=True)
+                sync_war_from_ib(ib, cfg, apply=True, force=True)
                 state = load_state(cfg)
                 synced = True
         except Exception as exc:
