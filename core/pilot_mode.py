@@ -293,6 +293,16 @@ def get_ai_deploy_budget(
                 account_equity = eq
             if cash > 0:
                 available_cash = cash
+            from core.war_account import war_ai_sizing_enabled, bullet_size_usd
+            if war_ai_sizing_enabled(cfg):
+                reserve = float(getattr(cfg, "WAR_CASH_RESERVE_PCT", 0.05) or 0.05)
+                env_reserve = os.getenv("WAR_CASH_RESERVE_PCT", "")
+                if env_reserve:
+                    try:
+                        reserve = float(env_reserve)
+                    except ValueError:
+                        pass
+                return max(0.0, (available_cash or cash) * (1.0 - reserve))
             bullet = bullet_size_usd(cfg)
             return max(0.0, min(bullet, available_cash or bullet))
     except Exception:

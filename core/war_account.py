@@ -235,11 +235,15 @@ def _entry_deploy_cap(
     *,
     use_lab: bool = False,
 ) -> float:
-    """Max USD for next entry — min(nominal bullet, settled minus fee buffer)."""
+    """Max USD for next entry — full settled pool under AI sizing, else bullet slice."""
     cfg = cfg or BotConfig()
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
     bullet = _bullet_size(state, cfg)
-    comm_buf = _commission_usd(cfg, bullet) * 2 + 0.5
+    comm_buf = _commission_usd(cfg, max(bullet, settled * 0.1)) * 2 + 0.5
+    if war_ai_sizing_enabled(cfg):
+        reserve = _env_float("WAR_CASH_RESERVE_PCT", 0.05)
+        deployable = settled * (1.0 - reserve) if reserve > 0 else settled
+        return max(50.0, deployable - comm_buf)
     if balance_driven_trips_enabled(cfg, use_lab=use_lab):
         return max(50.0, min(bullet, settled - comm_buf))
     return min(settled, bullet)
@@ -547,7 +551,7 @@ def _bullet_size(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> floa
 def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> str:
     cfg = cfg or BotConfig()
     live = is_live_war(cfg)
-    min_bullet = _bullet_size(state, cfg) * 0.85
+    min_bullet = _min_entry_settled(state, cfg)
     settled = float(state.get("settled_cash", 0))
     open_war = state.get("open_war")
 
@@ -732,12 +736,15 @@ def war_account_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     lab_trips, lab_cap = war_trip_display(state, cfg, use_lab=True)
     bullets_left = war_bullets_remaining(state, cfg)
     lab_bullets_left = war_bullets_remaining(state, cfg, use_lab=True)
+    deploy_cap = _entry_deploy_cap(state, cfg)
     ctx = {
         "war_enabled": True,
         "war_mode": mode,
         "war_live": is_live_war(cfg),
         "war_balance_driven": balance_driven_trips_enabled(cfg),
         "war_lab_balance_driven": balance_driven_trips_enabled(cfg, use_lab=True),
+        "war_ai_sizing": war_ai_sizing_enabled(cfg),
+        "war_deploy_cap_usd": round(deploy_cap, 2),
         "war_nav": round(float(state.get("nav", 0)), 2),
         "war_settled_cash": round(float(state.get("settled_cash", 0)), 2),
         "war_lab_nav": round(float(state.get("lab_nav", 0)), 2),
@@ -766,10 +773,17 @@ def war_context_line(cfg: Optional[BotConfig] = None) -> str:
     if not c:
         return ""
     if c.get("war_balance_driven"):
-        trips_bit = (
-            f"round_trips={c['war_round_trips_today']} "
-            f"bullets_left={c['war_bullets_remaining']} (settled-driven)"
-        )
+        if c.get("war_ai_sizing"):
+            trips_bit = (
+                f"round_trips={c['war_round_trips_today']} "
+                f"deploy_cap=${c.get('war_deploy_cap_usd', 0):,.0f} "
+                f"bullets_advisory={c['war_bullets_remaining']}/{c['war_bullets_total']}"
+            )
+        else:
+            trips_bit = (
+                f"round_trips={c['war_round_trips_today']} "
+                f"bullets_left={c['war_bullets_remaining']} (settled-driven)"
+            )
     else:
         trips_bit = (
             f"trips={c['war_round_trips_today']}/{c['war_round_trips_max']}"
@@ -798,7 +812,7 @@ def _observe_block_reason(state: Dict[str, Any], cfg: Optional[BotConfig] = None
                 f"war OBSERVE — settled ${settled:,.0f} below min entry "
                 f"${min_bullet:,.0f} (pool dry)"
             )
-        if bullets_left <= 0:
+        if not war_ai_sizing_enabled(cfg) and bullets_left <= 0:
             return (
                 f"war OBSERVE — no bullets left from settled ${settled:,.0f} "
                 f"(min entry ${min_bullet:,.0f})"
@@ -939,19 +953,24 @@ def rescale_decision_for_war(
     *,
     ticker: str = "",
 ) -> Dict[str, Any]:
-    """Clamp shares to war bullet + settled cash."""
+    """Clamp shares to war deploy cap + settled cash (full pool when AI sizing)."""
     cfg = cfg or BotConfig()
     if not war_account_enabled(cfg) or entry_px <= 0:
         return decision
     state = load_state(cfg)
     mode = state.get("mode") or _recompute_mode(state, cfg)
     use_lab = mode == "LAB_ACTIVE"
-    settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
     cap_usd = _entry_deploy_cap(state, cfg, use_lab=use_lab)
     shares = int(decision.get("shares") or 0)
+    deploy = float(decision.get("deploy_usd") or 0)
     if shares <= 0:
-        deploy = float(decision.get("deploy_usd") or cap_usd)
+        if deploy <= 0:
+            deploy = cap_usd
+        else:
+            deploy = min(deploy, cap_usd)
         shares = int(deploy / entry_px)
+    elif war_ai_sizing_enabled(cfg) and deploy > 0:
+        shares = min(shares, max(1, int(min(deploy, cap_usd) / entry_px)))
     max_sh = max(1, int(cap_usd / entry_px))
     if shares > max_sh:
         shares = max_sh
