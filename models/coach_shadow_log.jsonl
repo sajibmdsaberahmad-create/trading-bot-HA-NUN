@@ -4342,3 +4342,12 @@
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.1890821317212954,"shadow_only":true,"timestamp":"2026-06-30T10:48:25.903034+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":7.772642527720538,"shadow_only":true,"timestamp":"2026-06-30T10:48:28.061218+00:00"}
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1.37233704838107,"shadow_only":true,"timestamp":"2026-06-30T10:48:38.106752+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":7.772642527720538,"shadow_only":true,"timestamp":"2026-06-30T10:48:40.527459+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.196601391146694,"shadow_only":true,"timestamp":"2026-06-30T10:48:42.679787+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":7.772642527720538,"shadow_only":true,"timestamp":"2026-06-30T10:48:44.897679+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1.3845054206627927,"shadow_only":true,"timestamp":"2026-06-30T10:48:47.037761+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":7.772642527720538,"shadow_only":true,"timestamp":"2026-06-30T10:48:49.540770+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1.3921583711563987,"shadow_only":true,"timestamp":"2026-06-30T10:48:51.857468+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.286384515509543,"shadow_only":true,"timestamp":"2026-06-30T10:48:53.993839+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":7.772642527720538,"shadow_only":true,"timestamp":"2026-06-30T10:48:56.274739+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1.3921583711563987,"shadow_only":true,"timestamp":"2026-06-30T10:48:58.386689+00:00"}
