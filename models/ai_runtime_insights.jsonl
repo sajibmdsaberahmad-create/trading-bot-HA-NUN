@@ -2724,3 +2724,5 @@
 {"timestamp":"2026-06-30T11:23:16.134871+00:00","event":"order_timeout","ticker":"BTCT","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T11:25:31.021843+00:00","event":"order_timeout","ticker":"GVH","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T11:28:17.803503+00:00","event":"order_timeout","ticker":"GVH","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-30T11:32:14.805725+00:00","event":"order_timeout","ticker":"INTZ","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-30T11:33:30.838464+00:00","event":"council_timeout","ticker":"BIYA","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 capital discipline: no fallback entry","spike_ratio":1.2282439241793033,"scan_score":97.8,"confidence":0.45530000000000004,"market_state":"pre_market"}

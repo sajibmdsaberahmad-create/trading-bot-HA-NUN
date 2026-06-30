@@ -5,13 +5,6 @@
       "value": 0.63,
       "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
       "source": "runtime_council_timeout",
-      "queued_at": "2026-06-30T09:32:45.024607+00:00"
-    },
-    {
-      "param": "CONFIDENCE_THRESHOLD",
-      "value": 0.63,
-      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
-      "source": "runtime_council_timeout",
       "queued_at": "2026-06-30T09:37:45.731322+00:00"
     },
     {
@@ -349,7 +342,14 @@
       "reason": "Halim dev: WR 67% healthy \u2014 slight relax",
       "source": "halim_developer_post_standalone_flush",
       "queued_at": "2026-06-30T11:00:35.682345+00:00"
+    },
+    {
+      "param": "CONFIDENCE_THRESHOLD",
+      "value": 0.63,
+      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+      "source": "runtime_council_timeout",
+      "queued_at": "2026-06-30T11:33:31.245332+00:00"
     }
   ],
-  "updated_at": "2026-06-30T11:00:35.682351+00:00"
+  "updated_at": "2026-06-30T11:33:31.245340+00:00"
 }
