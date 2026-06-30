@@ -518,6 +518,12 @@ class ScalperRunner:
                 pass
         if extra:
             ctx.update(extra)
+        try:
+            from core.war_account import war_account_context
+            ctx.update(war_account_context(self.cfg))
+        except Exception:
+            pass
+        ctx["_runner"] = self
         return ctx
 
     def _validate_features(self):

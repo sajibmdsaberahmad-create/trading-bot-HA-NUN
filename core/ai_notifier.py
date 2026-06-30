@@ -164,9 +164,6 @@ class TelegramAIComposer:
             ):
                 return structured
 
-        if fallback and not enriched.get("raw_briefing"):
-            enriched["raw_briefing"] = fallback[:2500]
-
         ai_text = self._ollama_compose(
             event_type, enriched, fallback,
             max_chars=max_c, copilot=copilot, purpose=purpose,
@@ -240,7 +237,51 @@ class TelegramAIComposer:
         if price > 0 and shares > 0:
             out["deploy_usd"] = round(price * shares, 2)
 
+        if "war_mode" not in out:
+            try:
+                from core.war_account import war_account_context
+                out.update(war_account_context(self.cfg))
+            except Exception:
+                pass
+
         return out
+
+    def _try_halim_trade_notify(
+        self,
+        event_type: str,
+        context: Dict[str, Any],
+        structured_fallback: str,
+        max_chars: int,
+        *,
+        copilot: bool = False,
+    ) -> str:
+        if copilot:
+            return ""
+        try:
+            from core.halim_companion import halim_trading_notify
+            runner = context.get("_runner")
+            return halim_trading_notify(
+                event_type,
+                context,
+                cfg=self.cfg,
+                runner=runner,
+                structured_fallback=structured_fallback,
+                max_chars=max_chars,
+            )
+        except Exception as exc:
+            log.debug(f"Halim trade notify: {exc}")
+            return ""
+
+    @staticmethod
+    def _war_line(ctx: Dict[str, Any]) -> str:
+        if not ctx.get("war_enabled"):
+            return ""
+        settled = float(ctx.get("war_settled_cash", 0) or 0)
+        trips = int(ctx.get("war_round_trips_today", 0) or 0)
+        max_t = int(ctx.get("war_round_trips_max", 0) or 0)
+        mode = ctx.get("war_mode", "—")
+        nav = float(ctx.get("war_nav", 0) or 0)
+        return f"War {mode} · pool ${nav:,.0f} · settled ${settled:,.0f} · trips {trips}/{max_t}"
 
     @staticmethod
     def _event_guidance(event_type: str) -> str:
@@ -344,6 +385,9 @@ class TelegramAIComposer:
         footer = f"{et} · Mood: {mood}"
         if pilot_read:
             footer = f"{pilot_read}\n{footer}"
+        war_line = self._war_line(ctx)
+        if war_line:
+            footer = f"{war_line}\n{footer}"
 
         if event_type == "trade_opened":
             t = ctx.get("ticker", "?")
@@ -395,11 +439,13 @@ class TelegramAIComposer:
             )
 
         if event_type == "startup":
-            ib = ctx.get("ib_balance") or ctx.get("equity", 0)
+            ib = ctx.get("ib_equity") or ctx.get("ib_account") or ctx.get("equity", 0)
+            war = self._war_line(ctx)
+            war_part = f"\n{war}" if war else ""
             return (
                 f"🚀 HANOON ONLINE\n"
                 f"Market {ctx.get('market_state', '').upper()} · Pilot {ctx.get('pilot_level', 'Cadet')}\n"
-                f"IB ${float(ib):,.0f} · AI notifications live\n"
+                f"IB ${float(ib):,.0f} · day P&L ${float(ctx.get('day_pnl', 0)):+,.2f}{war_part}\n"
                 f"{footer}"
             )
 
@@ -456,12 +502,14 @@ class TelegramAIComposer:
             )
 
         if event_type == "session_close":
-            pnl = float(ctx.get("pnl", 0))
+            pnl = float(ctx.get("pnl", ctx.get("session_pnl", 0)))
             pct = float(ctx.get("pnl_pct", 0))
-            ib_chg = float(ctx.get("ib_change", 0))
+            ib_chg = float(ctx.get("ib_change", ctx.get("day_pnl", 0)))
+            war = self._war_line(ctx)
+            war_part = f"\n{war}" if war else ""
             return (
                 f"🛬 SESSION CLOSE\n"
-                f"Bot P&L ${pnl:+,.2f} ({pct:+.2f}%) · IB Δ ${ib_chg:+,.2f}\n"
+                f"IB day Δ ${ib_chg:+,.2f} · bot P&L ${pnl:+,.2f} ({pct:+.2f}%){war_part}\n"
                 f"Trades {ctx.get('trades_today', 0)} · {et} · Mood {mood}"
             )
 

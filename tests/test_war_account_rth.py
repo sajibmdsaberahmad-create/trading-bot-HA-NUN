@@ -71,3 +71,54 @@ def test_roll_session_invokes_rth_reset():
                     _roll_session(state, cfg)
     assert state["round_trips_today"] == 0
     assert state["settled_cash"] == 3500.0
+
+
+def test_fresh_trips_on_hanoon_start_when_settled_remains():
+    from core.war_account import _maybe_refresh_trips_if_settled
+
+    cfg = BotConfig()
+    state = {
+        "round_trips_today": 5,
+        "bullets_used_session": 5,
+        "settled_cash": 3469.0,
+        "nav": 5807.0,
+        "bullets_total": 8,
+        "open_war": None,
+        "open_lab": None,
+        "operating_capital": 3500.0,
+    }
+    with patch.dict(
+        "os.environ",
+        {
+            "WAR_BULLETS": "8",
+            "WAR_PAPER_MAX_ROUND_TRIPS_PER_DAY": "8",
+            "WAR_FRESH_TRIPS_ON_START": "true",
+            "WAR_LIVE_OPERATING_CAPITAL": "0",
+        },
+        clear=False,
+    ):
+        assert _maybe_refresh_trips_if_settled(state, cfg) is True
+    assert state["round_trips_today"] == 0
+    assert state["bullets_used_session"] == 0
+
+
+def test_fresh_trips_skipped_when_settled_dry():
+    from core.war_account import _maybe_refresh_trips_if_settled
+
+    cfg = BotConfig()
+    state = {
+        "round_trips_today": 8,
+        "settled_cash": 50.0,
+        "nav": 200.0,
+        "bullets_total": 8,
+        "operating_capital": 3500.0,
+        "open_war": None,
+        "open_lab": None,
+    }
+    with patch.dict(
+        "os.environ",
+        {"WAR_BULLETS": "8", "WAR_FRESH_TRIPS_ON_START": "true", "WAR_LIVE_OPERATING_CAPITAL": "0"},
+        clear=False,
+    ):
+        assert _maybe_refresh_trips_if_settled(state, cfg) is False
+    assert state["round_trips_today"] == 8
