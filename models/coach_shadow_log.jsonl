@@ -3306,3 +3306,4 @@
 {"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":300.0,"shadow_only":true,"timestamp":"2026-06-30T08:35:58.434758+00:00"}
 {"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":80.67466666666667,"spike_ratio":300.0,"shadow_only":true,"timestamp":"2026-06-30T08:36:06.638017+00:00"}
 {"ticker":"MARA","reason":"ppo_not_aligned","scan_score":87.6,"spike_ratio":270.0,"shadow_only":true,"timestamp":"2026-06-30T08:45:38.415439+00:00"}
+{"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":20.0,"shadow_only":true,"timestamp":"2026-06-30T08:46:14.325838+00:00"}
