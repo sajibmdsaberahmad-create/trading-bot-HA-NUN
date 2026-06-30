@@ -10,6 +10,40 @@
 
 ---
 
+## 2026-07-01 — Swing doctrine: maturity-scaled green entry/exit
+
+### Problem
+Swing needed the same green/uptrend/book-profit/slippage logic as scalp but with multi-day holds and slow learning — not full mandatory gates on day one.
+
+### Root cause
+Swing only used `swing_intel` score; no `swing_doctrine` layer; no maturity ramp from IB trips + brain stage.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/swing_doctrine.py` | **New** — maturity profile, swing micro, entry/exit assessment |
+| `core/swing_intel.py` | Doctrine gate on verdict (replaces raw green block) |
+| `core/swing_executor.py` | Entry doctrine + monitor exit via `commander_exit_ticker` |
+| `core/green_trade_doctrine.py` | Optional slip/ride overrides for swing time scale |
+| `docs/GREEN_CAPITAL_SWING_DOCTRINE.md` | **New** — complete session summary |
+| `tests/test_swing_doctrine.py` | **New** — maturity profile tests |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `SWING_DOCTRINE_ENABLED` | `true` | Swing green doctrine on |
+| `SWING_MULTIBAR_MAX_DAYS` | `12` | Max ride days when pred strong |
+| `SWING_DOCTRINE_TRIP_MATURE` | `24` | IB trips for full maturity weight |
+| `SWING_DOCTRINE_FULL_AT` | `0.72` | Level for mandatory green entry |
+
+### Verify
+```bash
+python3 -m pytest tests/test_swing_doctrine.py tests/test_green_trade_doctrine.py -q
+python3 -m py_compile core/swing_doctrine.py core/swing_executor.py
+```
+
+---
+
 ## 2026-07-01 — Multi-bar ride + slippage-aware green exit
 
 ### Problem
