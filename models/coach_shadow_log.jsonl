@@ -4271,3 +4271,4 @@
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.626216590467513,"shadow_only":true,"timestamp":"2026-06-30T10:44:04.307545+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":0.6440677966101696,"shadow_only":true,"timestamp":"2026-06-30T10:44:13.289253+00:00"}
 {"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":0.5294948630136986,"shadow_only":true,"timestamp":"2026-06-30T10:44:21.439361+00:00"}
+{"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":0.5294948630136986,"shadow_only":true,"timestamp":"2026-06-30T10:44:41.244729+00:00"}
