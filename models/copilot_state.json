@@ -5,7 +5,7 @@
   "session_wr": 0.0,
   "session_pnl": 0.0,
   "ticker_bias": {
-    "BITO": "CAUTION"
+    "TZA": "CAUTION"
   },
   "repeat_losers": [],
   "ppo_hints": {
@@ -17,6 +17,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782846628.9465861,
+  "updated_at": 1782846758.9275699,
   "source": "heuristic"
 }
