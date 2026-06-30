@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T20:01:28.969739+00:00",
+  "updated_at": "2026-06-30T20:31:06.247991+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,7 +36,7 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T20:01:28.914740+00:00",
+    "timestamp": "2026-06-30T20:31:06.113086+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -60,26 +60,26 @@
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
-        "size_kb": 0.8,
-        "modified": "2026-06-30T20:01:26.865035+00:00"
+        "size_kb": 0.4,
+        "modified": "2026-06-30T20:28:48.540190+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-30T19:59:32.694430+00:00"
+        "modified": "2026-06-30T20:28:40.785863+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 12082.3,
-        "modified": "2026-06-30T20:00:55.206192+00:00"
+        "size_kb": 12082.6,
+        "modified": "2026-06-30T20:28:41.413928+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 1600.6,
-        "modified": "2026-06-30T20:00:05.087971+00:00"
+        "size_kb": 1601.8,
+        "modified": "2026-06-30T20:01:30.313494+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -110,7 +110,7 @@
       "win_rate": 0.0,
       "avg_pnl": 0.0
     },
-    "buffer_records": 10175,
+    "buffer_records": 10177,
     "dataset_pairs": 167,
     "maturity": {
       "stage": "toddler",
@@ -120,7 +120,7 @@
       "metrics": {
         "closed_trades": 2725,
         "dataset_pairs": 167,
-        "evolution_count": 50,
+        "evolution_count": 51,
         "proxy_accuracy": 0.9231,
         "proxy_holdout_accuracy": 0.9231,
         "rolling_win_rate": null,
@@ -145,7 +145,7 @@
         "day": "2026-06-30",
         "decision": 7
       },
-      "decision_budget_left": 9,
+      "decision_budget_left": 0,
       "copilot_budget_left": 1,
       "ppo_teacher_budget_left": 0,
       "next_stage": "child"
