@@ -738,16 +738,34 @@ class ScalperExitMixin:
         qty = 0
         entry = 0.0
         try:
-            self.ib.reqPositions()
-            self.ib.sleep(0.3)
-            for p in self.ib.positions():
-                sym = (getattr(p.contract, "symbol", "") or "").upper()
-                if sym == ticker:
-                    qty = int(float(p.position))
-                    entry = float(getattr(p, "avgCost", 0) or 0)
-                    break
-        except Exception as exc:
-            return {"ok": False, "error": str(exc)}
+            from core.fill_tracker import ib_position_shares, position_entry_price
+            from core.ib_truth import get_snapshot, ib_truth_enabled, position_entry_from_truth
+            snap = get_snapshot()
+            if ib_truth_enabled(self.cfg) and snap.refreshed_at > 0:
+                pos = snap.long_positions().get(ticker.upper())
+                if pos is not None and pos.qty > 0:
+                    qty = int(pos.qty)
+                    entry = float(pos.avg_cost or 0)
+            if qty <= 0:
+                qty = int(ib_position_shares(self.ib, ticker))
+                entry = position_entry_from_truth(self.ib, ticker) or position_entry_price(
+                    self.ib, ticker, market_px=px,
+                )
+        except Exception:
+            qty = 0
+            entry = 0.0
+        if qty <= 0:
+            try:
+                self.ib.reqPositions()
+                self.ib.sleep(0.3)
+                for p in self.ib.positions():
+                    sym = (getattr(p.contract, "symbol", "") or "").upper()
+                    if sym == ticker:
+                        qty = int(float(p.position))
+                        entry = float(getattr(p, "avgCost", 0) or 0)
+                        break
+            except Exception as exc:
+                return {"ok": False, "error": str(exc)}
 
         if qty <= 0:
             return {"ok": False, "error": f"no open long position for {ticker}"}

@@ -292,11 +292,12 @@ def live_snapshot(
         })
     except Exception:
         try:
+            eq = float(getattr(runner, "account_equity", 0) or 0)
             snap.update({
-                "nav": round(float(getattr(runner, "bot_nav", 0) or 0), 2),
+                "nav": round(eq if eq > 0 else float(getattr(runner, "bot_nav", 0) or 0), 2),
                 "session_pnl": round(
-                    float(getattr(runner, "bot_nav", 0) or 0) - float(cfg.INITIAL_CASH), 2,
-                ),
+                    eq - float(getattr(runner, "_ib_starting_balance", 0) or eq), 2,
+                ) if eq > 0 else 0.0,
                 "trades_today": int(getattr(runner, "trades_today", 0) or 0),
                 "ticker": getattr(runner, "current_ticker", None),
                 "shares": float(getattr(runner, "shares", 0) or 0),
