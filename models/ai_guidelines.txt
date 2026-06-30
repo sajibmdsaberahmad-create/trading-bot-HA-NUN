@@ -141,3 +141,11 @@ green_profit_lock:giveback +8.21% (peak +15519.14% gave back 15510.93%)
 Observed trade_closed — recorded for learning.
 green_profit_lock:giveback +8.21% (peak +15519.14% gave back 15510.93%)
 
+🧭 COMMANDER LEARNING | 2026-06-30T16:23:46.662389+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)
+
+🧭 COMMANDER LEARNING | 2026-06-30T16:23:46.662613+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)
+
