@@ -3503,3 +3503,5 @@
 {"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":87.6,"spike_ratio":2.0208481402367626,"shadow_only":true,"timestamp":"2026-06-30T09:53:58.255974+00:00"}
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":1.1582809224256738,"shadow_only":true,"timestamp":"2026-06-30T09:54:03.547987+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.7937219730941705,"shadow_only":true,"timestamp":"2026-06-30T09:54:08.919780+00:00"}
+{"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":85.4,"spike_ratio":20.0,"shadow_only":true,"timestamp":"2026-06-30T09:57:09.269669+00:00"}
+{"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":85.4,"spike_ratio":6.666666666,"shadow_only":true,"timestamp":"2026-06-30T09:57:24.426379+00:00"}
