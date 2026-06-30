@@ -365,7 +365,6 @@ class ScalperExitMixin:
             self._refresh_account_balance()
         except Exception:
             pass
-        return True
 
         try:
             pilot_experience_to_git(self.pilot)

@@ -381,8 +381,11 @@ class ScalperEntryMixin:
         if fill_bracket:
             self._bracket_by_ticker[ticker] = fill_bracket
         self._load_position_context(ticker)
-        self._recalc_bot_nav()
         self._sync_bot_nav_from_ib()
+        try:
+            self._refresh_account_balance()
+        except Exception:
+            pass
         self._ensure_position_stream(ticker)
         self._risk_plans[ticker] = plan
         self.risk.open_position(plan)
