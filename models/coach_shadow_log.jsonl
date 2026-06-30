@@ -4634,3 +4634,13 @@
 {"ticker":"ABVX","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T11:21:40.475347+00:00"}
 {"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":335462.0,"shadow_only":true,"timestamp":"2026-06-30T11:21:43.859827+00:00"}
 {"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":267429.0,"shadow_only":true,"timestamp":"2026-06-30T11:21:46.983007+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":274812.0,"shadow_only":true,"timestamp":"2026-06-30T11:21:51.165799+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":7732.0,"shadow_only":true,"timestamp":"2026-06-30T11:21:55.022202+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":114618.0,"shadow_only":true,"timestamp":"2026-06-30T11:21:59.109078+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":233590.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:02.240068+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":308718.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:05.989468+00:00"}
+{"ticker":"KTTA","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":31703.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:09.131487+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":308718.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:10.367001+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":227627.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:13.624451+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":4054.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:16.773773+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":241192.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:17.389093+00:00"}
