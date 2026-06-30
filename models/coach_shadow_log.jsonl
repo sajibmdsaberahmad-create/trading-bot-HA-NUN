@@ -4106,3 +4106,12 @@
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":0.7833461835003855,"shadow_only":true,"timestamp":"2026-06-30T10:36:23.019060+00:00"}
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":2.87759537252995,"shadow_only":true,"timestamp":"2026-06-30T10:36:23.486869+00:00"}
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.920255375534542,"shadow_only":true,"timestamp":"2026-06-30T10:36:25.627273+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.2692278548126033,"shadow_only":true,"timestamp":"2026-06-30T10:36:27.630389+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.3145529970793146,"shadow_only":true,"timestamp":"2026-06-30T10:36:29.775024+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":0.988431151241535,"shadow_only":true,"timestamp":"2026-06-30T10:36:31.891974+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.920255375534542,"shadow_only":true,"timestamp":"2026-06-30T10:36:32.350089+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.2692278548126033,"shadow_only":true,"timestamp":"2026-06-30T10:36:34.325317+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.8846539453264533,"shadow_only":true,"timestamp":"2026-06-30T10:36:36.449496+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.920255375534542,"shadow_only":true,"timestamp":"2026-06-30T10:36:38.592187+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1.2692278548126033,"shadow_only":true,"timestamp":"2026-06-30T10:36:40.597702+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":4.027350281112201,"shadow_only":true,"timestamp":"2026-06-30T10:36:42.735279+00:00"}
