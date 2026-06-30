@@ -59,9 +59,15 @@ SWING_PAPER_ENABLED=false
 POSITION_HORIZON_ENABLED=false
 ```
 
-## Next (not yet live)
+## Live today (2026-07-01)
 
-- `reqPnLSingle` per-ticker IB PnL stream
-- Swing paper pool: `WAR_SWING_PAPER_USD`
-- PPO swing weights: `models/ppo_swing_1h.json` (train off-hours)
-- Horizon on war ledger rows + `brain_maturity` stage docs
+- `core/ib_extended.py` — reqPnL, reqPnLSingle, fundamentals, news, WSH, whatIfOrder
+- `core/swing_paper.py` + `WAR_SWING_PAPER_USD` virtual pool
+- `core/ppo_swing_train.py` → `models/ppo_swing_1h.json`
+- War ledger `horizon` tags
+- Bracket what-if margin gate in `broker.py`
+
+## Remaining
+
+- `POSITION_HORIZON_ENABLED` live multi-day IB orders
+- Options `reqSecDefOptParams`
