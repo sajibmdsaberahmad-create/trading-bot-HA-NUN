@@ -4415,3 +4415,12 @@
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":8.61104228609184,"shadow_only":true,"timestamp":"2026-06-30T10:51:40.990859+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":3.544027401170258,"shadow_only":true,"timestamp":"2026-06-30T10:51:43.233758+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":9.1053435744962,"shadow_only":true,"timestamp":"2026-06-30T10:51:45.807709+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3725598628530968,"shadow_only":true,"timestamp":"2026-06-30T10:51:47.916323+00:00"}
+{"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":1.5760612010019635,"shadow_only":true,"timestamp":"2026-06-30T10:51:50.125285+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":9.1053435744962,"shadow_only":true,"timestamp":"2026-06-30T10:51:52.277139+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":3.828742685885543,"shadow_only":true,"timestamp":"2026-06-30T10:51:54.565281+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":9.274033696729434,"shadow_only":true,"timestamp":"2026-06-30T10:51:56.801312+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":1.3725598628530968,"shadow_only":true,"timestamp":"2026-06-30T10:51:58.929923+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":9.274033696729434,"shadow_only":true,"timestamp":"2026-06-30T10:52:01.182041+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":8.191665477379763,"shadow_only":true,"timestamp":"2026-06-30T10:52:03.356235+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":10.432895606210769,"shadow_only":true,"timestamp":"2026-06-30T10:52:05.607915+00:00"}
