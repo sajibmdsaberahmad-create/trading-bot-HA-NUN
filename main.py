@@ -407,8 +407,8 @@ if __name__ == "__main__":
         log.warning("  paper mode on the live port.")
         log.warning("=" * 70)
 
-    log.info(f"HANOON | mode={args.mode.upper()} | ticker={cfg.TICKER} | "
-              f"capital=${cfg.INITIAL_CASH:,.0f} | port={cfg.IB_PORT} | client_id={cfg.IB_CLIENT_ID}")
+    from core.startup_log import log_launch_banner
+    log_launch_banner(cfg, args.mode)
 
     if args.mode == "warmup":
         run_warmup(cfg)
