@@ -624,6 +624,8 @@ def ib_truth_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
         "ib_lookahead_available_funds": round(acct.lookahead_available_funds, 2),
         "ib_highest_severity": acct.highest_severity,
         "ib_account_tags": {k: round(v, 4) for k, v in list(acct.tags.items())[:40]},
+        "ib_open_order_symbols": [o.symbol for o in snap.open_orders[:12]],
+    }
 
 
 def ib_ai_context(

@@ -87,6 +87,10 @@ class IBExtendedBundle:
     wsh_events: List[Dict[str, Any]] = field(default_factory=list)
     head_timestamps: Dict[str, str] = field(default_factory=dict)
     market_rules: Dict[str, List[float]] = field(default_factory=dict)
+    quote_snapshots: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    account_summary: Dict[str, float] = field(default_factory=dict)
+    completed_orders: List[Dict[str, Any]] = field(default_factory=list)
+    news_providers: List[Dict[str, str]] = field(default_factory=list)
     refreshed_at: float = 0.0
     refresh_mode: str = ""
 
