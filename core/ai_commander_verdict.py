@@ -123,6 +123,8 @@ class CommanderVerdictMixin:
             out["quality_enter"] = bool(eq.get("enter_ok"))
             out["quality_conf"] = float(eq.get("profit_probability", 0) or 0)
             out["quality_reason"] = str(eq.get("reason", eq.get("setup_type", "")))[:200]
+            out["profit_probability"] = float(eq.get("profit_probability", 0) or 0)
+            out["fakeout_risk"] = float(eq.get("fakeout_risk", 0) or 0)
         out = self._blend_halim_entry(
             out,
             ticker=ticker,
@@ -143,7 +145,18 @@ class CommanderVerdictMixin:
             if gut_note:
                 out["reason"] = f"{out.get('reason', '')} | {gut_note}".strip(" |")
 
-        if not enter and not is_ai_unlimited(self.cfg) and not is_ai_council_mode(self.cfg):
+        try:
+            from core.smart_stack import strict_profit_prob_enabled
+            strict_prob = strict_profit_prob_enabled(self.cfg)
+        except Exception:
+            strict_prob = False
+
+        if (
+            not enter
+            and not strict_prob
+            and not is_ai_unlimited(self.cfg)
+            and not is_ai_council_mode(self.cfg)
+        ):
             try:
                 from core.war_entry_gates import war_gates_active
                 war_on = war_gates_active(self.cfg)
@@ -217,6 +230,15 @@ class CommanderVerdictMixin:
                 confidence = float(vetoed.get("confidence", confidence))
             except Exception:
                 pass
+
+        try:
+            from core.entry_quality import apply_profit_prob_veto
+            vetoed_prob = apply_profit_prob_veto(self.cfg, {**out, "enter": enter, "confidence": confidence}, eq)
+            out = vetoed_prob
+            enter = bool(vetoed_prob.get("enter"))
+            confidence = float(vetoed_prob.get("confidence", confidence))
+        except Exception:
+            pass
 
         if not enter:
             return self._emit_spike_verdict(

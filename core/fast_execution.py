@@ -150,7 +150,13 @@ def should_disciplined_strong_entry(
         consecutive_losses=consecutive_losses,
         micro=micro,
     )
-    return ok
+    if not ok:
+        return False
+    from core.fast_execution import _passes_entry_quality_gate
+    return _passes_entry_quality_gate(
+        cfg, micro or {}, spike_ratio, scan_score, ppo_action, ppo_conf,
+        ticker=ticker,
+    )
 
 
 def prioritize_locked_targets(

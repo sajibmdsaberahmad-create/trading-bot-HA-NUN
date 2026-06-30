@@ -1402,6 +1402,15 @@ class ScalperSpikeMixin:
             )
             fc.update(quality)
             self._last_micro_forecast[ticker] = fc
+            from core.entry_quality import profit_prob_blocks_entry
+            if profit_prob_blocks_entry(self.cfg, quality):
+                log.info(
+                    f"  ⏭ PROFIT PROB veto {ticker}: {quality.get('reason', '')[:100]}"
+                )
+                self._spike_skip_until[ticker] = time.time() + float(
+                    getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                )
+                continue
             if not quality.get("enter_ok", True):
                 log.info(
                     f"  📊 QUALITY advisory {ticker}: {quality.get('reason', '')[:100]}"
