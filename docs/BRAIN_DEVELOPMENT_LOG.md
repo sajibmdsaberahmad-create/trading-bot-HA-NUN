@@ -2001,3 +2001,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 22:04 UTC` **git_auto** — sync: 5 files — BRAIN_DEVELOPMENT_LOG.md, ai_session_limits.json, macro_context.json +2 more | models=2 other=3 | brain=toddler dataset=106 
 - `2026-06-30 22:05 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=106 evolutions=52
 - `2026-06-30 22:07 UTC` **git_auto** — sync: 5 files — scalper_session.py, shutdown_control.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=10
+- `2026-06-30 22:07 UTC` **git_auto** — sync: 5 files — scalper_runner.py, scalper_session.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=106 

@@ -29,24 +29,37 @@ fsync_critical_artifacts()
 snapshot_learning(BotConfig(), trigger='pre_stop_live', halim_export=True)
 " 2>/dev/null || true
 
-CLIENT_ID="${CLIENT_ID:-${IB_CLIENT_ID:-1}}"
-python3 "$ROOT/scripts/guard_ib_client_id.py" --client-id "$CLIENT_ID" --release 2>/dev/null || true
+# Stop sidecars first so they cannot respawn or compete during teardown.
+"$ROOT/scripts/stop_git_sync.sh" 2>/dev/null || true
+"$ROOT/scripts/stop_halim_watchdog.sh" 2>/dev/null || true
+"$ROOT/scripts/stop_ib_gateway_watchdog.sh" 2>/dev/null || true
 
 PIDS=()
-if [ -f "$PID_FILE" ]; then
-  HPID=$(tr -d '[:space:]' <"$PID_FILE" 2>/dev/null || true)
-  if [ -n "$HPID" ] && kill -0 "$HPID" 2>/dev/null; then
-    PIDS+=("$HPID")
-  fi
-fi
-while IFS= read -r pid; do
-  [ -n "$pid" ] || continue
-  skip=0
-  for existing in "${PIDS[@]:-}"; do
-    [ "$existing" = "$pid" ] && skip=1 && break
+_add_pid() {
+  local pid="$1"
+  [ -n "$pid" ] || return 0
+  [[ "$pid" =~ ^[0-9]+$ ]] || return 0
+  kill -0 "$pid" 2>/dev/null || return 0
+  local i
+  for i in "${PIDS[@]:-}"; do
+    [ "$i" = "$pid" ] && return 0
   done
-  [ "$skip" -eq 1 ] || PIDS+=("$pid")
-done < <(pgrep -f "main.py --mode scalper" 2>/dev/null || true)
+  if ps -p "$pid" -o args= 2>/dev/null | grep -Eiq 'main\.py.*scalper'; then
+    PIDS+=("$pid")
+  fi
+}
+
+if [ -f "$PID_FILE" ]; then
+  _add_pid "$(tr -d '[:space:]' <"$PID_FILE" 2>/dev/null || true)"
+fi
+
+while IFS= read -r pid; do
+  _add_pid "$pid"
+done < <(pgrep -f 'main.py --mode scalper' 2>/dev/null || true)
+
+while IFS= read -r pid; do
+  _add_pid "$pid"
+done < <(pgrep -f 'main.py.*scalper' 2>/dev/null || true)
 
 if [ ${#PIDS[@]} -eq 0 ]; then
   echo "   No running HANOON scalper — running standalone data flush…"
@@ -54,6 +67,8 @@ if [ ${#PIDS[@]} -eq 0 ]; then
 from core.graceful_shutdown import run_standalone_shutdown_flush
 run_standalone_shutdown_flush(replay=False)
 " 2>/dev/null || true
+  CLIENT_ID="${CLIENT_ID:-${IB_CLIENT_ID:-1}}"
+  python3 "$ROOT/scripts/guard_ib_client_id.py" --client-id "$CLIENT_ID" --release 2>/dev/null || true
   rm -f "$PID_FILE" "$SHUTDOWN_FILE"
   echo "✅ HANOON data flush complete (no live process)"
   exit 0
@@ -64,6 +79,7 @@ for pid in "${PIDS[@]}"; do
   kill -TERM "$pid" 2>/dev/null || true
 done
 
+FORCED_KILL=false
 elapsed=0
 while [ "$elapsed" -lt "$WAIT_SEC" ]; do
   alive=0
@@ -89,12 +105,13 @@ for pid in "${PIDS[@]}"; do
 done
 
 if [ ${#still_alive[@]} -gt 0 ]; then
+  FORCED_KILL=true
   echo "⚠️  HANOON still running after ${WAIT_SEC}s — SIGKILL ${still_alive[*]}"
   for pid in "${still_alive[@]}"; do
     kill -KILL "$pid" 2>/dev/null || true
   done
   sleep 1
-  pkill -KILL -f "main.py --mode scalper" 2>/dev/null || true
+  pkill -KILL -f 'main.py.*scalper' 2>/dev/null || true
   echo "   Running fallback data flush…"
   python3 -c "
 from core.graceful_shutdown import run_standalone_shutdown_flush
@@ -102,13 +119,14 @@ run_standalone_shutdown_flush(replay=False)
 " 2>/dev/null || true
 fi
 
+CLIENT_ID="${CLIENT_ID:-${IB_CLIENT_ID:-1}}"
+python3 "$ROOT/scripts/guard_ib_client_id.py" --client-id "$CLIENT_ID" --release 2>/dev/null || true
+
 rm -f "$PID_FILE" "$SHUTDOWN_FILE"
 
-"$ROOT/scripts/stop_halim_watchdog.sh" 2>/dev/null || true
-"$ROOT/scripts/stop_ib_gateway_watchdog.sh" 2>/dev/null || true
-
-echo "▶ Final Halim gold export + SFT + Colab zip…"
-python3 -c "
+if [ "$FORCED_KILL" = true ]; then
+  echo "▶ Final Halim gold export + SFT + Colab zip (hard-kill fallback)…"
+  python3 -c "
 from core.config import BotConfig
 from core.halim_gold_pipeline import run_halim_gold_pipeline
 run_halim_gold_pipeline(
@@ -119,12 +137,15 @@ run_halim_gold_pipeline(
 )
 " 2>/dev/null || true
 
-if [ -d "$ROOT/venv" ]; then
-  python3 -c "
+  if [ -d "$ROOT/venv" ]; then
+    python3 -c "
 from core.local_cleanup import cleanup_local_workspace
 cleanup_local_workspace(aggressive=True)
 " 2>/dev/null || true
+  fi
+else
+  echo "✅ HANOON exited gracefully (in-process Halim + git flush already ran)"
 fi
 
-echo "✅ HANOON stopped — session data + Halim gold + git sync attempted"
+echo "✅ HANOON stopped"
 echo "   Tip: use ./stop.sh — not Ctrl+C (may skip evolution on hard kill)"
