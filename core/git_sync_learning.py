@@ -24,7 +24,7 @@ from core import git_sync_state as S
 
 REPO_DIR = S.REPO_DIR
 
-def _learning_files_flat() -> List[str]:
+LEARNING_ARTIFACTS: Dict[str, List[str]] = {
     out: List[str] = []
     for files in LEARNING_ARTIFACTS.values():
         out.extend(files)
