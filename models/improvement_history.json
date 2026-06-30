@@ -384,5 +384,31 @@
       "Penalize PPO micro-fast when council confidence is neutral (50%)",
       "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T19:23:18.905834+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {
+      "CONFIDENCE_THRESHOLD": {
+        "param": "CONFIDENCE_THRESHOLD",
+        "value": 0.7100000000000001,
+        "reason": "trade WR 25% \u2014 tighten PPO entry bar",
+        "ok": true,
+        "msg": "applied"
+      },
+      "MIN_PROFIT_PROBABILITY": {
+        "param": "MIN_PROFIT_PROBABILITY",
+        "value": 0.62,
+        "reason": "below teacher floor \u2014 raise profit probability gate",
+        "ok": true,
+        "msg": "applied"
+      }
+    },
+    "guidelines_summary": "",
+    "lessons": [
+      "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
+    ]
   }
 ]

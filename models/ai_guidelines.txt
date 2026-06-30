@@ -57,4 +57,15 @@ Diagnosis: Local teacher: 9% WR on 11 trades. 2 stop exits. Repeat tickers (adap
 Diagnosis: Local teacher: 9% WR on 11 trades. 2 stop exits. Repeat tickers (adapt entry, do not ban): BITO
 - Repeat-loss tickers: require micro forecast + profit_probability before re-entry
 - Penalize PPO micro-fast when council confidence is neutral (50%)
+- Widen stops or delay entry when instant stop hits dominate (hold_sec=0)🧭 COMMANDER LEARNING | 2026-06-30T19:23:18.905538+00:00
+• Applied mutations:
+  - CONFIDENCE_THRESHOLD → 0.7100000000000001 (trade WR 25% — tighten PPO entry bar)
+  - MIN_PROFIT_PROBABILITY → 0.62 (below teacher floor — raise profit probability gate)
+
+
+
+# PPO Teacher 2026-06-30 19:23 UTC
+Diagnosis: Local teacher: 25% WR on 4 trades. 2 stop exits. Repeat tickers (adapt entry, do not ban): 
+- Repeat-loss tickers: require micro forecast + profit_probability before re-entry
+- Penalize PPO micro-fast when council confidence is neutral (50%)
 - Widen stops or delay entry when instant stop hits dominate (hold_sec=0)
