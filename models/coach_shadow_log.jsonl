@@ -4785,3 +4785,13 @@
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":774220.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:01.409125+00:00"}
 {"ticker":"ENPH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":22257.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:04.645161+00:00"}
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":781.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:08.652590+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":924780.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:13.773620+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":13859.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:17.977948+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1071695.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:23.692108+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":12015.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:26.940287+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":3344.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:30.025276+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1193685.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:33.818989+00:00"}
+{"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":20750.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:37.595098+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":898312.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:41.521078+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2151.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:44.755415+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1010899.0,"shadow_only":true,"timestamp":"2026-06-30T11:31:49.828291+00:00"}
