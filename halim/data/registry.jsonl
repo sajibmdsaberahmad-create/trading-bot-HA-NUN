@@ -1881,3 +1881,23 @@
 {"timestamp":"2026-06-30T11:00:31.683870+00:00","event":"export_action_gold","added":2,"skipped":14452}
 {"timestamp":"2026-06-30T11:00:31.689195+00:00","event":"ppo_halim_coevolution","agreements":1394,"disagreements":960,"corrections_for_ppo":958,"corrections_for_halim":2,"complements":0,"label_v2_events":456,"legacy_mislabeled_skipped":1984,"market_proved_ppo":4,"market_proved_halim":0,"log_path":"halim/data/coevolution/correction_log.jsonl","export":{"ok":true,"added":587,"total":587,"events":5485,"rewritten":true},"trigger":"standalone_flush"}
 {"timestamp": "2026-06-30T11:00:35.776638+00:00", "event": "sync_from_tradingbot", "source": "/Users/mdsabersajib/Downloads/tradingbot", "files": ["data/trading/council_training_dataset.jsonl", "data/students/teacher_proxy.joblib", "data/students/scalper_weights.json", "HALIM_IDENTITY.json", "HALIM_MANIFEST.json", "data/trading/owned_brain_manifest.json", "data/trading/experience_buffer.jsonl"]}
+{"timestamp":"2026-06-30T11:02:33.316998+00:00","event":"capability_milestone","capability":"read_understand","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.317098+00:00","event":"capability_milestone","capability":"read_understand","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.317162+00:00","event":"capability_milestone","capability":"read_understand","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.317222+00:00","event":"capability_milestone","capability":"read_understand","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.390099+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.390222+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.390286+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.390344+00:00","event":"capability_milestone","capability":"trade_reflex","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.462436+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.462542+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.462836+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.462920+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.606729+00:00","event":"capability_milestone","capability":"reasoning","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.606852+00:00","event":"capability_milestone","capability":"reasoning","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.607096+00:00","event":"capability_milestone","capability":"reasoning","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.607156+00:00","event":"capability_milestone","capability":"reasoning","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.679552+00:00","event":"capability_milestone","capability":"decision_text","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.679660+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.679916+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T11:02:33.679974+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
