@@ -143,8 +143,7 @@ def build_session_ready_lines(runner: Any) -> List[str]:
     """Post-IB-connect session summary for the life engine."""
     cfg = getattr(runner, "cfg", None)
     from core.data import tick_by_tick_type
-    from core.market_hours import allowed_trading_sessions_label
-    from core.rth_session import can_trade_now, get_market_state
+    from core.market_hours import allowed_trading_sessions_label, can_trade_now, get_market_state
 
     account = "unknown"
     try:

@@ -10,6 +10,29 @@
 
 ---
 
+## 2026-07-01 — Startup logs: Life Engine banner (scalp + swing)
+
+### Problem
+Boot logs showed `HANOON | HANOON | mode=SCALPER | ticker=SPY | capital=$1,000` — duplicate name, legacy scalper-only label, misleading fixed ticker and config cash.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/startup_log.py` | `log_launch_banner`, `build_session_ready_lines`, phase-aware `capital_line` |
+| `core/notify.py` | Logger name `hanoon` (no duplicate prefix) |
+| `main.py` | Structured launch block instead of one-line SCALPER log |
+| `core/scalper_session.py` | `SESSION READY · scalp + swing` banner |
+| `scripts/start_hanoon.sh` | Shell banner text |
+| `tests/test_startup_log.py` | **New** |
+
+### Verify
+```bash
+python3 -m pytest tests/test_startup_log.py -q
+# Boot: HANOON LAUNCH → IB TRUTH CHECKLIST → SESSION READY · scalp + swing
+```
+
+---
+
 ## 2026-07-01 — IB Truth startup checklist
 
 ### Problem

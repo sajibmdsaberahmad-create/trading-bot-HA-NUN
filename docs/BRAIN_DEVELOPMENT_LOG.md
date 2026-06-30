@@ -1980,3 +1980,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:57 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=106 evolutions=52
 - `2026-06-30 21:57 UTC` **git_auto** — sync: 4 files — startup_log.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=toddler dataset=106 evolutions=52
 - `2026-06-30 21:57 UTC` **git_auto** — sync: 6 files — notify.py, startup_log.py, BRAIN_DEVELOPMENT_LOG.md +3 more | docs=1 core=1 other=4 | brain=toddler dataset=106 evolutions=5
+- `2026-06-30 21:57 UTC` **git_auto** — sync: 8 files — notify.py, scalper_runner.py, scalper_session.py +5 more | docs=1 core=2 other=5 | brain=toddler dataset=106 evolutions=52
