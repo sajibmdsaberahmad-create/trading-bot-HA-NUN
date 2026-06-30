@@ -5,10 +5,10 @@
   "qqq_pct": 3.19,
   "spy_price": 746.52,
   "qqq_price": 736.4,
-  "vix_level": 16.46,
+  "vix_level": 16.49,
   "vix_regime": "low",
   "risk_tone": "risk_on",
-  "timestamp": "2026-06-30T20:27:48.486303+00:00",
+  "timestamp": "2026-06-30T20:28:40.693194+00:00",
   "source": "yahoo_http",
-  "_fetched_at": 1782851268.4863
+  "_fetched_at": 1782851320.6931891
 }
