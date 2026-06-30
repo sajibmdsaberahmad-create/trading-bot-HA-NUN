@@ -12,14 +12,21 @@
   "fee_drag_today": 3.5000000000000004,
   "lab_capital": 5000.0,
   "lab_nav": 5000.0,
-  "lab_cash": 5000.0,
-  "lab_settled": 5000.0,
+  "lab_cash": 4645.899834,
+  "lab_settled": 4645.899834,
   "lab_round_trips_today": 0,
-  "mode": "LAB_ACTIVE",
+  "mode": "OBSERVE",
   "is_live": false,
   "session_date": "2026-06-30",
   "open_war": null,
-  "open_lab": null,
+  "open_lab": {
+    "ticker": "EDBL",
+    "shares": 945,
+    "entry": 0.3743388,
+    "ib_fill": 0.3699,
+    "comm": 0.35,
+    "ts": 1782822311.4645278
+  },
   "session_pnl_war": -15.518818379425115,
   "session_pnl_lab": 0.0,
   "ticker_session_pnl": {
@@ -31,5 +38,5 @@
     "INTZ": 3,
     "VWAV": 1
   },
-  "updated_at": 1782822292.940276
+  "updated_at": 1782822318.2251341
 }
