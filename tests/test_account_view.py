@@ -12,11 +12,12 @@ from core.account_view import day_pnl_ib, display_equity
 
 def test_day_pnl_ib():
     runner = MagicMock()
+    runner._rth_starting_balance = 0
     runner._ib_starting_balance = 100_000
     runner.account_equity = 99_500
     runner.cfg = MagicMock()
     snap = MagicMock()
-    snap.refreshed_at = 0
+    snap.refreshed_at = 0.0
     with patch("core.account_view.get_snapshot", return_value=snap):
         with patch("core.account_view.ib_truth_enabled", return_value=False):
             chg, pct = day_pnl_ib(runner)

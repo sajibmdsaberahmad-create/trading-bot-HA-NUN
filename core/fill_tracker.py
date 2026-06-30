@@ -178,6 +178,14 @@ def position_avg_cost(ib, symbol: str) -> float:
     return entry
 
 
+def _truth_snapshot_fresh() -> bool:
+    try:
+        from core.ib_truth import get_snapshot, ib_truth_enabled
+        return ib_truth_enabled() and get_snapshot().refreshed_at > 0
+    except Exception:
+        return False
+
+
 def _truth_long_position(symbol: str):
     """IB Truth position row when snapshot is fresh."""
     sym = (symbol or "").upper()
