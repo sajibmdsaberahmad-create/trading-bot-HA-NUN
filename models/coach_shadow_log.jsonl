@@ -3264,3 +3264,4 @@
 {"ticker":"ASTS","reason":"ppo_not_aligned","scan_score":70.8,"spike_ratio":1000.0,"shadow_only":true,"timestamp":"2026-06-30T08:23:41.640160+00:00"}
 {"ticker":"RIOT","reason":"profit_prob_below_80pct","scan_score":77.4,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T08:23:56.725518+00:00"}
 {"ticker":"ASTS","reason":"ppo_not_aligned","scan_score":70.8,"spike_ratio":447.0,"shadow_only":true,"timestamp":"2026-06-30T08:24:26.655934+00:00"}
+{"ticker":"ASTS","reason":"ppo_not_aligned","scan_score":70.8,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T08:24:56.429487+00:00"}
