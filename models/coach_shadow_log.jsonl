@@ -3566,3 +3566,8 @@
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":44422.0,"shadow_only":true,"timestamp":"2026-06-30T10:12:47.905067+00:00"}
 {"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":11054.0,"shadow_only":true,"timestamp":"2026-06-30T10:12:52.993981+00:00"}
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":26985.0,"shadow_only":true,"timestamp":"2026-06-30T10:12:58.274790+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":6160.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:09.193893+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":10863.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:11.483265+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":3057.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:13.822633+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":14924.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:16.300804+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":3358.0,"shadow_only":true,"timestamp":"2026-06-30T10:13:18.529596+00:00"}
