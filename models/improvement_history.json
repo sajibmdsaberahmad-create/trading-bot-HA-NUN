@@ -99,5 +99,23 @@
     "lessons": [
       "Review trade_closed on YHC"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T16:22:18.941450+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on CELZ"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T16:22:18.948881+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on CELZ"
+    ]
   }
 ]
