@@ -3,21 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 229,
   "training_sessions": 39,
-  "trades_observed": 1684,
+  "trades_observed": 1685,
   "scans_performed": 39,
   "improvements_applied": 2708,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:53:55.415336",
-      "age": "7d 20h 51m 6s",
-      "type": "TRAIN_COMPLETE",
-      "message": "Unified training completed",
-      "metadata": {
-        "weights_updated": true,
-        "ppo_trained": false
-      }
-    },
     {
       "timestamp": "2026-06-29T07:53:55.431760",
       "age": "7d 20h 51m 6s",
@@ -12231,6 +12221,13 @@
           "Review loss_streak on EDBL"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T12:33:04.225386",
+      "age": "9d 1h 30m 15s",
+      "type": "TRADE",
+      "message": "Observed trade: INTZ ? P&L=$-4.12",
+      "metadata": {}
     }
   ],
   "last_awakening": "2026-06-30T12:07:03.642722",
@@ -14393,9 +14390,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "defensive",
-  "total_pnl": 331218.42000000057,
+  "total_pnl": 331214.30000000057,
   "win_history": [
-    10.24,
     -13.91,
     -11.64,
     -0.92,
@@ -14894,20 +14890,21 @@
     0,
     -1.0,
     0.92,
-    -4.55
+    -4.55,
+    -4.12
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 1,
+  "consecutive_losses": 2,
   "worst_streak": 86,
-  "veteran_xp": 26070,
+  "veteran_xp": 26080,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1678,
-  "hours_flown": 167.79999999999475,
+  "flights_completed": 1679,
+  "hours_flown": 167.89999999999475,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14948,7 +14945,7 @@
     "TSL": 1,
     "CUP": 3,
     "JEM": 3,
-    "INT": 3,
+    "INT": 4,
     "HXH": 1,
     "VWA": 1,
     "EDB": 1
@@ -14958,5 +14955,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 25% \u00b7 $-37.18. Preserving capital over action."
+  "mood_message": "Win rate 25% \u00b7 $-36.14. Preserving capital over action."
 }
