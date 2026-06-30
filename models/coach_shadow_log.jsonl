@@ -3817,3 +3817,13 @@
 {"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":300.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:47.133682+00:00"}
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":6204.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:47.594242+00:00"}
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1523.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:49.741355+00:00"}
+{"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":1091.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:51.882678+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":6663.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:52.344787+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1502.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:54.437048+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":5297.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:56.681050+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":2744.0,"shadow_only":true,"timestamp":"2026-06-30T10:22:58.789978+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":5297.0,"shadow_only":true,"timestamp":"2026-06-30T10:23:01.087586+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1453.0,"shadow_only":true,"timestamp":"2026-06-30T10:23:03.154327+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":3027.0,"shadow_only":true,"timestamp":"2026-06-30T10:23:03.630328+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1433.0,"shadow_only":true,"timestamp":"2026-06-30T10:23:05.702613+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":4745.0,"shadow_only":true,"timestamp":"2026-06-30T10:23:06.159022+00:00"}
