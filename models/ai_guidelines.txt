@@ -149,3 +149,7 @@ green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)
 
+🧭 COMMANDER LEARNING | 2026-06-30T16:32:45.387310+00:00
+Observed ib_failure — recorded for learning.
+BUY 923 BIYA NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.3789 or a more aggressive price still within you
+

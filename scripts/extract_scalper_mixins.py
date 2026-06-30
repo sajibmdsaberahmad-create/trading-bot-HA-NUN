@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""One-shot extractor: ScalperRunner methods -> mixin modules (AST-safe)."""
+"""Extract ScalperRunner methods into mixin modules (preserves class header)."""
 
 from __future__ import annotations
 
 import ast
-import textwrap
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
@@ -75,53 +74,14 @@ GROUPS: Dict[str, Tuple[str, Set[str]]] = {
     "scalper_spike_loop": ("ScalperSpikeMixin", SPIKE_METHODS),
 }
 
+MIXIN_IMPORTS = """
+from core.scalper_exit_executor import ScalperExitMixin
+from core.scalper_entry_executor import ScalperEntryMixin
+from core.scalper_session import ScalperSessionMixin
+from core.scalper_spike_loop import ScalperSpikeMixin
+"""
 
-def _method_nodes(tree: ast.Module) -> Dict[str, ast.FunctionDef]:
-    for node in tree.body:
-        if isinstance(node, ast.ClassDef) and node.name == "ScalperRunner":
-            return {
-                n.name: n for n in node.body
-                if isinstance(n, ast.FunctionDef)
-            }
-    return {}
-
-
-def _extract_source(lines: List[str], node: ast.FunctionDef) -> str:
-    start = node.lineno - 1
-    end = node.end_lineno or node.lineno
-    return "".join(lines[start:end])
-
-
-def main() -> None:
-    text = RUNNER.read_text(encoding="utf-8")
-    lines = text.splitlines(keepends=True)
-    tree = ast.parse(text)
-    methods = _method_nodes(tree)
-
-    assigned: Set[str] = set()
-    for _, (_, names) in GROUPS.items():
-        assigned |= names
-
-    extracted: Dict[str, List[str]] = {k: [] for k in GROUPS}
-    remaining: List[str] = []
-
-    class_node = next(
-        n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "ScalperRunner"
-    )
-    for node in class_node.body:
-        if not isinstance(node, ast.FunctionDef):
-            continue
-        src = _extract_source(lines, node)
-        placed = False
-        for mod, (_, names) in GROUPS.items():
-            if node.name in names:
-                extracted[mod].append(src)
-                placed = True
-                break
-        if not placed:
-            remaining.append(src)
-
-    header = '''#!/usr/bin/env python3
+MIXIN_HEADER = '''#!/usr/bin/env python3
 """Extracted from scalper_runner — {title}."""
 
 from __future__ import annotations
@@ -135,56 +95,81 @@ from core.config import BotConfig
 from core.notify import log
 
 if TYPE_CHECKING:
-    from core.scalper_runner import ScalperRunner
+    pass
 
 
 class {cls}:
-    """Mixin — use via ScalperRunner multiple inheritance."""
+    """Mixin — composed into ScalperRunner."""
 
 '''
 
-    for mod, (cls, names) in GROUPS.items():
+
+def _extract_source(lines: List[str], node: ast.FunctionDef) -> str:
+    return "".join(lines[node.lineno - 1 : node.end_lineno or node.lineno])
+
+
+def main() -> None:
+    text = RUNNER.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+    tree = ast.parse(text)
+    class_node = next(
+        n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "ScalperRunner"
+    )
+
+    extracted: Dict[str, List[str]] = {k: [] for k in GROUPS}
+    remaining_nodes: List[ast.FunctionDef] = []
+
+    for node in class_node.body:
+        if not isinstance(node, ast.FunctionDef):
+            continue
+        src = _extract_source(lines, node)
+        placed = False
+        for mod, (_, names) in GROUPS.items():
+            if node.name in names:
+                extracted[mod].append(src)
+                placed = True
+                break
+        if not placed:
+            remaining_nodes.append(node)
+
+    for mod, (cls, _) in GROUPS.items():
         body = "".join(extracted[mod])
         if not body.strip():
-            print(f"skip empty {mod}")
             continue
-        title = mod.replace("_", " ")
         out = ROOT / "core" / f"{mod}.py"
-        out.write_text(header.format(title=title, cls=cls) + body, encoding="utf-8")
+        out.write_text(
+            MIXIN_HEADER.format(title=mod.replace("_", " "), cls=cls) + body,
+            encoding="utf-8",
+        )
         print(f"wrote {out.name}: {len(extracted[mod])} methods")
 
-    # Rebuild ScalperRunner class with remaining methods only
-    pre_class = text[: class_node.lineno - 1]
-    # find start of class line in pre_class - we need everything before class def
-    pre_lines = lines[: class_node.lineno - 1]
-    post_import_addition = """
-from core.scalper_exit_executor import ScalperExitMixin
-from core.scalper_entry_executor import ScalperEntryMixin
-from core.scalper_session import ScalperSessionMixin
-from core.scalper_spike_loop import ScalperSpikeMixin
-"""
+    # Module before class (imports + module-level helpers)
+    pre = "".join(lines[: class_node.lineno - 1])
+    if "ScalperExitMixin" not in pre:
+        anchor = pre.rfind("\nfrom core.")
+        if anchor < 0:
+            anchor = pre.rfind("\nimport ")
+        line_end = pre.find("\n", anchor + 1) if anchor >= 0 else len(pre)
+        pre = pre[: line_end + 1] + MIXIN_IMPORTS + pre[line_end + 1 :]
 
-    # Insert mixin imports before class definition (after last import block)
-    pre_text = "".join(pre_lines)
-    if "ScalperExitMixin" not in pre_text:
-        insert_at = pre_text.rfind("\nfrom core.")
-        if insert_at < 0:
-            insert_at = pre_text.rfind("\nimport ")
-        if insert_at >= 0:
-            line_end = pre_text.find("\n", insert_at + 1)
-            pre_text = pre_text[: line_end + 1] + post_import_addition + pre_text[line_end + 1 :]
+    pre = pre.replace(
+        "class ScalperRunner:\n",
+        "class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, "
+        "ScalperSessionMixin, ScalperSpikeMixin):\n",
+    )
 
-    class_header = "class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, ScalperSpikeMixin):\n"
-    old_header = "class ScalperRunner:\n"
-    pre_text = pre_text.replace(old_header, class_header)
+    # Everything after class body (if any module-level code follows class)
+    post_start = class_node.end_lineno or len(lines)
+    post = "".join(lines[post_start:])
 
-    new_class_body = "".join(remaining)
-    new_runner = pre_text + new_class_body
+    remaining_body = "".join(_extract_source(lines, n) for n in remaining_nodes)
+    new_text = pre + remaining_body + post
 
     backup = RUNNER.with_suffix(".py.bak")
-    backup.write_text(text, encoding="utf-8")
-    RUNNER.write_text(new_runner, encoding="utf-8")
-    print(f"scalper_runner.py: {len(remaining)} methods remain, backup at {backup.name}")
+    if not backup.exists():
+        backup.write_text(text, encoding="utf-8")
+    RUNNER.write_text(new_text, encoding="utf-8")
+    print(f"scalper_runner.py: {len(remaining_nodes)} methods remain")
 
 
 if __name__ == "__main__":

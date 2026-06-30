@@ -4,8 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: spike_top_intrabar: +1.44% vol=1.2x",
-    "RTH session live \u2014 profit hunt on stream bars while cache warms.",
     "Review council_timeout on TNMG",
     "Commander: Scanner+spike after timeout: score=98 vol=2.9x prob=63% | ATR R:R 2.0",
     "Review council_timeout on INLF",
@@ -103,10 +101,12 @@
     "Commander: green_profit_lock:giveback +8.21% (peak +15519.14% gave back 15510.93%)",
     "Review trade_closed on TZA",
     "Commander: green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)",
-    "Review loss_streak on TZA"
+    "Review loss_streak on TZA",
+    "Review ib_failure on BIYA",
+    "Commander: BUY 923 BIYA NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.3789 or a more aggressive price still within you"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 6,
-  "updated": "2026-06-30T16:23:46.628803"
+  "updated": "2026-06-30T16:32:45.364559"
 }
