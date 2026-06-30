@@ -1317,3 +1317,5 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 17:00 UTC` **git_auto** — sync: 9 files — fill_reconciler.py, BRAIN_DEVELOPMENT_LOG.md, registry.jsonl +6 more | halim=3 models=2 docs=1 other=3 | brain=adult dataset
 - `2026-06-30 17:00 UTC` **git_auto** — sync: 4 files — fill_reconciler.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=adult dataset=2081 evolutions=
 - `2026-06-30 17:01 UTC` **git_auto** — sync: 11 files — fill_reconciler.py, BRAIN_DEVELOPMENT_LOG.md, registry.jsonl +8 more | halim=4 models=3 docs=1 other=3 | brain=adult datase
+- `2026-06-30 17:02 UTC` **git_auto** — sync: 4 files — fill_reconciler.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=adult dataset=2081 evolutions=
+- `2026-06-30 17:02 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy holdout acc=95% (random=100%, 342 samples)
