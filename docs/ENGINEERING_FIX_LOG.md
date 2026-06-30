@@ -10,6 +10,45 @@
 
 ---
 
+## 2026-07-01 — Remove redundant local/Yahoo paths; IB Truth single source
+
+### Problem
+Macro (Yahoo), position shares/avgCost (`ib.positions()`), and session PnL (`bot_nav - INITIAL_CASH`) duplicated data already in `ib_truth` / `ib_hub` / `ib_macro`.
+
+### Root cause
+Legacy fallbacks ran during RTH even when IB snapshot was fresh; macro tick did not pass connector; war session PnL used FIFO only.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/market_context.py` | IB-first refresh via connector; Yahoo only if `MACRO_YAHOO_FALLBACK=true`; `get_ib_market_snapshot` → `ib_macro` |
+| `core/fill_tracker.py` | `_truth_long_position` for shares/avgCost; skip raw `positions()` when truth on |
+| `core/account_view.py` | Equity/PnL from snapshot when `refreshed_at > 0` |
+| `core/scalper_runner.py` | Macro warm/tick pass `conn`; truth-first position sync; skip local NAV when IB sync on |
+| `core/position_sync.py` | Truth-only `ib_long_position_map`; no duplicate `positions()` when fresh |
+| `core/position_intel.py` | No legacy `reqPositions` when truth enabled |
+| `core/scalper_exit_executor.py` | Commander exit reads truth snapshot first |
+| `core/war_ib_sync.py` | `session_pnl_war` prefers IB `RealizedPnL` tag |
+| `core/halim_companion.py` | Fallback uses `account_equity`, not `bot_nav` fiction |
+| `core/scalper_session.py` | Close/daily reports use `account_view.day_pnl` |
+| `core/daily_self_evaluation.py` | Day PnL from `account_view` |
+| `core/scanner.py` | Held tickers from truth snapshot |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `MACRO_YAHOO_FALLBACK` | `false` | Allow Yahoo macro only when IB disconnected |
+| `MACRO_FROM_IB` | `true` | SPY/QQQ/VIX via `ib_macro` |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_hub.py tests/test_ib_extended.py tests/test_ib_truth.py -q
+python3 -m py_compile core/scalper_exit_executor.py core/market_context.py
+python3 scripts/ib_services_audit.py
+```
+
+---
+
 ## 2026-07-01 — IB Hub: orchestrate entire IB API surface for all programs
 
 ### Problem
