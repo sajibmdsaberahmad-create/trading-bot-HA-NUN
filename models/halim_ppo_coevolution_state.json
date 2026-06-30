@@ -1,5 +1,5 @@
 {
-  "last_cycle": "2026-06-30T17:23:35.703020+00:00",
+  "last_cycle": "2026-06-30T17:30:46.028746+00:00",
   "trigger": "live_session_end",
   "stats": {
     "agreements": 1427,
@@ -20,7 +20,7 @@
     "events": 5906,
     "rewritten": true
   },
-  "cycles": 72,
+  "cycles": 73,
   "dialogue_export": {
     "ok": true,
     "pairs": 5302,
