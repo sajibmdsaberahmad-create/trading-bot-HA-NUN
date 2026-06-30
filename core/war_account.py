@@ -5,8 +5,9 @@ core/war_account.py — Economic truth layer: virtual war ledger for paper + liv
 The bot believes ONLY this ledger for sizing, settlement, fees, and mode — never
 raw IB paper ~$900k. Modes: WAR_ACTIVE | LAB_ACTIVE | OBSERVE | LIVE_WAR.
 
-Paper: war $1k + optional lab pool when war is T+1 dry (experience, not promotion).
-Live: same rules; operating capital from WAR_LIVE_OPERATING_CAPITAL (not full IB NAV).
+    Paper: war $1k (WAR_CAPITAL_USD) + optional lab pool when war is T+1 dry.
+    Live: same rules; operating capital from WAR_LIVE_OPERATING_CAPITAL (not full IB NAV).
+    Positions/PnL sync from IB Gateway when WAR_IB_SYNC=true (see core/war_ib_sync.py).
 """
 
 from __future__ import annotations
@@ -490,7 +491,7 @@ def _reset_session_counters(state: Dict[str, Any]) -> None:
 
 
 def _apply_fresh_session_capital(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
-    """Restore war/lab pools to configured operating capital (paper $3.5k / live $1k)."""
+    """Restore war/lab pools to configured operating capital (paper $1k / live $1k)."""
     cfg = cfg or BotConfig()
     cap = operating_capital_usd(cfg)
     lab = lab_capital_usd(cfg) if lab_enabled(cfg) else 0.0
@@ -517,7 +518,7 @@ def _roll_rth_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) ->
     Fresh war/lab budget + zero trip counters at 09:30 ET each session day.
 
     Premarket exhausts round-trip caps; RTH open gets a clean pool without manual reset.
-    Paper uses WAR_CAPITAL_USD (default $3.5k); live uses WAR_LIVE_OPERATING_CAPITAL ($1k).
+    Paper uses WAR_CAPITAL_USD (default $1k); live uses WAR_LIVE_OPERATING_CAPITAL ($1k).
     """
     cfg = cfg or BotConfig()
     if not _war_auto_reset_at_rth_enabled(cfg):
