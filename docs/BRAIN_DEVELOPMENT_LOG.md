@@ -1961,3 +1961,20 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:53 UTC` **git_auto** — sync: 6 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, start_hanoon.sh +3 more | docs=1 other=5 | brain=toddler dataset=167 evolutions
 - `2026-06-30 21:53 UTC` **git_auto** — sync: 7 files — scalper_runner.py, scalper_spike_loop.py, BRAIN_DEVELOPMENT_LOG.md +4 more | docs=3 core=1 other=3 | brain=toddler dataset=1
 - `2026-06-30 21:53 UTC` **git_auto** — sync: 4 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=toddler dataset=167 evolutions=
+- `2026-06-30 21:53 UTC` **git_auto** — sync: 4 files — scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 core=1 other=2 | brain=toddler dataset=167 evol
+- `2026-06-30 21:54 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=167 evolutions=51
+- `2026-06-30 21:54 UTC` **git_auto** — sync: 8 files — BRAIN_DEVELOPMENT_LOG.md, registry.jsonl, colab_manifest.json +5 more | halim=2 models=3 other=3 | brain=toddler dataset=167
+- `2026-06-30 21:54 UTC` **git_auto** — sync: 5 files — BRAIN_DEVELOPMENT_LOG.md, ai_session_limits.json, macro_context.json +2 more | models=2 other=3 | brain=toddler dataset=167 
+- `2026-06-30 21:54 UTC` **brain_proxy_trained** · stage **toddler** — Teacher proxy holdout acc=92% (random=97%, 335 samples)
+- `2026-06-30 21:54 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 3 mutation(s), git=ok
+- `2026-06-30 21:54 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 106 pairs
+- `2026-06-30 21:54 UTC` **git_auto** — sync: 29 files — BRAIN_DEVELOPMENT_LOG.md, HALIM_MANIFEST.json, registry.jsonl +26 more | halim=11 models=15 other=3 | brain=toddler dataset
+- `2026-06-30 21:55 UTC` **git_auto** — sync: 7 files — BRAIN_DEVELOPMENT_LOG.md, registry.jsonl, colab_manifest.json +4 more | halim=2 models=2 other=3 | brain=toddler dataset=106
+- `2026-06-30 21:55 UTC` **git_auto** — sync: 12 files — BRAIN_DEVELOPMENT_LOG.md, registry.jsonl, action_gold.jsonl +9 more | halim=6 models=3 other=3 | brain=toddler dataset=106 
+- `2026-06-30 21:55 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=106 evolutions=52
+- `2026-06-30 21:55 UTC` **git_auto** — sync: 4 files — BRAIN_DEVELOPMENT_LOG.md, ib_extended_cache.json, hanoon.env.enc +1 more | models=1 other=3 | brain=toddler dataset=106 evol
+- `2026-06-30 21:55 UTC` **git_auto** — sync: 4 files — BRAIN_DEVELOPMENT_LOG.md, halim_constitution.json, hanoon.env.enc +1 more | models=1 other=3 | brain=toddler dataset=106 evo
+- `2026-06-30 21:56 UTC` **git_auto** — sync: 16 files — BRAIN_DEVELOPMENT_LOG.md, ib_report_events.jsonl, 0dbc1fe34c91c315.json +13 more | halim=10 models=3 other=3 | brain=toddle
+- `2026-06-30 21:56 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=106 evolutions=52
+- `2026-06-30 21:57 UTC` **git_auto** — sync: 4 files — BRAIN_DEVELOPMENT_LOG.md, cognitive_state.json, hanoon.env.enc +1 more | models=1 other=3 | brain=toddler dataset=106 evolut
+- `2026-06-30 21:57 UTC` **git_auto** — sync: 3 files — BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc, sync.key | other=3 | brain=toddler dataset=106 evolutions=52
