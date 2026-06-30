@@ -1105,3 +1105,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 15:06 UTC` **git_training** — learn: session_batch: snapshot_periodic | learn_20260630_150653 | brain=child dataset=2081 evolutions=37
 - `2026-06-30 15:09 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, ib_connectivity.jsonl +2 more | models=1 docs=1 other=3 | brain=child dataset=2081
 - `2026-06-30 15:11 UTC` **git_auto** — sync: 6 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, copilot_state.json +3 more | models=2 docs=1 other=3 | brain=child dataset=2081 ev
+- `2026-06-30 15:11 UTC` **git_auto** — sync: 5 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, macro_context.json +2 more | models=1 docs=1 other=3 | brain=child dataset=2081 ev
