@@ -106,6 +106,18 @@ class ScalperSessionMixin:
         self._rth_open_day = today
         self._day_session_ended = False
 
+        try:
+            self._refresh_account_balance()
+            if self.account_equity > 0:
+                self._rth_starting_balance = float(self.account_equity)
+                self._ib_starting_balance = float(self.account_equity)
+                log.info(
+                    f"  📊 RTH session baseline NetLiq=${self._rth_starting_balance:,.2f} "
+                    f"(IB Truth FIFO from 09:30 ET)"
+                )
+        except Exception as exc:
+            log.debug(f"RTH baseline refresh: {exc}")
+
         is_startup = old_state == "startup"
         status = rth_status_line(self.cfg)
         from core.startup_log import sinfo

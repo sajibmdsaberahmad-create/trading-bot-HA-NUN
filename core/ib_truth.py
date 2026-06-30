@@ -301,11 +301,14 @@ def build_snapshot(
 
     cfg = cfg or BotConfig()
     currency = str(getattr(cfg, "CURRENCY", "USD") or "USD")
-    since = since_ts if since_ts is not None else session_start_ts_et()
+    from core.rth_session import ib_truth_session_start_ts
+    since = since_ts if since_ts is not None else ib_truth_session_start_ts(cfg)
+    rth_session = os.getenv("IB_TRUTH_RTH_SESSION", "true").lower() not in ("0", "false", "no")
 
     account = fetch_ib_account_snapshot(ib, currency=currency)
     positions = fetch_ib_positions(ib)
-    executions = fetch_ib_executions(ib, since_ts=since)
+    raw_execs = fetch_ib_executions(ib, since_ts=since)
+    executions = filter_rth_executions(raw_execs, cfg)
     trips = fifo_round_trips(executions)
 
     ticker_pnl: Dict[str, float] = {}
@@ -323,6 +326,7 @@ def build_snapshot(
         ticker_pnl_fifo=ticker_pnl,
         refreshed_at=time.time(),
         session_since_ts=since,
+        session_scope="rth" if rth_session else "calendar",
     )
 
 
@@ -409,7 +413,7 @@ def format_snapshot_summary(snap: IBTruthSnapshot) -> str:
         f"  Cash:          ${snap.account.total_cash:,.2f}",
         f"  RealizedPnL:   ${snap.account.realized_pnl:+,.2f}",
         f"  UnrealizedPnL: ${snap.account.unrealized_pnl:+,.2f}",
-        f"  FIFO session:  ${snap.session_pnl_fifo:+,.2f} ({len(snap.round_trips)} trips)",
+        f"  FIFO session:  ${snap.session_pnl_fifo:+,.2f} ({len(snap.round_trips)} trips, {snap.session_scope})",
         "",
         "── Positions ──",
     ]

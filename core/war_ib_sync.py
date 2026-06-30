@@ -14,19 +14,14 @@ from typing import Any, Dict, List, Optional
 
 from core.config import BotConfig
 from core.ib_truth import (
-    IBExecution,
-    IBPosition,
-    RoundTrip,
     build_snapshot,
     fifo_round_trips,
-    fetch_ib_executions,
-    fetch_ib_positions,
-    fetch_ib_account_snapshot,
     get_snapshot,
     ib_truth_enabled,
     refresh,
     session_start_ts_et,
 )
+from core.rth_session import ib_truth_session_start_ts
 from core.notify import log
 
 _REPO = Path(__file__).resolve().parents[1]
