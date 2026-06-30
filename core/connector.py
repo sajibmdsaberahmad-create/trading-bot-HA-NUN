@@ -865,6 +865,14 @@ class IBConnector:
                 log.debug(f"IB tick-by-tick issue ({errorCode}) — using 5s bars instead")
             return
 
+        # 322 — market rule missing (common on paper Gateway / delayed conIds)
+        if errorCode == 322:
+            log.debug(
+                f"IB 322 market rule unavailable (reqId={reqId}) — "
+                f"{errorString[:80]}"
+            )
+            return
+
         # Market-data failures → learn + avoid (162 no HMDS, 420 no permissions, …)
         try:
             from core.market_data_learning import (
