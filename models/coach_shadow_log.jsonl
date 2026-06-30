@@ -5502,3 +5502,7 @@
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":47488.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:00.000453+00:00"}
 {"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":996.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:03.543576+00:00"}
 {"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":330594.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:07.219245+00:00"}
+{"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":894.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:11.327436+00:00"}
+{"ticker":"CELZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":33450.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:14.651310+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":330119.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:18.274673+00:00"}
+{"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":8722.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:21.563511+00:00"}
