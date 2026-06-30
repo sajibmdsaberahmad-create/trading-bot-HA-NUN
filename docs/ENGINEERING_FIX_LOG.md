@@ -10,6 +10,38 @@
 
 ---
 
+## 2026-07-01 — IB Hub: orchestrate entire IB API surface for all programs
+
+### Problem
+IB services were spread across modules; some tags/APIs unused; balance refresh did not pull extended/macro every tick.
+
+### Root cause
+No single `ib_hub` orchestrator; `accountValues()` still called directly in places; look-ahead margin tags unmapped.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_hub.py` | **New** — `refresh_all_ib_services`, `get_hub_context`, `audit_ib_coverage` |
+| `core/ib_extended.py` | reqAccountSummary, reqTickers quotes, reqCompletedOrders, multi fundamental reports |
+| `core/ib_truth.py` | reqExecutions fallback, reqPositions prefetch, look-ahead tags, account code |
+| `core/scalper_runner.py` | `_refresh_account_balance` → ib_hub |
+| `core/halim_companion.py` | `get_hub_context` for full AI bundle |
+| `scripts/ib_services_audit.py` | **New** — coverage report CLI |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `IB_HUB_ENABLED` | `true` | Single orchestrated IB refresh on balance poll |
+| `IB_FUNDAMENTAL_REPORTS` | `ReportSnapshot,Ratios` | Multiple fundamental pulls |
+
+### Verify
+```bash
+python3 scripts/ib_services_audit.py
+python3 -m pytest tests/test_ib_hub.py -q
+```
+
+---
+
 ## 2026-07-01 — SyntaxError exit executor + IB client_id=1 guard
 
 ### Problem
