@@ -3458,3 +3458,5 @@
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":2.692307692307692,"shadow_only":true,"timestamp":"2026-06-30T09:45:58.816935+00:00"}
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":550.0,"shadow_only":true,"timestamp":"2026-06-30T09:47:13.778714+00:00"}
 {"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":900.0,"shadow_only":true,"timestamp":"2026-06-30T09:47:29.431293+00:00"}
+{"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":12.083333333333334,"shadow_only":true,"timestamp":"2026-06-30T09:47:44.564822+00:00"}
+{"ticker":"QS","reason":"profit_prob_below_80pct","scan_score":76.6,"spike_ratio":12.083333333333334,"shadow_only":true,"timestamp":"2026-06-30T09:47:59.687310+00:00"}
