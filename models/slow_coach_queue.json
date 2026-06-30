@@ -5,13 +5,6 @@
       "value": 0.63,
       "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
       "source": "runtime_council_timeout",
-      "queued_at": "2026-06-30T10:01:25.923758+00:00"
-    },
-    {
-      "param": "CONFIDENCE_THRESHOLD",
-      "value": 0.63,
-      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
-      "source": "runtime_council_timeout",
       "queued_at": "2026-06-30T10:11:08.912568+00:00"
     },
     {
@@ -349,7 +342,14 @@
       "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
       "source": "runtime_council_timeout",
       "queued_at": "2026-06-30T14:22:20.353595+00:00"
+    },
+    {
+      "param": "CONFIDENCE_THRESHOLD",
+      "value": 0.63,
+      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+      "source": "runtime_council_timeout",
+      "queued_at": "2026-06-30T14:23:12.499376+00:00"
     }
   ],
-  "updated_at": "2026-06-30T14:22:20.353601+00:00"
+  "updated_at": "2026-06-30T14:23:12.499381+00:00"
 }
