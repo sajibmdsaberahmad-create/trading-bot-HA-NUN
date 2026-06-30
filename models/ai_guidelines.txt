@@ -25,3 +25,11 @@ Halim heuristic dev plan — WR 43%
 Observed trade_closed — recorded for learning.
 green_profit_lock:giveback +0.65% (peak +1.00% gave back 0.35%)
 
+🧭 COMMANDER LEARNING | 2026-06-30T12:58:14.795499+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-30T12:58:14.795558+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+
