@@ -2419,3 +2419,4 @@
 {"event":"exit_postmortem","ticker":"COIN","entry":156.4723,"exit":157.51,"shares":4.0,"pnl_usd":4.15,"pnl_pct":0.66,"result":"win","regime_tag":"trend_grind|late_chase_risk","hold_sec":17.7,"exit_reason":"spike_top_exit: +0.62% vol=1.8x","entry_slippage_pct":-0.024609,"shadow":false,"timestamp":"2026-06-30T07:59:01.796054+00:00"}
 {"timestamp":"2026-06-30T10:28:43.116269+00:00","event":"ib_failure","ticker":"CUPR","reason":"IB closing-only \u2014 cannot open new positions","learn_mode":true,"pipeline":"entry_reject"}
 {"timestamp":"2026-06-30T11:03:31.539388+00:00","event":"ib_failure","ticker":"CUPR","reason":"IB closing-only \u2014 cannot open new positions","learn_mode":true,"pipeline":"entry_reject"}
+{"timestamp":"2026-06-30T11:04:07.752995+00:00","event":"ib_failure","ticker":"JEM","reason":"IB closing-only \u2014 cannot open new positions","learn_mode":true,"pipeline":"entry_reject"}

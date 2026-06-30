@@ -4538,3 +4538,11 @@
 {"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":129709.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:41.490939+00:00"}
 {"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":62604.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:44.957342+00:00"}
 {"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":108132.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:47.583203+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":86497.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:49.892784+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":92637.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:52.167722+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":105227.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:54.286476+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":104526.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:56.707087+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":79173.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:58.931059+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":129344.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:01.769733+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":34059.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:03.864879+00:00"}
+{"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":6948.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:05.998960+00:00"}
