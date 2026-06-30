@@ -17,9 +17,11 @@ from core.fill_tracker import (
     bracket_exit_fill,
     build_round_trip_record,
     ib_fill_strict,
+    position_avg_cost,
     read_order_fill_instant,
     recent_execution_fill,
     require_ib_fill_sync,
+    round_trip_pnl,
 )
 from core.notify import log
 
@@ -35,6 +37,7 @@ class FillRecord:
     qty: float
     ts: float
     exec_id: str = ""
+    commission: float = 0.0
 
 
 class FillExecutionCache:
@@ -75,6 +78,7 @@ class FillExecutionCache:
                 qty=qty,
                 ts=ts,
                 exec_id=str(getattr(ex, "execId", "") or ""),
+                commission=_execution_commission(fill),
             )
             self._records.append(rec)
             if len(self._records) > self._max_records:
@@ -118,6 +122,18 @@ class PendingClose:
     bracket: Any = None
     credited: bool = False
     credit_qty: float = 0.0
+
+
+def _execution_commission(fill) -> float:
+    try:
+        report = getattr(fill, "commissionReport", None)
+        if report is not None:
+            comm = float(getattr(report, "commission", 0) or 0)
+            if comm != 0:
+                return abs(comm)
+    except Exception:
+        pass
+    return 0.0
 
 
 def _sane_fill(px: float, ref: float) -> bool:
@@ -168,6 +184,65 @@ def resolve_exit_from_ib(
     return float(quote_px or 0), False
 
 
+def resolve_entry_from_ib(
+    ib,
+    cache: Optional[FillExecutionCache],
+    *,
+    symbol: str,
+    slot_entry_fill: float,
+    slot_entry_quote: float,
+    opened_at: float,
+) -> tuple[float, bool]:
+    """
+    Best IB entry fill for round-trip P&L — execution cache, then stored slot, then avgCost.
+    Returns (entry_fill, confirmed).
+    """
+    sym = (symbol or "").upper()
+    ref = float(slot_entry_fill or slot_entry_quote or 0)
+    since = max(0.0, float(opened_at or 0) - 1.0)
+
+    if cache is not None:
+        hit = cache.latest(sym, "BOT", since_ts=since)
+        if hit and _sane_fill(hit.price, ref or hit.price):
+            return hit.price, True
+
+    if slot_entry_fill > 0 and _sane_fill(slot_entry_fill, ref or slot_entry_fill):
+        return float(slot_entry_fill), True
+
+    px, qty = recent_execution_fill(
+        ib, sym, "BOT", since_ts=since, max_wait=0.0,
+    )
+    if px > 0 and qty > 0 and _sane_fill(px, ref or px):
+        return px, True
+
+    avg = position_avg_cost(ib, sym)
+    if avg > 0 and _sane_fill(avg, ref or avg):
+        return avg, True
+
+    if slot_entry_quote > 0:
+        return float(slot_entry_quote), False
+    return 0.0, False
+
+
+def _round_trip_commission(
+    cache: Optional[FillExecutionCache],
+    symbol: str,
+    since_ts: float,
+) -> float:
+    if cache is None:
+        return 0.0
+    sym = (symbol or "").upper()
+    total = 0.0
+    for rec in cache._records:
+        if rec.symbol != sym:
+            continue
+        if since_ts and rec.ts < since_ts - 1.0:
+            continue
+        if rec.commission > 0:
+            total += rec.commission
+    return round(total, 4)
+
+
 def build_close_record(
     pending: PendingClose,
     ib,
@@ -178,13 +253,22 @@ def build_close_record(
 ) -> Optional[Dict[str, Any]]:
     """Build trade record when IB fill is confirmed, or force at deadline."""
     slot = pending.slot or {}
-    entry_fill = float(slot.get("entry_fill_px") or slot.get("entry_price") or 0)
-    entry_quote = float(slot.get("entry_price") or entry_fill)
+    entry_quote = float(slot.get("entry_price") or 0)
+    opened_at = float(pending.opened_at or slot.get("opened_at") or 0)
+    slot_entry = float(slot.get("entry_fill_px") or entry_quote)
+    entry_fill, entry_confirmed = resolve_entry_from_ib(
+        ib,
+        cache,
+        symbol=pending.ticker,
+        slot_entry_fill=slot_entry,
+        slot_entry_quote=entry_quote,
+        opened_at=opened_at,
+    )
     shares = float(pending.shares or slot.get("shares") or 0)
     if shares <= 0:
         return None
 
-    exit_fill, confirmed = resolve_exit_from_ib(
+    exit_fill, exit_confirmed = resolve_exit_from_ib(
         ib,
         cache,
         symbol=pending.ticker,
@@ -194,6 +278,11 @@ def build_close_record(
         since_ts=pending.opened_at,
         entry_fill=entry_fill,
     )
+
+    confirmed = exit_confirmed
+    if require_ib_fill_sync(cfg) and not entry_confirmed and entry_fill <= 0:
+        if not force:
+            return None
 
     if not confirmed and not force:
         return None
@@ -206,6 +295,7 @@ def build_close_record(
         else:
             return None
 
+    commission = _round_trip_commission(cache, pending.ticker, opened_at)
     rec = build_round_trip_record(
         ticker=pending.ticker,
         entry_fill=entry_fill,
@@ -222,7 +312,15 @@ def build_close_record(
         stop_px=float(slot.get("stop") or 0),
         target_px=float(slot.get("target") or 0),
     )
-    rec["fill_confirmed"] = confirmed
+    if commission > 0:
+        pnl_usd, pnl_pct = round_trip_pnl(entry_fill, exit_fill, shares, commission=commission)
+        rec["pnl_usd"] = round(pnl_usd, 2)
+        rec["pnl_pct"] = round(pnl_pct, 2)
+        rec["result"] = "win" if pnl_usd > 0 else "loss"
+        rec["ib_commission_usd"] = commission
+    rec["fill_confirmed"] = confirmed and (entry_confirmed or entry_fill > 0)
+    rec["entry_fill_confirmed"] = entry_confirmed
+    rec["exit_fill_confirmed"] = exit_confirmed
     rec["reconcile_event"] = pending.event
     return rec
 
