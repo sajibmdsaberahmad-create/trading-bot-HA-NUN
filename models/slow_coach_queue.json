@@ -1,20 +1,6 @@
 {
   "items": [
     {
-      "param": "MIN_PROFIT_PROBABILITY",
-      "value": 0.49,
-      "reason": "below teacher floor \u2014 raise profit probability gate",
-      "source": "ppo_teacher",
-      "queued_at": "2026-06-30T04:52:16.076163+00:00"
-    },
-    {
-      "param": "MIN_PROFIT_PROBABILITY",
-      "value": 0.62,
-      "reason": "below teacher floor \u2014 raise profit probability gate",
-      "source": "ppo_teacher",
-      "queued_at": "2026-06-30T06:17:18.105852+00:00"
-    },
-    {
       "param": "CONFIDENCE_THRESHOLD",
       "value": 0.68,
       "reason": "trade WR 12% \u2014 tighten PPO entry bar",
@@ -349,7 +335,21 @@
       "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
       "source": "runtime_council_timeout",
       "queued_at": "2026-06-30T10:14:40.528574+00:00"
+    },
+    {
+      "param": "CONFIDENCE_THRESHOLD",
+      "value": 0.63,
+      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+      "source": "runtime_council_timeout",
+      "queued_at": "2026-06-30T10:15:26.209011+00:00"
+    },
+    {
+      "param": "CONFIDENCE_THRESHOLD",
+      "value": 0.63,
+      "reason": "Scanner timeout entries \u2014 slightly lower bar while council catches up",
+      "source": "runtime_council_timeout",
+      "queued_at": "2026-06-30T10:15:28.551802+00:00"
     }
   ],
-  "updated_at": "2026-06-30T10:14:40.528581+00:00"
+  "updated_at": "2026-06-30T10:15:28.551807+00:00"
 }
