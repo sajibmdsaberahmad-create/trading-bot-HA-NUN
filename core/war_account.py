@@ -178,12 +178,18 @@ def war_bullets_remaining(
     *,
     use_lab: bool = False,
 ) -> int:
-    """How many full bullet entries settled cash can still fund."""
+    """Deployment slots remaining — advisory under AI sizing, slice-based otherwise."""
     cfg = cfg or BotConfig()
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
     min_entry = _min_entry_settled(state, cfg)
     if min_entry <= 0 or settled < min_entry:
         return 0
+    if war_ai_sizing_enabled(cfg):
+        total = max(0, int(state.get("bullets_total", 0)))
+        used = int(state.get("bullets_used_session", 0))
+        if total > 0:
+            return max(0, total - used)
+        return 1
     return int(settled // min_entry)
 
 
@@ -214,6 +220,9 @@ def _trip_cap_blocks(
 ) -> bool:
     """True when no more entries allowed due to trip/balance limits."""
     cfg = cfg or BotConfig()
+    settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
+    if war_ai_sizing_enabled(cfg):
+        return settled < _min_entry_settled(state, cfg)
     if balance_driven_trips_enabled(cfg, use_lab=use_lab):
         return war_bullets_remaining(state, cfg, use_lab=use_lab) <= 0
     trips = int(state.get("lab_round_trips_today" if use_lab else "round_trips_today", 0))
