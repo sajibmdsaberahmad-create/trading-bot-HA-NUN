@@ -45,5 +45,14 @@
       "Hi",
       "Hi"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T16:40:02.669114+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on BITO"
+    ]
   }
 ]

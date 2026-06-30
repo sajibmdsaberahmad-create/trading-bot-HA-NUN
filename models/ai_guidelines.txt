@@ -169,3 +169,11 @@ WHAT must change before resuming? Propose max 3 param mutations.
 Recent losses:
 - BIYA: pnl=$-0.15 slip=0
 
+🧭 COMMANDER LEARNING | 2026-06-30T16:40:02.668602+00:00
+Observed loss_streak — recorded for learning.
+bracket_exit
+
+🧭 COMMANDER LEARNING | 2026-06-30T16:40:02.668915+00:00
+Observed trade_closed — recorded for learning.
+bracket_exit
+
