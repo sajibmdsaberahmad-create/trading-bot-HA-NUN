@@ -1,19 +1,19 @@
 {
-  "momentum": 0.5,
-  "volume": 0.5,
-  "institutional": 0.5,
-  "vwap_slope": 0.5,
-  "atr_bonus": 0.5,
-  "mean_reversion": 0.5,
-  "trend_filter": 0.5,
-  "price_rising": 0.5,
-  "rsi_filter": 0.5,
-  "volatility_gate": 0.5,
+  "momentum": 0.5440955135601866,
+  "volume": 0.5440955135601866,
+  "institutional": 0.5440955135601866,
+  "vwap_slope": 0.5440955135601866,
+  "atr_bonus": 0.5440955135601866,
+  "mean_reversion": 0.5440955135601866,
+  "trend_filter": 0.5440955135601866,
+  "price_rising": 0.5440955135601866,
+  "rsi_filter": 0.5440955135601866,
+  "volatility_gate": 0.5440955135601866,
   "_meta": {
-    "train_timestamp": "2026-06-29T07:53:55.429080",
+    "train_timestamp": "2026-06-30T08:40:24.368477",
     "buffer_total": 2000,
-    "buffer_win_rate": 0.228,
+    "buffer_win_rate": 0.053,
     "returns_win_rate": 0.143,
-    "combined_win_rate": 0.185
+    "combined_win_rate": 0.098
   }
 }
