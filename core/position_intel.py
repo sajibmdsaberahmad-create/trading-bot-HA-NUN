@@ -104,7 +104,8 @@ def collect_positions(runner: "ScalperRunner") -> Dict[str, Any]:
     cash = float(getattr(runner, "available_cash", 0) or getattr(runner, "bot_cash", 0) or 0)
     ib_chg, _ = (0.0, 0.0)
     try:
-        ib_chg, _ = runner._day_pnl_ib()
+        from core.account_view import day_pnl_ib
+        ib_chg, _ = day_pnl_ib(runner)
     except Exception:
         pass
 

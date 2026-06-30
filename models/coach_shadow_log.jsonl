@@ -5511,3 +5511,9 @@
 {"ticker":"CELZ","reason":"ppo_not_aligned","scan_score":91.2,"spike_ratio":78200.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:55.248669+00:00"}
 {"ticker":"SVRE","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":69337.0,"shadow_only":true,"timestamp":"2026-06-30T12:41:55.951939+00:00"}
 {"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":128725.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:03.923921+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":152646.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:16.162923+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":38815.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:16.682819+00:00"}
+{"ticker":"SVRE","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":86275.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:21.028752+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":35309.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:24.341986+00:00"}
+{"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":178877.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:27.672628+00:00"}
+{"ticker":"CELZ","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":33709.0,"shadow_only":true,"timestamp":"2026-06-30T12:43:29.061305+00:00"}
