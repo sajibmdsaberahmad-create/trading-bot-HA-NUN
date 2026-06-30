@@ -235,11 +235,23 @@ class CommanderVerdictMixin:
                 pass
 
         try:
-            from core.entry_quality import apply_profit_prob_veto
+            from core.entry_quality import apply_profit_prob_veto, apply_ai_sure_veto
             vetoed_prob = apply_profit_prob_veto(self.cfg, {**out, "enter": enter, "confidence": confidence}, eq)
             out = vetoed_prob
             enter = bool(vetoed_prob.get("enter"))
             confidence = float(vetoed_prob.get("confidence", confidence))
+            vetoed_sure = apply_ai_sure_veto(
+                self.cfg, out,
+                eq,
+                ppo_action=ppo_action,
+                ppo_conf=ppo_conf,
+                scan_score=scan_score,
+                spike_ratio=spike_ratio,
+                ticker=ticker,
+            )
+            out = vetoed_sure
+            enter = bool(vetoed_sure.get("enter"))
+            confidence = float(vetoed_sure.get("confidence", confidence))
         except Exception:
             pass
 

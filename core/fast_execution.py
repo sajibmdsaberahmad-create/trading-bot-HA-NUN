@@ -337,6 +337,12 @@ def should_micro_fast_entry(
     live_px: float = 0.0,
 ) -> bool:
     """Enter without Ollama wait — strong scanner score + micro momentum + profit odds."""
+    try:
+        from core.smart_stack import ai_sure_entry_enabled
+        if ai_sure_entry_enabled(cfg):
+            return False
+    except Exception:
+        pass
     from core.capital_discipline import allows_micro_fast_entry
     if not allows_micro_fast_entry(cfg):
         return False
