@@ -91,7 +91,7 @@ def predict_exit_slippage(
         vol_down = volumes[-1] < float(np.mean(volumes[-5:-1])) if len(volumes) >= 5 else False
         if price_up and vol_down:
             slip += 0.22
-        from core.indicators import compute_atr
+        from core.risk import compute_atr
         atr = compute_atr(df, period=5)
         vol_ratio = atr / current_px if current_px > 0 else 0.01
         slip += min(0.25, vol_ratio * 2.0)

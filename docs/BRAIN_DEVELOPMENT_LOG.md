@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — Multi-bar ride + slippage-aware exit (book profit / cut loss early) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Unified green doctrine: same war tactics on full-balance pre/post war (only sizing differs) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Swing intel: multi-TF + IB news/fundamentals + web learn + policy train — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Capital phases + real IB swing (HN orderRef tags, multi-day trips) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [HORIZON_ROADMAP.md](HORIZON_ROADMAP.md)
@@ -1939,3 +1940,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:44 UTC` **git_auto** — sync: 6 files — account_view.py, green_trade_doctrine.py, BRAIN_DEVELOPMENT_LOG.md +3 more | docs=1 core=1 other=4 | brain=toddler dataset=1
 - `2026-06-30 21:44 UTC` **git_auto** — sync: 5 files — account_view.py, green_trade_doctrine.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=1
 - `2026-06-30 21:44 UTC` **git_auto** — sync: 6 files — account_view.py, green_trade_doctrine.py, scalper_exit_executor.py +3 more | docs=1 core=2 other=3 | brain=toddler dataset=1
+- `2026-06-30 21:44 UTC` **git_auto** — sync: 5 files — account_view.py, scalper_exit_executor.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=

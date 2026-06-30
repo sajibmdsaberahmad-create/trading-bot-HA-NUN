@@ -10,6 +10,38 @@
 
 ---
 
+## 2026-07-01 — Multi-bar ride + slippage-aware green exit
+
+### Problem
+Exits were single-bar biased; no coordinated multi-bar `pred_3bar` ride; slippage prediction scattered in spike loop only; loss cuts not tied to predicted fill degradation.
+
+### Root cause
+`assess_green_exit` ignored `pred_3bar`, `profit_run`, bars held, and centralized slippage; profit hunt could exit while ride path was still valid.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/green_trade_doctrine.py` | `assess_multi_bar_ride`, `predict_exit_slippage`, `assess_dynamic_exit` |
+| `core/scalper_exit_executor.py` | Ride logging, loss cut, profit hunt defers on ride, slippage early exit |
+| `scripts/start_hanoon.sh` | `GREEN_MULTIBAR_RIDE`, `GREEN_SLIPPAGE_EXIT` defaults |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `GREEN_MULTIBAR_RIDE` | `true` | Hold up to N bars when pred_3bar + profit_run strong |
+| `GREEN_SLIPPAGE_EXIT` | `true` | Book profit / cut loss on predicted slippage |
+| `GREEN_MULTIBAR_MAX_BARS` | `5` | Max bars to ride before forced book |
+| `GREEN_SLIPPAGE_EXIT_PROFIT` | `0.62` | Book green when slip risk exceeds |
+| `GREEN_SLIPPAGE_EXIT_LOSS` | `0.52` | Cut red when slip + loss_pressure |
+
+### Verify
+```bash
+python3 -m py_compile core/green_trade_doctrine.py core/scalper_exit_executor.py
+python3 -m pytest tests/test_green_trade_doctrine.py -q
+```
+
+---
+
 ## 2026-07-01 — Unified green doctrine: same tactics war + full balance
 
 ### Problem
