@@ -2950,10 +2950,18 @@ class ScalperRunner:
                 current_px = self._latest_price()
                 
                 if not self.conn.is_connected():
-                    log.warning("IB connection lost. Reconnecting...")
+                    held = len(self._held_tickers())
+                    log.warning(
+                        f"IB connection lost ({held} open position(s)) — "
+                        "entering connectivity wait (no new entries)"
+                    )
                     if not self.conn.reconnect():
+                        log.error("IB reconnect ended — shutdown or finite attempts exhausted")
                         break
+                    log.info("IB link restored — refreshing account balance and streams")
                     self._refresh_account_balance()
+                    if self.conn.consume_resubscribe_pending():
+                        self._resubscribe_all_streams(force=True)
                 
                 # Update AI buffers periodically (throttled to every 5s)
                 now = time.time()
@@ -4301,8 +4309,10 @@ class ScalperRunner:
         """IB 1100/1102 — pause/resume bar warm while socket is down."""
         if event == "connectivity_lost":
             self._ib_connectivity_paused = True
+            log.info("IB connectivity handler: market-data warm paused (1100)")
         elif event == "data_ok":
             self._ib_connectivity_paused = False
+            log.info("IB connectivity handler: market-data warm resumed (1102)")
 
     def _resubscribe_all_streams(self, force: bool = False) -> None:
         """Re-request live streams after IB reconnect, 1101, or 10197 reclaim."""
@@ -7418,6 +7428,13 @@ class ScalperRunner:
         """
         can_trade, market_state = can_trade_now(self.cfg)
         if not can_trade:
+            return "waiting"
+
+        if (
+            not self.conn.is_connected()
+            or self.conn.in_connectivity_outage()
+            or self._ib_connectivity_paused
+        ):
             return "waiting"
 
         if not self.top_pick:

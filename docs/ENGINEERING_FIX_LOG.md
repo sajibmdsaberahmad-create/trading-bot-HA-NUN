@@ -10,6 +10,189 @@
 
 ---
 
+## 2026-06-30 — IB connectivity cleanup + detailed journal
+
+### Problem
+Redundant connectivity state (`_ib_connectivity_waiting` + outage flags), duplicate Telegram on restore (`reconnect_event` + `connectivity_restored`), watchdog notify path unused, anti-flap could return `False` and kill HANOON during outage, sparse reconnect failure logs.
+
+### Root cause
+Layered flags in scalper vs connector; legacy `reconnect_event`; anti-flap short-circuit without sleep.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_connectivity_journal.py` | **New** — `models/ib_connectivity.jsonl` + structured `HANOON.log` lines for every outage/retry/restore |
+| `core/connector.py` | Single outage flag; per-attempt journal; anti-flap sleeps; removed `reconnect_event`; trigger tags (`ib_1100`, `disconnected_event`, …) |
+| `core/notify.py` | Removed `reconnect_event`; restore message includes duration + attempt count |
+| `core/scalper_runner.py` | Dropped `_ib_connectivity_waiting`; entry guard uses `conn.in_connectivity_outage()` only; position-count log on disconnect |
+| `core/config.py` | (unchanged in cleanup pass — see wait-mode entry below) |
+| `scripts/start_hanoon.sh` / `scripts/stop_hanoon.sh` | (unchanged in cleanup pass — see wait-mode entry below) |
+| `scripts/ib_gateway_watchdog.py` | Log-only; journal `gateway_port_down/up`; periodic OK heartbeat |
+
+### Verify
+```bash
+tail -f logs/HANOON.log | rg "IB connectivity"
+tail -f models/ib_connectivity.jsonl
+```
+
+---
+
+## 2026-06-30 — IB connectivity wait mode + Gateway watchdog
+
+### Problem
+Live/paper HANOON exited after `RECONNECT_MAX_ATTEMPTS` (10) when Wi‑Fi or IB Gateway dropped — killing in-memory Halim/PPO state even though open positions and bracket stops remain on IB servers.
+
+### Root cause
+`IBConnector.reconnect()` capped attempts and `ScalperRunner` main loop `break` on failure. No sidecar monitored Gateway port; Telegram fired per final failure only.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/config.py` | `CONNECTIVITY_WAIT_ON_IB_LOSS`, `RECONNECT_MAX_ATTEMPTS_LIVE` (0=infinite), `RECONNECT_WAIT_LOG_EVERY`, `IB_GATEWAY_WATCHDOG_ENABLED` |
+| `core/connector.py` | Infinite live reconnect with interruptible sleep (respects shutdown); `_mark/_clear_connectivity_outage()`; one-shot outage/restore via notifier |
+| `core/notify.py` | `connectivity_lost()`, `connectivity_restored()` — one Telegram per outage cycle |
+| `core/scalper_runner.py` | Connectivity wait flag; no entries while outage; resubscribe after reconnect |
+| `scripts/ib_gateway_watchdog.py` | Sidecar TCP probe on `IB_HOST:IB_PORT`; writes `runtime/ib_gateway_down.flag` |
+| `scripts/start_ib_gateway_watchdog.sh` | Start watchdog (log-only notify by default) |
+| `scripts/stop_ib_gateway_watchdog.sh` | Stop watchdog on graceful HANOON shutdown |
+| `scripts/start_hanoon.sh` | Export wait-mode env; start IB Gateway watchdog with Halim watchdog |
+| `scripts/stop_hanoon.sh` | Stop IB Gateway watchdog |
+
+### Env
+- `CONNECTIVITY_WAIT_ON_IB_LOSS=true` (live default)
+- `RECONNECT_MAX_ATTEMPTS_LIVE=0` (infinite)
+- `RECONNECT_WAIT_LOG_EVERY=10`
+- `IB_GATEWAY_WATCHDOG_ENABLED=true`
+- `IB_GATEWAY_WATCHDOG_OK_EVERY=20` (watchdog heartbeat log interval)
+
+### Verify
+```bash
+python3 -c "
+from core.config import BotConfig
+from core.connector import IBConnector
+c = BotConfig()
+print('wait', c.CONNECTIVITY_WAIT_ON_IB_LOSS, 'live_max', c.RECONNECT_MAX_ATTEMPTS_LIVE)
+conn = IBConnector(c)
+print('max_attempts', conn._reconnect_max_attempts())
+"
+./scripts/start_ib_gateway_watchdog.sh
+tail -3 logs/ib_gateway_watchdog.log
+./scripts/stop_ib_gateway_watchdog.sh
+```
+
+---
+
+## 2026-06-30 — PPO training-echo entry parser
+
+### Problem
+After JSON prompt fix, 0% LM ready — model regurgitates gold lines (`PPO-led micro-fast: score=84 | ATR R:R 2.0`, `ppo=hold conf=0.50`) instead of JSON. All awaits ended `empty`; no `+halim+` blend.
+
+### Root cause
+Toddler SFT heavily trained on PPO/council `reason` strings; inference copies those tokens. Prior parser only handled instruction-echo and strict JSON.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_entry_line.py` | `_parse_training_echo_entry()`, `_extract_echo_confidence()` — detect PPO/ATR/entry_decision field echoes; default `enter=false` for `ppo-led micro-fast` gold copy; `ppo_buy`/`ppo=hold` explicit; log `ready (echo)` |
+
+### Verify
+```bash
+python3 -c "
+from core.halim_entry_line import _parse_entry_lm_response
+samples = [
+  'PPO-led micro-fast: score=80 ppo=hold | ATR R:R 2.0',
+  '} ppo=hold conf=0.50 note=Low confidence',
+  'COIN entry_decision: price=179.85 ppo_buy=False ppo_conf=0.54',
+]
+for s in samples: print(_parse_entry_lm_response(s))
+"
+```
+
+---
+
+## 2026-06-30 — Entry LM parse quality + coevolution halim_signal stamps
+
+### Problem
+~67% Halim entry LM outputs were unparseable toddler ramble (`Entry_decision is not a signal…`). Coevolution v2 rows stayed `halim_signal=null` even when pipeline showed `+halim+` because `_finalize_entry_decision` built a fresh verdict dict without copying `halim_enter` stamps.
+
+### Root cause
+1. Prompt echoed schema template (`enter=true|false`) which the 0.5B model repeated as prose.
+2. Parser only handled strict JSON; instruction-echo lines were discarded.
+3. Success-path `decision = {enter, shares, …}` dropped blend stamps before `_emit_spike_verdict` → `extract_coevolution_halim_signals` saw no `halim_enter`.
+4. Zero confidence from partial parses displayed as `0%`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_entry_line.py` | Shorter JSON-only prompt; `_normalize_entry_parsed()`; embedded-JSON + instruction-echo heuristics; conf floor 0.45/0.55 when model returns 0 |
+| `core/halim_ppo_coevolution.py` | `merge_coevolution_stamps()`, `enrich_decision_halim_peek()`, `COEVOLUTION_STAMP_KEYS` |
+| `core/ai_commander.py` | `_entry_verdict()` merges stamps into all verdict payloads; `_emit_spike_verdict` peeks Halim slot when stamps missing |
+| `scripts/halim_env.sh` | `HALIM_ENTRY_MAX_TOKENS=36` (shorter generation) |
+
+### Verify
+```bash
+python3 -c "
+from core.halim_entry_line import _parse_entry_lm_response
+s='Entry_decision only on clean momentum scalp. False on chop/fakeout.'
+print(_parse_entry_lm_response(s))
+"
+# Restart replay — coevolution tail should show halim_signal true/false not null
+grep halim_signal halim/data/coevolution/correction_log.jsonl | tail -5
+```
+
+---
+
+## 2026-06-30 — Halim entry await replay + live (participation fix)
+
+### Problem
+Halim entry LM never showed `Halim entry fresh` in replay: 0% blend, coevolution v2 `halim_signal=null`. Cloud teacher blocked by `daily_decision_cap_1`. Monitor reported `halim_serve=no` (wrong health URL). Live had `HALIM_ENTRY_AWAIT_LIVE=false` so fast paths skipped await entirely.
+
+### Root cause
+1. `HALIM_ENTRY_AWAIT_SEC=2.5` too short for MLX on M2 8GB → silent timeout (DEBUG only).
+2. `ring()` dropped new spikes when prior slot `in_flight` → await got `wrong_fp` immediately.
+3. Adult stage × proxy multiplier → decision API budget floor of 1/day; sample_skip throttled council.
+4. Live await disabled by default in `halim_env.sh`.
+5. Monitor probed `/v1/health`; serve exposes `/health`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/halim_env.sh` | `HALIM_ENTRY_AWAIT_SEC=4.5`, `HALIM_ENTRY_AWAIT_LIVE=true`, `HALIM_ENTRY_AWAIT_ENABLED`, LM timeout 8s, min ring 1s, max age 6s; `REPLAY/LIVE_DECISION_API_DAILY` floors; council sample off in training unless `*_COUNCIL_SAMPLE=true` |
+| `core/halim_entry_line.py` | Unified await for replay+live; supersede in-flight ring on new fingerprint; await polls through supersede; INFO logs for LM ready/empty/unparseable; `_parse_entry_lm_response()` heuristic fallback when MLX ramble ≠ JSON |
+| `core/ai_commander.py` | INFO logs for all await outcomes (`timeout`, `empty`, `wrong_fp`, `missing`) |
+| `core/brain_maturity.py` | `_training_session_decision_floor()`, `_decision_sample_throttle_enabled()` — replay/live gold get higher API budget, no sample_skip by default |
+| `scripts/monitor_replay_health.sh` | Try `/health` then `/v1/health` |
+
+### Env vars
+```bash
+HALIM_ENTRY_AWAIT_ENABLED=true
+HALIM_ENTRY_AWAIT_SEC=4.5
+HALIM_ENTRY_AWAIT_REPLAY=true
+HALIM_ENTRY_AWAIT_LIVE=true          # live scalper now waits for Halim LM too
+HALIM_ENTRY_LM_TIMEOUT_SEC=8
+HALIM_ENTRY_LM_MIN_RING_SEC=1.0
+REPLAY_DECISION_API_DAILY=48
+LIVE_DECISION_API_DAILY=16
+REPLAY_COUNCIL_SAMPLE=false          # set true to re-enable sample_skip in replay
+LIVE_COUNCIL_SAMPLE=false
+```
+
+### Verify
+```bash
+source scripts/halim_env.sh
+python3 -c "from core.halim_entry_line import halim_entry_await_sec; from core.config import BotConfig; print('replay', halim_entry_await_sec())"
+REPLAY_LIVE= python3 -c "import os; os.environ['HALIM_ENTRY_AWAIT_LIVE']='true'; from core.halim_entry_line import halim_entry_await_sec; print('live', halim_entry_await_sec())"
+curl -sf http://127.0.0.1:8765/health | head -1
+# Restart replay or live scalper — log should show Halim entry fresh / await timeout / LM ready
+grep -E 'Halim entry (fresh|await|LM)' logs/REPLAY_SCALPER.log | tail -20
+```
+
+### Follow-ups
+- If timeouts dominate, bump `HALIM_ENTRY_AWAIT_SEC` to 5.5 on M2 8GB.
+- Restart replay/live session required for env + code to load.
+
+---
+
 ## 2026-06-30 — Descriptive auto-commit + journal repair
 
 ### Problem

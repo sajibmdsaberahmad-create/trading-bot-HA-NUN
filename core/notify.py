@@ -268,11 +268,34 @@ class Notifier:
         if self.cfg.NOTIFY_ON_RISK_HALT:
             self._send_all(msg)
 
-    def reconnect_event(self, success: bool, attempt: int = 0):
-        if success:
-            msg = "🔌 Reconnected to IB Gateway successfully."
-        else:
-            msg = f"⚠️ Reconnect attempt {attempt} failed — retrying…"
+    def connectivity_lost(self, trigger: str = "", detail: str = ""):
+        """One-shot alert when IB link drops — not repeated per retry."""
+        parts = ["📡 IB connectivity lost — bot waiting (no new entries)."]
+        parts.append("Open positions keep bracket stops on IB servers.")
+        if trigger:
+            parts.append(f"Trigger: {trigger}")
+        if detail:
+            parts.append(detail)
+        if self.cfg.NOTIFY_ON_RECONNECT:
+            self._send_all("\n".join(parts))
+
+    def connectivity_restored(
+        self,
+        *,
+        duration_sec: float = 0.0,
+        attempt: int = 0,
+        total_reconnects: int = 0,
+    ):
+        """One-shot alert when IB link is back after an outage."""
+        try:
+            from core.ib_connectivity_journal import format_duration
+            dur = format_duration(duration_sec) if duration_sec > 0 else "n/a"
+        except Exception:
+            dur = f"{duration_sec:.0f}s" if duration_sec > 0 else "n/a"
+        msg = (
+            f"✅ IB connectivity restored — resuming trading loop.\n"
+            f"Outage: {dur} | attempt: {attempt} | session reconnects: {total_reconnects}"
+        )
         if self.cfg.NOTIFY_ON_RECONNECT:
             self._send_all(msg)
 

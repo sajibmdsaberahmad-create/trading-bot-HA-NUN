@@ -60,7 +60,10 @@ class IBConnector:
         self._10197_storm_until: float = 0.0
         self._pending_session_reclaim: bool = False
         self._connectivity_handlers: list = []
-        self._connectivity_lost: bool = False
+        self._connectivity_lost: bool = False  # IB 1100 — TWS↔IB link (10197 guard)
+        self._connectivity_outage_active: bool = False
+        self._outage_started_ts: float = 0.0
+        self._last_connect_error: Optional[str] = None
         self._pending_resubscribe: bool = False
         self._md_paused: bool = False
         self._10197_last_log_ts: float = 0.0
@@ -129,6 +132,7 @@ class IBConnector:
             return True
 
         except Exception as exc:
+            self._last_connect_error = str(exc)
             log.error(f"IB connection failed: {exc}")
             log.error(
                 "Troubleshooting checklist:\n"
@@ -462,63 +466,204 @@ class IBConnector:
         """Call whenever any IB event arrives, to mark the connection alive."""
         self._last_event_ts = time.time()
 
+    def in_connectivity_outage(self) -> bool:
+        """True while IB is down and live wait-mode is active."""
+        return bool(self._connectivity_outage_active)
+
+    def _is_replay_mode(self) -> bool:
+        import os
+        return os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+
+    def _reconnect_max_attempts(self) -> int:
+        """0 means infinite (live wait-mode only)."""
+        if self._is_replay_mode():
+            return int(self.cfg.RECONNECT_MAX_ATTEMPTS)
+        if getattr(self.cfg, "CONNECTIVITY_WAIT_ON_IB_LOSS", True):
+            live_max = int(getattr(self.cfg, "RECONNECT_MAX_ATTEMPTS_LIVE", 0))
+            if live_max <= 0:
+                return 0
+            return live_max
+        return int(self.cfg.RECONNECT_MAX_ATTEMPTS)
+
+    def _mark_connectivity_outage(self, trigger: str = "unknown") -> None:
+        if self._connectivity_outage_active:
+            return
+        self._connectivity_outage_active = True
+        self._outage_started_ts = time.time()
+        infinite = self._reconnect_max_attempts() <= 0
+        try:
+            from core.ib_connectivity_journal import log_ib_connectivity
+            log_ib_connectivity(
+                "outage_start",
+                trigger=trigger,
+                host=self.cfg.IB_HOST,
+                port=self.cfg.IB_PORT,
+                client_id=self.cfg.IB_CLIENT_ID,
+                wait_mode=infinite,
+                level="warning",
+            )
+        except Exception:
+            log.warning(
+                f"IB connectivity outage ({trigger}) — wait mode ON "
+                f"(no new entries; brackets remain on IB servers)"
+            )
+        if self.notifier:
+            self.notifier.connectivity_lost(trigger=trigger)
+
+    def _clear_connectivity_outage(self, *, attempt: int = 0) -> None:
+        if not self._connectivity_outage_active:
+            return
+        duration = time.time() - self._outage_started_ts if self._outage_started_ts else 0.0
+        self._connectivity_outage_active = False
+        self._outage_started_ts = 0.0
+        try:
+            from core.ib_connectivity_journal import format_duration, log_ib_connectivity
+            log_ib_connectivity(
+                "outage_restored",
+                duration=format_duration(duration),
+                duration_sec=round(duration, 1),
+                attempt=attempt,
+                total_reconnects=self._reconnect_count,
+                level="info",
+            )
+        except Exception:
+            log.info(
+                f"IB connectivity restored after {duration:.0f}s "
+                f"(session reconnects: {self._reconnect_count})"
+            )
+        if self.notifier:
+            self.notifier.connectivity_restored(
+                duration_sec=duration,
+                attempt=attempt,
+                total_reconnects=self._reconnect_count,
+            )
+
+    def _interruptible_sleep(self, seconds: float) -> bool:
+        """Sleep in 1s chunks; return True if graceful shutdown requested."""
+        end = time.time() + max(0.0, seconds)
+        while time.time() < end:
+            try:
+                from core.shutdown_control import shutdown_requested
+                if shutdown_requested():
+                    log.info("Reconnect paused — shutdown requested")
+                    return True
+            except Exception:
+                pass
+            time.sleep(min(1.0, end - time.time()))
+        return False
+
     def reconnect(self) -> bool:
         """
-        Attempt reconnection with:
-        - Anti-flap: minimum 30s between reconnects to prevent storms
-        - Exponential backoff capped at RECONNECT_MAX_DELAY_SEC
-        - Up to RECONNECT_MAX_ATTEMPTS times
+        Attempt reconnection with anti-flap, exponential backoff, and live wait-mode.
+        Returns False only on shutdown or finite attempts exhausted.
         """
         now = time.time()
-        
-        # Anti-flap: if we just reconnected within the last 30s, skip
+
         if now - self._last_reconnect_ts < 30:
-            log.debug(f"Anti-flap: skipping reconnect (last was {now - self._last_reconnect_ts:.0f}s ago)")
-            return self.ib.isConnected()
-        
-        self._contract = None  # force re-qualification after reconnect
-        
-        for attempt in range(1, self.cfg.RECONNECT_MAX_ATTEMPTS + 1):
+            if self.ib.isConnected():
+                return True
+            remain = 30.0 - (now - self._last_reconnect_ts)
+            try:
+                from core.ib_connectivity_journal import log_ib_connectivity
+                log_ib_connectivity(
+                    "anti_flap_wait",
+                    wait_sec=round(remain, 1),
+                    level="info",
+                )
+            except Exception:
+                log.info(f"Anti-flap: IB still down — next reconnect in {remain:.0f}s")
+            if self._interruptible_sleep(remain):
+                return False
+
+        self._contract = None
+        self._mark_connectivity_outage(trigger="reconnect_loop")
+
+        max_attempts = self._reconnect_max_attempts()
+        infinite = max_attempts <= 0
+        log_every = max(1, int(getattr(self.cfg, "RECONNECT_WAIT_LOG_EVERY", 10)))
+        attempt = 0
+
+        while True:
+            attempt += 1
+            if not infinite and attempt > max_attempts:
+                break
+
             wait = min(
                 self.cfg.RECONNECT_BASE_DELAY_SEC * (2 ** (attempt - 1)),
                 self.cfg.RECONNECT_MAX_DELAY_SEC,
             )
-            log.warning(
-                f"Reconnect attempt {attempt}/{self.cfg.RECONNECT_MAX_ATTEMPTS} "
-                f"in {wait}s …"
-            )
-            # Only notify on final failure, not every attempt
-            if self.notifier and attempt == self.cfg.RECONNECT_MAX_ATTEMPTS:
-                self.notifier.reconnect_event(success=False, attempt=attempt)
-            time.sleep(wait)
+            try:
+                from core.ib_connectivity_journal import log_ib_connectivity
+                log_ib_connectivity(
+                    "retry_scheduled",
+                    attempt=attempt,
+                    max_attempts=max_attempts if not infinite else "infinite",
+                    wait_sec=wait,
+                    level="warning" if attempt == 1 or (infinite and attempt % log_every == 0) else "info",
+                )
+            except Exception:
+                if infinite and attempt > 1 and attempt % log_every != 0:
+                    pass
+                else:
+                    suffix = " (infinite wait)" if infinite else f"/{max_attempts}"
+                    log.warning(f"Reconnect attempt {attempt}{suffix} in {wait}s")
+
+            if self._interruptible_sleep(wait):
+                try:
+                    from core.ib_connectivity_journal import log_ib_connectivity
+                    log_ib_connectivity("retry_aborted", reason="shutdown", attempt=attempt, level="info")
+                except Exception:
+                    pass
+                return False
+
             try:
                 if self.ib.isConnected():
                     self.ib.disconnect()
             except Exception:
                 pass
+
             if self.connect(reclaim=(attempt >= 2)):
                 time.sleep(2)
                 self._reconnect_count += 1
                 self._connectivity_lost = False
                 self._pending_resubscribe = True
-                log.info(f"Reconnected successfully. (total reconnects: {self._reconnect_count})")
-                if self.notifier:
-                    self.notifier.reconnect_event(success=True)
+                self._last_reconnect_ts = time.time()
+                self._last_connect_error = None
+                self._clear_connectivity_outage(attempt=attempt)
                 return True
+
+            err = self._last_connect_error or "connect returned false"
+            try:
+                from core.ib_connectivity_journal import log_ib_connectivity
+                log_ib_connectivity(
+                    "retry_failed",
+                    attempt=attempt,
+                    error=err[:240],
+                    level="warning",
+                )
+            except Exception:
+                log.warning(f"Reconnect attempt {attempt} failed: {err}")
+
             if attempt == 1:
                 try:
                     self.prepare_fresh_connection()
                 except Exception as exc:
                     log.debug(f"IB pre-reconnect reclaim: {exc}")
-        
-        log.error("All reconnection attempts failed.")
+
+        try:
+            from core.ib_connectivity_journal import log_ib_connectivity
+            log_ib_connectivity(
+                "outage_give_up",
+                max_attempts=max_attempts,
+                level="error",
+            )
+        except Exception:
+            log.error(f"All {max_attempts} reconnection attempts failed.")
         if self.notifier:
             self.notifier.error(
                 "IBConnector.reconnect",
-                f"All {self.cfg.RECONNECT_MAX_ATTEMPTS} reconnect attempts failed. "
-                "Bot is stopping. Any open position remains live in your IB "
-                "account with its protective bracket orders still resting "
-                "on IB's servers (they do not depend on this bot staying connected)."
+                f"All {max_attempts} reconnect attempts failed. "
+                "Bot is stopping. Open positions keep bracket stops on IB servers.",
             )
         return False
 
@@ -537,6 +682,7 @@ class IBConnector:
 
     def _on_disconnected(self):
         log.warning("IB connection dropped (disconnectedEvent fired).")
+        self._mark_connectivity_outage(trigger="disconnected_event")
 
     def pop_order_error(self, req_id: int) -> Optional[Dict[str, Any]]:
         """Return and clear IB error recorded for an order reqId."""
@@ -617,6 +763,7 @@ class IBConnector:
         # Connectivity lost / restored — IB docs 1100/1101/1102
         if errorCode == 1100:
             self._connectivity_lost = True
+            self._mark_connectivity_outage(trigger="ib_1100")
             log.warning(
                 "IB 1100 — connectivity between IB and Gateway lost "
                 "(waiting for restore before MD reclaim)"
@@ -629,9 +776,11 @@ class IBConnector:
             log.warning(
                 "IB 1101 — connectivity restored, market data lost (re-subscribe queued)"
             )
+            self._clear_connectivity_outage()
             return
         if errorCode == 1102:
             self._connectivity_lost = False
+            self._clear_connectivity_outage()
             log.info("IB 1102 — connectivity restored, market data maintained")
             self._notify_connectivity("data_ok")
             return

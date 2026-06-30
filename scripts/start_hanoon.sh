@@ -560,6 +560,17 @@ if [ "${HALIM_STANDALONE_WATCHDOG:-true}" = "true" ]; then
   "$ROOT/scripts/start_halim_watchdog.sh" || echo "   Halim watchdog warning (see logs/halim_watchdog.log)"
 fi
 
+export CONNECTIVITY_WAIT_ON_IB_LOSS="${CONNECTIVITY_WAIT_ON_IB_LOSS:-true}"
+export RECONNECT_MAX_ATTEMPTS_LIVE="${RECONNECT_MAX_ATTEMPTS_LIVE:-0}"
+export RECONNECT_WAIT_LOG_EVERY="${RECONNECT_WAIT_LOG_EVERY:-10}"
+export IB_GATEWAY_WATCHDOG_ENABLED="${IB_GATEWAY_WATCHDOG_ENABLED:-true}"
+export IB_GATEWAY_WATCHDOG_INTERVAL_SEC="${IB_GATEWAY_WATCHDOG_INTERVAL_SEC:-30}"
+
+if [ "${IB_GATEWAY_WATCHDOG_ENABLED}" = "true" ]; then
+  echo "🛡️ Starting IB Gateway watchdog (monitors ${IB_HOST}:${IB_PORT})…"
+  "$ROOT/scripts/start_ib_gateway_watchdog.sh" || echo "   IB Gateway watchdog warning (see logs/ib_gateway_watchdog.log)"
+fi
+
 # ── 6b. Standalone git sync (auto-push any IDE save — separate process) ───
 if [ "${START_GIT_SYNC_WITH_HANOON:-true}" = "true" ]; then
   echo ""

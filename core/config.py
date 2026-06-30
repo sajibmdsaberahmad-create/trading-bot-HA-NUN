@@ -129,6 +129,16 @@ class BotConfig:
     RECONNECT_BASE_DELAY_SEC: int = 2     # exponential backoff: 2,4,8,16...capped below
     RECONNECT_MAX_DELAY_SEC:  int = 60
     HEARTBEAT_TIMEOUT_SEC:    int = 30    # if no IB event in this long, assume connection dead
+    # Live/paper: wait indefinitely for IB instead of shutting down after N attempts
+    CONNECTIVITY_WAIT_ON_IB_LOSS: bool = os.getenv(
+        "CONNECTIVITY_WAIT_ON_IB_LOSS", "true"
+    ).lower() in ("1", "true", "yes")
+    # 0 = infinite reconnect attempts when CONNECTIVITY_WAIT_ON_IB_LOSS (live only)
+    RECONNECT_MAX_ATTEMPTS_LIVE: int = int(os.getenv("RECONNECT_MAX_ATTEMPTS_LIVE", "0"))
+    RECONNECT_WAIT_LOG_EVERY: int = int(os.getenv("RECONNECT_WAIT_LOG_EVERY", "10"))
+    IB_GATEWAY_WATCHDOG_ENABLED: bool = os.getenv(
+        "IB_GATEWAY_WATCHDOG_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
 
     # ════════════════════════════════════════════════════════════════════
     # CAPITAL & ACCOUNT SIZE
