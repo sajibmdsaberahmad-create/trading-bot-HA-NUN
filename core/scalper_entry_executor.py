@@ -77,7 +77,7 @@ class ScalperEntryMixin:
         min_fill_ratio: float,
         quote_px: float,
     ) -> Tuple[float, float, bool, str]:
-        return _confirm_entry_fill(
+        return confirm_entry_fill_from_ib(
             self.ib,
             ticker=ticker,
             st=st,
