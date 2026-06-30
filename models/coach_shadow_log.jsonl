@@ -5093,3 +5093,4 @@
 {"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":273292.0,"shadow_only":true,"timestamp":"2026-06-30T11:57:43.382622+00:00"}
 {"ticker":"HXHX","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":278397.0,"shadow_only":true,"timestamp":"2026-06-30T11:57:46.658592+00:00"}
 {"ticker":"EDBL","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":153089.0,"shadow_only":true,"timestamp":"2026-06-30T11:57:50.606857+00:00"}
+{"ticker":"BIYA","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":340481.0,"shadow_only":true,"timestamp":"2026-06-30T11:58:14.391023+00:00"}

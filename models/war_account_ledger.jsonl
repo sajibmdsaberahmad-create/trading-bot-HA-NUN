@@ -35,3 +35,4 @@
 {"event":"war_exit","ticker":"INTZ","mode":"WAR_ACTIVE","virtual_fill":0.9159191798399999,"ib_fill":0.9198,"net_pnl":-0.34,"gross_pnl":0.36,"fees":0.7,"promotion":true,"exit_reason":"green_profit_lock:ai_stall quick_scalp +0.49% (peak +0.49%)","ts":1782819754.7057679}
 {"event":"war_entry","ticker":"INTZ","mode":"WAR_ACTIVE","shares":385,"virtual_fill":0.9190984,"ib_fill":0.9082,"slippage_pct":0.012,"commission":0.35,"notional":353.852884,"promotion":true,"pipeline":"","ts":1782820100.929436}
 {"event":"war_exit","ticker":"INTZ","mode":"WAR_ACTIVE","virtual_fill":0.9073893815,"ib_fill":0.917,"net_pnl":-5.16,"gross_pnl":-4.46,"fees":0.7,"promotion":true,"exit_reason":"tick_micro_loss","ts":1782820426.6728802}
+{"event":"war_entry","ticker":"HXHX","mode":"WAR_ACTIVE","shares":700,"virtual_fill":0.5026604,"ib_fill":0.4967,"slippage_pct":0.012,"commission":0.35,"notional":351.86228,"promotion":true,"pipeline":"","ts":1782820673.317004}
