@@ -114,17 +114,12 @@ class ScalperExitMixin:
         self._refresh_aggregate_position_state()
 
     def _risk_plan_sane_for_tick(self, current_px: float) -> bool:
-        plan = self.risk.plan
-        entry = self._entry_price
-        if plan is None or entry <= 0 or plan.entry_price <= 0:
-            return False
-        if abs(plan.entry_price - entry) / entry > 0.05:
-            return False
-        if abs(plan.shares - self.shares) > max(1.0, 0.01 * max(self.shares, 1.0)):
-            return False
-        if abs(current_px / entry - 1.0) > 0.35:
-            return False
-        return True
+        return risk_plan_sane_for_tick(
+            self.risk.plan,
+            entry_price=self._entry_price,
+            shares=self.shares,
+            current_px=current_px,
+        )
     def _detect_all_exits(self):
         if not getattr(self.cfg, "USE_MULTI_POSITION", True):
             self._detect_exit(self._latest_price())

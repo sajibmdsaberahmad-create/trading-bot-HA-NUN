@@ -1100,7 +1100,8 @@ With multiple open positions, BITO showed +$0.21 on LIVE_PULSE then exited at -$
 ### Fix
 | File | Change |
 |------|--------|
-| `core/scalper_runner.py` | `_slot_entry_price`, `_bind_risk_plan_for_ticker`; load uses fill px; save guarded by `current_ticker`; always bind/clear risk plan per ticker |
+| `core/position_context.py` | `slot_entry_price`, `bind_risk_plan_for_ticker`, `risk_plan_sane_for_tick` |
+| `core/scalper_runner.py` | Delegates to position_context; load uses fill px; save guarded by `current_ticker` |
 | `core/scalper_exit_executor.py` | `try/finally` save in monitor loop; `_risk_plan_sane_for_tick` gate before `evaluate_tick` |
 | `core/scalper_entry_executor.py` | Persist `risk_usd` + `atr_at_entry` on slot for plan rebuild |
 
