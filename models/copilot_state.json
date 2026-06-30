@@ -1,12 +1,10 @@
 {
-  "narrative": "Local copilot: 40% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
+  "narrative": "Local copilot: 67% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
   "regime_read": "mixed",
   "risk_posture": "normal",
-  "session_wr": 0.4,
+  "session_wr": 0.6666666666666666,
   "session_pnl": 0.0,
   "ticker_bias": {
-    "RKLB": "CAUTION",
-    "LCID": "CAUTION",
     "NVDA": "CAUTION"
   },
   "repeat_losers": [],
@@ -16,8 +14,9 @@
     "min_spike_mult": 1.0
   },
   "lessons": [
-    "Replay: collect gold on all tickers; copilot skip relaxed"
+    "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
+    "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782806440.588907,
+  "updated_at": 1782807670.797141,
   "source": "heuristic"
 }
