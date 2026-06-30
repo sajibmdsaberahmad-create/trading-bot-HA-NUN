@@ -2651,3 +2651,5 @@
 {"timestamp":"2026-06-30T17:42:33.274448+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T17:42:33.274518+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T17:42:33.274565+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T17:47:03.274393+00:00","event":"export_action_gold","added":18,"skipped":17364}
+{"timestamp":"2026-06-30T17:47:04.349226+00:00","event":"shutdown_flush","trigger":"crash_recovery","action_gold_added":0,"action_gold_total":10111,"phase":"toddler"}
