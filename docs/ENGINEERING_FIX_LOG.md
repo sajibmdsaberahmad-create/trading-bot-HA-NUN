@@ -242,6 +242,7 @@ grep -c PPO_LEAD_WHILE scripts/start_hanoon.sh  # expect 1
 ```bash
 venv/bin/pytest tests/ -q
 python3 -c "from core.git_sync_defer import should_defer_git_push; from core.position_sync import sync_position_slots_from_ib"
+python3 -c "from core.entry_pipeline import entry_price_mode_for_session, stuck_entry_limit_px"
 ```
 
 ---
