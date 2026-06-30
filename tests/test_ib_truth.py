@@ -68,7 +68,40 @@ def test_ghost_exit_skips_bogus_pnl():
     assert state.get("session_pnl_war", 0) == 0
 
 
-def test_war_capital_defaults_1k():
+def test_execution_in_rth_window():
+    from datetime import datetime
+    from core.market_hours import MARKET_TZ
+    from core.rth_session import execution_in_rth_window, rth_session_start_ts
+
+    # 10:00 ET today — inside RTH
+    now = datetime.now(MARKET_TZ)
+    inside = now.replace(hour=10, minute=0, second=0, microsecond=0).timestamp()
+    assert execution_in_rth_window(inside) is True
+
+    # 08:00 ET — premarket, outside RTH window
+    pre = now.replace(hour=8, minute=0, second=0, microsecond=0).timestamp()
+    assert execution_in_rth_window(pre) is False
+
+    start = rth_session_start_ts()
+    assert start > 0
+
+
+def test_filter_rth_executions():
+    from core.ib_truth import IBExecution, filter_rth_executions
+    from core.market_hours import MARKET_TZ
+    from datetime import datetime
+
+    now = datetime.now(MARKET_TZ)
+    rth_ts = now.replace(hour=10, minute=0, second=0, microsecond=0).timestamp()
+    pre_ts = now.replace(hour=7, minute=0, second=0, microsecond=0).timestamp()
+    execs = [
+        IBExecution("T", "BOT", 20.0, 10, ts=rth_ts),
+        IBExecution("T", "SLD", 20.5, 10, ts=pre_ts),
+    ]
+    filtered = filter_rth_executions(execs)
+    assert len(filtered) == 1
+    assert filtered[0].side == "BOT"
+
     cfg = BotConfig()
     with patch.dict("os.environ", {"WAR_CAPITAL_USD": "1000"}, clear=False):
         from core.war_account import operating_capital_usd

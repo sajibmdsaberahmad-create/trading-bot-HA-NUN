@@ -10,6 +10,39 @@
 
 ---
 
+## 2026-07-01 — IB Truth session aligned to RTH 09:30–16:00 ET
+
+### Problem
+IB Truth FIFO session PnL used calendar midnight ET, while war ledger resets at **09:30 RTH** — premarket fills inflated session PnL and Telegram/AI replies didn't match the RTH trading day.
+
+### Root cause
+`session_start_ts_et()` returned 00:00 ET; `_ib_starting_balance` was set at bot startup (often premarket), not at the bell.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/rth_session.py` | `rth_session_start_ts`, `execution_in_rth_window`, `ib_truth_session_start_ts` |
+| `core/ib_truth.py` | RTH session window + filter premarket/after-hours fills |
+| `core/account_view.py` | Day PnL uses `_rth_starting_balance` when set |
+| `core/scalper_session.py` | `_on_rth_open` snapshots NetLiq baseline at 09:30 |
+| `core/scalper_runner.py` | `_rth_starting_balance` field |
+| `scripts/start_hanoon.sh` | `IB_TRUTH_RTH_SESSION`, `IB_TRUTH_RTH_FILLS_ONLY` |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `IB_TRUTH_RTH_SESSION` | `true` | FIFO since 09:30 ET (not midnight) |
+| `IB_TRUTH_RTH_FILLS_ONLY` | `true` | Exclude premarket/after-hours fills |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_truth.py -q
+# At 09:30 ET: log shows "RTH session baseline NetLiq=..."
+# Premarket fills excluded from ib_fifo_session_pnl
+```
+
+---
+
 ## 2026-07-01 — IB Truth hub: entire bot sources positions/PnL from IB Gateway
 
 ### Problem

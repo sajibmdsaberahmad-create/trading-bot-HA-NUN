@@ -201,7 +201,7 @@ def build_reconcile_report(
 
     cfg = cfg or BotConfig()
     state = load_state(cfg)
-    since = since_ts if since_ts is not None else session_start_ts_et()
+    since = since_ts if since_ts is not None else ib_truth_session_start_ts(cfg)
     snap = refresh(ib, cfg, force=True, since_ts=since)
     ledger = read_war_ledger(since_ts=since)
 
