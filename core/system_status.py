@@ -90,6 +90,15 @@ def collect_system_status(cfg: BotConfig, runner: Optional["ScalperRunner"] = No
     if runner:
         status["ib_equity"] = round(getattr(runner, "account_equity", 0), 2)
         status["bot_nav"] = round(getattr(runner, "bot_nav", 0), 2)
+        try:
+            from core.ib_truth import get_snapshot
+            snap = get_snapshot()
+            if snap.refreshed_at > 0:
+                status["ib_truth"] = True
+                status["ib_fifo_session_pnl"] = snap.session_pnl_fifo
+                status["ib_unrealized_pnl"] = snap.account.unrealized_pnl
+        except Exception:
+            pass
         status["trades_today"] = int(getattr(runner, "trades_today", 0) or 0)
         status["open_slots"] = len(getattr(runner, "_position_slots", {}) or {})
 

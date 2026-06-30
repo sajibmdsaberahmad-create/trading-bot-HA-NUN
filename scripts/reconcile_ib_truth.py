@@ -39,6 +39,7 @@ def main() -> int:
         print(f"Connection failed: {exc}")
         return 1
 
+    report: dict = {"ok": False}
     try:
         snap = refresh(ib, cfg, force=True)
         print(format_snapshot_summary(snap))
