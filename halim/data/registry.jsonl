@@ -3015,3 +3015,7 @@
 {"timestamp":"2026-06-30T19:40:18.144398+00:00","event":"evolution","trigger":"live_session_end","phase":"toddler","stage":"child","dataset_pairs":null,"device_profile":"m2_8gb","steps_ok":{"export_dataset":true,"train_proxy":false,"ppo_teacher":true,"weights":true,"halim_gold_pipeline":true}}
 {"timestamp":"2026-06-30T19:40:18.495813+00:00","event":"export_action_gold","added":2,"skipped":19294}
 {"timestamp":"2026-06-30T19:40:18.502328+00:00","event":"ppo_halim_coevolution","agreements":1427,"disagreements":1073,"corrections_for_ppo":1066,"corrections_for_halim":7,"complements":0,"label_v2_events":1343,"legacy_mislabeled_skipped":1984,"market_proved_ppo":20,"market_proved_halim":5,"log_path":"halim/data/coevolution/correction_log.jsonl","export":{"ok":true,"added":767,"total":767,"events":6443,"rewritten":true},"trigger":"live_session_end"}
+{"timestamp":"2026-06-30T19:40:23.012014+00:00","event":"capability_milestone","capability":"chat","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:40:23.012188+00:00","event":"capability_milestone","capability":"chat","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:40:23.012436+00:00","event":"capability_milestone","capability":"chat","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:40:23.012494+00:00","event":"capability_milestone","capability":"chat","level_pct":100,"phase":"toddler"}
