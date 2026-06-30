@@ -4219,3 +4219,13 @@
 {"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.9333654077459708,"shadow_only":true,"timestamp":"2026-06-30T10:40:56.771252+00:00"}
 {"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":2.9122654777712467,"shadow_only":true,"timestamp":"2026-06-30T10:40:58.874657+00:00"}
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":2.0228105446795137,"shadow_only":true,"timestamp":"2026-06-30T10:41:01.038520+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.9333654077459708,"shadow_only":true,"timestamp":"2026-06-30T10:41:03.047714+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":2.957372990832778,"shadow_only":true,"timestamp":"2026-06-30T10:41:05.268095+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1.557449253856175,"shadow_only":true,"timestamp":"2026-06-30T10:41:07.465738+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.4229214078964576,"shadow_only":true,"timestamp":"2026-06-30T10:41:09.502290+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":2.067178989467811,"shadow_only":true,"timestamp":"2026-06-30T10:41:11.669192+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1.6542351754586044,"shadow_only":true,"timestamp":"2026-06-30T10:41:13.878212+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.428708056530028,"shadow_only":true,"timestamp":"2026-06-30T10:41:15.904757+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":2.092859296300366,"shadow_only":true,"timestamp":"2026-06-30T10:41:18.080608+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1.684965525328528,"shadow_only":true,"timestamp":"2026-06-30T10:41:20.256472+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1.428708056530028,"shadow_only":true,"timestamp":"2026-06-30T10:41:22.305167+00:00"}
