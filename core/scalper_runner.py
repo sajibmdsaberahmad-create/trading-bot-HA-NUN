@@ -166,6 +166,11 @@ from core.entry_pipeline import (
     stuck_entry_limit_px,
 )
 from core.position_sync import repair_slot_entry_price, sync_position_slots_from_ib
+from core.position_context import (
+    bind_risk_plan_for_ticker,
+    risk_plan_sane_for_tick,
+    slot_entry_price,
+)
 from core.fill_tracker import (
     append_fill_ledger,
     build_round_trip_record,
