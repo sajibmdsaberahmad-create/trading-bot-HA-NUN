@@ -295,5 +295,14 @@
     "lessons": [
       "Review ib_failure on CUPR"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T10:29:49.454441+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on INTZ"
+    ]
   }
 ]
