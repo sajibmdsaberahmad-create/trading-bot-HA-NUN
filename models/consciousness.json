@@ -3,28 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 229,
   "training_sessions": 39,
-  "trades_observed": 1682,
+  "trades_observed": 1683,
   "scans_performed": 39,
-  "improvements_applied": 2705,
+  "improvements_applied": 2706,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:52:53.491936",
-      "age": "7d 20h 50m 4s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #196",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:53:03.102195",
-      "age": "7d 20h 50m 14s",
-      "type": "SCAN",
-      "message": "Market scan #39",
-      "metadata": {
-        "source": "off_hours",
-        "tickers": "live_ib"
-      }
-    },
     {
       "timestamp": "2026-06-29T07:53:03.117339",
       "age": "7d 20h 50m 14s",
@@ -12219,6 +12202,27 @@
           "Review loss_streak on VWAV"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T12:19:56.158028",
+      "age": "9d 1h 17m 7s",
+      "type": "TRADE",
+      "message": "Observed trade: INTZ ? P&L=$+0.92",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T12:19:56.636155",
+      "age": "9d 1h 17m 7s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2706",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on INTZ"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T12:07:03.642722",
@@ -14381,9 +14385,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "defensive",
-  "total_pnl": 331222.05000000057,
+  "total_pnl": 331222.97000000055,
   "win_history": [
-    -0.65,
     0.44,
     10.24,
     -13.91,
@@ -14882,20 +14885,21 @@
     -1.91,
     10.78,
     0,
-    -1.0
+    -1.0,
+    0.92
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 2,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 26030,
+  "veteran_xp": 26060,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1676,
-  "hours_flown": 167.59999999999476,
+  "flights_completed": 1677,
+  "hours_flown": 167.69999999999476,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14936,7 +14940,7 @@
     "TSL": 1,
     "CUP": 3,
     "JEM": 3,
-    "INT": 2,
+    "INT": 3,
     "HXH": 1,
     "VWA": 1
   },
@@ -14945,5 +14949,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 25% \u00b7 $-43.25. Preserving capital over action."
+  "mood_message": "Win rate 25% \u00b7 $-43.03. Preserving capital over action."
 }
