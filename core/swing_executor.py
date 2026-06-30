@@ -173,10 +173,10 @@ def try_swing_ib_entry(
         "target": tgt_px,
         "opened_at": now,
         "ib_fill_confirmed": False,
-            "swing_signal": signal.get("reason", ""),
-            "swing_confidence": signal.get("confidence", 0),
-            "swing_analysis_ts": time.time(),
-        }
+        "swing_signal": signal.get("reason", ""),
+        "swing_confidence": signal.get("confidence", 0),
+        "swing_analysis_ts": time.time(),
+    }
     runner._position_slots[sym] = slot
 
     row = tag_learning_row(
