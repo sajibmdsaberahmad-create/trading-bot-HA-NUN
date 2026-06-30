@@ -9,6 +9,7 @@ from core.position_context import (
     bind_risk_plan_for_ticker,
     risk_plan_sane_for_tick,
     slot_entry_price,
+    slot_price_sane,
 )
 from core.risk import RiskManager, TradePlan
 
@@ -43,6 +44,12 @@ def test_load_aal_does_not_keep_bito_risk_plan():
     assert risk.plan is not None
     assert risk.plan.entry_price == pytest.approx(18.0)
     assert risk.plan.entry_price != bito_plan.entry_price
+
+
+def test_slot_price_sane_rejects_cross_ticker_quote():
+    assert slot_price_sane(3.22, 3.24)
+    assert not slot_price_sane(3.22, 7.96)
+    assert slot_price_sane(7.95, 7.96)
 
 
 def test_risk_plan_sane_rejects_cross_ticker_price():

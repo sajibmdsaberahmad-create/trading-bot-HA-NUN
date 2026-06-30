@@ -29,6 +29,10 @@ class ScalperExitMixin:
             return
         if not self._load_position_context(ticker):
             return
+        px, trusted = self._resolve_monitor_price(ticker, self._entry_price)
+        if not trusted or px <= 0:
+            return
+        price = px
         if price > self._position_peak:
             self._position_peak = price
             if self.risk.plan:

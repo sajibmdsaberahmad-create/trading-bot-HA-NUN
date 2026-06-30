@@ -1781,7 +1781,9 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                             try:
                                 if not self._load_position_context(ticker):
                                     continue
-                                px = self._live_price_for(ticker, self._entry_price)
+                                px, trusted = self._resolve_monitor_price(ticker, self._entry_price)
+                                if not trusted or px <= 0:
+                                    continue
                                 if self._has_ai_council(ticker, "exit_decision"):
                                     continue
                                 if self._has_ai_council(ticker, "position_manage"):
