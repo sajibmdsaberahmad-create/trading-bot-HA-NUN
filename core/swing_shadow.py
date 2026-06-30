@@ -87,11 +87,22 @@ def run_swing_shadow_scan(
 
     for sym in _symbols_for_scan(runner, cfg):
         try:
-            bars = dm.get_bars(sym, "1 hour", duration="5 D")
+            from core.swing_intel import analyze_swing, swing_intel_line
+            analysis = analyze_swing(runner, cfg, sym, log_row=True)
+            signal = {
+                "bias": analysis.get("bias", "hold"),
+                "strength": float(analysis.get("strength", 0) or 0),
+                "confidence": float(analysis.get("confidence", 0) or 0),
+                "reason": analysis.get("reason", ""),
+            }
         except Exception as exc:
-            log.debug(f"swing shadow bars {sym}: {exc}")
-            continue
-        signal = _simple_swing_signal(bars or [])
+            log.debug(f"swing shadow intel {sym}: {exc}")
+            try:
+                bars = dm.get_bars(sym, "1 hour", duration="5 D")
+            except Exception:
+                bars = []
+            signal = _simple_swing_signal(bars or [])
+            analysis = {}
         ib_pos = next((p for p in snap.positions if p.symbol == sym), None)
         row = tag_record(
             {
@@ -99,12 +110,16 @@ def run_swing_shadow_scan(
                 "symbol": sym,
                 "verdict": signal["bias"],
                 "strength": round(float(signal.get("strength", 0)), 4),
+                "confidence": round(float(signal.get("confidence", 0) or 0), 4),
+                "enter": bool(analysis.get("enter")) if analysis else False,
                 "reason": signal.get("reason", ""),
                 "ib_mark": round(ib_pos.market_price, 4) if ib_pos else 0.0,
                 "ib_unrealized": round(ib_pos.unrealized_pnl, 2) if ib_pos else 0.0,
                 "ib_qty": ib_pos.qty if ib_pos else 0.0,
                 "shadow_only": True,
-                "source": "swing_shadow",
+                "source": "swing_shadow_intel",
+                "macro_tone": (analysis.get("macro") or {}).get("risk_tone", ""),
+                "web_sentiment": (analysis.get("web") or {}).get("web_sentiment", ""),
             },
             HORIZON_SWING,
         )
