@@ -264,3 +264,16 @@
 {"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:07:02.653491+00:00"}
 {"event":"learning_snapshot","trigger":"pre_stop_replay","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:07:02.698164+00:00"}
 {"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:07:02.726693+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:16:48.295875+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_live","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:16:48.339860+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_replay","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:17:24.151001+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_live","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:18:34.709704+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":true,"timestamp":"2026-06-30T06:18:34.773361+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":true,"timestamp":"2026-06-30T06:18:41.547985+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:20:22.492840+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_replay","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:20:22.571207+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:20:22.593697+00:00"}
+{"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:37:43.457909+00:00"}
+{"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:50:41.881264+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_replay","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:50:41.891792+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T06:50:41.918368+00:00"}

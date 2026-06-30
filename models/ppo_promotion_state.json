@@ -1,17 +1,20 @@
 {
-  "timestamp": "2026-06-30T04:51:45.916866+00:00",
-  "promoted": true,
+  "timestamp": "2026-06-30T06:17:05.293434+00:00",
+  "promoted": false,
   "evaluation": {
-    "pass": true,
+    "pass": false,
     "metrics": {
-      "trades": 500,
-      "wins": 220,
-      "losses": 280,
-      "win_rate": 0.44,
-      "pnl_usd": 212417.29,
-      "worst_trade_pct": -3.39
+      "trades": 11,
+      "wins": 2,
+      "losses": 9,
+      "win_rate": 0.18181818181818182,
+      "pnl_usd": -44.54,
+      "worst_trade_pct": -0.44
     },
-    "reasons": [],
+    "reasons": [
+      "trades 11 < 12",
+      "win_rate 18% < 40%"
+    ],
     "thresholds": {
       "min_trades": 12,
       "min_win_rate": 0.4,
@@ -20,5 +23,5 @@
       "lookback": 0
     }
   },
-  "reason": "gate_pass"
+  "reason": "gate_blocked"
 }
