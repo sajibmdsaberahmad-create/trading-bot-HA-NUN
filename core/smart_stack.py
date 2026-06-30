@@ -581,7 +581,7 @@ def build_halim_local_entry(
             if echo_inc and h_conf < min_halim:
                 if (
                     enter_ok
-                    and profit_prob >= min_prob_eff
+                    and profit_prob >= min_prob
                     and scan_score >= 42
                     and spike_ratio >= 1.12
                 ):
