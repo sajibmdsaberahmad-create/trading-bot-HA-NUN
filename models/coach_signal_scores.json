@@ -1,10 +1,10 @@
 {
   "fee_bleed": {
-    "count": 30,
+    "count": 31,
     "sessions": [],
     "pnl_usd": -14.23,
-    "last_ticker": "SOXS",
-    "last_at": "2026-06-30T19:03:03.551943+00:00"
+    "last_ticker": "AAL",
+    "last_at": "2026-06-30T19:04:35.207332+00:00"
   },
   "hope_hold": {
     "count": 2,
