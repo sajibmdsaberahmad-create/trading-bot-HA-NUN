@@ -2048,9 +2048,20 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         try:
                             from core.swing_shadow import run_swing_shadow_scan
                             from core.trade_horizon import update_scalp_gate_from_ib
+                            from core.ib_extended import refresh_ib_extended, ib_extended_enabled
+                            from core.swing_paper import sync_swing_paper_from_shadow_verdicts
+                            from core.ppo_swing_train import train_ppo_swing_from_shadow
 
                             run_swing_shadow_scan(self, self.cfg)
                             update_scalp_gate_from_ib(self.cfg)
+                            if ib_extended_enabled():
+                                refresh_ib_extended(
+                                    self.ib, self.cfg, self.conn,
+                                    symbols=list(getattr(self, "locked_targets", []) or [])[:8],
+                                    full=True, force=True,
+                                )
+                            sync_swing_paper_from_shadow_verdicts(self, self.cfg)
+                            train_ppo_swing_from_shadow(self.cfg)
                         except Exception as exc:
                             log.debug(f"off-hours horizon: {exc}")
                 

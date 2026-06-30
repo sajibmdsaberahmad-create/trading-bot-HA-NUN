@@ -500,6 +500,24 @@ class ScalperSessionMixin:
             
             # Update market regime from broader context (lightweight, stays in-process)
             self._update_market_context()
+
+            try:
+                from core.ib_extended import ib_extended_enabled, refresh_ib_extended
+                from core.swing_shadow import run_swing_shadow_scan
+                from core.swing_paper import sync_swing_paper_from_shadow_verdicts
+                from core.ppo_swing_train import train_ppo_swing_from_shadow
+
+                if ib_extended_enabled():
+                    refresh_ib_extended(
+                        self.ib, self.cfg, self.conn,
+                        symbols=list(getattr(self, "locked_targets", []) or [])[:10],
+                        full=True, force=True,
+                    )
+                run_swing_shadow_scan(self, self.cfg, force=True)
+                sync_swing_paper_from_shadow_verdicts(self, self.cfg)
+                train_ppo_swing_from_shadow(self.cfg)
+            except Exception as exc:
+                log.debug(f"Off-hours IB extended/swing: {exc}")
             
             # Train weights on historical data (lightweight, stays in-process)
             self._daily_self_train()

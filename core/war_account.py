@@ -345,6 +345,11 @@ def lab_capital_usd(cfg: Optional[BotConfig] = None) -> float:
     return _env_float("WAR_LAB_CAPITAL_USD", float(getattr(cfg, "WAR_LAB_CAPITAL_USD", 2500.0)))
 
 
+def swing_paper_capital_usd(cfg: Optional[BotConfig] = None) -> float:
+    """Virtual swing paper pool — IB marks, no live orders."""
+    return _env_float("WAR_SWING_PAPER_USD", 2000.0)
+
+
 def lab_enabled(cfg: Optional[BotConfig] = None) -> bool:
     if not war_account_enabled(cfg):
         return False

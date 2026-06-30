@@ -134,6 +134,11 @@ def horizon_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
             "scalp_profit_gate_passed": scalp_profit_gate_passed(cfg),
         }
     )
+    try:
+        from core.swing_paper import swing_paper_context
+        ctx.update(swing_paper_context(cfg))
+    except Exception:
+        pass
     return ctx
 
 
