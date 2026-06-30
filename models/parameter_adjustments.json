@@ -2,7 +2,7 @@
   "CONFIDENCE_THRESHOLD": {
     "param": "CONFIDENCE_THRESHOLD",
     "value": 0.7100000000000001,
-    "reason": "trade WR 25% \u2014 tighten PPO entry bar",
+    "reason": "trade WR 0% \u2014 tighten PPO entry bar",
     "ok": true,
     "msg": "applied"
   },
