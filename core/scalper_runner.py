@@ -282,6 +282,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self._last_pulse_price: float = 0.0
         self._last_price_change_at: float = 0.0
         self._last_price_snapshot_at: float = 0.0
+        self._snapshot_cooldown_until: Dict[str, float] = {}
+        self._last_snapshot_px: Dict[str, float] = {}
         self._last_pulse_fingerprint: str = ""
         self._last_stagnation_decision: Dict[str, Any] = {}
         self._last_entry_telemetry: Dict[str, Any] = {}

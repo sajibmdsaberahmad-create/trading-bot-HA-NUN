@@ -192,6 +192,29 @@ def _ib_position_cost(ib, symbol: str) -> Tuple[float, float]:
     return 0.0, 1.0
 
 
+def sanitize_quote_price(
+    quote_px: float,
+    *,
+    ref_px: float = 0.0,
+    pred_px: float = 0.0,
+    symbol: str = "",
+) -> float:
+    """Reconcile live IB quotes vs bar history / micro prediction (10x paper drift)."""
+    if quote_px <= 0:
+        return 0.0
+    refs = [r for r in (ref_px, pred_px) if r and r > 0]
+    if not refs:
+        return quote_px
+    ref = sum(refs) / len(refs)
+    fixed = normalize_ib_avg_cost(quote_px, market_px=ref)
+    if abs(fixed - quote_px) / max(quote_px, 0.01) > 0.05 and symbol:
+        log.warning(
+            f"  🔧 Quote sanitized {symbol.upper()} ${quote_px:.4f} → ${fixed:.4f} "
+            f"(ref ${ref:.4f})"
+        )
+    return fixed
+
+
 def snapshot_market_price(
     ib,
     symbol: str,
