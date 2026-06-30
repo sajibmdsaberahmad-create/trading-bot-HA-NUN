@@ -1254,46 +1254,45 @@ class ScalperExitMixin:
             ticker = self.current_ticker or ""
             if not self._risk_plan_sane_for_tick(current_px):
                 self._bind_risk_plan_for_ticker(ticker)
-            if not self._risk_plan_sane_for_tick(current_px):
+            if self._risk_plan_sane_for_tick(current_px):
+                prev_stop = self.risk.plan.current_stop_price
+                should_risk_exit, risk_reason = self.risk.evaluate_tick(current_px)
+                if self.risk.plan.current_stop_price != prev_stop:
+                    self._apply_stop_update(
+                        self.risk.plan.current_stop_price,
+                        f"risk trail ({risk_reason or 'ratchet'})",
+                    )
+                if should_risk_exit and risk_reason:
+                    entry_px = self._entry_price
+                    pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
+                    stalled = self._ai_profit_decision_stalled(pnl_pct)
+                    if profit_exit_bypasses_council(
+                        self.cfg, risk_reason, pnl_pct, ai_stalled=stalled,
+                    ):
+                        log.info(f"  ⚡ MECHANICAL RISK EXIT: {risk_reason}")
+                        track_profit_hunt_event(
+                            self.cfg, risk_reason, ticker,
+                            {"reason": risk_reason, "price": current_px},
+                            pnl_usd=(current_px - entry_px) * self.shares if entry_px else 0,
+                            pnl_pct=pnl_pct, record_buffer=True, push_git=True,
+                        )
+                        self._exit_position(current_px, risk_reason)
+                        self._active_stream_ticker = None
+                        return
+                    if is_ai_council_mode(self.cfg) and self.ai_commander:
+                        if self._deliberate_risk_exit(ticker, current_px, risk_reason):
+                            self._active_stream_ticker = None
+                            return
+                    else:
+                        log.info(f"  ⚡ RISK EXIT: {risk_reason}")
+                        self._exit_position(current_px, risk_reason)
+                        self._active_stream_ticker = None
+                        return
+            else:
                 log.warning(
                     f"  ⚠️ Risk tick skipped {ticker}: plan/price mismatch "
                     f"(px=${current_px:.2f} entry=${self._entry_price:.2f})"
                 )
-            else:
-                prev_stop = self.risk.plan.current_stop_price
-                should_risk_exit, risk_reason = self.risk.evaluate_tick(current_px)
-            if self.risk.plan.current_stop_price != prev_stop:
-                self._apply_stop_update(
-                    self.risk.plan.current_stop_price,
-                    f"risk trail ({risk_reason or 'ratchet'})",
-                )
-            if should_risk_exit and risk_reason:
-                ticker = self.current_ticker or ""
-                entry_px = self._entry_price
-                pnl_pct = ((current_px / entry_px) - 1) if entry_px else 0.0
-                stalled = self._ai_profit_decision_stalled(pnl_pct)
-                if profit_exit_bypasses_council(
-                    self.cfg, risk_reason, pnl_pct, ai_stalled=stalled,
-                ):
-                    log.info(f"  ⚡ MECHANICAL RISK EXIT: {risk_reason}")
-                    track_profit_hunt_event(
-                        self.cfg, risk_reason, ticker,
-                        {"reason": risk_reason, "price": current_px},
-                        pnl_usd=(current_px - entry_px) * self.shares if entry_px else 0,
-                        pnl_pct=pnl_pct, record_buffer=True, push_git=True,
-                    )
-                    self._exit_position(current_px, risk_reason)
-                    self._active_stream_ticker = None
-                    return
-                if is_ai_council_mode(self.cfg) and self.ai_commander:
-                    if self._deliberate_risk_exit(ticker, current_px, risk_reason):
-                        self._active_stream_ticker = None
-                        return
-                else:
-                    log.info(f"  ⚡ RISK EXIT: {risk_reason}")
-                    self._exit_position(current_px, risk_reason)
-                    self._active_stream_ticker = None
-                    return
 
         if self._enforce_green_profit_lock(current_px):
             self._active_stream_ticker = None
