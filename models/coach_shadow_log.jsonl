@@ -4847,3 +4847,9 @@
 {"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":1.928026122346144,"shadow_only":true,"timestamp":"2026-06-30T11:42:56.226407+00:00"}
 {"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":315883.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:07.094369+00:00"}
 {"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":552950.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:11.102911+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":6768.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:14.441114+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":247763.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:17.618459+00:00"}
+{"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":694412.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:21.081973+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":5137.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:24.295058+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":326189.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:27.687224+00:00"}
+{"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":442686.0,"shadow_only":true,"timestamp":"2026-06-30T11:43:31.459944+00:00"}
