@@ -1051,4 +1051,38 @@ What to watch if this causes regressions.
 
 ### Notes
 Session context, links, follow-ups.
+
+---
+
+## 2026-07-01 — War RTH reset spam + profit-hunt NameError
+
+### Problem
+War account RTH reset logged dozens of times per session (every spike/context read). Position monitor spammed `name 'check_missed_profit_hunt' is not defined` (4000+ ERROR lines) — exits on BITO/TZA broken.
+
+### Root cause
+`_roll_rth_session` set `rth_rolled_date` in memory but `war_account_context` / `war_account_state` called `_roll_session` without `save_state`, so the next read re-triggered RTH reset. `scalper_exit_executor` mixin imports from `scalper_mixin_imports` which omitted `check_missed_profit_hunt` (only imported in `scalper_runner.py`).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `_today_key()` uses `now_et()` only (no UTC fallback); `_roll_session` persists state after calendar/RTH roll; calendar midnight roll logs explicitly |
+| `core/scalper_mixin_imports.py` | Export `check_missed_profit_hunt` for exit mixin |
+
+### Env vars (if any)
+```bash
+WAR_AUTO_RESET_AT_RTH=true   # RTH pool refresh at 09:30 ET only
+TZ=America/New_York          # set by main.py + start_hanoon.sh
 ```
+
+### Verify
+```bash
+pytest tests/test_war_account_rth.py -q
+# Restart bot; one RTH reset per ET day max; no check_missed_profit_hunt errors
+grep -c "check_missed_profit_hunt" logs/HANOON.log  # should stop growing after restart
+```
+
+### Rollback / risks
+Auto-save inside `_roll_session` adds one disk write per roll event (low frequency). Calendar roll now logs at ET midnight — expected once per US session day.
+
+### Notes
+War balance boundaries are **US Eastern**: calendar counters at **00:00 ET** (10:00 BDT), pool refresh at **09:30 ET** RTH open (19:30 BDT). Midnight BDT = 14:00 ET — not a war reset boundary.
