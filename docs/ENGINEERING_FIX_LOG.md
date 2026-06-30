@@ -1077,6 +1077,36 @@ TZ=America/New_York          # set by main.py + start_hanoon.sh
 ### Verify
 ```bash
 pytest tests/test_war_account_rth.py -q
+```
+
+---
+
+## 2026-07-01 — Multi-position monitor bleed + LIVE_PULSE entry desync
+
+### Problem
+With multiple open positions, BITO showed +$0.21 on LIVE_PULSE then exited at -$0.21 via mechanical `trailing_stop`. AAL pulse line showed BITO stop/TP and fake +128% P&L — AAL's price was evaluated against BITO's stale `risk.plan`.
+
+### Root cause
+`_load_position_context` only called `risk.open_position` when `_risk_plans[ticker]` existed; otherwise BITO's plan stayed active. `_save_position_context` could write AAL's transient state into BITO's slot if `current_ticker` drifted. LIVE_PULSE used planned `entry_price` instead of `entry_fill_px`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_runner.py` | `_slot_entry_price`, `_bind_risk_plan_for_ticker`; load uses fill px; save guarded by `current_ticker`; always bind/clear risk plan per ticker |
+| `core/scalper_exit_executor.py` | `try/finally` save in monitor loop; `_risk_plan_sane_for_tick` gate before `evaluate_tick` |
+| `core/scalper_entry_executor.py` | Persist `risk_usd` + `atr_at_entry` on slot for plan rebuild |
+
+### Env vars (if any)
+None — behavior fix only.
+
+### Verify
+```bash
+pytest tests/test_position_context_isolation.py -q
+# restart bot to pick up check_missed_profit_hunt import fix from prior entry
+```
+
+### Notes
+Restart HANOON after deploy. War phantom PnL and `get_ai_deploy_budget` NameError remain open.
 # Restart bot; one RTH reset per ET day max; no check_missed_profit_hunt errors
 grep -c "check_missed_profit_hunt" logs/HANOON.log  # should stop growing after restart
 ```
