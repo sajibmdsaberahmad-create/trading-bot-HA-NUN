@@ -97,3 +97,11 @@ WHAT must change before resuming? Propose max 3 param mutations.
 Recent losses:
 - BTCT: pnl=$-2.90 slip=0
 
+🧭 COMMANDER LEARNING | 2026-06-30T14:19:35.833934+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +1.28% (peak +1.28%)
+
+🧭 COMMANDER LEARNING | 2026-06-30T14:19:35.850103+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +1.28% (peak +1.28%)
+

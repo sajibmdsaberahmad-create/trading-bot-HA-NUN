@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: BUY 875 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1714 or a more aggressive price still within your spec",
     "Commander: BUY 871 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1715 or a more aggressive price still within your spec",
     "Commander: green_profit_lock:ai_stall quick_scalp +1.10% (peak +1.10%)",
     "Commander: BUY 875 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1708 or a more aggressive price still within your spec",
@@ -103,10 +102,11 @@
     "Review loss_streak on CELZ",
     "Review trade_closed on BTCT",
     "Review loss_streak on BTCT",
-    "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- BTCT: pnl=$-2.90 slip=0"
+    "Commander: LOSS STREAK HALT \u2014 4 consecutive losses.\nWHY did we lose? Read recent trades and post-mortems.\nWHAT must change before resuming? Propose max 3 param mutations.\nRecent losses:\n- BTCT: pnl=$-2.90 slip=0",
+    "Commander: green_profit_lock:ai_stall quick_scalp +1.28% (peak +1.28%)"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 10,
-  "updated": "2026-06-30T14:18:53.587005"
+  "trades_observed": 12,
+  "updated": "2026-06-30T14:19:35.801617"
 }

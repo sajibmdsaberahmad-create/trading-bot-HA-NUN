@@ -45,5 +45,23 @@
       "Hi",
       "Hi"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T14:19:35.836959+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on BTCT"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T14:19:35.850552+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on BTCT"
+    ]
   }
 ]
