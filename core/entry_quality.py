@@ -351,8 +351,51 @@ def mtf_entry_caution(
     return False, ""
 
 
+def profit_prob_blocks_entry(
+    cfg: BotConfig,
+    quality: Optional[Dict[str, Any]],
+) -> bool:
+    """Hard block when calculative profit_probability is red (Smart Stack default)."""
+    try:
+        from core.smart_stack import strict_profit_prob_enabled
+        if not strict_profit_prob_enabled(cfg):
+            return False
+    except Exception:
+        return False
+    if not quality:
+        return True
+    return not bool(quality.get("enter_ok", True))
+
+
+def apply_profit_prob_veto(
+    cfg: BotConfig,
+    decision: Dict[str, Any],
+    quality: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Last-line veto — stamp profit fields and block red calculative quality."""
+    out = dict(decision)
+    if quality:
+        out["profit_probability"] = float(quality.get("profit_probability", 0) or 0)
+        out["fakeout_risk"] = float(quality.get("fakeout_risk", 0) or 0)
+        out["quality_enter"] = bool(quality.get("enter_ok", True))
+        out["quality_conf"] = float(quality.get("profit_probability", 0) or 0)
+        out["quality_reason"] = str(quality.get("reason", ""))[:200]
+    if not profit_prob_blocks_entry(cfg, quality):
+        return out
+    out["enter"] = False
+    out["pending"] = False
+    reason = str((quality or {}).get("reason", "profit_probability below threshold"))[:160]
+    out["reason"] = f"profit_prob veto: {reason}"[:200]
+    pipe = str(out.get("pipeline", "") or "entry")
+    if "profit_prob" not in pipe:
+        out["pipeline"] = f"{pipe}+profit_prob_veto" if pipe else "profit_prob:veto"
+    return out
+
+
 def quality_blocks_entry(cfg: BotConfig, quality: Dict[str, Any]) -> bool:
-    """True only when AI has raised hardness/block — otherwise advisory."""
+    """True when hardness/block enabled, or strict profit prob is red."""
+    if profit_prob_blocks_entry(cfg, quality):
+        return True
     if getattr(cfg, "ENTRY_QUALITY_HARD_BLOCK", False):
         return not bool(quality.get("enter_ok", True))
     hardness = float(getattr(cfg, "ENTRY_QUALITY_HARDNESS", 0.0))

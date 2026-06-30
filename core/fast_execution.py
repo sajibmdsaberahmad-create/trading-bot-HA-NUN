@@ -373,17 +373,28 @@ def _passes_entry_quality_gate(
     ppo_action: int,
     ppo_conf: float,
     ticker: str = "",
+    live_px: float = 0.0,
 ) -> bool:
-    if not getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False):
+    require_quality = bool(getattr(cfg, "SPIKE_FAST_REQUIRES_QUALITY", False))
+    try:
+        from core.smart_stack import strict_profit_prob_enabled
+        require_quality = require_quality or strict_profit_prob_enabled(cfg)
+    except Exception:
+        pass
+    if not require_quality:
         return True
     from core.entry_quality import assess_entry_quality, quality_blocks_entry
+    micro = micro or {}
+    px = float(live_px or 0)
+    if px <= 0:
+        px = float(micro.get("live_px", 0) or 0)
     q = assess_entry_quality(
         cfg, micro,
         spike_ratio=spike_ratio,
         scan_score=scan_score,
         ppo_action=ppo_action,
         ppo_conf=ppo_conf,
-        live_px=float((micro or {}).get("pred_1bar", 0) or 0),
+        live_px=px,
         ticker=ticker,
     )
     if micro is not None:
