@@ -37,6 +37,18 @@ def ib_extended_enabled() -> bool:
     return os.getenv("IB_EXTENDED_ENABLED", "true").lower() in ("1", "true", "yes")
 
 
+def market_rules_enabled(cfg: Optional["BotConfig"] = None) -> bool:
+    """reqMarketRule often 322 on paper Gateway — skip unless explicitly enabled."""
+    raw = os.getenv("IB_EXTENDED_MARKET_RULES", "").strip().lower()
+    if raw in ("0", "false", "no", "off"):
+        return False
+    if raw in ("1", "true", "yes", "on"):
+        return True
+    if cfg is not None and getattr(cfg, "PAPER_TRADING", False):
+        return False
+    return True
+
+
 def _primary_account(ib) -> str:
     try:
         for v in ib.accountValues():
@@ -275,11 +287,7 @@ def fetch_quote_snapshots(ib, connector: "IBConnector", symbols: List[str]) -> D
                 "close": round(float(getattr(t, "close", 0) or 0), 4),
                 "volume": float(getattr(t, "volume", 0) or 0),
             }
-        for t in tickers:
-            try:
-                ib.cancelMktData(t.contract)
-            except Exception:
-                pass
+        # reqTickers is snapshot-only — no streaming reqId; cancelMktData spams IB noise.
     except Exception as exc:
         log.debug(f"reqTickers quotes: {exc}")
     return out
@@ -603,10 +611,11 @@ def refresh_ib_extended(
     for p in snap.positions:
         if p.con_id and p.con_id not in con_ids:
             con_ids.append(p.con_id)
-    try:
-        bundle.market_rules = fetch_market_rules(ib, con_ids)
-    except Exception as exc:
-        log.debug(f"market_rules: {exc}")
+    if market_rules_enabled(cfg):
+        try:
+            bundle.market_rules = fetch_market_rules(ib, con_ids)
+        except Exception as exc:
+            log.debug(f"market_rules: {exc}")
 
     try:
         bundle.quote_snapshots = fetch_quote_snapshots(ib, connector, syms)

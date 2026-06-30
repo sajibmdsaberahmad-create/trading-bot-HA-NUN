@@ -114,7 +114,7 @@ def build_logger(log_path: Optional[str] = None) -> logging.Logger:
     sh = logging.StreamHandler(sys.stdout)
     sh.setFormatter(fmt)
 
-    logger = logging.getLogger("hanoon")
+    logger = logging.getLogger("HANOON")
     logger.setLevel(logging.INFO)
     if not logger.handlers:
         logger.addHandler(fh)

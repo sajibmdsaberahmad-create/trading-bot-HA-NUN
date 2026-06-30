@@ -7,6 +7,7 @@ from core.ib_extended import (
     _parse_fundamental_xml,
     extended_ai_context,
     ib_extended_enabled,
+    market_rules_enabled,
     what_if_margin_allows,
 )
 
@@ -27,6 +28,18 @@ def test_extended_ai_context_empty():
 def test_ib_extended_enabled_default():
     with patch.dict("os.environ", {"IB_EXTENDED_ENABLED": "true"}):
         assert ib_extended_enabled() is True
+
+
+def test_market_rules_disabled_on_paper_by_default():
+    cfg = MagicMock(PAPER_TRADING=True)
+    with patch.dict("os.environ", {}, clear=True):
+        assert market_rules_enabled(cfg) is False
+
+
+def test_market_rules_env_override():
+    cfg = MagicMock(PAPER_TRADING=True)
+    with patch.dict("os.environ", {"IB_EXTENDED_MARKET_RULES": "true"}):
+        assert market_rules_enabled(cfg) is True
 
 
 def test_what_if_skipped_when_gate_off():
