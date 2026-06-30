@@ -87,12 +87,12 @@ IB_API_CATEGORIES: List[Tuple[str, str, str, str]] = [
   ("Positions", "positions()", "ib_truth, position_sync", "Qty + avgCost per contract"),
   ("Positions", "portfolio()", "ib_truth", "Mark, unrealized, realized, marketValue"),
   ("Positions", "reqPositions()", "broker, exit", "Force refresh before positions()"),
-  ("PnL", "reqPnL(account)", "planned", "Streaming account PnL — alternative to tags"),
-  ("PnL", "reqPnLSingle(conId)", "planned", "Per-symbol streaming PnL"),
+  ("PnL", "reqPnL(account)", "ib_extended", "Streaming account PnL snapshot"),
+  ("PnL", "reqPnLSingle(conId)", "ib_extended", "Per-symbol IB PnL"),
   ("Orders", "openTrades()", "ib_truth, broker", "Live orders + status"),
   ("Orders", "trades()", "ib_truth, daily_ib_learning", "Session order history"),
   ("Orders", "reqAllOpenOrders()", "ib_truth", "Include TWS manual orders"),
-  ("Orders", "whatIfOrder()", "—", "Margin preview before submit"),
+  ("Orders", "whatIfOrder()", "ib_extended, broker", "Margin preview before bracket entry"),
   ("Fills", "fills()", "ib_truth, fill_tracker", "Executions + commissionReport"),
   ("Fills", "reqExecutions()", "fill_tracker", "Historical execution filter"),
   ("Market", "reqMktData()", "scalper_runner, market_context", "L1 quote stream"),
@@ -103,23 +103,24 @@ IB_API_CATEGORIES: List[Tuple[str, str, str, str]] = [
   ("Bars", "reqRealTimeBars()", "data.py fallback", "5s bars when no tick stream"),
   ("Scanner", "reqScannerSubscription()", "scanner.py", "Top % gainers, volume"),
   ("Contract", "qualifyContracts()", "connector", "conId, exchange, min tick"),
-  ("Contract", "reqContractDetails()", "—", "Hours, margin, listings"),
+  ("Contract", "reqContractDetails()", "ib_extended", "Hours, margin, listings"),
   ("Contract", "reqSecDefOptParams()", "—", "Options chain params"),
   ("Time", "reqCurrentTime()", "connector", "Gateway clock + health ping"),
-  ("Time", "reqHeadTimeStamp()", "—", "First bar timestamp for symbol"),
-  ("News", "reqNewsBulletins()", "—", "IB news headlines"),
-  ("News", "reqHistoricalNews()", "—", "News history per provider"),
-  ("Fundamentals", "reqFundamentalData()", "—", "XML ratios — slow, rate limited"),
-  ("Risk", "marketRule()", "—", "Min price increment table"),
-  ("Calendar", "reqWshMetaData()", "—", "Wall Street Horizon events"),
+  ("Time", "reqHeadTimeStamp()", "ib_extended", "First bar timestamp for symbol"),
+  ("News", "reqNewsBulletins()", "ib_extended", "IB news headlines"),
+  ("News", "reqHistoricalNews()", "ib_extended", "Per-symbol headlines"),
+  ("Fundamentals", "reqFundamentalData()", "ib_extended", "ReportSnapshot ratios"),
+  ("Risk", "marketRule()", "ib_extended", "Min price increment table"),
+  ("Calendar", "reqWshMetaData()", "ib_extended", "Wall Street Horizon events"),
   ("Connection", "connectedEvent / errorEvent", "connector", "Health + 10197 reclaim"),
 ]
 
 # Consumption status for AI context builder
 USED_NOW = frozenset({
-  "ib_truth", "position_sync", "broker", "fill_tracker", "scalper_runner",
+  "ib_truth", "ib_extended", "position_sync", "broker", "fill_tracker", "scalper_runner",
   "market_context", "data.py", "scanner.py", "connector", "trader",
   "ib_macro", "daily_ib_learning", "account_view", "war_ib_sync",
+  "swing_paper", "ppo_swing_train",
 })
 
 
