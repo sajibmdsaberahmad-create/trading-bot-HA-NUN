@@ -113,6 +113,8 @@ def assess_multi_bar_ride(
     micro: Optional[Dict[str, Any]] = None,
     bars_held: int = 0,
     slippage_risk: float = 0.0,
+    max_bars: Optional[int] = None,
+    min_profit_run: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     Decide whether to ride multiple bars for more profit vs book now.
@@ -126,8 +128,8 @@ def assess_multi_bar_ride(
     pred_3 = float(micro.get("pred_3bar") or current_px)
     profit_run = float(micro.get("profit_run", 0) or 0)
     fade = float(micro.get("fade_risk", 0) or 0)
-    min_run = _env_float("GREEN_MULTIBAR_MIN_PROFIT_RUN", 0.38)
-    max_bars = int(_env_float("GREEN_MULTIBAR_MAX_BARS", 5))
+    min_run = min_profit_run if min_profit_run is not None else _env_float("GREEN_MULTIBAR_MIN_PROFIT_RUN", 0.38)
+    max_bars_n = int(max_bars) if max_bars is not None else int(_env_float("GREEN_MULTIBAR_MAX_BARS", 5))
     min_edge = _env_float("GREEN_MULTIBAR_MIN_UPSIDE_PCT", 0.003)
 
     upside_1 = (pred_1 / current_px - 1.0) if current_px > 0 else 0.0
@@ -138,7 +140,7 @@ def assess_multi_bar_ride(
     momentum_ok = float(micro.get("dir", 0) or 0) >= 0 and float(micro.get("momentum", 0) or 0) > 0.04
     fade_ok = fade < _env_float("GREEN_MULTIBAR_MAX_FADE", 0.42)
     slip_ok = slippage_risk < _env_float("GREEN_SLIPPAGE_RIDE_MAX", 0.55)
-    bars_ok = bars_held < max_bars
+    bars_ok = bars_held < max_bars_n
     run_ok = profit_run >= min_run
 
     ride_score = (
