@@ -514,12 +514,16 @@ class ScalperSessionMixin:
             self._update_market_context()
 
             try:
-                from core.ib_extended import ib_extended_enabled, refresh_ib_extended
-                from core.swing_shadow import run_swing_shadow_scan
-                from core.swing_paper import sync_swing_paper_from_shadow_verdicts
-                from core.ppo_swing_train import train_ppo_swing_from_shadow
+                from core.ib_hub import refresh_all_ib_services
+                from core.ib_extended import ib_extended_enabled
 
                 if ib_extended_enabled():
+                    refresh_all_ib_services(
+                        self.ib, self.cfg, self.conn,
+                        full=True, force=True, runner=self,
+                    )
+                else:
+                    from core.ib_extended import refresh_ib_extended
                     refresh_ib_extended(
                         self.ib, self.cfg, self.conn,
                         symbols=list(getattr(self, "locked_targets", []) or [])[:10],
