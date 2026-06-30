@@ -239,7 +239,7 @@ def collect_training_records(
     from core.experience_buffer import load_recent
 
     cap = n or int(os.getenv("PPO_REWARD_BUFFER_LOOKBACK", "600"))
-    raw = load_recent(cap)
+    raw = load_recent(cap * 2)
     if extra:
         raw = list(raw) + list(extra)
     out: List[Dict[str, Any]] = []
@@ -252,7 +252,10 @@ def collect_training_records(
             continue
         if src in REWARD_SOURCES or rec.get("reward") is not None or rec.get("pnl_usd") is not None:
             out.append(rec)
-    return out
+    if os.getenv("PPO_REWARD_BALANCED_SAMPLE", "true").lower() in ("1", "true", "yes"):
+        from core.experience_buffer import sample_balanced_records
+        return sample_balanced_records(out, max_records=cap)
+    return out[-cap:]
 
 
 class LabeledTradingEnv(TradingEnv):

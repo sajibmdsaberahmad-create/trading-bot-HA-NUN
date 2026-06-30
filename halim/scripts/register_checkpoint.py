@@ -47,6 +47,37 @@ def main() -> int:
     cfg_path.write_text(json.dumps(cfg, indent=2))
 
     latest = ckpt_root / "latest"
+    gate_force = os.getenv("HALIM_PROMOTION_FORCE", "").lower() in ("1", "true", "yes")
+    gate_disabled = os.getenv("HALIM_PROMOTION_GATE", "true").lower() in ("0", "false", "no")
+
+    if not gate_disabled and not gate_force:
+        if str(ROOT) not in sys.path:
+            sys.path.insert(0, str(ROOT))
+        try:
+            from core.halim_promotion_gate import try_promote_halim_checkpoint
+            from core.config import BotConfig
+
+            promo = try_promote_halim_checkpoint(
+                args.name,
+                cfg=BotConfig(),
+                force=False,
+            )
+            print(json.dumps({
+                "ok": promo.get("ok", False),
+                "promoted": promo.get("promoted", False),
+                "checkpoint": str(src),
+                "latest": str(latest),
+                "gate": promo,
+            }, indent=2))
+            return 0 if promo.get("promoted") else 1
+        except Exception as exc:
+            print(json.dumps({
+                "ok": False,
+                "reason": "promotion_gate_error",
+                "error": str(exc)[:200],
+            }))
+            return 1
+
     if latest.is_symlink() or latest.exists():
         latest.unlink()
     latest.symlink_to(args.name)

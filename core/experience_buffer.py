@@ -138,6 +138,87 @@ def tail(n: int = 50) -> list:
     return load_recent(n)
 
 
+def _is_high_volatility_record(rec: Dict[str, Any]) -> bool:
+    try:
+        spike = float(rec.get("spike_ratio", 0) or 0)
+    except (TypeError, ValueError):
+        spike = 0.0
+    regime = str(rec.get("regime", "")).lower()
+    if spike >= float(os.getenv("PPO_REWARD_HIGH_VOL_SPIKE", "1.45")):
+        return True
+    if regime in ("volatile", "high_vol", "spike", "trending_volatile"):
+        return True
+    return False
+
+
+def sample_balanced_records(
+    records: List[Dict[str, Any]],
+    *,
+    max_records: Optional[int] = None,
+    high_vol_fraction: Optional[float] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Mix recent tail with high-volatility examples so calm sessions do not erase
+    spike-regime memory from PPO reward training.
+    """
+    if not records:
+        return []
+    cap = max_records or int(os.getenv("PPO_REWARD_BUFFER_LOOKBACK", "600"))
+    frac = high_vol_fraction
+    if frac is None:
+        try:
+            frac = float(os.getenv("PPO_REWARD_HIGH_VOL_FRACTION", "0.30"))
+        except (TypeError, ValueError):
+            frac = 0.30
+    frac = max(0.0, min(0.6, frac))
+
+    high = [r for r in records if _is_high_volatility_record(r)]
+    calm = [r for r in records if not _is_high_volatility_record(r)]
+    n_high = min(len(high), max(1, int(cap * frac))) if high else 0
+    n_calm = cap - n_high
+    picked: List[Dict[str, Any]] = []
+    seen = set()
+
+    def _key(r: Dict[str, Any]) -> tuple:
+        return (
+            r.get("entry_id"),
+            r.get("timestamp"),
+            r.get("ticker"),
+            r.get("source"),
+        )
+
+    for r in reversed(high[-max(n_high * 3, n_high):]):
+        k = _key(r)
+        if k in seen:
+            continue
+        seen.add(k)
+        picked.append(r)
+        if len([x for x in picked if _is_high_volatility_record(x)]) >= n_high:
+            break
+
+    for r in reversed(calm):
+        k = _key(r)
+        if k in seen:
+            continue
+        seen.add(k)
+        picked.append(r)
+        if len(picked) >= cap:
+            break
+
+    if len(picked) < cap:
+        for r in reversed(records):
+            k = _key(r)
+            if k in seen:
+                continue
+            seen.add(k)
+            picked.append(r)
+            if len(picked) >= cap:
+                break
+
+    picked.reverse()
+    return picked[:cap]
+
+
 def stats() -> Dict[str, Any]:
     global _stats_cache, _stats_cache_ts
     ttl = float(os.getenv("EXPERIENCE_BUFFER_STATS_TTL_SEC", "120"))
