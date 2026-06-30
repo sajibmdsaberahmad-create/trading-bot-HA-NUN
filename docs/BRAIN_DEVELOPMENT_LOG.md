@@ -794,3 +794,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 12:30 UTC` **git_auto** — sync: 16 files — account_evaluator.py, git_sync.py, BRAIN_DEVELOPMENT_LOG.md +13 more | halim=2 models=8 docs=1 core=1 other=4 | brain=adult
 - `2026-06-30 12:31 UTC` **git_auto** — sync: 18 files — account_evaluator.py, git_sync.py, BRAIN_DEVELOPMENT_LOG.md +15 more | halim=3 models=7 docs=2 core=1 other=5 | brain=adult
 - `2026-06-30 12:31 UTC` **git_auto** — sync: 6 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +3 more | halim=1 docs=1 other=4 | brain=adult dataset=2532
+- `2026-06-30 12:32 UTC` **git_auto** — sync: 12 files — account_evaluator.py, BRAIN_DEVELOPMENT_LOG.md, registry.jsonl +9 more | halim=5 models=2 docs=1 other=4 | brain=adult data
