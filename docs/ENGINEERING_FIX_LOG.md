@@ -10,6 +10,26 @@
 
 ---
 
+## 2026-07-01 — Account evaluator: IB Truth for position/order snapshots
+
+### Problem
+`AccountEvaluator` still called `reqPositions()` and `reqAllOpenOrders()` on market transitions, duplicating `ib_truth` / `ib_hub` refresh.
+
+### Root cause
+Evaluator predated central snapshot; open/close reports bypassed `get_snapshot()`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/account_evaluator.py` | `_ib_positions` / `_open_orders` read from `get_snapshot()` after optional `refresh()` |
+
+### Verify
+```bash
+python3 -m py_compile core/account_evaluator.py
+```
+
+---
+
 ## 2026-07-01 — Remove redundant local/Yahoo paths; IB Truth single source
 
 ### Problem
@@ -33,7 +53,6 @@ Legacy fallbacks ran during RTH even when IB snapshot was fresh; macro tick did 
 | `core/scalper_session.py` | Close/daily reports use `account_view.day_pnl` |
 | `core/daily_self_evaluation.py` | Day PnL from `account_view` |
 | `core/scanner.py` | Held tickers from truth snapshot |
-| `core/account_evaluator.py` | Open/close snapshots use `get_snapshot()` positions + open orders (no `reqPositions`/`reqAllOpenOrders`) |
 
 ### Env vars
 | Var | Default | Effect |
