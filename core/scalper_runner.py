@@ -612,12 +612,15 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             if not self._ib_sync_enabled():
                 self.bot_nav = self.bot_cash + self.shares * self._latest_price()
         self._sync_bot_nav_from_ib()
+
+    def _maybe_sync_war_from_ib(self, *, force: bool = False) -> None:
+        """Throttled war ledger sync — not every balance poll."""
         try:
             from core.war_ib_sync import sync_war_from_ib, war_ib_sync_enabled
             if war_ib_sync_enabled(self.cfg):
-                sync_war_from_ib(self.ib, self.cfg, apply=True)
+                sync_war_from_ib(self.ib, self.cfg, apply=True, force=force)
         except Exception as exc:
-            log.debug(f"War IB sync on refresh: {exc}")
+            log.debug(f"War IB sync: {exc}")
     def _deployable_cash(self) -> float:
         """Cash for new entries — war settled cash when war account enabled."""
         try:
@@ -705,6 +708,13 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         """IB snapshot when 5s streams are up but prices never arrived."""
         if not self._locked_targets:
             return
+        try:
+            from core.market_hours import can_trade_now
+            can_trade, _ = can_trade_now(self.cfg)
+            if not can_trade:
+                return
+        except Exception:
+            pass
         heal_iv = float(getattr(self.cfg, "STREAM_PRICE_HEAL_SEC", 20.0))
         if now - getattr(self, "_last_stream_heal", 0) < heal_iv:
             return
@@ -849,6 +859,15 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         t = (ticker or "").upper()
         if not t:
             return 0.0
+        held = t in self._held_tickers() or t in (self._position_slots or {})
+        can_trade = True
+        try:
+            from core.market_hours import can_trade_now
+            can_trade, _ = can_trade_now(self.cfg)
+            if not can_trade and not held:
+                return float(self._last_snapshot_px.get(t, 0) or 0)
+        except Exception:
+            pass
         now = time.time()
         cooldown = float(getattr(self.cfg, "PRICE_SNAPSHOT_COOLDOWN_SEC", 8.0))
         if now < self._snapshot_cooldown_until.get(t, 0):
@@ -890,7 +909,10 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 if dm is not None:
                     dm.last_tick_price = px
                 if prev <= 0 or abs(px - prev) / max(prev, 0.01) > 0.002:
-                    log.info(f"  📡 Price snapshot refresh {t}: ${px:.4f}")
+                    if held or can_trade:
+                        log.info(f"  📡 Price snapshot refresh {t}: ${px:.4f}")
+                    else:
+                        log.debug(f"  📡 Price snapshot refresh {t}: ${px:.4f} (watchlist)")
                 else:
                     log.debug(f"  📡 Price snapshot refresh {t}: ${px:.4f} (unchanged)")
             return px
@@ -2019,6 +2041,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         self._train_off_hours()
                 
                 self._refresh_account_balance()
+                self._maybe_sync_war_from_ib()
                 maybe_refresh_session_limits(self)
                 self._write_live_metrics()
                 rt = getattr(self, "_halim_runtime", None)
