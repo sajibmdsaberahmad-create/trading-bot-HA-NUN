@@ -132,6 +132,67 @@ def _parse_training_echo_entry(text: str) -> Optional[Dict[str, Any]]:
     }
 
 
+def _parse_spike_score_echo(text: str) -> Optional[Dict[str, Any]]:
+    """
+    Toddler echo lines from gold SFT, e.g.:
+    COIN: sofi score=92 ppo=0.50 vol=1.00x x=18.16x
+    COIN entry_decision=conf=0.54 note=ppo=hold score=84
+    PPO-led micro-fast: score=82 vol=1.0x ppo=hold conf=0.54
+    """
+    import re
+
+    low = text.lower()
+    m = re.search(
+        r"(?:^|\s)[A-Z]{1,5}:\s*([a-z]{1,5})\s+score=(\d+(?:\.\d+)?)\s+ppo=([\d.]+)",
+        text,
+        re.I,
+    )
+    if m:
+        score = float(m.group(2))
+        ppo = float(m.group(3))
+        if ppo > 1.0:
+            ppo /= 100.0
+        enter = score >= 75.0 and ppo >= 0.48
+        conf = min(0.95, max(0.40, score / 100.0))
+        return {
+            "enter": enter,
+            "confidence": conf,
+            "reason": f"score echo {score:.0f}",
+        }
+
+    m = re.search(
+        r"entry_decision=.*?conf=([\d.]+).*?score=(\d+(?:\.\d+)?)",
+        text,
+        re.I,
+    )
+    if m:
+        conf = float(m.group(1))
+        score = float(m.group(2))
+        if conf > 1.0:
+            conf /= 100.0
+        ppo_hold = "ppo=hold" in low or "ppo= hold" in low
+        enter = score >= 78.0 and conf >= 0.52 and not ppo_hold
+        return {
+            "enter": enter,
+            "confidence": conf,
+            "reason": f"entry_decision echo score={score:.0f}",
+        }
+
+    if "ppo-led micro-fast" in low or "ppo not required" in low:
+        score_m = re.search(r"score=(\d+(?:\.\d+)?)", text, re.I)
+        if score_m:
+            score = float(score_m.group(1))
+            conf = _extract_echo_confidence(text) or min(0.90, score / 100.0)
+            ppo_hold = "ppo=hold" in low
+            enter = score >= 80.0 and conf >= 0.50 and not ppo_hold
+            return {
+                "enter": enter,
+                "confidence": conf,
+                "reason": f"micro-fast echo score={score:.0f}",
+            }
+    return None
+
+
 def _parse_entry_lm_response(raw: str) -> Dict[str, Any]:
     """Parse Halim entry JSON; fallback heuristics for toddler-model ramble."""
     import json
@@ -157,6 +218,10 @@ def _parse_entry_lm_response(raw: str) -> Dict[str, Any]:
     echo = _parse_training_echo_entry(text)
     if echo:
         return _normalize_entry_parsed(echo)
+
+    spike_echo = _parse_spike_score_echo(text)
+    if spike_echo:
+        return _normalize_entry_parsed(spike_echo)
 
     low = text.lower()
     # Instruction-echo (model repeats prompt rules instead of answering)

@@ -407,3 +407,5 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 10:00 UTC` **git_auto** — sync: 9 files — BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl, coach_shadow_log.jsonl +6 more | halim=1 models=4 other=4 | brain=adult dataset=
 - `2026-06-30 10:00 UTC` **git_auto** — sync: 11 files — BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl, coach_shadow_log.jsonl +8 more | halim=1 models=6 other=4 | brain=adult dataset
 - `2026-06-30 10:00 UTC` **git_auto** — sync: 7 files — config.py, market_hours.py, scanner_session.py +4 more | docs=1 core=2 other=4 | brain=adult dataset=2462 evolutions=26
+- `2026-06-30 10:01 UTC` **git_auto** — sync: 7 files — broker.py, config.py, scanner_session.py +4 more | docs=1 core=2 other=4 | brain=adult dataset=2462 evolutions=26
+- `2026-06-30 10:01 UTC` **git_training** — learn: session_batch: snapshot_periodic | learn_20260630_100114 | brain=adult dataset=2462 evolutions=26
