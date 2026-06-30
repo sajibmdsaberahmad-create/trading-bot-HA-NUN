@@ -3341,3 +3341,4 @@
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.164216082293914,"shadow_only":true,"timestamp":"2026-06-30T08:57:12.644435+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.164216082293914,"shadow_only":true,"timestamp":"2026-06-30T08:57:28.108021+00:00"}
 {"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T08:57:43.140610+00:00"}
+{"ticker":"PLTR","reason":"profit_prob_below_80pct","scan_score":89.8,"spike_ratio":1.219907775478283,"shadow_only":true,"timestamp":"2026-06-30T08:57:58.216687+00:00"}
