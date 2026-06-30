@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
 
+from core.market_hours import should_defer_bracket_children
 from core.fill_tracker import (
     confirm_entry_fill,
     ib_position_shares,
@@ -101,3 +102,52 @@ def confirm_entry_fill_from_ib(
         started_at=float(st.get("started_at", 0)),
         quote_px=quote_px,
     )
+
+
+def entry_price_mode_for_session(
+    cfg,
+    broker,
+    current_px: float,
+    bid: float,
+    ask: float,
+    shares: int,
+    avg_volume: float,
+) -> Tuple[Optional[float], str]:
+    """
+    Paper RTH: MARKET by default. Extended hours: aggressive LIMIT only —
+    IB paper parent MARKET orders stall in PreSubmitted outside RTH.
+    """
+    if should_defer_bracket_children(cfg):
+        limit_px, mode = broker.decide_smart_entry(
+            current_px, bid, ask, shares, avg_volume,
+        )
+        if limit_px and limit_px > 0:
+            return limit_px, f"ext_hours_{mode}"
+        ref = ask if ask and ask > 0 else current_px
+        buf = float(getattr(cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.003))
+        return broker._round_price(ref * (1.0 + buf)), "ext_hours_limit_ask"
+    if (
+        getattr(cfg, "PAPER_TRADING", False)
+        and getattr(cfg, "PAPER_MARKET_ENTRIES", True)
+    ):
+        return None, "paper_market"
+    return broker.decide_smart_entry(current_px, bid, ask, shares, avg_volume)
+
+
+def stuck_entry_limit_px(
+    cfg,
+    broker,
+    bid: float,
+    ask: float,
+    ref_px: float,
+    shares: int,
+) -> Tuple[float, str]:
+    """Limit price for PreSubmitted recovery — never re-submit bare MARKET ext-hours."""
+    limit_px, mode = broker.decide_smart_entry(
+        ref_px, bid, ask, shares, 0.0,
+    )
+    if limit_px and limit_px > 0:
+        return limit_px, mode
+    ref = ask if ask and ask > 0 else ref_px
+    buf = float(getattr(cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.004))
+    return broker._round_price(ref * (1.0 + buf)), "limit_chase"
