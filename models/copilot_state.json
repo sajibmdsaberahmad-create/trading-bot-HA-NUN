@@ -4,7 +4,11 @@
   "risk_posture": "defensive",
   "session_wr": 0.0,
   "session_pnl": 0.0,
-  "ticker_bias": {},
+  "ticker_bias": {
+    "INTZ": "CAUTION",
+    "VWAV": "CAUTION",
+    "SVRE": "CAUTION"
+  },
   "repeat_losers": [],
   "ppo_hints": {
     "confidence_boost": 0.04,
@@ -15,6 +19,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782846097.530507,
+  "updated_at": 1782846218.211947,
   "source": "heuristic"
 }
