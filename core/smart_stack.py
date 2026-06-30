@@ -159,7 +159,7 @@ def war_posture_adjustments(cfg: BotConfig) -> Dict[str, float]:
             st = war_account_state(cfg) or {}
             trips = int(st.get("war_round_trips_today", st.get("round_trips_today", 0)) or 0)
             bullets_left = int(st.get("war_bullets_remaining", 0) or 0)
-            if st.get("war_balance_driven"):
+            if st.get("war_balance_driven") and not st.get("war_ai_sizing"):
                 if bullets_left <= 1:
                     bump_conf += 0.04
                     bump_prob += 0.05
