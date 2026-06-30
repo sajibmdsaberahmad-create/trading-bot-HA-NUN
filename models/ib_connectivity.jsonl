@@ -28,3 +28,4 @@
 {"ts": 1782839065.8349812, "event": "outage_start", "source": "ib_connector", "trigger": "disconnected_event", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
 {"ts": 1782839653.8557298, "event": "outage_start", "source": "ib_connector", "trigger": "disconnected_event", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
 {"ts": 1782839903.4507651, "event": "outage_start", "source": "ib_connector", "trigger": "disconnected_event", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
+{"ts": 1782840222.423098, "event": "outage_start", "source": "ib_connector", "trigger": "disconnected_event", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
