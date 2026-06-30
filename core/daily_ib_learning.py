@@ -55,31 +55,22 @@ def _pack_path(day_str: str) -> Path:
 
 
 def fetch_ib_account_snapshot(connector: Optional["IBConnector"]) -> Dict[str, Any]:
-    """Pull live IB account values and portfolio summary."""
+    """Pull live IB account values and portfolio summary — delegates to ib_truth."""
     if connector is None or not connector.is_connected():
         return {}
-    out: Dict[str, Any] = {"values": {}, "portfolio": []}
     try:
-        ib = connector.ib
-        for v in ib.accountValues():
-            tag = getattr(v, "tag", "")
-            cur = getattr(v, "currency", "")
-            if cur in ("USD", "BASE", ""):
-                out["values"][tag] = round(float(getattr(v, "value", 0) or 0), 4)
-        ib.reqPositions()
-        ib.sleep(0.25)
-        for p in ib.positions():
-            qty = float(getattr(p, "position", 0) or 0)
-            if abs(qty) < 0.5:
-                continue
-            out["portfolio"].append({
-                "symbol": getattr(p.contract, "symbol", "?"),
-                "shares": qty,
-                "avg_cost": round(float(getattr(p, "avgCost", 0) or 0), 4),
-            })
+        from core.ib_truth import build_snapshot, ib_truth_context
+
+        snap = build_snapshot(connector.ib, connector.cfg if hasattr(connector, "cfg") else None)
+        ctx = ib_truth_context()
+        return {
+            "values": snap.account.tags,
+            "portfolio": ctx.get("ib_positions", []),
+            "open_orders": len(snap.open_orders),
+        }
     except Exception as exc:
         log.debug(f"IB account snapshot: {exc}")
-    return out
+        return {}
 
 
 def fetch_ib_day_orders(

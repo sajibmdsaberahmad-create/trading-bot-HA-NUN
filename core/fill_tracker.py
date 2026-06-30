@@ -31,7 +31,10 @@ def _now() -> str:
 
 def append_fill_ledger(record: Dict[str, Any]) -> None:
     """Persistent round-trip fill log for training reconciliation."""
+    from core.trade_horizon import tag_record
+
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    record = tag_record(record)
     record.setdefault("timestamp", _now())
     line = json.dumps(record, default=str, separators=(",", ":"))
     with _lock:

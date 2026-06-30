@@ -2045,6 +2045,14 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                     if now - getattr(self, "_last_off_hours_train", 0) >= train_iv:
                         self._last_off_hours_train = now
                         self._train_off_hours()
+                        try:
+                            from core.swing_shadow import run_swing_shadow_scan
+                            from core.trade_horizon import update_scalp_gate_from_ib
+
+                            run_swing_shadow_scan(self, self.cfg)
+                            update_scalp_gate_from_ib(self.cfg)
+                        except Exception as exc:
+                            log.debug(f"off-hours horizon: {exc}")
                 
                 self._refresh_account_balance()
                 self._maybe_sync_war_from_ib()
