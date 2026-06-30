@@ -1162,3 +1162,28 @@ Post-restart monitor spammed `name 'risk_plan_sane_for_tick' is not defined` on 
 pytest tests/test_position_context_isolation.py -q
 grep risk_plan_sane logs/HANOON.log  # should not grow after restart
 ```
+
+---
+
+## 2026-07-01 — Mid-session git push + IB position recovery on restart
+
+### Problem
+`logs push success: trade: BUY` during RTH wasted CPU/network. `risk_plan_sane_for_tick` blocked monitor. After restart, open IB positions (BITO/TZA) not adopted — no live management until re-entry.
+
+### Root cause
+`enable_halim_developer_mode` forced `GIT_PUSH_DURING_SESSION=true` and started Halim embedded git watcher (`set_standalone_mode`), bypassing defer policy. `_sync_all_positions_from_ib` returned early when `_position_slots` empty.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_developer.py` | Respect `GIT_PUSH_DURING_SESSION`; no embedded watcher when false |
+| `core/git_sync_defer.py` | Check session defer before standalone bypass |
+| `core/position_sync.py` | `adopt_ib_positions_into_slots` for restart recovery |
+| `core/scalper_runner.py` | Adopt IB positions at startup + each sync |
+| `core/scalper_entry_executor.py` | Skip `push_trade` when defer active |
+
+### Verify
+```bash
+pytest tests/test_git_sync_defer.py tests/test_position_context_isolation.py -q
+# restart — no logs push during RTH; Recovered IB position lines on open holdings
+```
