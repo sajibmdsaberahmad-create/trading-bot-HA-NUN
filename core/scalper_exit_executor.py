@@ -98,16 +98,33 @@ class ScalperExitMixin:
             )
     def _monitor_all_open_positions(self):
         for ticker in list(self._position_slots.keys()):
+            loaded = False
             try:
                 if not self._load_position_context(ticker):
                     continue
+                loaded = True
                 px = self._live_price_for(ticker, self._entry_price)
                 if px > 0:
                     self._live_position_monitor(px)
-                self._save_position_context(ticker)
             except Exception as exc:
                 log.error(f"Position monitor failed for {ticker}: {exc}")
+            finally:
+                if loaded:
+                    self._save_position_context(ticker)
         self._refresh_aggregate_position_state()
+
+    def _risk_plan_sane_for_tick(self, current_px: float) -> bool:
+        plan = self.risk.plan
+        entry = self._entry_price
+        if plan is None or entry <= 0 or plan.entry_price <= 0:
+            return False
+        if abs(plan.entry_price - entry) / entry > 0.05:
+            return False
+        if abs(plan.shares - self.shares) > max(1.0, 0.01 * max(self.shares, 1.0)):
+            return False
+        if abs(current_px / entry - 1.0) > 0.35:
+            return False
+        return True
     def _detect_all_exits(self):
         if not getattr(self.cfg, "USE_MULTI_POSITION", True):
             self._detect_exit(self._latest_price())
@@ -1234,8 +1251,17 @@ class ScalperExitMixin:
 
         # Risk engine tick exits — AI council on profit; mechanical only on loss
         if self.risk.plan:
-            prev_stop = self.risk.plan.current_stop_price
-            should_risk_exit, risk_reason = self.risk.evaluate_tick(current_px)
+            ticker = self.current_ticker or ""
+            if not self._risk_plan_sane_for_tick(current_px):
+                self._bind_risk_plan_for_ticker(ticker)
+            if not self._risk_plan_sane_for_tick(current_px):
+                log.warning(
+                    f"  ⚠️ Risk tick skipped {ticker}: plan/price mismatch "
+                    f"(px=${current_px:.2f} entry=${self._entry_price:.2f})"
+                )
+            else:
+                prev_stop = self.risk.plan.current_stop_price
+                should_risk_exit, risk_reason = self.risk.evaluate_tick(current_px)
             if self.risk.plan.current_stop_price != prev_stop:
                 self._apply_stop_update(
                     self.risk.plan.current_stop_price,
