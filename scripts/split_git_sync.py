@@ -191,6 +191,7 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             body = "".join(learning_consts) + body
         if mod == "git_sync_push" and "_pending_pushes" not in body:
             body = "_pending_pushes: list = []\n_pending_lock = Lock()\n" + body
+        body = re.sub(r"^\s*global\s+[^\n]+\n", "", body, flags=re.M)
         body = re.sub(r"\b_enabled\b", "S._enabled", body)
         body = re.sub(r"\b_repo\b", "S._repo", body)
         body = re.sub(r"\b_token\b", "S._token", body)
@@ -205,6 +206,9 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         body = re.sub(r"\b_git_init_done\b", "S._git_init_done", body)
         body = re.sub(r"\bglobal S\.(_enabled|_repo|_token|_last_push_ts|_push_count|_failed_pushes|_last_checkpoint_ts)\b", "", body)
         body = body.replace("S.S.", "S.")
+        if mod == "git_sync_push":
+            body = body.replace("S._pending_pushes", "_pending_pushes")
+            body = body.replace("S._pending_lock", "_pending_lock")
         (ROOT / "core" / f"{mod}.py").write_text(HEADER.format(title=title) + body, encoding="utf-8")
         print(f"wrote {mod}.py ({len(extracted[mod])} funcs)")
 
