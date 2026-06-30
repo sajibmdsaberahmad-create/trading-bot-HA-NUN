@@ -158,12 +158,19 @@ def main() -> None:
         "ScalperSessionMixin, ScalperSpikeMixin):\n",
     )
 
-    # Everything after class body (if any module-level code follows class)
+    class_line = lines[class_node.lineno - 1]
+    if "ScalperExitMixin" not in class_line:
+        class_line = class_line.replace(
+            "class ScalperRunner:",
+            "class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, "
+            "ScalperSessionMixin, ScalperSpikeMixin):",
+        )
+
     post_start = class_node.end_lineno or len(lines)
     post = "".join(lines[post_start:])
 
     remaining_body = "".join(_extract_source(lines, n) for n in remaining_nodes)
-    new_text = pre + remaining_body + post
+    new_text = pre + class_line + remaining_body + post
 
     backup = RUNNER.with_suffix(".py.bak")
     if not backup.exists():

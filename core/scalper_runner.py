@@ -231,6 +231,7 @@ def _only_uptrend(df: pd.DataFrame, current_px: float, min_bars: int = 20) -> bo
     return True
 
 
+class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, ScalperSpikeMixin):
     def __init__(self, connector: IBConnector, cfg: BotConfig, notifier: Notifier):
         self.conn = connector
         self.ib = connector.ib

@@ -16,5 +16,34 @@
     "lessons": [
       "Review ib_failure on BIYA"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T16:33:08.192876+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on BIYA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T16:33:08.192703+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on BIYA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T16:33:10.680000+00:00",
+    "source": "loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Loss streak 4 \u2014 applied 4 guardrail mutation(s) (deterministic + heuristics)",
+    "lessons": [
+      "ping - are you there ?",
+      "Hi",
+      "Hi"
+    ]
   }
 ]

@@ -153,3 +153,19 @@ green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)
 Observed ib_failure — recorded for learning.
 BUY 923 BIYA NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.3789 or a more aggressive price still within you
 
+🧭 COMMANDER LEARNING | 2026-06-30T16:33:08.189107+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:giveback +0.16% (peak +0.36% gave back 0.21%)
+
+🧭 COMMANDER LEARNING | 2026-06-30T16:33:08.192380+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:giveback +0.16% (peak +0.36% gave back 0.21%)
+
+🧭 COMMANDER LEARNING | 2026-06-30T16:33:10.678398+00:00
+Loss streak 4 — applied 4 guardrail mutation(s) (deterministic + heuristics)
+LOSS STREAK HALT — 4 consecutive losses.
+WHY did we lose? Read recent trades and post-mortems.
+WHAT must change before resuming? Propose max 3 param mutations.
+Recent losses:
+- BIYA: pnl=$-0.15 slip=0
+
