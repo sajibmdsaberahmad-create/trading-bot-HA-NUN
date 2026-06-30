@@ -56,6 +56,7 @@ from core.fast_execution import (
     tick_stream_count,
 )
 from core.market_data_learning import (
+    clear_transient_md_blocks,
     filter_tradeable_tickers,
     is_market_data_blocked,
     record_fetch_failure,

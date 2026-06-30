@@ -1,6 +1,6 @@
 {
-  "pairs_total": 14594,
-  "train_pairs": 13865,
+  "pairs_total": 14599,
+  "train_pairs": 13870,
   "valid_pairs": 729,
   "by_source": {
     "council": 854,
@@ -10,8 +10,8 @@
     "web_learn": 109,
     "ppo:micro_fast": 1595,
     "council:timeout_hold": 3,
-    "halim_lm": 2480,
-    "halim_server": 452,
+    "halim_lm": 2483,
+    "halim_server": 454,
     "companion_generative": 561,
     "market_hours": 17,
     "rss_learn": 3,
