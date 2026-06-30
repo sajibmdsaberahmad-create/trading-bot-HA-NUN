@@ -1,29 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 229,
+  "total_awakenings": 230,
   "training_sessions": 39,
   "trades_observed": 1685,
   "scans_performed": 39,
   "improvements_applied": 2710,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:54:07.290501",
-      "age": "7d 20h 51m 18s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2039",
-      "metadata": {
-        "source": "commander_chat",
-        "summary": "Could not parse AI plan \u2014 retained guidance for prompts only.",
-        "applied": [],
-        "lessons": [
-          "ping - are you there ?",
-          "Hi",
-          "Hi"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:55:59.372507",
       "age": "7d 20h 53m 10s",
@@ -12128,9 +12112,16 @@
           "Review loss_streak on INTZ"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T12:36:51.972318",
+      "age": "9d 1h 34m 3s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #230",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-30T12:07:03.642722",
+  "last_awakening": "2026-06-30T12:36:51.971972",
   "current_version": "v20260629_075355",
   "version_history": [
     {
