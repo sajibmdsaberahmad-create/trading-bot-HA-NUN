@@ -196,6 +196,33 @@ Live session: no `session_batch` / `pull --rebase` logs during trading. On `stop
 
 ---
 
+## 2026-06-30 — Codebase organization & hygiene
+
+### Problem
+Scattered env defaults, triple accounting confusion, runtime jsonl in git, no unit tests, monolithic scalper, duplicate launcher exports.
+
+### Fix
+| Area | Change |
+|------|--------|
+| `core/account_view.py` | IB-grounded equity / day P&L |
+| `core/entry_pipeline.py` | Extracted IB entry fill confirmation |
+| `scripts/start_hanoon.sh` | Deduped `PPO_LEAD` / `TRAILING_PROFIT` exports; git/IB sync env |
+| `tests/` | pytest for fills, git defer, account_view |
+| `.gitignore` | Runtime journals + session state local-only |
+| `archive/replay_live_runner.py` | Deprecated (use `replay_scalper_runner`) |
+| `docs/OPS.md`, `ARCHITECTURE.md`, `models/README.md`, `GIT_SYNC.md` | Updated |
+| `main.py` | `--port` inherits `BotConfig.IB_PORT` (4002) |
+| `core/config.py` | `SMART_STACK`, `RAM_LIVE_ONLY` in BotConfig |
+| `core/capital_discipline.py` | Fix PPO_LEAD getattr default |
+
+### Verify
+```bash
+python3 -m pytest tests/ -q
+grep -c PPO_LEAD_WHILE scripts/start_hanoon.sh  # expect 1
+```
+
+---
+
 ## 2026-06-30 — War replay ledger isolation (code)
 
 ### Problem
