@@ -450,7 +450,9 @@ class ScalperEntryMixin:
                 f"Entry: ${fill_px:.2f}\nStop: ${plan.initial_stop_price:.2f}\n"
                 f"Target: ${plan.take_profit_price:.2f}\nDeployed: ${cost:,.0f}"
             )
-        push_trade(ticker, "BUY", fill_px, shares)
+        from core.git_sync_defer import should_defer_git_push
+        if not should_defer_git_push("trade"):
+            push_trade(ticker, "BUY", fill_px, shares)
         append_fill_ledger({
             "event": "entry_fill",
             "ticker": ticker,

@@ -1425,6 +1425,15 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             n = self.broker.flatten_orphan_short_positions()
             if n:
                 log.info(f"🧹 Covered {n} orphan short position(s) on paper account")
+            adopted = adopt_ib_positions_into_slots(self.ib, self._position_slots)
+            for ticker in adopted:
+                self._bind_risk_plan_for_ticker(ticker)
+                try:
+                    self._ensure_position_stream(ticker)
+                except Exception:
+                    pass
+            if adopted:
+                self._refresh_aggregate_position_state()
         except Exception:
             pass
 
