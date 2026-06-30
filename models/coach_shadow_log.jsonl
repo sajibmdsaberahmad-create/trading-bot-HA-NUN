@@ -4595,3 +4595,8 @@
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":3130.0,"shadow_only":true,"timestamp":"2026-06-30T11:07:11.737455+00:00"}
 {"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":2905.0,"shadow_only":true,"timestamp":"2026-06-30T11:07:13.998948+00:00"}
 {"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":124354.0,"shadow_only":true,"timestamp":"2026-06-30T11:18:16.337185+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":163461.0,"shadow_only":true,"timestamp":"2026-06-30T11:18:25.681645+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":57135.0,"shadow_only":true,"timestamp":"2026-06-30T11:18:30.021532+00:00"}
+{"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":36466.0,"shadow_only":true,"timestamp":"2026-06-30T11:18:33.072971+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":25441.0,"shadow_only":true,"timestamp":"2026-06-30T11:18:37.009879+00:00"}
+{"ticker":"BTCT","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":13153.0,"shadow_only":true,"timestamp":"2026-06-30T11:18:40.219964+00:00"}
