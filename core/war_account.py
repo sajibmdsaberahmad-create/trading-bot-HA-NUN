@@ -28,6 +28,66 @@ LEDGER_PATH = _REPO / "models" / "war_account_ledger.jsonl"
 _state_lock = threading.RLock()
 
 _MODES_WAR_ENTRY = frozenset({"WAR_ACTIVE", "LIVE_WAR"})
+
+
+def _normalize_open_positions(state: Dict[str, Any]) -> None:
+    """Migrate legacy single open_war/open_lab → per-ticker dicts."""
+    wars: Dict[str, Any] = {}
+    raw_wars = state.get("open_wars")
+    if isinstance(raw_wars, dict):
+        for k, v in raw_wars.items():
+            if isinstance(v, dict):
+                wars[str(k).upper()] = v
+    legacy_war = state.get("open_war")
+    if isinstance(legacy_war, dict) and legacy_war.get("ticker"):
+        wars.setdefault(str(legacy_war["ticker"]).upper(), legacy_war)
+    state["open_wars"] = wars
+
+    labs: Dict[str, Any] = {}
+    raw_labs = state.get("open_labs")
+    if isinstance(raw_labs, dict):
+        for k, v in raw_labs.items():
+            if isinstance(v, dict):
+                labs[str(k).upper()] = v
+    legacy_lab = state.get("open_lab")
+    if isinstance(legacy_lab, dict) and legacy_lab.get("ticker"):
+        labs.setdefault(str(legacy_lab["ticker"]).upper(), legacy_lab)
+    state["open_labs"] = labs
+
+    state["open_war"] = next(iter(wars.values()), None) if wars else None
+    state["open_lab"] = next(iter(labs.values()), None) if labs else None
+
+
+def _has_open_positions(state: Dict[str, Any]) -> bool:
+    _normalize_open_positions(state)
+    return bool(state.get("open_wars")) or bool(state.get("open_labs"))
+
+
+def _resolve_open_slot(state: Dict[str, Any], ticker: str) -> Tuple[bool, Dict[str, Any]]:
+    _normalize_open_positions(state)
+    t = ticker.upper()
+    labs = state.get("open_labs") or {}
+    if t in labs:
+        return True, labs[t]
+    wars = state.get("open_wars") or {}
+    if t in wars:
+        return False, wars[t]
+    return False, {}
+
+
+def _clear_open_slot(state: Dict[str, Any], ticker: str, *, use_lab: bool) -> None:
+    _normalize_open_positions(state)
+    t = ticker.upper()
+    if use_lab:
+        labs = state.get("open_labs") or {}
+        labs.pop(t, None)
+        state["open_labs"] = labs
+        state["open_lab"] = next(iter(labs.values()), None) if labs else None
+    else:
+        wars = state.get("open_wars") or {}
+        wars.pop(t, None)
+        state["open_wars"] = wars
+        state["open_war"] = next(iter(wars.values()), None) if wars else None
 _MODES_LAB_ENTRY = frozenset({"LAB_ACTIVE"})
 
 
@@ -327,6 +387,8 @@ def _default_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         "rth_rolled_date": None,
         "open_war": None,
         "open_lab": None,
+        "open_wars": {},
+        "open_labs": {},
         "session_pnl_war": 0.0,
         "session_pnl_lab": 0.0,
         "ticker_session_pnl": {},
@@ -342,6 +404,7 @@ def load_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
             try:
                 data = json.loads(STATE_PATH.read_text(encoding="utf-8"))
                 if isinstance(data, dict) and data.get("nav") is not None:
+                    _normalize_open_positions(data)
                     return data
             except Exception:
                 pass
@@ -424,7 +487,7 @@ def _roll_rth_session(state: Dict[str, Any], cfg: Optional[BotConfig] = None) ->
     today = _today_key()
     if state.get("rth_rolled_date") == today:
         return False
-    if state.get("open_war") or state.get("open_lab"):
+    if _has_open_positions(state):
         log.info(
             "⚔️ War RTH reset skipped — open position carried from extended hours"
         )
@@ -569,15 +632,14 @@ def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> s
     live = is_live_war(cfg)
     min_bullet = _min_entry_settled(state, cfg)
     settled = float(state.get("settled_cash", 0))
-    open_war = state.get("open_war")
-
+    open_war = state.get("open_wars") or {}
     if open_war:
         return "LIVE_WAR" if live else "WAR_ACTIVE"
 
     war_trips_blocked = _trip_cap_blocks(state, cfg, use_lab=False)
     if war_trips_blocked or settled < min_bullet:
         if lab_enabled(cfg) and float(state.get("lab_settled", 0)) >= min_bullet * 0.5:
-            if not state.get("open_lab") and not _trip_cap_blocks(state, cfg, use_lab=True):
+            if not state.get("open_labs") and not _trip_cap_blocks(state, cfg, use_lab=True):
                 return "LAB_ACTIVE"
         return "OBSERVE"
 
