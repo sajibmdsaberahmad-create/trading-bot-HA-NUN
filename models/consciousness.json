@@ -5,16 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
-  "improvements_applied": 2675,
+  "improvements_applied": 2676,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:05.053971",
-      "age": "7d 19h 57m 16s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-4.93",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:00:07.339699",
       "age": "7d 19h 57m 18s",
@@ -12285,6 +12278,20 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #225",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T10:11:14.984197",
+      "age": "8d 23h 8m 26s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2676",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on INTZ"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T10:09:24.779823",
