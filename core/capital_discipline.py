@@ -104,6 +104,8 @@ def allows_ppo_lead_while_pending(
     spike_ratio: float = 0.0,
 ) -> bool:
     cfg = cfg or BotConfig()
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     if not capital_discipline_enabled(cfg):
         return bool(cfg.PPO_LEAD_WHILE_COUNCIL_PENDING)
     if bool(getattr(cfg, "CAPITAL_PPO_LEAD_STRONG_SPIKE", True)) and is_strong_spike_setup(
@@ -118,6 +120,8 @@ def allows_scanner_fast_bypass(
     scan_score: float = 0.0,
     spike_ratio: float = 0.0,
 ) -> bool:
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     if not capital_discipline_enabled(cfg):
         return True
     if bool(getattr(cfg, "CAPITAL_SCANNER_FAST_STRONG", True)) and is_strong_spike_setup(
@@ -182,8 +186,10 @@ def effective_min_profit_probability(
         pass
     if is_strong_spike_setup(cfg, scan_score, spike_ratio):
         try:
-            from core.smart_stack import strict_profit_prob_enabled
-            if not strict_profit_prob_enabled(cfg):
+            from core.smart_stack import strict_profit_prob_enabled, ai_sure_entry_enabled
+            if ai_sure_entry_enabled(cfg) or strict_profit_prob_enabled(cfg):
+                pass
+            else:
                 strong = float(getattr(cfg, "CAPITAL_STRONG_PROFIT_PROB_FLOOR", 0.48))
                 base = min(base, strong)
         except Exception:

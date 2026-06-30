@@ -318,10 +318,12 @@ def merge_entry_decision(
     min_conf_eff = effective_min_confidence(cfg) if cfg else min_conf
     min_conf = max(min_conf, min_conf_eff)
     try:
-        from core.smart_stack import strict_profit_prob_enabled
+        from core.smart_stack import strict_profit_prob_enabled, ai_sure_entry_enabled
         strict_prob = strict_profit_prob_enabled(cfg)
+        ai_sure = ai_sure_entry_enabled(cfg)
     except Exception:
         strict_prob = False
+        ai_sure = False
     enter_ok = bool((quality or {}).get("enter_ok", True))
     timeout_min_scan = float(
         getattr(cfg, "COUNCIL_TIMEOUT_MIN_SCAN_SCORE", 40.0),
@@ -402,7 +404,7 @@ def merge_entry_decision(
         min_prob = effective_min_profit_probability(cfg, scan_score, spike_ratio) if cfg else min_prob
         if allows_ppo_lead_while_pending(
             cfg, scan_score=scan_score, spike_ratio=spike_ratio,
-        ) and ppo_buy and is_strong_spike_setup(cfg, scan_score, spike_ratio):
+        ) and ppo_buy and is_strong_spike_setup(cfg, scan_score, spike_ratio) and not ai_sure:
             prob_ok = profit_prob >= min_prob if strict_prob else profit_prob >= min_prob * 0.90
             if (
                 (prob_ok and bool((quality or {}).get("enter_ok", True)))
