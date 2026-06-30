@@ -4,12 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Spike-top hunt on TNMG: spike_top_exit: +14.93% vol=2.2x",
-    "Commander: spike_top_exit: +14.93% vol=2.2x",
-    "Commander: BUY 912 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1643 or a more aggressive price still within your spec",
-    "Commander: hard_stop",
-    "Commander: BUY 885 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1670 or a more aggressive price still within your spec",
-    "Review order_timeout on SOAR",
     "Commander: BUY 886 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1688 or a more aggressive price still within your spec",
     "Commander: stop_breach",
     "Commander: BUY 893 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1679 or a more aggressive price still within your spec",
@@ -103,10 +97,16 @@
     "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0636 or a more aggressive price still within y",
     "Review loss_streak on INLF",
     "Commander: green_profit_lock:ai_stall quick_scalp +3.46% (peak +4.12%)",
-    "Review trade_closed on INLF"
+    "Review trade_closed on INLF",
+    "Review loss_streak on SOXS",
+    "Commander: green_profit_lock:ai_stall quick_scalp +10.49% (peak +0.06%)",
+    "Review trade_closed on SOXS",
+    "Spike-top hunt on CELZ: spike_top_intrabar: +8.94% vol=1.2x",
+    "Commander: spike_top_intrabar: +8.94% vol=1.2x",
+    "Review loss_streak on CELZ"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 4,
-  "updated": "2026-06-30T13:36:21.301327"
+  "trades_observed": 8,
+  "updated": "2026-06-30T13:43:21.610716"
 }

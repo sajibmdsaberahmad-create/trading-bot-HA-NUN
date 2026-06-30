@@ -65,3 +65,19 @@ green_profit_lock:ai_stall quick_scalp +3.46% (peak +4.12%)
 Observed ib_failure — recorded for learning.
 IB closing-only — cannot open new positions
 
+🧭 COMMANDER LEARNING | 2026-06-30T13:43:11.121774+00:00
+Observed loss_streak — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +10.49% (peak +0.06%)
+
+🧭 COMMANDER LEARNING | 2026-06-30T13:43:11.121702+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +10.49% (peak +0.06%)
+
+🧭 COMMANDER LEARNING | 2026-06-30T13:43:21.663971+00:00
+Observed loss_streak — recorded for learning.
+spike_top_intrabar: +8.94% vol=1.2x
+
+🧭 COMMANDER LEARNING | 2026-06-30T13:43:21.664052+00:00
+Observed trade_closed — recorded for learning.
+spike_top_intrabar: +8.94% vol=1.2x
+
