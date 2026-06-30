@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — Swing doctrine: maturity-scaled green entry/exit + summary doc — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [GREEN_CAPITAL_SWING_DOCTRINE.md](GREEN_CAPITAL_SWING_DOCTRINE.md)
 - `2026-07-01` **engineering** — Multi-bar ride + slippage-aware exit (book profit / cut loss early) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Unified green doctrine: same war tactics on full-balance pre/post war (only sizing differs) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Swing intel: multi-TF + IB news/fundamentals + web learn + policy train — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
