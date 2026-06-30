@@ -1,20 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 221,
+  "total_awakenings": 222,
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
   "improvements_applied": 2668,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T06:58:10.873043",
-      "age": "7d 19h 55m 22s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$+3.98",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T06:58:12.112269",
       "age": "7d 19h 55m 23s",
@@ -12271,9 +12264,16 @@
       "type": "TRADE",
       "message": "Observed trade: COIN ? P&L=$+4.15",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T08:20:19.701452",
+      "age": "8d 21h 17m 31s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #222",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-30T07:24:16.702344",
+  "last_awakening": "2026-06-30T08:20:19.701108",
   "current_version": "v20260629_075355",
   "version_history": [
     {

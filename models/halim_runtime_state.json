@@ -1,7 +1,7 @@
 {
   "mode": "trade_focus",
-  "market_state": "open",
+  "market_state": "pre_market",
   "can_trade": true,
-  "updated_at": "2026-06-30T08:00:21.797015+00:00",
-  "focus": "profit_hunting"
+  "updated_at": "2026-06-30T08:20:24.007595+00:00",
+  "initialized": true
 }

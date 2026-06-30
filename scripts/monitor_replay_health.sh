@@ -27,9 +27,12 @@ while true; do
   fi
 
   halim_up="no"
-  if curl -sf --max-time 2 "http://127.0.0.1:8765/v1/health" >/dev/null 2>&1; then
-    halim_up="yes"
-  fi
+  for halim_health in "http://127.0.0.1:8765/health" "http://127.0.0.1:8765/v1/health"; do
+    if curl -sf --max-time 2 "$halim_health" >/dev/null 2>&1; then
+      halim_up="yes"
+      break
+    fi
+  done
 
   v2=0 agree=0 disagree=0 comp=0 ppo_fix=0 halim_fix=0
   if [[ -f halim/data/coevolution/correction_log.jsonl ]]; then

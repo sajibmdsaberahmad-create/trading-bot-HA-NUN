@@ -313,7 +313,7 @@ class AICommander:
             log.debug(f"Halim entry ring: {exc}")
 
     def _await_halim_entry_slot(self, ticker: str, fingerprint: str) -> str:
-        """Wait for async Halim entry LM before fast paths (replay default)."""
+        """Wait for async Halim entry LM before fast paths (replay + live)."""
         try:
             from core.halim_entry_line import halim_entry_await_sec
             wait = halim_entry_await_sec(self.cfg)
@@ -329,12 +329,16 @@ class AICommander:
                     f"enter={h_enter} conf={h_conf:.0%} (await {wait:.1f}s)"
                 )
             elif outcome == "timeout":
-                log.debug(
+                log.info(
                     f"  🧠 Halim entry await timeout {ticker.upper()} ({wait:.1f}s) — fast path"
+                )
+            elif outcome in ("empty", "wrong_fp", "missing"):
+                log.info(
+                    f"  🧠 Halim entry await {outcome} {ticker.upper()} ({wait:.1f}s) — fast path"
                 )
             return outcome
         except Exception as exc:
-            log.debug(f"Halim entry await: {exc}")
+            log.info(f"  🧠 Halim entry await error {ticker.upper()}: {exc}")
             return "error"
 
     def _blend_halim_entry(
@@ -2027,6 +2031,10 @@ class AICommander:
             row["council_reason"] = str(council_parsed.get("reason", ""))[:200]
         return row
 
+    def _entry_verdict(self, payload: Dict[str, Any], out: Dict[str, Any]) -> Dict[str, Any]:
+        from core.halim_ppo_coevolution import merge_coevolution_stamps
+        return merge_coevolution_stamps(payload, out)
+
     def _emit_spike_verdict(
         self,
         decision: Dict[str, Any],
@@ -2043,6 +2051,14 @@ class AICommander:
         if decision.get("pending"):
             return decision
         dec = {**decision}
+        if hasattr(self, "_halim_entry"):
+            try:
+                from core.halim_ppo_coevolution import enrich_decision_halim_peek
+                dec = enrich_decision_halim_peek(
+                    dec, self._halim_entry.peek(ticker), task="entry_decision",
+                )
+            except Exception:
+                pass
         dec.setdefault("ppo_action", ppo_action)
         dec.setdefault("ppo_conf", ppo_conf)
         if ppo_reason:
@@ -2169,7 +2185,8 @@ class AICommander:
                     )
                 if not vetoed.get("enter"):
                     return self._emit_spike_verdict(
-                        {
+                        self._entry_verdict(
+                            {
                             "enter": False,
                             "confidence": float(vetoed.get("confidence", confidence)),
                             "shares": 0,
@@ -2180,7 +2197,9 @@ class AICommander:
                             "journal": str(out.get("journal", ""))[:300],
                             "pipeline": str(vetoed.get("pipeline", "war:entry_veto")),
                             "pending": False,
-                        },
+                            },
+                            out,
+                        ),
                         ticker=ticker,
                         spike_ratio=spike_ratio,
                         scan_score=scan_score,
@@ -2197,7 +2216,8 @@ class AICommander:
 
         if not enter:
             return self._emit_spike_verdict(
-                {
+                self._entry_verdict(
+                    {
                     "enter": False,
                     "confidence": confidence,
                     "shares": 0,
@@ -2208,7 +2228,9 @@ class AICommander:
                     "journal": str(out.get("journal", ""))[:300],
                     "pipeline": str(out.get("pipeline", "")),
                     "pending": False,
-                },
+                    },
+                    out,
+                ),
                 ticker=ticker,
                 spike_ratio=spike_ratio,
                 scan_score=scan_score,
@@ -2238,7 +2260,8 @@ class AICommander:
                 spike_ratio=spike_ratio, pipeline="atr_reject",
             )
             return self._emit_spike_verdict(
-                {
+                self._entry_verdict(
+                    {
                     "enter": False,
                     "confidence": confidence,
                     "shares": 0,
@@ -2249,7 +2272,9 @@ class AICommander:
                     "journal": str(out.get("journal", reason))[:300],
                     "pipeline": "atr_reject",
                     "pending": False,
-                },
+                    },
+                    out,
+                ),
                 ticker=ticker,
                 spike_ratio=spike_ratio,
                 scan_score=scan_score,
@@ -2261,7 +2286,8 @@ class AICommander:
 
         reason = str(out.get("reason", ppo_reason or "AI entry"))
         journal_note = str(out.get("journal", reason))[:300]
-        decision = {
+        decision = self._entry_verdict(
+            {
             "enter": True,
             "confidence": confidence,
             "shares": bracket.shares,
@@ -2276,7 +2302,9 @@ class AICommander:
             "council_agreement": out.get("council_agreement"),
             "ticker": ticker,
             "entry": current_px,
-        }
+            },
+            out,
+        )
         ok, decision, err = validate_decision_bracket(self.cfg, decision, fallback_entry=current_px)
         if not ok:
             snap = self.ollama_audit_snapshot(ticker)
@@ -2289,7 +2317,8 @@ class AICommander:
                 spike_ratio=spike_ratio, pipeline="bracket_validator",
             )
             return self._emit_spike_verdict(
-                {
+                self._entry_verdict(
+                    {
                     "enter": False,
                     "confidence": confidence,
                     "shares": 0,
@@ -2300,7 +2329,9 @@ class AICommander:
                     "journal": journal_note,
                     "pipeline": "bracket_validator",
                     "pending": False,
-                },
+                    },
+                    out,
+                ),
                 ticker=ticker,
                 spike_ratio=spike_ratio,
                 scan_score=scan_score,
