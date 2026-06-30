@@ -4531,3 +4531,6 @@
 {"ticker":"ABVX","reason":"profit_prob_below_80pct","scan_score":91.2,"spike_ratio":3.481,"shadow_only":true,"timestamp":"2026-06-30T10:56:54.109265+00:00"}
 {"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":0.9755289056514822,"shadow_only":true,"timestamp":"2026-06-30T10:56:56.606589+00:00"}
 {"ticker":"GVH","reason":"profit_prob_below_80pct","scan_score":80.2,"spike_ratio":5873.0,"shadow_only":true,"timestamp":"2026-06-30T10:56:57.073505+00:00"}
+{"ticker":"CUPR","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":174293.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:11.034185+00:00"}
+{"ticker":"CUPR","reason":"ppo_not_aligned","scan_score":93.4,"spike_ratio":158743.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:16.552921+00:00"}
+{"ticker":"KTTA","reason":"ppo_not_aligned","scan_score":82.4,"spike_ratio":146343.0,"shadow_only":true,"timestamp":"2026-06-30T11:03:19.258671+00:00"}
