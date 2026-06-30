@@ -3278,3 +3278,4 @@
 {"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T08:28:12.211100+00:00"}
 {"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":786.0,"shadow_only":true,"timestamp":"2026-06-30T08:29:26.458734+00:00"}
 {"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":775.0,"shadow_only":true,"timestamp":"2026-06-30T08:29:41.705025+00:00"}
+{"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":1082.0,"shadow_only":true,"timestamp":"2026-06-30T08:29:58.157680+00:00"}
