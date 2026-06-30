@@ -165,7 +165,11 @@ from core.entry_pipeline import (
     new_entry_poll_state,
     stuck_entry_limit_px,
 )
-from core.position_sync import repair_slot_entry_price, sync_position_slots_from_ib
+from core.position_sync import (
+    adopt_ib_positions_into_slots,
+    repair_slot_entry_price,
+    sync_position_slots_from_ib,
+)
 from core.position_context import (
     bind_risk_plan_for_ticker,
     risk_plan_sane_for_tick,
@@ -1007,14 +1011,20 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         if not getattr(self.cfg, "USE_MULTI_POSITION", True):
             self._sync_position_from_ib()
             return
-        if not self._position_slots:
-            return
         try:
-            sync_position_slots_from_ib(
-                self.ib,
-                self._position_slots,
-                short_warned=self._short_warned,
-            )
+            adopted = adopt_ib_positions_into_slots(self.ib, self._position_slots)
+            for ticker in adopted:
+                self._bind_risk_plan_for_ticker(ticker)
+                try:
+                    self._ensure_position_stream(ticker)
+                except Exception:
+                    pass
+            if self._position_slots:
+                sync_position_slots_from_ib(
+                    self.ib,
+                    self._position_slots,
+                    short_warned=self._short_warned,
+                )
             self._refresh_aggregate_position_state()
         except Exception as exc:
             log.debug(f"Multi position sync: {exc}")

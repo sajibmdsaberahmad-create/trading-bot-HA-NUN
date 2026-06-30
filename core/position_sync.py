@@ -47,6 +47,58 @@ def ib_long_position_map(ib) -> Dict[str, float]:
     return out
 
 
+def adopt_ib_positions_into_slots(
+    ib,
+    position_slots: Dict[str, Dict[str, Any]],
+) -> list[str]:
+    """Recover IB long holdings into position_slots so monitor/AI can manage after restart."""
+    adopted: list[str] = []
+    ib_map = ib_long_position_map(ib)
+    now = time.time()
+    for ticker, sh in ib_map.items():
+        if sh <= 0:
+            continue
+        t = ticker.upper()
+        avg = position_avg_cost(ib, t)
+        entry = avg if avg > 0 else 0.0
+        slot = position_slots.get(t)
+        if slot and float(slot.get("shares", 0) or 0) > 0:
+            if entry > 0:
+                slot["entry_fill_px"] = entry
+                slot["entry_price"] = entry
+                slot["ib_fill_confirmed"] = True
+            slot["shares"] = float(sh)
+            continue
+        stop = entry * 0.995 if entry > 0 else 0.0
+        target = entry * 1.015 if entry > 0 else 0.0
+        position_slots[t] = {
+            "shares": float(sh),
+            "session_shares": float(sh),
+            "entry_price": entry,
+            "entry_fill_px": entry,
+            "ib_fill_confirmed": entry > 0,
+            "stop": stop,
+            "target": target,
+            "peak": entry or 0.0,
+            "hard_floor": stop,
+            "opened_at": now,
+            "prev_shares": float(sh),
+            "last_pulse_price": entry,
+            "last_price_change_at": now,
+            "last_price_snapshot_at": 0.0,
+            "last_pulse_fingerprint": "",
+            "last_position_pulse": 0.0,
+            "last_ai_position_manage": 0.0,
+            "last_stagnation_decision": {},
+            "recovered_from_ib": True,
+        }
+        adopted.append(t)
+        log.info(
+            f"  📎 Recovered IB position {t}: {sh:.0f}sh @ ${entry:.4f} — live monitor armed"
+        )
+    return adopted
+
+
 def sync_position_slots_from_ib(
     ib,
     position_slots: Dict[str, Dict[str, Any]],
