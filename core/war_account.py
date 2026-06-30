@@ -1027,19 +1027,21 @@ def check_entry_allowed(
     if not war_account_enabled(cfg):
         return None
 
+    full_balance_phase = False
     try:
         from core.capital_phase import capital_phases_enabled, uses_war_sizing
-        if capital_phases_enabled(cfg) and not uses_war_sizing(cfg):
-            return None
+        full_balance_phase = capital_phases_enabled(cfg) and not uses_war_sizing(cfg)
     except Exception:
         pass
 
     if pipeline:
         try:
+            from core.green_trade_doctrine import same_tactics_all_phases
             from core.war_entry_gates import war_entry_veto
-            veto = war_entry_veto(cfg, pipeline=pipeline)
-            if veto:
-                return veto
+            if not full_balance_phase or same_tactics_all_phases(cfg):
+                veto = war_entry_veto(cfg, pipeline=pipeline)
+                if veto:
+                    return veto
         except Exception:
             pass
 
@@ -1050,6 +1052,9 @@ def check_entry_allowed(
             return g
     except Exception:
         pass
+
+    if full_balance_phase:
+        return None
 
     state = load_state(cfg)
     with _state_lock:

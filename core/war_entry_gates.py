@@ -25,8 +25,12 @@ def _env_float(name: str, default: float) -> float:
 
 
 def war_gates_active(cfg: Optional[BotConfig] = None) -> bool:
+    """War sniper gates OR unified green doctrine on all capital phases."""
     try:
+        from core.green_trade_doctrine import same_tactics_all_phases
         from core.war_account import war_account_enabled, sniper_mode
+        if same_tactics_all_phases(cfg) and war_account_enabled(cfg):
+            return True
         return war_account_enabled(cfg) and sniper_mode(cfg)
     except Exception:
         return False
