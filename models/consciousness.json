@@ -5,37 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1676,
   "scans_performed": 39,
-  "improvements_applied": 2686,
+  "improvements_applied": 2689,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:01:38.141416",
-      "age": "7d 19h 58m 49s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2025",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on COIN"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T07:01:43.412306",
-      "age": "7d 19h 58m 54s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-7.68",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:01:52.257289",
-      "age": "7d 19h 59m 3s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-3.71",
-      "metadata": {}
-    },
     {
       "timestamp": "2026-06-29T07:02:59.789409",
       "age": "7d 20h 0m 11s",
@@ -12297,6 +12269,48 @@
         "applied": [],
         "lessons": [
           "Review ib_failure on CUPR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:19:50.368614",
+      "age": "9d 0h 17m 1s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2687",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on KTTA"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:19:51.048222",
+      "age": "9d 0h 17m 2s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2688",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on INTZ"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:19:55.182026",
+      "age": "9d 0h 17m 6s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2689",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on BTCT"
         ]
       }
     }

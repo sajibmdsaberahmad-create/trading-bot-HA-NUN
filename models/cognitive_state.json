@@ -4,7 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review trade_closed on KNDI",
     "Commander: green_profit_lock:ai_stall quick_scalp +4.47% (peak +4.47%)",
     "Commander: green_profit_lock:giveback +0.23% (peak +0.91% gave back 0.68%)",
     "Review ib_failure on KNDI",
@@ -103,10 +102,11 @@
     "Review ib_failure on CUPR",
     "Commander: IB closing-only \u2014 cannot open new positions",
     "Review ib_failure on JEM",
-    "Review order_timeout on KTTA"
+    "Review order_timeout on KTTA",
+    "Review order_timeout on BTCT"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-30T11:18:51.121132"
+  "updated": "2026-06-30T11:19:55.181601"
 }
