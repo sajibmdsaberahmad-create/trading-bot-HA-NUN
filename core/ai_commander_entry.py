@@ -680,7 +680,7 @@ class CommanderEntryMixin:
         self._await_halim_entry_slot(ticker, fp)
         if allows_micro_fast_entry(self.cfg) and should_micro_fast_entry(
             self.cfg, spike_ratio, scan_score, micro, ppo_action, ppo_conf,
-            ticker=ticker,
+            ticker=ticker, live_px=float(current_px or 0),
         ):
             fp = self._ring_entry_council_for_learning(
                 ticker, current_px, spike_ratio, scan_score,
@@ -1159,6 +1159,7 @@ class CommanderEntryMixin:
                 promote_scanner = True
             elif should_micro_fast_entry(
                 self.cfg, spike_ratio, scan_score, micro, ticker=ticker,
+                live_px=float(state.get("current_px", 0) or 0),
             ):
                 promote_scanner = True
                 spike_ratio = max(spike_ratio, float(micro.get("vol_accel", spike_ratio)))
