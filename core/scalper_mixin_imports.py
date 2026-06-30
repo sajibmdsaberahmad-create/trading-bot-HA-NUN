@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+from core.agent import predict_with_reasoning
 from core.ai_learning_policy import (
     failure_cooldown_sec,
     is_ib_structural_reject,
@@ -20,7 +21,11 @@ from core.ai_learning_policy import (
 )
 from core.bracket_validator import adapt_bracket_to_fill, validate_decision_bracket
 from core.broker import BracketHandle, parse_ib_order_block
+from core.async_utils import get_background_worker
 from core.capital_discipline import allows_ppo_lead_while_pending
+from core.commander_learning import run_commander_learning_cycle
+from core.data import DataManager, coalesce_bars
+from core.deferred_council_learning import deferred_learning_enabled
 from core.config import BotConfig
 from core.entry_pipeline import (
     confirm_entry_fill_from_ib as _confirm_entry_fill,
@@ -77,7 +82,16 @@ from core.fill_tracker import (
     resolve_entry_fill,
     resolve_exit_fill,
 )
-from core.git_sync import push_daily_summary, push_learning_checkpoint_async
+from core.git_sync import (
+    push_daily_summary,
+    push_learning_checkpoint_async,
+    push_model_release,
+    push_trade,
+    sync_all_learning_artifacts,
+)
+from core.institutional import InstitutionalDetector
+from core.local_cleanup import cleanup_local_workspace
+from core.market_context import summarize_market_context
 from core.market_hours import (
     allowed_trading_sessions_label,
     can_trade_now,
@@ -110,7 +124,9 @@ from core.pilot_mode import (
     send_dynamic_notification,
     snapshot_features,
 )
-from core.scanner import ScanResult, ScannerHit
+from core.scanner import PENNY_STOCK_UNIVERSE, ScanResult, ScannerHit, StockScanner
+from core.self_improver import generate_self_improvement_plan
+from core.train_subprocess import launch_training
 from core.position_sync import repair_slot_entry_price, sync_position_slots_from_ib
 from core.profit_hunting import (
     evaluate_spike_top_exit,
