@@ -92,19 +92,19 @@ def main() -> None:
     for node in tree.body:
         if isinstance(node, ast.Assign):
             names = [t.id for t in node.targets if isinstance(t, ast.Name)]
-            if names and names[0] in {
-                "_repo", "_token", "_enabled", "MIN_PUSH_INTERVAL_SEC", "_NEVER_PUSH_FILES",
-            } or (names and names[0].startswith("_") and node.lineno < 400):
-                if names[0] in {"_repo", "_token", "_enabled", "_push_lock", "_last_push_ts",
-                    "_push_count", "_failed_pushes", "_ollama_brain", "_gh_cli_cached",
-                    "_gh_missing_logged", "_gh_auth_verified", "_git_init_done",
-                    "_learning_restore_done", "_checkpoint_lock", "_checkpoint_pending",
-                    "_checkpoint_batched_reasons", "_checkpoint_flush_timer", "_last_checkpoint_ts",
-                    "_CHECKPOINT_MIN_INTERVAL_SEC", "_standalone_mode", "_watcher_stop",
-                    "_watcher_thread", "_last_dirty_fingerprint", "_flush_timer",
-                    "_git_journal_lock", "_git_session_stats", "MIN_PUSH_INTERVAL_SEC",
-                    "_NEVER_PUSH_FILES"}:
-                    state_lines.append(_chunk(lines, node))
+            if not names:
+                continue
+            n0 = names[0]
+            if n0 in {
+                "_repo", "_token", "_enabled", "_push_lock", "_last_push_ts",
+                "_push_count", "_failed_pushes", "_ollama_brain", "_gh_cli_cached",
+                "_gh_missing_logged", "_gh_auth_verified", "_git_init_done",
+                "_learning_restore_done", "_last_checkpoint_ts",
+                "_CHECKPOINT_MIN_INTERVAL_SEC", "_standalone_mode", "_watcher_stop",
+                "_watcher_thread", "_last_dirty_fingerprint", "_flush_timer",
+                "_git_journal_lock", "_git_session_stats", "MIN_PUSH_INTERVAL_SEC",
+            }:
+                state_lines.append(_chunk(lines, node))
         if isinstance(node, ast.AnnAssign) and getattr(node.target, "id", "") == "_NEVER_PUSH_FILES":
             state_lines.append(_chunk(lines, node))
 
@@ -291,30 +291,60 @@ _token = S._token
     backup = SRC.with_suffix(".py.bak")
     backup.write_text(text, encoding="utf-8")
 
-    # Fix keep: also need defer imports helpers - grep what's left
-    new_keep = []
-    seen_import = False
-    for chunk in keep:
-        if chunk.startswith("from ") or chunk.startswith("import "):
-            if not seen_import:
-                new_keep.append(chunk)
-                if "git_sync_state" not in chunk:
-                    new_keep.append("from core import git_sync_state as S\n")
-                seen_import = True
-            elif "git_sync_state" not in chunk:
-                new_keep.append(chunk)
-        elif "def " in chunk or chunk.strip().startswith("#"):
-            new_keep.append(chunk)
-
-    # Replace global declarations in kept init with S. assignments
     kept_text = "".join(new_keep)
-    kept_text = re.sub(
-        r"global (_repo|_token|_enabled|_ollama_brain|_git_init_done|_learning_restore_done|_last_push_ts)",
-        r"global S.\1",
-        kept_text,
-    )
+    # Route legacy state through git_sync_state
+    for name in (
+        "_enabled", "_repo", "_token", "_ollama_brain", "_git_init_done",
+        "_learning_restore_done", "_last_push_ts", "_gh_cli_cached",
+        "_gh_missing_logged", "_gh_auth_verified", "_standalone_mode",
+        "_last_dirty_fingerprint", "_watcher_stop", "_checkpoint_lock",
+        "_checkpoint_flush_timer",
+    ):
+        kept_text = re.sub(rf"\bglobal {name}\b", "", kept_text)
+        kept_text = re.sub(rf"\bglobal S\.{name}\b", "", kept_text)
+        kept_text = re.sub(rf"\b{name}\b", f"S.{name}", kept_text)
+    kept_text = kept_text.replace("S.S.", "S.")
+    kept_text = kept_text.replace("S._checkpoint_lock", "_defer.checkpoint_lock")
+    kept_text = kept_text.replace("S._checkpoint_batched_reasons", "_defer.checkpoint_batched_reasons")
+    kept_text = kept_text.replace("S._checkpoint_flush_timer", "_defer.checkpoint_flush_timer")
+    kept_text = re.sub(r"\bREPO_DIR\b", "S.REPO_DIR", kept_text)
+    kept_text = kept_text.replace("S.REPO_DIR", "REPO_DIR")  # keep REPO_DIR alias
+    kept_text = "REPO_DIR = S.REPO_DIR\n" + kept_text
 
-    SRC.write_text(kept_text + bridge, encoding="utf-8")
+    header = '''#!/usr/bin/env python3
+"""
+core/git_sync.py — Automatic GitHub push for EVERY change.
+
+Facade over git_sync_commit, git_sync_push, git_sync_routing, git_sync_learning.
+"""
+
+'''
+    bridge_at_top = '''
+from core import git_sync_state as S
+from core import git_sync_commit as _gcommit
+from core import git_sync_push as _gpush
+from core import git_sync_routing as _groute
+from core import git_sync_learning as _glearn
+from core import git_sync_defer as _defer
+
+REPO_DIR = S.REPO_DIR
+
+'''
+    # defer helpers used in kept code
+    defer_imports = """
+_is_replay_live = _defer.is_replay_live
+_git_session_push_enabled = _defer.git_session_push_enabled
+_batch_checkpoints_enabled = _defer.batch_checkpoints_enabled
+_queue_batched_checkpoint = _defer.queue_batched_checkpoint
+_schedule_batched_checkpoint_flush = _defer.schedule_batched_checkpoint_flush
+_should_defer_git_push = _defer.should_defer_git_push
+_shutdown_git_reason = _defer.shutdown_git_reason
+_checkpoint_lock = _defer.checkpoint_lock
+cfg_bot = _defer.cfg_bot
+
+"""
+
+    SRC.write_text(header + bridge_at_top + defer_imports + kept_text + bridge, encoding="utf-8")
     print(f"git_sync.py -> {len(kept_text.splitlines())} lines + bridge")
 
 
