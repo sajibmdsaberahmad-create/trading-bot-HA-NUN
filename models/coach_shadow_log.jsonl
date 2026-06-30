@@ -3682,3 +3682,9 @@
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.526066350692943,"shadow_only":true,"timestamp":"2026-06-30T10:17:45.860189+00:00"}
 {"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":2100.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:47.946300+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.526066350692943,"shadow_only":true,"timestamp":"2026-06-30T10:17:50.511979+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.526066350692943,"shadow_only":true,"timestamp":"2026-06-30T10:17:54.582575+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":10181.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:56.641776+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1748.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:57.108390+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":18786.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:59.176829+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T10:17:59.628937+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":8319.0,"shadow_only":true,"timestamp":"2026-06-30T10:18:01.714445+00:00"}
