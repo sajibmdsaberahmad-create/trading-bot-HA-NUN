@@ -3259,3 +3259,4 @@
 {"ticker":"ASTS","reason":"ppo_not_aligned","scan_score":70.8,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T08:21:39.405092+00:00"}
 {"ticker":"ASTS","reason":"ppo_not_aligned","scan_score":70.8,"spike_ratio":400.0,"shadow_only":true,"timestamp":"2026-06-30T08:22:24.085364+00:00"}
 {"ticker":"LCID","reason":"ppo_not_aligned","scan_score":66.4,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T08:22:39.284757+00:00"}
+{"ticker":"ASTS","reason":"ppo_not_aligned","scan_score":70.8,"spike_ratio":2842.0,"shadow_only":true,"timestamp":"2026-06-30T08:23:09.550835+00:00"}
