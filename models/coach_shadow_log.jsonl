@@ -4139,3 +4139,8 @@
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.063,"shadow_only":true,"timestamp":"2026-06-30T10:37:34.124739+00:00"}
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.3317338810456094,"shadow_only":true,"timestamp":"2026-06-30T10:37:36.671751+00:00"}
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.082,"shadow_only":true,"timestamp":"2026-06-30T10:37:38.805202+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.097,"shadow_only":true,"timestamp":"2026-06-30T10:37:42.884805+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":0.7048685491723466,"shadow_only":true,"timestamp":"2026-06-30T10:37:46.606780+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.119,"shadow_only":true,"timestamp":"2026-06-30T10:37:47.524718+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.195,"shadow_only":true,"timestamp":"2026-06-30T10:37:51.627651+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":3.316,"shadow_only":true,"timestamp":"2026-06-30T10:37:55.923242+00:00"}
