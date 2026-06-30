@@ -654,6 +654,16 @@ def init(cfg: BotConfig, ollama_brain: Optional[Any] = None):
             f"📤 Git sync: batched checkpoints — one push every ~{deb:.0f}s max "
             "(no per-trade triple-repo spam)"
         )
+    elif _enabled and not _git_session_push_enabled():
+        log.info(
+            "📤 Git sync: session pushes OFF — learning queued until stop_hanoon "
+            "(set GIT_PUSH_DURING_SESSION=true to push while trading)"
+        )
+        with _checkpoint_lock:
+            global _checkpoint_flush_timer
+            if _checkpoint_flush_timer is not None:
+                _checkpoint_flush_timer.cancel()
+                _checkpoint_flush_timer = None
     # Git auto-watch runs only via scripts/start_git_sync.sh (standalone daemon).
     # HANOON session never starts the watcher — zero impact on trading loop.
 
@@ -1617,10 +1627,20 @@ def _schedule_batched_checkpoint_flush() -> None:
 
 
 def _batched_checkpoint_flush_callback() -> None:
+    if not _git_session_push_enabled():
+        return
     try:
         flush_batched_git_sync("session_batch", full_sync=False, force=True)
     except Exception as exc:
         log.debug(f"Batched git flush: {exc}")
+
+
+def _shutdown_git_reason(summary_reason: str, combined: str = "") -> bool:
+    blob = f"{summary_reason} {combined}".lower()
+    return any(
+        k in blob
+        for k in ("pre_shutdown", "shutdown", "replay_end", "manual_sync")
+    )
 
 
 def flush_batched_git_sync(
@@ -1631,6 +1651,19 @@ def flush_batched_git_sync(
 ) -> bool:
     """One consolidated learning push from all queued checkpoint reasons."""
     global _checkpoint_flush_timer, _last_checkpoint_ts
+    if (
+        not is_replay_live()
+        and not _shutdown_git_reason(summary_reason)
+        and not _git_session_push_enabled()
+    ):
+        with _checkpoint_lock:
+            n = len(_checkpoint_batched_reasons)
+        if n:
+            log.debug(
+                f"Git batch flush deferred ({summary_reason}) — {n} reason(s) queued for shutdown"
+            )
+        return False
+
     with _checkpoint_lock:
         reasons = sorted(_checkpoint_batched_reasons)
         _checkpoint_batched_reasons.clear()

@@ -12,14 +12,21 @@
   "fee_drag_today": 3.5000000000000004,
   "lab_capital": 5000.0,
   "lab_nav": 4990.9106679999995,
-  "lab_cash": 4990.9106679999995,
-  "lab_settled": 4990.9106679999995,
+  "lab_cash": 4640.184445410336,
+  "lab_settled": 4640.184445410336,
   "lab_round_trips_today": 1,
-  "mode": "LAB_ACTIVE",
+  "mode": "OBSERVE",
   "is_live": false,
   "session_date": "2026-06-30",
   "open_war": null,
-  "open_lab": null,
+  "open_lab": {
+    "ticker": "INTZ",
+    "shares": 380,
+    "entry": 0.9220426910254292,
+    "ib_fill": 0.9188,
+    "comm": 0.35,
+    "ts": 1782822635.7214952
+  },
   "session_pnl_war": -15.518818379425115,
   "session_pnl_lab": -9.089332000000038,
   "ticker_session_pnl": {
@@ -33,5 +40,5 @@
     "VWAV": 1,
     "EDBL": 1
   },
-  "updated_at": 1782822620.9574568
+  "updated_at": 1782822644.5472808
 }
