@@ -159,7 +159,13 @@ from core.trade_telemetry import (
     log_post_fill_adapt, log_regime_atr_outcome, log_round_trip_fills, regime_tag,
 )
 from core.account_view import day_pnl_ib as _day_pnl_ib_view
-from core.entry_pipeline import confirm_entry_fill_from_ib as _confirm_entry_fill
+from core.entry_pipeline import (
+    confirm_entry_fill_from_ib as _confirm_entry_fill,
+    entry_price_mode_for_session,
+    new_entry_poll_state,
+    stuck_entry_limit_px,
+)
+from core.position_sync import repair_slot_entry_price, sync_position_slots_from_ib
 from core.fill_tracker import (
     append_fill_ledger,
     build_round_trip_record,

@@ -1555,92 +1555,16 @@ def set_global_config(cfg: Any):
     """Set global config reference for repo routing."""
     global cfg_bot
     cfg_bot = cfg
+    _defer.set_defer_config(cfg)
 
 
-def is_replay_live() -> bool:
-    """True when running CSV replay-live (not wall-clock live IB)."""
-    return os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
-
-
-def _git_session_push_enabled() -> bool:
-    """True when HANOON may flush batched learning pushes while the scalper is running."""
-    if is_replay_live():
-        return False
-    if cfg_bot is not None:
-        return bool(getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False))
-    return os.getenv("GIT_PUSH_DURING_SESSION", "false").lower() in ("1", "true", "yes")
-
-
-def _batch_checkpoints_enabled() -> bool:
-    """Collapse many checkpoint reasons into one debounced push (live) or end flush (replay)."""
-    if is_replay_live():
-        return True
-    if os.getenv("GIT_BATCH_CHECKPOINTS", "true").lower() in ("0", "false", "no"):
-        return False
-    return _git_session_push_enabled()
-
-
-def _should_defer_git_push(category: str = "general") -> bool:
-    """HANOON defers session pushes; replay defers ALL until teardown; live batches."""
-    if is_standalone_mode() and not is_replay_live():
-        return False
-    if category in ("shutdown", "manual_sync", "replay_end"):
-        return False
-    if is_replay_live():
-        return True
-    if _batch_checkpoints_enabled() and category in (
-        "training", "trade", "checkpoint", "auto", "general", "daily",
-        "guardrail", "model", "release",
-    ):
-        return True
-    if cfg_bot is not None and not getattr(cfg_bot, "GIT_PUSH_DURING_SESSION", False):
-        return True
-    if not _git_session_push_enabled():
-        return True
-    return False
-
-
-def _queue_batched_checkpoint(reason: str) -> None:
-    """Accumulate checkpoint reasons — flushed once (debounced live / replay end)."""
-    global _deferred_push_count
-    r = (reason or "checkpoint").strip()[:120]
-    with _checkpoint_lock:
-        if r not in _checkpoint_batched_reasons:
-            _checkpoint_batched_reasons.add(r)
-            _deferred_push_count += 1
-
-
-def _schedule_batched_checkpoint_flush() -> None:
-    """Live only — reset debounce timer; replay waits for teardown flush."""
-    if is_replay_live():
-        return
-    if not _git_session_push_enabled():
-        return
-    global _checkpoint_flush_timer
-    delay = float(os.getenv("GIT_CHECKPOINT_DEBOUNCE_SEC", "180"))
-    with _checkpoint_lock:
-        if _checkpoint_flush_timer is not None:
-            _checkpoint_flush_timer.cancel()
-        _checkpoint_flush_timer = Timer(delay, _batched_checkpoint_flush_callback)
-        _checkpoint_flush_timer.daemon = True
-        _checkpoint_flush_timer.start()
-
-
-def _batched_checkpoint_flush_callback() -> None:
-    if not _git_session_push_enabled():
-        return
-    try:
-        flush_batched_git_sync("session_batch", full_sync=False, force=True)
-    except Exception as exc:
-        log.debug(f"Batched git flush: {exc}")
-
-
-def _shutdown_git_reason(summary_reason: str, combined: str = "") -> bool:
-    blob = f"{summary_reason} {combined}".lower()
-    return any(
-        k in blob
-        for k in ("pre_shutdown", "shutdown", "replay_end", "manual_sync")
-    )
+is_replay_live = _defer.is_replay_live
+_git_session_push_enabled = _defer.git_session_push_enabled
+_batch_checkpoints_enabled = _defer.batch_checkpoints_enabled
+_should_defer_git_push = _defer.should_defer_git_push
+_queue_batched_checkpoint = _defer.queue_batched_checkpoint
+_schedule_batched_checkpoint_flush = _defer.schedule_batched_checkpoint_flush
+_shutdown_git_reason = _defer.shutdown_git_reason
 
 
 def flush_batched_git_sync(
@@ -1703,16 +1627,8 @@ def flush_replay_session_git_sync(
     return push_full_shutdown_sync(final_nav, return_pct, report_path)
 
 
-def batched_git_stats() -> Dict[str, Any]:
-    with _checkpoint_lock:
-        pending = sorted(_checkpoint_batched_reasons)
-    return {
-        "replay_live": is_replay_live(),
-        "batch_enabled": _batch_checkpoints_enabled(),
-        "deferred_skips": _deferred_push_count,
-        "pending_reasons": pending,
-        "pending_count": len(pending),
-    }
+batched_git_stats = _defer.batched_git_stats
+
 
 def push_trade(ticker: str, action: str, price: float, qty: float):
     """Push after a trade event."""
@@ -2542,3 +2458,8 @@ def sync_all_repos(reason: str = "manual_sync") -> Dict[str, bool]:
     out: Dict[str, bool] = {}
     out["learning"] = push_learning_checkpoint(reason, full_sync=True)
     return out
+
+
+_defer.register_session_flush_hook(
+    lambda: flush_batched_git_sync("session_batch", full_sync=False, force=True),
+)
