@@ -1734,3 +1734,15 @@
 {"timestamp":"2026-06-30T08:43:58.501226+00:00","event":"capability_milestone","capability":"decision_text","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T08:43:58.501306+00:00","event":"capability_milestone","capability":"decision_text","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T08:43:58.501356+00:00","event":"capability_milestone","capability":"decision_text","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:45.661135+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:45.661394+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:45.661453+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:45.661497+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.512053+00:00","event":"capability_milestone","capability":"decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.512191+00:00","event":"capability_milestone","capability":"decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.512296+00:00","event":"capability_milestone","capability":"decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.512361+00:00","event":"capability_milestone","capability":"decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.581251+00:00","event":"capability_milestone","capability":"enter_skip","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.581389+00:00","event":"capability_milestone","capability":"enter_skip","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.581656+00:00","event":"capability_milestone","capability":"enter_skip","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T08:45:50.581728+00:00","event":"capability_milestone","capability":"enter_skip","level_pct":100,"phase":"toddler"}
