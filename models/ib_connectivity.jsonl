@@ -22,3 +22,4 @@
 {"ts": 1782832298.121669, "event": "outage_restored", "source": "ib_connector", "duration": "1m 44s", "duration_sec": 104.4, "attempt": 5, "total_reconnects": 1}
 {"ts": 1782835080.000641, "event": "watchdog_start", "source": "gateway_watchdog", "host": "127.0.0.1", "port": 4002, "interval_sec": 30.0}
 {"ts": 1782836387.994405, "event": "watchdog_start", "source": "gateway_watchdog", "host": "127.0.0.1", "port": 4002, "interval_sec": 30.0}
+{"ts": 1782838555.431396, "event": "watchdog_start", "source": "gateway_watchdog", "host": "127.0.0.1", "port": 4002, "interval_sec": 30.0}
