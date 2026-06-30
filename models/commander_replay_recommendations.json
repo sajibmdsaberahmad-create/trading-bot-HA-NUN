@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "generated_at": "2026-06-29T16:45:06.462163+00:00",
-  "day": null,
+  "generated_at": "2026-06-30T20:00:04.709441+00:00",
+  "day": "2026-06-30",
   "commander": {
     "source": "commander_ib_report",
     "report": "Since_Inception_Detailed_11_20260427",
@@ -122,341 +122,343 @@
     ]
   },
   "live": {
-    "trip_count": 500,
-    "valid_trip_count": 500,
-    "total_pnl_usd": 212425.16,
+    "trip_count": 155,
+    "valid_trip_count": 155,
+    "total_pnl_usd": -1181.46,
     "class_counts": {
-      "fee_bleed": 89,
-      "good_cut": 189,
-      "loss_other": 205,
-      "tail_loss": 16,
-      "neutral": 1
+      "fee_bleed": 33,
+      "loss_other": 92,
+      "good_cut": 21,
+      "hope_hold": 2,
+      "neutral": 4,
+      "tail_loss": 3
     },
     "pnl_by_class": {
-      "fee_bleed": -1.93,
-      "good_cut": 215792.99,
-      "loss_other": -1934.81,
-      "tail_loss": -1431.09,
-      "neutral": 0.0
+      "fee_bleed": -14.71,
+      "loss_other": -834.49,
+      "good_cut": 188.67,
+      "hope_hold": -1.91,
+      "neutral": 0.0,
+      "tail_loss": -519.02
     },
     "trips": [
       {
-        "ticker": "TNMG",
-        "pnl_usd": -2.96,
-        "pnl_pct": -1.98,
-        "hold_sec": 60.2,
+        "ticker": "CELZ",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 63.6,
+        "class": "fee_bleed",
+        "exit_reason": "bracket_exit"
+      },
+      {
+        "ticker": "INLF",
+        "pnl_usd": -0.72,
+        "pnl_pct": -0.99,
+        "hold_sec": 32.3,
+        "class": "fee_bleed",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +3.46% (peak +4.12%)"
+      },
+      {
+        "ticker": "SOXS",
+        "pnl_usd": -1.0,
+        "pnl_pct": -0.22,
+        "hold_sec": 66.3,
+        "class": "fee_bleed",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +10.49% (peak +0.06%)"
+      },
+      {
+        "ticker": "CELZ",
+        "pnl_usd": -1.0,
+        "pnl_pct": -0.23,
+        "hold_sec": 0.0,
+        "class": "fee_bleed",
+        "exit_reason": "spike_top_intrabar: +8.94% vol=1.2x"
+      },
+      {
+        "ticker": "BTCT",
+        "pnl_usd": -2.9,
+        "pnl_pct": -0.48,
+        "hold_sec": 39.6,
+        "class": "loss_other",
+        "exit_reason": "tick_micro_loss"
+      },
+      {
+        "ticker": "BTCT",
+        "pnl_usd": -1.83,
+        "pnl_pct": -0.52,
+        "hold_sec": 19.1,
+        "class": "fee_bleed",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +1.28% (peak +1.28%)"
+      },
+      {
+        "ticker": "INTZ",
+        "pnl_usd": 55.25,
+        "pnl_pct": 9.16,
+        "hold_sec": 35.6,
+        "class": "good_cut",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +9.58% (peak +11.24%)"
+      },
+      {
+        "ticker": "SOXS",
+        "pnl_usd": -5.0,
+        "pnl_pct": -0.75,
+        "hold_sec": 60.3,
         "class": "loss_other",
         "exit_reason": "bracket_exit"
       },
       {
-        "ticker": "SOXS",
-        "pnl_usd": -100.0,
-        "pnl_pct": -0.48,
-        "hold_sec": 63.2,
-        "class": "tail_loss",
+        "ticker": "YHC",
+        "pnl_usd": -3.82,
+        "pnl_pct": -1.93,
+        "hold_sec": 24.7,
+        "class": "loss_other",
+        "exit_reason": "tick_micro_loss"
+      },
+      {
+        "ticker": "CELZ",
+        "pnl_usd": -10.76,
+        "pnl_pct": -1.6,
+        "hold_sec": 63.4,
+        "class": "loss_other",
         "exit_reason": "bracket_exit"
       },
       {
-        "ticker": "TNMG",
-        "pnl_usd": -126.89,
-        "pnl_pct": -2.54,
-        "hold_sec": 71.9,
-        "class": "tail_loss",
-        "exit_reason": "bracket_exit"
+        "ticker": "INLF",
+        "pnl_usd": -0.58,
+        "pnl_pct": -1.27,
+        "hold_sec": 40.4,
+        "class": "fee_bleed",
+        "exit_reason": "green_profit_lock:giveback +8.21% (peak +15519.14% gave back 15510.93%)"
       },
       {
-        "ticker": "SOXS",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 61.2,
+        "ticker": "TZA",
+        "pnl_usd": -1.0,
+        "pnl_pct": -0.15,
+        "hold_sec": 167.5,
+        "class": "loss_other",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)"
+      },
+      {
+        "ticker": "BIYA",
+        "pnl_usd": -0.15,
+        "pnl_pct": -0.27,
+        "hold_sec": 21.7,
+        "class": "fee_bleed",
+        "exit_reason": "green_profit_lock:giveback +0.16% (peak +0.36% gave back 0.21%)"
+      },
+      {
+        "ticker": "BITO",
+        "pnl_usd": -0.16,
+        "pnl_pct": -0.02,
+        "hold_sec": 0.0,
         "class": "fee_bleed",
         "exit_reason": "bracket_exit"
       },
       {
-        "ticker": "TNMG",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 56.0,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +0.98% (peak +0.98%)"
-      },
-      {
-        "ticker": "SOXS",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 60.1,
-        "class": "fee_bleed",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "SOXS",
-        "pnl_usd": -50.0,
-        "pnl_pct": -0.23,
-        "hold_sec": 27.8,
-        "class": "tail_loss",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +0.46% (peak +0.46%)"
-      },
-      {
-        "ticker": "KNDI",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 190.8,
-        "class": "neutral",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +4.47% (peak +4.47%)"
-      },
-      {
-        "ticker": "SOXS",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 34.3,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:giveback +0.23% (peak +0.91% gave back 0.68%)"
-      },
-      {
-        "ticker": "SOXS",
-        "pnl_usd": 50.0,
-        "pnl_pct": 0.23,
-        "hold_sec": 29.1,
+        "ticker": "BIYA",
+        "pnl_usd": 8.86,
+        "pnl_pct": 2.54,
+        "hold_sec": 83.1,
         "class": "good_cut",
-        "exit_reason": "green_profit_lock:giveback +0.23% (peak +0.45% gave back 0.23%)"
-      },
-      {
-        "ticker": "SOAR",
-        "pnl_usd": -0.73,
-        "pnl_pct": -1.28,
-        "hold_sec": 60.0,
-        "class": "fee_bleed",
         "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "SOAR",
-        "pnl_usd": -1.89,
-        "pnl_pct": -1.32,
-        "hold_sec": 60.1,
-        "class": "fee_bleed",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -100.0,
-        "pnl_pct": -0.5,
-        "hold_sec": 123.0,
-        "class": "tail_loss",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -50.0,
-        "pnl_pct": -0.25,
-        "hold_sec": 60.7,
-        "class": "tail_loss",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "TNMG",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 18.7,
-        "class": "fee_bleed",
-        "exit_reason": "trailing_profit"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -100.0,
-        "pnl_pct": -0.5,
-        "hold_sec": 171.5,
-        "class": "tail_loss",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -50.0,
-        "pnl_pct": -0.25,
-        "hold_sec": 18.4,
-        "class": "tail_loss",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)"
       },
       {
         "ticker": "TZA",
         "pnl_usd": 0.0,
         "pnl_pct": 0.0,
-        "hold_sec": 31.0,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +2366.09% (peak +2366.09%)"
+        "hold_sec": 723.6,
+        "class": "hope_hold",
+        "exit_reason": "tick_micro_loss"
       },
       {
-        "ticker": "SOAR",
-        "pnl_usd": -0.18,
-        "pnl_pct": -0.12,
-        "hold_sec": 60.3,
+        "ticker": "INLF",
+        "pnl_usd": -0.72,
+        "pnl_pct": -1.02,
+        "hold_sec": 208.6,
+        "class": "loss_other",
+        "exit_reason": "bracket_exit"
+      },
+      {
+        "ticker": "CELZ",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 12.9,
+        "class": "fee_bleed",
+        "exit_reason": "tick_micro_loss"
+      },
+      {
+        "ticker": "CELZ",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 27.6,
+        "class": "fee_bleed",
+        "exit_reason": "spike_top_intrabar: +1.07% vol=39088.0x"
+      },
+      {
+        "ticker": "BITO",
+        "pnl_usd": -0.21,
+        "pnl_pct": -0.13,
+        "hold_sec": 40.5,
         "class": "fee_bleed",
         "exit_reason": "trailing_stop"
       },
       {
         "ticker": "TZA",
-        "pnl_usd": -40.75,
-        "pnl_pct": -0.25,
-        "hold_sec": 26.2,
-        "class": "tail_loss",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)"
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 132.0,
+        "class": "neutral",
+        "exit_reason": "stop_breach"
       },
       {
-        "ticker": "TZA",
-        "pnl_usd": -100.0,
-        "pnl_pct": -0.5,
-        "hold_sec": 19.5,
-        "class": "tail_loss",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +0.50% (peak +0.50%)"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -100.0,
-        "pnl_pct": -0.51,
-        "hold_sec": 33.9,
-        "class": "tail_loss",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +1.01% (peak +1.01%)"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -100.0,
-        "pnl_pct": -0.51,
-        "hold_sec": 37.6,
-        "class": "tail_loss",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +1.52% (peak +1.52%)"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": 1.9,
-        "pnl_pct": 0.3,
-        "hold_sec": 69.2,
-        "class": "fee_bleed",
+        "ticker": "AAL",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 160.7,
+        "class": "neutral",
         "exit_reason": "bracket_exit"
       },
       {
-        "ticker": "TNMG",
-        "pnl_usd": -1.65,
-        "pnl_pct": -1.1,
-        "hold_sec": 75.2,
-        "class": "fee_bleed",
+        "ticker": "AAL",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 166.5,
+        "class": "neutral",
         "exit_reason": "bracket_exit"
       },
       {
-        "ticker": "TZA",
-        "pnl_usd": -1.14,
-        "pnl_pct": -0.18,
-        "hold_sec": 40.0,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +1.85% (peak +1.85%)"
-      },
-      {
-        "ticker": "TNMG",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 60.4,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:giveback +0.66% (peak +1.20% gave back 0.54%)"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -50.0,
-        "pnl_pct": -0.26,
-        "hold_sec": 41.9,
-        "class": "tail_loss",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +2.04% (peak +2.04%)"
-      },
-      {
-        "ticker": "TNMG",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 69.1,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +306.46% (peak +0.03%)"
-      },
-      {
-        "ticker": "TNMG",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 17.5,
-        "class": "fee_bleed",
-        "exit_reason": "spike_top_exit: +14.93% vol=2.2x"
-      },
-      {
-        "ticker": "SOAR",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 46.5,
-        "class": "fee_bleed",
-        "exit_reason": "hard_stop"
-      },
-      {
-        "ticker": "SOAR",
-        "pnl_usd": 31.45,
-        "pnl_pct": 3.87,
-        "hold_sec": 162.7,
-        "class": "good_cut",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "TNMG",
-        "pnl_usd": -32.37,
-        "pnl_pct": -0.61,
-        "hold_sec": 165.1,
+        "ticker": "EDBL",
+        "pnl_usd": -184.42,
+        "pnl_pct": -52.08,
+        "hold_sec": 42.5,
         "class": "tail_loss",
         "exit_reason": "stop_breach"
       },
       {
-        "ticker": "TNMG",
-        "pnl_usd": -25.02,
-        "pnl_pct": -0.48,
-        "hold_sec": 28.9,
+        "ticker": "INTZ",
+        "pnl_usd": -63.55,
+        "pnl_pct": -5.17,
+        "hold_sec": 53.2,
         "class": "loss_other",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +146.39% (peak +146.39%)"
+      },
+      {
+        "ticker": "VWAV",
+        "pnl_usd": -224.56,
+        "pnl_pct": -42.97,
+        "hold_sec": 53.9,
+        "class": "tail_loss",
+        "exit_reason": "stop_breach"
+      },
+      {
+        "ticker": "SVRE",
+        "pnl_usd": -110.04,
+        "pnl_pct": -61.55,
+        "hold_sec": 54.5,
+        "class": "tail_loss",
+        "exit_reason": "stop_breach"
+      },
+      {
+        "ticker": "SOXS",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 28.9,
+        "class": "fee_bleed",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +146.06% (peak +146.06%)"
+      },
+      {
+        "ticker": "BIYA",
+        "pnl_usd": 2.64,
+        "pnl_pct": 0.75,
+        "hold_sec": 12.8,
+        "class": "good_cut",
+        "exit_reason": "spike_top_intrabar: +1.70% vol=77654.0x"
+      },
+      {
+        "ticker": "AAL",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 57.6,
+        "class": "fee_bleed",
+        "exit_reason": "stop_breach"
+      },
+      {
+        "ticker": "CELZ",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 25.0,
+        "class": "fee_bleed",
+        "exit_reason": "spike_top_intrabar: +0.62% vol=24301.0x"
+      },
+      {
+        "ticker": "BITO",
+        "pnl_usd": -17.48,
+        "pnl_pct": -0.13,
+        "hold_sec": 0.0,
+        "class": "loss_other",
+        "exit_reason": "micro_loss: pressure=0.63 pred\u2193$7.92"
+      },
+      {
+        "ticker": "TZA",
+        "pnl_usd": -1.53,
+        "pnl_pct": -0.76,
+        "hold_sec": 95.2,
+        "class": "loss_other",
+        "exit_reason": "stop_breach"
+      },
+      {
+        "ticker": "BIYA",
+        "pnl_usd": 26.1,
+        "pnl_pct": 7.46,
+        "hold_sec": 111.7,
+        "class": "good_cut",
+        "exit_reason": "spike_top_intrabar: +0.43% vol=221735.0x"
+      },
+      {
+        "ticker": "T",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 231.2,
+        "class": "neutral",
+        "exit_reason": "stop_breach"
+      },
+      {
+        "ticker": "INLF",
+        "pnl_usd": -5.38,
+        "pnl_pct": 4.11,
+        "hold_sec": 0.0,
+        "class": "good_cut",
         "exit_reason": "tick_micro_loss"
       },
       {
-        "ticker": "SOAR",
+        "ticker": "CELZ",
         "pnl_usd": 0.0,
         "pnl_pct": 0.0,
-        "hold_sec": 60.0,
+        "hold_sec": 61.3,
         "class": "fee_bleed",
+        "exit_reason": "spike_top_intrabar: +1.30% vol=14435.0x"
+      },
+      {
+        "ticker": "AAL",
+        "pnl_usd": -1.54,
+        "pnl_pct": -0.06,
+        "hold_sec": 18.6,
+        "class": "fee_bleed",
+        "exit_reason": "green_profit_lock:ai_stall quick_scalp +14.05% (peak +14.05%)"
+      },
+      {
+        "ticker": "SOXS",
+        "pnl_usd": -18.92,
+        "pnl_pct": -0.62,
+        "hold_sec": 103.5,
+        "class": "loss_other",
         "exit_reason": "bracket_exit"
       },
       {
-        "ticker": "SOAR",
+        "ticker": "BITO",
         "pnl_usd": 0.0,
         "pnl_pct": 0.0,
-        "hold_sec": 16.9,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +1.10% (peak +1.10%)"
-      },
-      {
-        "ticker": "SOAR",
-        "pnl_usd": -1.23,
-        "pnl_pct": -0.82,
-        "hold_sec": 60.1,
-        "class": "fee_bleed",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "SOAR",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 26.0,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:giveback +0.29% (peak +0.46% gave back 0.17%)"
-      },
-      {
-        "ticker": "SOAR",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 43.8,
-        "class": "fee_bleed",
-        "exit_reason": "spike_top_intrabar: +1.44% vol=1.2x"
-      },
-      {
-        "ticker": "TNMG",
-        "pnl_usd": -1.76,
-        "pnl_pct": -0.98,
-        "hold_sec": 60.6,
+        "hold_sec": 63.6,
         "class": "fee_bleed",
         "exit_reason": "bracket_exit"
       }
@@ -471,6 +473,16 @@
       "suggested_params": [
         "STAGNATION_EXIT_SEC",
         "MIN_PROFIT_PROBABILITY"
+      ]
+    },
+    {
+      "id": "live_hope_hold",
+      "priority": "high",
+      "signal": "hope_hold",
+      "message": "Live sessions show hope-hold losses \u2014 tighten stagnation / early loss exits.",
+      "suggested_params": [
+        "STAGNATION_EXIT_SEC",
+        "SCALP_PROFIT_GIVEBACK_PCT"
       ]
     },
     {
