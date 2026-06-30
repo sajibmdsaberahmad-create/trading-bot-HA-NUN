@@ -10,6 +10,21 @@
 
 ---
 
+## 2026-07-01 — stop.sh: main-loop interruptible sleep (completes stop fix)
+
+### Problem
+`stop_hanoon.sh` and session shutdown helpers were merged, but `scalper_runner` main loop still used blocking `ib.sleep()` and off-hours horizon work could continue after stop.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_runner.py` | `_interruptible_ib_sleep` on main loop + deferred scanner warmup; abort off-hours train/horizon on stop |
+
+### Verify
+`./stop.sh` while HANOON running — process exits within ~30s, not stuck in off-hours block.
+
+---
+
 ## 2026-07-01 — stop.sh: responsive shutdown + no duplicate flush
 
 ### Problem

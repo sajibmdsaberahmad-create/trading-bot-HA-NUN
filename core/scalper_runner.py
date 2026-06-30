@@ -1757,7 +1757,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         loop_sec,
                         float(getattr(self.cfg, "ENTRY_PENDING_LOOP_SEC", 0.05)),
                     )
-                self.ib.sleep(loop_sec)
+                if self._interruptible_ib_sleep(loop_sec):
+                    break
 
                 # Fill polls first — don't let councils/scans delay IB bracket confirmation
                 if getattr(self.cfg, "PARALLEL_ENTRY_EXIT", True):
@@ -1826,7 +1827,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                             log.info(
                                 f"🔍 Deferred IB live scanner — warmup {warmup:.0f}s…"
                             )
-                            self.ib.sleep(warmup)
+                            if self._interruptible_ib_sleep(warmup):
+                                break
                         log.info("🔍 Running deferred IB live scanner…")
                         try:
                             self._scan_and_rank(startup=False)
@@ -2083,34 +2085,40 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                             f"enabled: {allowed_trading_sessions_label(self.cfg)} | training mode"
                         )
                     train_iv = float(getattr(self.cfg, "OFF_HOURS_TRAIN_INTERVAL_SEC", 3600))
-                    if now - getattr(self, "_last_off_hours_train", 0) >= train_iv:
+                    if (
+                        not self._shutdown_abort()
+                        and now - getattr(self, "_last_off_hours_train", 0) >= train_iv
+                    ):
                         self._last_off_hours_train = now
                         self._train_off_hours()
-                        try:
-                            from core.swing_shadow import run_swing_shadow_scan
-                            from core.trade_horizon import update_scalp_gate_from_ib
-                            from core.ib_hub import refresh_all_ib_services
-                            from core.ib_extended import ib_extended_enabled
-                            from core.swing_paper import sync_swing_paper_from_shadow_verdicts
-                            from core.ppo_swing_train import train_ppo_swing_from_shadow
-                            from core.swing_learning import ingest_ib_swing_round_trips
-                            from core.swing_web_learn import run_swing_web_learn_cycle
-                            from core.swing_train import train_swing_policy
+                        if self._shutdown_abort():
+                            break
+                        if not self._shutdown_abort():
+                            try:
+                                from core.swing_shadow import run_swing_shadow_scan
+                                from core.trade_horizon import update_scalp_gate_from_ib
+                                from core.ib_hub import refresh_all_ib_services
+                                from core.ib_extended import ib_extended_enabled
+                                from core.swing_paper import sync_swing_paper_from_shadow_verdicts
+                                from core.ppo_swing_train import train_ppo_swing_from_shadow
+                                from core.swing_learning import ingest_ib_swing_round_trips
+                                from core.swing_web_learn import run_swing_web_learn_cycle
+                                from core.swing_train import train_swing_policy
 
-                            run_swing_shadow_scan(self, self.cfg)
-                            ingest_ib_swing_round_trips(self.cfg)
-                            run_swing_web_learn_cycle(self.cfg)
-                            train_swing_policy(self.cfg)
-                            update_scalp_gate_from_ib(self.cfg)
-                            if ib_extended_enabled():
-                                refresh_all_ib_services(
-                                    self.ib, self.cfg, self.conn,
-                                    full=True, force=True, runner=self,
-                                )
-                            sync_swing_paper_from_shadow_verdicts(self, self.cfg)
-                            train_ppo_swing_from_shadow(self.cfg)
-                        except Exception as exc:
-                            log.debug(f"off-hours horizon: {exc}")
+                                run_swing_shadow_scan(self, self.cfg)
+                                ingest_ib_swing_round_trips(self.cfg)
+                                run_swing_web_learn_cycle(self.cfg)
+                                train_swing_policy(self.cfg)
+                                update_scalp_gate_from_ib(self.cfg)
+                                if ib_extended_enabled():
+                                    refresh_all_ib_services(
+                                        self.ib, self.cfg, self.conn,
+                                        full=True, force=True, runner=self,
+                                    )
+                                sync_swing_paper_from_shadow_verdicts(self, self.cfg)
+                                train_ppo_swing_from_shadow(self.cfg)
+                            except Exception as exc:
+                                log.debug(f"off-hours horizon: {exc}")
                 
                 self._refresh_account_balance()
                 self._maybe_sync_war_from_ib()
