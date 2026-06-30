@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-07-01` **engineering** — Capital phases + real IB swing (HN orderRef tags, multi-day trips) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [HORIZON_ROADMAP.md](HORIZON_ROADMAP.md)
 - `2026-07-01` **engineering** — IB replaces local/Yahoo duplicates (macro, positions, session PnL) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Fix exit executor SyntaxError + IB client_id=1 guard — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — IB Truth extended (open orders, IB RealizedPnL primary) + trade horizon scalp/swing shadow — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) · [HORIZON_ROADMAP.md](HORIZON_ROADMAP.md)
@@ -1913,3 +1914,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 21:31 UTC` **git_auto** — sync: 6 files — account_view.py, scalper_entry_executor.py, swing_learning.py +3 more | docs=1 core=2 other=3 | brain=toddler dataset=167 ev
 - `2026-06-30 21:31 UTC` **git_auto** — sync: 4 files — account_view.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=toddler dataset=167 evolutions=51
 - `2026-06-30 21:31 UTC` **git_auto** — sync: 8 files — account_view.py, ppo_swing_train.py, scalper_entry_executor.py +5 more | docs=1 core=4 other=3 | brain=toddler dataset=167 e
+- `2026-06-30 21:32 UTC` **git_auto** — sync: 10 files — account_view.py, smart_stack.py, war_account.py +7 more | docs=1 core=2 other=7 | brain=toddler dataset=167 evolutions=51

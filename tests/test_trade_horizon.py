@@ -23,8 +23,9 @@ def test_active_order_horizon_is_scalp():
 
 
 def test_tag_record_defaults_scalp():
-    row = tag_record({"symbol": "SPY"})
-    assert row["horizon"] == HORIZON_SCALP
+    with patch.dict("os.environ", {"CAPITAL_PHASES_ENABLED": "false"}, clear=False):
+        row = tag_record({"symbol": "SPY"})
+        assert row["horizon"] == HORIZON_SCALP
 
 
 def test_tag_record_swing():

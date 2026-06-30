@@ -10,6 +10,49 @@
 
 ---
 
+## 2026-07-01 — Capital phases + real IB swing with HN orderRef tags
+
+### Problem
+War $1k sizing applied all day; OBSERVE blocked afternoon learning; swing used virtual `swing_paper_state.json` instead of IB fills; no multi-day swing labels.
+
+### Root cause
+Single sizing authority in `get_ai_deploy_budget()`; `active_order_horizon()` scalp-only; no `capital_phase` or `orderRef` horizon tags.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/capital_phase.py` | **New** — `premarket_full` / `rth_war` / `rth_full` phase router |
+| `core/horizon_tags.py` | **New** — `HN\|horizon\|phase\|pipeline` orderRef + log tags |
+| `core/swing_executor.py` | **New** — live IB swing brackets (GTC), IB Truth marks |
+| `core/swing_learning.py` | **New** — `swing_ib_trips.jsonl` multi-day close labels |
+| `core/broker.py` | orderRef + GTC for swing brackets |
+| `core/war_account.py` | `war_ledger_applies()` — ledger only in `rth_war` scalp |
+| `core/pilot_mode.py` | Full IB budget outside `rth_war` |
+| `core/paper_mode.py` | `is_paper_free_learning` when phase is full |
+| `core/account_view.py` | Phase-aware `sizing_equity` |
+| `core/trade_horizon.py` | `swing_ib_live_enabled`, tag `capital_phase` |
+| `core/scalper_runner.py` | Swing IB cycle + trip ingest off-hours |
+| `core/scalper_entry_executor.py` | Scalp skips swing-held symbols; war ledger guard |
+| `core/scalper_exit_executor.py` | Swing close → `record_swing_ib_close` |
+| `core/ppo_swing_train.py` | Prefer IB trips over shadow verdicts |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `CAPITAL_PHASES_ENABLED` | `true` | 3-phase capital routing |
+| `CAPITAL_PHASE_SKIP_LAB` | `true` | War dry → full IB (not LAB pool) |
+| `SWING_IB_LIVE` | `true` | Real IB swing in full phases |
+| `SWING_IB_MAX_POSITIONS` | `3` | Max concurrent swing lines |
+| `SWING_STOP_PCT` / `SWING_TARGET_PCT` | `0.04` / `0.08` | Swing bracket width |
+
+### Verify
+```bash
+python3 -m pytest tests/test_capital_phase.py tests/test_horizon_tags.py tests/test_trade_horizon.py -q
+python3 -m py_compile core/capital_phase.py core/swing_executor.py core/swing_learning.py
+```
+
+---
+
 ## 2026-07-01 — Account evaluator: IB Truth for position/order snapshots
 
 ### Problem
