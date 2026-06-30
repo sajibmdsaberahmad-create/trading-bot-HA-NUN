@@ -3302,3 +3302,4 @@
 {"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":300.0,"shadow_only":true,"timestamp":"2026-06-30T08:33:57.387950+00:00"}
 {"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":765.0,"shadow_only":true,"timestamp":"2026-06-30T08:34:42.546745+00:00"}
 {"ticker":"MARA","reason":"profit_prob_below_80pct","scan_score":80.67466666666667,"spike_ratio":400.0,"shadow_only":true,"timestamp":"2026-06-30T08:34:57.958834+00:00"}
+{"ticker":"ASTS","reason":"profit_prob_below_80pct","scan_score":70.8,"spike_ratio":500.0,"shadow_only":true,"timestamp":"2026-06-30T08:35:43.164867+00:00"}
