@@ -1797,3 +1797,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 20:23 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, ib_truth.py +2 more | docs=1 core=1 other=3 | brain=toddler dataset=167 
 - `2026-06-30 20:23 UTC` **git_auto** — sync: 4 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, hanoon.env.enc +1 more | docs=1 other=3 | brain=toddler dataset=167 evol
 - `2026-06-30 20:23 UTC` **git_auto** — sync: 6 files — account_view.py, ai_commander_deferred.py, war_ib_sync.py +3 more | docs=1 core=2 other=3 | brain=toddler dataset=167 evolut
+- `2026-06-30 20:23 UTC` **git_auto** — sync: 5 files — account_view.py, scalper_runner.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=toddler dataset=167 evo

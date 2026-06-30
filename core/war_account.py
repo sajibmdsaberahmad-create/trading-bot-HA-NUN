@@ -764,7 +764,7 @@ def _sync_paper_war_config(state: Dict[str, Any], cfg: Optional[BotConfig] = Non
         state["bullets_total"] = bullets
 
 
-def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
+def ensure_war_account(cfg: Optional[BotConfig] = None, ib=None) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
     if is_replay_session():
         log.debug("War account init skipped — replay session")
@@ -778,7 +778,16 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     _maybe_refresh_trips_if_settled(state, cfg)
     state["mode"] = _recompute_mode(state, cfg)
     state["is_live"] = is_live_war(cfg)
-    save_state(state)
+    if ib is not None:
+        try:
+            from core.war_ib_sync import sync_war_from_ib, war_ib_sync_enabled
+            if war_ib_sync_enabled(cfg):
+                sync_war_from_ib(ib, cfg, apply=True)
+                state = load_state(cfg)
+        except Exception as exc:
+            log.warning(f"War IB sync at startup: {exc}")
+    else:
+        save_state(state)
     war_trips, war_cap = war_trip_display(state, cfg)
     lab_trips, lab_cap = war_trip_display(state, cfg, use_lab=True)
     bullets_left = war_bullets_remaining(state, cfg)
@@ -1287,14 +1296,15 @@ def record_exit(
         cfg, side="SELL", quote=ib_fill or quote, shares=shares, ticker=ticker,
         spread_pct=spread_pct,
     )
-    sh = int(shares or open_slot.get("shares", 0) or 0)
+    sh = int(open_slot.get("shares", 0) or shares or 0) if open_slot else int(shares or 0)
     proceeds = v_fill * sh
     exit_comm = _commission_usd(cfg, proceeds)
+    nav = float(state.get("nav", operating_capital_usd(cfg)) or operating_capital_usd(cfg))
 
     if open_slot:
         entry_v = float(open_slot.get("entry", 0) or 0)
         entry_comm = float(open_slot.get("comm", 0) or 0)
-        gross = (v_fill - entry_v) * sh if entry_v > 0 else float(pnl_usd_ib)
+        gross = (v_fill - entry_v) * sh if entry_v > 0 else None
     elif entry_ib_fill > 0:
         entry_v = float(entry_ib_fill)
         entry_comm = _commission_usd(cfg, entry_v * sh)
@@ -1306,11 +1316,31 @@ def record_exit(
     else:
         entry_v = 0.0
         entry_comm = 0.0
-        gross = float(pnl_usd_ib)
-        log.warning(
-            f"  ⚠️ WAR EXIT {t}: no open slot — using IB PnL ${pnl_usd_ib:+.2f}"
-        )
+        gross = None
+        log.warning(f"  ⚠️ WAR EXIT {t}: ghost exit — no slot, no IB entry fill")
+
+    if gross is None:
+        max_abs = max(nav * 0.35, sh * max(v_fill, 0.01) * 0.25)
+        if entry_ib_fill > 0 and v_fill > 0 and sh > 0:
+            gross = (v_fill - entry_ib_fill) * sh
+            entry_v = entry_ib_fill
+            entry_comm = _commission_usd(cfg, entry_v * sh)
+        elif abs(pnl_usd_ib) > 0 and abs(pnl_usd_ib) <= max_abs:
+            gross = float(pnl_usd_ib)
+            log.warning(f"  ⚠️ WAR EXIT {t}: using capped IB PnL ${pnl_usd_ib:+.2f}")
+        else:
+            log.warning(
+                f"  ⚠️ WAR EXIT {t}: skipping ledger — bogus PnL "
+                f"(pnl_usd_ib=${pnl_usd_ib:+.2f} cap=${max_abs:.2f})"
+            )
+            return {"skipped": True, "reason": "ghost_exit_no_slot", "ticker": t}
     net = gross - entry_comm - exit_comm
+    max_trip_loss = nav * 0.50
+    if net < -max_trip_loss:
+        log.warning(
+            f"  ⚠️ WAR EXIT {t}: capping loss ${net:+.2f} → ${-max_trip_loss:+.2f}"
+        )
+        net = -max_trip_loss
 
     if use_lab:
         state["lab_cash"] = float(state.get("lab_cash", 0)) + proceeds - exit_comm
