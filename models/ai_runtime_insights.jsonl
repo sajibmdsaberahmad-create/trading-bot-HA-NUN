@@ -2694,3 +2694,4 @@
 {"timestamp":"2026-06-30T10:20:51.411903+00:00","event":"order_timeout","ticker":"INTZ","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T10:29:11.844098+00:00","event":"ib_failure","ticker":"CUPR","reason":"IB closing-only \u2014 cannot open new positions","spike_ratio":356.0,"market_state":"pre_market"}
 {"timestamp":"2026-06-30T10:29:49.202274+00:00","event":"order_timeout","ticker":"INTZ","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-30T10:32:00.475286+00:00","event":"council_timeout","ticker":"AVXX","pipeline":"council:timeout_pass+halim","reason":"Halim 54% | Council timeout \u2014 capital discipline: no fallback entry","spike_ratio":1.20014184615822,"scan_score":95.6,"confidence":0.7413000000000001,"market_state":"pre_market"}
