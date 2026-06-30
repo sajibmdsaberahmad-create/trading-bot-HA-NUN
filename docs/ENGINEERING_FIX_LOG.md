@@ -10,6 +10,21 @@
 
 ---
 
+## 2026-07-01 — account_view sizing uses IB equity outside war phase
+
+### Problem
+`sizing_equity()` always preferred war ledger even in `premarket_full` / `rth_full` full-balance phases.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/account_view.py` | `sizing_equity` returns `display_equity` when `uses_war_sizing` is false |
+
+### Verify
+Full-balance phase deploy budget matches IB paper equity in logs.
+
+---
+
 ## 2026-07-01 — Swing doctrine: maturity-scaled green entry/exit
 
 ### Problem

@@ -51,8 +51,14 @@ def display_equity(runner: "ScalperRunner", cfg: Optional["BotConfig"] = None) -
 
 
 def sizing_equity(runner: "ScalperRunner", cfg: Optional["BotConfig"] = None) -> float:
-    """Capital used for position sizing (war ledger when enabled)."""
+    """Capital used for position sizing — phase-aware war vs IB."""
     cfg = cfg or getattr(runner, "cfg", None)
+    try:
+        from core.capital_phase import uses_war_sizing
+        if not uses_war_sizing(cfg, runner):
+            return display_equity(runner, cfg)
+    except Exception:
+        pass
     try:
         from core.war_account import war_account_enabled, war_effective_equity
         if war_account_enabled(cfg):
