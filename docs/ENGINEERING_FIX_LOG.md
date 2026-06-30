@@ -1187,3 +1187,23 @@ grep risk_plan_sane logs/HANOON.log  # should not grow after restart
 pytest tests/test_git_sync_defer.py tests/test_position_context_isolation.py -q
 # restart — no logs push during RTH; Recovered IB position lines on open holdings
 ```
+
+---
+
+## 2026-07-01 — Exit finalize crash + git shutdown NameError
+
+### Problem
+Recovered-position exit crashed: `'ScalperRunner' object has no attribute '_last_entry_telemetry'`. Shutdown git sync failed: `_brain_snapshot_line` not defined in git_sync_learning. EDBL re-adopted while exit pending.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_runner.py` | Init `_last_entry_telemetry`; exclude pending-close tickers from adopt |
+| `core/scalper_exit_executor.py` | Safe getattr for telemetry ATR on close |
+| `core/git_sync_learning.py` | Call `_gs()._brain_snapshot_line()` |
+| `core/position_sync.py` | `exclude_tickers` on adopt |
+
+### Verify
+```bash
+pytest tests/test_git_sync_defer.py tests/test_position_context_isolation.py -q
+```
