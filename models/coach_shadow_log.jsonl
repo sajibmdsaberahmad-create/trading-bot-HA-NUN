@@ -3401,3 +3401,4 @@
 {"ticker":"COIN","reason":"profit_prob_below_80pct","scan_score":83.2,"spike_ratio":5.666666666369341,"shadow_only":true,"timestamp":"2026-06-30T09:30:01.868049+00:00"}
 {"ticker":"SOFI","reason":"profit_prob_below_80pct","scan_score":92.0,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T09:30:35.051344+00:00"}
 {"ticker":"COIN","reason":"profit_prob_below_80pct","scan_score":83.2,"spike_ratio":5.999999999666667,"shadow_only":true,"timestamp":"2026-06-30T09:30:37.127927+00:00"}
+{"ticker":"COIN","reason":"profit_prob_below_80pct","scan_score":83.2,"spike_ratio":5.999999999666667,"shadow_only":true,"timestamp":"2026-06-30T09:30:54.894542+00:00"}
