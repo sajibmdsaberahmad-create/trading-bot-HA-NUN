@@ -221,8 +221,10 @@ def _trip_cap_blocks(
     """True when no more entries allowed due to trip/balance limits."""
     cfg = cfg or BotConfig()
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
-    if war_ai_sizing_enabled(cfg):
-        return settled < _min_entry_settled(state, cfg)
+    if settled < _min_entry_settled(state, cfg):
+        return True
+    if war_ai_sizing_enabled(cfg) and balance_driven_trips_enabled(cfg, use_lab=use_lab):
+        return False
     if balance_driven_trips_enabled(cfg, use_lab=use_lab):
         return war_bullets_remaining(state, cfg, use_lab=use_lab) <= 0
     trips = int(state.get("lab_round_trips_today" if use_lab else "round_trips_today", 0))
