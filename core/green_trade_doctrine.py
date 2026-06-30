@@ -311,7 +311,7 @@ def assess_dynamic_exit(
     }
 
 
-def assess_green_exit(
+def same_tactics_all_phases(cfg: Optional["BotConfig"] = None) -> bool:
     """Quality/confidence/profit-prob gates apply in war AND full-balance phases."""
     return unified_doctrine_enabled(cfg)
 
