@@ -1,27 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 222,
+  "total_awakenings": 223,
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
   "improvements_applied": 2668,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T06:58:12.112269",
-      "age": "7d 19h 55m 23s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2011",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T06:58:19.341699",
       "age": "7d 19h 55m 30s",
@@ -12271,9 +12257,16 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #222",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T08:43:51.903426",
+      "age": "8d 21h 41m 3s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #223",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-30T08:20:19.701108",
+  "last_awakening": "2026-06-30T08:43:51.902837",
   "current_version": "v20260629_075355",
   "version_history": [
     {
