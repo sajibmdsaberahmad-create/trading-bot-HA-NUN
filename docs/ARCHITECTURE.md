@@ -1,41 +1,37 @@
 # Architecture
 
-How the codebase is organized and why. Read `LAUNCH_GUIDE.md` to run
-the bot and `TRAINING_GUIDE.md` to understand the AI. This document is
-for understanding (or modifying) the code itself.
+How the codebase is organized and why. **Production live trading:** `main.py --mode scalper`
+→ `core/scalper_runner.py` (HANOON hull). See `docs/OPS.md` and `docs/VISION_SMART_STACK.md`.
+
+Legacy PPO single-ticker mode (`trader.py`, `--mode trade`) remains for compatibility.
 
 ---
 
 ## File Map
 
 ```
-main.py                  CLI entry point — parses args, dispatches to a mode
+main.py                  CLI — scalper (canonical), replay-live, legacy trade/warmup
 
 core/
-  config.py              Every tunable parameter, in one place, fully commented
-  notify.py              Logging + Telegram/email notifications
-  connector.py           IB Gateway connection, reconnection, contract qualification
-  data.py                Historical fetch + live tick stream + bar aggregation
-  features.py            Raw OHLCV -> 14-feature matrix
-  env.py                 Gymnasium environment used for training
-  agent.py               PPO build/load + online fine-tuning manager
-  risk.py                Position sizing, stop/target calculation, circuit breakers
-  broker.py               IB bracket order placement and management
-  performance.py         Trade log, win rate, Sharpe, drawdown tracking
-  trader.py              Live orchestration — wires everything together
-  runners.py             Warm-up training and offline evaluate modes
+  scalper_runner.py      HANOON hull — scanner, entry, exit, council (split in progress)
+  smart_stack.py         Life Engine hub — sensors → PPO → Halim → blend → war
+  ai_commander.py        Council prompts, spike decisions, learning export
+  account_view.py        IB-grounded equity / day P&L display
+  entry_pipeline.py      IB-confirmed entry fill detection
+  config.py              BotConfig — tunable parameters
+  broker.py              IB bracket orders
+  git_sync.py            Learning artifact sync (deferred during live session)
+  war_account.py         Virtual sizing ledger ($1k war / lab)
+  trader.py              LEGACY — single-ticker PPO live trader
 
 docs/
-  LAUNCH_GUIDE.md         Setup, IB Gateway, Telegram, Mac -> VPS deployment
-  TRAINING_GUIDE.md        PPO, features, fine-tuning, tuning
-  ARCHITECTURE.md          This file
-  VISION_SMART_STACK.md    Life Engine — one ship, maturity roadmap (read before entry changes)
+  OPS.md                 Start/stop, env defaults, accounting truth
+  VISION_SMART_STACK.md  Smart stack rules (mandatory for loop changes)
+  ENGINEERING_FIX_LOG.md Fix journal
 ```
 
-Each module has exactly one job. `trader.py` is the only file that
-knows about all the others — every other module is independently
-testable and doesn't import its siblings except `config.py` and
-`notify.py`.
+The scalper hull orchestrates modules; prefer extending `smart_stack.py` and
+`entry_pipeline.py` over growing `scalper_runner.py` further.
 
 ---
 
