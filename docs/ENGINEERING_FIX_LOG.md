@@ -167,6 +167,32 @@ IB_FILL_FORCE_SEC=120
 
 ---
 
+## 2026-06-30 — Defer git push during live session (performance)
+
+### Problem
+During premarket/RTH, logs showed `Push rejected — pull --rebase` and multi-repo `session_batch` pushes while entries/exits were active. Git commit/push/rebase competes with IB loop for disk, CPU, and network.
+
+### Root cause
+`GIT_PUSH_DURING_SESSION` defaulted **true** despite config comment saying defer. Batched checkpoint timer still flushed every ~180s with `force=True`, bypassing defer.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/config.py` | `GIT_PUSH_DURING_SESSION` default **false** |
+| `core/git_sync.py` | `_git_session_push_enabled()`; no debounce flush when off; queue until shutdown |
+
+### Env vars
+```bash
+GIT_PUSH_DURING_SESSION=false   # default — flush on stop_hanoon only
+LEARNING_PUSH_ON_TRADE=true     # still queues; no push until shutdown
+# Optional: ./scripts/stop_git_sync.sh during RTH
+```
+
+### Verify
+Live session: no `session_batch` / `pull --rebase` logs during trading. On `stop_hanoon.sh`: `pre_shutdown` + full learning push once.
+
+---
+
 ## 2026-06-30 — War replay ledger isolation (code)
 
 ### Problem
