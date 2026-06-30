@@ -1,8 +1,8 @@
 {
-  "narrative": "Local copilot: 40% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
+  "narrative": "Local copilot: 33% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
   "regime_read": "mixed",
   "risk_posture": "normal",
-  "session_wr": 0.4,
+  "session_wr": 0.3333333333333333,
   "session_pnl": 0.0,
   "ticker_bias": {
     "VWAV": "CAUTION",
@@ -19,6 +19,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782824286.033206,
+  "updated_at": 1782824496.818035,
   "source": "heuristic"
 }
