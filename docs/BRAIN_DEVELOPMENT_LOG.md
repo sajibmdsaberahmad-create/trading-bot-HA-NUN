@@ -156,3 +156,5 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 08:37 UTC` **git_auto** — sync: 26 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +23 more | halim=7 models=14 docs=1 other=4 | brain=adult datase
 - `2026-06-30 08:37 UTC` **brain_ppo_teacher** — PPO teacher live_session_end: WR 36%, source heuristic_fallback
 - `2026-06-30 08:37 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2462 pairs
+- `2026-06-30 08:37 UTC` **git_auto** — sync: 27 files — war_account.py, BRAIN_DEVELOPMENT_LOG.md, action_log.jsonl +24 more | halim=8 models=14 docs=1 other=4 | brain=adult datase
+- `2026-06-30 08:37 UTC` **git_training** — learn: pre_shutdown: account_session_shutdown, snapshot_periodic | learn_20260630_083727 | brain=adult dataset=2462 evolutions=25
