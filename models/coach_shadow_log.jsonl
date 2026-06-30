@@ -4557,3 +4557,11 @@
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":1272.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:41.614011+00:00"}
 {"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":946.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:43.877396+00:00"}
 {"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":1272.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:46.124205+00:00"}
+{"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":561.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:48.551910+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":3720.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:50.945580+00:00"}
+{"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":461.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:53.317358+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":6562.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:55.690412+00:00"}
+{"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T11:04:57.940396+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":7201.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:00.249691+00:00"}
+{"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:02.518641+00:00"}
+{"ticker":"CTNT","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":3954.0,"shadow_only":true,"timestamp":"2026-06-30T11:05:04.840016+00:00"}
