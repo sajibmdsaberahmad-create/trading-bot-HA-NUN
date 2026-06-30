@@ -20,6 +20,10 @@ import pandas as pd
 
 logger = logging.getLogger("MARKET_REGIME")
 
+MIN_FULL_BARS = 50
+MIN_SHORT_BARS = 5
+
+
 class MarketRegime(Enum):
     UNKNOWN = "unknown"
     BULL_TREND = "bull_trend"
@@ -57,14 +61,96 @@ class MarketRegimeDetector:
     def __init__(self):
         self._current_regime: Optional[RegimeResult] = None
 
+    def _classify_short(self, df: pd.DataFrame) -> RegimeResult:
+        """Regime from 5–49 bars — live stream / spike path (no 50-bar wait)."""
+        closes = df["close"].astype(float).values
+        n = len(closes)
+        current_px = float(closes[-1])
+        slope = (closes[-1] - closes[0]) / (closes[0] + 1e-9)
+        lookback = min(5, n - 1)
+        roc_5 = (closes[-1] / closes[-1 - lookback] - 1) * 100 if lookback > 0 else 0.0
+
+        tr = np.abs(np.diff(closes))
+        atr = float(np.mean(tr[-min(14, len(tr)):])) if len(tr) else 0.0
+        volatility_pct = (atr / (current_px + 1e-9)) * 100
+
+        volumes = (
+            df["volume"].astype(float).values
+            if "volume" in df.columns else np.ones(n, dtype=float)
+        )
+        vol_short = float(np.mean(volumes[-min(5, n):]))
+        vol_long = float(np.mean(volumes[-min(20, n):]))
+        vol_ratio = vol_short / (vol_long + 1e-9)
+
+        gap_pct = 0.0
+        if "open" in df.columns and n >= 2:
+            gap_pct = (
+                (float(df["open"].iloc[-1]) - closes[-2])
+                / (closes[-2] + 1e-9) * 100
+            )
+
+        regime = MarketRegime.SIDEWAYS
+        confidence = 0.4
+
+        if abs(gap_pct) > 1.5:
+            regime = MarketRegime.GAP_UP if gap_pct > 0 else MarketRegime.GAP_DOWN
+            confidence = min(0.85, 0.5 + abs(gap_pct) / 10.0)
+        elif volatility_pct > 3.0 or vol_ratio > 2.0:
+            regime = MarketRegime.HIGH_VOLATILITY
+            confidence = min(0.8, 0.45 + vol_ratio * 0.12)
+        elif slope > 0.01 and roc_5 > 0.25:
+            regime = MarketRegime.BULL_TREND
+            confidence = min(0.75, 0.45 + abs(slope) * 10.0)
+        elif slope < -0.01 and roc_5 < -0.25:
+            regime = MarketRegime.BEAR_TREND
+            confidence = min(0.75, 0.45 + abs(slope) * 10.0)
+        elif abs(slope) < 0.008 and volatility_pct < 1.5:
+            regime = MarketRegime.SIDEWAYS
+            confidence = 0.55
+        elif vol_ratio > 1.35 and slope > 0.003:
+            regime = MarketRegime.BREAKOUT
+            confidence = 0.58
+        elif vol_ratio > 1.35 and slope < -0.003:
+            regime = MarketRegime.BREAKDOWN
+            confidence = 0.58
+        elif roc_5 > 0.12:
+            regime = MarketRegime.BULL_TREND
+            confidence = 0.42
+        elif roc_5 < -0.12:
+            regime = MarketRegime.BEAR_TREND
+            confidence = 0.42
+        elif volatility_pct > 2.0:
+            regime = MarketRegime.HIGH_VOLATILITY
+            confidence = 0.45
+
+        volume_regime = (
+            "rising" if vol_ratio > 1.2
+            else "declining" if vol_ratio < 0.8
+            else "normal"
+        )
+        return RegimeResult(
+            regime=regime,
+            confidence=round(confidence, 2),
+            trend_strength=round(abs(slope), 3),
+            volatility_percentile=round(volatility_pct, 2),
+            momentum=round(roc_5, 2),
+            volume_regime=volume_regime,
+            recommendation=self._recommend(regime, confidence, volatility_pct),
+        )
+
     def classify(self, df: pd.DataFrame, vix_df: Optional[pd.DataFrame] = None) -> RegimeResult:
-        if df is None or len(df) < 50:
+        if df is None or len(df) < MIN_SHORT_BARS:
             return RegimeResult(
                 regime=MarketRegime.UNKNOWN, confidence=0.0,
                 trend_strength=0.0, volatility_percentile=50.0,
                 momentum=0.0, volume_regime="normal",
                 recommendation="Insufficient data"
             )
+
+        if len(df) < MIN_FULL_BARS:
+            result = self._classify_short(df)
+            self._current_regime = result
+            return result
 
         closes = df["close"].values
         volumes = df["volume"].values
@@ -164,3 +250,70 @@ class MarketRegimeDetector:
     @property
     def current(self) -> Optional[RegimeResult]:
         return self._current_regime
+
+
+def resolve_regime(
+    detector: MarketRegimeDetector,
+    df: Optional[pd.DataFrame],
+    *,
+    spike_ratio: float = 1.0,
+    vol_ratio: float = 1.0,
+) -> tuple[RegimeResult, str]:
+    """
+    Classify bars and return (result, telemetry tag).
+    Tag uses spike/vol heuristics when bars are thin — never bare 'unknown' on spikes.
+    """
+    from core.trade_telemetry import regime_tag
+
+    if df is not None and len(df) >= MIN_SHORT_BARS:
+        try:
+            result = detector.classify(df)
+        except Exception:
+            result = RegimeResult(
+                regime=MarketRegime.UNKNOWN, confidence=0.0,
+                trend_strength=0.0, volatility_percentile=50.0,
+                momentum=0.0, volume_regime="normal",
+                recommendation="classify error",
+            )
+    else:
+        result = RegimeResult(
+            regime=MarketRegime.UNKNOWN, confidence=0.0,
+            trend_strength=0.0, volatility_percentile=50.0,
+            momentum=0.0, volume_regime="normal",
+            recommendation="Insufficient data",
+        )
+    tag = regime_tag(result, spike_ratio=spike_ratio, vol_ratio=vol_ratio)
+    return result, tag
+
+
+def regime_from_macro(ctx: dict) -> RegimeResult:
+    """SPY/VIX snapshot → regime when no ticker bar history (consciousness, copilot)."""
+    spy_pct = float(ctx.get("spy_pct", 0) or 0)
+    vix = float(ctx.get("vix_level", 0) or ctx.get("vix", 0) or 0)
+    if vix >= 28:
+        regime = MarketRegime.HIGH_VOLATILITY
+        conf = 0.75
+    elif spy_pct >= 0.45:
+        regime = MarketRegime.BULL_TREND
+        conf = 0.6
+    elif spy_pct <= -0.45:
+        regime = MarketRegime.BEAR_TREND
+        conf = 0.6
+    elif abs(spy_pct) < 0.12:
+        regime = MarketRegime.SIDEWAYS
+        conf = 0.5
+    elif spy_pct > 0:
+        regime = MarketRegime.BULL_TREND
+        conf = 0.45
+    else:
+        regime = MarketRegime.BEAR_TREND
+        conf = 0.45
+    return RegimeResult(
+        regime=regime,
+        confidence=conf,
+        trend_strength=round(abs(spy_pct) / 2.0, 3),
+        volatility_percentile=min(99.0, max(5.0, vix * 2.5)),
+        momentum=spy_pct,
+        volume_regime="normal",
+        recommendation="Macro SPY/VIX inference",
+    )

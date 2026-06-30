@@ -8422,21 +8422,31 @@ class ScalperRunner:
         """Refresh Yahoo macro cache and update regime detector."""
         try:
             from core.market_context import refresh_macro_context
+            from core.market_regime import regime_from_macro
             ctx = refresh_macro_context(force=True)
-            regime = self.regime_detector.classify(
-                self.data.get_bar_dataframe() if hasattr(self.data, 'get_bar_dataframe') else None,
-                vix_df=None,
+            bar_df = (
+                self.data.get_bar_dataframe()
+                if hasattr(self.data, "get_bar_dataframe") else None
             )
+            if bar_df is not None and len(bar_df) >= 5:
+                regime = self.regime_detector.classify(bar_df)
+            else:
+                regime = regime_from_macro(ctx or {})
+            from core.trade_telemetry import regime_tag
+            regime_label = regime_tag(regime)
             buffer_append({
                 "source": "market_context",
                 "ticker": "MARKET",
                 "action": "REGIME",
-                "regime": regime.regime.value if hasattr(regime, 'regime') else "unknown",
+                "regime": regime_label,
                 "confidence": getattr(regime, 'confidence', 0.0),
                 "features": [],
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             })
-            log.info(f"🌍 Market context: {ctx.get('spy_trend', 'unknown')} SPY, {ctx.get('vix_regime', 'unknown')} VIX")
+            log.info(
+                f"🌍 Market context: {ctx.get('spy_trend', 'unknown')} SPY, "
+                f"{ctx.get('vix_regime', 'unknown')} VIX, regime={regime_label}"
+            )
         except Exception as exc:
             log.debug(f"Market context update failed: {exc}")
 
