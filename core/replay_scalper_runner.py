@@ -775,17 +775,16 @@ class ReplayScalperRunner(ScalperRunner):
         if shares < 1:
             return "waiting"
 
-        regime_result = (
-            self.regime_detector.classify(df_fast)
-            if hasattr(self.regime_detector, "classify") else None
-        )
-        from core.trade_telemetry import regime_tag
+        from core.market_regime import resolve_regime
 
         spike = float(getattr(self, "_last_spike_ratio", 1.0))
         vol_ratio = float(market_ctx.get("recent_volume", 0)) / (
             float(market_ctx.get("avg_volume", 0)) + 1e-9
         )
-        regime_label = regime_tag(regime_result, spike_ratio=spike, vol_ratio=vol_ratio)
+        regime_result, regime_label = resolve_regime(
+            self.regime_detector, df_fast,
+            spike_ratio=spike, vol_ratio=vol_ratio,
+        )
         plan = TradePlan(
             side="LONG",
             entry_price=current_px,
