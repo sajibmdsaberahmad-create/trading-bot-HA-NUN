@@ -2959,3 +2959,7 @@
 {"timestamp":"2026-06-30T19:24:39.541932+00:00","event":"capability_milestone","capability":"chat","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:24:39.542010+00:00","event":"capability_milestone","capability":"chat","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:24:39.542077+00:00","event":"capability_milestone","capability":"chat","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:54.073593+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":25,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:54.073764+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":50,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:54.073843+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":75,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:24:54.073902+00:00","event":"capability_milestone","capability":"exit_decision","level_pct":100,"phase":"toddler"}
