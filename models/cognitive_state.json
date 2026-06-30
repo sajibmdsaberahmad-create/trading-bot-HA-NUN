@@ -4,15 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Commander: trailing_stop",
-    "Commander: BUY 937 SOAR AMEX  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.1604 or a more aggressive price still within your spec",
-    "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0673 or a more aggressive price still within y",
-    "Review loss_streak on SOAR",
-    "Review order_timeout on INLF",
-    "Commander: Submitted",
-    "Commander: micro_loss: pressure=0.61 pred\u2193$0.85",
-    "Commander: green_profit_lock:ai_stall quick_scalp +0.55% (peak +0.55%)",
-    "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0667 or a more aggressive price still within y",
     "Commander: micro_loss: pressure=0.65 pred\u2193$4.07",
     "Commander: BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0664 or a more aggressive price still within y",
     "Commander: council_exit: PPO exit after council timeout: spike_top_intrabar: +2.32% vol=452871.0x",
@@ -103,10 +94,19 @@
     "Review trade_closed on RKLB",
     "Review loss_streak on RKLB",
     "Commander: tick_micro_loss",
-    "Commander: replay_target"
+    "Commander: replay_target",
+    "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+    "Penalize PPO micro-fast when council confidence is neutral (50%)",
+    "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)",
+    "Commander: green_profit_lock:ai_stall quick_scalp +0.71% (peak +0.71%)",
+    "Commander: green_profit_lock:giveback +0.19% (peak +0.26% gave back 0.07%)",
+    "Commander: green_profit_lock:ai_stall_min_green +0.30%",
+    "Commander: green_profit_lock:ai_stall quick_scalp +0.41% (peak +0.41%)",
+    "Commander: bracket_exit",
+    "Spike-top hunt on COIN: spike_top_exit: +0.62% vol=1.8x"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
-  "trades_observed": 40,
-  "updated": "2026-06-30T06:50:41.918119"
+  "trades_observed": 50,
+  "updated": "2026-06-30T08:01:00.824244"
 }

@@ -1,26 +1,23 @@
 {
-  "narrative": "Local copilot: 10% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
+  "narrative": "Local copilot: 40% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required).",
   "regime_read": "mixed",
-  "risk_posture": "defensive",
-  "session_wr": 0.1,
+  "risk_posture": "normal",
+  "session_wr": 0.4,
   "session_pnl": 0.0,
   "ticker_bias": {
-    "NVDA": "CAUTION",
-    "PLTR": "CAUTION",
-    "RIOT": "CAUTION",
-    "ASTS": "CAUTION",
-    "MARA": "CAUTION",
-    "COIN": "CAUTION"
+    "RKLB": "CAUTION",
+    "LCID": "CAUTION",
+    "NVDA": "CAUTION"
   },
   "repeat_losers": [],
   "ppo_hints": {
-    "confidence_boost": 0.04,
+    "confidence_boost": 0.0,
     "require_quality_on_repeat": false,
     "min_spike_mult": 1.0
   },
   "lessons": [
     "Replay: collect gold on all tickers; copilot skip relaxed"
   ],
-  "updated_at": 1782802010.197375,
+  "updated_at": 1782806440.588907,
   "source": "heuristic"
 }

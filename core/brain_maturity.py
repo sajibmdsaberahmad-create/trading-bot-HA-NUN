@@ -329,9 +329,51 @@ def record_evolution() -> None:
         _save_state(state)
 
 
+def _training_session_decision_floor() -> int:
+    """Higher teacher API budget during replay/live gold collection."""
+    replay = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+    if replay:
+        try:
+            return max(0, int(os.getenv("REPLAY_DECISION_API_DAILY", "48")))
+        except (TypeError, ValueError):
+            return 48
+    try:
+        from core.trading_focus_guard import is_live_scalper_active
+        live_active = is_live_scalper_active()
+    except Exception:
+        live_active = False
+    if live_active and os.getenv("HALIM_LIVE_GOLD_COLLECT", "true").lower() in (
+        "1", "true", "yes",
+    ):
+        try:
+            return max(0, int(os.getenv("LIVE_DECISION_API_DAILY", "16")))
+        except (TypeError, ValueError):
+            return 16
+    return 0
+
+
+def _decision_sample_throttle_enabled() -> bool:
+    """Replay/live training skips council sample_skip unless explicitly enabled."""
+    replay = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+    if replay:
+        return os.getenv("REPLAY_COUNCIL_SAMPLE", "false").lower() in ("1", "true", "yes")
+    try:
+        from core.trading_focus_guard import is_live_scalper_active
+        if is_live_scalper_active():
+            return os.getenv("LIVE_COUNCIL_SAMPLE", "false").lower() in ("1", "true", "yes")
+    except Exception:
+        pass
+    return True
+
+
 def _daily_budget_for(purpose: str, limits: Dict[str, Any], mult: float) -> int:
     key = _PURPOSE_MAP.get(purpose, "decision_api_daily")
-    return max(0, int(limits.get(key, 0) * mult))
+    base = max(0, int(limits.get(key, 0) * mult))
+    if purpose == "decision":
+        floor = _training_session_decision_floor()
+        if floor > 0:
+            return max(base, floor)
+    return base
 
 
 def allow_teacher_api(purpose: str, cfg: Optional[BotConfig] = None) -> Tuple[bool, str]:
@@ -355,7 +397,7 @@ def allow_teacher_api(purpose: str, cfg: Optional[BotConfig] = None) -> Tuple[bo
     if used >= budget:
         return False, f"daily_{purpose}_cap_{budget}"
 
-    if purpose == "decision":
+    if purpose == "decision" and _decision_sample_throttle_enabled():
         rate = float(limits.get("council_sample_rate", 1.0)) * mult
         if rate <= 0:
             return False, f"{snap['stage']}_council_local_only"

@@ -40,24 +40,187 @@ def _max_age_sec(cfg: BotConfig) -> float:
 
 
 def _min_ring_sec(cfg: BotConfig) -> float:
-    return float(os.getenv("HALIM_ENTRY_LM_MIN_RING_SEC", "2.0"))
+    return float(os.getenv("HALIM_ENTRY_LM_MIN_RING_SEC", "1.0"))
 
 
 def halim_entry_await_sec(cfg: Optional[BotConfig] = None) -> float:
-    """Seconds to wait for async Halim entry LM before fast paths (replay default)."""
+    """Seconds to wait for async Halim entry LM before fast paths (replay + live)."""
     cfg = cfg or BotConfig()
+    if os.getenv("HALIM_ENTRY_AWAIT_ENABLED", "true").lower() not in ("1", "true", "yes"):
+        return 0.0
     try:
-        sec = float(os.getenv("HALIM_ENTRY_AWAIT_SEC", "2.5"))
+        sec = float(os.getenv("HALIM_ENTRY_AWAIT_SEC", "4.5"))
     except (TypeError, ValueError):
-        sec = 2.5
+        sec = 4.5
     if sec <= 0:
         return 0.0
     replay = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
     if replay and os.getenv("HALIM_ENTRY_AWAIT_REPLAY", "true").lower() in ("1", "true", "yes"):
         return sec
-    if not replay and os.getenv("HALIM_ENTRY_AWAIT_LIVE", "false").lower() in ("1", "true", "yes"):
+    if not replay and os.getenv("HALIM_ENTRY_AWAIT_LIVE", "true").lower() in ("1", "true", "yes"):
         return sec
     return 0.0
+
+
+def _extract_echo_confidence(text: str) -> Optional[float]:
+    import re
+    for pat in (
+        r"ppo_conf\s*=\s*([\d.]+)",
+        r"(?:^|[\s{])conf\s*=\s*([\d.]+)",
+        r"ppo\s*=\s*([\d.]+)",
+        r"ppo\s+(\d+(?:\.\d+)?)\s*%",
+        r"PPO\s+(\d+(?:\.\d+)?)\s*%",
+    ):
+        m = re.search(pat, text, re.I)
+        if m:
+            v = float(m.group(1))
+            return v / 100.0 if v > 1.0 else v
+    return None
+
+
+def _parse_training_echo_entry(text: str) -> Optional[Dict[str, Any]]:
+    """
+    Toddler model often regurgitates PPO/council training lines instead of JSON.
+    Treat as weak Halim advisory so await/blend/coevolution can participate.
+    """
+    import re
+
+    low = text.lower()
+    markers = (
+        "ppo-led micro-fast",
+        "ppo_led",
+        "atr r:r",
+        "ollama logging async",
+        "entry_decision:",
+        "entry_decision=",
+        "ppo=hold",
+        "ppo_conf=",
+        "ppo_note=",
+    )
+    if not any(m in low for m in markers):
+        return None
+
+    conf = _extract_echo_confidence(text)
+    enter: Optional[bool] = None
+
+    if re.search(r"ppo_buy\s*=\s*true", text, re.I):
+        enter = True
+    elif re.search(r"ppo_buy\s*=\s*false", text, re.I) or re.search(
+        r"ppo\s*=\s*hold", low
+    ):
+        enter = False
+    elif re.search(r"\benter\s*=\s*false\b", low):
+        enter = False
+    elif re.search(r"\benter\s*=\s*true\b", low) and not re.search(
+        r"enter\s*=\s*true\s*\|", low
+    ):
+        enter = True
+    elif "false on chop" in low or "fakeout" in low:
+        enter = False
+    elif "ppo-led micro-fast" in low or "atr r:r" in low:
+        # Gold copy of executed PPO path — defer (skip), not independent enter
+        enter = False
+
+    if enter is None:
+        return None
+    if conf is None:
+        conf = 0.55 if enter else 0.48
+    return {
+        "enter": enter,
+        "confidence": conf,
+        "reason": "training echo",
+    }
+
+
+def _parse_entry_lm_response(raw: str) -> Dict[str, Any]:
+    """Parse Halim entry JSON; fallback heuristics for toddler-model ramble."""
+    import json
+    import re
+
+    text = (raw or "").strip()
+    if not text:
+        return {}
+
+    parsed = _parse_json_response(text)
+    if parsed.get("enter") is not None:
+        return _normalize_entry_parsed(parsed)
+
+    # Embedded JSON object in prose
+    for m in re.finditer(r"\{[^{}]*\"enter\"\s*:\s*(true|false)[^{}]*\}", text, re.I):
+        try:
+            blob = json.loads(m.group(0))
+            if blob.get("enter") is not None:
+                return _normalize_entry_parsed(blob)
+        except Exception:
+            continue
+
+    echo = _parse_training_echo_entry(text)
+    if echo:
+        return _normalize_entry_parsed(echo)
+
+    low = text.lower()
+    # Instruction-echo (model repeats prompt rules instead of answering)
+    if "entry_decision is not a signal" in low:
+        return {"enter": False, "confidence": 0.4, "reason": "template echo skip"}
+    if "entry_decision" in low and "{" not in text:
+        enter = None
+        conf = 0.42
+        if re.search(r"\bfalse on\b", low) or "fakeout" in low or "chop" in low:
+            enter = False
+        elif re.search(r"\bclean momentum\b", low) or re.search(r"\bmomentum scalp\b", low):
+            if not re.search(r"\bfalse\b", low):
+                enter = True
+                conf = 0.58
+        if enter is not None:
+            return {"enter": enter, "confidence": conf, "reason": text[:80]}
+
+    enter = None
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.lower().startswith("enter="):
+            continue
+        if "|" in line:
+            continue
+        val = line.split("=", 1)[-1].strip().lower()
+        if val == "true":
+            enter = True
+            break
+        if val == "false":
+            enter = False
+            break
+    if enter is None:
+        if re.search(r'"enter"\s*:\s*true\b', text, re.I):
+            enter = True
+        elif re.search(r'"enter"\s*:\s*false\b', text, re.I):
+            enter = False
+    conf = None
+    m = re.search(r'confidence["\s:=]+([0-9.]+)', text, re.I)
+    if m:
+        conf = float(m.group(1))
+        if conf > 1.0:
+            conf /= 100.0
+    if enter is None and conf is not None:
+        enter = conf >= 0.55
+    if enter is None:
+        return {}
+    return _normalize_entry_parsed({
+        "enter": enter,
+        "confidence": conf if conf is not None else (0.65 if enter else 0.35),
+        "reason": text[:80],
+    })
+
+
+def _normalize_entry_parsed(parsed: Dict[str, Any]) -> Dict[str, Any]:
+    out = dict(parsed)
+    out["enter"] = bool(parsed.get("enter", False))
+    conf = float(parsed.get("confidence", 0) or 0)
+    if conf <= 0:
+        conf = 0.55 if out["enter"] else 0.45
+    elif conf > 1.0:
+        conf /= 100.0
+    out["confidence"] = round(min(0.99, max(0.0, conf)), 4)
+    out["reason"] = str(parsed.get("reason", ""))[:80]
+    return out
 
 
 def _build_entry_prompt(
@@ -72,19 +235,16 @@ def _build_entry_prompt(
     loss_context: str = "",
     macro_context: str = "",
 ) -> str:
-    loss_line = f"\n{loss_context}\n" if loss_context else ""
-    macro_line = f"\n{macro_context}\n" if macro_context else ""
+    loss_line = f"{loss_context.strip()}\n" if loss_context else ""
+    macro_line = f"{macro_context.strip()}\n" if macro_context else ""
+    ppo_side = "buy" if ppo_buy else "hold"
     return (
-        "You are M. A. Halim — owned trading mind. Reply JSON only, no markdown.\n"
-        '{"enter":true|false,"confidence":0.0-1.0,"reason":"max 10 words"}\n'
-        f"TASK: entry_decision {ticker.upper()}\n"
-        f"price={price:.4f} vol_spike={spike:.2f}x scan_score={scan:.0f}\n"
-        f"ppo_buy={ppo_buy} ppo_conf={ppo_conf:.2f} ppo_note={ppo_reason[:60]}\n"
-        f"{macro_line}"
-        f"{loss_line}"
-        "enter=true only on clean momentum scalp; false on chop/fakeout. "
-        "Macro context is advisory only — never skip solely because SPY is up. "
-        "If session loss memory present, skip unless setup clearly changed."
+        f"ENTRY {ticker.upper()} price={price:.4f} spike={spike:.2f}x score={scan:.0f}\n"
+        f"ppo={ppo_side} conf={ppo_conf:.2f} note={ppo_reason[:50]}\n"
+        f"{macro_line}{loss_line}"
+        'Reply ONE json object only. No other text.\n'
+        '{"enter":false,"confidence":0.55,"reason":"chop fakeout"}\n'
+        "enter=true only on clean momentum scalp; false on chop or fakeout."
     )
 
 
@@ -126,8 +286,10 @@ class HalimEntryLine:
         return ""
 
     def _run(self, key: str, seq: int, prompt: str) -> None:
+        t0 = time.time()
         raw = self._halim_complete(prompt)
-        parsed = _parse_json_response(raw)
+        parsed = _parse_entry_lm_response(raw)
+        elapsed_ms = (time.time() - t0) * 1000
         with self._lock:
             slot = self._slots.get(key)
             if not slot or slot.seq != seq:
@@ -137,6 +299,19 @@ class HalimEntryLine:
             slot.raw = raw[:500]
             slot.parsed = parsed
             slot.source = "halim_lm" if parsed else "halim_lm_empty"
+        if parsed:
+            tag = "echo" if str(parsed.get("reason", "")).startswith("training echo") else "json"
+            log.info(
+                f"  🧠 Halim entry LM ready {key} "
+                f"enter={bool(parsed.get('enter'))} conf={float(parsed.get('confidence', 0) or 0):.0%} "
+                f"({elapsed_ms:.0f}ms, {tag})"
+            )
+        elif raw:
+            log.info(
+                f"  🧠 Halim entry LM unparseable {key} ({elapsed_ms:.0f}ms): {raw[:100]!r}"
+            )
+        else:
+            log.info(f"  🧠 Halim entry LM empty {key} ({elapsed_ms:.0f}ms, serve no text)")
         if parsed:
             try:
                 from core.halim_action_learn import record_action
@@ -172,8 +347,13 @@ class HalimEntryLine:
             prev = self._slots.get(key)
             if prev:
                 if prev.in_flight:
-                    return
-                if prev.fingerprint == fingerprint and (now - prev.submitted_at) < _min_ring_sec(self.cfg):
+                    if prev.fingerprint == fingerprint:
+                        return
+                    log.debug(
+                        f"  🧠 Halim entry supersede {key} "
+                        f"(new spike while LM in flight)"
+                    )
+                elif prev.fingerprint == fingerprint and (now - prev.submitted_at) < _min_ring_sec(self.cfg):
                     return
             self._seq += 1
             seq = self._seq
@@ -274,9 +454,14 @@ class HalimEntryLine:
         while time.time() < deadline:
             with self._lock:
                 slot = self._slots.get(key)
-                if not slot or slot.fingerprint != fingerprint:
-                    return "wrong_fp"
-                if slot.in_flight:
+                if not slot:
+                    return "missing"
+                if slot.fingerprint != fingerprint:
+                    if slot.in_flight:
+                        st = "in_flight"
+                    else:
+                        return "wrong_fp"
+                elif slot.in_flight:
                     st = "in_flight"
                 elif slot.parsed:
                     st = "ready"
@@ -309,6 +494,8 @@ def merge_halim_entry_advisory(
 
     h_enter = bool(parsed.get("enter", False))
     h_conf = float(parsed.get("confidence", 0.5) or 0.5)
+    if h_conf <= 0:
+        h_conf = 0.55 if h_enter else 0.45
     h_reason = str(parsed.get("reason", ""))[:80]
     blend_w = float(os.getenv("HALIM_ENTRY_BLEND_WEIGHT", "0.30"))
     soft_veto = os.getenv("HALIM_ENTRY_SOFT_VETO", "true").lower() in ("1", "true", "yes")

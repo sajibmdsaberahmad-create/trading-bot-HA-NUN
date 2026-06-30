@@ -125,6 +125,52 @@ def extract_coevolution_halim_signals(
     return ("unknown", None, 0.0, "")
 
 
+COEVOLUTION_STAMP_KEYS = (
+    "halim_enter", "halim_conf", "halim_reason", "halim_agree",
+    "halim_exit",
+    "council_enter", "council_conf", "council_reason", "council_exit",
+    "proxy_enter", "proxy_conf", "proxy_reason",
+    "quality_enter", "quality_conf", "quality_reason",
+)
+
+
+def merge_coevolution_stamps(
+    target: Dict[str, Any],
+    source: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Copy Halim/council/quality stamps into verdict dict for honest coevolution labels."""
+    row = dict(target)
+    for key in COEVOLUTION_STAMP_KEYS:
+        if key in source:
+            row[key] = source[key]
+    return row
+
+
+def enrich_decision_halim_peek(
+    decision: Dict[str, Any],
+    halim_peek: Optional[Dict[str, Any]],
+    *,
+    task: str = "entry_decision",
+) -> Dict[str, Any]:
+    """Fill halim_enter from latest slot peek when blend stamps were dropped."""
+    row = dict(decision)
+    if task == "entry_decision" and row.get("halim_enter") is not None:
+        return row
+    if not halim_peek:
+        return row
+    parsed = halim_peek.get("parsed") or {}
+    if task != "entry_decision" or parsed.get("enter") is None:
+        return row
+    h_enter = bool(parsed.get("enter"))
+    conf = float(parsed.get("confidence", 0) or 0)
+    if conf <= 0:
+        conf = 0.55 if h_enter else 0.45
+    row.setdefault("halim_enter", h_enter)
+    row.setdefault("halim_conf", round(conf, 4))
+    row.setdefault("halim_reason", str(parsed.get("reason", ""))[:80])
+    return row
+
+
 def compare_ppo_halim(
     *,
     task: str,

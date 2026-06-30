@@ -1,21 +1,76 @@
 [
   {
-    "timestamp": "2026-06-30T06:38:39.690290+00:00",
+    "timestamp": "2026-06-30T07:42:08.764193+00:00",
     "source": "runtime_trade_closed",
     "adjustments": {},
     "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
     "lessons": [
-      "Review trade_closed on ASTS"
+      "Review trade_closed on RKLB"
     ]
   },
   {
-    "timestamp": "2026-06-30T06:47:42.949145+00:00",
+    "timestamp": "2026-06-30T07:42:08.907110+00:00",
     "source": "runtime_loss_streak",
     "adjustments": {},
     "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
     "lessons": [
-      "Review loss_streak on PLTR"
+      "Review loss_streak on RKLB"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T07:45:59.653184+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on LCID"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T07:45:59.653525+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on LCID"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T07:57:06.920426+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on NVDA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T07:57:06.920724+00:00",
+    "source": "runtime_loss_streak",
+    "adjustments": {},
+    "guidelines_summary": "Observed loss_streak \u2014 recorded for learning.",
+    "lessons": [
+      "Review loss_streak on NVDA"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T07:59:00.028638+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on COIN"
+    ]
+  },
+  {
+    "timestamp": "2026-06-30T08:01:37.885832+00:00",
+    "source": "ppo_teacher",
+    "adjustments": {},
+    "guidelines_summary": "",
+    "lessons": [
+      "Repeat-loss tickers: require micro forecast + profit_probability before re-entry",
+      "Penalize PPO micro-fast when council confidence is neutral (50%)",
+      "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
     ]
   }
-]}
 ]

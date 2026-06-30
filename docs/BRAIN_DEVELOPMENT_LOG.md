@@ -86,3 +86,12 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 06:17 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 2272 pairs
 - `2026-06-30 06:18 UTC` **brain_ppo_teacher** — PPO teacher live_session_end: WR 13%, source heuristic_fallback
 - `2026-06-30 06:18 UTC` **brain_evolution** · stage **adult** — Evolution live_session_end — stage adult, dataset 2272 pairs
+- `2026-06-30 07:10 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=98% (282 samples)
+- `2026-06-30 07:11 UTC` **brain_ppo_teacher** — PPO teacher coordinated_close: WR 18%, source heuristic_fallback
+- `2026-06-30 07:11 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=98% (282 samples)
+- `2026-06-30 07:11 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 19%, source heuristic_fallback
+- `2026-06-30 07:11 UTC` **brain_evolution** · stage **adult** — Evolution replay_teardown — stage adult, dataset 2282 pairs
+- `2026-06-30 08:01 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=97% (303 samples)
+- `2026-06-30 08:01 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy acc=97% (303 samples)
+- `2026-06-30 08:01 UTC` **brain_ppo_teacher** — PPO teacher replay_teardown: WR 36%, source heuristic_fallback
+- `2026-06-30 08:01 UTC` **brain_evolution** · stage **adult** — Evolution replay_teardown — stage adult, dataset 2462 pairs
