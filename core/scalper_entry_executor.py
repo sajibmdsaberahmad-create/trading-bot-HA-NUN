@@ -159,7 +159,7 @@ class ScalperEntryMixin:
         if df is None or len(df) < 20:
             return
         px = float(df["close"].iloc[-1])
-        if not _only_uptrend(df.tail(60), px):
+        if not only_uptrend(df.tail(60), px):
             return
         is_spike, vol = self._detect_volume_spike(df.tail(60))
         if not is_spike:
@@ -1381,7 +1381,7 @@ class ScalperEntryMixin:
             if not is_ai_unlimited(self.cfg) or capital_discipline_enabled(self.cfg):
                 from core.capital_discipline import is_strong_spike_setup
                 from core.sniper_execution import sniper_vol_flash
-                uptrend_ok = _only_uptrend(df_fast, current_px, min_bars=min_bars)
+                uptrend_ok = only_uptrend(df_fast, current_px, min_bars=min_bars)
                 if not uptrend_ok and not (
                     should_spike_fast_entry(self.cfg, spike_ratio, scan_score)
                     or is_strong_spike_setup(self.cfg, scan_score, spike_ratio)

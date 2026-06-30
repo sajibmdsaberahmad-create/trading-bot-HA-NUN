@@ -169,5 +169,3 @@ from core.trade_telemetry import (
     log_round_trip_fills,
     regime_tag,
 )
-
-_only_uptrend = only_uptrend

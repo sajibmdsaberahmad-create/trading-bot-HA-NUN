@@ -1173,7 +1173,7 @@ class ScalperSpikeMixin:
                         continue
                     self._store_scan_cache(ticker, fresh)
                     px = float(fresh["close"].iloc[-1])
-                    if not _only_uptrend(fresh.tail(60), px):
+                    if not only_uptrend(fresh.tail(60), px):
                         continue
                     is_spike, vol = self._detect_volume_spike(fresh.tail(60))
                     opp = float(target.rank_score) * (vol if is_spike else 0.6)
@@ -1288,7 +1288,7 @@ class ScalperSpikeMixin:
             spike_fast_ok = should_spike_fast_entry(
                 self.cfg, 1.0, float(target.rank_score),
             )
-            uptrend_ok = _only_uptrend(work_df, live_px, min_bars=min_bars)
+            uptrend_ok = only_uptrend(work_df, live_px, min_bars=min_bars)
             if not uptrend_ok and not (
                 ai_fast_execution(self.cfg)
                 and ticker.upper() in priority_names
@@ -1600,7 +1600,7 @@ class ScalperSpikeMixin:
         closes = df["close"].values
         volumes = df["volume"].values
         current_px = float(closes[-1])
-        if not _only_uptrend(df, current_px):
+        if not only_uptrend(df, current_px):
             return {"ticker": ticker, "total_score": 0, "price": current_px, "volume": int(volumes[-1]), "avg_volume": int(np.mean(volumes[-20:])), "rel_vol": 1.0, "reasons": "not_uptrend"}
         score = 1.0
         reasons = ["uptrend"]
