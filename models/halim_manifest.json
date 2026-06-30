@@ -1,7 +1,7 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-06-30T18:49:49.440981+00:00",
+  "updated_at": "2026-06-30T18:50:05.269113+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
@@ -36,14 +36,12 @@
     "models/halim_manifest.json"
   ],
   "brain_status": {
-    "timestamp": "2026-06-30T18:49:49.416018+00:00",
+    "timestamp": "2026-06-30T18:50:05.071857+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
-        "exists": true,
-        "path": "ppo_trader.zip",
-        "size_kb": 28474.7,
-        "modified": "2026-06-30T17:10:22.024439+00:00"
+        "exists": false,
+        "path": "ppo_trader.zip"
       },
       "ppo_replay": {
         "exists": true,
@@ -78,8 +76,8 @@
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 1629.6,
-        "modified": "2026-06-30T18:49:41.642233+00:00"
+        "size_kb": 1621.2,
+        "modified": "2026-06-30T18:49:56.787916+00:00"
       },
       "council_dataset": {
         "exists": true,
@@ -120,7 +118,7 @@
       "metrics": {
         "closed_trades": 2709,
         "dataset_pairs": 388,
-        "evolution_count": 45,
+        "evolution_count": 46,
         "proxy_accuracy": 0.9,
         "proxy_holdout_accuracy": 0.9,
         "rolling_win_rate": null,
@@ -145,7 +143,7 @@
         "day": "2026-06-30",
         "decision": 7
       },
-      "decision_budget_left": 9,
+      "decision_budget_left": 0,
       "copilot_budget_left": 1,
       "ppo_teacher_budget_left": 0,
       "next_stage": "teen"
