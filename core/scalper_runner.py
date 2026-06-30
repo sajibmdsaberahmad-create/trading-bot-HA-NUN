@@ -1508,6 +1508,22 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         # Full initialization report (pushed to git — not echoed to console)
         self._write_init_report()
         self._refresh_account_balance()
+        try:
+            from core.ib_truth_checklist import (
+                log_startup_checklist,
+                run_startup_checklist,
+                startup_block_on_fail,
+            )
+            _chk = run_startup_checklist(self, self.ib, self.cfg, wait=True)
+            log_startup_checklist(_chk)
+            if _chk.get("block") and not _chk.get("ok"):
+                if startup_block_on_fail(self.cfg):
+                    log.error("HANOON halted: IB Truth checklist failed — fix Gateway and restart")
+                    from core.shutdown_control import remove_pid_file
+                    remove_pid_file()
+                    return
+        except Exception as exc:
+            log.debug(f"IB Truth startup checklist: {exc}")
         self._log_startup_banner()
         if os.getenv("REPLAY_LIVE", "").lower() not in ("1", "true", "yes"):
             try:
