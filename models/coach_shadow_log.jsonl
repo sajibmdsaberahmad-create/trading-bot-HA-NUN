@@ -3777,3 +3777,13 @@
 {"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1472.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:23.322756+00:00"}
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":7861.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:25.411838+00:00"}
 {"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":500.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:27.528288+00:00"}
+{"ticker":"DGNX","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":109196.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:29.595576+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":2326.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:31.600832+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1536.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:33.662105+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":10383.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:34.153073+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:36.123636+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":1822.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:38.249924+00:00"}
+{"ticker":"INTZ","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":1003.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:40.251156+00:00"}
+{"ticker":"DGNX","reason":"ppo_not_aligned","scan_score":86.8,"spike_ratio":15472.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:42.331673+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":3163.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:44.317871+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":836.0,"shadow_only":true,"timestamp":"2026-06-30T10:21:46.287983+00:00"}
