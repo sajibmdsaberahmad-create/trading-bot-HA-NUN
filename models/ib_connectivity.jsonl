@@ -2,3 +2,4 @@
 {"ts": 1782807386.350464, "event": "outage_start", "source": "ib_connector", "trigger": "unit_test", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
 {"ts": 1782807386.350919, "event": "outage_restored", "source": "ib_connector", "duration": "0s", "duration_sec": 0.0, "attempt": 3, "total_reconnects": 0}
 {"ts": 1782807597.702486, "event": "watchdog_start", "source": "gateway_watchdog", "host": "127.0.0.1", "port": 4002, "interval_sec": 30.0}
+{"ts": 1782810240.4006422, "event": "outage_start", "source": "ib_connector", "trigger": "ib_1100", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
