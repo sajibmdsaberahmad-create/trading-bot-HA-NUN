@@ -4652,3 +4652,5 @@
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":119267.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:34.971738+00:00"}
 {"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":426510.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:38.097784+00:00"}
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":75035.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:41.273832+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":84.6,"spike_ratio":484818.0,"shadow_only":true,"timestamp":"2026-06-30T11:22:47.939889+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":13771.0,"shadow_only":true,"timestamp":"2026-06-30T11:23:00.227575+00:00"}

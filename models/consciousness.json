@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 227,
   "training_sessions": 39,
-  "trades_observed": 1676,
+  "trades_observed": 1677,
   "scans_performed": 39,
-  "improvements_applied": 2691,
+  "improvements_applied": 2692,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:03:06.953704",
-      "age": "7d 20h 0m 18s",
-      "type": "TRADE",
-      "message": "Observed trade: LCID ? P&L=$-6.08",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:03:09.402245",
-      "age": "7d 20h 0m 20s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2028",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on LCID"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:03:09.402676",
       "age": "7d 20h 0m 20s",
@@ -12320,6 +12299,27 @@
           "Review order_timeout on INTZ"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T11:22:46.276601",
+      "age": "9d 0h 19m 57s",
+      "type": "TRADE",
+      "message": "Observed trade: JEM LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:22:46.674834",
+      "age": "9d 0h 19m 57s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2692",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on JEM"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T11:17:29.887075",
@@ -14484,7 +14484,6 @@
   "mood": "recalibrating",
   "total_pnl": 331211.64000000054,
   "win_history": [
-    2.81,
     2.58,
     -13.58,
     -8.95,
@@ -14983,20 +14982,21 @@
     0,
     0,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_losses": 5,
   "worst_streak": 86,
-  "veteran_xp": 25930,
+  "veteran_xp": 25940,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1670,
-  "hours_flown": 166.9999999999948,
+  "flights_completed": 1671,
+  "hours_flown": 167.0999999999948,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15036,12 +15036,12 @@
     "MST": 1,
     "TSL": 1,
     "CUP": 3,
-    "JEM": 1
+    "JEM": 2
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-69.63 recent). Tightening entries until edge returns."
+  "mood_message": "Four losses in a row ($-70.37 recent). Tightening entries until edge returns."
 }
