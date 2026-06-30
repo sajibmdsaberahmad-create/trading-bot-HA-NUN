@@ -139,18 +139,29 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     for node in tree.body:
         if isinstance(node, ast.Assign):
-            for t in node.targets:
-                if isinstance(t, ast.Name) and t.id in ("LEARNING_ARTIFACTS", "LEARNING_REQUIRED_CODE"):
-                    learning_consts.append(_chunk(lines, node))
-                    continue
-                if isinstance(t, ast.Name) and t.id in ("_pending_pushes", "_pending_lock"):
-                    extracted["git_sync_push"].append(_chunk(lines, node))
-            else:
-                if not any(
-                    isinstance(t, ast.Name) and t.id in ("LEARNING_ARTIFACTS", "LEARNING_REQUIRED_CODE", "_pending_pushes", "_pending_lock")
-                    for t in node.targets
-                ):
-                    pass
+            names = [t.id for t in node.targets if isinstance(t, ast.Name)]
+            if any(n in ("LEARNING_ARTIFACTS", "LEARNING_REQUIRED_CODE") for n in names):
+                learning_consts.append(_chunk(lines, node))
+                continue
+            if any(n in ("_pending_pushes", "_pending_lock") for n in names):
+                extracted["git_sync_push"].append(_chunk(lines, node))
+                continue
+            state_names = {
+                "_repo", "_token", "_enabled", "_push_lock", "_last_push_ts",
+                "_push_count", "_failed_pushes", "_ollama_brain", "_gh_cli_cached",
+                "_gh_missing_logged", "_gh_auth_verified", "_git_init_done",
+                "_learning_restore_done", "_last_checkpoint_ts", "_CHECKPOINT_MIN_INTERVAL_SEC",
+                "_standalone_mode", "_watcher_stop", "_watcher_thread",
+                "_last_dirty_fingerprint", "_flush_timer", "_git_journal_lock",
+                "_git_session_stats", "MIN_PUSH_INTERVAL_SEC",
+                "_checkpoint_lock", "_checkpoint_pending", "_checkpoint_batched_reasons",
+                "_checkpoint_flush_timer",
+            }
+            if any(n in state_names for n in names):
+                continue
+            keep.append(_chunk(lines, node))
+            continue
+        if isinstance(node, ast.AnnAssign) and getattr(node.target, "id", "") == "_NEVER_PUSH_FILES":
             continue
         if isinstance(node, ast.FunctionDef):
             placed = False
@@ -193,7 +204,8 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         body = re.sub(r"\b_git_journal_lock\b", "S._git_journal_lock", body)
         body = re.sub(r"\b_learning_restore_done\b", "S._learning_restore_done", body)
         body = re.sub(r"\b_git_init_done\b", "S._git_init_done", body)
-        body = re.sub(r"\bglobal (_enabled|_repo|_token|_last_push_ts|_push_count|_failed_pushes|_last_checkpoint_ts)\b", r"global S.\1", body)
+        body = re.sub(r"\bglobal S\.(_enabled|_repo|_token|_last_push_ts|_push_count|_failed_pushes|_last_checkpoint_ts)\b", "", body)
+        body = body.replace("S.S.", "S.")
         (ROOT / "core" / f"{mod}.py").write_text(HEADER.format(title=title) + body, encoding="utf-8")
         print(f"wrote {mod}.py ({len(extracted[mod])} funcs)")
 

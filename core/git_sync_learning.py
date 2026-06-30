@@ -222,7 +222,7 @@ def push_learning_checkpoint(
     if not S._enabled:
         return False
 
-    global S._last_push_ts, S._last_checkpoint_ts
+    , S._last_checkpoint_ts
     now = time.time()
     with _checkpoint_lock:
         if now - S._last_checkpoint_ts < S._CHECKPOINT_MIN_INTERVAL_SEC and not full_sync:
