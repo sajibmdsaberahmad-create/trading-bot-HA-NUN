@@ -151,6 +151,21 @@ def get_copilot_brief() -> CopilotBrief:
         return brief
 
 
+def _infer_regime_read() -> str:
+    """SPY/VIX macro → copilot regime label (never bare 'unknown')."""
+    try:
+        from core.market_context import get_macro_context
+        from core.market_regime import regime_from_macro
+        from core.trade_telemetry import regime_tag
+        ctx = get_macro_context() or {}
+        if not ctx.get("spy_trend") and not ctx.get("vix_level"):
+            return "mixed"
+        tag = regime_tag(regime_from_macro(ctx))
+        return tag.replace("_", " ").replace("|", " / ")
+    except Exception:
+        return "mixed"
+
+
 def _build_session_context(runner: Optional["ScalperRunner"], cfg: BotConfig) -> str:
     """Aggregate session memory into one prompt block (the 'context window')."""
     lines: List[str] = []
@@ -245,13 +260,17 @@ def _parse_brief_json(raw: str, stats: Dict[str, Any]) -> CopilotBrief:
             session_wr=float(stats.get("win_rate", 0)),
             updated_at=time.time(),
             source="parse_fallback",
+            regime_read=_infer_regime_read(),
         )
     bias = plan.get("ticker_bias") or {}
     if isinstance(bias, list):
         bias = {str(x.get("ticker", "")).upper(): x.get("bias", "OK") for x in bias if x.get("ticker")}
+    raw_regime = str(plan.get("regime_read", plan.get("regime", ""))).strip()
+    if not raw_regime or raw_regime.lower() == "unknown":
+        raw_regime = _infer_regime_read()
     return CopilotBrief(
         narrative=str(plan.get("narrative", plan.get("summary", "")))[:800],
-        regime_read=str(plan.get("regime_read", plan.get("regime", "unknown"))),
+        regime_read=raw_regime,
         risk_posture=str(plan.get("risk_posture", "normal")),
         session_wr=float(stats.get("win_rate", 0)),
         ticker_bias={str(k).upper(): str(v) for k, v in bias.items()},
@@ -285,13 +304,15 @@ def _heuristic_brief(stats: Dict[str, Any], cfg: Optional[BotConfig] = None) -> 
             bias[tk] = "CAUTION"
     wr = float(stats.get("win_rate", 0))
     posture = "defensive" if wr < 0.25 else "normal"
+    regime_read = _infer_regime_read()
     return CopilotBrief(
         narrative=(
             f"Local copilot: {wr:.0%} session WR. "
             f"Adapt entry quality on: {', '.join(repeat) or 'none'} "
-            f"({'hard skip' if hard_block else 'caution — tighter setup required'})."
+            f"({'hard skip' if hard_block else 'caution — tighter setup required'}). "
+            f"Tape: {regime_read}."
         ),
-        regime_read="mixed",
+        regime_read=regime_read,
         risk_posture=posture,
         session_wr=wr,
         ticker_bias=bias,
