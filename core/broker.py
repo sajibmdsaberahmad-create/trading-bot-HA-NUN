@@ -46,6 +46,7 @@ from core.config import BotConfig
 from core.connector import IBConnector
 from core.market_hours import (
     should_use_extended_hours_orders,
+    should_defer_bracket_children,
     orders_allowed,
     allowed_trading_sessions_label,
 )
@@ -100,6 +101,7 @@ class BracketHandle:
     symbol: str = ""
     last_stop_price: float = 0.0
     last_target_price: float = 0.0
+    children_deferred: bool = False
     _last_replace_ts: float = field(default=0.0, repr=False)
 
 
@@ -148,6 +150,14 @@ class BrokerExecutor:
         """
         if not self._session_allows_orders("bracket"):
             raise RuntimeError("Market session closed — bracket entry blocked")
+        if should_defer_bracket_children(self.cfg):
+            return self._place_parent_only_buy(
+                quantity=quantity,
+                limit_or_market_price=limit_or_market_price,
+                stop_price=stop_price,
+                target_price=target_price,
+                symbol=symbol,
+            )
         contract = self.conn.get_contract(symbol)
 
         parent_id = self.ib.client.getReqId()
@@ -199,6 +209,82 @@ class BrokerExecutor:
             symbol=(symbol or self.cfg.TICKER or getattr(contract, "symbol", "") or "").upper(),
             last_stop_price=self._round_price(stop_price),
             last_target_price=self._round_price(target_price),
+        )
+
+    def _place_parent_only_buy(
+        self,
+        quantity: int,
+        limit_or_market_price: Optional[float],
+        stop_price: float,
+        target_price: float,
+        *,
+        symbol: Optional[str] = None,
+    ) -> BracketHandle:
+        """Extended-hours entry: parent only (transmit=True); children after fill."""
+        contract = self.conn.get_contract(symbol)
+        parent_id = self.ib.client.getReqId()
+        if limit_or_market_price is None:
+            parent = MarketOrder("BUY", quantity)
+        else:
+            parent = LimitOrder("BUY", quantity, self._round_price(limit_or_market_price))
+        self._configure_order(parent)
+        parent.orderId = parent_id
+        parent.transmit = True
+        parent_trade = self.ib.placeOrder(contract, parent)
+        sym = (symbol or self.cfg.TICKER or getattr(contract, "symbol", "") or "").upper()
+        oca_group = f"bracket_{parent_id}"
+        log.info(
+            f"Entry BUY ext-hours parent-only: {quantity} sh {sym}, parent#{parent_id} "
+            f"(stop ${stop_price:.2f} / target ${target_price:.2f} after fill)"
+        )
+        return BracketHandle(
+            parent_order_id=parent_id,
+            parent_trade=parent_trade,
+            oca_group=oca_group,
+            quantity=quantity,
+            symbol=sym,
+            last_stop_price=self._round_price(stop_price),
+            last_target_price=self._round_price(target_price),
+            children_deferred=True,
+        )
+
+    def attach_bracket_children(
+        self,
+        handle: BracketHandle,
+        stop_price: float,
+        target_price: float,
+        quantity: Optional[int] = None,
+    ) -> None:
+        """Attach stop + target OCA after parent fill (extended-hours deferred path)."""
+        if not handle or not getattr(handle, "children_deferred", False):
+            return
+        if not self._session_allows_orders("bracket children"):
+            return
+        qty = int(quantity or handle.quantity or 0)
+        if qty < 1:
+            return
+        contract = self._contract_for_handle(handle)
+        oca_group = handle.oca_group or f"bracket_{handle.parent_order_id}"
+        stop_child = StopOrder("SELL", qty, self._round_price(stop_price))
+        self._configure_order(stop_child)
+        stop_child.orderId = self.ib.client.getReqId()
+        stop_child.transmit = False
+        stop_child.ocaGroup = oca_group
+        stop_child.ocaType = 1
+        target_child = LimitOrder("SELL", qty, self._round_price(target_price))
+        self._configure_order(target_child)
+        target_child.orderId = self.ib.client.getReqId()
+        target_child.transmit = True
+        target_child.ocaGroup = oca_group
+        target_child.ocaType = 1
+        handle.stop_trade = self.ib.placeOrder(contract, stop_child)
+        handle.target_trade = self.ib.placeOrder(contract, target_child)
+        handle.last_stop_price = self._round_price(stop_price)
+        handle.last_target_price = self._round_price(target_price)
+        handle.children_deferred = False
+        log.info(
+            f"Bracket children attached {handle.symbol}: stop ${stop_price:.2f}, "
+            f"target ${target_price:.2f} (OCA {oca_group})"
         )
 
     def _contract_for_handle(self, handle: BracketHandle):
@@ -384,12 +470,12 @@ class BrokerExecutor:
             if cancelled:
                 self.ib.sleep(0.5)
                 log.info(f"🧹 Cancelled {cancelled} stale open order(s) from prior session")
-            # Clear stuck PendingSubmit orders (block new brackets on paper)
+            # Clear stuck PendingSubmit / PreSubmitted orders (block new brackets on paper)
             pending = 0
             for trade in list(self.ib.openTrades()):
                 try:
                     st = trade.orderStatus.status if trade.orderStatus else ""
-                    if st == "PendingSubmit":
+                    if st in ("PendingSubmit", "PreSubmitted"):
                         oid = int(getattr(trade.order, "orderId", 0) or 0)
                         if oid > 0:
                             self.ib.cancelOrder(trade.order)
@@ -398,7 +484,7 @@ class BrokerExecutor:
                     pass
             if pending:
                 self.ib.sleep(0.3)
-                log.info(f"🧹 Cancelled {pending} stuck PendingSubmit order(s)")
+                log.info(f"🧹 Cancelled {pending} stuck PendingSubmit/PreSubmitted order(s)")
         except Exception as exc:
             log.debug(f"Stale order cleanup: {exc}")
         return cancelled
