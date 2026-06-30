@@ -990,6 +990,27 @@ def _observe_block_reason(state: Dict[str, Any], cfg: Optional[BotConfig] = None
     return f"war OBSERVE — logging only (settled=${settled:,.0f})"
 
 
+def war_ledger_applies(
+    cfg: Optional[BotConfig] = None,
+    *,
+    horizon: str = "scalp",
+    capital_phase: Optional[str] = None,
+) -> bool:
+    """Virtual war ledger debits only for RTH war scalp."""
+    if not war_account_enabled(cfg):
+        return False
+    if horizon != "scalp":
+        return False
+    try:
+        from core.capital_phase import capital_phases_enabled, PHASE_RTH_WAR, capital_phase as current_capital_phase
+        if capital_phases_enabled(cfg):
+            phase = capital_phase or current_capital_phase(cfg)
+            return phase == PHASE_RTH_WAR
+    except Exception:
+        pass
+    return True
+
+
 def check_entry_allowed(
     cfg: Optional[BotConfig],
     *,
@@ -1000,6 +1021,17 @@ def check_entry_allowed(
     cfg = cfg or BotConfig()
     if not war_account_enabled(cfg):
         return None
+
+    try:
+        from core.capital_phase import capital_phases_enabled, uses_war_sizing, capital_phase
+        phase = capital_phase(cfg)
+        if capital_phases_enabled(cfg) and not uses_war_sizing(cfg, market_state="open" if phase == "rth_war" else None):
+            if phase != "rth_war":
+                return None
+        if capital_phases_enabled(cfg) and phase != "rth_war":
+            return None
+    except Exception:
+        pass
 
     if pipeline:
         try:

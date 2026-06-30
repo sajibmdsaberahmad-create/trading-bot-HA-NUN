@@ -33,8 +33,45 @@ def _truth() -> bool:
 
 
 def active_order_horizon(cfg: Optional["BotConfig"] = None) -> str:
-    """Only horizon allowed to place live IB orders today."""
+    """Default live horizon for legacy callers — prefer allows_horizon_live()."""
+    try:
+        from core.capital_phase import capital_phase, PHASE_RTH_WAR, capital_phases_enabled
+        if capital_phases_enabled(cfg):
+            if capital_phase(cfg) == PHASE_RTH_WAR:
+                return HORIZON_SCALP
+            return HORIZON_SWING
+    except Exception:
+        pass
     return HORIZON_SCALP
+
+
+def swing_ib_live_enabled(
+    cfg: Optional["BotConfig"] = None,
+    capital_phase: Optional[str] = None,
+) -> bool:
+    """Real IB swing orders (not virtual swing_paper)."""
+    if os.getenv("SWING_IB_LIVE", "true").lower() in ("0", "false", "no"):
+        return False
+    try:
+        from core.capital_phase import (
+            PHASE_OFF,
+            PHASE_RTH_WAR,
+            capital_phases_enabled,
+            capital_phase as get_phase,
+        )
+        phase = capital_phase or (get_phase(cfg) if capital_phases_enabled(cfg) else "")
+        if capital_phases_enabled(cfg):
+            if phase in (PHASE_OFF, PHASE_RTH_WAR):
+                return False
+        else:
+            return False
+    except Exception:
+        return False
+    try:
+        from core.brain_maturity import compute_stage
+        return compute_stage(cfg) in ("teen", "adult", "child")
+    except Exception:
+        return True
 
 
 def swing_shadow_enabled(cfg: Optional["BotConfig"] = None) -> bool:
@@ -50,6 +87,8 @@ def swing_shadow_enabled(cfg: Optional["BotConfig"] = None) -> bool:
 
 
 def swing_paper_enabled(cfg: Optional["BotConfig"] = None) -> bool:
+    if swing_ib_live_enabled(cfg):
+        return False
     if os.getenv("SWING_PAPER_ENABLED", "false").lower() not in ("1", "true", "yes"):
         return False
     if not scalp_profit_gate_passed(cfg):
@@ -125,9 +164,17 @@ def update_scalp_gate_from_ib(cfg: Optional["BotConfig"] = None) -> Dict[str, An
 
 def horizon_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
     ctx = ib_truth_context(cfg)
+    phase = ""
+    try:
+        from core.capital_phase import capital_phase_context
+        ctx.update(capital_phase_context(cfg))
+        phase = ctx.get("capital_phase", "")
+    except Exception:
+        pass
     ctx.update(
         {
             "active_order_horizon": active_order_horizon(cfg),
+            "swing_ib_live_enabled": swing_ib_live_enabled(cfg, phase),
             "swing_shadow_enabled": swing_shadow_enabled(cfg),
             "swing_paper_enabled": swing_paper_enabled(cfg),
             "position_horizon_enabled": position_horizon_enabled(cfg),
@@ -143,7 +190,13 @@ def horizon_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
 
 
 def tag_record(record: Dict[str, Any], horizon: Optional[str] = None) -> Dict[str, Any]:
-    """Stamp horizon on verdict/fill/ledger rows."""
+    """Stamp horizon + capital_phase on verdict/fill/ledger rows."""
     h = horizon or record.get("horizon") or active_order_horizon()
     record["horizon"] = h
+    if "capital_phase" not in record:
+        try:
+            from core.capital_phase import capital_phase
+            record["capital_phase"] = capital_phase()
+        except Exception:
+            pass
     return record
