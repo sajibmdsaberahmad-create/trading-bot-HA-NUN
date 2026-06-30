@@ -4287,3 +4287,12 @@
 {"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.1750976623054505,"shadow_only":true,"timestamp":"2026-06-30T10:45:38.491696+00:00"}
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.2460947598578147,"shadow_only":true,"timestamp":"2026-06-30T10:45:40.821617+00:00"}
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.2631421470347581,"shadow_only":true,"timestamp":"2026-06-30T10:45:43.607833+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.2649029069776547,"shadow_only":true,"timestamp":"2026-06-30T10:45:47.887835+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":1.4926023527790695,"shadow_only":true,"timestamp":"2026-06-30T10:45:50.967706+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.274139121328041,"shadow_only":true,"timestamp":"2026-06-30T10:45:53.286378+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":0.4230055658627087,"shadow_only":true,"timestamp":"2026-06-30T10:45:55.381224+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":2.397785011798343,"shadow_only":true,"timestamp":"2026-06-30T10:45:57.735546+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.2860832883438633,"shadow_only":true,"timestamp":"2026-06-30T10:46:00.049527+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":2.3636014137781363,"shadow_only":true,"timestamp":"2026-06-30T10:46:02.284350+00:00"}
+{"ticker":"PAVS","reason":"profit_prob_below_80pct","scan_score":89.0,"spike_ratio":2.921390309857214,"shadow_only":true,"timestamp":"2026-06-30T10:46:02.749623+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1.260523896821058,"shadow_only":true,"timestamp":"2026-06-30T10:46:04.989201+00:00"}
