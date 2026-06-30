@@ -261,12 +261,12 @@ def confirm_entry_fill(
 
     current_pos = ib_position_shares(ib, sym)
     delta = current_pos - float(ib_pos_baseline or 0)
-    if delta >= min_qty:
+    max_delta = float(order_shares) * 1.25
+    if min_qty <= delta <= max_delta:
         avg = position_avg_cost(ib, sym)
         if avg > 0 and _sane_fill_ratio(avg, quote_px):
             use_qty = min(delta, float(order_shares))
-            if ib_pos_baseline > 0 or use_qty >= min_qty:
-                return use_qty, avg, True, "position_delta"
+            return use_qty, avg, True, "position_delta"
 
     return 0.0, 0.0, False, ""
 
