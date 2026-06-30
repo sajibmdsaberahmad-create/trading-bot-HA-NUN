@@ -107,9 +107,10 @@ def max_war_round_trips_per_day(
         )
     if is_live_war(cfg):
         return _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 2)
+    bullets = _env_int("WAR_BULLETS", 8)
     return _env_int(
         "WAR_PAPER_MAX_ROUND_TRIPS_PER_DAY",
-        _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", 5),
+        _env_int("WAR_MAX_ROUND_TRIPS_PER_DAY", bullets),
     )
 
 
@@ -426,6 +427,49 @@ def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> s
     return "LIVE_WAR" if live else "WAR_ACTIVE"
 
 
+def _reset_war_trip_counters(state: Dict[str, Any]) -> None:
+    state["round_trips_today"] = 0
+    state["bullets_used_session"] = 0
+
+
+def _fresh_trips_on_hanoon_start_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    """Paper: unblock war entries on HANOON restart when settled cash remains."""
+    cfg = cfg or BotConfig()
+    if is_live_war(cfg):
+        return os.getenv("WAR_FRESH_TRIPS_ON_START", "false").lower() in ("1", "true", "yes")
+    return os.getenv("WAR_FRESH_TRIPS_ON_START", "true").lower() not in ("0", "false", "no")
+
+
+def _maybe_refresh_trips_if_settled(
+    state: Dict[str, Any],
+    cfg: Optional[BotConfig] = None,
+) -> bool:
+    """
+    Trip cap blocks entries even when settled cash remains.
+    On HANOON startup, refresh war trip counters if pool still has bullets left.
+    """
+    cfg = cfg or BotConfig()
+    if not _fresh_trips_on_hanoon_start_enabled(cfg):
+        return False
+    if state.get("open_war") or state.get("open_lab"):
+        return False
+    trips = int(state.get("round_trips_today", 0))
+    max_trips = max_war_round_trips_per_day(cfg)
+    if trips < max_trips:
+        return False
+    settled = float(state.get("settled_cash", 0))
+    min_bullet = _bullet_size(state, cfg) * 0.85
+    if settled < min_bullet:
+        return False
+    old_trips = trips
+    _reset_war_trip_counters(state)
+    log.info(
+        f"⚔️ War trips refreshed on HANOON start — settled=${settled:,.0f} "
+        f"was trip-capped at {old_trips}/{max_trips}; war entries re-enabled"
+    )
+    return True
+
+
 def _sync_paper_war_config(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
     """Apply env capital/bullet updates on paper restart (same session day)."""
     cfg = cfg or BotConfig()
@@ -463,7 +507,10 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     _roll_session(state, cfg)
     _apply_settlement(state, cfg)
     _sync_paper_war_config(state, cfg)
-    state["mode"] = _recompute_mode(state, cfg)
+    if _maybe_refresh_trips_if_settled(state, cfg):
+        state["mode"] = _recompute_mode(state, cfg)
+    else:
+        state["mode"] = _recompute_mode(state, cfg)
     state["is_live"] = is_live_war(cfg)
     save_state(state)
     log.info(
