@@ -427,6 +427,9 @@ def apply_ai_sure_veto(
         out["pipeline"] = f"{pipe}+ai_sure_veto" if pipe else "ai_sure:fast_block"
         return out
 
+    if "ai_sure_quality_timeout" in pipe and enter_ok and profit_prob >= min_prob:
+        return out
+
     sure = dynamic_entry_surety(
         cfg, scan_score=scan_score, spike_ratio=spike_ratio, ticker=ticker,
     )
@@ -459,7 +462,11 @@ def apply_ai_sure_veto(
         out["pipeline"] = f"{pipe}+ai_sure_veto" if pipe else "ai_sure:prob"
         return out
 
-    allowed_halim = pipe.startswith("halim:ai_sure") or pipe.startswith("halim:local_lead")
+    allowed_halim = (
+        pipe.startswith("halim:ai_sure")
+        or pipe.startswith("halim:local_lead")
+        or "ai_sure_quality_timeout" in pipe
+    )
     if allowed_halim or council_ok:
         return out
 

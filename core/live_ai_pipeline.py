@@ -437,6 +437,53 @@ def merge_entry_decision(
         return base
 
     if ollama_status == "timeout":
+        ai_sure_timeout = False
+        if ai_sure:
+            try:
+                from core.smart_stack import dynamic_entry_surety
+                sure = dynamic_entry_surety(
+                    cfg, scan_score=scan_score, spike_ratio=spike_ratio, ticker=ticker,
+                )
+                min_prob_eff = float(sure.get("min_prob", min_prob))
+                min_conf_eff = float(sure.get("min_conf", min_conf))
+            except Exception:
+                min_prob_eff = min_prob
+                min_conf_eff = min_conf
+            if (
+                enter_ok
+                and profit_prob >= min_prob_eff
+                and scan_score >= timeout_min_scan * 0.8
+                and spike_ratio >= 1.12
+            ):
+                if ppo_buy and ppo_conf >= min_conf_eff * 0.90:
+                    ai_sure_timeout = True
+                    base.update({
+                        "enter": True,
+                        "confidence": max(ppo_conf, profit_prob, min_conf_eff * 0.88),
+                        "pipeline": "council:ai_sure_quality_timeout",
+                        "reason": (
+                            f"AI-sure quality timeout: prob={profit_prob:.0%} "
+                            f"score={scan_score:.0f} PPO {ppo_conf:.0%}"
+                        )[:200],
+                    })
+                elif (
+                    profit_prob >= min_prob_eff + 0.06
+                    and scan_score >= 48
+                    and spike_ratio >= 1.15
+                    and ppo_conf >= min_conf_eff * 0.85
+                ):
+                    ai_sure_timeout = True
+                    base.update({
+                        "enter": True,
+                        "confidence": max(ppo_conf, profit_prob, min_conf_eff * 0.82),
+                        "pipeline": "council:ai_sure_quality_timeout",
+                        "reason": (
+                            f"AI-sure strong quality timeout: prob={profit_prob:.0%} "
+                            f"score={scan_score:.0f} vol={spike_ratio:.1f}x"
+                        )[:200],
+                    })
+            if ai_sure_timeout:
+                return _maybe_war_veto(base)
         if not allows_timeout_fallback_entry(cfg, scan_score, spike_ratio):
             base["pipeline"] = "council:timeout_pass"
             base["reason"] = "Council timeout — capital discipline: no fallback entry"

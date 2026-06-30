@@ -2096,6 +2096,13 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 f"  ⏱️ COUNCIL force-clear {ticker}/{task} ({age:.0f}s) — "
                 f"mechanical rules resume"
             )
+            if task == "entry_decision" and self.ai_commander:
+                try:
+                    st = dict(st)
+                    st["force_timeout"] = True
+                    self._resolve_entry_council(key, st)
+                except Exception as exc:
+                    log.debug(f"Council force-resolve {ticker}: {exc}")
             if task == "entry_decision":
                 self._spike_attempt_until[ticker] = 0.0
             self._ai_councils.pop(key, None)

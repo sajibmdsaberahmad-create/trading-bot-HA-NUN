@@ -2,11 +2,11 @@
   "name": "M. A. Halim",
   "legacy_name": "HANOON Owned Brain",
   "version": 1,
-  "updated_at": "2026-06-30T19:40:16.594405+00:00",
+  "updated_at": "2026-06-30T19:56:44.952134+00:00",
   "device": {
     "profile": "m2_8gb",
     "detected_ram_mb": 8192,
-    "updated_at": "2026-06-30T19:40:16.594422+00:00",
+    "updated_at": "2026-06-30T19:56:44.952145+00:00",
     "ram_mb_max": 10240,
     "ram_tier": "compact",
     "ppo_micro_steps": 512,
@@ -19,7 +19,7 @@
   "evolution": {
     "trigger": "live_session_end",
     "device_profile": "m2_8gb",
-    "stage": "child",
+    "stage": "toddler",
     "steps": {
       "export_dataset": {
         "ok": true,
@@ -40,8 +40,8 @@
         "ok": true,
         "trigger": "live_session_end",
         "win_rate": 0.0,
-        "trade_count": 5,
-        "diagnosis": "Local teacher: 0% WR on 5 trades. 0 stop exits. Repeat tickers (adapt entry, do not ban): ",
+        "trade_count": 3,
+        "diagnosis": "Local teacher: 0% WR on 3 trades. 0 stop exits. Repeat tickers (adapt entry, do not ban): ",
         "strategy_shift": "Adapt entry quality on repeat-loss names \u2014 tighter profit_probability, spike confirmation, and PPO confidence; do not blanket-skip tickers",
         "ppo_focus": "Reward entries with profit_run + spike_lik alignment; penalize chase without volume",
         "teacher_labels": 0,
@@ -53,16 +53,16 @@
           "Penalize PPO micro-fast when council confidence is neutral (50%)",
           "Widen stops or delay entry when instant stop hits dominate (hold_sec=0)"
         ],
-        "timestamp": "2026-06-30T19:40:16.437947+00:00"
+        "timestamp": "2026-06-30T19:56:44.796107+00:00"
       },
       "weights": {
         "ok": true
       }
     },
-    "timestamp": "2026-06-30T19:40:15.899008+00:00"
+    "timestamp": "2026-06-30T19:56:44.136994+00:00"
   },
   "status": {
-    "timestamp": "2026-06-30T19:40:16.572770+00:00",
+    "timestamp": "2026-06-30T19:56:44.928477+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -87,37 +87,37 @@
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.8,
-        "modified": "2026-06-30T19:40:16.572563+00:00"
+        "modified": "2026-06-30T19:56:44.928274+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.6,
-        "modified": "2026-06-30T19:38:43.018054+00:00"
+        "modified": "2026-06-30T19:54:09.662297+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 11403.1,
-        "modified": "2026-06-30T19:40:09.398478+00:00"
+        "size_kb": 11476.3,
+        "modified": "2026-06-30T19:56:34.949740+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 1565.4,
-        "modified": "2026-06-30T19:40:08.998276+00:00"
+        "size_kb": 1595.5,
+        "modified": "2026-06-30T19:56:42.192937+00:00"
       },
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
         "size_kb": 66.6,
-        "modified": "2026-06-30T19:40:16.024230+00:00"
+        "modified": "2026-06-30T19:56:44.284979+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
         "path": "models/ppo_teacher_sessions.jsonl",
-        "size_kb": 47.3,
-        "modified": "2026-06-30T19:40:16.438084+00:00"
+        "size_kb": 48.1,
+        "modified": "2026-06-30T19:56:44.796271+00:00"
       }
     },
     "phases": {
@@ -132,11 +132,11 @@
     "api_dependency": "low-medium",
     "next_milestone": "Export council dataset; fine-tune small LLM student on cheap GPU",
     "trade_stats": {
-      "count": 5,
+      "count": 4,
       "win_rate": 0.0,
-      "avg_pnl": -5.17
+      "avg_pnl": -5.12
     },
-    "buffer_records": 9543,
+    "buffer_records": 9708,
     "dataset_pairs": 167,
     "maturity": {
       "stage": "toddler",
@@ -146,7 +146,7 @@
       "metrics": {
         "closed_trades": 2725,
         "dataset_pairs": 167,
-        "evolution_count": 48,
+        "evolution_count": 49,
         "proxy_accuracy": 0.9,
         "proxy_holdout_accuracy": 0.9,
         "rolling_win_rate": null,

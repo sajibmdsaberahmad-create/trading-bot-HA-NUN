@@ -1,5 +1,5 @@
 {
-  "last_cycle": "2026-06-30T19:40:18.502180+00:00",
+  "last_cycle": "2026-06-30T19:56:47.103149+00:00",
   "trigger": "live_session_end",
   "stats": {
     "agreements": 1427,
@@ -7,7 +7,7 @@
     "corrections_for_ppo": 1066,
     "corrections_for_halim": 7,
     "complements": 0,
-    "label_v2_events": 1343,
+    "label_v2_events": 1425,
     "legacy_mislabeled_skipped": 1984,
     "market_proved_ppo": 20,
     "market_proved_halim": 5,
@@ -17,10 +17,10 @@
     "ok": true,
     "added": 767,
     "total": 767,
-    "events": 6443,
+    "events": 6525,
     "rewritten": true
   },
-  "cycles": 79,
+  "cycles": 80,
   "dialogue_export": {
     "ok": true,
     "pairs": 5330,

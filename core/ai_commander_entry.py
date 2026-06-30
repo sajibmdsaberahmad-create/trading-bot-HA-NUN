@@ -1191,7 +1191,7 @@ class CommanderEntryMixin:
                 except Exception:
                     status = "scanner_fast"
                     parsed = {}
-        elif status != "fresh" and age > max_wait:
+        elif status != "fresh" and (age > max_wait or state.get("force_timeout")):
             status = "timeout"
             parsed = {}
         merged = merge_entry_decision(
