@@ -1,27 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 224,
+  "total_awakenings": 225,
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
   "improvements_applied": 2675,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:01.952843",
-      "age": "7d 19h 57m 13s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2015",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:00:05.053971",
       "age": "7d 19h 57m 16s",
@@ -12292,9 +12278,16 @@
           "Review order_timeout on SOFI"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T10:09:24.780652",
+      "age": "8d 23h 6m 36s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #225",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-06-30T09:12:47.694844",
+  "last_awakening": "2026-06-30T10:09:24.779823",
   "current_version": "v20260629_075355",
   "version_history": [
     {
