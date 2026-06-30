@@ -124,6 +124,24 @@ def max_war_entries_per_hour(cfg: Optional[BotConfig] = None) -> int:
     )
 
 
+def war_ai_sizing_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    """
+    AI chooses deploy size and bullet count — war pool is not sliced into fixed
+    mechanical bullets. Settled cash is the hard limit; bullets_total is advisory.
+    """
+    cfg = cfg or BotConfig()
+    env = os.getenv("WAR_AI_SIZING", "").strip().lower()
+    if env in ("0", "false", "no"):
+        return False
+    if env in ("1", "true", "yes"):
+        return True
+    try:
+        from core.pilot_mode import ai_full_capital_access
+        return ai_full_capital_access(cfg)
+    except Exception:
+        return os.getenv("AI_UNLIMITED_MODE", "true").lower() not in ("0", "false", "no")
+
+
 def balance_driven_trips_enabled(
     cfg: Optional[BotConfig] = None,
     *,
