@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-06-30` **engineering** — IB fill sync: confirmed entries/exits, IB-grounded P&L (no orphan position phantom profits) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Pre-market PreSubmitted fix: ext-hours limit entries + stuck limit retries — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Learning flywheel hardening: outcome PPO teacher, proxy holdout eval, brain stage quality gates, Halim promotion gate, balanced PPO reward sampling — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 
@@ -676,3 +677,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 11:38 UTC` **brain_proxy_trained** · stage **adult** — Teacher proxy holdout acc=100% (random=100%, 380 samples)
 - `2026-06-30 11:38 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
 - `2026-06-30 11:38 UTC` **brain_evolution** · stage **adult** — Evolution standalone_flush — stage adult, dataset 2524 pairs
+- `2026-06-30 11:38 UTC` **git_auto** — sync: 36 files — account_evaluator.py, brain_maturity.py, scalper_runner.py +33 more | halim=12 models=17 docs=1 core=2 other=4 | brain=adul

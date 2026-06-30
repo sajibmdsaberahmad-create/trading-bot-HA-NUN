@@ -132,6 +132,41 @@ Pre-market replay — entry log should show `ext_hours_limit_*` or `LIMIT@$…`,
 
 ---
 
+## 2026-06-30 — IB fill sync (phantom P&L vs IB account)
+
+### Problem
+Premarket logs showed large internal profits (~$100k+) while IB account showed losses. Bot NAV / unrealized P&L diverged from broker reality.
+
+### Root cause
+1. Entry fill detection treated **entire existing IB position** as a new fill (orphan paper holdings).
+2. `_sync_all_positions_from_ib` could inflate slot shares to full IB size while keeping bot entry price.
+3. Exit P&L credited from **quote fallback** after 8s without IB execution.
+4. `bot_nav` / `day_pnl` used internal ledger, not IB NetLiquidation change.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/fill_tracker.py` | `confirm_entry_fill`, `ib_position_shares`, `require_ib_fill_sync`, `ib_fill_strict` |
+| `core/scalper_runner.py` | Baseline position at order submit; IB-confirmed entry only; strict exit finalize; NAV sync to IB |
+| `core/fill_reconciler.py` | No quote-force P&L when `IB_FILL_STRICT` |
+| `core/position_intel.py` | IB-first shares/entry; display IB day P&L |
+| `core/account_evaluator.py` | Day P&L from IB change when sync on |
+| `core/config.py` | `REQUIRE_IB_FILL_SYNC`, `IB_FILL_STRICT`, `IB_FILL_FORCE_SEC` |
+
+### Env vars
+```bash
+REQUIRE_IB_FILL_SYNC=true   # default
+IB_FILL_STRICT=true         # no quote P&L booking
+IB_FILL_FORCE_SEC=120
+```
+
+### Verify
+- Entry log: `✅ IB entry confirmed TICKER: Nsh @ $X (order_status|position_delta|exec_cache)`
+- Exit log: `📕 EXIT TICKER (IB fill):` — not `est. fill` unless strict off
+- `/positions` shows `Day P&L` matching IB account change, not inflated unrealized
+
+---
+
 ## 2026-06-30 — War replay ledger isolation (code)
 
 ### Problem
