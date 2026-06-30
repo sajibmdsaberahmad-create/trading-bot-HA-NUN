@@ -281,13 +281,18 @@ def get_ai_deploy_budget(
 ) -> float:
     """Max USD deployable for one new position — war ledger or equity-based slots."""
     try:
+        from core.capital_phase import capital_phases_enabled, uses_war_sizing
+        war_sizing = uses_war_sizing(cfg)
+    except Exception:
+        war_sizing = True
+    try:
         from core.war_account import (
             war_account_enabled,
             war_effective_equity,
             war_settled_cash,
             bullet_size_usd,
         )
-        if war_account_enabled(cfg):
+        if war_account_enabled(cfg) and war_sizing:
             eq = war_effective_equity(cfg)
             cash = war_settled_cash(cfg)
             if eq > 0:

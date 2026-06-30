@@ -16,6 +16,14 @@ if TYPE_CHECKING:
 
 def is_paper_free_learning(cfg: "BotConfig") -> bool:
     try:
+        from core.capital_phase import capital_phases_enabled, uses_war_sizing
+        if capital_phases_enabled(cfg) and not uses_war_sizing(cfg):
+            return bool(getattr(cfg, "PAPER_TRADING", False)) and bool(
+                getattr(cfg, "AI_PAPER_FREE_LEARNING", True)
+            )
+    except Exception:
+        pass
+    try:
         from core.war_account import war_account_enabled
         if war_account_enabled(cfg):
             return False

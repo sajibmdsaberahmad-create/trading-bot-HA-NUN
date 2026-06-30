@@ -910,6 +910,11 @@ def war_account_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     }
     unsettled = sum(float(u.get("amount", 0)) for u in (state.get("unsettled") or []))
     ctx["war_unsettled_cash"] = round(unsettled, 2)
+    try:
+        from core.capital_phase import capital_phase_context
+        ctx.update(capital_phase_context(cfg))
+    except Exception:
+        pass
     return ctx
 
 
@@ -1252,7 +1257,7 @@ def record_entry(
     spread_pct: float = 0.0,
 ) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
-    if not war_account_enabled(cfg):
+    if not war_ledger_applies(cfg):
         return {}
     state = load_state(cfg)
     _roll_session(state, cfg)
