@@ -49,3 +49,7 @@ ib_day_learning:2026-06-29:IB day 2026-06-29: 399 trades, P&L $+47100.79
 Observed trade_closed — recorded for learning.
 bracket_exit
 
+🧭 COMMANDER LEARNING | 2026-06-30T13:33:49.730661+00:00
+Observed ib_failure — recorded for learning.
+BUY 1,200 INLF NASDAQ.SCM  In accordance with our regulatory obligations as a broker, we will initially cap (or limit) the price of your Limit Order to 0.0636 or a more aggressive price still within y
+
