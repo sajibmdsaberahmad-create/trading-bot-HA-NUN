@@ -1578,3 +1578,7 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 18:48 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, registry.jsonl +2 more | halim=1 docs=1 other=3 | brain=child dataset=18
 - `2026-06-30 18:49 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, scalper_mixin_imports.py, BRAIN_DEVELOPMENT_LOG.md +2 more | docs=1 core=1 other=3 | brain=child d
 - `2026-06-30 18:49 UTC` **git_auto** — sync: 5 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, correction_log.jsonl +2 more | halim=1 docs=1 other=3 | brain=child data
+- `2026-06-30 18:49 UTC` **git_auto** — sync: 6 files — ai_commander_deferred.py, BRAIN_DEVELOPMENT_LOG.md, ENGINEERING_FIX_LOG.md +3 more | halim=1 docs=2 other=3 | brain=child da
+- `2026-06-30 18:49 UTC` **brain_proxy_trained** · stage **child** — Teacher proxy holdout acc=90% (random=98%, 323 samples)
+- `2026-06-30 18:49 UTC` **brain_ppo_teacher** — PPO teacher live_session_end: WR 9%, source heuristic_fallback
+- `2026-06-30 18:49 UTC` **brain_evolution** · stage **child** — Evolution live_session_end — stage child, dataset 388 pairs
