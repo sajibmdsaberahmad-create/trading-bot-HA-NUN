@@ -1107,6 +1107,91 @@ def rescale_decision_for_war(
     return out
 
 
+def adopt_war_ib_recovery(
+    cfg: Optional[BotConfig],
+    *,
+    ticker: str,
+    shares: int,
+    ib_fill: float,
+    quote: float,
+    spread_pct: float = 0.0,
+) -> Dict[str, Any]:
+    """Register IB-recovered war slot without debiting settled like a new BUY."""
+    cfg = cfg or BotConfig()
+    if not war_account_enabled(cfg):
+        return {}
+    state = load_state(cfg)
+    _roll_session(state, cfg)
+    mode = state.get("mode") or _recompute_mode(state, cfg)
+    if mode == "LAB_ACTIVE":
+        return {}
+
+    t_up = ticker.upper()
+    sh = int(shares or 0)
+    if sh <= 0:
+        return {}
+
+    v_fill, slip = apply_slippage_overlay(
+        cfg, side="BUY", quote=ib_fill or quote, shares=sh, ticker=ticker,
+        spread_pct=spread_pct,
+    )
+    if v_fill <= 0:
+        return {}
+
+    notional = v_fill * sh
+    nav = float(state.get("nav", state.get("operating_capital", 0)) or operating_capital_usd(cfg))
+    max_ledger_pct = _env_float("WAR_IB_RECOVER_MAX_NAV_PCT", 0.90)
+    if notional > nav * max_ledger_pct:
+        log.warning(
+            f"  ⚠️ IB recover {t_up} ${notional:,.0f} > {max_ledger_pct:.0%} of war nav "
+            f"${nav:,.0f} — monitor only (not war ledger)"
+        )
+        return {"skipped": True, "reason": "exceeds_war_nav", "ticker": t_up, "notional": notional}
+
+    _normalize_open_positions(state)
+    wars = state.setdefault("open_wars", {})
+    if t_up in wars:
+        return wars[t_up]
+
+    comm = _commission_usd(cfg, notional)
+    slot_data = {
+        "ticker": t_up,
+        "shares": sh,
+        "entry": v_fill,
+        "ib_fill": ib_fill,
+        "comm": comm,
+        "ts": time.time(),
+        "pipeline": "ib_recover",
+        "promotion": promotion_tag_for_mode(mode),
+        "recovered": True,
+    }
+    wars[t_up] = slot_data
+    state["open_war"] = slot_data
+    _reconcile_war_cash_from_positions(state, cfg)
+    state["mode"] = mode
+    save_state(state)
+
+    row = {
+        "event": "war_ib_recover",
+        "ticker": t_up,
+        "mode": mode,
+        "shares": sh,
+        "virtual_fill": v_fill,
+        "ib_fill": ib_fill,
+        "slippage_pct": slip,
+        "commission": comm,
+        "notional": notional,
+        "pipeline": "ib_recover",
+        "ts": time.time(),
+    }
+    _append_ledger(row)
+    log.info(
+        f"  ⚔️ WAR IB RECOVER {t_up}: {sh}sh @ ${v_fill:.4f} "
+        f"(ledger only — settled=${float(state.get('settled_cash', 0)):,.0f})"
+    )
+    return row
+
+
 def record_entry(
     cfg: Optional[BotConfig],
     *,

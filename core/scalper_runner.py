@@ -956,9 +956,9 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         )
         return px, False
     def _record_war_adoptions(self, adopted: list[str]) -> None:
-        """Ledger war entries for IB-recovered slots so exits reconcile."""
+        """Register IB-recovered slots on war ledger without debiting settled cash."""
         try:
-            from core.war_account import record_entry, war_account_enabled
+            from core.war_account import adopt_war_ib_recovery, war_account_enabled
             if not war_account_enabled(self.cfg) or not adopted:
                 return
             for ticker in adopted:
@@ -969,13 +969,12 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 entry = self._slot_entry_price(slot)
                 if sh <= 0 or entry <= 0:
                     continue
-                record_entry(
+                adopt_war_ib_recovery(
                     self.cfg,
                     ticker=ticker,
                     shares=sh,
                     ib_fill=entry,
                     quote=entry,
-                    pipeline="ib_recover",
                 )
         except Exception as exc:
             log.debug(f"War adopt entry: {exc}")
