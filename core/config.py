@@ -118,6 +118,8 @@ class BotConfig:
         os.getenv("IB_10197_STORM_BACKOFF_SEC", "300"),
     )
     PAPER_TRADING: bool = True     # Never flip to False without 30+ days of paper history
+    SMART_STACK: bool = os.getenv("SMART_STACK", "true").lower() in ("1", "true", "yes")
+    RAM_LIVE_ONLY: bool = os.getenv("RAM_LIVE_ONLY", "true").lower() in ("1", "true", "yes")
     # Paper $1M+ account: AI sizes from IB equity, learns without small-account caps
     AI_PAPER_FREE_LEARNING: bool = os.getenv(
         "AI_PAPER_FREE_LEARNING", "true"

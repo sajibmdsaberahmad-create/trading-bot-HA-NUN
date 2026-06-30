@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from core.config import BotConfig
-from core.fill_tracker import require_ib_fill_sync
+from core.account_view import day_pnl as account_day_pnl
 from core.market_hours import format_et, get_market_state
 from core.notify import log
 
@@ -171,8 +171,9 @@ class AccountEvaluator:
         baseline = float(getattr(self.cfg, "INITIAL_CASH", 1000))
         ib_start = getattr(runner, "_ib_starting_balance", None) or runner.account_equity
         bot_nav = getattr(runner, "bot_nav", runner.bot_cash)
+        day_pnl_usd, day_pnl_pct = account_day_pnl(runner, self.cfg)
+        day_pnl = day_pnl_usd
         ib_change = runner.account_equity - ib_start
-        day_pnl = ib_change if require_ib_fill_sync(getattr(runner, "cfg", None)) else bot_nav - baseline
 
         trades = self._all_trades(runner)
         wins = sum(1 for t in trades if t.get("result") == "win" or t.get("won"))
