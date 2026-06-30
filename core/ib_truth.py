@@ -429,13 +429,10 @@ def build_snapshot(
 
     ticker_pnl: Dict[str, float] = {}
     total_fifo = 0.0
-    total_comm = 0.0
     for trip in trips:
         ticker_pnl[trip.symbol] = round(ticker_pnl.get(trip.symbol, 0) + trip.pnl_usd, 2)
         total_fifo += trip.pnl_usd
-        total_comm += trip.commission
-    for ex in executions:
-        total_comm += ex.commission
+    total_comm = sum(ex.commission for ex in executions)
 
     ticker_pnl_ib: Dict[str, float] = {}
     for p in positions:
@@ -534,16 +531,29 @@ def ib_truth_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
     return {
         "ib_truth": True,
         "session_scope": snap.session_scope,
+        "ib_server_time": snap.server_time,
+        "ib_connected": snap.connected,
         "ib_net_liquidation": round(acct.net_liquidation, 2),
         "ib_cash": round(acct.total_cash, 2),
+        "ib_settled_cash": round(acct.settled_cash, 2),
         "ib_realized_pnl": round(acct.realized_pnl, 2),
         "ib_unrealized_pnl": round(acct.unrealized_pnl, 2),
         "ib_session_pnl": snap.session_pnl_ib,
         "ib_fifo_session_pnl": snap.session_pnl_fifo,
+        "ib_session_commissions": snap.session_commissions,
         "ib_buying_power": round(acct.buying_power, 2),
+        "ib_available_funds": round(acct.available_funds, 2),
+        "ib_excess_liquidity": round(acct.excess_liquidity, 2),
+        "ib_init_margin": round(acct.init_margin_req, 2),
+        "ib_maint_margin": round(acct.maint_margin_req, 2),
+        "ib_day_trades_remaining": acct.day_trades_remaining,
+        "ib_leverage": round(acct.leverage, 2),
+        "ib_cushion": round(acct.cushion, 4),
         "ib_gross_position_value": round(acct.gross_position_value, 2),
         "ib_open_orders": len(snap.open_orders),
         "ib_position_count": len(snap.positions),
+        "ib_executions_session": len(snap.executions),
+        "ib_round_trips": len(snap.round_trips),
         "ib_positions": [
             {
                 "symbol": p.symbol,
@@ -551,13 +561,71 @@ def ib_truth_context(cfg: Optional["BotConfig"] = None) -> Dict[str, Any]:
                 "avg_cost": round(p.avg_cost, 4),
                 "market_price": round(p.market_price, 4),
                 "market_value": round(p.market_value, 2),
+                "cost_basis": round(p.cost_basis, 2),
                 "unrealized_pnl": round(p.unrealized_pnl, 2),
                 "realized_pnl": round(p.realized_pnl, 2),
+                "con_id": p.con_id,
             }
             for p in snap.positions
         ],
+        "ib_open_orders_detail": [
+            {
+                "symbol": o.symbol,
+                "action": o.action,
+                "type": o.order_type,
+                "status": o.status,
+                "qty": o.qty,
+                "filled": o.filled,
+                "lmt": o.lmt_price,
+                "stop": o.aux_price,
+                "parent_id": o.parent_id,
+            }
+            for o in snap.open_orders[:20]
+        ],
         "ib_open_order_symbols": [o.symbol for o in snap.open_orders[:12]],
     }
+
+
+def ib_ai_context(
+    cfg: Optional["BotConfig"] = None,
+    connector: Any = None,
+) -> Dict[str, Any]:
+    """
+    Full IB context for Halim/council/Telegram — account, positions, orders,
+    session fills, macro (IB-first), and API catalog stats.
+    """
+    from core.ib_data_catalog import catalog_summary
+
+    ctx = ib_truth_context(cfg)
+    if not ctx.get("ib_truth"):
+        return {"ib_truth": False, "catalog": catalog_summary()}
+
+    snap = get_snapshot()
+    ctx["ib_ticker_pnl_fifo"] = dict(snap.ticker_pnl_fifo)
+    ctx["ib_ticker_pnl_ib"] = dict(snap.ticker_pnl_ib)
+    ctx["catalog"] = catalog_summary()
+
+    if connector is not None:
+        try:
+            from core.ib_macro import get_ib_macro_context
+            macro = get_ib_macro_context(connector)
+            if macro.get("spy_price", 0) > 0:
+                ctx["macro"] = macro
+                ctx["spy_price"] = macro.get("spy_price")
+                ctx["spy_change_pct"] = macro.get("spy_change_pct")
+                ctx["qqq_price"] = macro.get("qqq_price")
+                ctx["vix_level"] = macro.get("vix_level")
+                ctx["risk_tone"] = macro.get("risk_tone")
+        except Exception as exc:
+            log.debug(f"ib_ai_context macro: {exc}")
+
+    try:
+        from core.trade_horizon import horizon_context
+        ctx.update(horizon_context(cfg))
+    except Exception:
+        pass
+
+    return ctx
 
 
 def position_entry_from_truth(

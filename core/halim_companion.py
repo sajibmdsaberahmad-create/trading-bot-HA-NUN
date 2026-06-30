@@ -313,6 +313,14 @@ def live_snapshot(
         snap.update(horizon_context(cfg))
     except Exception:
         pass
+    try:
+        from core.ib_truth import ib_ai_context
+        conn = getattr(runner, "conn", None)
+        ib_ctx = ib_ai_context(cfg, connector=conn)
+        if ib_ctx.get("ib_truth"):
+            snap.update(ib_ctx)
+    except Exception:
+        pass
     return snap
 
 
