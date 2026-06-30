@@ -5,9 +5,9 @@
   "session_wr": 0.3333333333333333,
   "session_pnl": 0.0,
   "ticker_bias": {
-    "VWAV": "CAUTION",
     "INTZ": "CAUTION",
-    "EDBL": "CAUTION"
+    "EDBL": "CAUTION",
+    "SVRE": "CAUTION"
   },
   "repeat_losers": [],
   "ppo_hints": {
@@ -19,6 +19,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782824870.098617,
+  "updated_at": 1782824991.9696572,
   "source": "heuristic"
 }
