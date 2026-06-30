@@ -103,6 +103,35 @@ IB Error **201 closing-only** on CUPR is account/risk restriction — existing `
 
 ---
 
+## 2026-06-30 — Pre-market PreSubmitted entry timeouts (GVH)
+
+### Problem
+GVH (and ext-hours entries) polled 80/80 in `PreSubmitted` ~27s then `order_timeout`. Yesterday RTH fills worked; 07:25 ET pre-market did not.
+
+### Root cause
+1. `_entry_price_mode` forced `PAPER_MARKET_ENTRIES` → bare MARKET even outside RTH.
+2. IB paper parent-only + `outsideRth` MARKET orders often never leave `PreSubmitted`.
+3. Stuck recovery retried MARKET once (`market_retry_done`) then waited until poll cap — no limit chase.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_runner.py` | Ext-hours use `decide_smart_entry` limit; `_stuck_entry_limit_px`; up to `ENTRY_STUCK_MAX_RETRIES` limit retries |
+| `core/config.py` | `ENTRY_STUCK_MAX_RETRIES` (default 2) |
+
+### Env vars
+```bash
+ENTRY_STUCK_MAX_RETRIES=2
+PENDING_SUBMIT_MAX_SEC=4
+# Optional: force limit in RTH paper too
+# PAPER_MARKET_ENTRIES=false
+```
+
+### Verify
+Pre-market replay — entry log should show `ext_hours_limit_*` or `LIMIT@$…`, not bare `MARKET`. On stuck: `Stuck-entry retry GVH: limit@…`.
+
+---
+
 ## 2026-06-30 — War replay ledger isolation (code)
 
 ### Problem

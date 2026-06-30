@@ -28,7 +28,15 @@ from typing import Optional, List, Dict, Tuple, Any
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from core.market_hours import get_market_state, market_status_line, now_et, can_trade_now, is_extended_session, allowed_trading_sessions_label
+from core.market_hours import (
+    get_market_state,
+    market_status_line,
+    now_et,
+    can_trade_now,
+    is_extended_session,
+    allowed_trading_sessions_label,
+    should_defer_bracket_children,
+)
 from core.rth_session import (
     is_rth,
     rth_status_line,
@@ -1292,13 +1300,43 @@ class ScalperRunner:
         shares: int,
         avg_volume: float,
     ) -> Tuple[Optional[float], str]:
-        """Paper uses MARKET entries by default — limits often sit in PendingSubmit."""
+        """
+        Paper RTH: MARKET by default. Extended hours: aggressive LIMIT only —
+        IB paper parent MARKET orders stall in PreSubmitted outside RTH.
+        """
+        if should_defer_bracket_children(self.cfg):
+            limit_px, mode = self.broker.decide_smart_entry(
+                current_px, bid, ask, shares, avg_volume,
+            )
+            if limit_px and limit_px > 0:
+                return limit_px, f"ext_hours_{mode}"
+            ref = ask if ask and ask > 0 else current_px
+            buf = float(getattr(self.cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.003))
+            return self.broker._round_price(ref * (1.0 + buf)), "ext_hours_limit_ask"
         if (
             getattr(self.cfg, "PAPER_TRADING", False)
             and getattr(self.cfg, "PAPER_MARKET_ENTRIES", True)
         ):
             return None, "paper_market"
         return self.broker.decide_smart_entry(current_px, bid, ask, shares, avg_volume)
+
+    def _stuck_entry_limit_px(
+        self,
+        ticker: str,
+        ref_px: float,
+        shares: int,
+    ) -> Tuple[float, str]:
+        """Limit price for PreSubmitted recovery — never re-submit bare MARKET ext-hours."""
+        bid, ask = self._get_bid_ask(ticker)
+        live = self._live_price_for(ticker, ref_px)
+        limit_px, mode = self.broker.decide_smart_entry(
+            live, bid, ask, shares, 0.0,
+        )
+        if limit_px and limit_px > 0:
+            return limit_px, mode
+        ref = ask if ask and ask > 0 else live
+        buf = float(getattr(self.cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.004))
+        return self.broker._round_price(ref * (1.0 + buf)), "limit_chase"
 
     def _sync_position_from_ib(self):
         """Keep local shares in sync with IB (detect bracket fills/exits)."""
@@ -6498,13 +6536,15 @@ class ScalperRunner:
                 st["order_stuck_since"] = time.time()
                 since = st["order_stuck_since"]
             max_stuck = float(getattr(self.cfg, "PENDING_SUBMIT_MAX_SEC", 4.0))
-            if (
-                (time.time() - since) >= max_stuck
-                and not st.get("market_retry_done")
-            ):
-                st["market_retry_done"] = True
+            max_stuck_retries = int(getattr(self.cfg, "ENTRY_STUCK_MAX_RETRIES", 2))
+            stuck_retries = int(st.get("stuck_retries", 0))
+            if (time.time() - since) >= max_stuck and stuck_retries < max_stuck_retries:
+                st["stuck_retries"] = stuck_retries + 1
+                use_limit = should_defer_bracket_children(self.cfg) or stuck_retries >= 1
                 log.warning(
-                    f"  ⚡ {ticker} stuck {parent_status} >{max_stuck:.0f}s — cancel + retry"
+                    f"  ⚡ {ticker} stuck {parent_status} >{max_stuck:.0f}s — "
+                    f"cancel + retry #{st['stuck_retries']} "
+                    f"({'LIMIT' if use_limit else 'MARKET'})"
                 )
                 self.broker.cancel_open_orders_for_symbol(ticker)
                 self.ib.sleep(0.3)
@@ -6515,9 +6555,17 @@ class ScalperRunner:
                         int(getattr(self.cfg, "PAPER_MAX_ENTRY_SHARES", 5000)),
                     )
                 try:
+                    if use_limit:
+                        entry_px, retry_mode = self._stuck_entry_limit_px(
+                            ticker, fill_px, retry_sh,
+                        )
+                        mode_note = f"limit@{entry_px:.4f} ({retry_mode})"
+                    else:
+                        entry_px = None
+                        mode_note = "MARKET"
                     new_bracket = self.broker.place_bracket_buy(
                         quantity=retry_sh,
-                        limit_or_market_price=None,
+                        limit_or_market_price=entry_px,
                         stop_price=plan.initial_stop_price,
                         target_price=plan.take_profit_price,
                         symbol=ticker,
@@ -6527,9 +6575,10 @@ class ScalperRunner:
                     st["shares"] = retry_sh
                     st["polls"] = 0
                     st["order_stuck_since"] = None
-                    st["limit_px"] = None
+                    st["limit_px"] = entry_px
+                    log.info(f"  🔄 Stuck-entry retry {ticker}: {mode_note}")
                 except Exception as exc:
-                    log.warning(f"  Market retry failed for {ticker}: {exc}")
+                    log.warning(f"  Stuck-entry retry failed for {ticker}: {exc}")
                     self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
                 return
         else:
