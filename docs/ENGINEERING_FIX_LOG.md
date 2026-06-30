@@ -13,7 +13,10 @@
 ## 2026-06-30 — Scalper mixin missing imports (require_ib_fill_sync NameError)
 
 ### Problem
-HANOON crashed on startup after monolith split: `NameError: name 'require_ib_fill_sync' is not defined` in `scalper_entry_executor._ib_sync_enabled` during `_refresh_account_balance()`.
+HANOON crashed on startup after monolith split:
+- `NameError: name 'require_ib_fill_sync' is not defined` in `_ib_sync_enabled` / `_refresh_account_balance`
+- `NameError: name 'clear_transient_md_blocks' is not defined` in `_on_rth_open`
+- `NameError: name 'get_live_scan_universe' is not defined` in startup IB scan (`scalper_spike_loop`)
 
 ### Root cause
 Mixin extraction moved methods into separate modules but only copied a minimal header — symbols resolved from `scalper_runner.py` module scope were no longer in scope for mixin method globals.
@@ -21,7 +24,7 @@ Mixin extraction moved methods into separate modules but only copied a minimal h
 ### Fix
 | File | Change |
 |------|--------|
-| `core/scalper_mixin_imports.py` | **New** — shared imports for all scalper mixins |
+| `core/scalper_mixin_imports.py` | **New** — shared imports for all scalper mixins (fill sync, git sync, pilot_mode scan universe, session helpers, etc.) |
 | `core/scalper_entry_executor.py` | `from core.scalper_mixin_imports import *` |
 | `core/scalper_exit_executor.py` | same |
 | `core/scalper_session.py` | same |
@@ -32,6 +35,7 @@ Mixin extraction moved methods into separate modules but only copied a minimal h
 ```bash
 python3 -c "from core.scalper_runner import ScalperRunner"
 python3 -m pytest tests/ -q
+./scripts/start_hanoon.sh   # no Fatal error; startup scan locks tickers
 ```
 
 ---
