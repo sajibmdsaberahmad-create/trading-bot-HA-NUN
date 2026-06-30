@@ -166,6 +166,9 @@ def balance_driven_trips_enabled(
 
 def _min_entry_settled(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> float:
     """Minimum settled cash required to fund one war/lab entry."""
+    cfg = cfg or BotConfig()
+    if war_ai_sizing_enabled(cfg):
+        return max(50.0, _commission_usd(cfg, 100.0) * 2 + 1.0)
     return _bullet_size(state, cfg) * 0.85
 
 
