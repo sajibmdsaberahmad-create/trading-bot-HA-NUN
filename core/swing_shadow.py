@@ -87,7 +87,7 @@ def run_swing_shadow_scan(
 
     for sym in _symbols_for_scan(runner, cfg):
         try:
-            from core.swing_intel import analyze_swing, swing_intel_line
+            from core.swing_intel import analyze_swing
             analysis = analyze_swing(runner, cfg, sym, log_row=True)
             signal = {
                 "bias": analysis.get("bias", "hold"),

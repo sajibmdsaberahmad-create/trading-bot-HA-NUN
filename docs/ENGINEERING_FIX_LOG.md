@@ -10,6 +10,39 @@
 
 ---
 
+## 2026-07-01 — Swing intel: full analysis, web learn, policy training
+
+### Problem
+Swing used a single 1h SMA signal; no fundamentals/news/macro/web context; training only counted shadow biases.
+
+### Root cause
+`swing_executor` called `_simple_swing_signal` only; no integration with `ib_extended` news/fundamentals or Halim web learn cache.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/swing_intel.py` | **New** — multi-TF technicals, IB hub data, macro, web RAG, composite score |
+| `core/swing_web_learn.py` | **New** — off-hours Wikipedia swing topics → learn cache |
+| `core/swing_train.py` | **New** — `swing_policy.json` from IB trips + analysis log |
+| `core/swing_executor.py` | Entries gated on full `analyze_swing()` |
+| `core/swing_shadow.py` | Shadow verdicts include intel fields |
+| `core/scalper_runner.py` | Off-hours web learn + policy train |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `SWING_INTEL_ENABLED` | `true` | Full analysis pipeline |
+| `SWING_WEB_LEARN` | `true` | Internet read-only swing topics |
+| `SWING_INTEL_MIN_SCORE` | `28` | Entry score floor (trained policy overrides) |
+
+### Verify
+```bash
+python3 -m pytest tests/test_swing_intel.py tests/test_capital_phase.py -q
+python3 -m py_compile core/swing_intel.py core/swing_web_learn.py core/swing_train.py
+```
+
+---
+
 ## 2026-07-01 — Capital phases + real IB swing with HN orderRef tags
 
 ### Problem

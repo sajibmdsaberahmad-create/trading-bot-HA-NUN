@@ -118,7 +118,7 @@ def try_swing_ib_entry(
     sym = sym.upper()
     if signal.get("bias") != "long":
         return None
-    if not signal.get("enter") and float(signal.get("confidence", 0) or 0) < _min_signal_strength():
+    if not signal.get("enter", True):
         return None
     if float(signal.get("strength", 0) or 0) < _min_signal_strength():
         return None
