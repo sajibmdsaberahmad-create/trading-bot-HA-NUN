@@ -65,39 +65,37 @@ Consumer: `ib_truth`, `fill_tracker`, `war_ib_sync`
 | `reqContractDetails()` | Trading hours, min tick, margin per symbol |
 | `marketRule()` | Price increment table |
 
-Positions now carry `con_id` for future `reqPnLSingle`.
+Positions carry `con_id` — used by `reqPnLSingle` in `ib_extended.py`.
 
 ---
 
 ## F — Fundamentals
 
-| IB source | Use |
-|-----------|-----|
-| `reqFundamentalData()` | Ratios XML — slow, rate-limited |
+| IB source | Consumer |
+|-----------|----------|
+| `reqFundamentalData(ReportSnapshot)` | `core/ib_extended.py` — off-hours full refresh |
 
-**Not wired** — use only off-hours if needed; never block spike loop.
+Halim: `ib_fundamentals` in `ib_ai_context()`.
 
 ---
 
 ## G — Greeks / options
 
-| IB source | Use |
-|-----------|-----|
-| `reqSecDefOptParams()` | Option chains |
-| `calculateImpliedVolatility()` | Options desk |
-
-**Not wired** — equity scalp hull only today.
+| IB source | Status |
+|-----------|--------|
+| `reqSecDefOptParams()` | Not in equity scalp hull |
+| `calculateImpliedVolatility()` | Not in equity scalp hull |
 
 ---
 
 ## H — Historical news
 
-| IB source | Use |
-|-----------|-----|
-| `reqHistoricalNews()` | Symbol headlines |
-| `reqNewsBulletins()` | Broad tape |
+| IB source | Consumer |
+|-----------|----------|
+| `reqNewsBulletins()` | `ib_extended.fetch_news_bulletins` |
+| `reqHistoricalNews()` | `ib_extended.fetch_historical_news` |
 
-**Not wired** — Halim web learn is separate; can migrate to IB news later.
+Halim: `ib_news_bulletins`, `ib_news_headlines`.
 
 ---
 
@@ -130,7 +128,7 @@ Prefer `reqTickers` for macro snapshots; stream only for held symbols.
 |-----------|-----|
 | `whatIfOrder()` | Pre-trade margin impact |
 
-**Planned** — before large war entries.
+**Wired** — `core/broker.py` before every bracket; gate `IB_WHATIF_MARGIN_GATE`.
 
 ---
 
@@ -159,7 +157,7 @@ Consumer: `ib_truth.fetch_ib_open_orders()` → `ib_open_orders_detail` in AI co
 | `reqPnL(account)` | Streaming account PnL |
 | `reqPnLSingle(account, conId)` | Per-symbol streaming PnL |
 
-**Planned** — today we use `RealizedPnL` / `portfolio()` tags (same broker math).
+**Wired** — `core/ib_extended.py`; also `RealizedPnL` account tag in `ib_truth`.
 
 ---
 
@@ -195,7 +193,7 @@ Consumer: `core/data.py` — fastest layer.
 |-----------|-----|
 | `reqWshMetaData()` / earnings calendar | Event risk |
 
-**Not wired** — optional teen+ maturity feature.
+**Wired** — `ib_extended.fetch_wsh_events` (off-hours; requires IB WSH subscription).
 
 ---
 
@@ -209,8 +207,8 @@ Call `ib_ai_context(cfg, connector)` — includes:
 - Session FIFO per-ticker + IB per-line realized
 - Commissions (from IB fill reports)
 - Macro SPY/QQQ/VIX from IB (`MACRO_FROM_IB=true`)
-- Horizon gates (scalp/swing shadow)
-- Catalog stats (what's used vs available)
+- **Extended:** fundamentals, news, WSH, reqPnLSingle, contract hours, market rules
+- Horizon gates + swing paper pool context
 
 Wired into: `halim_companion.live_snapshot()`, expandable to council/copilot.
 
