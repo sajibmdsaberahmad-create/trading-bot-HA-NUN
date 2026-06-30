@@ -2649,3 +2649,4 @@
 {"timestamp":"2026-06-30T09:03:23.709998+00:00","event":"order_timeout","ticker":"SOFI","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T09:16:09.292091+00:00","event":"council_timeout","ticker":"SOFI","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 capital discipline: no fallback entry","spike_ratio":20.0,"scan_score":92.0,"confidence":0.7178,"market_state":"pre_market"}
 {"timestamp":"2026-06-30T09:23:57.233004+00:00","event":"order_timeout","ticker":"SOFI","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-30T09:27:14.638739+00:00","event":"council_timeout","ticker":"MARA","pipeline":"council:timeout_pass","reason":"Council timeout \u2014 capital discipline: no fallback entry","spike_ratio":1.6063348416107879,"scan_score":87.6,"confidence":0.22334999999999994,"market_state":"pre_market"}
