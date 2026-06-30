@@ -42,22 +42,35 @@ def regime_tag(
     vol_ratio: float = 1.0,
 ) -> str:
     """Human-readable regime bucket for telemetry."""
+    base: Optional[str] = None
     if regime_result is not None:
-        label = str(getattr(getattr(regime_result, "regime", None), "value", regime_result))
-        if "high_vol" in label or "breakout" in label:
+        raw = getattr(getattr(regime_result, "regime", None), "value", None)
+        label = str(raw or regime_result).strip().lower().replace("marketregime.", "")
+        if label and label not in ("unknown", "none", ""):
+            if "high_vol" in label or label in ("breakout", "breakdown"):
+                base = "high_vol_spike"
+            elif "gap_up" in label:
+                base = "gap_up"
+            elif "gap_down" in label:
+                base = "gap_down"
+            elif "bear" in label:
+                base = "bear_trend"
+            elif "bull" in label or "trending_up" in label:
+                base = "trend_grind"
+            elif "sideways" in label or "ranging" in label or "accumulation" in label:
+                base = "choppy_consolidation"
+            elif "low_vol" in label:
+                base = "slow_grind"
+            else:
+                base = label.replace(" ", "_")
+
+    if base is None:
+        if spike_ratio >= 2.5:
             base = "high_vol_spike"
-        elif "sideways" in label or "accumulation" in label:
-            base = "choppy_consolidation"
-        elif "bull" in label or "breakout" in label:
-            base = "trend_grind"
+        elif spike_ratio >= 1.3:
+            base = "momentum_spike"
         else:
-            base = label
-    elif spike_ratio >= 2.5:
-        base = "high_vol_spike"
-    elif spike_ratio >= 1.3:
-        base = "momentum_spike"
-    else:
-        base = "slow_grind"
+            base = "slow_grind"
     if vol_ratio >= 3.0 and spike_ratio >= 2.0:
         return f"{base}|late_chase_risk"
     return base
