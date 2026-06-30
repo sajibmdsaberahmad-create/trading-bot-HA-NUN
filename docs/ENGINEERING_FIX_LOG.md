@@ -10,6 +10,35 @@
 
 ---
 
+## 2026-07-01 — stop.sh: responsive shutdown + no duplicate flush
+
+### Problem
+`./stop.sh` appeared hung or ineffective: bot kept running for minutes after stop, or stop script ran another full Halim gold + git pipeline even when the live process had already flushed cleanly.
+
+### Root cause
+1. Main loop used blocking `ib.sleep(loop_sec)` — stop request / SIGTERM only checked at loop top, so off-hours training and long sleeps delayed exit.
+2. `stop_hanoon.sh` released IB client lock before the process exited.
+3. After graceful SIGTERM teardown, stop script always re-ran Halim gold + cleanup (duplicate of in-process `_shutdown()`).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/shutdown_control.py` | `interruptible_wait()` — chunked sleep checks shutdown flag |
+| `core/scalper_session.py` | `_interruptible_ib_sleep()`; signal handler writes shutdown file; off-hours train aborts on stop |
+| `core/scalper_runner.py` | Main loop + deferred scanner warmup use interruptible sleep; skip off-hours train when stopping |
+| `scripts/stop_hanoon.sh` | Stop sidecars first; broader PID match; release IB lock after exit; skip duplicate flush on graceful stop |
+| `tests/test_shutdown_control.py` | **New** — interruptible wait tests |
+
+### Verify
+```bash
+bash -n scripts/stop_hanoon.sh
+python3 -m pytest tests/test_shutdown_control.py -q
+# ./stop.sh while HANOON running → exits within ~30s with "exited gracefully"
+# Hard-kill path still runs fallback Halim gold
+```
+
+---
+
 ## 2026-07-01 — IB 322 connector log downgrade (completes boot noise fix)
 
 ### Problem
