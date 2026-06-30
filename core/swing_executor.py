@@ -120,6 +120,13 @@ def try_swing_ib_entry(
         return None
     if not signal.get("enter", True):
         return None
+    analysis = signal.get("analysis") or {}
+    try:
+        from core.swing_doctrine import apply_swing_entry_doctrine, swing_doctrine_enabled
+        if swing_doctrine_enabled(cfg) and not apply_swing_entry_doctrine(cfg, runner, sym, analysis):
+            return None
+    except Exception:
+        pass
     if float(signal.get("strength", 0) or 0) < _min_signal_strength():
         return None
     if ticker_held_as_swing(runner, sym):
@@ -221,8 +228,9 @@ def run_swing_ib_cycle(
 
 
 def monitor_swing_ib_slots(runner: Any, cfg: Optional["BotConfig"] = None) -> None:
-    """Refresh swing slot marks from IB Truth (no local PnL math)."""
+    """Refresh swing slot marks from IB Truth; maturity-scaled green exit doctrine."""
     from core.ib_truth import get_snapshot
+    cfg = cfg or getattr(runner, "cfg", None)
     snap = get_snapshot()
     if snap.refreshed_at <= 0:
         return
@@ -237,3 +245,38 @@ def monitor_swing_ib_slots(runner: Any, cfg: Optional["BotConfig"] = None) -> No
             slot["entry_price"] = pos.avg_cost
         slot["ib_unrealized"] = pos.unrealized_pnl
         slot["ib_fill_confirmed"] = pos.qty > 0
+
+        try:
+            from core.swing_doctrine import assess_swing_exit, swing_doctrine_enabled
+            if not swing_doctrine_enabled(cfg):
+                continue
+            dx = assess_swing_exit(cfg, runner, sym, slot)
+            slot["last_swing_doctrine"] = {
+                "action": dx.get("action"),
+                "hold_days": dx.get("hold_days"),
+                "maturity": (dx.get("maturity") or {}).get("maturity_level"),
+            }
+            if dx.get("action") == "ride_multibar":
+                ride = dx.get("ride") or {}
+                log.debug(
+                    f"  📈 SWING RIDE {sym}: +{(dx.get('pnl_pct') or 0):.2%} "
+                    f"days={dx.get('hold_days')} pred_3=${ride.get('pred_3bar', 0):.2f}"
+                )
+            elif dx.get("should_exit") and dx.get("reason"):
+                reason = str(dx["reason"])
+                if dx.get("action") == "advisory":
+                    log.debug(f"  📈 SWING advisory exit {sym}: {reason[:80]}")
+                elif hasattr(runner, "commander_exit_ticker"):
+                    log.info(f"  📈 SWING EXIT {sym}: {reason[:100]}")
+                    _append_ledger(tag_learning_row({
+                        "event": "swing_doctrine_exit",
+                        "symbol": sym,
+                        "reason": reason,
+                        "pnl_pct": dx.get("pnl_pct"),
+                        "hold_days": dx.get("hold_days"),
+                        "maturity": dx.get("maturity"),
+                        "ts": time.time(),
+                    }, horizon=HORIZON_SWING))
+                    runner.commander_exit_ticker(sym, reason)
+        except Exception as exc:
+            log.debug(f"swing doctrine monitor {sym}: {exc}")
