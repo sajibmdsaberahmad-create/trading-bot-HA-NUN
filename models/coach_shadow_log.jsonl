@@ -3591,3 +3591,14 @@
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1015.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:14.083667+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:16.109020+00:00"}
 {"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":1138.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:18.517351+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1015.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:20.488994+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":10262.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:23.105984+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":100.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:25.301698+00:00"}
+{"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":1691.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:27.527472+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":27359.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:29.557913+00:00"}
+{"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":93.4,"spike_ratio":1.9559126493601426,"shadow_only":true,"timestamp":"2026-06-30T10:14:31.544954+00:00"}
+{"ticker":"JEM","reason":"profit_prob_below_80pct","scan_score":100.0,"spike_ratio":565.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:33.899455+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":27848.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:35.977638+00:00"}
+{"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":4.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:38.003845+00:00"}
+{"ticker":"CAST","reason":"profit_prob_below_80pct","scan_score":82.4,"spike_ratio":200.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:40.696884+00:00"}
+{"ticker":"CTNT","reason":"profit_prob_below_80pct","scan_score":84.6,"spike_ratio":6941.0,"shadow_only":true,"timestamp":"2026-06-30T10:14:41.154404+00:00"}
