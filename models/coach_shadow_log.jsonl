@@ -4594,3 +4594,4 @@
 {"ticker":"BTCT","reason":"profit_prob_below_80pct","scan_score":97.8,"spike_ratio":9631.0,"shadow_only":true,"timestamp":"2026-06-30T11:07:08.498283+00:00"}
 {"ticker":"AVXX","reason":"profit_prob_below_80pct","scan_score":95.6,"spike_ratio":3130.0,"shadow_only":true,"timestamp":"2026-06-30T11:07:11.737455+00:00"}
 {"ticker":"GVH","reason":"ppo_not_aligned","scan_score":80.2,"spike_ratio":2905.0,"shadow_only":true,"timestamp":"2026-06-30T11:07:13.998948+00:00"}
+{"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":124354.0,"shadow_only":true,"timestamp":"2026-06-30T11:18:16.337185+00:00"}
