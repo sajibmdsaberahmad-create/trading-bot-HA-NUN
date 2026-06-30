@@ -322,3 +322,5 @@
 {"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T12:03:33.668093+00:00"}
 {"event":"learning_snapshot","trigger":"session_shutdown","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T12:03:35.257316+00:00"}
 {"event":"learning_snapshot","trigger":"periodic","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T12:22:03.897803+00:00"}
+{"event":"learning_snapshot","trigger":"pre_stop_live","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T12:31:49.413871+00:00"}
+{"event":"learning_snapshot","trigger":"signal","fsync_files":21,"ppo":false,"timestamp":"2026-06-30T12:31:49.460449+00:00"}
