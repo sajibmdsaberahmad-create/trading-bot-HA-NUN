@@ -1077,7 +1077,15 @@ TZ=America/New_York          # set by main.py + start_hanoon.sh
 ### Verify
 ```bash
 pytest tests/test_war_account_rth.py -q
+# Restart bot; one RTH reset per ET day max; no check_missed_profit_hunt errors
+grep -c "check_missed_profit_hunt" logs/HANOON.log  # should stop growing after restart
 ```
+
+### Rollback / risks
+Auto-save inside `_roll_session` adds one disk write per roll event (low frequency). Calendar roll now logs at ET midnight — expected once per US session day.
+
+### Notes
+War balance boundaries are **US Eastern**: calendar counters at **00:00 ET** (10:00 BDT), pool refresh at **09:30 ET** RTH open (19:30 BDT). Midnight BDT = 14:00 ET — not a war reset boundary.
 
 ---
 
@@ -1107,12 +1115,8 @@ pytest tests/test_position_context_isolation.py -q
 
 ### Notes
 Restart HANOON after deploy. War phantom PnL and `get_ai_deploy_budget` NameError remain open.
-# Restart bot; one RTH reset per ET day max; no check_missed_profit_hunt errors
-grep -c "check_missed_profit_hunt" logs/HANOON.log  # should stop growing after restart
-```
 
 ### Rollback / risks
-Auto-save inside `_roll_session` adds one disk write per roll event (low frequency). Calendar roll now logs at ET midnight — expected once per US session day.
+Per-ticker risk plan rebuild may differ slightly from original plan if slot lacks `risk_usd`/`atr_at_entry` (pre-fix slots). Monitor logs for `Risk tick skipped` warnings.
 
-### Notes
-War balance boundaries are **US Eastern**: calendar counters at **00:00 ET** (10:00 BDT), pool refresh at **09:30 ET** RTH open (19:30 BDT). Midnight BDT = 14:00 ET — not a war reset boundary.
+---
