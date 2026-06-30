@@ -12,11 +12,11 @@ from core.config import BotConfig
 from core.notify import log
 
 if TYPE_CHECKING:
-    from core.scalper_runner import ScalperRunner
+    pass
 
 
 class ScalperSessionMixin:
-    """Mixin — use via ScalperRunner multiple inheritance."""
+    """Mixin — composed into ScalperRunner."""
 
     def _suspend_off_hours_market_data(self, market_state: str) -> None:
         """Release IB market data streams when session is not tradable."""

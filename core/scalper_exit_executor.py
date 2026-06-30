@@ -12,11 +12,11 @@ from core.config import BotConfig
 from core.notify import log
 
 if TYPE_CHECKING:
-    from core.scalper_runner import ScalperRunner
+    pass
 
 
 class ScalperExitMixin:
-    """Mixin — use via ScalperRunner multiple inheritance."""
+    """Mixin — composed into ScalperRunner."""
 
     def _service_tick_position_exit(self, ticker: str, price: float) -> None:
         """Sub-second micro profit/loss exit on tick (mechanical, no council wait)."""
