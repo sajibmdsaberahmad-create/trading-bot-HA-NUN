@@ -693,6 +693,10 @@ class BotConfig:
     PAPER_MARKET_ENTRIES: bool = os.getenv("PAPER_MARKET_ENTRIES", "true").lower() not in (
         "0", "false", "no",
     )
+    # Pre/after-hours: parent-only entry, attach stop/target after fill (IB paper bracket fix)
+    EXTENDED_HOURS_DEFER_BRACKET: bool = os.getenv(
+        "EXTENDED_HOURS_DEFER_BRACKET", "true",
+    ).lower() not in ("0", "false", "no")
     PAPER_SCAN_BAR_DURATION: str = os.getenv("PAPER_SCAN_BAR_DURATION", "420 S")
     PENDING_SUBMIT_MAX_SEC: float = float(os.getenv("PENDING_SUBMIT_MAX_SEC", "4"))
     ENTRY_PENDING_LOOP_SEC: float = float(os.getenv("ENTRY_PENDING_LOOP_SEC", "0.05"))
