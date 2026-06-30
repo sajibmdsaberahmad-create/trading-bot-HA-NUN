@@ -25,3 +25,11 @@ Halim heuristic dev plan — WR 0%
 Observed trade_closed — recorded for learning.
 green_profit_lock:ai_stall quick_scalp +0.49% (peak +0.49%)
 
+🧭 COMMANDER LEARNING | 2026-06-30T11:53:48.156116+00:00
+Observed loss_streak — recorded for learning.
+tick_micro_loss
+
+🧭 COMMANDER LEARNING | 2026-06-30T11:53:48.156171+00:00
+Observed trade_closed — recorded for learning.
+tick_micro_loss
+

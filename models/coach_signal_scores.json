@@ -5,5 +5,12 @@
     "pnl_usd": -8.5,
     "last_ticker": "COIN",
     "last_at": "2026-06-30T07:58:49.970343+00:00"
+  },
+  "hope_hold": {
+    "count": 1,
+    "sessions": [],
+    "pnl_usd": -1.91,
+    "last_ticker": "INTZ",
+    "last_at": "2026-06-30T11:53:46.667529+00:00"
   }
 }

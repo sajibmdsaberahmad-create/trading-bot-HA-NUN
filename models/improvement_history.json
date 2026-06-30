@@ -607,5 +607,14 @@
     "lessons": [
       "Review trade_closed on INTZ"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T11:53:48.156619+00:00",
+    "source": "runtime_trade_closed",
+    "adjustments": {},
+    "guidelines_summary": "Observed trade_closed \u2014 recorded for learning.",
+    "lessons": [
+      "Review trade_closed on INTZ"
+    ]
   }
 ]

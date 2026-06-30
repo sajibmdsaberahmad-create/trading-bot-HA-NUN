@@ -1,15 +1,15 @@
 {
   "operating_capital": 3500.0,
-  "nav": 3851.9354688357844,
-  "cash": 3497.7325848357846,
-  "settled_cash": 3145.4537005973843,
+  "nav": 4192.139687138784,
+  "cash": 4188.4632935387845,
+  "settled_cash": 3490.8190549488845,
   "unsettled": [],
-  "deployed_usd": 353.852884,
+  "deployed_usd": 3.67639360000004,
   "bullets_total": 8,
   "bullets_used_session": 2,
-  "round_trips_today": 1,
+  "round_trips_today": 2,
   "entries_today": 2,
-  "fee_drag_today": 1.0499999999999998,
+  "fee_drag_today": 1.4,
   "lab_capital": 5000.0,
   "lab_nav": 5000.0,
   "lab_cash": 5000.0,
@@ -18,24 +18,15 @@
   "mode": "WAR_ACTIVE",
   "is_live": false,
   "session_date": "2026-06-30",
-  "open_war": {
-    "ticker": "INTZ",
-    "shares": 385,
-    "entry": 0.9190984,
-    "ib_fill": 0.9082,
-    "comm": 0.35,
-    "pipeline": "",
-    "promotion": true,
-    "ts": 1782820100.929224
-  },
+  "open_war": null,
   "open_lab": null,
-  "session_pnl_war": -0.3434154026157592,
+  "session_pnl_war": -5.504551451115738,
   "session_pnl_lab": 0.0,
   "ticker_session_pnl": {
-    "INTZ": -0.34
+    "INTZ": -5.5
   },
   "ticker_session_losses": {
-    "INTZ": 1
+    "INTZ": 2
   },
-  "updated_at": 1782820408.282041
+  "updated_at": 1782820426.6717598
 }

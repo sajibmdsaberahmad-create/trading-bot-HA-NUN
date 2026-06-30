@@ -3,42 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 228,
   "training_sessions": 39,
-  "trades_observed": 1678,
+  "trades_observed": 1679,
   "scans_performed": 39,
-  "improvements_applied": 2699,
+  "improvements_applied": 2701,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:04:52.196275",
-      "age": "7d 20h 2m 3s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2034",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on MARA"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T07:35:53.570481",
-      "age": "7d 20h 33m 4s",
-      "type": "AWAKEN",
-      "message": "Consciousness awakened #195",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:36:04.824438",
-      "age": "7d 20h 33m 16s",
-      "type": "SCAN",
-      "message": "Market scan #38",
-      "metadata": {
-        "source": "off_hours",
-        "tickers": "live_ib"
-      }
-    },
     {
       "timestamp": "2026-06-29T07:36:04.839238",
       "age": "7d 20h 33m 16s",
@@ -12327,6 +12296,41 @@
           "Review trade_closed on INTZ"
         ]
       }
+    },
+    {
+      "timestamp": "2026-06-30T11:53:47.337610",
+      "age": "9d 0h 50m 58s",
+      "type": "TRADE",
+      "message": "Observed trade: INTZ ? P&L=$-1.91",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:53:48.103383",
+      "age": "9d 0h 50m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2700",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on INTZ"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T11:53:48.105083",
+      "age": "9d 0h 50m 59s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2701",
+      "metadata": {
+        "source": "runtime_loss_streak",
+        "summary": "Observed loss_streak \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review loss_streak on INTZ"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T11:40:20.692480",
@@ -14489,9 +14493,8 @@
   ],
   "last_training": "2026-06-29T07:53:55.457760",
   "mood": "defensive",
-  "total_pnl": 331214.1800000005,
+  "total_pnl": 331212.27000000054,
   "win_history": [
-    -13.58,
     -8.95,
     -12.62,
     -0.72,
@@ -14990,20 +14993,21 @@
     0,
     0,
     0,
-    2.54
+    2.54,
+    -1.91
   ],
-  "consecutive_wins": 1,
-  "consecutive_losses": 0,
+  "consecutive_wins": 0,
+  "consecutive_losses": 1,
   "worst_streak": 86,
-  "veteran_xp": 25970,
+  "veteran_xp": 25980,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1672,
-  "hours_flown": 167.1999999999948,
+  "flights_completed": 1673,
+  "hours_flown": 167.29999999999478,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15044,12 +15048,12 @@
     "TSL": 1,
     "CUP": 3,
     "JEM": 2,
-    "INT": 1
+    "INT": 2
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Win rate 25% \u00b7 $-68.28. Preserving capital over action."
+  "mood_message": "Win rate 25% \u00b7 $-68.29. Preserving capital over action."
 }
