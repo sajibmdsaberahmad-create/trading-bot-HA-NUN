@@ -342,10 +342,13 @@ def should_ring_teacher_api(
     ticker: str,
     halim_status: str = "",
     halim_conf: float = 0.0,
+    halim_parsed: Optional[Dict[str, Any]] = None,
     ppo_action: int = 0,
     ppo_conf: float = 0.0,
     scan_score: float = 0.0,
     spike_ratio: float = 1.0,
+    profit_prob: float = 0.0,
+    enter_ok: bool = True,
     disagreement: bool = False,
 ) -> Tuple[bool, str]:
     """
@@ -382,6 +385,29 @@ def should_ring_teacher_api(
 
     if halim_conf > 0 and halim_conf < 0.55 and scan_score >= 45:
         return True, "teacher:halim_uncertain"
+
+    try:
+        from core.halim_entry_line import halim_advisory_is_echo
+        if (
+            halim_parsed
+            and halim_advisory_is_echo(halim_parsed)
+            and profit_prob >= 0.68
+            and enter_ok
+            and scan_score >= 40
+        ):
+            return True, "teacher:halim_echo_quality"
+    except Exception:
+        pass
+
+    if (
+        profit_prob >= 0.75
+        and enter_ok
+        and scan_score >= 42
+        and spike_ratio >= 1.12
+        and halim_status == "fresh"
+        and not bool((halim_parsed or {}).get("enter"))
+    ):
+        return True, "teacher:quality_halim_skip"
 
     # Maturity sample rate for curriculum labels
     try:
@@ -492,6 +518,12 @@ def build_halim_local_entry(
     """
     from core.capital_discipline import effective_min_profit_probability
 
+    try:
+        from core.halim_entry_line import halim_advisory_is_echo
+    except Exception:
+        def halim_advisory_is_echo(_parsed):  # type: ignore
+            return False
+
     h_status = str(halim_live.get("status", "missing"))
     h_parsed = halim_live.get("parsed") or {}
     profit_prob = float(quality.get("profit_probability", 0.5) or 0.5)
@@ -545,6 +577,23 @@ def build_halim_local_entry(
             )
         if ai_sure:
             min_halim = float(sure.get("min_halim_conf", min_conf_eff * 0.88))
+            echo_inc = halim_advisory_is_echo(h_parsed)
+            if echo_inc and h_conf < min_halim:
+                if (
+                    enter_ok
+                    and profit_prob >= min_prob_eff
+                    and scan_score >= 42
+                    and spike_ratio >= 1.12
+                ):
+                    return _out(
+                        False, "halim:ai_sure_escalate",
+                        (
+                            f"AI-sure: Halim echo inconclusive — council+quality "
+                            f"prob={profit_prob:.0%} score={scan_score:.0f}"
+                        ),
+                        max(base_conf, profit_prob * 0.88),
+                        pending=True,
+                    )
             if (
                 h_enter
                 and h_conf >= min_halim

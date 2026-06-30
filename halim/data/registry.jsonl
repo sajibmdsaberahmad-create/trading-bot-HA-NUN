@@ -3055,3 +3055,4 @@
 {"timestamp":"2026-06-30T19:48:15.694088+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":50,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:48:15.694186+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":75,"phase":"toddler"}
 {"timestamp":"2026-06-30T19:48:15.694245+00:00","event":"capability_milestone","capability":"entry_decision","level_pct":100,"phase":"toddler"}
+{"timestamp":"2026-06-30T19:56:34.768416+00:00","event":"export_action_gold","added":25,"skipped":19501}
