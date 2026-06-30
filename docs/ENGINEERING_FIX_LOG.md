@@ -10,6 +10,40 @@
 
 ---
 
+## 2026-06-30 — IB fill sync hardening (entry+exit P&L from broker)
+
+### Problem
+User audit: ensure entry/exit fills and per-trade P&L come from IB executions, not quote estimates, and bot NAV stays aligned with IB NetLiquidation.
+
+### Root cause
+`build_close_record` used slot entry only; exit reconcile did not re-check BOT executions; `bot_nav` was recalculated from internal cash mid-loop even when `REQUIRE_IB_FILL_SYNC=true`; post-trade account values were not refreshed from IB immediately.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/fill_reconciler.py` | `resolve_entry_from_ib`; IB commission on fills; net P&L with commission |
+| `core/fill_tracker.py` | `round_trip_pnl(..., commission=)` |
+| `core/scalper_exit_executor.py` | IB-only `_build_trade_close_record`; refresh account after finalize |
+| `core/scalper_entry_executor.py` | Refresh IB account after entry fill |
+| `core/scalper_runner.py` | Skip internal NAV recalc when IB sync on |
+| `scripts/start_hanoon.sh` | Export `IB_FILL_FORCE_SEC` |
+| `tests/test_fill_reconciler.py` | Strict + confirmed fill tests |
+
+### Env vars
+```bash
+REQUIRE_IB_FILL_SYNC=true
+IB_FILL_STRICT=true
+IB_FILL_FORCE_SEC=120
+```
+
+### Verify
+```bash
+python3 -m pytest tests/test_fill_reconciler.py tests/test_fill_tracker.py -q
+# Live: entry log `✅ IB entry confirmed`; exit `📕 EXIT (IB fill)`; Day P&L matches IB account change
+```
+
+---
+
 ## 2026-06-30 — Monolith split: scalper_runner, ai_commander, git_sync learning
 
 ### Problem
