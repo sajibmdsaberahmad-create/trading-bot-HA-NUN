@@ -351,22 +351,6 @@ def mtf_entry_caution(
     return False, ""
 
 
-def profit_prob_blocks_entry(
-    cfg: BotConfig,
-    quality: Optional[Dict[str, Any]],
-) -> bool:
-    """Hard block when calculative profit_probability is red (Smart Stack default)."""
-    try:
-        from core.smart_stack import strict_profit_prob_enabled
-        if not strict_profit_prob_enabled(cfg):
-            return False
-    except Exception:
-        return False
-    if not quality:
-        return True
-    return not bool(quality.get("enter_ok", True))
-
-
 def apply_profit_prob_veto(
     cfg: BotConfig,
     decision: Dict[str, Any],

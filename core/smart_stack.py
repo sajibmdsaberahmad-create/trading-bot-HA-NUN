@@ -543,6 +543,32 @@ def build_halim_local_entry(
                 f"Halim skip {h_conf:.0%}: {h_reason}",
                 max(base_conf, h_conf * 0.5),
             )
+        if ai_sure:
+            min_halim = float(sure.get("min_halim_conf", min_conf_eff * 0.88))
+            if (
+                h_enter
+                and h_conf >= min_halim
+                and ppo_action == 1
+                and base_conf >= min_conf_eff * 0.92
+                and enter_ok
+                and profit_prob >= min_prob_eff
+            ):
+                return _out(
+                    True, "halim:ai_sure_lead",
+                    (
+                        f"AI-sure Halim {h_conf:.0%}: {h_reason or 'enter'} "
+                        f"prob={profit_prob:.0%} PPO {base_conf:.0%}"
+                    ),
+                    max(base_conf, h_conf, profit_prob),
+                )
+            return _out(
+                False, "halim:ai_sure_wait",
+                (
+                    f"AI-sure pass: Halim enter={h_enter} {h_conf:.0%} "
+                    f"prob={profit_prob:.0%} (need {min_prob_eff:.0%}) PPO {base_conf:.0%}"
+                ),
+                max(base_conf, h_conf * 0.6),
+            )
         enter = h_enter and h_conf >= min_conf * 0.80
         if not enter and h_enter and scan_score >= 45 and profit_prob >= (
             min_prob if strict_prob else min_prob * 0.88
@@ -560,6 +586,24 @@ def build_halim_local_entry(
             False, "halim:local_skip",
             f"Halim pass {h_conf:.0%}: {h_reason or 'wait'}",
             max(base_conf, h_conf * 0.6),
+        )
+
+    if ai_sure:
+        if h_status == "in_flight" and allow_pending_in_flight:
+            return _out(
+                False, "halim:ai_sure_pending",
+                f"AI-sure: awaiting Halim ({base_conf:.0%} PPO, prob={profit_prob:.0%})",
+                base_conf,
+                pending=True,
+            )
+        return _out(
+            False, "halim:ai_sure_no_halim",
+            (
+                f"AI-sure: no Halim signal ({h_status}) — "
+                f"prob={profit_prob:.0%} score={scan_score:.0f}"
+            ),
+            base_conf,
+            pending=h_status in ("in_flight", "missing", "stale_context", "empty"),
         )
 
     if h_status == "in_flight" and allow_pending_in_flight:
@@ -676,6 +720,10 @@ def startup_banner_line(cfg: Optional[BotConfig] = None) -> str:
     parts = ["🧠 LIFE ENGINE: Halim+PPO lead"]
     if mechanical_gates_advisory_only(cfg):
         parts.append("advisory gates")
+    if ai_sure_entry_enabled(cfg):
+        parts.append("AI-sure entries")
+    if strict_profit_prob_enabled(cfg):
+        parts.append("strict profit prob")
     if smart_war_posture_enabled(cfg):
         parts.append("war posture")
     parts.append("teacher curriculum")
