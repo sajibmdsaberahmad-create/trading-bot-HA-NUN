@@ -12,5 +12,12 @@
     "pnl_usd": -1.91,
     "last_ticker": "TZA",
     "last_at": "2026-06-30T18:02:22.750474+00:00"
+  },
+  "tail_loss": {
+    "count": 1,
+    "sessions": [],
+    "pnl_usd": -184.42,
+    "last_ticker": "EDBL",
+    "last_at": "2026-06-30T18:58:37.431154+00:00"
   }
 }
