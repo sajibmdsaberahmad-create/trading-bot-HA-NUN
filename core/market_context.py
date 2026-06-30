@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-core/market_context.py — Broader market context from Yahoo Finance.
+core/market_context.py — Macro context from IB Gateway (SPY/QQQ/VIX).
 
-Cached SPY/QQQ/VIX snapshot for council, Halim, and copilot prompts.
-Advisory only — never blocks entries. Refreshed on a timer (not per entry).
+Yahoo is fallback only when IB disconnected and MACRO_YAHOO_FALLBACK=true.
 """
 
 from __future__ import annotations
@@ -139,21 +138,23 @@ def _trend_label(pct: float) -> str:
     return "flat"
 
 
+def _yahoo_fallback_enabled() -> bool:
+    return os.getenv("MACRO_YAHOO_FALLBACK", "false").lower() in ("1", "true", "yes")
+
+
 def _fetch_macro_context() -> Dict:
-    """Pull fresh Yahoo snapshot (blocking — call from refresh/tick only)."""
-    summary: Dict = {
-        "spy_trend": "unknown",
-        "qqq_trend": "unknown",
-        "spy_pct": 0.0,
-        "qqq_pct": 0.0,
-        "spy_price": 0.0,
-        "qqq_price": 0.0,
-        "vix_level": 0.0,
-        "vix_regime": "low",
-        "risk_tone": "neutral",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "source": "yahoo",
-    }
+    """Yahoo fallback — only when MACRO_YAHOO_FALLBACK=true and IB unavailable."""
+    if not _yahoo_fallback_enabled():
+        return {
+            "spy_trend": "unknown",
+            "qqq_trend": "unknown",
+            "spy_pct": 0.0,
+            "qqq_pct": 0.0,
+            "vix_level": 0.0,
+            "risk_tone": "neutral",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "unavailable",
+        }
     yf = _try_import_yfinance()
     try:
         spy = _symbol_snapshot("SPY", yf)
@@ -269,8 +270,8 @@ def get_macro_context() -> Dict:
     return refresh_macro_context(force=True)
 
 
-def tick_macro_context_if_due() -> Optional[Dict]:
-    """Main-loop hook: refresh when due; log on meaningful change."""
+def tick_macro_context_if_due(connector=None) -> Optional[Dict]:
+    """Main-loop hook: refresh when due; IB-first via connector."""
     if not macro_context_enabled():
         return None
     now = time.time()
@@ -279,7 +280,7 @@ def tick_macro_context_if_due() -> Optional[Dict]:
     if (now - fetched_at) < _refresh_interval_sec():
         return None
     prev = dict(get_macro_context())
-    ctx = refresh_macro_context(force=True)
+    ctx = refresh_macro_context(force=True, connector=connector)
     tone = ctx.get("risk_tone", "neutral")
     if (
         not prev
@@ -295,15 +296,13 @@ def tick_macro_context_if_due() -> Optional[Dict]:
     return ctx
 
 
-def warm_macro_context_background() -> None:
-    """Non-blocking Yahoo warm — macro ready before first council call."""
-    if not macro_context_enabled():
-        return
+def warm_macro_context_background(connector=None) -> None:
+    """Non-blocking macro warm — IB-first when connector available."""
 
     def _run() -> None:
         try:
             stale = not get_macro_context()
-            ctx = refresh_macro_context(force=stale)
+            ctx = refresh_macro_context(force=stale, connector=connector)
             if ctx.get("source") in ("unavailable", "error"):
                 return
             log.info(
@@ -314,6 +313,8 @@ def warm_macro_context_background() -> None:
         except Exception as exc:
             logger.debug(f"Macro warm: {exc}")
 
+    if not macro_context_enabled():
+        return
     threading.Thread(target=_run, daemon=True, name="macro-warm").start()
 
 
