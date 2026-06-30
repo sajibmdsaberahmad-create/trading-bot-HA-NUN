@@ -32,3 +32,4 @@
 {"event":"war_exit","ticker":"RKLB","mode":"LAB_ACTIVE","virtual_fill":118.08812400000001,"ib_fill":118.23,"net_pnl":-26.55,"gross_pnl":-25.37,"fees":1.18,"promotion":true,"exit_reason":"tick_micro_loss","ts":1782797481.629921}
 {"event":"session_reset","reason":"user_live_session_reset","mode":"WAR_ACTIVE","nav":3500.0,"ts":1782808513.678345}
 {"event":"war_entry","ticker":"INTZ","mode":"WAR_ACTIVE","shares":385,"virtual_fill":0.9149929860805603,"ib_fill":0.9082,"slippage_pct":0.0074796147110332365,"commission":0.35,"notional":352.2722996410157,"promotion":true,"pipeline":"","ts":1782819710.616813}
+{"event":"war_exit","ticker":"INTZ","mode":"WAR_ACTIVE","virtual_fill":0.9159191798399999,"ib_fill":0.9198,"net_pnl":-0.34,"gross_pnl":0.36,"fees":0.7,"promotion":true,"exit_reason":"green_profit_lock:ai_stall quick_scalp +0.49% (peak +0.49%)","ts":1782819754.7057679}

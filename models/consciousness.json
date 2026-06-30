@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 228,
   "training_sessions": 39,
-  "trades_observed": 1677,
+  "trades_observed": 1678,
   "scans_performed": 39,
-  "improvements_applied": 2698,
+  "improvements_applied": 2699,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:04:46.833664",
-      "age": "7d 20h 1m 58s",
-      "type": "TRADE",
-      "message": "Observed trade: MARA ? P&L=$-8.65",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:04:52.196147",
-      "age": "7d 20h 2m 3s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2034",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on MARA"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:04:52.196275",
       "age": "7d 20h 2m 3s",
@@ -12327,6 +12306,27 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #228",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:42:35.379138",
+      "age": "9d 0h 39m 46s",
+      "type": "TRADE",
+      "message": "Observed trade: INTZ ? P&L=$+2.54",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:42:35.931496",
+      "age": "9d 0h 39m 47s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2699",
+      "metadata": {
+        "source": "runtime_trade_closed",
+        "summary": "Observed trade_closed \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review trade_closed on INTZ"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T11:40:20.692480",
@@ -14488,10 +14488,9 @@
     }
   ],
   "last_training": "2026-06-29T07:53:55.457760",
-  "mood": "recalibrating",
-  "total_pnl": 331211.64000000054,
+  "mood": "defensive",
+  "total_pnl": 331214.1800000005,
   "win_history": [
-    2.58,
     -13.58,
     -8.95,
     -12.62,
@@ -14990,20 +14989,21 @@
     0,
     0,
     0,
-    0
+    0,
+    2.54
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 5,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 25940,
+  "veteran_xp": 25970,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1671,
-  "hours_flown": 167.0999999999948,
+  "flights_completed": 1672,
+  "hours_flown": 167.1999999999948,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15043,12 +15043,13 @@
     "MST": 1,
     "TSL": 1,
     "CUP": 3,
-    "JEM": 2
+    "JEM": 2,
+    "INT": 1
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-70.37 recent). Tightening entries until edge returns."
+  "mood_message": "Win rate 25% \u00b7 $-68.28. Preserving capital over action."
 }

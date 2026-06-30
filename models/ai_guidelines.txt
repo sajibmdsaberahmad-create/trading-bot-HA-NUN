@@ -21,3 +21,7 @@ Combined win rate: 8.6% (buffer=2.9%, returns=14.3%)
 🧭 COMMANDER LEARNING | 2026-06-30T11:38:10.672872+00:00
 Halim heuristic dev plan — WR 0%
 
+🧭 COMMANDER LEARNING | 2026-06-30T11:42:35.986038+00:00
+Observed trade_closed — recorded for learning.
+green_profit_lock:ai_stall quick_scalp +0.49% (peak +0.49%)
+
