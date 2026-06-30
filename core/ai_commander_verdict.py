@@ -115,8 +115,10 @@ class CommanderVerdictMixin:
         equity: float = 0.0,
         cash: float = 0.0,
         gate_context: Optional[Dict[str, Any]] = None,
+        micro: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
+        micro = micro or getattr(self, "_finalize_entry_micro", None) or {}
         eq = getattr(self, "_entry_quality_snapshot", None) or out.get("entry_quality")
         if isinstance(eq, dict):
             out = dict(out)
@@ -254,6 +256,33 @@ class CommanderVerdictMixin:
             confidence = float(vetoed_sure.get("confidence", confidence))
         except Exception:
             pass
+
+        if enter:
+            try:
+                from core.green_trade_doctrine import green_entry_mandatory, require_green_entry
+                if green_entry_mandatory(self.cfg) and df is not None and len(df) > 0:
+                    block = require_green_entry(
+                        self.cfg,
+                        ticker=ticker,
+                        df=df,
+                        current_px=current_px,
+                        micro=micro or {},
+                        spike_ratio=spike_ratio,
+                        scan_score=scan_score,
+                        ppo_action=ppo_action,
+                        ppo_conf=ppo_conf,
+                        decision=out,
+                    )
+                    if block:
+                        enter = False
+                        out = {
+                            **out,
+                            "enter": False,
+                            "reason": block,
+                            "pipeline": "green_doctrine:veto",
+                        }
+            except Exception:
+                pass
 
         if not enter:
             return self._emit_spike_verdict(

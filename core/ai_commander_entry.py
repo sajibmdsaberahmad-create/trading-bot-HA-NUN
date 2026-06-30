@@ -555,6 +555,7 @@ class CommanderEntryMixin:
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
         micro = (account or {}).get("micro_forecast") or {}
+        self._finalize_entry_micro = micro
         from core.entry_quality import assess_entry_quality, apply_ai_entry_quality
         quality = assess_entry_quality(
             self.cfg, micro,
