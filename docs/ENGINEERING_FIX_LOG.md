@@ -1284,3 +1284,26 @@ assert not h['enter']
 print('ok')
 "
 ```
+
+## 2026-07-01 — IB recover war ledger overdrawing settled cash
+
+### Problem
+After `reset_live_war_session()`, bot restart adopted IB paper positions (e.g. T 347sh ~$7.2k) via `_record_war_adoptions()` → `record_entry(..., pipeline="ib_recover")`, debiting full notional from `settled_cash`. War pool showed `settled_cash: -$3,993` and every spike blocked: `war:block — need $50 > settled/deploy cap ($-3,993)`.
+
+### Root cause
+IB position recovery treated pre-existing holdings as fresh war BUYs, double-counting deployment against a $3.5k war NAV.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `adopt_war_ib_recovery()` — ledger adopt without cash debit; `_reconcile_war_cash_from_positions()`; `_heal_war_cash_ledger()` on load when settled < 0 |
+| `core/scalper_runner.py` | `_record_war_adoptions()` uses `adopt_war_ib_recovery` not `record_entry` |
+| `tests/test_war_multi_position.py` | Coverage for recover adopt + oversized skip |
+
+### Env
+- `WAR_IB_RECOVER_MAX_NAV_PCT=0.90` — positions above this fraction of war NAV are monitor-only (not war ledger)
+
+### Verify
+```bash
+pytest tests/test_war_multi_position.py -q
+```
