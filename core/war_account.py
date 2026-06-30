@@ -527,12 +527,8 @@ def _recompute_mode(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> s
     war_trips_blocked = _trip_cap_blocks(state, cfg, use_lab=False)
     if war_trips_blocked or settled < min_bullet:
         if lab_enabled(cfg) and float(state.get("lab_settled", 0)) >= min_bullet * 0.5:
-            lab_trips = int(state.get("lab_round_trips_today", 0))
-            lab_max = max_war_round_trips_per_day(cfg, use_lab=True)
-            lab_blocked = _trip_cap_blocks(state, cfg, use_lab=True)
-            if not lab_blocked and not state.get("open_lab"):
-                if balance_driven_trips_enabled(cfg, use_lab=True) or lab_trips < lab_max:
-                    return "LAB_ACTIVE"
+            if not state.get("open_lab") and not _trip_cap_blocks(state, cfg, use_lab=True):
+                return "LAB_ACTIVE"
         return "OBSERVE"
 
     return "LIVE_WAR" if live else "WAR_ACTIVE"
@@ -702,19 +698,30 @@ def war_account_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     mode = _recompute_mode(state, cfg)
     state["mode"] = mode
     bullet = _bullet_size(state, cfg)
-    max_trips = max_war_round_trips_per_day(cfg)
+    war_trips, war_cap = war_trip_display(state, cfg)
+    lab_trips, lab_cap = war_trip_display(state, cfg, use_lab=True)
+    bullets_left = war_bullets_remaining(state, cfg)
+    lab_bullets_left = war_bullets_remaining(state, cfg, use_lab=True)
     ctx = {
         "war_enabled": True,
         "war_mode": mode,
         "war_live": is_live_war(cfg),
+        "war_balance_driven": balance_driven_trips_enabled(cfg),
+        "war_lab_balance_driven": balance_driven_trips_enabled(cfg, use_lab=True),
         "war_nav": round(float(state.get("nav", 0)), 2),
         "war_settled_cash": round(float(state.get("settled_cash", 0)), 2),
         "war_lab_nav": round(float(state.get("lab_nav", 0)), 2),
+        "war_lab_settled": round(float(state.get("lab_settled", 0)), 2),
         "war_bullet_usd": round(bullet, 2),
+        "war_min_entry_usd": round(_min_entry_settled(state, cfg), 2),
         "war_bullets_total": int(state.get("bullets_total", 5)),
         "war_bullets_used": int(state.get("bullets_used_session", 0)),
-        "war_round_trips_today": int(state.get("round_trips_today", 0)),
-        "war_round_trips_max": max_trips,
+        "war_bullets_remaining": bullets_left,
+        "war_lab_bullets_remaining": lab_bullets_left,
+        "war_round_trips_today": war_trips,
+        "war_round_trips_max": war_cap,
+        "war_lab_round_trips_today": lab_trips,
+        "war_lab_round_trips_max": lab_cap,
         "war_fee_drag_today": round(float(state.get("fee_drag_today", 0)), 2),
         "war_promotion": promotion_tag_for_mode(mode),
         "war_sniper": sniper_mode(cfg),
@@ -728,42 +735,69 @@ def war_context_line(cfg: Optional[BotConfig] = None) -> str:
     c = war_account_context(cfg)
     if not c:
         return ""
+    if c.get("war_balance_driven"):
+        trips_bit = (
+            f"round_trips={c['war_round_trips_today']} "
+            f"bullets_left={c['war_bullets_remaining']} (settled-driven)"
+        )
+    else:
+        trips_bit = (
+            f"trips={c['war_round_trips_today']}/{c['war_round_trips_max']}"
+        )
     return (
         f"WAR ACCOUNT [{c['war_mode']}]{' LIVE' if c.get('war_live') else ''}: "
         f"nav=${c['war_nav']:,.0f} settled=${c['war_settled_cash']:,.0f} "
-        f"bullet≈${c['war_bullet_usd']:,.0f} "
-        f"trips={c['war_round_trips_today']}/{c['war_round_trips_max']} "
+        f"bullet≈${c['war_bullet_usd']:,.0f} {trips_bit} "
         f"fees_today=${c['war_fee_drag_today']:,.2f} "
         f"promotion={'yes' if c['war_promotion'] else 'observe/lab'}"
     )
 
 
 def _observe_block_reason(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> str:
-    """Human-readable OBSERVE veto — trip cap vs settled cash."""
+    """Human-readable OBSERVE veto — settled cash vs trip cap."""
     cfg = cfg or BotConfig()
-    trips = int(state.get("round_trips_today", 0))
-    max_trips = max_war_round_trips_per_day(cfg)
     settled = float(state.get("settled_cash", 0))
-    lab_trips = int(state.get("lab_round_trips_today", 0))
-    lab_max = max_war_round_trips_per_day(cfg, use_lab=True)
+    min_bullet = _min_entry_settled(state, cfg)
     lab_settled = float(state.get("lab_settled", 0))
-    min_bullet = _bullet_size(state, cfg) * 0.85
+    bullets_left = war_bullets_remaining(state, cfg)
+    lab_bullets_left = war_bullets_remaining(state, cfg, use_lab=True)
 
-    if trips >= max_trips:
-        return (
-            f"war OBSERVE — daily war trip cap {trips}/{max_trips} "
-            f"(settled=${settled:,.0f} still available); resets 09:30 ET"
-        )
-    if settled < min_bullet:
-        return (
-            f"war OBSERVE — settled ${settled:,.0f} below min bullet "
-            f"${min_bullet:,.0f} (T+1 dry)"
-        )
-    if lab_trips >= lab_max and lab_settled < min_bullet * 0.5:
-        return (
-            f"war OBSERVE — lab trip cap {lab_trips}/{lab_max} "
-            f"(war settled=${settled:,.0f})"
-        )
+    if balance_driven_trips_enabled(cfg):
+        if settled < min_bullet:
+            return (
+                f"war OBSERVE — settled ${settled:,.0f} below min entry "
+                f"${min_bullet:,.0f} (pool dry)"
+            )
+        if bullets_left <= 0:
+            return (
+                f"war OBSERVE — no bullets left from settled ${settled:,.0f} "
+                f"(min entry ${min_bullet:,.0f})"
+            )
+    else:
+        war_trips, war_cap = war_trip_display(state, cfg)
+        if war_trips >= war_cap:
+            return (
+                f"war OBSERVE — daily war trip cap {war_trips}/{war_cap} "
+                f"(settled=${settled:,.0f} still available); resets 09:30 ET"
+            )
+        if settled < min_bullet:
+            return (
+                f"war OBSERVE — settled ${settled:,.0f} below min bullet "
+                f"${min_bullet:,.0f} (T+1 dry)"
+            )
+
+    if balance_driven_trips_enabled(cfg, use_lab=True):
+        if lab_bullets_left <= 0 and lab_settled < min_bullet * 0.5:
+            return (
+                f"war OBSERVE — lab pool dry (lab settled=${lab_settled:,.0f})"
+            )
+    else:
+        lab_trips, lab_cap = war_trip_display(state, cfg, use_lab=True)
+        if lab_trips >= lab_cap and lab_settled < min_bullet * 0.5:
+            return (
+                f"war OBSERVE — lab trip cap {lab_trips}/{lab_cap} "
+                f"(war settled=${settled:,.0f})"
+            )
     return f"war OBSERVE — logging only (settled=${settled:,.0f})"
 
 
@@ -810,21 +844,26 @@ def check_entry_allowed(
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
     notional = float(notional_usd or 0)
     bullet = _bullet_size(state, cfg)
-    max_notional = min(settled, bullet * 1.05)
+    deploy_cap = _entry_deploy_cap(state, cfg, use_lab=use_lab)
+    max_notional = min(settled, deploy_cap * 1.05)
 
     if notional <= 0:
-        notional = bullet
+        notional = deploy_cap
 
     if notional > max_notional:
         return (
-            f"war {mode}: need ${notional:,.0f} > settled/bullet "
+            f"war {mode}: need ${notional:,.0f} > settled/deploy cap "
             f"(${max_notional:,.0f})"
         )
 
-    trips = int(state.get("lab_round_trips_today" if use_lab else "round_trips_today", 0))
-    max_trips = max_war_round_trips_per_day(cfg, use_lab=use_lab)
-    if trips >= max_trips:
-        return f"war {mode}: round-trip cap {trips}/{max_trips}"
+    if _trip_cap_blocks(state, cfg, use_lab=use_lab):
+        if balance_driven_trips_enabled(cfg, use_lab=use_lab):
+            return (
+                f"war {mode}: settled ${settled:,.0f} below min entry "
+                f"${_min_entry_settled(state, cfg):,.0f}"
+            )
+        trips, cap = war_trip_display(state, cfg, use_lab=use_lab)
+        return f"war {mode}: round-trip cap {trips}/{cap}"
 
     comm = _commission_usd(cfg, notional) * 2
     min_edge = _env_float("WAR_MIN_NET_EDGE_USD", 0.75)
@@ -878,8 +917,7 @@ def rescale_decision_for_war(
     mode = state.get("mode") or _recompute_mode(state, cfg)
     use_lab = mode == "LAB_ACTIVE"
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
-    bullet = _bullet_size(state, cfg)
-    cap_usd = min(settled, bullet)
+    cap_usd = _entry_deploy_cap(state, cfg, use_lab=use_lab)
     shares = int(decision.get("shares") or 0)
     if shares <= 0:
         deploy = float(decision.get("deploy_usd") or cap_usd)

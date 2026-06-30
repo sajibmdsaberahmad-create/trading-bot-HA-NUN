@@ -157,14 +157,23 @@ def war_posture_adjustments(cfg: BotConfig) -> Dict[str, float]:
         from core.war_account import war_account_state, war_account_enabled
         if war_account_enabled(cfg):
             st = war_account_state(cfg) or {}
-            trips = int(st.get("trips_today", 0) or 0)
-            if trips >= 2:
+            trips = int(st.get("war_round_trips_today", st.get("round_trips_today", 0)) or 0)
+            bullets_left = int(st.get("war_bullets_remaining", 0) or 0)
+            if st.get("war_balance_driven"):
+                if bullets_left <= 1:
+                    bump_conf += 0.04
+                    bump_prob += 0.05
+                    notes.append(f"war_bullets_left={bullets_left}")
+                if bullets_left <= 0:
+                    bump_conf += 0.06
+                    bump_prob += 0.08
+            elif trips >= 2:
                 bump_conf += 0.04
                 bump_prob += 0.05
                 notes.append(f"war_trips={trips}")
-            if trips >= 3:
-                bump_conf += 0.06
-                bump_prob += 0.08
+                if trips >= 3:
+                    bump_conf += 0.06
+                    bump_prob += 0.08
     except Exception:
         pass
     try:

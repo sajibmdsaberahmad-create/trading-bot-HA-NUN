@@ -277,10 +277,17 @@ class TelegramAIComposer:
         if not ctx.get("war_enabled"):
             return ""
         settled = float(ctx.get("war_settled_cash", 0) or 0)
-        trips = int(ctx.get("war_round_trips_today", 0) or 0)
-        max_t = int(ctx.get("war_round_trips_max", 0) or 0)
         mode = ctx.get("war_mode", "—")
         nav = float(ctx.get("war_nav", 0) or 0)
+        if ctx.get("war_balance_driven"):
+            left = int(ctx.get("war_bullets_remaining", 0) or 0)
+            fired = int(ctx.get("war_round_trips_today", 0) or 0)
+            return (
+                f"War {mode} · pool ${nav:,.0f} · settled ${settled:,.0f} · "
+                f"{left} bullets left · {fired} fired"
+            )
+        trips = int(ctx.get("war_round_trips_today", 0) or 0)
+        max_t = int(ctx.get("war_round_trips_max", 0) or 0)
         return f"War {mode} · pool ${nav:,.0f} · settled ${settled:,.0f} · trips {trips}/{max_t}"
 
     @staticmethod

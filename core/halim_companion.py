@@ -210,8 +210,8 @@ def _intent_task(intent: str, trigger: str = "") -> str:
         ),
         "trade_entry": (
             "Commander Telegram alert: you just opened a position. Halim voice — first person, "
-            "exact numbers from TELEGRAM EVENT DATA (IB equity, war pool, entry/stop/target). "
-            "Short, organized, 2–4 lines max."
+            "exact numbers from TELEGRAM EVENT DATA (IB equity, war pool, bullets remaining, "
+            "entry/stop/target). Short, organized, 2–4 lines max."
         ),
         "trade_exit": (
             "Commander Telegram alert: position closed. Halim voice — P&L, session totals, "

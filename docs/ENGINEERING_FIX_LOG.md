@@ -10,6 +10,36 @@
 
 ---
 
+## 2026-06-30 — Balance-driven war trips (settled cash, not fixed cap)
+
+### Problem
+User wanted trips tied to **available settled balance**, not a fixed daily round-trip counter. With $3,469 settled, fixed cap 5/5 blocked entries despite cash for ~6 more bullets.
+
+### Root cause
+`round_trips_today >= max_war_round_trips_per_day()` forced OBSERVE independent of settled cash. `bullets_used_session` was telemetry only; trip cap was the real gate.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `WAR_BALANCE_DRIVEN_TRIPS` (paper default true): `war_bullets_remaining()`, `_trip_cap_blocks()` from settled; `war_account_state()` for posture; `_entry_deploy_cap()` uses remaining cash |
+| `core/smart_stack.py` | War posture uses `war_bullets_remaining` when balance-driven |
+| `core/ai_notifier.py` / `scalper_runner.py` | Telegram/session close show bullets left + fired |
+| `scripts/start_hanoon.sh` | `WAR_BALANCE_DRIVEN_TRIPS=true`, `WAR_BALANCE_DRIVEN_LAB=true` |
+
+### Env vars
+```bash
+WAR_BALANCE_DRIVEN_TRIPS=true      # paper default — cap = settled / min bullet
+WAR_BALANCE_DRIVEN_TRIPS=false     # legacy fixed trip cap (live default)
+WAR_BALANCE_DRIVEN_LAB=true        # lab pool same logic
+```
+
+### Verify
+- `round_trips=5` + `settled=$3469` → `mode=WAR_ACTIVE`, `bullets_left≥5`
+- OBSERVE only when `settled < min_entry`
+- `pytest tests/test_war_account_rth.py -q`
+
+---
+
 ## 2026-06-30 — War trip cap vs settled cash + Halim trade Telegram
 
 ### Problem

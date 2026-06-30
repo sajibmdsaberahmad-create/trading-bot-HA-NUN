@@ -8724,11 +8724,20 @@ class ScalperRunner:
         summary += f" IB Account:    ${self.account_equity:>12,.2f}  (start: ${ib_start:,.2f})\n"
         summary += f" IB Change:     ${ib_change:>+12,.2f} ({ib_change_pct:+.2f}%)\n"
         if war_ctx:
+            if war_ctx.get("war_balance_driven"):
+                war_trips_bit = (
+                    f"bullets_left={war_ctx.get('war_bullets_remaining', 0)}  "
+                    f"fired={war_ctx.get('war_round_trips_today', 0)}"
+                )
+            else:
+                war_trips_bit = (
+                    f"trips {war_ctx.get('war_round_trips_today', 0)}/"
+                    f"{war_ctx.get('war_round_trips_max', '?')}"
+                )
             summary += (
                 f" War pool:      ${float(war_ctx.get('war_nav', 0)):>12,.0f}  "
                 f"settled=${float(war_ctx.get('war_settled_cash', 0)):,.0f}  "
-                f"trips {war_ctx.get('war_round_trips_today', 0)}/"
-                f"{war_ctx.get('war_round_trips_max', '?')}  "
+                f"{war_trips_bit}  "
                 f"mode={war_ctx.get('war_mode', '?')}\n"
             )
         summary += f" Bot Cash:      ${self.bot_cash:>12,.2f}\n"
