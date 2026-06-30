@@ -10,6 +10,41 @@
 
 ---
 
+## 2026-07-01 — War IB sync log spam + RTH-aware Telegram/Halim replies
+
+### Problem
+1. `War IB sync applied` logged every ~3s — `_refresh_account_balance()` called `sync_war_from_ib(apply=True)` on every main-loop tick and every `/status` Telegram command.
+2. `Price snapshot refresh PLTR/MARA/RIOT` spammed after 16:00 ET — stream heal polled watchlist tickers off-hours.
+3. Halim/Telegram replies used raw `bot_nav` / midnight PnL — not RTH session context (after hours at 16:28 still looked "live").
+
+### Root cause
+War sync had no throttle or change detection; ledger line appended every poll. Stream heal ignored `can_trade_now`. `_runner_ctx` called full balance refresh (triggering sync). Companion snapshot lacked `rth_tier` / `market_note`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_ib_sync.py` | 90s throttle (`WAR_IB_SYNC_INTERVAL_SEC`); log/ledger only when nav/slots/pnl change |
+| `core/scalper_runner.py` | War sync removed from `_refresh_account_balance`; `_maybe_sync_war_from_ib()` on loop + post-exit |
+| `core/scalper_runner.py` | Skip snapshots/stream-heal off-hours unless ticker is held |
+| `core/rth_session.py` | `rth_reply_context()` for AI/Telegram |
+| `core/halim_companion.py` | `live_snapshot` uses RTH context + `ib_fifo_session_pnl` |
+| `core/telegram_listener.py` | `_runner_ctx` uses `ib_truth.refresh` + RTH fallback text |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `WAR_IB_SYNC_INTERVAL_SEC` | `90` | Min seconds between war ledger apply+log |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_truth.py -q
+# After restart: no War IB sync lines every 3s; at most 1 per 90s if unchanged
+# After 16:00 ET: no PLTR/MARA snapshot INFO unless position held
+# /status at 16:28 shows "After hours" + RTH session PnL
+```
+
+---
+
 ## 2026-07-01 — IB Truth session aligned to RTH 09:30–16:00 ET
 
 ### Problem
