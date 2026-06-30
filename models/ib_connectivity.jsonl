@@ -24,3 +24,4 @@
 {"ts": 1782836387.994405, "event": "watchdog_start", "source": "gateway_watchdog", "host": "127.0.0.1", "port": 4002, "interval_sec": 30.0}
 {"ts": 1782838555.431396, "event": "watchdog_start", "source": "gateway_watchdog", "host": "127.0.0.1", "port": 4002, "interval_sec": 30.0}
 {"ts": 1782838580.345587, "event": "outage_start", "source": "ib_connector", "trigger": "disconnected_event", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
+{"ts": 1782838832.962285, "event": "outage_start", "source": "ib_connector", "trigger": "disconnected_event", "host": "127.0.0.1", "port": 4002, "client_id": 1, "wait_mode": true}
