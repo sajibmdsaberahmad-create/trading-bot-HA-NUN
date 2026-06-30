@@ -25,7 +25,12 @@ from core.ai_learning_policy import (
 from core.bracket_validator import adapt_bracket_to_fill, validate_decision_bracket
 from core.broker import BracketHandle, parse_ib_order_block
 from core.async_utils import get_background_worker
-from core.capital_discipline import allows_ppo_lead_while_pending
+from core.capital_discipline import (
+    allows_ppo_lead_while_pending,
+    capital_discipline_enabled,
+    check_entry_rate_limit,
+    entry_cooldown_after_skip,
+)
 from core.commander_learning import run_commander_learning_cycle
 from core.data import DataManager, coalesce_bars
 from core.deferred_council_learning import deferred_learning_enabled
@@ -153,6 +158,7 @@ from core.profit_hunting import (
 from core.reward_shaping import reward_from_bracket_reject, reward_from_trade
 from core.risk import TradePlan, compute_atr, compute_momentum_score, safe_vwap
 from core.rth_session import ai_session_context_block, is_rth, rth_status_line, rth_tier
+from core.scalper_filters import only_uptrend as _only_uptrend
 from core.scalper_micro_predict import bars_with_live_tick, micro_forecast
 from core.trade_telemetry import (
     log_bracket_reject,
