@@ -277,5 +277,14 @@
     "lessons": [
       "Review order_timeout on INTZ"
     ]
+  },
+  {
+    "timestamp": "2026-06-30T10:20:51.660249+00:00",
+    "source": "runtime_order_timeout",
+    "adjustments": {},
+    "guidelines_summary": "Observed order_timeout \u2014 recorded for learning.",
+    "lessons": [
+      "Review order_timeout on INTZ"
+    ]
   }
 ]

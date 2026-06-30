@@ -25,3 +25,7 @@ Halim heuristic dev plan — WR 44%
 Observed order_timeout — recorded for learning.
 PreSubmitted
 
+🧭 COMMANDER LEARNING | 2026-06-30T10:20:51.659832+00:00
+Observed order_timeout — recorded for learning.
+PreSubmitted
+
