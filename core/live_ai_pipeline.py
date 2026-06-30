@@ -317,6 +317,12 @@ def merge_entry_decision(
     min_prob = effective_min_profit_probability(cfg) if cfg else 0.58
     min_conf_eff = effective_min_confidence(cfg) if cfg else min_conf
     min_conf = max(min_conf, min_conf_eff)
+    try:
+        from core.smart_stack import strict_profit_prob_enabled
+        strict_prob = strict_profit_prob_enabled(cfg)
+    except Exception:
+        strict_prob = False
+    enter_ok = bool((quality or {}).get("enter_ok", True))
     timeout_min_scan = float(
         getattr(cfg, "COUNCIL_TIMEOUT_MIN_SCAN_SCORE", 40.0),
     ) if cfg else 40.0
@@ -394,20 +400,18 @@ def merge_entry_decision(
             is_strong_spike_setup,
         )
         min_prob = effective_min_profit_probability(cfg, scan_score, spike_ratio) if cfg else min_prob
-        try:
-            from core.smart_stack import strict_profit_prob_enabled
-            strict_prob = strict_profit_prob_enabled(cfg)
-        except Exception:
-            strict_prob = False
         if allows_ppo_lead_while_pending(
             cfg, scan_score=scan_score, spike_ratio=spike_ratio,
         ) and ppo_buy and is_strong_spike_setup(cfg, scan_score, spike_ratio):
             prob_ok = profit_prob >= min_prob if strict_prob else profit_prob >= min_prob * 0.90
-            if prob_ok and bool((quality or {}).get("enter_ok", True)) or (
-                not strict_prob
-                and scan_score >= 85
-                and spike_ratio >= 1.4
-                and ppo_conf >= min_conf * 0.75
+            if (
+                (prob_ok and bool((quality or {}).get("enter_ok", True)))
+                or (
+                    not strict_prob
+                    and scan_score >= 85
+                    and spike_ratio >= 1.4
+                    and ppo_conf >= min_conf * 0.75
+                )
             ):
                 base.update({
                     "enter": True,
@@ -435,16 +439,25 @@ def merge_entry_decision(
             base["pipeline"] = "council:timeout_pass"
             base["reason"] = "Council timeout — capital discipline: no fallback entry"
             return base
-        # Council timed out — PPO + scanner context only (no block, no hard skip)
+        # Council timed out — require green profit_probability when strict
         blend = ppo_conf
-        if ppo_buy and ppo_conf >= min_conf:
+        if (
+            ppo_buy
+            and ppo_conf >= min_conf
+            and (not strict_prob or (enter_ok and profit_prob >= min_prob))
+        ):
             base.update({
                 "enter": True,
                 "confidence": ppo_conf,
                 "pipeline": "council:ppo_timeout_lead",
                 "reason": f"PPO lead after council timeout: {ppo_reason}"[:200],
             })
-        elif spike_ratio >= 1.4 and scan_score >= timeout_min_scan and ppo_conf >= min_conf * 0.7:
+        elif (
+            spike_ratio >= 1.4
+            and scan_score >= timeout_min_scan
+            and ppo_conf >= min_conf * 0.7
+            and (not strict_prob or (enter_ok and profit_prob >= min_prob))
+        ):
             base.update({
                 "enter": True,
                 "confidence": max(ppo_conf, profit_prob, 0.55),
@@ -454,7 +467,7 @@ def merge_entry_decision(
                     f"vol={spike_ratio:.1f}x prob={profit_prob:.0%}"
                 )[:200],
             })
-        elif profit_prob >= min_prob and scan_score >= timeout_min_scan * 0.8:
+        elif profit_prob >= min_prob and scan_score >= timeout_min_scan * 0.8 and enter_ok:
             base.update({
                 "enter": True,
                 "confidence": max(ppo_conf, profit_prob, 0.55),
@@ -464,7 +477,11 @@ def merge_entry_decision(
                     f"score={scan_score:.0f}"
                 )[:200],
             })
-        elif scan_score >= timeout_min_scan * 1.5 and ppo_conf >= min_conf * 0.65:
+        elif (
+            not strict_prob
+            and scan_score >= timeout_min_scan * 1.5
+            and ppo_conf >= min_conf * 0.65
+        ):
             base.update({
                 "enter": True,
                 "confidence": max(ppo_conf, 0.55, min(scan_score / 100.0, 0.80)),
