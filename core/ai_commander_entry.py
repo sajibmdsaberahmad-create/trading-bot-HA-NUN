@@ -72,7 +72,9 @@ class CommanderEntryMixin:
         ppo_buy: bool,
         ppo_conf: float,
         ppo_reason: str = "",
+        quality: Optional[Dict[str, Any]] = None,
     ) -> None:
+        q = quality or {}
         try:
             self._halim_entry.ring(
                 ticker,
@@ -83,6 +85,10 @@ class CommanderEntryMixin:
                 ppo_buy=ppo_buy,
                 ppo_conf=ppo_conf,
                 ppo_reason=ppo_reason,
+                profit_prob=float(q.get("profit_probability", 0) or 0),
+                enter_ok=bool(q.get("enter_ok", True)),
+                fakeout_risk=float(q.get("fakeout_risk", 0) or 0),
+                setup_type=str(q.get("setup_type", "")),
             )
         except Exception as exc:
             log.debug(f"Halim entry ring: {exc}")
@@ -548,11 +554,6 @@ class CommanderEntryMixin:
             cap_line = f"{cap_line}{macro_line}\n"
 
         fp = entry_fingerprint(ticker, current_px, spike_ratio, scan_score)
-        self._ring_halim_entry(
-            ticker, fp,
-            price=current_px, spike=spike_ratio, scan=scan_score,
-            ppo_buy=ppo_action == 1, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
-        )
         micro = (account or {}).get("micro_forecast") or {}
         from core.entry_quality import assess_entry_quality, apply_ai_entry_quality
         quality = assess_entry_quality(
@@ -563,6 +564,12 @@ class CommanderEntryMixin:
             ppo_conf=ppo_conf,
             live_px=current_px,
             ticker=ticker,
+        )
+        self._ring_halim_entry(
+            ticker, fp,
+            price=current_px, spike=spike_ratio, scan=scan_score,
+            ppo_buy=ppo_action == 1, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+            quality=quality,
         )
         account = dict(account or {})
         account["entry_quality"] = quality
@@ -821,10 +828,13 @@ class CommanderEntryMixin:
                         ticker=ticker,
                         halim_status=halim_st,
                         halim_conf=float(h_parsed.get("confidence", 0) or 0),
+                        halim_parsed=h_parsed,
                         ppo_action=ppo_action,
                         ppo_conf=ppo_conf,
                         scan_score=scan_score,
                         spike_ratio=spike_ratio,
+                        profit_prob=float(quality.get("profit_probability", 0) or 0),
+                        enter_ok=bool(quality.get("enter_ok", True)),
                         disagreement=(
                             h_parsed.get("enter") is not None
                             and bool(h_parsed.get("enter")) != (ppo_action == 1)

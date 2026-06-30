@@ -449,6 +449,10 @@ class HalimEntryLine:
         ppo_buy: bool,
         ppo_conf: float,
         ppo_reason: str = "",
+        profit_prob: float = 0.0,
+        enter_ok: bool = True,
+        fakeout_risk: float = 0.0,
+        setup_type: str = "",
     ) -> None:
         if not halim_entry_lm_enabled(self.cfg):
             return
@@ -501,6 +505,10 @@ class HalimEntryLine:
             ppo_reason=ppo_reason,
             loss_context=loss_ctx,
             macro_context=macro_ctx,
+            profit_prob=profit_prob,
+            enter_ok=enter_ok,
+            fakeout_risk=fakeout_risk,
+            setup_type=setup_type,
         )
         threading.Thread(
             target=self._run,
