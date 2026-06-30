@@ -139,7 +139,7 @@ class ScalperSessionMixin:
             pass
         try:
             from core.market_context import refresh_macro_context
-            ctx = refresh_macro_context(force=True)
+            ctx = refresh_macro_context(force=True, connector=getattr(self, "conn", None))
             log.info(
                 f"🌍 RTH macro: SPY {ctx.get('spy_pct', 0):+.2f}% | "
                 f"QQQ {ctx.get('qqq_pct', 0):+.2f}% | "

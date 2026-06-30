@@ -96,6 +96,8 @@ def account_summary(runner: "ScalperRunner") -> Dict[str, Any]:
         "ib_realized_pnl": round(ib_realized, 2),
         "ib_unrealized_pnl": round(ib_unrealized, 2),
         "ib_fifo_session_pnl": round(snap.session_pnl_fifo, 2) if snap.refreshed_at > 0 else 0.0,
+        "ib_session_pnl": round(snap.session_pnl_ib, 2) if snap.refreshed_at > 0 else 0.0,
+        "ib_open_orders": len(snap.open_orders) if snap.refreshed_at > 0 else 0,
         "cash": round(
             float(getattr(runner, "available_cash", 0) or getattr(runner, "bot_cash", 0) or 0),
             2,
