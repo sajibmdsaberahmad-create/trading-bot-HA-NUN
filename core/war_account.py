@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import os
 import time
+import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -24,6 +25,7 @@ from core.notify import log
 _REPO = Path(__file__).resolve().parents[1]
 STATE_PATH = _REPO / "models" / "war_account_state.json"
 LEDGER_PATH = _REPO / "models" / "war_account_ledger.jsonl"
+_state_lock = threading.Lock()
 
 _MODES_WAR_ENTRY = frozenset({"WAR_ACTIVE", "LIVE_WAR"})
 _MODES_LAB_ENTRY = frozenset({"LAB_ACTIVE"})
