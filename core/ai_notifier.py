@@ -143,8 +143,18 @@ class TelegramAIComposer:
         purpose = classify_notify_event(event_type, copilot=copilot)
         use_api = notify_event_wants_api(self.cfg, event_type, copilot=copilot)
 
+        enriched = self._enrich_context(event_type, context)
+        if fallback and not enriched.get("raw_briefing"):
+            enriched["raw_briefing"] = fallback[:2500]
+        structured = fallback or self._structured_fallback(event_type, enriched, fallback)
+
         if not use_api:
-            return fallback or self._structured_fallback(event_type, context, fallback)
+            halim_text = self._try_halim_trade_notify(
+                event_type, enriched, structured, max_c, copilot=copilot,
+            )
+            if halim_text:
+                return halim_text
+            return structured
 
         if not copilot:
             min_gap = float(getattr(self.cfg, "AI_TELEGRAM_MIN_INTERVAL_SEC", 6.0))
@@ -152,9 +162,8 @@ class TelegramAIComposer:
             if now - self._last_sent.get(event_type, 0) < min_gap and event_type in (
                 "watch_pulse", "system_status", "info",
             ):
-                return fallback or self._structured_fallback(event_type, context, fallback)
+                return structured
 
-        enriched = self._enrich_context(event_type, context)
         if fallback and not enriched.get("raw_briefing"):
             enriched["raw_briefing"] = fallback[:2500]
 
@@ -166,7 +175,13 @@ class TelegramAIComposer:
             self._last_sent[event_type] = time.time()
             return ai_text
 
-        out = fallback or self._structured_fallback(event_type, context, fallback)
+        halim_text = self._try_halim_trade_notify(
+            event_type, enriched, structured, max_c, copilot=copilot,
+        )
+        if halim_text:
+            return halim_text
+
+        out = structured
         try:
             from core.halim_capabilities import record_teacher_action
             record_teacher_action(

@@ -507,10 +507,8 @@ def ensure_war_account(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     _roll_session(state, cfg)
     _apply_settlement(state, cfg)
     _sync_paper_war_config(state, cfg)
-    if _maybe_refresh_trips_if_settled(state, cfg):
-        state["mode"] = _recompute_mode(state, cfg)
-    else:
-        state["mode"] = _recompute_mode(state, cfg)
+    _maybe_refresh_trips_if_settled(state, cfg)
+    state["mode"] = _recompute_mode(state, cfg)
     state["is_live"] = is_live_war(cfg)
     save_state(state)
     log.info(

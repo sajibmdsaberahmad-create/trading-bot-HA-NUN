@@ -208,6 +208,19 @@ def _intent_task(intent: str, trigger: str = "") -> str:
             "Halim: [what the mind learned — who was right, next adjustment]\n"
             "Use TRADE DECISION DATA. First person. Max 5 lines."
         ),
+        "trade_entry": (
+            "Commander Telegram alert: you just opened a position. Halim voice — first person, "
+            "exact numbers from TELEGRAM EVENT DATA (IB equity, war pool, entry/stop/target). "
+            "Short, organized, 2–4 lines max."
+        ),
+        "trade_exit": (
+            "Commander Telegram alert: position closed. Halim voice — P&L, session totals, "
+            "war pool if present. Honest tone. 2–4 lines max."
+        ),
+        "session_close": (
+            "Session closing summary for Commander on Telegram. Halim voice — IB day change, "
+            "war pool nav/settled, trades today. Ground every number in TELEGRAM EVENT DATA."
+        ),
         "short": "Reply briefly as Halim. LIVE SNAPSHOT for any numbers.",
         "empty": "Commander opened chat with no text. Say hello as Halim — you're online.",
         "dialogue": (
@@ -261,15 +274,34 @@ def live_snapshot(
     if runner is None:
         return snap
     try:
+        from core.account_view import account_summary
+        acct = account_summary(runner)
         snap.update({
-            "nav": round(float(getattr(runner, "bot_nav", 0) or 0), 2),
-            "session_pnl": round(
-                float(getattr(runner, "bot_nav", 0) or 0) - float(cfg.INITIAL_CASH), 2,
-            ),
+            "ib_equity": round(float(acct.get("ib_equity", 0) or 0), 2),
+            "day_pnl": round(float(acct.get("day_pnl", 0) or 0), 2),
+            "ib_change": round(float(acct.get("ib_change", 0) or 0), 2),
+            "nav": round(float(acct.get("equity", 0) or 0), 2),
+            "session_pnl": round(float(acct.get("day_pnl", 0) or 0), 2),
             "trades_today": int(getattr(runner, "trades_today", 0) or 0),
             "ticker": getattr(runner, "current_ticker", None),
             "shares": float(getattr(runner, "shares", 0) or 0),
         })
+    except Exception:
+        try:
+            snap.update({
+                "nav": round(float(getattr(runner, "bot_nav", 0) or 0), 2),
+                "session_pnl": round(
+                    float(getattr(runner, "bot_nav", 0) or 0) - float(cfg.INITIAL_CASH), 2,
+                ),
+                "trades_today": int(getattr(runner, "trades_today", 0) or 0),
+                "ticker": getattr(runner, "current_ticker", None),
+                "shares": float(getattr(runner, "shares", 0) or 0),
+            })
+        except Exception:
+            pass
+    try:
+        from core.war_account import war_account_context
+        snap.update(war_account_context(cfg))
     except Exception:
         pass
     return snap
@@ -503,6 +535,56 @@ def halim_generative_notify(
     extra = f"BRAIN EVENT ({event}):\n{json.dumps(ctx, default=str)}"
     r = companion_speak("", cfg=cfg, extra=extra, intent=intent, purpose="notify")
     return (r.get("text") or "").strip()
+
+
+_TRADE_TELEGRAM_EVENTS = frozenset({
+    "trade_opened", "trade_closed", "early_exit", "profit_hunt", "hot_swap",
+    "startup", "session_close",
+})
+
+
+def halim_trading_notify(
+    event: str,
+    ctx: Dict[str, Any],
+    *,
+    cfg: Optional[BotConfig] = None,
+    runner: Optional["ScalperRunner"] = None,
+    structured_fallback: str = "",
+    max_chars: int = 450,
+) -> str:
+    """
+    Halim local voice for trade/session Telegram — native LM first, caller falls back to templates.
+    """
+    if str(event or "").lower() not in _TRADE_TELEGRAM_EVENTS:
+        return ""
+    if os.getenv("HALIM_TELEGRAM_TRADE_NOTIFY", "true").lower() in ("0", "false", "no"):
+        return ""
+    cfg = cfg or BotConfig()
+    intent_map = {
+        "trade_opened": "trade_entry",
+        "trade_closed": "trade_exit",
+        "early_exit": "trade_exit",
+        "profit_hunt": "trade_exit",
+        "hot_swap": "trade_entry",
+        "startup": "session_open",
+        "session_close": "session_close",
+    }
+    payload = {k: v for k, v in ctx.items() if not str(k).startswith("_")}
+    extra = f"TELEGRAM EVENT ({event}):\n{json.dumps(payload, default=str)}"
+    if structured_fallback:
+        extra += f"\n\nStructured brief (mirror these numbers exactly):\n{structured_fallback[:900]}"
+    r = companion_speak(
+        "",
+        cfg=cfg,
+        runner=runner,
+        extra=extra,
+        intent=intent_map.get(str(event).lower(), "status"),
+        purpose="notify",
+    )
+    text = (r.get("text") or "").strip()
+    if text and companion_output_ok(text):
+        return text[:max_chars]
+    return ""
 
 
 def explain_ppo_teacher_notify(ctx: Dict[str, Any]) -> str:
