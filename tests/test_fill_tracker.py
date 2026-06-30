@@ -50,7 +50,7 @@ class TestConfirmEntryFill:
         pos = MagicMock()
         pos.contract.symbol = "TEST"
         pos.position = 5000
-        pos.avgCost = 0.01
+        pos.avgCost = 1.20
 
         ib = MagicMock()
         ib.positions.return_value = [pos]
@@ -92,11 +92,12 @@ class TestConfirmEntryFill:
             cache=None,
             order_shares=100,
             min_fill_ratio=0.85,
-            ib_pos_baseline=0,
+            ib_pos_baseline=5000,
             started_at=1000.0,
             quote_px=1.20,
         )
         assert ok is False
+        assert qty == 0
         assert qty == 0
 
 
