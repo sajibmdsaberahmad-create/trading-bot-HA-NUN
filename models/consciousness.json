@@ -3,32 +3,11 @@
   "creation_event": "AI Consciousness Initialized",
   "total_awakenings": 227,
   "training_sessions": 39,
-  "trades_observed": 1675,
+  "trades_observed": 1676,
   "scans_performed": 39,
-  "improvements_applied": 2685,
+  "improvements_applied": 2686,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:01:36.964811",
-      "age": "7d 19h 58m 48s",
-      "type": "TRADE",
-      "message": "Observed trade: COIN ? P&L=$-6.18",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T07:01:38.140591",
-      "age": "7d 19h 58m 49s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2025",
-      "metadata": {
-        "source": "runtime_loss_streak",
-        "summary": "Observed loss_streak \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review loss_streak on COIN"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:01:38.141416",
       "age": "7d 19h 58m 49s",
@@ -12299,6 +12278,27 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #227",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:18:50.725575",
+      "age": "9d 0h 16m 2s",
+      "type": "TRADE",
+      "message": "Observed trade: CUPR LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-06-30T11:18:51.122417",
+      "age": "9d 0h 16m 2s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2686",
+      "metadata": {
+        "source": "runtime_ib_failure",
+        "summary": "Observed ib_failure \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review ib_failure on CUPR"
+        ]
+      }
     }
   ],
   "last_awakening": "2026-06-30T11:17:29.887075",
@@ -14460,10 +14460,9 @@
     }
   ],
   "last_training": "2026-06-29T07:53:55.457760",
-  "mood": "steady",
+  "mood": "recalibrating",
   "total_pnl": 331211.64000000054,
   "win_history": [
-    -4.66,
     2.81,
     2.58,
     -13.58,
@@ -14962,20 +14961,21 @@
     4.15,
     0,
     0,
+    0,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 3,
+  "consecutive_losses": 4,
   "worst_streak": 86,
-  "veteran_xp": 25920,
+  "veteran_xp": 25930,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 74,
     "entry_timing": 100
   },
-  "flights_completed": 1669,
-  "hours_flown": 166.8999999999948,
+  "flights_completed": 1670,
+  "hours_flown": 166.9999999999948,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -15014,7 +15014,7 @@
     "KND": 1,
     "MST": 1,
     "TSL": 1,
-    "CUP": 2,
+    "CUP": 3,
     "JEM": 1
   },
   "best_streak": 114,
@@ -15022,5 +15022,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Mixed session \u00b7 $-61.06. Watching for cleaner setups."
+  "mood_message": "Four losses in a row ($-69.63 recent). Tightening entries until edge returns."
 }

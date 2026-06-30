@@ -2714,3 +2714,4 @@
 {"timestamp":"2026-06-30T11:05:38.851430+00:00","event":"order_timeout","ticker":"INTZ","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T11:06:25.273349+00:00","event":"order_timeout","ticker":"INTZ","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
 {"timestamp":"2026-06-30T11:06:54.025407+00:00","event":"order_timeout","ticker":"KTTA","reason":"PreSubmitted","ib_code":399,"parent_status":"PreSubmitted","market_state":"pre_market"}
+{"timestamp":"2026-06-30T11:18:50.759575+00:00","event":"ib_failure","ticker":"CUPR","reason":"IB closing-only \u2014 cannot open new positions","spike_ratio":6837.0,"market_state":"pre_market"}
