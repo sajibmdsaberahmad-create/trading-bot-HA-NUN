@@ -1224,6 +1224,7 @@ class ScalperRunner:
         if not self._position_slots:
             return
         try:
+            from core.fill_tracker import position_avg_cost
             ib_map: Dict[str, float] = {}
             for p in self.ib.positions():
                 sym = getattr(p.contract, "symbol", "")
@@ -1988,18 +1989,25 @@ class ScalperRunner:
             return
         cache = self._fill_cache()
         fallback_sec = float(getattr(self.cfg, "FILL_RECONCILE_FALLBACK_SEC", 8.0))
+        force_sec = float(getattr(self.cfg, "IB_FILL_FORCE_SEC", 120.0))
         now = time.time()
 
         for key, pending in list(self._pending_closes.items()):
-            force = (now - pending.started_at) >= fallback_sec
-            trade_rec = build_close_record(pending, self.ib, cache, force=force)
+            age = now - pending.started_at
+            force = age >= fallback_sec
+            if ib_fill_strict(self.cfg) and age < force_sec:
+                force = False
+            trade_rec = build_close_record(
+                pending, self.ib, cache, force=force, cfg=self.cfg,
+            )
             if trade_rec is None:
                 continue
+            if not self._finalize_closed_trade(trade_rec, pending):
+                continue
             self._pending_closes.pop(key, None)
-            self._finalize_closed_trade(trade_rec, pending)
 
-    def _finalize_closed_trade(self, trade_rec: Dict[str, Any], pending: PendingClose) -> None:
-        """Notify and learn using IB-confirmed fills."""
+    def _finalize_closed_trade(self, trade_rec: Dict[str, Any], pending: PendingClose) -> bool:
+        """Notify and learn using IB-confirmed fills. Returns False if still awaiting IB."""
         ticker = pending.ticker
         exit_fill = float(trade_rec.get("exit_fill") or trade_rec.get("exit", 0))
         pnl = float(trade_rec.get("pnl_usd", 0))
@@ -2009,8 +2017,21 @@ class ScalperRunner:
         qty = float(trade_rec.get("shares") or pending.shares or 0)
 
         if not pending.credited and qty > 0 and exit_fill > 0:
-            self._credit_exit_proceeds(qty, exit_fill)
-            pending.credited = True
+            if confirmed or not ib_fill_strict(self.cfg):
+                self._credit_exit_proceeds(qty, exit_fill)
+                pending.credited = True
+            else:
+                log.warning(
+                    f"  ⏳ EXIT {ticker}: awaiting IB fill confirmation "
+                    f"(quote ${pending.quote_exit_px:.4f}) — cash/P&L deferred"
+                )
+                return False
+
+        if not confirmed and ib_fill_strict(self.cfg):
+            log.warning(
+                f"  ⏳ EXIT {ticker}: IB fill not confirmed — finalize deferred"
+            )
+            return False
 
         tag = "IB fill" if confirmed else "est. fill"
         log.info(
@@ -6225,8 +6246,10 @@ class ScalperRunner:
                 pass
         slot = {
             "shares": float(shares),
+            "session_shares": float(shares),
             "entry_price": fill_px,
             "entry_fill_px": fill_px,
+            "ib_fill_confirmed": True,
             "limit_px": float(limit_px) if limit_px else None,
             "entry_slippage_pct": round(slippage_pct, 6),
             "entry_mode": str(tel.get("entry_mode", "market")),
@@ -6285,6 +6308,7 @@ class ScalperRunner:
             self._bracket_by_ticker[ticker] = fill_bracket
         self._load_position_context(ticker)
         self._recalc_bot_nav()
+        self._sync_bot_nav_from_ib()
         self._ensure_position_stream(ticker)
         self._risk_plans[ticker] = plan
         self.risk.open_position(plan)
@@ -6587,25 +6611,20 @@ class ScalperRunner:
             self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
             return
         filled_shares = 0.0
-        filled = float(parent_trade.orderStatus.filled) if parent_trade and parent_trade.orderStatus else 0.0
-        if filled > 0:
+        fill_px = float(st["fill_px"])
+        filled, avg_px, confirmed, fill_src = self._confirm_entry_fill_from_ib(
+            ticker, st, bracket, shares, min_fill_ratio, fill_px,
+        )
+        if confirmed:
             filled_shares = filled
-            avg = float(parent_trade.orderStatus.avgFillPrice or fill_px)
-            if avg > 0:
-                fill_px = avg
+            if avg_px > 0:
+                fill_px = avg_px
                 st["fill_px"] = fill_px
-        if filled_shares < 1:
-            for p in self.ib.positions():
-                if getattr(p.contract, "symbol", "") == ticker and float(p.position) > 0:
-                    pos_shares = float(p.position)
-                    if pos_shares >= shares * min_fill_ratio:
-                        filled_shares = pos_shares
-                        avg_cost = float(getattr(p, "avgCost", 0) or 0)
-                        if avg_cost > 0:
-                            fill_px = avg_cost
-                            st["fill_px"] = fill_px
-                        break
-        if filled_shares >= shares * min_fill_ratio or parent_status == "Filled":
+            log.info(
+                f"  ✅ IB entry confirmed {ticker}: {int(filled_shares)}sh "
+                f"@ ${fill_px:.4f} ({fill_src})"
+            )
+        if confirmed and filled_shares >= shares * min_fill_ratio:
             self._open_position_from_fill(ticker, int(filled_shares), fill_px, plan)
             return
         if parent_status in ("PendingSubmit", "PreSubmitted"):
@@ -7555,6 +7574,7 @@ class ScalperRunner:
                     "plan": plan,
                     "fill_px": current_px,
                     "limit_px": entry_parent_px,
+                    "ib_pos_baseline": self._ib_position_shares(ticker),
                     "polls": 0,
                     "max_polls": fill_polls,
                     "min_fill_ratio": min_fill_ratio,
@@ -8027,6 +8047,7 @@ class ScalperRunner:
                         "plan": plan,
                         "fill_px": current_px,
                         "limit_px": entry_parent_px,
+                        "ib_pos_baseline": self._ib_position_shares(ticker),
                         "polls": 0,
                         "max_polls": fill_polls,
                         "min_fill_ratio": min_fill_ratio,
@@ -8043,6 +8064,11 @@ class ScalperRunner:
                     )
                     return "waiting"
 
+                poll_st = {
+                    "ib_pos_baseline": self._ib_position_shares(ticker),
+                    "started_at": time.time(),
+                    "fill_px": current_px,
+                }
                 filled_shares = 0.0
                 parent_trade = getattr(bracket, "parent_trade", None)
                 parent_id = bracket.parent_order_id
@@ -8078,25 +8104,15 @@ class ScalperRunner:
                         self._pending_brackets_by_ticker.pop(ticker, None)
                         self._clear_pending_entry(ticker, cooldown_sec=fail_cd)
                         return 'waiting'
-                    filled = float(parent_trade.orderStatus.filled) if parent_trade and parent_trade.orderStatus else 0.0
-                    if filled > 0:
+                    filled, avg_px, confirmed, fill_src = self._confirm_entry_fill_from_ib(
+                        ticker, poll_st, bracket, shares, min_fill_ratio, fill_px,
+                    )
+                    if confirmed:
                         filled_shares = filled
-                        avg = float(parent_trade.orderStatus.avgFillPrice or current_px)
-                        if avg > 0:
-                            fill_px = avg
-                        if parent_status == "Filled" or filled >= shares * min_fill_ratio:
-                            cancelled = False
-                            break
-                    if filled_shares < 1:
-                        for p in self.ib.positions():
-                            if getattr(p.contract, "symbol", "") == ticker and float(p.position) > 0:
-                                pos_shares = float(p.position)
-                                if pos_shares >= shares * min_fill_ratio:
-                                    filled_shares = pos_shares
-                                    avg_cost = float(getattr(p, "avgCost", 0) or 0)
-                                    fill_px = avg_cost if avg_cost > 0 else current_px
-                                    cancelled = False
-                                    break
+                        if avg_px > 0:
+                            fill_px = avg_px
+                        cancelled = False
+                        break
 
                 if filled_shares >= shares * min_fill_ratio:
                     break
