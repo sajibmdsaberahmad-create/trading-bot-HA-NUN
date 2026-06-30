@@ -2,6 +2,7 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+- `2026-06-30` **engineering** — War trip cap aligned with bullets + Halim trade Telegram voice — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Regime unknown fix: short-bar classify + spike fallback on live stream — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — Codebase organization: AccountView, entry_pipeline, pytest, gitignore runtime journals, OPS docs — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-06-30` **engineering** — IB fill sync: confirmed entries/exits, IB-grounded P&L (no orphan position phantom profits) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -1188,3 +1189,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 16:07 UTC` **git_auto** — sync: 10 files — results_1min_20260621_091449.json, results_20260621_090243.json, results_20260621_090634.json +7 more | models=1 docs=1 oth
 - `2026-06-30 16:08 UTC` **git_auto** — sync: 11 files — results_1min_20260621_091449.json, results_20260621_090243.json, results_20260621_090634.json +8 more | models=1 docs=1 cor
 - `2026-06-30 16:09 UTC` **git_auto** — sync: 15 files — results_1min_20260621_091449.json, results_20260621_090243.json, results_20260621_090634.json +12 more | models=2 docs=1 co
+- `2026-06-30 16:10 UTC` **git_auto** — sync: 15 files — results_1min_20260621_091449.json, results_20260621_090243.json, results_20260621_090634.json +12 more | models=1 docs=2 co

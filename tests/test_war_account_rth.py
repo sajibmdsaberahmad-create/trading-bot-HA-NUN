@@ -91,7 +91,7 @@ def test_fresh_trips_on_hanoon_start_when_settled_remains():
         "os.environ",
         {
             "WAR_BULLETS": "8",
-            "WAR_PAPER_MAX_ROUND_TRIPS_PER_DAY": "8",
+            "WAR_PAPER_MAX_ROUND_TRIPS_PER_DAY": "5",
             "WAR_FRESH_TRIPS_ON_START": "true",
             "WAR_LIVE_OPERATING_CAPITAL": "0",
         },
@@ -108,7 +108,7 @@ def test_fresh_trips_skipped_when_settled_dry():
     cfg = BotConfig()
     state = {
         "round_trips_today": 8,
-        "settled_cash": 50.0,
+        "settled_cash": 10.0,
         "nav": 200.0,
         "bullets_total": 8,
         "operating_capital": 3500.0,
