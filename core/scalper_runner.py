@@ -159,7 +159,13 @@ from core.trade_telemetry import (
     log_post_fill_adapt, log_regime_atr_outcome, log_round_trip_fills, regime_tag,
 )
 from core.fill_tracker import (
-    append_fill_ledger, build_round_trip_record, resolve_entry_fill,
+    append_fill_ledger,
+    build_round_trip_record,
+    confirm_entry_fill,
+    ib_fill_strict,
+    ib_position_shares,
+    require_ib_fill_sync,
+    resolve_entry_fill,
     resolve_exit_fill,
 )
 from core.fill_reconciler import (
@@ -574,7 +580,11 @@ class ScalperRunner:
             self.cfg._latest_account_balance = self.account_equity
         except Exception as exc:
             log.debug(f"Could not fetch IB account balance: {exc}")
-        self.bot_nav = self.bot_cash + self.shares * self._latest_price()
+        if getattr(self.cfg, "USE_MULTI_POSITION", True) and self._position_slots:
+            self._recalc_bot_nav()
+        else:
+            self.bot_nav = self.bot_cash + self.shares * self._latest_price()
+        self._sync_bot_nav_from_ib()
 
     def _deployable_cash(self) -> float:
         """Cash for new entries — war settled cash when war account enabled."""
@@ -1229,7 +1239,17 @@ class ScalperRunner:
                         )
             for ticker, slot in list(self._position_slots.items()):
                 if ticker in ib_map:
-                    slot["shares"] = ib_map[ticker]
+                    ib_sh = float(ib_map[ticker])
+                    session_sh = float(slot.get("session_shares", 0) or slot.get("shares", 0))
+                    if session_sh > 0:
+                        slot["shares"] = min(ib_sh, session_sh)
+                    else:
+                        slot["shares"] = ib_sh
+                    if slot.get("ib_fill_confirmed"):
+                        avg = position_avg_cost(self.ib, ticker)
+                        if avg > 0:
+                            slot["entry_fill_px"] = avg
+                            slot["entry_price"] = avg
                 else:
                     opened = float(slot.get("opened_at", 0))
                     if opened and (time.time() - opened) < 60.0:
@@ -1337,6 +1357,64 @@ class ScalperRunner:
         ref = ask if ask and ask > 0 else live
         buf = float(getattr(self.cfg, "ENTRY_LIMIT_BUFFER_PCT", 0.004))
         return self.broker._round_price(ref * (1.0 + buf)), "limit_chase"
+
+    def _ib_sync_enabled(self) -> bool:
+        return require_ib_fill_sync(self.cfg)
+
+    def _ib_position_shares(self, ticker: str) -> float:
+        return ib_position_shares(self.ib, ticker)
+
+    def _confirm_entry_fill_from_ib(
+        self,
+        ticker: str,
+        st: Dict[str, Any],
+        bracket: Any,
+        shares: int,
+        min_fill_ratio: float,
+        quote_px: float,
+    ) -> Tuple[float, float, bool, str]:
+        """IB-confirmed entry — never treat orphan paper holdings as a new fill."""
+        if not self._ib_sync_enabled():
+            parent_trade = getattr(bracket, "parent_trade", None)
+            filled = 0.0
+            fill_px = quote_px
+            if parent_trade and parent_trade.orderStatus:
+                filled = float(parent_trade.orderStatus.filled or 0)
+                avg = float(parent_trade.orderStatus.avgFillPrice or 0)
+                if avg > 0:
+                    fill_px = avg
+            status = (
+                parent_trade.orderStatus.status
+                if parent_trade and parent_trade.orderStatus else ""
+            )
+            if filled >= shares * min_fill_ratio or status == "Filled":
+                return filled or float(shares), fill_px, True, "legacy"
+            return 0.0, 0.0, False, ""
+        return confirm_entry_fill(
+            self.ib,
+            symbol=ticker,
+            parent_trade=getattr(bracket, "parent_trade", None),
+            cache=self._fill_cache(),
+            order_shares=float(shares),
+            min_fill_ratio=min_fill_ratio,
+            ib_pos_baseline=float(st.get("ib_pos_baseline", 0)),
+            started_at=float(st.get("started_at", 0)),
+            quote_px=quote_px,
+        )
+
+    def _day_pnl_ib(self) -> Tuple[float, float]:
+        """Session P&L from IB NetLiquidation — economic truth."""
+        ib_start = float(getattr(self, "_ib_starting_balance", 0) or self.account_equity)
+        change = float(self.account_equity) - ib_start
+        pct = (change / ib_start * 100.0) if ib_start > 0 else 0.0
+        return change, pct
+
+    def _sync_bot_nav_from_ib(self) -> None:
+        """Keep displayed NAV aligned with IB when fill sync is on."""
+        if not self._ib_sync_enabled():
+            return
+        if self.account_equity > 0:
+            self.bot_nav = float(self.account_equity)
 
     def _sync_position_from_ib(self):
         """Keep local shares in sync with IB (detect bracket fills/exits)."""
