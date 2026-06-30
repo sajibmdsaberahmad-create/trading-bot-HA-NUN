@@ -5,23 +5,9 @@
   "training_sessions": 39,
   "trades_observed": 1672,
   "scans_performed": 39,
-  "improvements_applied": 2674,
+  "improvements_applied": 2675,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T07:00:01.951181",
-      "age": "7d 19h 57m 13s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2015",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on ASTS"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T07:00:01.952843",
       "age": "7d 19h 57m 13s",
@@ -12290,6 +12276,20 @@
         "applied": [],
         "lessons": [
           "Review order_timeout on PLTR"
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-06-30T09:35:30.835450",
+      "age": "8d 22h 32m 42s",
+      "type": "IMPROVE",
+      "message": "Applied improvement #2675",
+      "metadata": {
+        "source": "runtime_order_timeout",
+        "summary": "Observed order_timeout \u2014 recorded for learning.",
+        "applied": [],
+        "lessons": [
+          "Review order_timeout on SOFI"
         ]
       }
     }
