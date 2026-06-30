@@ -4823,3 +4823,8 @@
 {"ticker":"PYXS","reason":"ppo_not_aligned","scan_score":78.0,"spike_ratio":62740.0,"shadow_only":true,"timestamp":"2026-06-30T11:34:25.537743+00:00"}
 {"ticker":"AVAV","reason":"profit_prob_below_80pct","scan_score":86.8,"spike_ratio":1855.0,"shadow_only":true,"timestamp":"2026-06-30T11:34:30.773914+00:00"}
 {"ticker":"JEM","reason":"ppo_not_aligned","scan_score":100.0,"spike_ratio":17509.0,"shadow_only":true,"timestamp":"2026-06-30T11:41:06.379111+00:00"}
+{"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":1216614.0,"shadow_only":true,"timestamp":"2026-06-30T11:41:17.144502+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":469735.0,"shadow_only":true,"timestamp":"2026-06-30T11:41:20.522608+00:00"}
+{"ticker":"INTZ","reason":"ppo_not_aligned","scan_score":89.0,"spike_ratio":155950.0,"shadow_only":true,"timestamp":"2026-06-30T11:41:23.680357+00:00"}
+{"ticker":"EDBL","reason":"ppo_not_aligned","scan_score":97.8,"spike_ratio":805792.0,"shadow_only":true,"timestamp":"2026-06-30T11:41:26.910618+00:00"}
+{"ticker":"BIYA","reason":"ppo_not_aligned","scan_score":95.6,"spike_ratio":365888.0,"shadow_only":true,"timestamp":"2026-06-30T11:41:29.956423+00:00"}
