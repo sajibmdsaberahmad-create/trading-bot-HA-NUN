@@ -337,6 +337,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self._target_last_bar_count: Dict[str, int] = {}        # ticker -> last seen bar count
         self._active_stream_ticker: Optional[str] = None        # Currently streaming ticker
         self._risk_plans: Dict[str, TradePlan] = {}             # ticker -> active risk plan
+        self._position_ctx_lock = threading.RLock()
+        self._ctx_slot_shares: float = 0.0
         
         self.trade_journal: List[Dict] = []
         self._trade_journal_max = int(os.getenv("TRADE_JOURNAL_MAX", "500"))

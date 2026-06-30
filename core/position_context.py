@@ -54,6 +54,13 @@ def bind_risk_plan_for_ticker(
     return True
 
 
+def slot_price_sane(entry_price: float, current_px: float, *, max_dev: float = 0.35) -> bool:
+    """Reject cross-ticker or stale quotes before mechanical profit exits."""
+    if entry_price <= 0 or current_px <= 0:
+        return False
+    return abs(current_px / entry_price - 1.0) <= max_dev
+
+
 def risk_plan_sane_for_tick(
     plan: Optional[TradePlan],
     *,
