@@ -1184,9 +1184,12 @@ class ScalperRunner:
     def _recalc_bot_nav(self):
         total_pos = 0.0
         for t, s in self._position_slots.items():
+            if not s.get("ib_fill_confirmed", True):
+                continue
             px = self._live_price_for(t, float(s.get("entry_price", 0)))
             total_pos += float(s.get("shares", 0)) * px
         self.bot_nav = self.bot_cash + total_pos
+        self._sync_bot_nav_from_ib()
 
     def _account_context_for_ai(self) -> Dict[str, Any]:
         deployed = 0.0
@@ -2120,7 +2123,9 @@ class ScalperRunner:
             schedule_post_close_learning(self.cfg, self)
         except Exception as exc:
             log.debug(f"Post-close learning schedule: {exc}")
+        self._sync_bot_nav_from_ib()
         self._attempt_hot_swap_entry()
+        return True
 
     def _clear_closed_position_state(self, ticker: str) -> None:
         """Drop local position tracking after exit (IB brackets may still rest)."""

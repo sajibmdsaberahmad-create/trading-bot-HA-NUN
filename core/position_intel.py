@@ -51,11 +51,19 @@ def collect_positions(runner: "ScalperRunner") -> Dict[str, Any]:
     for ticker in tickers:
         slot = slots.get(ticker, {})
         ib = ib_map.get(ticker, {})
-        shares = float(slot.get("shares") or ib.get("shares") or 0)
+        ib_sh = float(ib.get("shares") or 0)
+        slot_sh = float(slot.get("shares") or 0)
+        session_sh = float(slot.get("session_shares", 0) or slot_sh)
+        if ib_sh > 0:
+            shares = ib_sh
+            if session_sh > 0 and ticker in slots:
+                shares = min(ib_sh, session_sh)
+        else:
+            shares = slot_sh if slot.get("ib_fill_confirmed") else 0.0
         if shares < 0.5:
             continue
 
-        entry = float(slot.get("entry_price") or ib.get("avg_cost") or 0)
+        entry = float(ib.get("avg_cost") or slot.get("entry_fill_px") or slot.get("entry_price") or 0)
         px = runner._live_price_for(ticker, entry)
         if px <= 0:
             px = entry
@@ -93,12 +101,18 @@ def collect_positions(runner: "ScalperRunner") -> Dict[str, Any]:
         total_risk_usd += stop_risk
 
     equity = float(getattr(runner, "account_equity", 0) or 0)
-    cash = float(getattr(runner, "bot_cash", 0) or 0)
+    cash = float(getattr(runner, "available_cash", 0) or getattr(runner, "bot_cash", 0) or 0)
+    ib_chg, _ = (0.0, 0.0)
+    try:
+        ib_chg, _ = runner._day_pnl_ib()
+    except Exception:
+        pass
 
     return {
         "equity": round(equity, 2),
         "cash": round(cash, 2),
-        "nav": round(getattr(runner, "bot_nav", 0) or 0, 2),
+        "nav": round(getattr(runner, "bot_nav", 0) or equity, 2),
+        "ib_day_pnl": round(ib_chg, 2),
         "position_count": len(positions),
         "total_market_value": round(total_value, 2),
         "total_unrealized_pnl": round(total_unrealized, 2),
@@ -154,7 +168,7 @@ def collect_risk(runner: "ScalperRunner") -> Dict[str, Any]:
 def format_positions_report(intel: Dict[str, Any], *, max_positions: int = 12) -> str:
     lines = [
         "📊 OPEN POSITIONS",
-        f"IB ${intel.get('equity', 0):,.2f} · NAV ${intel.get('nav', 0):,.2f} · "
+        f"IB ${intel.get('equity', 0):,.2f} · Day P&L ${intel.get('ib_day_pnl', 0):+,.2f} · "
         f"Cash ${intel.get('cash', 0):,.2f}",
         f"Deployed ${intel.get('total_market_value', 0):,.0f} "
         f"({intel.get('deployed_pct', 0):.1f}%) · "
