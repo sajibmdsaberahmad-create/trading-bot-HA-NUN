@@ -3,12 +3,14 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import pytest
+
 from core.fill_tracker import normalize_ib_avg_cost, position_entry_price
 from core.position_context import slot_price_sane
 
 
 def test_normalize_ib_avg_cost_fixes_10x_drift():
-    assert normalize_ib_avg_cost(140.83, market_px=14.08) == 14.083
+    assert normalize_ib_avg_cost(140.83, market_px=14.08) == pytest.approx(14.083)
 
 
 def test_normalize_ib_avg_cost_keeps_matching_avg():
@@ -27,7 +29,7 @@ def test_position_entry_price_normalizes_with_market():
     pos.avgCost = 140.83
     ib.positions.return_value = [pos]
     px = position_entry_price(ib, "INTC", market_px=14.08)
-    assert px == 14.083
+    assert px == pytest.approx(14.083)
 
 
 def test_slot_price_sane_rejects_bito_price_on_soxs_entry():

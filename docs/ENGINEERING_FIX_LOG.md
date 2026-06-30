@@ -1307,3 +1307,28 @@ IB position recovery treated pre-existing holdings as fresh war BUYs, double-cou
 ```bash
 pytest tests/test_war_multi_position.py -q
 ```
+
+## 2026-07-01 — INTC avgCost + multi-position price cross-talk
+
+### Problem
+IB recover showed `INTC @ $140.83` (10× real ~$14) — war ledger, stops, and PnL wrong. Multi-position monitor bled prices across slots (`T` P&L +$8,976 with `BITO` entry $7.98 / 706sh; `plan/price mismatch` on BITO/CELZ).
+
+### Root cause
+- Raw IB `avgCost` used without reconciling to live quote (paper 10× drift).
+- `_live_price_for` returned another ticker's cached/stream price when entry sanity failed.
+- `_force_price_snapshot` mutated `cfg.TICKER` instead of `get_contract(ticker)`.
+- Monitor pulse used aggregate `self.shares` instead of per-slot `_ctx_slot_shares`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/fill_tracker.py` | `position_entry_price`, `normalize_ib_avg_cost`, `snapshot_market_price` |
+| `core/position_sync.py` | Adopt/repair/sync use normalized entry |
+| `core/scalper_runner.py` | Sanitized `_live_price_for`; `get_contract(ticker)` snapshots; stricter load/save context |
+| `core/scalper_exit_executor.py` | Pulse PnL uses slot shares only |
+| `tests/test_position_entry_price.py` | avgCost 10× + cross-price rejection |
+
+### Verify
+```bash
+pytest tests/test_position_entry_price.py tests/test_position_context_isolation.py -q
+```
