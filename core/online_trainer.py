@@ -297,6 +297,12 @@ def run_incremental_training(cfg: BotConfig, fresh_records: list = None, ppo_ste
         from core.pilot_mode import get_new_buffer_records
         fresh_records = get_new_buffer_records(load_recent(n=200))
 
+    try:
+        from core.learn_approval import filter_for_ppo_training
+        fresh_records = filter_for_ppo_training(fresh_records or [], cfg)
+    except Exception:
+        pass
+
     if not fresh_records:
         log.debug("No new records for incremental training")
         return False

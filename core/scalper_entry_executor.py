@@ -921,6 +921,20 @@ class ScalperEntryMixin:
         entry_px: float,
     ) -> Dict[str, Any]:
         try:
+            from core.ppo_deploy_tiers import apply_deploy_tier_to_decision, ppo_deploy_tiers_enabled
+            if ppo_deploy_tiers_enabled(self.cfg):
+                decision = apply_deploy_tier_to_decision(
+                    self.cfg,
+                    decision,
+                    entry_px,
+                    ppo_action=int(decision.get("ppo_action", 1) or 1),
+                    ppo_conf=float(decision.get("ppo_conf", decision.get("confidence", 0.5)) or 0.5),
+                    spike_ratio=float(getattr(self, "_last_spike_ratio", 1.0) or 1.0),
+                    scan_score=float(getattr(self, "_last_scan_score", 0) or 0),
+                )
+        except Exception as exc:
+            log.debug(f"PPO deploy tier: {exc}")
+        try:
             from core.war_account import rescale_decision_for_war, war_ledger_applies
             if war_ledger_applies(self.cfg):
                 return rescale_decision_for_war(

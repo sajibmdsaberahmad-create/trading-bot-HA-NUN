@@ -262,9 +262,38 @@ def apply_smart_war_entry(
     """
     Smart war: posture bumps + soft veto on weak edge.
     Legacy hard veto when smart_war_posture disabled.
+    WAR_ENTRY_ADVISORY_ONLY: annotate only — never flip enter.
     """
     if not bool(decision.get("enter")):
         return decision
+    try:
+        from core.war_entry_gates import war_entry_advisory_only, war_entry_advisory_context
+        if war_entry_advisory_only(cfg):
+            prob = float(
+                decision.get("profit_probability")
+                or decision.get("ollama_profit_probability")
+                or decision.get("quality_conf")
+                or 0.0
+            )
+            conf = float(decision.get("confidence", ppo_conf) or ppo_conf)
+            out = dict(decision)
+            out["war_advisory"] = war_entry_advisory_context(
+                cfg,
+                pipeline=str(out.get("pipeline", "")),
+                confidence=conf,
+                ppo_action=int(ppo_action),
+                ppo_conf=float(ppo_conf),
+                profit_probability=prob,
+                spike_ratio=float(spike_ratio),
+                scan_score=float(scan_score),
+            )
+            posture = war_posture_adjustments(cfg)
+            if posture.get("note"):
+                prev = str(out.get("reason", ""))[:120]
+                out["reason"] = f"war advisory posture | {prev}"[:200]
+            return out
+    except Exception:
+        pass
     out = dict(decision)
     if not smart_war_posture_enabled(cfg):
         try:

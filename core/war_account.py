@@ -1042,8 +1042,11 @@ def check_entry_allowed(
     if pipeline:
         try:
             from core.green_trade_doctrine import same_tactics_all_phases
-            from core.war_entry_gates import war_entry_veto
-            if not full_balance_phase or same_tactics_all_phases(cfg):
+            from core.war_entry_gates import war_entry_advisory_only, war_entry_veto
+            if (
+                (not full_balance_phase or same_tactics_all_phases(cfg))
+                and not war_entry_advisory_only(cfg)
+            ):
                 veto = war_entry_veto(cfg, pipeline=pipeline)
                 if veto:
                     return veto

@@ -24,6 +24,11 @@ if TYPE_CHECKING:
     from core.config import BotConfig
 
 
+def green_verdict_recheck_enabled(cfg: Optional["BotConfig"] = None) -> bool:
+    """Second green check in verdict finalize (spike loop already checked)."""
+    return os.getenv("GREEN_VERDICT_RECHECK", "true").lower() in ("1", "true", "yes")
+
+
 def unified_doctrine_enabled(cfg: Optional["BotConfig"] = None) -> bool:
     return os.getenv("GREEN_DOCTRINE_UNIFIED", "true").lower() in ("1", "true", "yes")
 
@@ -537,12 +542,23 @@ def apply_unified_pipeline_gates(
     if not same_tactics_all_phases(cfg):
         return None
     try:
-        from core.war_entry_gates import war_entry_veto
+        from core.war_entry_gates import war_entry_advisory_only, war_entry_veto
+        if war_entry_advisory_only(cfg):
+            return None
+        dec = decision or {}
         veto = war_entry_veto(
             cfg,
-            pipeline=pipeline,
-            ticker=ticker,
-            decision=decision or {},
+            pipeline=pipeline or str(dec.get("pipeline", "")),
+            confidence=float(dec.get("confidence", 0) or 0),
+            ppo_action=int(dec.get("ppo_action", 0) or 0),
+            ppo_conf=float(dec.get("ppo_conf", dec.get("confidence", 0)) or 0),
+            profit_probability=float(
+                dec.get("profit_probability")
+                or dec.get("ollama_profit_probability")
+                or 0.0
+            ),
+            spike_ratio=float(dec.get("spike_ratio", 1.0) or 1.0),
+            scan_score=float(dec.get("scan_score", 0) or 0),
         )
         return veto
     except Exception as exc:

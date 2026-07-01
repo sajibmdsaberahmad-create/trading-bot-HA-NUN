@@ -24,6 +24,14 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
+def war_entry_advisory_only(cfg: Optional[BotConfig] = None) -> bool:
+    """
+    When true, war doctrine never blocks entries — only annotates posture for sizing/learn.
+    Set WAR_ENTRY_ADVISORY_ONLY=true in PPO wheel profile.
+    """
+    return _env_bool("WAR_ENTRY_ADVISORY_ONLY", "false")
+
+
 def war_gates_active(cfg: Optional[BotConfig] = None) -> bool:
     """War sniper gates OR unified green doctrine on all capital phases."""
     try:
@@ -98,7 +106,7 @@ def is_sniper_flash_pipeline(pipeline: str) -> bool:
     return p in ("sniper:flash", "sniper:strong") or p.startswith("sniper:")
 
 
-def war_entry_veto(
+def _war_entry_veto_reason(
     cfg: BotConfig,
     *,
     pipeline: str = "",
@@ -109,10 +117,7 @@ def war_entry_veto(
     spike_ratio: float = 1.0,
     scan_score: float = 0.0,
 ) -> Optional[str]:
-    """
-    Return veto reason if war/sniper should not take this entry.
-    None = allowed to proceed.
-    """
+    """Internal: would-block reason without advisory-only bypass."""
     if not war_gates_active(cfg):
         return None
 
@@ -164,6 +169,66 @@ def war_entry_veto(
     return None
 
 
+def war_entry_veto(
+    cfg: BotConfig,
+    *,
+    pipeline: str = "",
+    confidence: float = 0.0,
+    ppo_action: int = 0,
+    ppo_conf: float = 0.0,
+    profit_probability: float = 0.0,
+    spike_ratio: float = 1.0,
+    scan_score: float = 0.0,
+) -> Optional[str]:
+    """
+    Return veto reason if war/sniper should not take this entry.
+    None = allowed to proceed. Advisory-only mode always returns None.
+    """
+    if war_entry_advisory_only(cfg):
+        return None
+    return _war_entry_veto_reason(
+        cfg,
+        pipeline=pipeline,
+        confidence=confidence,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        profit_probability=profit_probability,
+        spike_ratio=spike_ratio,
+        scan_score=scan_score,
+    )
+
+
+def war_entry_advisory_context(
+    cfg: BotConfig,
+    *,
+    pipeline: str = "",
+    confidence: float = 0.0,
+    ppo_action: int = 0,
+    ppo_conf: float = 0.0,
+    profit_probability: float = 0.0,
+    spike_ratio: float = 1.0,
+    scan_score: float = 0.0,
+) -> Dict[str, Any]:
+    """Non-blocking war posture note for verdict rows and sizing."""
+    reason = _war_entry_veto_reason(
+        cfg,
+        pipeline=pipeline,
+        confidence=confidence,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        profit_probability=profit_probability,
+        spike_ratio=spike_ratio,
+        scan_score=scan_score,
+    )
+    return {
+        "war_advisory_only": war_entry_advisory_only(cfg),
+        "war_would_veto": bool(reason),
+        "war_advisory_note": (reason or "war:advisory_ok")[:200],
+        "war_min_conf": war_min_entry_confidence(cfg),
+        "war_min_prob": war_min_profit_probability(cfg),
+    }
+
+
 def is_sniper_strong_enough(
     cfg: Optional[BotConfig],
     scan_score: float,
@@ -196,10 +261,30 @@ def apply_war_entry_veto(
         or decision.get("ollama_profit_probability")
         or 0.0
     )
+    pipe = str(decision.get("pipeline", ""))
+    conf = float(decision.get("confidence", 0) or 0)
+    advisory = war_entry_advisory_context(
+        cfg,
+        pipeline=pipe,
+        confidence=conf,
+        ppo_action=int(ppo_action),
+        ppo_conf=float(ppo_conf),
+        profit_probability=prob,
+        spike_ratio=float(spike_ratio),
+        scan_score=float(scan_score),
+    )
+    if war_entry_advisory_only(cfg):
+        out = dict(decision)
+        out["war_advisory"] = advisory
+        if advisory.get("war_would_veto"):
+            prev = str(out.get("reason", ""))[:100]
+            note = str(advisory.get("war_advisory_note", ""))[:80]
+            out["reason"] = f"war advisory (no block): {note} | {prev}"[:200]
+        return out
     veto = war_entry_veto(
         cfg,
-        pipeline=str(decision.get("pipeline", "")),
-        confidence=float(decision.get("confidence", 0) or 0),
+        pipeline=pipe,
+        confidence=conf,
         ppo_action=int(ppo_action),
         ppo_conf=float(ppo_conf),
         profit_probability=prob,

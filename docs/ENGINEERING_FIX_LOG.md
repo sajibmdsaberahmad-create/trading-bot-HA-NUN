@@ -15,6 +15,45 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 
 ---
 
+## 2026-07-01 — PPO wheel: war advisory, deploy tiers, learn firewall, Halim async
+
+### Problem
+Stacked war/commander/lottery gates duplicated green doctrine. War blocked entries (`war:entry_veto`) instead of only sizing the $1k teaching ledger. Halim await clock-blocked PPO. PPO trained on every buffer row including unlabeled spikes. Green checked twice (spike + verdict).
+
+### Root cause
+Legacy sniper/war gates and commander lottery floors were wired as hard vetoes alongside green. Lottery was a gate stack, not a PPO deploy tier. No learn-approval filter on `ppo_reward_trainer`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_entry_gates.py` | `WAR_ENTRY_ADVISORY_ONLY` — annotate, never veto |
+| `core/smart_stack.py` | `apply_smart_war_entry` advisory path |
+| `core/ppo_deploy_tiers.py` | **New** — normal/strong/lottery_bullet sizing |
+| `core/learn_approval.py` | **New** — `LEARN_APPROVAL_REQUIRED` train firewall |
+| `core/green_trade_doctrine.py` | `GREEN_VERDICT_RECHECK`; fix unified pipeline gate kwargs |
+| `core/war_account.py` | Skip pipeline war veto when advisory |
+| `core/scalper_entry_executor.py` | Tier sizing before war rescale |
+| `core/ppo_reward_trainer.py` | Filter training records |
+| `core/online_trainer.py` | Incremental train filter |
+| `core/ai_commander_verdict.py` | Skip second green when `GREEN_VERDICT_RECHECK=false` |
+| `scripts/start_hanoon.sh` | Wheel env block |
+| `tests/test_ppo_wheel.py` | Unit tests |
+| `docs/PPO_WHEEL_ARCHITECTURE.md` | Full architecture spec |
+
+### Env vars
+`WAR_ENTRY_ADVISORY_ONLY=true`, `PPO_DEPLOY_TIERS_ENABLED=true`, `LEARN_APPROVAL_REQUIRED=true`, `GREEN_VERDICT_RECHECK=false`, `HALIM_ENTRY_AWAIT_SEC=0`
+
+### Verify
+```bash
+./scripts/stop_hanoon.sh && ./scripts/start_hanoon.sh
+venv/bin/pytest tests/test_ppo_wheel.py -q
+```
+No `war:entry_veto` when advisory on; `deploy_tier` on strong setups; green veto still fires.
+
+**Full spec:** [PPO_WHEEL_ARCHITECTURE.md](PPO_WHEEL_ARCHITECTURE.md)
+
+---
+
 ## 2026-07-01 — PPO-led profile: unlimited entries + dedupe overlapping gates
 
 ### Problem

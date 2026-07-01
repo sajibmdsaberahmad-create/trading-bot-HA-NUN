@@ -292,8 +292,17 @@ class CommanderVerdictMixin:
 
         if enter:
             try:
-                from core.green_trade_doctrine import green_entry_mandatory, require_green_entry
-                if green_entry_mandatory(self.cfg) and df is not None and len(df) > 0:
+                from core.green_trade_doctrine import (
+                    green_entry_mandatory,
+                    green_verdict_recheck_enabled,
+                    require_green_entry,
+                )
+                if (
+                    green_entry_mandatory(self.cfg)
+                    and green_verdict_recheck_enabled(self.cfg)
+                    and df is not None
+                    and len(df) > 0
+                ):
                     block = require_green_entry(
                         self.cfg,
                         ticker=ticker,

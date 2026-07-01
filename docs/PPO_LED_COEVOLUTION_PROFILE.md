@@ -2,7 +2,7 @@
 
 **Status:** Active in `scripts/start_hanoon.sh` (profile block at end of env exports)  
 **Date:** 2026-07-01  
-**Related:** [VISION_SMART_STACK.md](VISION_SMART_STACK.md) · [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+**Related:** [PPO_WHEEL_ARCHITECTURE.md](PPO_WHEEL_ARCHITECTURE.md) · [VISION_SMART_STACK.md](VISION_SMART_STACK.md) · [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 
 ---
 
@@ -166,7 +166,7 @@ export WAR_MAX_ENTRIES_PER_HOUR=2
 
 ## Known remaining overlap (future env flag)
 
-Green is checked **twice** today (spike loop + verdict finalize). Harmless but redundant. Proposed: `GREEN_VERDICT_RECHECK=false` (not implemented yet).
+Green is checked **twice** by default (spike loop + verdict finalize). Set `GREEN_VERDICT_RECHECK=false` in the PPO wheel profile to skip the second check. See [PPO_WHEEL_ARCHITECTURE.md](PPO_WHEEL_ARCHITECTURE.md).
 
 ---
 

@@ -237,6 +237,7 @@ def collect_training_records(
     n: Optional[int] = None,
 ) -> List[Dict[str, Any]]:
     from core.experience_buffer import load_recent
+    from core.learn_approval import filter_for_ppo_training
 
     cap = n or int(os.getenv("PPO_REWARD_BUFFER_LOOKBACK", "600"))
     raw = load_recent(cap * 2)
@@ -252,6 +253,7 @@ def collect_training_records(
             continue
         if src in REWARD_SOURCES or rec.get("reward") is not None or rec.get("pnl_usd") is not None:
             out.append(rec)
+    out = filter_for_ppo_training(out, cfg)
     if os.getenv("PPO_REWARD_BALANCED_SAMPLE", "true").lower() in ("1", "true", "yes"):
         from core.experience_buffer import sample_balanced_records
         return sample_balanced_records(out, max_records=cap)
