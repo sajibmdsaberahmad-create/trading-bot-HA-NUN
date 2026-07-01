@@ -136,13 +136,79 @@ Unapproved spike-only rows are logged but do not move PPO weights until Halim/AP
 
 ---
 
-## Halim async
+## Halim async (participation — not blocking)
 
-`HALIM_ENTRY_AWAIT_SEC=0` — PPO may submit while Halim inference is in flight. Halim still:
+`HALIM_ENTRY_AWAIT_SEC=0` — PPO may submit while Halim inference is in flight. Halim **still participates** on every spike; it does not clock-block orders.
 
-- blends when fresh (`HALIM_ENTRY_BLEND_WEIGHT`)
-- registers action gold (`HALIM_ACTION_LEARN`)
-- coevolution stamps (`HALIM_PPO_COEVOLUTION`)
+### What fires every `decide_entry` (live)
+
+| Step | Module | Role |
+|------|--------|------|
+| 1 | `ai_commander_entry._ring_halim_entry` | Async MLX JSON inference via `:8765` serve |
+| 2 | `halim_entry_line.merge_halim_entry_advisory` | Blend / complement when status=`fresh` |
+| 3 | `halim_outcome_gold.register_entry_advisory` | Action gold for SFT / v4 training |
+| 4 | `halim_ppo_coevolution.record_coevolution` | PPO↔Halim compare → correction log + buffer |
+| 5 | `ai_commander_verdict._blend_halim_entry` | Finalize path stamps `halim_enter`, `halim_conf` |
+| 6 | Deferred council | Late attach when Halim was `in_flight` at submit |
+
+### Profile flags (wheel block)
+
+| Variable | Value | Effect |
+|----------|-------|--------|
+| `HALIM_ENTRY_LM_ENABLED` | `true` | Local LM on |
+| `HALIM_ENTRY_SOFT_VETO` | `false` | Halim **cannot** flip `enter=False` over PPO |
+| `HALIM_PPO_COMPLEMENT` | `true` | Halim can lift PPO HOLD when conf clears bar |
+| `HALIM_ENTRY_BLEND_WEIGHT` | `0.35` | Confidence nudge when Halim agrees |
+| `HALIM_PPO_COEVOLUTION` | `true` | Mutual learning + learn-firewall auto-approve |
+| `HALIM_ENTRY_AWAIT_SEC` | `0` | No wait — PPO leads; Halim catches up async |
+
+### Fast path vs fresh Halim
+
+On PPO-lead paths Halim may still be `in_flight` at order submit. That is **by design**:
+
+- Ring always runs → gold + coevolution queue populated
+- Blend applies when `consume()` returns `fresh` before finalize
+- If missed live, deferred council + post-trade outcome dialogue still stamp `learn_approved` rows
+- `LEARN_APPROVAL_REQUIRED=true` means PPO trains on Halim-stamped rows, not raw spikes alone
+
+**Verify Halim is alive:**
+
+```bash
+curl -s http://127.0.0.1:8765/health   # or see logs/halim_serve.log
+grep -E "Halim entry|halim_complement|coevolution" logs/scalper.log | tail -20
+```
+
+---
+
+## Halim v4 — when stable on device
+
+Colab training auto-names the next zip `halim_toddler_v4.zip` (see `halim/colab/colab_drive_setup.py`). Install on Mac:
+
+```bash
+# Drop zip in ~/Downloads or Drive sync path, then:
+./scripts/halim_apply_colab_checkpoint.sh --if-new
+./scripts/stop_hanoon.sh && ./scripts/start_hanoon.sh
+```
+
+**Same wiring, better brain** — no pipeline rewrite. v4 improves:
+
+| Area | Today (toddler) | After stable v4 |
+|------|-----------------|-----------------|
+| Entry blend | Often `in_flight` on fast PPO path | More `fresh` JSON before finalize → stronger conf nudge |
+| Complement | PPO HOLD → Halim enter lift | Higher accuracy on quality-led overrides |
+| Coevolution | Corrections → gold | Richer `halim_ppo_coevolution` → more `learn_approved` PPO steps |
+| API teacher | Hard cases when Halim missing/low conf | Fewer API rings as `halim_conf` rises (`brain_maturity`) |
+| Learn firewall | Halim-stamped rows train PPO | Larger approved fraction of buffer |
+
+### Suggested tuning after v4 is stable (manual)
+
+```bash
+export HALIM_ENTRY_BLEND_WEIGHT=0.42      # was 0.35 — trust local LM more
+export HALIM_ENTRY_AWAIT_SEC=0.3          # optional micro-peek, still non-blocking
+# Keep HALIM_ENTRY_SOFT_VETO=false — PPO still executes; Halim teaches
+```
+
+Optional future env (not coded yet): `HALIM_V4_BLEND_BOOST=true` to auto-raise blend weight when checkpoint manifest reports `v4+`.
 
 Corrections feed learning; they do not retract live orders.
 
