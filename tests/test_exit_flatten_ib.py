@@ -51,7 +51,7 @@ class TestFlattenExitLimit(unittest.TestCase):
             LimitOrder=lambda *a, **k: limit_inst,
             MarketOrder=lambda *a, **k: SimpleNamespace(action="SELL"),
         )
-        with patch.dict(sys.modules, {"ib_insync": fake_mod}):
+        with patch.dict(sys.modules, {"core.ib_client": fake_mod}):
             order, mode = flatten_order_for_session(
                 self.cfg, self.broker, 2, 137.67, 137.66, 137.68,
             )

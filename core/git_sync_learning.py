@@ -27,6 +27,7 @@ def _gs():
 # ═════════════════════════════════════════════════════════════════════════════
 
 from core.training_dataset_paths import council_training_dataset_path
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 LEARNING_ARTIFACTS: Dict[str, List[str]] = {
     "code": [
@@ -350,7 +351,7 @@ def push_learning_checkpoint(
         _gs()._last_checkpoint_ts = now
         _gs()._last_push_ts = 0
 
-        tag = f"learn_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        tag = f"learn_{utc_now().strftime('%Y%m%d_%H%M%S')}"
         existing = [f for f in _learning_files_flat() if os.path.exists(os.path.join(REPO_DIR, f))]
 
         hanoon_files = [f for f in existing if f in LEARNING_ARTIFACTS.get("code", [])]

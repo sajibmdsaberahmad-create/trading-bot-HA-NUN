@@ -27,6 +27,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
+from core.time_utils import utc_now, utc_now_iso, utc_today
+
 MODELS_DIR = Path("models")
 BUFFER_PATH = MODELS_DIR / "experience_buffer.jsonl"
 MODELS_DIR.mkdir(exist_ok=True)
@@ -68,7 +70,7 @@ def _tail_jsonl(path: Path, n: int) -> List[Dict[str, Any]]:
 
 def append(record: Dict[str, Any]) -> None:
     """Append one experience record to the buffer."""
-    record.setdefault("timestamp", datetime.utcnow().isoformat())
+    record.setdefault("timestamp", utc_now_iso())
     record.setdefault("model_version", "scalper_v1")
     line = json.dumps(record, separators=(",", ":"))
     global _stats_cache, _line_count
@@ -222,7 +224,7 @@ def sample_balanced_records(
 def stats() -> Dict[str, Any]:
     global _stats_cache, _stats_cache_ts
     ttl = float(os.getenv("EXPERIENCE_BUFFER_STATS_TTL_SEC", "120"))
-    now = datetime.utcnow().timestamp()
+    now = utc_now().timestamp()
     if _stats_cache and (now - _stats_cache_ts) < ttl:
         return dict(_stats_cache)
     sample_n = int(os.getenv("EXPERIENCE_BUFFER_STATS_SAMPLE", "2000"))

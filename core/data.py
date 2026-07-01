@@ -34,9 +34,9 @@ import numpy as np
 import pandas as pd
 
 try:
-    import ib_insync as ibi
+    import core.ib_client as ibi
 except ImportError:
-    raise SystemExit("ERROR: ib_insync not installed. Fix: pip install ib_insync")
+    raise SystemExit("ERROR: IB client not installed. Fix: pip install ib-insync or ib_async")
 
 from core.config import BotConfig
 from core.connector import IBConnector

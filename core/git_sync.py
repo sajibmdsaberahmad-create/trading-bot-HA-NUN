@@ -39,6 +39,7 @@ from threading import Lock, Timer
 
 from core.config import BotConfig
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 from core import git_sync_defer as _defer
 
 # Repository directory (project root)
@@ -444,7 +445,7 @@ def _record_auto_commit_in_brain_log(message: str, category: str) -> None:
         return
     try:
         log_path = os.path.join(REPO_DIR, "docs", "BRAIN_DEVELOPMENT_LOG.md")
-        ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        ts = utc_now().strftime("%Y-%m-%d %H:%M UTC")
         first_line = (message or "").strip().split("\n")[0][:140]
         line = f"- `{ts}` **git_{category}** — {first_line}"
         with open(log_path, "a", encoding="utf-8") as fh:
@@ -477,7 +478,7 @@ def record_git_push_event(
     """Append every push to logs/git_sync_journal.jsonl (no Telegram spam)."""
     global _git_session_stats
     os.makedirs(os.path.dirname(_GIT_JOURNAL_PATH), exist_ok=True)
-    ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    ts = utc_now().strftime("%Y-%m-%d %H:%M:%S UTC")
     entry = {
         "timestamp": ts,
         "ok": ok,
@@ -507,7 +508,7 @@ def write_git_session_summary() -> str:
     with _git_journal_lock:
         stats = dict(_git_session_stats)
     lines = [
-        f"Git sync session summary — {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}",
+        f"Git sync session summary — {utc_now().strftime('%Y-%m-%d %H:%M:%S UTC')}",
         f"Pushes OK: {stats.get('ok', 0)} | Failed: {stats.get('fail', 0)}",
         f"Last OK: {stats.get('last_ok_at', '—')}",
         f"Last message: {stats.get('last_message', '—')}",
@@ -1059,7 +1060,7 @@ def _flush_pending():
 
 def _build_combined_message(messages: List[str], categories: List[str]) -> str:
     """Build a combined commit message for batched pushes."""
-    ts = datetime.utcnow().strftime("%H:%M:%S")
+    ts = utc_now().strftime("%H:%M:%S")
     cat_str = "/".join(categories[:3])  # Max 3 categories
     msg_preview = messages[0][:50]
     
@@ -1105,7 +1106,7 @@ def _do_push(message: str, files: Optional[List[str]], category: str, repo_url: 
                 _last_push_ts = time.time()
                 return True
             
-            timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+            timestamp = utc_now().strftime("%Y-%m-%d %H:%M:%S UTC")
             body = _enrich_commit_message(message, category, files)
             full_message = f"{body}\n\nTimestamp: {timestamp}\nAuto-pushed by git_sync.py"
             commit_env = {**os.environ, "GIT_SYNC_AUTO_COMMIT": "1"}
@@ -1528,7 +1529,7 @@ def push_to_secondary_repo(repo_key: str, files: List[str], message: str, catego
         subprocess.run(["git", "config", "user.name", "HANUN-Bot"], cwd=tmpdir, capture_output=True)
         
         subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True)
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        timestamp = utc_now().strftime("%Y-%m-%d %H:%M:%S UTC")
         commit_msg = f"[{repo_key}] {message}\n\nCategory: {category}\nTimestamp: {timestamp}\nAuto-pushed by git_sync.py"
         subprocess.run(["git", "commit", "-m", commit_msg, "--allow-empty"], cwd=tmpdir, capture_output=True)
         result = _git_push_with_rebase_retry(tmpdir, timeout=90)
@@ -1741,7 +1742,7 @@ def push_full_shutdown_sync(final_nav: float, return_pct: float, report_path: st
     global _last_push_ts
     _last_push_ts = 0  # bypass debounce for shutdown
 
-    tag = f"shutdown_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    tag = f"shutdown_{utc_now().strftime('%Y%m%d_%H%M%S')}"
     brain = _brain_snapshot_line()
     shutdown_title = (
         f"shutdown: NAV=${final_nav:,.0f} return={return_pct:+.1f}% | {tag}"
@@ -1843,7 +1844,7 @@ def push_model_release(version: str, model_path: str = "ppo_trader.zip", notes: 
         log.debug(f"Model release deferred until shutdown: v{version}")
         return True
     try:
-        now = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        now = utc_now().strftime("%Y%m%d_%H%M%S")
         tag_name = f"v{version}_{now}"
 
         ensure_github_cli(force_auth=True)
@@ -1941,7 +1942,7 @@ def sync_all_learning_artifacts(release_tag: str = None) -> bool:
         log.debug(f"Full learning sync deferred until shutdown: {release_tag or 'auto'}")
         return True
     if not release_tag:
-        release_tag = f"training_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        release_tag = f"training_{utc_now().strftime('%Y%m%d_%H%M%S')}"
 
     ensure_github_cli(force_auth=True)
     
@@ -1966,14 +1967,14 @@ def sync_all_learning_artifacts(release_tag: str = None) -> bool:
         _run_gh(
             ["release", "create", release_tag,
              "--title", f"HANOON training {release_tag}",
-             "--notes", f"Training sync {datetime.utcnow().isoformat()}"],
+             "--notes", f"Training sync {utc_now_iso()}"],
             cwd=REPO_DIR,
         )
 
     if _gh_cli_available():
         for lf in large_files:
             rel = lf if not lf.startswith(REPO_DIR) else os.path.relpath(lf, REPO_DIR)
-            push_large_file_to_release(rel, release_tag, f"Training model weights - {datetime.utcnow().isoformat()}")
+            push_large_file_to_release(rel, release_tag, f"Training model weights - {utc_now_iso()}")
 
     small_files = [
         "models/pilot_experience.json",

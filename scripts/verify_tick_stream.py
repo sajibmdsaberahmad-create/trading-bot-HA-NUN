@@ -72,9 +72,9 @@ def live_probe(symbol: str, host: str, port: int, client_id: int, wait_sec: floa
     """Connect to IB Gateway and wait for AllLast ticks on one symbol."""
     errors: list[str] = []
     try:
-        import ib_insync as ibi
+        import core.ib_client as ibi
     except ImportError:
-        return ["ib_insync not installed"]
+        return ["IB client not installed (ib-insync or ib_async)"]
 
     from core.config import BotConfig
     from core.data import DataManager, tick_by_tick_type

@@ -57,6 +57,7 @@ from core.self_evaluator import SelfEvaluator
 from core.council_brain import CouncilBrain
 from core.human_cognition import get_system_prompt, enrich_prompt, apply_gut_override
 from core.git_sync import init as git_sync_init, push_learning_checkpoint_async
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 logger = logging.getLogger("COGNITIVE_CORE")
 
@@ -172,7 +173,7 @@ class CognitiveCore:
                 "last_thought": self.state.last_thought[:500],
                 "market_belief": self.state.market_belief,
                 "trades_observed": len(self._trade_outcomes),
-                "updated": datetime.utcnow().isoformat(),
+                "updated": utc_now_iso(),
             }
             COGNITIVE_STATE_PATH.write_text(json.dumps(payload, indent=2))
             now = time.time()
@@ -357,7 +358,7 @@ class CognitiveCore:
 
     def decide_training_schedule(self) -> Dict:
         """AI decides when and how to train."""
-        now = datetime.utcnow()
+        now = utc_now()
         return {
             "should_train": now.hour >= 21 or now.hour < 4,
             "priority": "high" if self.state.mood in ("anxious", "learning") else "normal",

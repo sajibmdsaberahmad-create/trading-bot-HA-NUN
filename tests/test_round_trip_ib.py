@@ -35,7 +35,7 @@ class TestRoundTripIb(unittest.TestCase):
             ENTRY_LIMIT_BUFFER_PCT=0.004,
             MAX_ACCEPTABLE_SLIPPAGE_PCT=0.004,
         )
-        with patch.dict(sys.modules, {"ib_insync": fake_mod}):
+        with patch.dict(sys.modules, {"core.ib_client": fake_mod}):
             order, mode = flatten_order_for_session(
                 cfg, _FakeBroker(), 500, 20.0, 19.98, 20.02,
             )

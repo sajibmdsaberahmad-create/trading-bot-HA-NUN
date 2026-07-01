@@ -40,6 +40,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 
 @dataclass
@@ -48,7 +49,7 @@ class GitTask:
     files: List[str]
     message: str
     push: bool = False
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=utc_now_iso)
 
 
 @dataclass
@@ -57,7 +58,7 @@ class OllamaTask:
     func: Callable
     args: tuple
     kwargs: dict
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=utc_now_iso)
 
 
 class BackgroundWorker:

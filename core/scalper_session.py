@@ -12,6 +12,7 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 if TYPE_CHECKING:
     pass
@@ -638,7 +639,7 @@ class ScalperSessionMixin:
             
             # Tag git release after off-hours training
             try:
-                version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                version = utc_now().strftime("%Y%m%d_%H%M%S")
                 push_model_release(version, notes="off_hours_full_training")
                 sync_all_learning_artifacts(f"off_hours_{version}")
             except Exception:

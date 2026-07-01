@@ -26,6 +26,7 @@ from core.agent import build_ppo_agent, OnlineLearningManager
 from core.env import TradingEnv
 from core.experience_buffer import load_all, load_recent, append as buffer_append
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 MODELS_DIR = Path("models")
 MODELS_DIR.mkdir(exist_ok=True)
@@ -104,7 +105,7 @@ def _append_trades_to_buffer(trades: list, source: str):
             "win": win,
             "reward": float(pnl) if pnl is not None else 0.0,
             "confidence": t.get("avg_confidence", t.get("confidence", 0.5)),
-            "timestamp": t.get("timestamp", datetime.utcnow().isoformat()),
+            "timestamp": t.get("timestamp", utc_now_iso()),
         }
         buffer_append(record)
 
@@ -153,7 +154,7 @@ def _update_weights_from_buffer():
             continue
         weights[k] = max(0.5, min(weights[k] * factor, 50.0))
     weights["_meta"] = {
-        "train_timestamp": datetime.utcnow().isoformat(),
+        "train_timestamp": utc_now_iso(),
         "buffer_total": stats.get("total", 0),
         "buffer_win_rate": round(float(stats.get("win_rate", 0)), 3),
         "trade_win_rate": round(float(win_rate), 3),
@@ -188,7 +189,7 @@ def _train_ppo_on_buffer(cfg: BotConfig, steps: int = 20_000):
 def _generate_guidelines(weights: dict) -> str:
     try:
         win_rate = weights.get("_meta", {}).get("buffer_win_rate", 0.5)
-        rules = [f"🧭 AI GUIDELINES | generated {datetime.utcnow().isoformat()}"]
+        rules = [f"🧭 AI GUIDELINES | generated {utc_now_iso()}"]
         if win_rate < 0.4:
             rules.append("Win rate below 40%: tighten stops, reduce size, increase scan interval")
         elif win_rate > 0.7:
@@ -235,7 +236,7 @@ def run_unified_training(cfg: BotConfig, ppo_steps: int = 20_000):
     guidelines = _generate_guidelines(weights)
     with open(GUIDELINES_PATH, "w") as f:
         f.write(guidelines)
-        f.write(f"\n\nGenerated: {datetime.utcnow().isoformat()}\n")
+        f.write(f"\n\nGenerated: {utc_now_iso()}\n")
         f.write(f"Weights: {json.dumps(weights, indent=2)}\n")
 
     # 5) Append to training history
@@ -247,7 +248,7 @@ def run_unified_training(cfg: BotConfig, ppo_steps: int = 20_000):
         except Exception:
             pass
     history.append({
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": utc_now_iso(),
         "ppo_trained": trained,
         "steps": ppo_steps,
         "weights": weights,
@@ -320,7 +321,7 @@ def run_incremental_training(cfg: BotConfig, fresh_records: list = None, ppo_ste
     trained = _train_ppo_on_buffer(cfg, steps=min(ppo_steps, 8192))
 
     history_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": utc_now_iso(),
         "mode": "incremental",
         "new_records": len(fresh_records),
         "ppo_trained": trained,
@@ -339,7 +340,7 @@ def run_incremental_training(cfg: BotConfig, fresh_records: list = None, ppo_ste
 
     try:
         from core.git_sync import push_change, push_model_release, sync_all_learning_artifacts
-        version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        version = utc_now().strftime("%Y%m%d_%H%M%S")
         push_change(
             f"train: incremental pilot | new={len(fresh_records)} ppo={trained}",
             files=[

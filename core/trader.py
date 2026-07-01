@@ -46,6 +46,7 @@ from core.performance import PerformanceTracker
 from core.notify import log, Notifier
 from core.git_sync import init as git_sync_init, push_trade, push_daily_summary
 from core.startup_checks import run_startup_checks
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 
 class LiveTrader:
@@ -121,7 +122,7 @@ class LiveTrader:
                 "bars_processed": self._bars_processed,
                 "trades": trades[-20:],
                 "equity_curve": equity_curve[-500:],
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": utc_now_iso(),
             }
             with open("live_metrics.json", "w") as f:
                 json.dump(metrics, f, indent=2)
@@ -376,7 +377,7 @@ class LiveTrader:
 
         self.risk.open_position(plan)
 
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = utc_now().strftime("%Y-%m-%d %H:%M:%S")
         self.perf.record_trade(timestamp, "BUY", current_px, quantity, cost, self.nav)
 
         log.info(f"ENTRY: {quantity} x {self.cfg.TICKER} @ ${current_px:.2f} | Cash left: ${self.cash:,.2f}")
@@ -403,7 +404,7 @@ class LiveTrader:
         self.shares = 0.0
         self.nav = self.cash
 
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = utc_now().strftime("%Y-%m-%d %H:%M:%S")
         self.perf.record_trade(timestamp, "SELL", price, quantity, proceeds, self.nav, exit_reason=reason)
         self.risk.record_trade_result(pnl_usd)
         self.risk.close_position()

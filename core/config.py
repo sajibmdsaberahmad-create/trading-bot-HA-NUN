@@ -92,6 +92,7 @@ class BotConfig:
     # IB GATEWAY CONNECTION
     # ════════════════════════════════════════════════════════════════════
     IB_HOST:       str  = "127.0.0.1"
+    IB_CLIENT_BACKEND: str = os.getenv("IB_CLIENT_BACKEND", "ib_insync")  # ib_insync | ib_async
     IB_PORT:       int  = 4002     # 4002/4001 = IB Gateway, 7497 = TWS paper, 7496 = TWS live
     IB_CLIENT_ID:  int  = 1       # Single IB API client ID — do not rotate (causes 10197)
     IB_CLIENT_ID_RECLAIM_RETRIES: int = int(os.getenv("IB_CLIENT_ID_RECLAIM_RETRIES", "5"))

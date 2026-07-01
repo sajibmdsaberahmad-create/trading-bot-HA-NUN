@@ -21,9 +21,9 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        import ib_insync as ibi
+        import core.ib_client as ibi
     except ImportError:
-        print("ERROR: pip install ib_insync")
+        print("ERROR: pip install ib-insync or ib_async")
         return 1
 
     from core.config import BotConfig

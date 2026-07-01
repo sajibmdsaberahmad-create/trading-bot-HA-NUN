@@ -37,10 +37,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, Dict, Any
 
-try:
-    from ib_insync import MarketOrder, LimitOrder, StopOrder, StopLimitOrder, Trade
-except ImportError:
-    raise SystemExit("ERROR: ib_insync not installed. Fix: pip install ib_insync")
+from core.ib_client import MarketOrder, LimitOrder, StopOrder, StopLimitOrder, Trade
 
 from core.config import BotConfig
 from core.connector import IBConnector
@@ -536,7 +533,7 @@ class BrokerExecutor:
         """Buy to cover unexpected short positions left on the paper account."""
         covered = 0
         try:
-            from ib_insync import Stock
+            from core.ib_client import Stock
             self.ib.reqPositions()
             self.ib.sleep(0.5)
             for p in list(self.ib.positions()):

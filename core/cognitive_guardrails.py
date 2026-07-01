@@ -34,6 +34,7 @@ from core.param_bounds import (
     validate_mutation,
 )
 from core.paper_mode import account_equity, is_paper_free_learning
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 logger = logging.getLogger("COGNITIVE_GUARDRAILS")
 
@@ -71,7 +72,7 @@ class EnforcedLimits:
     """Runtime-enforced limits with counters."""
 
     def __init__(self):
-        self._today = datetime.utcnow().date()
+        self._today = utc_today()
         self._daily_trades = 0
         self._daily_pnl = 0.0
         self._daily_loss_usd = 0.0
@@ -83,7 +84,7 @@ class EnforcedLimits:
         self._last_check = {}
 
     def _check_date(self):
-        today = datetime.utcnow().date()
+        today = utc_today()
         if today != self._today:
             with self._lock:
                 self._today = today
@@ -311,7 +312,7 @@ class CognitiveGuardrails:
     def _audit(self, action: str, detail: str):
         entry = {
             "ts": time.time(),
-            "ts_str": datetime.utcnow().isoformat(),
+            "ts_str": utc_now_iso(),
             "action": action,
             "detail": detail,
         }

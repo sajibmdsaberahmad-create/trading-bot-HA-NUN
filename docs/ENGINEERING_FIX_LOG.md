@@ -15,6 +15,30 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 
 ---
 
+## 2026-07-01 — Deferred audit complete: ib_async shim, UTC, git untrack
+
+### Problem
+Remaining audit items were docs-only: unmaintained ib_insync, datetime.utcnow deprecations, runtime journals in git.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_client.py` | `IB_CLIENT_BACKEND=ib_insync` (default) or `ib_async` |
+| `core/time_utils.py` | Timezone-aware UTC; bulk replace in core modules |
+| `tests/test_ib_client.py` | Backend shim tests (157 total passing) |
+| `.gitignore` + `git rm --cached` | Untrack runtime journals, IB locks, connectivity cache |
+| `docs/IB_ASYNC_MIGRATION.md` | Phase 2 shim complete |
+
+### Env
+`IB_CLIENT_BACKEND=ib_async` to try maintained fork
+
+### Verify
+```bash
+venv/bin/python -m pytest tests/ -q
+```
+
+---
+
 ## 2026-07-01 — Codebase health: tests, CI, maturity ladder, TF optional
 
 ### Problem

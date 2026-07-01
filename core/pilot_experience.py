@@ -35,6 +35,7 @@ import numpy as np
 
 from core.config import BotConfig
 from core.git_sync import push_learning_checkpoint_async
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 logger = logging.getLogger("PILOT")
 
@@ -178,7 +179,7 @@ class PilotExperienceSystem:
 
         self._current_flight = FlightRecord(
             ticker=ticker,
-            entry_time=datetime.utcnow().isoformat(),
+            entry_time=utc_now_iso(),
             entry_price=entry_price,
             regime=regime_val,
             vix_level=vix_level,
@@ -193,7 +194,7 @@ class PilotExperienceSystem:
         if not self._current_flight:
             return {"xp_gained": 0, "new_level": self.state.level}
         
-        self._current_flight.exit_time = datetime.utcnow().isoformat()
+        self._current_flight.exit_time = utc_now_iso()
         self._current_flight.exit_price = exit_price
         self._current_flight.pnl_usd = pnl_usd
         self._current_flight.pnl_pct = pnl_pct

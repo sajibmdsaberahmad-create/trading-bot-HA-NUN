@@ -99,7 +99,7 @@ def resolve_hanoon_log_path() -> str:
 def build_logger(log_path: Optional[str] = None) -> logging.Logger:
     """
     Build the project-wide logger. Writes to both stdout and a rotating
-    log file. ib_insync's own chatty network logs are suppressed to
+    log file. IB client library chatty network logs are suppressed to
     WARNING so they don't drown out the bot's own status lines.
     """
     if log_path is None:
@@ -120,7 +120,8 @@ def build_logger(log_path: Optional[str] = None) -> logging.Logger:
         logger.addHandler(fh)
         logger.addHandler(sh)
 
-    logging.getLogger("ib_insync").setLevel(logging.WARNING)
+    for _ib_log in ("ib_insync", "ib_async"):
+        logging.getLogger(_ib_log).setLevel(logging.WARNING)
     return logger
 
 

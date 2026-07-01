@@ -1,4 +1,6 @@
 ib_insync
+ib-insync>=0.9.86
+ib_async>=2.0.0          # Maintained successor (IB_CLIENT_BACKEND=ib_async)
 gymnasium
 stable-baselines3[extra]
 pandas>=1.5.0

@@ -11,13 +11,15 @@ import time
 from typing import Optional, Dict, Any
 
 try:
-    from ib_insync import IB, Stock
-    import ib_insync as ibi
-except ImportError:
+    from core.ib_client import IB, Stock
+    from core import ib_client as ibi
+except SystemExit:
+    raise
+except ImportError as exc:
     raise SystemExit(
-        "\nERROR: ib_insync is not installed.\n"
-        "Fix:   pip install ib_insync\n"
-    )
+        "\nERROR: IB client not available.\n"
+        "Fix:   pip install ib-insync  OR  pip install ib_async\n"
+    ) from exc
 
 from core.config import BotConfig
 from core.notify import log, Notifier
@@ -81,7 +83,7 @@ class IBConnector:
         try:
             # Suppress ib_insync INFO chatter that fills the client output buffer
             try:
-                import ib_insync as ibi
+                from core import ib_client as ibi
                 ibi.util.log.level = 30  # WARNING
                 ibi.util.logToConsole(False)
                 # Allow tick/stream subscriptions from the synchronous main loop.
@@ -97,6 +99,8 @@ class IBConnector:
                 self.prepare_fresh_connection()
             self._connect_ib_socket()
             accounts = self.ib.managedAccounts()
+            from core.ib_client import ib_backend_name
+            log.info(f"  IB backend: {ib_backend_name()}")
             mode_label = "PAPER" if self.cfg.PAPER_TRADING else "LIVE"
             acct = accounts[0] if accounts else "unknown"
             from core.startup_log import startup_compact, sinfo

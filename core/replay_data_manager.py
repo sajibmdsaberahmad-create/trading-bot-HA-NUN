@@ -30,7 +30,7 @@ class ReplayDataManager(DataManager):
 
     def _get_contract(self):
         try:
-            import ib_insync as ibi
+            import core.ib_client as ibi
             return ibi.Stock(self.cfg.TICKER, self.cfg.EXCHANGE, self.cfg.CURRENCY)
         except Exception:
             return None

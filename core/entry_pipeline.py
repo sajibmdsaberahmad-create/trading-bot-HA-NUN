@@ -17,7 +17,7 @@ from core.fill_tracker import (
 )
 
 if TYPE_CHECKING:
-    from ib_insync import IB
+    from core.ib_client import IB
 
 
 def ib_position_shares_for(ib: "IB", ticker: str) -> float:
@@ -226,7 +226,7 @@ def flatten_order_for_session(
     Pick flatten SELL order type. Extended hours / penny / thin-book: marketable LIMIT.
     IB paper parent MARKET orders stall in PreSubmitted outside RTH.
     """
-    from ib_insync import LimitOrder, MarketOrder
+    from core.ib_client import LimitOrder, MarketOrder
 
     penny_thr = float(getattr(cfg, "PENNY_PRICE_THRESHOLD", 1.0))
     is_penny = last_price > 0 and last_price < penny_thr
@@ -262,7 +262,7 @@ def cover_order_for_session(
     ask: Optional[float],
 ):
     """Pick orphan-short cover BUY order — limit outside RTH / penny."""
-    from ib_insync import LimitOrder, MarketOrder
+    from core.ib_client import LimitOrder, MarketOrder
 
     penny_thr = float(getattr(cfg, "PENNY_PRICE_THRESHOLD", 1.0))
     is_penny = last_price > 0 and last_price < penny_thr

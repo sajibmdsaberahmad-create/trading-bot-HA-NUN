@@ -43,6 +43,7 @@ from datetime import datetime
 from pathlib import Path
 
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -66,7 +67,7 @@ def launch_training(cmd: List[str],
     Returns:
         Training session ID, or None on submission failure
     """
-    session_id = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    session_id = utc_now().strftime("%Y%m%d_%H%M%S")
     
     try:
         # Prepare output capture
@@ -78,7 +79,7 @@ def launch_training(cmd: List[str],
         with open(output_file, 'w') as f:
             f.write(f"Training session: {session_id}\n")
             f.write(f"Command: {' '.join(cmd)}\n")
-            f.write(f"Started: {datetime.utcnow().isoformat()}\n")
+            f.write(f"Started: {utc_now_iso()}\n")
             f.write(f"Memory limit: {memory_limit_mb}MB\n\n")
         
         # Build environment
@@ -143,7 +144,7 @@ def _watchdog(proc: subprocess.Popen, session_id: str, timeout: int, output_file
         # Append completion marker
         try:
             with open(output_file, 'a') as f:
-                f.write(f"\nCompleted: {datetime.utcnow().isoformat()}\n")
+                f.write(f"\nCompleted: {utc_now_iso()}\n")
                 f.write(f"Exit code: {rc}\n")
         except Exception:
             pass
@@ -172,7 +173,7 @@ def _watchdog(proc: subprocess.Popen, session_id: str, timeout: int, output_file
             pass
         try:
             with open(output_file, 'a') as f:
-                f.write(f"\nTIMEOUT after {timeout}s | Killed at {datetime.utcnow().isoformat()}\n")
+                f.write(f"\nTIMEOUT after {timeout}s | Killed at {utc_now_iso()}\n")
         except Exception:
             pass
     
@@ -225,12 +226,12 @@ def main():
     log.info(f"Subprocess training starting: mode={args.mode} ticker={args.ticker}")
     
     # Launch via Popen so this script becomes the isolated training runner
-    output_file = args.output or f"models/daily_reports/train_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.log"
+    output_file = args.output or f"models/daily_reports/train_{utc_now().strftime('%Y%m%d_%H%M%S')}.log"
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     
     with open(output_file, 'w') as f:
         f.write(f"Training: {args.mode} | ticker={args.ticker}\n")
-        f.write(f"Started: {datetime.utcnow().isoformat()}\n\n")
+        f.write(f"Started: {utc_now_iso()}\n\n")
     
     proc = subprocess.Popen(
         cmd,
@@ -248,7 +249,7 @@ def main():
         rc = -1
     
     with open(output_file, 'a') as f:
-        f.write(f"\nCompleted: {datetime.utcnow().isoformat()}\nExit: {rc}\n")
+        f.write(f"\nCompleted: {utc_now_iso()}\nExit: {rc}\n")
     
     sys.exit(rc)
 

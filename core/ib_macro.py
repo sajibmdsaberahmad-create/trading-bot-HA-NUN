@@ -54,7 +54,7 @@ def fetch_ib_macro_snapshot(connector: Optional["IBConnector"]) -> Dict[str, Any
         out["source"] = "none"
         return out
     try:
-        from ib_insync import Index, Stock
+        from core.ib_client import Index, Stock
 
         ib = connector.ib
         contracts = [

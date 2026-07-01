@@ -321,7 +321,7 @@ class StockScanner:
         hits: Dict[str, ScannerHit] = {}
         if ib_connector and hasattr(ib_connector, 'ib') and ib_connector.ib.isConnected():
             try:
-                from ib_insync import ScannerSubscription
+                from core.ib_client import ScannerSubscription
                 from core.scanner_session import ib_scanner_profile, should_run_ib_scanner
                 from core.universe_filter import passes_profit_hunt_universe
                 ib = ib_connector.ib

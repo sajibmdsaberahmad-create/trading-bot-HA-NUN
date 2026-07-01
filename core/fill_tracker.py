@@ -343,7 +343,7 @@ def snapshot_market_price(
     if port_px > 0:
         return port_px
     try:
-        from ib_insync import Stock
+        from core.ib_client import Stock
 
         qualified = ib.qualifyContracts(Stock(sym, exchange, currency))
         if not qualified:

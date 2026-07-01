@@ -17,8 +17,9 @@ from core.market_hours import get_market_state
 from core.universe_filter import PROFIT_HUNT_SCAN_CODES
 
 try:
-    from ib_insync.contract import TagValue
-except ImportError:
+    from core.ib_client import ib_module
+    TagValue = ib_module().contract.TagValue
+except Exception:
     TagValue = None  # type: ignore
 
 

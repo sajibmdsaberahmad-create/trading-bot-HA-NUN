@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from typing import Any, List, Optional, TYPE_CHECKING
 
 try:
-    import ib_insync as ibi
+    import core.ib_client as ibi
 except ImportError:
     ibi = None  # type: ignore
 

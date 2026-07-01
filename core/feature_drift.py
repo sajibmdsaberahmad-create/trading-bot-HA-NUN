@@ -34,6 +34,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -81,7 +82,7 @@ class ValidationResult:
     passed: bool
     message: str
     details: Dict[str, Any] = field(default_factory=dict)
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=utc_now_iso)
 
 
 class FeatureDriftValidator:

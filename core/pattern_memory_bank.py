@@ -20,6 +20,7 @@ import numpy as np
 
 from core.config import BotConfig
 from core.git_sync import push_learning_checkpoint_async
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 logger = logging.getLogger("PATTERNS")
 
@@ -129,14 +130,14 @@ class PatternMemoryBank:
                 pattern.times_successful += 1
             pattern.avg_return = (pattern.avg_return * (pattern.times_seen - 1) + pnl_pct) / pattern.times_seen
             pattern.tags = list(set(pattern.tags + (tags or [])))
-            pattern.timestamp = datetime.utcnow().isoformat()
+            pattern.timestamp = utc_now_iso()
             logger.info(f"Pattern updated: {existing_id} | seen={pattern.times_seen} | win_rate={pattern.times_successful / pattern.times_seen:.0%}")
         else:
             pattern_id = f"pt_{pattern_type[:3]}_{len(self.patterns) + 1:04d}"
             pattern = PatternTemplate(
                 pattern_id=pattern_id,
                 ticker=ticker,
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=utc_now_iso(),
                 regime=regime,
                 pattern_type=pattern_type,
                 features=features,

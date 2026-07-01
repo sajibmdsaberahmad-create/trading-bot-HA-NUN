@@ -21,6 +21,7 @@ from core.experience_buffer import load_all, stats as buffer_stats
 from core.notify import log
 from core.pilot_experience import PilotExperienceSystem
 from core.pattern_memory_bank import PatternMemoryBank
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 logger = logging.getLogger("SELF_IMPROVER")
 
@@ -108,7 +109,7 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
     - improvement history entry
     """
     global _LAST_PLAN_TS
-    now = datetime.utcnow().timestamp()
+    now = utc_now().timestamp()
     if _LAST_PLAN_TS and (now - _LAST_PLAN_TS) < _PLAN_COOLDOWN_SEC:
         log.debug(
             f"Self-improvement skipped — cooldown "
@@ -118,7 +119,7 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
             "guidelines": generate_guidelines_text(),
             "adjustments": {},
             "win_rate": 0.0,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now_iso(),
             "skipped": "cooldown",
         }
 
@@ -205,7 +206,7 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
                 continue
             weights[k] = max(0.5, min(weights.get(k, 1.0) * factor, 50.0))
         weights["_meta"] = {
-            "train_timestamp": datetime.utcnow().isoformat(),
+            "train_timestamp": utc_now_iso(),
             "buffer_total": buffer.get("total", 0),
             "buffer_win_rate": round(buffer_wr, 3),
             "returns_win_rate": round(returns_wr, 3),
@@ -220,7 +221,7 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
     # Human-readable guidelines
     # ----------------------------
     lines: List[str] = []
-    lines.append(f"🧭 SELF-IMPROVEMENT GUIDELINES | {datetime.utcnow().isoformat()}")
+    lines.append(f"🧭 SELF-IMPROVEMENT GUIDELINES | {utc_now_iso()}")
     lines.append(f"Combined win rate: {combined_wr:.1%} (buffer={buffer_wr:.1%}, returns={returns_wr:.1%})")
 
     if combined_wr < 0.4:
@@ -274,7 +275,7 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
         except Exception:
             pass
     history.append({
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": utc_now_iso(),
         "win_rate": combined_wr,
         "buffer_win_rate": buffer_wr,
         "returns_win_rate": returns_wr,
@@ -290,7 +291,7 @@ def generate_self_improvement_plan(cfg: BotConfig) -> Dict[str, Any]:
         "guidelines": guidelines,
         "adjustments": adjustments,
         "win_rate": combined_wr,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": utc_now_iso(),
     }
 
 
@@ -339,7 +340,7 @@ def generate_veteran_progression_plan(cfg: BotConfig) -> Dict[str, Any]:
     Higher-level pilots get access to more aggressive parameters.
     """
     lines: List[str] = []
-    lines.append(f"🧭 VETERAN PROGRESSION PLAN | {datetime.utcnow().isoformat()}")
+    lines.append(f"🧭 VETERAN PROGRESSION PLAN | {utc_now_iso()}")
     
     # Load current veteran status
     pilot = PilotExperienceSystem(cfg)

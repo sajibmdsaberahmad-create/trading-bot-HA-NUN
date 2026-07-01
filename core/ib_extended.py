@@ -419,7 +419,7 @@ def fetch_wsh_events(ib, connector: "IBConnector", symbols: List[str]) -> List[D
         log.debug(f"reqWshMetaData: {exc}")
         return out
     try:
-        from ib_insync import WshEventData
+        from core.ib_client import WshEventData
     except ImportError:
         return out
     for sym in symbols[:8]:
@@ -494,7 +494,7 @@ def what_if_order(
     action: str = "BUY",
 ) -> Dict[str, Any]:
     """IB whatIfOrder margin preview — no order placed."""
-    from ib_insync import LimitOrder, MarketOrder
+    from core.ib_client import LimitOrder, MarketOrder
 
     sym = (symbol or "").upper()
     out: Dict[str, Any] = {"symbol": sym, "qty": quantity, "ok": False}

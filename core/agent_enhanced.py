@@ -38,6 +38,7 @@ except ImportError:
 from core.config import BotConfig
 from core.env import TradingEnv
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -833,7 +834,7 @@ class AdaptiveLearner:
     
     def backup_model(self) -> str:
         """Create a timestamped backup of the current model before updating."""
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = utc_now().strftime("%Y%m%d_%H%M%S")
         backup_path = os.path.join(self._backup_dir, f"ppo_{timestamp}.zip")
         
         try:

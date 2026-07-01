@@ -25,6 +25,7 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.notify import log
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 logger = logging.getLogger("SELF_EVALUATOR")
 
@@ -187,7 +188,7 @@ class SelfEvaluator:
 
         latest = self._evaluation_history[-1]
         plan = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now_iso(),
             "overall_score": round(latest.overall_score, 2),
             "strengths": latest.strengths,
             "weaknesses": latest.weaknesses,

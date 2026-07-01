@@ -14,7 +14,7 @@ import logging
 import os
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
@@ -29,6 +29,7 @@ from core.self_improver import generate_self_improvement_plan
 from core.notify import log
 from core.pilot_experience import PilotExperienceSystem, pilot_experience_to_git
 from core.pattern_memory_bank import PatternMemoryBank, pattern_memory_to_git
+from core.time_utils import utc_now, utc_now_iso, utc_today
 
 logger = logging.getLogger("CONSCIOUSNESS")
 
@@ -74,7 +75,7 @@ class AIConsciousness:
 
     def _awaken(self):
         """First boot or restart — establish consciousness."""
-        now = datetime.utcnow()
+        now = utc_now()
 
         if not self.state.get("birth_time"):
             self.state["birth_time"] = now.isoformat()
@@ -133,7 +134,9 @@ class AIConsciousness:
         """Return human-readable age from exact birth time."""
         try:
             birth = datetime.fromisoformat(self.state["birth_time"])
-            delta = datetime.utcnow() - birth
+            if birth.tzinfo is None:
+                birth = birth.replace(tzinfo=timezone.utc)
+            delta = utc_now() - birth
             total_seconds = int(delta.total_seconds())
             days = total_seconds // 86400
             hours = (total_seconds % 86400) // 3600
@@ -172,7 +175,7 @@ class AIConsciousness:
         if getattr(self, "_defer_git_push", False):
             self._pending_git_push = True
             return
-        now = datetime.utcnow().timestamp()
+        now = utc_now().timestamp()
         if now - getattr(self, "_last_git_push", 0) <= 120:
             return
         self._last_git_push = now
@@ -188,7 +191,7 @@ class AIConsciousness:
     def _write_thought(self, thought_type: str, message: str, metadata: Optional[Dict] = None):
         """Write a thought to the AI's journal."""
         entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now_iso(),
             "age": self._age_string(),
             "type": thought_type,
             "mood": self.state.get("mood", "learning"),
@@ -204,7 +207,7 @@ class AIConsciousness:
     def _log_event(self, event_type: str, message: str, metadata: Optional[Dict] = None):
         """Record a significant event in AI's memory."""
         event = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now_iso(),
             "age": self._age_string(),
             "type": event_type,
             "message": message,
@@ -367,7 +370,7 @@ class AIConsciousness:
             return True
         try:
             last_train_dt = datetime.fromisoformat(last_train)
-            hours_since = (datetime.utcnow() - last_train_dt).total_seconds() / 3600
+            hours_since = (utc_now() - last_train_dt).total_seconds() / 3600
             return hours_since >= 6.0
         except Exception:
             return True
@@ -390,7 +393,7 @@ class AIConsciousness:
 
         results = {
             "session": session_num,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now_iso(),
             "age": self._age_string(),
             "mood": self.state.get("mood", "learning"),
             "steps": {},
@@ -455,7 +458,7 @@ class AIConsciousness:
             except Exception as exc:
                 logger.debug(f"Report generation failed: {exc}")
 
-            self.state["last_training"] = datetime.utcnow().isoformat()
+            self.state["last_training"] = utc_now_iso()
             self._save_state()
 
             self._update_mood()
@@ -479,10 +482,10 @@ class AIConsciousness:
 
     def _create_version(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Create a version snapshot — AI's way of remembering its evolution."""
-        version_id = f"v{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        version_id = f"v{utc_now().strftime('%Y%m%d_%H%M%S')}"
         version = {
             "id": version_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now_iso(),
             "age": self._age_string(),
             "session": self.state["training_sessions"],
             "mood": self.state.get("mood", "learning"),
@@ -511,7 +514,7 @@ class AIConsciousness:
 
     def _generate_daily_report(self, training_results: Dict[str, Any]) -> Path:
         """Generate a daily self-awareness report."""
-        today = datetime.utcnow().strftime("%Y-%m-%d")
+        today = utc_now().strftime("%Y-%m-%d")
         report_path = DAILY_REPORTS_DIR / f"report_{today}.txt"
         mood_msg = self.MOODS.get(self.state.get("mood", "learning"), "📊")
 
@@ -556,7 +559,7 @@ class AIConsciousness:
     def reflect(self) -> str:
         """Self-reflection — the AI evaluates its own existence and writes a narrative."""
         lines = []
-        now = datetime.utcnow()
+        now = utc_now()
         age = self._age_string()
         mood = self.state.get("mood", "learning")
         mood_msg = self.MOODS.get(mood, "📊")
