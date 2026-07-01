@@ -119,9 +119,9 @@ def package_colab_sft(*, root: Path | None = None) -> Dict[str, Any]:
         "by_source": manifest.get("by_source"),
         "raw_sources": raw,
         "upload_rule": (
-            "Upload halim_toddler_v2.zip + THIS halim_sft.zip to My Drive/Halim/. "
-            "Open halim/colab/halim_toddler_train.ipynb in Colab — no files.upload(). "
-            "Train script is bundled inside halim_sft.zip. "
+            "Upload THIS halim_sft.zip to My Drive/Halim/. "
+            "Optional: halim_toddler_vN.zip (highest N used only if toddler_v1/ adapter missing on Drive). "
+            "Open halim/colab/halim_toddler_train.ipynb — colab_drive_setup.py picks latest vN automatically. "
             "Rebuild on Mac: halim_prepare_train_incremental.sh or halim_colab_ready.sh. "
             "Check build_id in colab_manifest.json."
         ),

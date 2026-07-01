@@ -550,33 +550,22 @@ class TelegramCommandListener:
         if not r:
             return {}
         try:
-            from core.ib_truth import refresh
-            from core.account_view import account_summary
-            refresh(r.ib, self.cfg)
-            acct = account_summary(r)
+            from core.notify_ib_context import ib_telegram_account
+            ctx = ib_telegram_account(r, self.cfg)
         except Exception:
-            acct = {}
+            ctx = {}
         try:
             from core.rth_session import rth_reply_context
-            rth = rth_reply_context(self.cfg)
+            ctx.update(rth_reply_context(self.cfg))
         except Exception:
-            rth = {"market_state": get_market_state(self.cfg), "time_et": format_et()}
-        ctx = {
-            "ib_account": round(float(acct.get("ib_equity", getattr(r, "account_equity", 0)) or 0), 2),
-            "bot_nav": round(float(acct.get("equity", getattr(r, "bot_nav", 0)) or 0), 2),
-            "day_pnl": round(float(acct.get("ib_fifo_session_pnl", acct.get("day_pnl", 0)) or 0), 2),
-            "ib_fifo_session_pnl": round(float(acct.get("ib_fifo_session_pnl", 0) or 0), 2),
-            "trades_today": getattr(r, "trades_today", 0),
-            "position": getattr(r, "current_ticker", None),
-            "shares": getattr(r, "shares", 0),
-            "time_et": format_et(),
-            **rth,
-        }
+            ctx["market_state"] = get_market_state(self.cfg)
+            ctx["time_et"] = format_et()
         try:
             from core.war_account import war_account_context
             ctx.update(war_account_context(self.cfg))
         except Exception:
             pass
+        ctx["data_source"] = "ib_truth"
         return ctx
 
     def _cmd_status(self, chat_id: int, reply_id: Optional[int]) -> None:
@@ -596,11 +585,12 @@ class TelegramCommandListener:
         ctx["open_positions"] = pos_n
         ctx["unrealized_pnl"] = unreal
         fallback = (
-            f"LIVE STATUS · {ctx.get('rth_tier', ctx.get('market_state', '?'))}\n"
+            f"LIVE STATUS · IB · {ctx.get('rth_tier', ctx.get('market_state', '?'))}\n"
             f"{ctx.get('time_et', '')}\n"
-            f"IB ${ctx.get('ib_account', 0):,.2f} · RTH PnL ${ctx.get('ib_fifo_session_pnl', ctx.get('day_pnl', 0)):+,.2f}\n"
-            f"War nav ${ctx.get('nav', ctx.get('war_nav', 0)):,.0f} · "
-            f"Trades {ctx.get('trades_today', 0)} · Open {pos_n} · Unrealized ${unreal:+,.2f}\n"
+            f"NetLiq ${ctx.get('ib_equity', ctx.get('ib_account', 0)):,.2f} · "
+            f"Session P&L ${ctx.get('ib_fifo_session_pnl', ctx.get('session_pnl', 0)):+,.2f}\n"
+            f"Round-trips {ctx.get('ib_round_trips', ctx.get('trades_today', 0))} · "
+            f"Open {pos_n} · Unrealized ${unreal:+,.2f}\n"
             f"{ctx.get('market_note', '')}"
         )
         self.send_ai(chat_id, "status", ctx, fallback, reply_to=reply_id)
@@ -812,7 +802,11 @@ class TelegramCommandListener:
         ctx = self._runner_ctx()
         ctx["mood"] = mood
         ctx["mood_message"] = message
-        fallback = f"MOOD: {mood}\n{message}\nMarket {ctx.get('market_state', '?').upper()} · {ctx.get('trades_today', 0)} trades today"
+        fallback = (
+            f"MOOD: {mood}\n{message}\n"
+            f"Market {ctx.get('market_state', '?').upper()} · "
+            f"IB round-trips {ctx.get('ib_round_trips', ctx.get('trades_today', 0))}"
+        )
         self.send_ai(chat_id, "mood", ctx, fallback, reply_to=reply_id)
 
     def _think(self, user_text: str, extra: str = "") -> str:

@@ -4,10 +4,6 @@
   "confidence": 0.35,
   "mode": "autonomous",
   "learned_lessons": [
-    "Review trade_closed on MARA",
-    "Commander: replay_stop",
-    "Review loss_streak on MARA",
-    "Review loss_streak on RIOT",
     "Review trade_closed on RIOT",
     "Review trade_closed on TSLA",
     "Review loss_streak on TSLA",
@@ -103,10 +99,14 @@
     "Missed spike-top exit on CELZ: peak $1.56 left ~$10 on table",
     "Spike-top hunt on CELZ: spike_top_intrabar: +1.30% vol=14435.0x",
     "Commander: off_hours_review",
-    "Commander: ib_day_learning:2026-06-30:IB day 2026-06-30: 399 trades, P&L $+46616.14"
+    "Commander: ib_day_learning:2026-06-30:IB day 2026-06-30: 399 trades, P&L $+46616.14",
+    "Halim documents every mutation in git \u2014 review improvement_history.json",
+    "Session trade WR 0% on 0 round-trips",
+    "Skip repeat losers until proxy confidence rises",
+    "Commander: Halim heuristic dev plan \u2014 WR 0%"
   ],
   "last_thought": "```json\n{\n  \"gut_feel\": 0.75,\n  \"intuition\": 0.9,\n  \"trade_decisions\": {\n    \"hunting_spikes\": [\n      {\n        \"volume\": 10000,\n        \"momentum\": true,\n        \"profit_probability\": 0.6,\n        \"fakeouts\": false\n      }\n    ],\n    \"exit_on_calculated_edge\": true\n  },\n  \"risk_limits\": {\n    \"max_loss\": 50,\n    \"trade_count\": 10\n  }\n}\n```",
   "market_belief": {},
   "trades_observed": 0,
-  "updated": "2026-06-30T22:01:33.098090"
+  "updated": "2026-07-01T09:11:12.203963"
 }

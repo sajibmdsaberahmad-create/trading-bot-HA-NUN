@@ -189,22 +189,28 @@ def _build_session_context(runner: Optional["ScalperRunner"], cfg: BotConfig) ->
 
     if runner is not None:
         try:
-            nav = float(getattr(runner, "bot_nav", 0) or cfg.INITIAL_CASH)
-            cash = float(getattr(runner, "bot_cash", 0) or nav)
-            lines.append(f"ACCOUNT: NAV=${nav:,.0f} cash=${cash:,.0f} trades_today={getattr(runner, 'trades_today', 0)}")
+            from core.account_view import account_summary
+            acct = account_summary(runner)
+            lines.append(
+                f"ACCOUNT (IB): NetLiq=${acct['equity']:,.0f} "
+                f"session_pnl=${acct.get('ib_fifo_session_pnl', acct['day_pnl']):+,.2f} "
+                f"round_trips={acct.get('ib_round_trips', 0)}"
+            )
         except Exception:
             pass
-        locked = getattr(runner, "_locked_targets", None) or []
-        if locked:
-            names = [getattr(t, "ticker", str(t)) for t in locked[:12]]
-            lines.append(f"LOCKED WATCH: {', '.join(names)}")
-        open_pos = getattr(runner, "_position_slots", {}) or {}
-        if open_pos:
-            for sym, slot in list(open_pos.items())[:5]:
+        try:
+            from core.position_intel import collect_positions
+            pos_pack = collect_positions(runner)
+            for p in (pos_pack.get("positions") or [])[:5]:
                 lines.append(
-                    f"OPEN {sym}: {slot.get('shares', 0)}sh @ ${slot.get('entry_price', 0):.4f} "
-                    f"stop=${slot.get('stop', 0):.4f} tp=${slot.get('target', 0):.4f}"
+                    f"OPEN {p.get('ticker')}: {p.get('shares', 0)}sh @ ${p.get('entry', 0):.4f} "
+                    f"IB mark=${p.get('price', 0):.4f} unreal=${p.get('unrealized_pnl', 0):+,.2f}"
                 )
+        except Exception:
+            locked = getattr(runner, "_locked_targets", None) or []
+            if locked:
+                names = [getattr(t, "ticker", str(t)) for t in locked[:12]]
+                lines.append(f"LOCKED WATCH: {', '.join(names)}")
 
     try:
         from core.experience_buffer import stats as buf_stats
@@ -251,17 +257,21 @@ def _build_session_context(runner: Optional["ScalperRunner"], cfg: BotConfig) ->
     return "\n".join(lines)
 
 
-def _parse_brief_json(raw: str, stats: Dict[str, Any]) -> CopilotBrief:
+def _parse_brief_json(raw: str, stats: Dict[str, Any]) -> Optional[CopilotBrief]:
     from core.commander_learning import _parse_plan_json
+    from core.response_sanity import response_looks_english, sanitize_log_text
+
     plan = _parse_plan_json(raw)
     if not plan:
-        return CopilotBrief(
-            narrative=(raw or "")[:500],
-            session_wr=float(stats.get("win_rate", 0)),
-            updated_at=time.time(),
-            source="parse_fallback",
-            regime_read=_infer_regime_read(),
-        )
+        snippet = sanitize_log_text(raw, 120)
+        if raw and not response_looks_english(raw):
+            log.warning(
+                f"Copilot: discarded non-English / unparseable cloud response"
+                + (f" — {snippet}" if snippet else "")
+            )
+        else:
+            log.debug("Copilot: JSON parse failed — using local heuristic brief")
+        return None
     bias = plan.get("ticker_bias") or {}
     if isinstance(bias, list):
         bias = {str(x.get("ticker", "")).upper(): x.get("bias", "OK") for x in bias if x.get("ticker")}
@@ -386,6 +396,7 @@ class TradingCopilot:
 
         prompt = (
             "You are HANOON Trading Copilot — a full reasoning AI running ALONGSIDE a PPO scalper.\n"
+            "Respond in English only. Output a single JSON object only — no markdown, no prose outside JSON.\n"
             "You have the FULL session context below. Think step-by-step, then output JSON only.\n\n"
             f"{ctx}\n\n"
             "Analyze: what is going wrong/right? Which tickers need tighter entry quality?\n"
@@ -426,13 +437,20 @@ class TradingCopilot:
             client = CouncilClient(self.cfg)
             if client.enabled():
                 raw = client._complete(
-                    prompt, priority=False, fast=True, purpose="copilot",
+                    prompt,
+                    priority=False,
+                    fast=True,
+                    purpose="copilot",
+                    system=(
+                        "You are HANOON trading copilot. English only. "
+                        "Return valid JSON matching the schema — no other text."
+                    ),
                 )
         except Exception as exc:
             log.debug(f"Copilot API: {exc}")
 
         if raw:
-            brief = _parse_brief_json(raw, stats)
+            brief = _parse_brief_json(raw, stats) or _heuristic_brief(stats, self.cfg)
         else:
             brief = _heuristic_brief(stats, self.cfg)
 

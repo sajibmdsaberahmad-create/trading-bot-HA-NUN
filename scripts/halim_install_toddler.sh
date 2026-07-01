@@ -17,16 +17,24 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$SRC" ]]; then
-  for candidate in \
-    "$HOME/Downloads/halim_toddler_v3.zip" \
-    "$HOME/Downloads/halim_toddler_v3" \
-    "$HOME/Downloads/halim_toddler_v2.zip" \
-    "$HOME/Downloads/halim_toddler_v1.zip"; do
-    if [[ -e "$candidate" ]]; then
-      SRC="$candidate"
-      break
-    fi
+  # Prefer highest halim_toddler_vN.zip in Downloads
+  best_v=0
+  for candidate in "$HOME/Downloads"/halim_toddler_v*.zip; do
+    [[ -f "$candidate" ]] || continue
+    v=$(basename "$candidate" | sed -n 's/.*v\([0-9]*\).*/\1/p')
+    [[ -n "$v" && "$v" -gt "$best_v" ]] && best_v="$v" && SRC="$candidate"
   done
+  if [[ -z "$SRC" ]]; then
+    for candidate in \
+      "$HOME/Downloads/halim_toddler_v3" \
+      "$HOME/Downloads/halim_toddler_v2" \
+      "$HOME/Downloads/halim_toddler_v1"; do
+      if [[ -e "$candidate" ]]; then
+        SRC="$candidate"
+        break
+      fi
+    done
+  fi
 fi
 
 if [[ -z "$SRC" || ! -e "$SRC" ]]; then
@@ -101,5 +109,5 @@ chmod +x "$ROOT/scripts/halim_register_checkpoint.sh"
 
 echo ""
 echo "✓ Halim toddler installed: $CKPT"
-echo "  Next: ./scripts/ensure_halim_active.sh --serve-only"
-echo "  Record train: ./scripts/halim_record_train.sh"
+echo "  Auto pipeline: ./scripts/halim_apply_colab_checkpoint.sh"
+echo "  Or restart HANOON (HALIM_AUTO_INSTALL_COLAB=true)"

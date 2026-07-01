@@ -172,7 +172,25 @@ def collect_day_report(
 
     wins = sum(1 for t in trades if t.get("result") == "win" or t.get("won") is True)
     losses = sum(1 for t in trades if t.get("result") == "loss" or t.get("won") is False)
-    day_pnl = sum(float(t.get("pnl_usd", 0) or 0) for t in trades)
+    ib_day_pnl = 0.0
+    ib_round_trips = 0
+    use_ib_pnl = False
+    if runner is not None:
+        try:
+            from core.ib_truth import get_snapshot, ib_truth_enabled
+            if ib_truth_enabled(cfg):
+                from core.notify_ib_context import ib_telegram_account
+                ib_telegram_account(runner, cfg)
+                snap = get_snapshot()
+                if snap.refreshed_at > 0:
+                    use_ib_pnl = True
+                    ib_day_pnl = float(snap.session_pnl_fifo)
+                    ib_round_trips = len(snap.round_trips)
+        except Exception:
+            pass
+    day_pnl = ib_day_pnl if use_ib_pnl else sum(
+        float(t.get("pnl_usd", 0) or 0) for t in trades
+    )
 
     timeline: List[Dict[str, Any]] = []
     for bucket, kind in (
@@ -200,28 +218,27 @@ def collect_day_report(
     account = {}
     if runner is not None:
         try:
-            runner._refresh_account_balance()
-            account = {
-                "ib_account": round(getattr(runner, "account_equity", 0), 2),
-                "bot_nav": round(getattr(runner, "bot_nav", 0), 2),
-                "bot_cash": round(getattr(runner, "bot_cash", 0), 2),
-                "trades_today": getattr(runner, "trades_today", 0),
-                "position": getattr(runner, "current_ticker", None),
-                "shares": getattr(runner, "shares", 0),
-            }
+            from core.notify_ib_context import ib_telegram_account
+            account = ib_telegram_account(runner, cfg)
+            account["ib_account"] = account.get("nav", account.get("ib_equity", 0))
+            account["position"] = account.get("position")
+            account["shares"] = account.get("shares", 0)
         except Exception:
             pass
 
+    trade_count = ib_round_trips if ib_round_trips > 0 else len(trades)
     return {
         "day": day_str,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "market_tz": str(MARKET_TZ),
         "summary": {
-            "trades": len(trades),
+            "trades": trade_count,
             "wins": wins,
             "losses": losses,
             "win_rate_pct": round(wins / max(wins + losses, 1) * 100, 1),
             "day_pnl_usd": round(day_pnl, 2),
+            "ib_session_pnl": round(ib_day_pnl, 2),
+            "ib_round_trips": ib_round_trips,
             "entries": len(entries),
             "exits": len(exits),
             "aborts": len(aborts),
@@ -247,14 +264,15 @@ def format_structured_report(report: Dict[str, Any], max_lines: int = 80) -> str
     lines = [
         f"📊 DAILY ACTIVITY — {report.get('day', '?')}",
         f"Trades {s.get('trades', 0)} · {s.get('wins', 0)}W/{s.get('losses', 0)}L · "
-        f"Win {s.get('win_rate_pct', 0):.0f}% · P&L ${s.get('day_pnl_usd', 0):+.2f}",
+        f"Win {s.get('win_rate_pct', 0):.0f}% · Session P&L ${s.get('day_pnl_usd', 0):+.2f} (IB)",
         f"Entries {s.get('entries', 0)} · Exits {s.get('exits', 0)} · "
         f"Aborts {s.get('aborts', 0)} · IB fills {s.get('ib_fills', 0)}",
     ]
     if acct:
         lines.append(
-            f"IB ${acct.get('ib_account', 0):,.2f} · NAV ${acct.get('bot_nav', 0):,.2f} · "
-            f"Cash ${acct.get('bot_cash', 0):,.2f}"
+            f"IB ${acct.get('ib_account', acct.get('nav', 0)):,.2f} · "
+            f"Session P&L ${acct.get('session_pnl', acct.get('ib_fifo_session_pnl', 0)):+,.2f} · "
+            f"Round-trips {acct.get('ib_round_trips', acct.get('trades_today', 0))}"
         )
         if acct.get("position"):
             lines.append(f"Open: {acct.get('shares', 0):.0f} {acct.get('position')}")

@@ -275,35 +275,29 @@ def collect_self_eval_context(
     account = dict(report.get("account", {}))
     if runner is not None:
         try:
-            from core.account_view import day_pnl as account_day_pnl, display_equity
-            runner._refresh_account_balance()
-            baseline = float(getattr(cfg, "INITIAL_CASH", 1000))
-            day_pnl_usd, _ = account_day_pnl(runner, cfg)
+            from core.notify_ib_context import ib_telegram_account
+            ib_acct = ib_telegram_account(runner, cfg)
             account.update({
-                "ib_account": round(getattr(runner, "account_equity", 0), 2),
-                "bot_nav": round(display_equity(runner, cfg), 2),
-                "bot_cash": round(getattr(runner, "bot_cash", 0), 2),
-                "day_pnl_usd": round(day_pnl_usd, 2),
-                "trades_today": getattr(runner, "trades_today", 0),
+                "ib_account": round(float(ib_acct.get("nav", 0) or 0), 2),
+                "day_pnl_usd": round(float(ib_acct.get("ib_fifo_session_pnl", 0) or 0), 2),
+                "ib_fifo_session_pnl": round(float(ib_acct.get("ib_fifo_session_pnl", 0) or 0), 2),
+                "ib_round_trips": int(ib_acct.get("ib_round_trips", 0) or 0),
+                "trades_today": int(ib_acct.get("ib_round_trips", 0) or 0),
+                "pnl_source": "ib_truth",
             })
         except Exception:
             pass
 
     before_after: Dict[str, Any] = {"has_morning": morning is not None}
     if morning:
+        close_ib = float(account.get("ib_account", 0))
+        morning_ib = float(morning.get("ib_account", morning.get("bot_nav", 0)) or 0)
         before_after.update({
-            "morning_nav": morning.get("bot_nav"),
-            "morning_ib": morning.get("ib_account"),
-            "morning_trades": morning.get("trades_today"),
+            "morning_ib": morning_ib,
+            "morning_trades": morning.get("ib_round_trips", morning.get("trades_today")),
             "morning_position": morning.get("position"),
-            "close_nav": account.get("bot_nav"),
-            "close_ib": account.get("ib_account"),
-            "nav_delta": round(
-                float(account.get("bot_nav", 0)) - float(morning.get("bot_nav", 0)), 2
-            ),
-            "ib_delta": round(
-                float(account.get("ib_account", 0)) - float(morning.get("ib_account", 0)), 2
-            ),
+            "close_ib": close_ib,
+            "ib_delta": round(close_ib - morning_ib, 2),
         })
 
     pilot: Dict[str, Any] = {}
@@ -378,12 +372,12 @@ def _fallback_statement(ctx: Dict[str, Any]) -> str:
         f"  Day total:   {s.get('trades', 0)} trades · P&L ${s.get('day_pnl_usd', 0):+.2f} · "
         f"Win {s.get('win_rate_pct', 0):.0f}%",
         "",
-        f"ACCOUNT  IB ${acct.get('ib_account', 0):,.2f} · NAV ${acct.get('bot_nav', 0):,.2f}",
+        f"ACCOUNT  IB ${acct.get('ib_account', 0):,.2f} · "
+        f"Session P&L ${acct.get('ib_fifo_session_pnl', acct.get('day_pnl_usd', 0)):+,.2f} (IB)",
     ]
     if ba.get("has_morning"):
         lines.append(
-            f"  Morning → close: NAV Δ ${ba.get('nav_delta', 0):+,.2f} · "
-            f"IB Δ ${ba.get('ib_delta', 0):+,.2f}"
+            f"  Morning → close: IB Δ ${ba.get('ib_delta', 0):+,.2f}"
         )
     learn = ctx.get("learning", {})
     buf = learn.get("buffer_today", {})
@@ -484,7 +478,8 @@ def _brief_notification(statement: str, ctx: Dict[str, Any]) -> str:
         f"{headline[:200]}\n"
         f"Pre-mkt {pre.get('trades', 0)} trades ${pre.get('pnl_usd', 0):+.0f} · "
         f"Day {s.get('trades', 0)} trades ${s.get('day_pnl_usd', 0):+.0f} · "
-        f"NAV ${acct.get('bot_nav', 0):,.0f}\n"
+        f"IB ${acct.get('ib_account', acct.get('nav', 0)):,.0f} · "
+        f"Session P&L ${acct.get('ib_fifo_session_pnl', acct.get('day_pnl_usd', 0)):+,.0f}\n"
         f"Full report saved → models/daily_reports/self_eval_{ctx.get('day', '').replace('-', '')}.txt"
     )
 

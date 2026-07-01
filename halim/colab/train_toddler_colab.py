@@ -12,6 +12,7 @@ Env (set in Colab before running):
   HALIM_SAVE_STEPS       0=epoch only; e.g. 200 for step saves during long runs
   HALIM_SAVE_TOTAL_LIMIT keep last N checkpoints (default 3)
   HALIM_RESUME_CHECKPOINT explicit path to checkpoint-N folder
+  HALIM_FAST_PATH        auto (default) — T4: batch 8, no AMP
 """
 
 from __future__ import annotations
@@ -27,12 +28,57 @@ SFT_DIR = Path(os.getenv("HALIM_SFT_DIR", "sft"))
 OUT_DIR = Path(os.getenv("HALIM_OUT_DIR", "toddler_v1"))
 MAX_SEQ_LENGTH = int(os.getenv("HALIM_MAX_SEQ_LENGTH", "1024"))
 EPOCHS = float(os.getenv("HALIM_EPOCHS", "0"))
-BATCH_SIZE = int(os.getenv("HALIM_BATCH_SIZE", "2"))
-GRAD_ACCUM = int(os.getenv("HALIM_GRAD_ACCUM", "4"))
 LORA_R = int(os.getenv("HALIM_LORA_R", "16"))
 LORA_ALPHA = int(os.getenv("HALIM_LORA_ALPHA", "32"))
 SAVE_STEPS = int(os.getenv("HALIM_SAVE_STEPS", "0"))
 SAVE_TOTAL_LIMIT = int(os.getenv("HALIM_SAVE_TOTAL_LIMIT", "3"))
+
+
+def _resolve_training_knobs() -> tuple[int, int, bool, bool, str]:
+    """Pick batch / precision for Colab T4 (high VRAM use, no AMP) unless env overrides."""
+    import torch
+
+    batch_raw = os.getenv("HALIM_BATCH_SIZE", "").strip()
+    accum_raw = os.getenv("HALIM_GRAD_ACCUM", "").strip()
+    fp16_raw = os.getenv("HALIM_FP16", "").strip().lower()
+    bf16_raw = os.getenv("HALIM_BF16", "").strip().lower()
+    fast = os.getenv("HALIM_FAST_PATH", "auto").lower()
+    max_power = os.getenv("HALIM_MAX_POWER", "false").lower() in ("1", "true", "yes")
+
+    batch = int(batch_raw) if batch_raw else 0
+    accum = int(accum_raw) if accum_raw else 0
+    profile = "manual" if batch_raw or accum_raw else "legacy"
+
+    if fast not in ("0", "false", "off", "no") and torch.cuda.is_available():
+        name = torch.cuda.get_device_name(0).upper()
+        vram_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        if fast in ("1", "true", "yes", "auto") and ("T4" in name or vram_gb <= 16.5):
+            if not batch_raw:
+                batch = 16 if max_power else 8
+            if not accum_raw:
+                accum = 1
+            profile = "colab_t4_max" if max_power else "colab_t4_fast"
+
+    if batch <= 0:
+        batch = 2
+    if accum <= 0:
+        accum = 4
+    if profile == "legacy" and not batch_raw and not accum_raw:
+        profile = "legacy_default"
+
+    if fp16_raw in ("1", "true", "yes"):
+        fp16, bf16 = True, False
+    elif bf16_raw in ("1", "true", "yes"):
+        fp16, bf16 = False, True
+    elif fp16_raw in ("0", "false", "no"):
+        fp16, bf16 = False, bf16_raw not in ("0", "false", "no")
+    elif profile in ("colab_t4_fast", "colab_t4_max"):
+        # T4 QLoRA + fp16 GradScaler crashes (bf16 unscale) — speed from large batch, fp32 LoRA
+        fp16, bf16 = False, False
+    else:
+        fp16, bf16 = False, True
+
+    return batch, accum, fp16, bf16, profile
 
 
 def _env_bool(name: str, default: str = "false") -> bool:
@@ -157,7 +203,10 @@ def _prepare_adapter_dir(adapter_dir: Path, *, fresh_train: bool, resume_ckpt: s
     adapter_dir.mkdir(parents=True, exist_ok=True)
 
 
-def _build_sft_config(SFTConfig, *, adapter_dir: Path, epochs: float) -> object:
+def _build_sft_config(
+    SFTConfig, *, adapter_dir: Path, epochs: float,
+    batch_size: int, grad_accum: int, fp16: bool, bf16: bool,
+) -> object:
     import inspect
 
     save_strategy = "steps" if SAVE_STEPS > 0 else "epoch"
@@ -166,17 +215,17 @@ def _build_sft_config(SFTConfig, *, adapter_dir: Path, epochs: float) -> object:
     kwargs = {
         "output_dir": str(adapter_dir),
         "num_train_epochs": epochs,
-        "per_device_train_batch_size": BATCH_SIZE,
-        "per_device_eval_batch_size": BATCH_SIZE,
-        "gradient_accumulation_steps": GRAD_ACCUM,
+        "per_device_train_batch_size": batch_size,
+        "per_device_eval_batch_size": batch_size,
+        "gradient_accumulation_steps": grad_accum,
         "learning_rate": 2e-4,
         "logging_steps": 25,
         "eval_strategy": "epoch",
         "save_strategy": save_strategy,
         "save_steps": save_steps,
         "save_total_limit": SAVE_TOTAL_LIMIT,
-        "fp16": False,
-        "bf16": True,
+        "fp16": fp16,
+        "bf16": bf16,
         "report_to": "none",
         "dataset_text_field": "text",
     }
@@ -207,7 +256,7 @@ def _record_trained_hashes(train_rows: list, build_id: str) -> None:
 def main() -> None:
     import torch
     from datasets import Dataset
-    from peft import LoraConfig, PeftModel
+    from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
     from trl import SFTConfig, SFTTrainer
 
@@ -215,6 +264,9 @@ def main() -> None:
     print("GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "NONE — enable GPU in Colab!")
     if not torch.cuda.is_available():
         raise RuntimeError("No GPU. In Colab: Runtime → Change runtime type → T4 GPU")
+
+    batch_size, grad_accum, fp16, bf16, train_profile = _resolve_training_knobs()
+    eff_batch = batch_size * grad_accum
 
     train_rows = _load_rows(SFT_DIR / "train.jsonl")
     valid_rows = _load_rows(SFT_DIR / "valid.jsonl")
@@ -238,7 +290,13 @@ def main() -> None:
     build_id = colab_manifest.get("build_id", "unknown")
     created = colab_manifest.get("created_at", "")
     print(f"OUT_DIR: {OUT_DIR.resolve()}")
-    print(f"Train: {len(train_rows)} | Valid: {len(valid_rows)} | Epochs: {epochs} | SFT mode: {sft_mode}")
+    print(
+        f"Train: {len(train_rows)} | Valid: {len(valid_rows)} | Epochs: {epochs} | SFT mode: {sft_mode}"
+    )
+    print(
+        f"Knobs: batch={batch_size} grad_accum={grad_accum} eff_batch={eff_batch} "
+        f"fp16={fp16} bf16={bf16} profile={train_profile}"
+    )
     print(f"Halim SFT build_id: {build_id}  packaged_at: {created}")
     print(f"CONTINUE_LORA: {continue_lora} | RESUME_CKPT: {resume_ckpt or 'none'}")
     if build_id == "unknown":
@@ -252,10 +310,19 @@ def main() -> None:
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
+    # 4bit matmul dtype — independent of Trainer AMP (T4 fast uses fp32 train + fp16 bnb)
+    if fp16:
+        compute_dtype = torch.float16
+    elif bf16:
+        compute_dtype = torch.bfloat16
+    else:
+        compute_dtype = torch.float16
+    print(f"bnb_4bit_compute_dtype: {compute_dtype} (trainer fp16={fp16} bf16={bf16})")
+
     bnb = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_compute_dtype=compute_dtype,
         bnb_4bit_use_double_quant=True,
     )
     model = AutoModelForCausalLM.from_pretrained(
@@ -264,6 +331,7 @@ def main() -> None:
         device_map="auto",
         trust_remote_code=True,
     )
+    model = prepare_model_for_kbit_training(model)
 
     if continue_lora and (adapter_dir / "adapter_model.safetensors").is_file():
         print("Loading existing LoRA adapter for continued training…")
@@ -284,7 +352,10 @@ def main() -> None:
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
     )
 
-    training_args = _build_sft_config(SFTConfig, adapter_dir=adapter_dir, epochs=epochs)
+    training_args = _build_sft_config(
+        SFTConfig, adapter_dir=adapter_dir, epochs=epochs,
+        batch_size=batch_size, grad_accum=grad_accum, fp16=fp16, bf16=bf16,
+    )
 
     trainer_kwargs = {
         "model": model,

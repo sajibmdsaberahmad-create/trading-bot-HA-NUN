@@ -89,7 +89,7 @@ export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/mpl}"
 export CAPITAL_DISCIPLINE="${CAPITAL_DISCIPLINE:-true}"
 export TREAT_PAPER_AS_LIVE="${TREAT_PAPER_AS_LIVE:-true}"
 export AI_SPIKE_FAST_ENTRY="${AI_SPIKE_FAST_ENTRY:-false}"
-export PPO_LEAD_WHILE_COUNCIL_PENDING="${PPO_LEAD_WHILE_COUNCIL_PENDING:-false}"
+export PPO_LEAD_WHILE_COUNCIL_PENDING="${PPO_LEAD_WHILE_COUNCIL_PENDING:-true}"
 export MIN_PROFIT_PROBABILITY="${MIN_PROFIT_PROBABILITY:-0.65}"
 export CONFIDENCE_THRESHOLD="${CONFIDENCE_THRESHOLD:-0.68}"
 export ENTRY_QUALITY_BLEND_WEIGHT="${ENTRY_QUALITY_BLEND_WEIGHT:-0.55}"
@@ -242,8 +242,8 @@ export COPILOT_CAUTION_CONF_BUMP="${COPILOT_CAUTION_CONF_BUMP:-0.08}"
 # War account — paper trains with higher budget + more trips; live stays $1k / 2 trips
 export WAR_ACCOUNT_ENABLED="${WAR_ACCOUNT_ENABLED:-true}"
 export WAR_CAPITAL_USD="${WAR_CAPITAL_USD:-1000}"
-export IB_TRUTH_RTH_SESSION="${IB_TRUTH_RTH_SESSION:-true}"
-export IB_TRUTH_RTH_FILLS_ONLY="${IB_TRUTH_RTH_FILLS_ONLY:-true}"
+export IB_TRUTH_RTH_SESSION="${IB_TRUTH_RTH_SESSION:-false}"
+export IB_TRUTH_RTH_FILLS_ONLY="${IB_TRUTH_RTH_FILLS_ONLY:-false}"
 export MACRO_FROM_IB="${MACRO_FROM_IB:-true}"
 export IB_MACRO_TTL_SEC="${IB_MACRO_TTL_SEC:-120}"
 export WAR_IB_SYNC="${WAR_IB_SYNC:-true}"
@@ -397,8 +397,18 @@ export LOSS_STREAK_BLOCK_BYPASS_AT="${LOSS_STREAK_BLOCK_BYPASS_AT:-2}"
 export AI_SPIKE_COOLDOWN_FAST_SEC="${AI_SPIKE_COOLDOWN_FAST_SEC:-20}"
 # Live session gold collection (dialogue/copilot LM for training; user chat still off)
 export HALIM_LIVE_GOLD_COLLECT="${HALIM_LIVE_GOLD_COLLECT:-true}"
+export HALIM_ENTRY_LM_ENABLED="${HALIM_ENTRY_LM_ENABLED:-true}"
+export HALIM_ENTRY_IB_CONTEXT="${HALIM_ENTRY_IB_CONTEXT:-true}"
+export HALIM_ENTRY_BLEND_WEIGHT="${HALIM_ENTRY_BLEND_WEIGHT:-0.35}"
+export HALIM_ENTRY_AWAIT_LIVE="${HALIM_ENTRY_AWAIT_LIVE:-true}"
+export HALIM_ENTRY_AWAIT_SEC="${HALIM_ENTRY_AWAIT_SEC:-2.5}"
+export HALIM_PPO_COMPLEMENT="${HALIM_PPO_COMPLEMENT:-true}"
+export HALIM_OUTCOME_GOLD="${HALIM_OUTCOME_GOLD:-true}"
+export HALIM_AUTO_INSTALL_COLAB="${HALIM_AUTO_INSTALL_COLAB:-true}"
 export HALIM_PREPARE_SFT_ON_SHUTDOWN="${HALIM_PREPARE_SFT_ON_SHUTDOWN:-true}"
 export HALIM_PPO_COEVOLUTION="${HALIM_PPO_COEVOLUTION:-true}"
+export HALIM_PPO_TEACHER_VIA_HALIM="${HALIM_PPO_TEACHER_VIA_HALIM:-auto}"
+export HALIM_PPO_TEACHER_TIMEOUT_SEC="${HALIM_PPO_TEACHER_TIMEOUT_SEC:-120}"
 export HALIM_PPO_DIALOGUE="${HALIM_PPO_DIALOGUE:-true}"
 export HALIM_PPO_GENERATIVE_REFLECT="${HALIM_PPO_GENERATIVE_REFLECT:-true}"
 export HALIM_COMPANION_LEARN="${HALIM_COMPANION_LEARN:-true}"
@@ -608,7 +618,11 @@ except Exception:
     pass
 " 2>&1 || echo "   Pre-flight warnings (non-fatal)"
 
-# ── 6a. Halim serve — always active before scalper (toddler LM + PPO distillation) ──
+# ── 6a. Halim serve — auto-install Colab zip if new, then always active ──
+if [[ "${HALIM_AUTO_INSTALL_COLAB:-true}" == "true" ]]; then
+  echo "📦 Checking for new Colab Halim checkpoint (Downloads / Drive)…"
+  "$ROOT/scripts/halim_apply_colab_checkpoint.sh" --if-new 2>/dev/null || true
+fi
 if [ "${TRADING_BOT_TELEGRAM_LISTEN:-true}" = "true" ]; then
   "$ROOT/scripts/halim_stop.sh" --telegram-only 2>/dev/null || true
 fi

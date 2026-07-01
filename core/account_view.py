@@ -19,11 +19,20 @@ if TYPE_CHECKING:
 
 
 def day_pnl_ib(runner: "ScalperRunner") -> Tuple[float, float]:
-    """Session P&L from IB Truth (RTH FIFO fills, else NetLiq delta since RTH open)."""
-    rth_start = float(getattr(runner, "_rth_starting_balance", 0) or 0)
-    ib_start = rth_start or float(
-        getattr(runner, "_ib_starting_balance", 0) or runner.account_equity
-    )
+    """Session P&L from IB Truth — full calendar day or RTH window per IB_TRUTH_RTH_SESSION."""
+    import os
+
+    rth_session = os.getenv("IB_TRUTH_RTH_SESSION", "true").lower() not in ("0", "false", "no")
+    if rth_session:
+        ib_start = float(getattr(runner, "_rth_starting_balance", 0) or 0)
+        if ib_start <= 0:
+            ib_start = float(
+                getattr(runner, "_ib_starting_balance", 0) or runner.account_equity
+            )
+    else:
+        ib_start = float(
+            getattr(runner, "_ib_starting_balance", 0) or runner.account_equity
+        )
     if ib_truth_enabled(getattr(runner, "cfg", None)):
         snap = get_snapshot()
         if snap.refreshed_at > 0:
@@ -94,10 +103,13 @@ def account_summary(runner: "ScalperRunner") -> Dict[str, Any]:
     snap = get_snapshot()
     ib_realized = snap.account.realized_pnl if snap.refreshed_at > 0 else 0.0
     ib_unrealized = snap.account.unrealized_pnl if snap.refreshed_at > 0 else 0.0
+    ib_equity = float(getattr(runner, "account_equity", 0) or 0)
+    if snap.refreshed_at > 0 and snap.account.net_liquidation > 0:
+        ib_equity = float(snap.account.net_liquidation)
     return {
         "equity": round(display_equity(runner, cfg), 2),
         "sizing_equity": round(sizing_equity(runner, cfg), 2),
-        "ib_equity": round(float(getattr(runner, "account_equity", 0) or 0), 2),
+        "ib_equity": round(ib_equity, 2),
         "bot_nav": round(float(getattr(runner, "bot_nav", 0) or 0), 2),
         "day_pnl": round(pnl_usd, 2),
         "day_pnl_pct": round(pnl_pct, 2),

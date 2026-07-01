@@ -353,8 +353,10 @@ class AICommander(CommanderVerdictMixin, CommanderLearningMixin, CommanderEntryM
             px = context.get("price", 0)
             pnl = context.get("pnl_usd", 0)
             pct = context.get("pnl_pct", 0)
+            src = context.get("pnl_source", "")
+            src_tag = " IB" if src == "ib_truth" else ""
             return (
-                f"🧠 LIVE_PULSE: {t} ${px:.4f} | P&L ${pnl:+.2f} ({pct:+.2f}%) | "
+                f"🧠 LIVE_PULSE{src_tag}: {t} ${px:.4f} | P&L ${pnl:+.2f} ({pct:+.2f}%) | "
                 f"Stop ${context.get('stop', 0):.4f} | TP ${context.get('target', 0):.4f}"
             )
         if category == "ENTRY_DECISION":

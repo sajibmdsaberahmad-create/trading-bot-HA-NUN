@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from core.config import BotConfig
-from core.account_view import day_pnl as account_day_pnl
 from core.market_hours import format_et, get_market_state
 from core.notify import log
 
@@ -97,14 +96,20 @@ class AccountEvaluator:
             and notifier
             and getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True)
         ):
+            from core.notify_ib_context import telegram_notify_context
             from core.pilot_mode import send_dynamic_notification
-            ctx = {
-                **comparison,
-                "event": event,
-                "statement": statement,
-                "market_state": get_market_state(self.cfg),
-                "time_et": format_et(),
-            }
+            ctx = telegram_notify_context(
+                runner,
+                self.cfg,
+                {
+                    **comparison,
+                    "event": event,
+                    "statement": statement,
+                    "market_state": get_market_state(self.cfg),
+                    "time_et": format_et(),
+                },
+                event_type=f"account_{event}",
+            )
             send_dynamic_notification(
                 notifier, autopilot, f"account_{event}",
                 ctx, statement,
@@ -170,10 +175,30 @@ class AccountEvaluator:
     def _capture_snapshot(self, runner: "ScalperRunner", event: str) -> Dict[str, Any]:
         baseline = float(getattr(self.cfg, "INITIAL_CASH", 1000))
         ib_start = getattr(runner, "_ib_starting_balance", None) or runner.account_equity
-        bot_nav = getattr(runner, "bot_nav", runner.bot_cash)
-        day_pnl_usd, day_pnl_pct = account_day_pnl(runner, self.cfg)
-        day_pnl = day_pnl_usd
-        ib_change = runner.account_equity - ib_start
+        try:
+            from core.ib_truth import get_snapshot, refresh
+            ib = getattr(runner, "ib", None)
+            if ib is not None:
+                refresh(ib, self.cfg, force=False)
+        except Exception:
+            pass
+        from core.account_view import account_summary
+        acct = account_summary(runner, self.cfg)
+        snap_ib = None
+        try:
+            from core.ib_truth import get_snapshot
+            snap_ib = get_snapshot()
+        except Exception:
+            snap_ib = None
+        ib_account = float(acct.get("ib_equity") or getattr(runner, "account_equity", 0) or 0)
+        day_pnl = float(acct.get("ib_fifo_session_pnl", acct.get("day_pnl", 0)) or 0)
+        day_pnl_pct = (day_pnl / baseline * 100) if baseline else 0.0
+        ib_change = float(acct.get("ib_change", ib_account - ib_start) or 0)
+        round_trips = (
+            len(snap_ib.round_trips)
+            if snap_ib is not None and snap_ib.refreshed_at > 0
+            else 0
+        )
 
         trades = self._all_trades(runner)
         wins = sum(1 for t in trades if t.get("result") == "win" or t.get("won"))
@@ -184,16 +209,17 @@ class AccountEvaluator:
             "time_et": format_et(),
             "time_utc": datetime.now(timezone.utc).isoformat(),
             "market_state": get_market_state(self.cfg),
-            "ib_account": round(runner.account_equity, 2),
+            "ib_account": round(ib_account, 2),
             "ib_start": round(ib_start, 2),
             "ib_change": round(ib_change, 2),
             "ib_change_pct": round(ib_change / ib_start * 100, 2) if ib_start else 0,
-            "bot_cash": round(runner.bot_cash, 2),
-            "bot_nav": round(bot_nav, 2),
+            "ib_fifo_session_pnl": round(day_pnl, 2),
             "baseline": baseline,
             "day_pnl": round(day_pnl, 2),
-            "day_pnl_pct": round(day_pnl / baseline * 100, 2) if baseline else 0,
-            "trades_today": getattr(runner, "trades_today", 0),
+            "day_pnl_pct": round(day_pnl_pct, 2),
+            "ib_round_trips": round_trips,
+            "trades_today": round_trips,
+            "pnl_source": "ib_truth",
             "trades_total": len(trades),
             "wins": wins,
             "losses": losses,
@@ -211,15 +237,12 @@ class AccountEvaluator:
             return {
                 "has_previous": False,
                 "message": "First snapshot — no prior session to compare.",
-                "nav": current.get("bot_nav", 0),
                 "ib_account": current.get("ib_account", 0),
                 "day_pnl": current.get("day_pnl", 0),
                 "trades_today": current.get("trades_today", 0),
             }
 
-        prev_nav = float(previous.get("bot_nav", 0))
-        cur_nav = float(current.get("bot_nav", 0))
-        prev_ib = float(previous.get("ib_account", 0))
+        prev_ib = float(previous.get("ib_account", previous.get("bot_nav", 0)) or 0)
         cur_ib = float(current.get("ib_account", 0))
         prev_trades = int(previous.get("trades_total", 0))
         cur_trades = int(current.get("trades_total", 0))
@@ -228,8 +251,6 @@ class AccountEvaluator:
             "has_previous": True,
             "previous_event": previous.get("event"),
             "previous_time_et": previous.get("time_et"),
-            "nav_delta": round(cur_nav - prev_nav, 2),
-            "nav_delta_pct": round((cur_nav - prev_nav) / (prev_nav + 1e-9) * 100, 2),
             "ib_delta": round(cur_ib - prev_ib, 2),
             "ib_delta_pct": round((cur_ib - prev_ib) / (prev_ib + 1e-9) * 100, 2),
             "trades_since": cur_trades - prev_trades,
@@ -237,7 +258,6 @@ class AccountEvaluator:
             "losses_since": int(current.get("losses", 0)) - int(previous.get("losses", 0)),
             "position_was": previous.get("position"),
             "position_now": current.get("position"),
-            "nav": cur_nav,
             "ib_account": cur_ib,
             "day_pnl": current.get("day_pnl", 0),
             "trades_today": current.get("trades_today", 0),
@@ -267,13 +287,13 @@ class AccountEvaluator:
         if previous:
             prompt += (
                 f"PREVIOUS SNAPSHOT ({previous.get('event')} @ {previous.get('time_et')}):\n"
-                f"{json.dumps({k: previous[k] for k in ('ib_account', 'bot_nav', 'day_pnl', 'position', 'trades_total', 'wins', 'losses') if k in previous}, default=str)}\n\n"
+                f"{json.dumps({k: previous[k] for k in ('ib_account', 'day_pnl', 'ib_round_trips', 'position', 'trades_total', 'wins', 'losses') if k in previous}, default=str)}\n\n"
             )
         prompt += (
             f"CHANGES SINCE LAST:\n{json.dumps(comparison, default=str)[:600]}\n\n"
             "Write 5-8 lines:\n"
             "• Headline: what happened (open/close/startup)\n"
-            "• IB account & bot NAV with exact $ deltas vs last snapshot\n"
+            "• IB NetLiq & session P&L with exact $ deltas vs last snapshot\n"
             "• Trades: count, W/L, win rate, notable P&L\n"
             "• Open positions & orders right now\n"
             "• Your pilot read: what improved, what to watch next session\n"
@@ -302,9 +322,8 @@ class AccountEvaluator:
             head,
             f"IB ${current.get('ib_account', 0):,.2f} "
             f"(Δ ${current.get('ib_change', 0):+,.2f}) · "
-            f"NAV ${current.get('bot_nav', 0):,.2f} · "
-            f"Day P&L ${current.get('day_pnl', 0):+,.2f}",
-            f"Trades {current.get('trades_today', 0)} today · "
+            f"Session P&L ${current.get('day_pnl', 0):+,.2f} · IB",
+            f"Round-trips {current.get('trades_today', 0)} · "
             f"{current.get('wins', 0)}W/{current.get('losses', 0)}L · "
             f"Win {current.get('win_rate_pct', 0):.0f}%",
         ]
@@ -322,9 +341,8 @@ class AccountEvaluator:
         if comparison.get("has_previous"):
             lines.append(
                 f"vs last ({comparison.get('previous_event')}): "
-                f"NAV Δ ${comparison.get('nav_delta', 0):+,.2f} · "
                 f"IB Δ ${comparison.get('ib_delta', 0):+,.2f} · "
-                f"+{comparison.get('trades_since', 0)} trades"
+                f"+{comparison.get('trades_since', 0)} journal trades"
             )
         lines.append(current.get("time_et", ""))
         return "\n".join(lines)
@@ -370,17 +388,19 @@ class AccountEvaluator:
         return trades
 
     def _position_summary(self, runner: "ScalperRunner") -> Optional[str]:
-        if runner.shares > 0 and runner.current_ticker:
-            px = 0.0
-            try:
-                px = runner._latest_price()
-            except Exception:
-                pass
-            val = runner.shares * px
-            return (
-                f"{runner.shares:.0f} {runner.current_ticker} "
-                f"@ ~${px:.4f} (${val:,.0f})"
-            )
+        try:
+            from core.ib_truth import get_snapshot
+            snap = get_snapshot()
+            if snap.refreshed_at > 0:
+                parts = []
+                for sym, pos in snap.long_positions().items():
+                    mkt = float(pos.market_price or pos.avg_cost or 0)
+                    val = pos.qty * mkt
+                    parts.append(f"{pos.qty:.0f} {sym} @ ${pos.avg_cost:.4f} (IB ${val:,.0f})")
+                if parts:
+                    return "; ".join(parts[:3])
+        except Exception:
+            pass
         return None
 
     def _ib_positions(self, runner: "ScalperRunner") -> List[Dict]:

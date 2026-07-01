@@ -285,23 +285,24 @@ def live_snapshot(
             "ib_realized_pnl": round(float(acct.get("ib_realized_pnl", 0) or 0), 2),
             "ib_unrealized_pnl": round(float(acct.get("ib_unrealized_pnl", 0) or 0), 2),
             "nav": round(float(acct.get("equity", 0) or 0), 2),
-            "session_pnl": round(float(acct.get("day_pnl", 0) or 0), 2),
-            "trades_today": int(getattr(runner, "trades_today", 0) or 0),
+            "session_pnl": round(float(acct.get("ib_fifo_session_pnl", acct.get("day_pnl", 0)) or 0), 2),
+            "ib_round_trips": int(acct.get("ib_round_trips", 0) or 0),
+            "trades_today": int(acct.get("ib_round_trips", acct.get("trades_today", 0)) or 0),
+            "pnl_source": "ib_truth",
             "ticker": getattr(runner, "current_ticker", None),
             "shares": float(getattr(runner, "shares", 0) or 0),
         })
     except Exception:
         try:
             eq = float(getattr(runner, "account_equity", 0) or 0)
-            snap.update({
-                "nav": round(eq if eq > 0 else float(getattr(runner, "bot_nav", 0) or 0), 2),
-                "session_pnl": round(
-                    eq - float(getattr(runner, "_ib_starting_balance", 0) or eq), 2,
-                ) if eq > 0 else 0.0,
-                "trades_today": int(getattr(runner, "trades_today", 0) or 0),
-                "ticker": getattr(runner, "current_ticker", None),
-                "shares": float(getattr(runner, "shares", 0) or 0),
-            })
+            if eq > 0:
+                snap.update({
+                    "nav": round(eq, 2),
+                    "ib_equity": round(eq, 2),
+                    "session_pnl": 0.0,
+                    "trades_today": 0,
+                    "pnl_source": "ib_account_only",
+                })
         except Exception:
             pass
     try:

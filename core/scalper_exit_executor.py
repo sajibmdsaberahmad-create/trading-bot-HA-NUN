@@ -326,18 +326,23 @@ class ScalperExitMixin:
             "result": result,
             "entry_fill": trade_rec.get("entry_fill"),
             "exit_fill": exit_fill,
+            "price": exit_fill,
+            "exit": exit_fill,
+            "reason": pending.reason,
             "fill_confirmed": confirmed,
+            "exit_fill_confirmed": trade_rec.get("exit_fill_confirmed"),
+            "pnl_source": "ib_fill" if confirmed else "pending",
             "pilot_level": self.pilot.state.level if hasattr(self, "pilot") else "Cadet",
         }
         notify_event = "early_exit" if pending.event == "early_exit" else "trade_closed"
         fallback = (
             f"📕 EXIT {ticker} | P&L ${pnl:+.2f} ({pnl_pct:+.1f}%) | {result.upper()}\n"
-            f"Entry ${trade_rec.get('entry_fill', 0):.4f} → Exit ${exit_fill:.4f} ({tag})"
+            f"IB ${trade_rec.get('entry_fill', 0):.4f} → ${exit_fill:.4f} ({tag})"
         )
         if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
             send_dynamic_notification(
                 self.notifier, self.autopilot, notify_event,
-                self._notify_context(exit_ctx),
+                self._notify_context(exit_ctx, event_type=notify_event),
                 fallback,
                 ai_commander=self.ai_commander,
                 consciousness=self.consciousness,
@@ -792,43 +797,75 @@ class ScalperExitMixin:
             px = entry or self._live_price_for(ticker, entry)
 
         old_ticker = self.cfg.TICKER
+        exit_since = time.time()
         try:
             self.cfg.TICKER = ticker
             self.conn._contract = None
             self.broker.cancel_open_orders_for_symbol(ticker)
-            self.broker.flatten_position(qty, urgent=True, symbol=ticker)
+            flatten_trade = self.broker.flatten_position(qty, urgent=True, symbol=ticker)
             self.ib.sleep(1)
-            pnl = (px - entry) * qty if entry > 0 else 0.0
-            log.info(f"⚡ COMMANDER EXIT: {ticker} @ ${px:.2f} | {reason} | P&L ${pnl:+.2f}")
+            from core.fill_reconciler import resolve_exit_from_ib, round_trip_pnl
+            from core.ib_truth import get_snapshot, refresh
+            cache = getattr(self, "_fill_cache", None)
+            exit_fill, exit_ok = resolve_exit_from_ib(
+                self.ib,
+                cache,
+                symbol=ticker,
+                flatten_trade=flatten_trade,
+                quote_px=px,
+                since_ts=exit_since - 2.0,
+                entry_fill=entry,
+            )
+            if exit_ok and exit_fill > 0:
+                px = exit_fill
+            refresh(self.ib, self.cfg, force=True)
+            snap = get_snapshot()
+            if exit_ok and entry > 0 and px > 0:
+                pnl, _pnl_pct = round_trip_pnl(entry, px, qty)
+            elif snap.refreshed_at > 0:
+                trip = snap.ticker_pnl_fifo.get(ticker.upper())
+                pnl = float(trip) if trip is not None else 0.0
+            else:
+                pnl = 0.0
+            log.info(
+                f"⚡ COMMANDER EXIT: {ticker} @ ${px:.2f} | {reason} | "
+                f"P&L ${pnl:+.2f} ({'IB fill' if exit_ok else 'pending IB'})"
+            )
+            notify_ctx = self._notify_context({
+                "ticker": ticker, "price": px, "pnl_usd": round(pnl, 2),
+                "reason": reason, "entry": entry,
+                "fill_confirmed": exit_ok,
+                "exit_fill_confirmed": exit_ok,
+                "pnl_source": "ib_fill" if exit_ok else "pending",
+            }, event_type="trade_closed")
             if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
                 from core.notify import send_dynamic_notification
                 send_dynamic_notification(
                     self.notifier, self.autopilot, "commander_exit",
-                    self._notify_context({
-                        "ticker": ticker, "price": px, "pnl_usd": round(pnl, 2),
-                        "reason": reason, "entry": entry,
-                    }),
-                    f"⚡ COMMANDER EXIT\n{ticker} @ ${px:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}",
+                    notify_ctx,
+                    f"⚡ COMMANDER EXIT · IB\n{ticker} @ ${px:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}",
                     ai_commander=self.ai_commander,
                     consciousness=self.consciousness,
                     pilot=self.pilot,
                 )
             else:
-                self.notifier.info(f"⚡ COMMANDER EXIT\n{ticker} @ ${px:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}")
+                self.notifier.info(
+                    f"⚡ COMMANDER EXIT · IB\n{ticker} @ ${px:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}"
+                )
             try:
                 from core.telegram_broadcast import broadcast_ops
                 broadcast_ops(
                     self.cfg,
                     "commander_exit",
-                    {
-                        "ticker": ticker, "price": px, "pnl": round(pnl, 2),
-                        "reason": reason, "entry": entry,
-                    },
-                    f"EXIT {ticker} @ ${px:.2f} | {reason} | P&L ${pnl:+.2f}",
+                    notify_ctx,
+                    f"EXIT {ticker} @ ${px:.2f} | {reason} | P&L ${pnl:+.2f} · IB",
                 )
             except Exception:
                 pass
-            return {"ok": True, "ticker": ticker, "price": px, "pnl": round(pnl, 2), "reason": reason, "source": "ib_only"}
+            return {
+                "ok": True, "ticker": ticker, "price": px, "pnl": round(pnl, 2),
+                "reason": reason, "source": "ib_only", "pnl_source": "ib_fill" if exit_ok else "pending",
+            }
         except Exception as exc:
             log.error(f"Commander exit failed {ticker}: {exc}")
             return {"ok": False, "error": str(exc)}
@@ -1321,13 +1358,27 @@ class ScalperExitMixin:
             "ticker": ticker,
             "price": current_px,
             "pnl_usd": round((current_px - self._entry_price) * shares, 2),
-            "pnl_pct": round(((current_px / self._entry_price) - 1) * 100, 2),
+            "pnl_pct": round(((current_px / self._entry_price) - 1) * 100, 2) if self._entry_price else 0.0,
             "stop": self._position_stop,
             "target": self._position_target,
             "peak": self._position_peak,
             "stagnant_sec": round(stagnant_sec, 1),
             "price_frozen_sec": round(frozen_sec, 1),
+            "pnl_source": "stream",
         }
+        try:
+            from core.ib_truth import ib_truth_enabled, position_pulse
+            if ib_truth_enabled(self.cfg):
+                ibp = position_pulse(ticker)
+                if ibp.get("ok"):
+                    pulse_ctx["price"] = float(ibp["price"])
+                    pulse_ctx["pnl_usd"] = float(ibp["pnl_usd"])
+                    pulse_ctx["pnl_pct"] = float(ibp["pnl_pct"])
+                    pulse_ctx["pnl_source"] = "ib_truth"
+                    current_px = float(ibp["price"])
+                    trusted = True
+        except Exception:
+            pass
         ai_check_sec = float(getattr(self.cfg, "AI_STAGNATION_CHECK_SEC", 30.0))
         if (
             getattr(self.cfg, "AI_FULL_CONTROL", True)

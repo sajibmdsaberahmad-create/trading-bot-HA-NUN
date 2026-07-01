@@ -8,6 +8,7 @@ War pool = WAR_CAPITAL_USD ($1k) for sizing; positions/PnL grounded in IB Gatewa
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -113,11 +114,36 @@ def _align_operating_capital(state: Dict[str, Any], cfg: BotConfig) -> bool:
     return True
 
 
+def _snapshot_max_age_sec() -> float:
+    try:
+        return max(5.0, float(os.getenv("IB_TRUTH_STARTUP_MAX_AGE_SEC", "30")))
+    except (TypeError, ValueError):
+        return 30.0
+
+
+def _resolve_sync_snapshot(
+    ib,
+    cfg: BotConfig,
+    *,
+    force: bool,
+    since_ts: Optional[float] = None,
+):
+    """One IB Truth pull per war sync — reuse checklist snapshot when still fresh."""
+    from core.ib_truth import get_snapshot, refresh
+
+    if not force:
+        cached = get_snapshot()
+        if cached.refreshed_at > 0 and (time.time() - cached.refreshed_at) <= _snapshot_max_age_sec():
+            return cached
+    return refresh(ib, cfg, force=True, since_ts=since_ts)
+
+
 def sync_war_positions_from_ib(
     ib,
     cfg: Optional[BotConfig] = None,
     *,
     state: Optional[Dict[str, Any]] = None,
+    snap=None,
 ) -> Dict[str, Any]:
     from core.war_account import (
         _commission_usd,
@@ -132,7 +158,8 @@ def sync_war_positions_from_ib(
     state = state if state is not None else load_state(cfg)
     _normalize_open_positions(state)
 
-    snap = refresh(ib, cfg, force=True)
+    if snap is None:
+        snap = refresh(ib, cfg, force=True)
     ib_long = snap.long_positions()
     nav = float(state.get("nav", operating_capital_usd(cfg)) or operating_capital_usd(cfg))
     max_notional = _max_war_notional(nav, cfg)
@@ -192,12 +219,14 @@ def sync_session_pnl_from_ib(
     *,
     state: Optional[Dict[str, Any]] = None,
     since_ts: Optional[float] = None,
+    snap=None,
 ) -> Dict[str, Any]:
     from core.war_account import load_state, _reconcile_war_cash_from_positions
 
     cfg = cfg or BotConfig()
     state = state if state is not None else load_state(cfg)
-    snap = refresh(ib, cfg, force=True, since_ts=since_ts)
+    if snap is None:
+        snap = refresh(ib, cfg, force=True, since_ts=since_ts)
 
     if snap.refreshed_at > 0:
         session_pnl = snap.session_pnl_ib
@@ -227,13 +256,15 @@ def build_reconcile_report(
     cfg: Optional[BotConfig] = None,
     *,
     since_ts: Optional[float] = None,
+    snap=None,
 ) -> Dict[str, Any]:
     from core.war_account import LEDGER_PATH as WAR_LEDGER, STATE_PATH, load_state, operating_capital_usd
 
     cfg = cfg or BotConfig()
     state = load_state(cfg)
     since = since_ts if since_ts is not None else ib_truth_session_start_ts(cfg)
-    snap = refresh(ib, cfg, force=True, since_ts=since)
+    if snap is None:
+        snap = refresh(ib, cfg, force=True, since_ts=since)
     ledger = read_war_ledger(since_ts=since)
 
     ib_trip_pnl = dict(snap.ticker_pnl_fifo)
@@ -318,11 +349,15 @@ def sync_war_from_ib(
     if apply and not force and (now - _last_war_sync_ts) < interval:
         return {"ok": True, "skipped": "throttle", "next_in_sec": round(interval - (now - _last_war_sync_ts), 1)}
 
+    from core.rth_session import ib_truth_session_start_ts
+
     state = load_state(cfg)
     cap_changed = _align_operating_capital(state, cfg)
-    pos_result = sync_war_positions_from_ib(ib, cfg, state=state)
-    pnl_result = sync_session_pnl_from_ib(ib, cfg, state=state)
-    report = build_reconcile_report(ib, cfg)
+    since = ib_truth_session_start_ts(cfg)
+    snap = _resolve_sync_snapshot(ib, cfg, force=force, since_ts=since)
+    pos_result = sync_war_positions_from_ib(ib, cfg, state=state, snap=snap)
+    pnl_result = sync_session_pnl_from_ib(ib, cfg, state=state, snap=snap)
+    report = build_reconcile_report(ib, cfg, since_ts=since, snap=snap)
 
     result = {
         "ok": True,

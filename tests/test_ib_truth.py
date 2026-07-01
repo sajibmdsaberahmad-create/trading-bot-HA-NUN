@@ -109,3 +109,22 @@ def test_war_capital_defaults_1k():
     with patch.dict("os.environ", {"WAR_CAPITAL_USD": "1000"}, clear=False):
         from core.war_account import operating_capital_usd
         assert operating_capital_usd(cfg) == 1000.0
+
+
+def test_war_sync_reuses_fresh_ib_truth_snapshot():
+    import time as _time
+    from core.ib_truth import IBAccountSnapshot, IBTruthSnapshot
+    from core.war_ib_sync import _resolve_sync_snapshot
+
+    cfg = BotConfig()
+    ib = MagicMock()
+    fresh = IBTruthSnapshot(
+        account=IBAccountSnapshot(net_liquidation=1000.0),
+        refreshed_at=_time.time(),
+        connected=True,
+    )
+    with patch("core.ib_truth.get_snapshot", return_value=fresh):
+        with patch("core.ib_truth.refresh") as mock_refresh:
+            snap = _resolve_sync_snapshot(ib, cfg, force=False)
+    assert snap is fresh
+    mock_refresh.assert_not_called()

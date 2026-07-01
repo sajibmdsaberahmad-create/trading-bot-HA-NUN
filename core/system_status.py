@@ -89,17 +89,22 @@ def collect_system_status(cfg: BotConfig, runner: Optional["ScalperRunner"] = No
 
     if runner:
         status["ib_equity"] = round(getattr(runner, "account_equity", 0), 2)
-        status["bot_nav"] = round(getattr(runner, "bot_nav", 0), 2)
         try:
-            from core.ib_truth import get_snapshot
+            from core.ib_truth import get_snapshot, ib_truth_enabled
+            if ib_truth_enabled(cfg):
+                from core.notify_ib_context import ib_telegram_account
+                ib_acct = ib_telegram_account(runner, cfg)
+                status["ib_equity"] = round(float(ib_acct.get("nav", 0) or 0), 2)
             snap = get_snapshot()
             if snap.refreshed_at > 0:
                 status["ib_truth"] = True
                 status["ib_fifo_session_pnl"] = snap.session_pnl_fifo
                 status["ib_unrealized_pnl"] = snap.account.unrealized_pnl
+                status["trades_today"] = len(snap.round_trips)
         except Exception:
-            pass
-        status["trades_today"] = int(getattr(runner, "trades_today", 0) or 0)
+            status["trades_today"] = 0
+        if "trades_today" not in status:
+            status["trades_today"] = 0
         status["open_slots"] = len(getattr(runner, "_position_slots", {}) or {})
 
         if getattr(runner, "consciousness", None):
@@ -153,13 +158,15 @@ def format_system_report(status: Dict[str, Any]) -> str:
         f"{status.get('time_et', '')} · Market {str(status.get('market_state', '?')).upper()} · "
         f"{'PAPER' if status.get('paper') else 'LIVE'}",
         "",
-        "💰 Account",
-        f"IB ${status.get('ib_equity', 0):,.2f} · NAV ${status.get('bot_nav', 0):,.2f} · "
-        f"{status.get('open_slots', 0)} bot slot(s) · {status.get('trades_today', 0)} trades today",
+        "💰 Account (IB)",
+        f"NetLiq ${status.get('ib_equity', 0):,.2f} · "
+        f"Session P&L ${status.get('ib_fifo_session_pnl', 0):+,.2f} · "
+        f"{status.get('open_slots', 0)} bot slot(s) · "
+        f"{status.get('trades_today', 0)} IB round-trips",
     ]
     if risk:
         lines.append(
-            f"Daily P&L ${risk.get('daily_pnl', 0):+,.2f} · "
+            f"Session P&L ${risk.get('daily_pnl', 0):+,.2f} (IB) · "
             f"Unrealized ${risk.get('unrealized', 0):+,.2f} · "
             f"Deployed {risk.get('deployed_pct', 0):.1f}%"
         )

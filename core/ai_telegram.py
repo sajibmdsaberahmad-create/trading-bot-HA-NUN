@@ -61,6 +61,14 @@ def format_outbound_message(
     max_chars: Optional[int] = None,
 ) -> str:
     """AI-compose any outbound Telegram text — copilot replies, broadcasts, alerts."""
+    if runner is not None:
+        try:
+            from core.notify_ib_context import merge_ib_telegram_context
+            context = merge_ib_telegram_context(
+                runner, cfg, context, event_type=event_type,
+            )
+        except Exception as exc:
+            log.debug(f"IB telegram context merge ({event_type}): {exc}")
     try:
         composer = get_composer(cfg, ai_commander=ai_commander, runner=runner)
         return composer.compose_outbound(

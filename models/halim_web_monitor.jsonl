@@ -1643,3 +1643,16 @@
 {"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Bid%E2%80%93ask_spread","chars":10032,"hash":"c1eaa0574071333e","read_only":true,"timestamp":"2026-06-28T15:02:06.725772+00:00"}
 {"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Investor_psychology","chars":12000,"hash":"67b02a4392b9df13","read_only":true,"timestamp":"2026-06-29T07:41:41.105550+00:00"}
 {"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Scalping_(trading)","chars":6694,"hash":"bf27ae9adb207493","read_only":true,"timestamp":"2026-06-29T07:55:59.274334+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Ichimoku_Kink%C5%8D_Hy%C5%8D","chars":11327,"hash":"3bb14a942f59558d","read_only":true,"timestamp":"2026-07-01T06:48:34.374881+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)","chars":10374,"hash":"d1bc3333870e9548","read_only":true,"timestamp":"2026-07-01T06:48:35.926453+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Macroeconomics","chars":12000,"hash":"35ca72d44174803d","read_only":true,"timestamp":"2026-07-01T06:48:37.665728+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Federal_Reserve","chars":12000,"hash":"1131b622207bd44a","read_only":true,"timestamp":"2026-07-01T06:48:39.401284+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Interest_rate","chars":12000,"hash":"cba77fbb4e991f1e","read_only":true,"timestamp":"2026-07-01T06:48:41.105656+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Inflation","chars":12000,"hash":"56bbc981e341a03a","read_only":true,"timestamp":"2026-07-01T06:48:42.835895+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Monetary_policy","chars":12000,"hash":"e656f8fff81ad759","read_only":true,"timestamp":"2026-07-01T06:48:44.487155+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Recession","chars":12000,"hash":"5ade28166107eee3","read_only":true,"timestamp":"2026-07-01T06:48:46.290499+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Swing_trading","chars":6459,"hash":"bf710f61fd7672df","read_only":true,"timestamp":"2026-07-01T06:51:48.897263+00:00"}
+{"ok":false,"url":"https://en.wikipedia.org/wiki/Position_trading","reason":"http_404","timestamp":"2026-07-01T06:51:50.009831+00:00","event":"learn_fetch_failed"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Trend_following","chars":12000,"hash":"ed07e121d6276310","read_only":true,"timestamp":"2026-07-01T06:51:50.674694+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Support_and_resistance","chars":7790,"hash":"e451371acd22047c","read_only":true,"timestamp":"2026-07-01T06:51:51.869245+00:00"}
+{"event":"learn_fetch_ok","host":"en.wikipedia.org","url":"https://en.wikipedia.org/wiki/Grammar","chars":12000,"hash":"799f022c7926e035","read_only":true,"timestamp":"2026-07-01T06:52:47.029496+00:00"}

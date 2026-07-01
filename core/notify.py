@@ -216,13 +216,23 @@ class Notifier:
 
     def trade_opened(self, side: str, ticker: str, qty: float, price: float,
                       stop_price: float, target_price: float, risk_usd: float):
-        bal = getattr(self.cfg, "_latest_account_balance", None)
+        ib_bal = None
+        try:
+            from core.ib_truth import get_snapshot, ib_truth_enabled
+            if ib_truth_enabled(self.cfg):
+                snap = get_snapshot()
+                if snap.refreshed_at > 0 and snap.account.net_liquidation > 0:
+                    ib_bal = snap.account.net_liquidation
+        except Exception:
+            pass
+        if ib_bal is None:
+            ib_bal = getattr(self.cfg, "_latest_account_balance", None)
         fallback = (
             f"🟢 TRADE OPENED\n"
             f"{side} {qty:.2f} {ticker} @ ${price:.2f}\n"
             f"Stop: ${stop_price:.2f}  |  Target: ${target_price:.2f}\n"
             f"Risking: ${risk_usd:.2f}"
-            + (f"\nAccount: ${bal:,.2f}" if bal else "")
+            + (f"\nIB Account: ${ib_bal:,.2f}" if ib_bal else "")
         )
         if not self.cfg.NOTIFY_ON_TRADE_OPEN:
             return
@@ -239,12 +249,29 @@ class Notifier:
     def trade_closed(self, ticker: str, qty: float, price: float,
                       pnl_usd: float, pnl_pct: float, reason: str):
         emoji = "✅" if pnl_usd >= 0 else "🔴"
-        bal = getattr(self.cfg, "_latest_account_balance", None)
+        ib_bal = None
+        session_pnl = None
+        try:
+            from core.ib_truth import get_snapshot, ib_truth_enabled
+            if ib_truth_enabled(self.cfg):
+                snap = get_snapshot()
+                if snap.refreshed_at > 0:
+                    if snap.account.net_liquidation > 0:
+                        ib_bal = snap.account.net_liquidation
+                    session_pnl = snap.session_pnl_fifo
+        except Exception:
+            pass
+        if ib_bal is None:
+            ib_bal = getattr(self.cfg, "_latest_account_balance", None)
+        sess_line = (
+            f"\nSession P&L (IB): ${session_pnl:+,.2f}"
+            if session_pnl is not None else ""
+        )
         fallback = (
-            f"{emoji} TRADE CLOSED ({reason})\n"
+            f"{emoji} TRADE CLOSED ({reason}) · IB\n"
             f"{qty:.2f} {ticker} @ ${price:.2f}\n"
-            f"P&L: ${pnl_usd:+.2f} ({pnl_pct:+.2f}%)"
-            + (f"\nAccount: ${bal:,.2f}" if bal else "")
+            f"P&L: ${pnl_usd:+.2f} ({pnl_pct:+.2f}%){sess_line}"
+            + (f"\nIB NetLiq: ${ib_bal:,.2f}" if ib_bal else "")
         )
         if not self.cfg.NOTIFY_ON_TRADE_CLOSE:
             return

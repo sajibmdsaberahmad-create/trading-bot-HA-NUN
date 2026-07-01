@@ -93,12 +93,25 @@ def collect_positions(runner: "ScalperRunner") -> Dict[str, Any]:
         )
         ib_unreal = float(ib.get("unrealized_pnl") or 0)
         mkt_px = float(ib.get("market_price") or 0)
-        px = runner._live_price_for(ticker, mkt_px or entry)
-        if px <= 0:
-            px = mkt_px or entry
-
-        market_value = shares * px
-        unrealized = ib_unreal if ib_unreal != 0 else ((px - entry) * shares if entry > 0 else 0.0)
+        if ticker in ib_map and ib_truth_enabled(getattr(runner, "cfg", None)):
+            entry = float(ib.get("avg_cost") or entry or 0)
+            px = mkt_px if mkt_px > 0 else entry
+            if px <= 0:
+                continue
+            market_value = shares * px
+            unrealized = ib_unreal
+        else:
+            if not slot.get("ib_fill_confirmed") and ticker not in ib_map:
+                continue
+            px = mkt_px if mkt_px > 0 else float(
+                runner._live_price_for(ticker, entry) if entry > 0 else 0
+            )
+            if px <= 0:
+                px = entry
+            market_value = shares * px
+            unrealized = ib_unreal if ib_unreal != 0 else (
+                (px - entry) * shares if entry > 0 else 0.0
+            )
         stop = float(slot.get("stop") or 0)
         target = float(slot.get("target") or 0)
         peak = float(slot.get("peak") or px)
@@ -182,6 +195,9 @@ def collect_risk(runner: "ScalperRunner") -> Dict[str, Any]:
     except Exception:
         max_positions = int(getattr(cfg, "MAX_CONCURRENT_POSITIONS", 1) or 1)
 
+    snap = get_snapshot()
+    round_trips = len(snap.round_trips) if snap.refreshed_at > 0 else 0
+
     return {
         **intel,
         "halted": halted,
@@ -194,7 +210,8 @@ def collect_risk(runner: "ScalperRunner") -> Dict[str, Any]:
         "max_positions": max_positions,
         "slots_used": intel["position_count"],
         "win_rate_pct": round(getattr(risk, "win_rate", 0) * 100, 1) if risk else 0.0,
-        "trades_today": int(getattr(runner, "trades_today", 0) or 0),
+        "trades_today": round_trips,
+        "ib_round_trips": round_trips,
     }
 
 
@@ -246,7 +263,7 @@ def format_risk_report(risk: Dict[str, Any]) -> str:
         f"Unrealized ${risk.get('total_unrealized_pnl', 0):+,.2f} · "
         f"Stop risk ${risk.get('total_stop_risk_usd', 0):,.0f}",
         f"Slots {risk.get('slots_used', 0)}/{risk.get('max_positions', 1)} · "
-        f"Trades today {risk.get('trades_today', 0)} · "
+        f"IB round-trips {risk.get('ib_round_trips', risk.get('trades_today', 0))} · "
         f"Consecutive losses {risk.get('consecutive_losses', 0)}",
     ]
     if risk.get("halted") and risk.get("halt_reason"):

@@ -1,144 +1,105 @@
-# Colab cells — Google Drive only (no `files.upload`)
+# Colab cells (mirror of `halim_toddler_train.ipynb`)
 
-**Notebook:** open `halim/colab/halim_toddler_train.ipynb` in Colab (upload once to Drive or open from repo).
+**Use the notebook** — `halim/colab/halim_toddler_train.ipynb` — upload it to Colab fresh.
 
-Upload these **2 files** in your browser to `My Drive/Halim/`:
-
-| File | Mac path |
-|------|----------|
-| `halim_toddler_v2.zip` | `~/Downloads/halim_toddler_v2.zip` |
-| `halim_sft.zip` | `~/Downloads/tradingbot/halim_sft.zip` |
-
-`halim_sft.zip` bundles `train_toddler_colab.py` — no separate script upload.
+These cells are identical to the notebook. Full guide: **`COLAB_GUIDE.md`**.
 
 ---
 
-## Cell 1 — Mount Drive + env (incremental v3)
+## Cell 1 — Mount Drive
 
 ```python
 from google.colab import drive
 drive.mount('/content/drive')
 
 import os
-WORK = "/content/drive/MyDrive/Halim"
+WORK = '/content/drive/MyDrive/Halim'
 os.makedirs(WORK, exist_ok=True)
-
-os.environ["HALIM_OUT_DIR"] = f"{WORK}/toddler_v1"
-os.environ["HALIM_CONTINUE_LORA"] = "auto"
-os.environ["HALIM_RESUME"] = "false"          # incremental: do NOT resume finished v2
-os.environ["HALIM_SAVE_TOTAL_LIMIT"] = "3"
-
-print("Drive folder:", WORK)
+os.environ['HALIM_WORK'] = WORK
+print('Drive folder:', WORK)
 !ls -la "$WORK"
 ```
 
 ---
 
-## Cell 2 — Unzip v2 weights from Drive (first time only)
-
-Skip this cell if `toddler_v1/lora_adapter/adapter_model.safetensors` already exists.
-
-```python
-import zipfile
-from pathlib import Path
-
-WORK = Path("/content/drive/MyDrive/Halim")
-v2 = WORK / "halim_toddler_v2.zip"
-if not v2.is_file():
-    raise FileNotFoundError(f"Upload halim_toddler_v2.zip to {WORK}")
-
-with zipfile.ZipFile(v2, "r") as zf:
-    zf.extractall(WORK)
-
-adp = WORK / "toddler_v1" / "lora_adapter"
-print("adapter:", (adp / "adapter_model.safetensors").is_file())
-print("checkpoints:", [p.name for p in sorted(adp.glob("checkpoint-*"))][-5:])
-```
-
----
-
-## Cell 3 — Clear finished v2 checkpoints (incremental v3 only)
-
-Keeps `adapter_model.safetensors`, removes stale `checkpoint-*` so trainer won't skip.
-
-```python
-import shutil
-from pathlib import Path
-
-adp = Path("/content/drive/MyDrive/Halim/toddler_v1/lora_adapter")
-for p in adp.glob("checkpoint-*"):
-    shutil.rmtree(p)
-    print("removed", p.name)
-print("adapter kept:", (adp / "adapter_model.safetensors").is_file())
-```
-
----
-
-## Cell 4 — pip
+## Cell 2 — Upload SFT + setup
 
 ```python
 !pip install -q transformers peft trl datasets accelerate bitsandbytes
-```
 
----
-
-## Cell 5 — Unzip SFT from Drive (not files.upload)
-
-```python
-import zipfile
-import json
+from google.colab import files
+import os, shutil, zipfile
 from pathlib import Path
 
-WORK = Path("/content/drive/MyDrive/Halim")
-sft = WORK / "halim_sft.zip"
-if not sft.is_file():
-    raise FileNotFoundError(f"Upload halim_sft.zip to {WORK}")
+for stale in ('sft', 'toddler_v1', 'train_toddler_colab.py', 'colab_drive_setup.py'):
+    p = Path('/content') / stale
+    if p.is_dir():
+        shutil.rmtree(p)
+    elif p.is_file():
+        p.unlink()
 
-with zipfile.ZipFile(sft, "r") as zf:
-    zf.extractall("/content")
+print('Pick halim_sft.zip from Mac')
+uploaded = files.upload()
+sft_zip = None
+for name, data in uploaded.items():
+    dest = Path('/content') / name
+    dest.write_bytes(data)
+    if name.endswith('.zip'):
+        sft_zip = dest
 
-manifest = json.loads(Path("/content/sft/colab_manifest.json").read_text())
-print(json.dumps(manifest, indent=2))
-print("sft_mode:", manifest.get("sft_mode", "full"))
-```
+if sft_zip is None:
+    sft_zip = next(Path('/content').glob('halim_sft*.zip'), None)
+if sft_zip is None:
+    raise FileNotFoundError('Upload halim_sft.zip')
 
----
+with zipfile.ZipFile(sft_zip, 'r') as zf:
+    zf.extractall('/content')
 
-## Cell 6 — Train (script comes from halim_sft.zip)
-
-```python
-from pathlib import Path
-
-if not Path("/content/train_toddler_colab.py").is_file():
-    raise FileNotFoundError("Re-run Cell 5 — halim_sft.zip should include train_toddler_colab.py")
-
+WORK = Path(os.environ['HALIM_WORK'])
 %cd /content
+!python colab_drive_setup.py
+```
+
+---
+
+## Cell 3 — Fresh fast train
+
+```python
+%cd /content
+import os, shutil
+from pathlib import Path
+
+adapter = Path('toddler_v1/lora_adapter')
+if adapter.exists():
+    shutil.rmtree(adapter)
+
+os.environ['HALIM_OUT_DIR'] = '/content/toddler_v1'
+os.environ['HALIM_FRESH_TRAIN'] = 'true'
+os.environ['HALIM_CONTINUE_LORA'] = 'false'
+os.environ['HALIM_FAST_PATH'] = 'auto'
+
 !python train_toddler_colab.py
 ```
 
-**Good output:**
-- `CONTINUE_LORA: True | RESUME_CKPT: none`
-- `Loading existing LoRA adapter for continued training…`
-- Progress bar **~30–90 min** (NOT `train_runtime: 0.007`)
-
 ---
 
-## Cell 7 — Zip v3 on Drive (download optional)
+## Cell 4 — Zip to Drive
 
 ```python
-!cd /content/drive/MyDrive/Halim && zip -r halim_toddler_v3.zip toddler_v1
-print("Saved:", "/content/drive/MyDrive/Halim/halim_toddler_v3.zip")
-```
+import json, shutil, subprocess
+from pathlib import Path
 
-Download on Mac from [drive.google.com](https://drive.google.com) → `Halim/halim_toddler_v3.zip`
+WORK = Path('/content/drive/MyDrive/Halim')
+state_path = WORK / 'halim_colab_state.json'
+state = json.loads(state_path.read_text()) if state_path.is_file() else {}
+out_name = state.get('next_output_zip', 'halim_toddler_v4.zip')
 
----
+src = Path('/content/toddler_v1')
+if not (src / 'merged').is_dir():
+    raise FileNotFoundError('Wait for Cell 3 to finish')
 
-## If Colab crashed mid-train
-
-```python
-os.environ["HALIM_RESUME"] = "true"
-os.environ["HALIM_RESUME_MIDRUN"] = "true"   # only for crash recovery
-# do NOT run Cell 3 (don't delete checkpoints)
-# re-run Cell 5 + Cell 6
+shutil.copytree(src, WORK / 'toddler_v1', dirs_exist_ok=True)
+subprocess.run(['zip', '-r', out_name, 'toddler_v1'], cwd=str(WORK), check=True)
+print('Saved:', WORK / out_name)
+print('Mac: ./scripts/halim_apply_colab_checkpoint.sh')
 ```

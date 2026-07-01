@@ -194,8 +194,27 @@ class TelegramAIComposer:
         out.setdefault("event", event_type)
         out["market_state"] = get_market_state(self.cfg)
         out["time_et"] = format_et(fmt="%H:%M ET")
-        out["session_trades"] = self._session_trades
-        out["session_pnl"] = round(self._session_pnl, 2)
+
+        # Session totals — IB FIFO only (never composer local accumulator)
+        ib_sess = out.get("ib_fifo_session_pnl")
+        if ib_sess is not None:
+            out["session_pnl"] = round(float(ib_sess), 2)
+            out["day_pnl"] = round(float(ib_sess), 2)
+        elif out.get("session_pnl") is not None:
+            out["session_pnl"] = round(float(out["session_pnl"]), 2)
+        ib_trips = out.get("ib_round_trips")
+        if ib_trips is not None:
+            out["session_trades"] = int(ib_trips)
+            out["trades_today"] = int(ib_trips)
+
+        # Economic display — IB NetLiq only
+        ib_eq = float(out.get("ib_equity") or out.get("ib_account") or out.get("equity") or 0)
+        if ib_eq > 0:
+            out["nav"] = ib_eq
+            out["equity"] = ib_eq
+            out["ib_account"] = ib_eq
+        out.pop("bot_nav", None)
+        out.pop("bot_cash", None)
 
         if self.pilot:
             try:
@@ -405,11 +424,13 @@ class TelegramAIComposer:
             risk = ctx.get("risk_usd") or ctx.get("risk_usd_calc", 0)
             rr = ctx.get("reward_risk_ratio", "—")
             deploy = ctx.get("deployed") or ctx.get("deploy_usd", 0)
+            ib_tag = " · IB fill" if ctx.get("pnl_source") == "ib_fill" else ""
             return (
-                f"🎯 PILOT ENTRY │ {t}\n"
+                f"🎯 PILOT ENTRY │ {t}{ib_tag}\n"
                 f"{sh} sh @ ${float(px):.4f} · Deploy ${float(deploy):,.0f}\n"
                 f"Stop ${float(stop):.4f} · TP ${float(target):.4f} · Risk ${float(risk):.2f}\n"
-                f"R:R {rr} · {footer}"
+                f"R:R {rr} · IB ${float(ctx.get('ib_equity', 0)):,.0f} · Session ${float(ctx.get('session_pnl', 0)):+,.2f}\n"
+                f"{footer}"
             )
 
         if event_type == "trade_closed":
@@ -418,9 +439,16 @@ class TelegramAIComposer:
             pct = float(ctx.get("pnl_pct", 0))
             result = ctx.get("result", "win" if pnl >= 0 else "loss").upper()
             emoji = "✅" if pnl >= 0 else "🔴"
+            ib_tag = " · IB" if ctx.get("pnl_source") in ("ib_fill", "ib_truth") else ""
+            exit_px = ctx.get("exit_fill") or ctx.get("price") or 0
+            entry_px = ctx.get("entry_fill") or ctx.get("entry") or 0
+            fill_line = ""
+            if entry_px and exit_px:
+                fill_line = f"\nIB ${float(entry_px):.4f} → ${float(exit_px):.4f}"
             return (
-                f"{emoji} FLIGHT CLOSED │ {t} · {result}\n"
-                f"P&L ${pnl:+.2f} ({pct:+.2f}%) · Session ${ctx.get('session_pnl', 0):+.2f}\n"
+                f"{emoji} FLIGHT CLOSED │ {t} · {result}{ib_tag}\n"
+                f"P&L ${pnl:+.2f} ({pct:+.2f}%){fill_line}\n"
+                f"Session ${float(ctx.get('session_pnl', 0)):+,.2f} · IB ${float(ctx.get('ib_equity', 0)):,.0f}\n"
                 f"Rank {ctx.get('pilot_level', 'Cadet')} · {footer}"
             )
 
@@ -428,10 +456,11 @@ class TelegramAIComposer:
             t = ctx.get("ticker", "?")
             pnl = float(ctx.get("pnl_usd", 0))
             reason = ctx.get("reason", "exit")[:60]
+            ib_tag = " · IB" if ctx.get("pnl_source") in ("ib_fill", "ib_truth") else ""
             return (
-                f"⚡ EARLY EXIT │ {t}\n"
+                f"⚡ EARLY EXIT │ {t}{ib_tag}\n"
                 f"P&L ${pnl:+.2f} · {reason}\n"
-                f"Session ${ctx.get('session_pnl', 0):+.2f} · {et}"
+                f"Session ${float(ctx.get('session_pnl', 0)):+,.2f} · IB ${float(ctx.get('ib_equity', 0)):,.0f} · {et}"
             )
 
         if event_type == "targets_locked":
@@ -446,24 +475,25 @@ class TelegramAIComposer:
             )
 
         if event_type == "startup":
-            ib = ctx.get("ib_equity") or ctx.get("ib_account") or ctx.get("equity", 0)
+            ib = ctx.get("ib_equity") or ctx.get("ib_account") or 0
             war = self._war_line(ctx)
             war_part = f"\n{war}" if war else ""
+            sess = float(ctx.get("ib_fifo_session_pnl", ctx.get("session_pnl", 0)) or 0)
             return (
-                f"🚀 HANOON ONLINE\n"
+                f"🚀 HANOON ONLINE · IB Truth\n"
                 f"Market {ctx.get('market_state', '').upper()} · Pilot {ctx.get('pilot_level', 'Cadet')}\n"
-                f"IB ${float(ib):,.0f} · day P&L ${float(ctx.get('day_pnl', 0)):+,.2f}{war_part}\n"
+                f"IB ${float(ib):,.0f} · Session P&L ${sess:+,.2f}{war_part}\n"
                 f"{footer}"
             )
 
         if event_type == "daily_summary":
-            nav = ctx.get("nav") or ctx.get("bot_nav", 0)
-            pnl = ctx.get("pnl") or ctx.get("session_pnl", 0)
-            trades = ctx.get("trades_today") or ctx.get("trades", 0)
+            nav = ctx.get("ib_equity") or ctx.get("nav") or 0
+            pnl = ctx.get("ib_fifo_session_pnl") or ctx.get("session_pnl", 0)
+            trades = ctx.get("ib_round_trips") or ctx.get("trades_today") or 0
             return (
-                f"📊 SESSION WRAP\n"
-                f"NAV ${float(nav):,.2f} · Day P&L ${float(pnl):+,.2f}\n"
-                f"Trades {trades} · {et}"
+                f"📊 SESSION WRAP · IB\n"
+                f"NetLiq ${float(nav):,.2f} · Session P&L ${float(pnl):+,.2f}\n"
+                f"Round-trips {trades} · {et}"
             )
 
         if event_type == "brain_evolution":
@@ -509,29 +539,28 @@ class TelegramAIComposer:
             )
 
         if event_type == "session_close":
-            pnl = float(ctx.get("pnl", ctx.get("session_pnl", 0)))
-            pct = float(ctx.get("pnl_pct", 0))
-            ib_chg = float(ctx.get("ib_change", ctx.get("day_pnl", 0)))
+            ib_chg = float(ctx.get("ib_change", ctx.get("ib_fifo_session_pnl", ctx.get("session_pnl", 0))))
+            ib_eq = float(ctx.get("ib_equity") or ctx.get("ib_account") or 0)
             war = self._war_line(ctx)
             war_part = f"\n{war}" if war else ""
+            trips = ctx.get("ib_round_trips") or ctx.get("trades_today", 0)
             return (
-                f"🛬 SESSION CLOSE\n"
-                f"IB day Δ ${ib_chg:+,.2f} · bot P&L ${pnl:+,.2f} ({pct:+.2f}%){war_part}\n"
-                f"Trades {ctx.get('trades_today', 0)} · {et} · Mood {mood}"
+                f"🛬 SESSION CLOSE · IB\n"
+                f"Session P&L ${ib_chg:+,.2f} · NetLiq ${ib_eq:,.0f}{war_part}\n"
+                f"Round-trips {trips} · {et} · Mood {mood}"
             )
 
         if event_type.startswith("account_"):
             stmt = ctx.get("statement") or fallback
             if stmt and len(stmt) > 20:
                 return stmt[:500]
-            nav_d = ctx.get("nav_delta", 0)
-            ib_d = ctx.get("ib_delta", 0)
+            ib_eq = float(ctx.get("ib_equity") or ctx.get("ib_account") or ctx.get("nav", 0))
+            ib_d = float(ctx.get("ib_change", ctx.get("ib_fifo_session_pnl", ctx.get("day_pnl", 0))))
             return (
-                f"📋 ACCOUNT BRIEF\n"
-                f"NAV ${ctx.get('nav', 0):,.2f} (Δ ${float(nav_d):+,.2f})\n"
-                f"IB ${ctx.get('ib_account', 0):,.2f} (Δ ${float(ib_d):+,.2f})\n"
-                f"Day P&L ${ctx.get('day_pnl', 0):+,.2f} · Trades {ctx.get('trades_today', 0)}\n"
-                f"{et}"
+                f"📋 ACCOUNT BRIEF · IB\n"
+                f"NetLiq ${ib_eq:,.2f} · Session P&L ${ib_d:+,.2f}\n"
+                f"Round-trips {ctx.get('ib_round_trips', ctx.get('trades_today', 0))} · {et}\n"
+                f"{mood}"
             )
 
         # Generic — still cleaner than raw fallback
@@ -550,6 +579,16 @@ def send_smart_telegram(
     pilot=None,
 ) -> None:
     """Single entry point for AI Telegram alerts."""
+    runner = context.get("_runner")
+    cfg = getattr(notifier, "cfg", BotConfig())
+    if runner is not None:
+        try:
+            from core.notify_ib_context import telegram_notify_context
+            extra = {k: v for k, v in context.items() if k != "_runner"}
+            context = telegram_notify_context(runner, cfg, extra, event_type=event_type)
+        except Exception:
+            pass
+
     composer = getattr(notifier, "_ai_composer", None)
     if composer is None:
         composer = TelegramAIComposer(
@@ -562,7 +601,8 @@ def send_smart_telegram(
         notifier._ai_composer = composer
 
     if event_type in ("trade_closed", "early_exit") and context.get("pnl_usd") is not None:
-        composer.record_trade(float(context["pnl_usd"]))
+        if context.get("pnl_source") in ("ib_fill", "ib_truth"):
+            composer.record_trade(float(context["pnl_usd"]))
 
     msg = composer.compose(event_type, context, fallback)
     if ai_commander:

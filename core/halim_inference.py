@@ -91,9 +91,12 @@ def try_reasoning_complete(
     chat_purposes = frozenset({
         "chat", "commander_chat", "dialogue", "companion", "copilot",
     })
+    teacher_purposes = frozenset({"ppo_teacher"})
     default_timeout = float(os.getenv("HALIM_INFERENCE_TIMEOUT_SEC", "90"))
     if purpose in chat_purposes:
         timeout = float(os.getenv("HALIM_CHAT_INFERENCE_TIMEOUT_SEC", str(default_timeout)))
+    elif purpose in teacher_purposes:
+        timeout = float(os.getenv("HALIM_PPO_TEACHER_TIMEOUT_SEC", "120"))
     else:
         timeout = float(os.getenv("HALIM_REASONING_TIMEOUT_SEC", str(min(default_timeout, 30.0))))
 

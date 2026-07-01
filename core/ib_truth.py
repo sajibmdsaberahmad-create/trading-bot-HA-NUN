@@ -548,9 +548,16 @@ def day_pnl_from_snapshot(
     snap: IBTruthSnapshot,
     ib_start: float,
 ) -> Tuple[float, float]:
-    """Session P&L — IB account RealizedPnL when snapshot fresh, else FIFO, else NetLiq delta."""
+    """Session P&L — IB FIFO (full trading day) or RealizedPnL tag when RTH-scoped."""
     if snap.refreshed_at > 0:
-        pnl = snap.session_pnl_ib
+        if snap.session_scope == "calendar" and (
+            snap.session_pnl_fifo != 0 or snap.round_trips
+        ):
+            pnl = snap.session_pnl_fifo
+        elif snap.session_pnl_ib != 0:
+            pnl = snap.session_pnl_ib
+        else:
+            pnl = snap.session_pnl_fifo
     elif snap.session_pnl_fifo != 0 or snap.round_trips:
         pnl = snap.session_pnl_fifo
     else:
@@ -699,6 +706,42 @@ def position_entry_from_truth(
         return pos.avg_cost
     mkt = pos.market_price if pos else 0.0
     return position_entry_price(ib, sym, market_px=mkt)
+
+
+def position_pulse(
+    symbol: str,
+    snap: Optional[IBTruthSnapshot] = None,
+) -> Dict[str, Any]:
+    """
+    IB-only mark + unrealized for position monitoring (no stream fiction).
+    Returns ok=False when snapshot stale or flat.
+    """
+    sym = (symbol or "").upper()
+    snap = snap or get_snapshot()
+    if snap.refreshed_at <= 0:
+        return {"ok": False, "source": "ib_truth_stale"}
+    pos = snap.long_positions().get(sym)
+    if not pos or pos.qty <= 0:
+        return {"ok": False, "source": "ib_flat"}
+    entry = float(pos.avg_cost or 0)
+    mkt = float(pos.market_price or 0)
+    px = mkt if mkt > 0 else entry
+    shares = float(pos.qty)
+    unreal = float(pos.unrealized_pnl or 0)
+    if unreal == 0 and entry > 0 and px > 0 and shares > 0:
+        unreal = (px - entry) * shares
+    pct = ((px / entry) - 1.0) * 100.0 if entry > 0 else 0.0
+    return {
+        "ok": True,
+        "source": "ib_truth",
+        "ticker": sym,
+        "price": round(px, 6),
+        "entry": round(entry, 6),
+        "shares": shares,
+        "pnl_usd": round(unreal, 2),
+        "pnl_pct": round(pct, 4),
+        "unrealized_pnl": round(unreal, 2),
+    }
 
 
 def format_snapshot_summary(snap: IBTruthSnapshot) -> str:

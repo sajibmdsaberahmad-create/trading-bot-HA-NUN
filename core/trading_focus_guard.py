@@ -94,7 +94,7 @@ def halim_lm_blocked_during_trading(purpose: str = "chat") -> bool:
     live_gold = os.getenv("HALIM_LIVE_GOLD_COLLECT", "true").lower() in ("1", "true", "yes")
     gold_purposes = frozenset({
         "decision_text", "dialogue", "copilot", "reasoning", "notify",
-        "entry_decision", "exit_decision", "commander_chat",
+        "entry_decision", "exit_decision", "commander_chat", "ppo_teacher",
     })
     if (purpose or "chat").lower() in gold_purposes:
         if replay_gold and (

@@ -68,6 +68,12 @@ class CommanderVerdictMixin:
         dec.setdefault("ppo_conf", ppo_conf)
         if ppo_reason:
             dec.setdefault("ppo_reason", ppo_reason)
+        halim_status = ""
+        if hasattr(self, "_halim_entry"):
+            try:
+                halim_status = str(self._halim_entry.peek(ticker).get("status", ""))
+            except Exception:
+                pass
         try:
             self._record_council_learning(
                 ticker, dec, "entry_decision", ppo_action, ppo_conf,
@@ -77,9 +83,6 @@ class CommanderVerdictMixin:
         try:
             from core.smart_stack import log_spike_verdict
             gate_context = gate_context or getattr(self, "_decide_entry_gate_ctx", None)
-            halim_status = ""
-            if hasattr(self, "_halim_entry"):
-                halim_status = str(self._halim_entry.peek(ticker).get("status", ""))
             log_spike_verdict(
                 self.cfg,
                 ticker=ticker,
@@ -90,6 +93,36 @@ class CommanderVerdictMixin:
                 decision=decision,
                 gate_context=gate_context,
                 halim_status=halim_status,
+            )
+        except Exception:
+            pass
+        try:
+            from core.halim_ppo_coevolution import (
+                extract_coevolution_halim_signals,
+                record_coevolution,
+            )
+
+            halim_src, halim_sig, halim_conf, halim_reason = extract_coevolution_halim_signals(
+                dec, "entry_decision",
+            )
+            record_coevolution(
+                self.cfg,
+                ticker=ticker,
+                task="entry_decision",
+                ppo_signal=ppo_action == 1,
+                ppo_conf=ppo_conf,
+                ppo_reason=ppo_reason,
+                halim_source=halim_src,
+                halim_signal=halim_sig,
+                halim_conf=halim_conf,
+                halim_reason=halim_reason,
+                executed=dec,
+                pipeline=str(dec.get("pipeline", "")),
+                extra={
+                    "spike_ratio": spike_ratio,
+                    "scan_score": scan_score,
+                    "halim_status": halim_status,
+                },
             )
         except Exception:
             pass

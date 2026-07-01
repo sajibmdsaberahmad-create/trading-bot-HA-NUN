@@ -279,8 +279,10 @@ def rth_reply_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         "rth_tier": rth_tier(cfg),
         "is_rth": is_rth(cfg),
         "time_et": now_et().strftime("%Y-%m-%d %H:%M %Z"),
-        "session_window": "09:30-16:00 ET",
     }
+    import os
+    rth_session = os.getenv("IB_TRUTH_RTH_SESSION", "true").lower() not in ("0", "false", "no")
+    ctx["session_window"] = "09:30-16:00 ET" if rth_session else "00:00 ET — all fills (pre/RTH/AH)"
     secs_open = seconds_since_rth_open(cfg)
     if secs_open is not None:
         ctx["minutes_since_rth_open"] = round(secs_open / 60.0, 1)
@@ -300,15 +302,25 @@ def rth_reply_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     except Exception:
         pass
     if state == "open":
-        ctx["market_note"] = (
-            f"RTH live — PnL from IB RealizedPnL tag since 09:30 ET ({ctx.get('session_scope', 'rth')})."
-        )
+        if rth_session:
+            ctx["market_note"] = (
+                f"RTH live — PnL from IB since 09:30 ET ({ctx.get('session_scope', 'rth')})."
+            )
+        else:
+            ctx["market_note"] = (
+                "RTH live — session P&L from IB FIFO since midnight ET (pre-market fills included)."
+            )
     elif state == "after_hours":
         ctx["market_note"] = (
-            "After hours (RTH closed 16:00 ET). Report today's RTH session PnL only — no new entries."
+            "After hours — session P&L from IB (all fills today when IB_TRUTH_RTH_SESSION=false)."
         )
     elif state == "pre_market":
-        ctx["market_note"] = "Pre-market — RTH opens 09:30 ET. Session PnL resets at the bell."
+        if rth_session:
+            ctx["market_note"] = "Pre-market — RTH session P&L resets at 09:30 ET bell."
+        else:
+            ctx["market_note"] = (
+                "Pre-market — session P&L from IB FIFO since midnight ET (pre-market fills count)."
+            )
     else:
         ctx["market_note"] = "Market closed — cite last RTH session results, not live trading."
     return ctx

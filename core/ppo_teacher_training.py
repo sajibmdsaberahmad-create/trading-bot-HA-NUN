@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-core/ppo_teacher_training.py — Cloud teacher improves PPO (teacher–student distillation).
+core/ppo_teacher_training.py — Teacher improves PPO (teacher–student distillation).
 
-Cloud teacher (Groq/Gemini council) improves student PPO — teacher–student distillation.
+Teacher chain: Halim LM (local) → Groq/Gemini council → local outcome/heuristic.
 Reviews recent closed trades, labels what PPO *should* have done, adjusts strategy
 params within bounds, and drives weighted PPO micro-training on corrected rewards.
 """
@@ -330,29 +330,14 @@ def _heuristic_teacher_plan(stats: Dict[str, Any], cfg: BotConfig) -> Dict[str, 
     }
 
 
-def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    from core.commander_learning import _parse_plan_json
-    from core.council_client import CouncilClient
-    from core.council_budget import PURPOSE_PPO_TEACHER
+def _build_ppo_teacher_prompt(
+    cfg: BotConfig, summary: str, stats: Dict[str, Any],
+) -> str:
     from core.param_bounds import format_bounds_for_prompt, tunable_param_names
-
-    try:
-        from core.brain_maturity import allow_ppo_teacher_api
-        ok, reason = allow_ppo_teacher_api(cfg)
-        if not ok:
-            log.info(f"🎓 PPO teacher: local student only ({reason})")
-            return _local_teacher_plan(stats, cfg)
-    except Exception:
-        pass
-
-    client = CouncilClient(cfg)
-    if not client.enabled():
-        log.warning("PPO teacher: council API unavailable — using local outcome/heuristic teacher")
-        return _local_teacher_plan(stats, cfg)
 
     bounds = format_bounds_for_prompt(cfg, 25)
     allowed = ", ".join(tunable_param_names(cfg)[:18])
-    prompt = (
+    return (
         "You are the TEACHER model improving student PPO and Halim reflex agents.\n"
         "The student PPO picks entries/exits on 1-min scalps. Win rate is falling — diagnose and fix.\n"
         "Markets fluctuate — adapt entry quality and stops; do NOT recommend blanket ticker bans.\n\n"
@@ -376,6 +361,84 @@ def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Option
         "teacher_action: 0=HOLD/skip, 1=BUY, 2=EXIT. teacher_reward: -1.0 to +1.0.\n"
         "Penalize weak entries on repeat-loss tickers; reward skipped bad setups and strong micro alignment."
     )
+
+
+def _halim_ppo_teacher_mode() -> str:
+    return os.getenv("HALIM_PPO_TEACHER_VIA_HALIM", "auto").lower().strip()
+
+
+def _halim_teacher_available(cfg: BotConfig) -> bool:
+    mode = _halim_ppo_teacher_mode()
+    if mode in ("0", "false", "off", "groq_only", "council_only"):
+        return False
+    if mode in ("1", "true", "yes", "halim", "halim_first"):
+        return True
+    try:
+        from core.halim_inference import local_status
+
+        st = local_status(cfg)
+        reasoning = st.get("reasoning") or {}
+        if reasoning.get("ready") or reasoning.get("enabled"):
+            return True
+        return bool(st.get("ok") and (st.get("phase") or "") in ("toddler", "child", "adult"))
+    except Exception:
+        return False
+
+
+def _try_halim_teacher(cfg: BotConfig, prompt: str) -> Optional[str]:
+    """Halim LM teacher — Groq fallback when empty or parse fails."""
+    if not _halim_teacher_available(cfg):
+        return None
+    try:
+        from core.halim_inference import try_reasoning_complete
+
+        text, source = try_reasoning_complete(prompt, purpose="ppo_teacher", cfg=cfg)
+        if text and source not in ("unavailable", "disabled", "trading_focus"):
+            log.info(f"🎓 PPO teacher: Halim LM responded ({source})")
+            return text
+        if source == "trading_focus":
+            log.debug("PPO teacher: Halim blocked during trading focus — Groq/local fallback")
+    except Exception as exc:
+        log.debug(f"PPO teacher Halim: {exc}")
+    return None
+
+
+def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    from core.commander_learning import _parse_plan_json
+    from core.council_client import CouncilClient
+    from core.council_budget import PURPOSE_PPO_TEACHER
+
+    try:
+        from core.brain_maturity import allow_ppo_teacher_api
+        ok, reason = allow_ppo_teacher_api(cfg)
+        if not ok:
+            log.info(f"🎓 PPO teacher: local student only ({reason})")
+            return _local_teacher_plan(stats, cfg)
+    except Exception:
+        pass
+
+    prompt = _build_ppo_teacher_prompt(cfg, summary, stats)
+    mode = _halim_ppo_teacher_mode()
+    halim_only = mode in ("halim_only", "halim-first-only")
+
+    raw = _try_halim_teacher(cfg, prompt)
+    if raw:
+        plan = _parse_plan_json(raw)
+        if plan:
+            plan["_source"] = "halim_lm"
+            plan["_raw_excerpt"] = raw[:600]
+            return plan
+        log.warning("PPO teacher: Halim JSON unparseable — trying Groq/local fallback")
+
+    if halim_only:
+        log.warning("PPO teacher: halim_only mode — using local outcome/heuristic teacher")
+        return _local_teacher_plan(stats, cfg)
+
+    client = CouncilClient(cfg)
+    if not client.enabled():
+        log.warning("PPO teacher: council API unavailable — using local outcome/heuristic teacher")
+        return _local_teacher_plan(stats, cfg)
+
     raw = None
     max_attempts = int(getattr(cfg, "PPO_TEACHER_API_RETRIES", 2))
     for attempt in range(max_attempts):
@@ -400,6 +463,7 @@ def _call_teacher(cfg: BotConfig, summary: str, stats: Dict[str, Any]) -> Option
     if not plan:
         log.warning("PPO teacher: could not parse council JSON — local outcome/heuristic teacher")
         return _local_teacher_plan(stats, cfg)
+    plan["_source"] = "cloud_api"
     plan["_raw_excerpt"] = raw[:600]
     return plan
 
@@ -518,7 +582,7 @@ def run_ppo_teacher_session(
     summary = _summarize_for_teacher(stats, cfg)
     log.info(
         f"🎓 PPO TEACHER session ({trigger}) — trade WR={wr:.1%} "
-        f"({stats['count']} trades) — calling cloud API…"
+        f"({stats['count']} trades) — teacher chain Halim→Groq→local…"
     )
 
     plan = _call_teacher(cfg, summary, stats)

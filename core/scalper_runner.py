@@ -468,54 +468,15 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 pass
         except Exception as exc:
             log.debug(f"Telegram listener init skipped: {exc}")
-    def _notify_context(self, extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Rich context for AI Telegram briefings."""
-        from core.account_view import account_summary, day_pnl
-        acct = account_summary(self)
-        pnl_usd, pnl_pct = day_pnl(self, self.cfg)
-        ctx: Dict[str, Any] = {
-            "nav": acct["equity"],
-            "bot_nav": acct["bot_nav"],
-            "ib_account": acct["ib_equity"],
-            "ib_equity": acct["ib_equity"],
-            "day_pnl": acct["day_pnl"],
-            "ib_change": acct["ib_change"],
-            "ib_fifo_session_pnl": acct.get("ib_fifo_session_pnl", 0),
-            "session_pnl": acct.get("ib_fifo_session_pnl", pnl_usd),
-            "bot_cash": round(self.bot_cash, 2),
-            "equity": acct["equity"],
-            "position": self.current_ticker,
-            "shares": self.shares,
-            "trades_today": self.trades_today,
-            "win_rate": round(getattr(self.risk, "win_rate", 0) * 100, 1),
-            "deployed_pct": round(
-                (self.shares * self._latest_price()) / (acct["ib_equity"] + 1e-9) * 100, 2
-            ) if self.shares > 0 and acct["ib_equity"] > 0 else 0,
-        }
-        try:
-            from core.rth_session import rth_reply_context
-            ctx.update(rth_reply_context(self.cfg))
-        except Exception:
-            pass
-        if self.top_pick:
-            ctx["top_pick"] = self.top_pick.ticker
-            ctx["top_score"] = self.top_pick.rank_score
-        if self._locked_targets:
-            ctx["locked"] = [t.ticker for t in self._locked_targets[:5]]
-        if hasattr(self, "pilot"):
-            try:
-                ctx.update(self.pilot.get_veteran_status())
-            except Exception:
-                pass
-        if extra:
-            ctx.update(extra)
-        try:
-            from core.war_account import war_account_context
-            ctx.update(war_account_context(self.cfg))
-        except Exception:
-            pass
-        ctx["_runner"] = self
-        return ctx
+    def _notify_context(
+        self,
+        extra: Optional[Dict[str, Any]] = None,
+        *,
+        event_type: str = "",
+    ) -> Dict[str, Any]:
+        """Telegram context — IB Truth only (see core/notify_ib_context.py)."""
+        from core.notify_ib_context import telegram_notify_context
+        return telegram_notify_context(self, self.cfg, extra, event_type=event_type)
     def _validate_features(self):
         """Run feature pipeline validation (deferred so IB connect is not blocked)."""
         def _run():
@@ -1051,7 +1012,20 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             self._bind_risk_plan_for_ticker(ticker)
             return True
     def _resolve_monitor_price(self, ticker: str, entry_px: float) -> Tuple[float, bool]:
-        """Per-ticker price for monitor — IB snapshot when stream/cache looks cross-wired."""
+        """Per-ticker price for monitor — IB Truth mark when snapshot fresh."""
+        try:
+            from core.ib_truth import get_snapshot, ib_truth_enabled, position_pulse
+            if ib_truth_enabled(self.cfg):
+                snap = get_snapshot()
+                if snap.refreshed_at > 0:
+                    pulse = position_pulse(ticker, snap)
+                    if pulse.get("ok"):
+                        px = float(pulse["price"])
+                        if entry_px <= 0 or px > 0:
+                            return px, True
+        except Exception:
+            pass
+
         from core.position_context import slot_price_sane
 
         fallback = entry_px if entry_px > 0 else 0.0
@@ -1558,9 +1532,12 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             ensure_commander_runtime(self.cfg, replay=replay_mode)
         except Exception as exc:
             log.debug(f"Commander runtime: {exc}")
+        self._defer_war_ib_sync = False
         try:
             from core.war_account import ensure_war_account
-            ensure_war_account(self.cfg, ib=self.ib)
+            ensure_war_account(self.cfg, sync_ib=False)
+            if self.ib is not None and self.conn.is_connected():
+                self._defer_war_ib_sync = True
         except Exception as exc:
             log.debug(f"War account: {exc}")
         try:
@@ -1603,7 +1580,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
             send_dynamic_notification(
                 self.notifier, self.autopilot, "startup",
-                self._notify_context({"ib_balance": self._ib_starting_balance}),
+                self._notify_context({"ib_balance": self._ib_starting_balance}, event_type="startup"),
                 "🚀 Life engine running (scalp + swing)",
                 ai_commander=self.ai_commander,
                 consciousness=self.consciousness,
@@ -1702,6 +1679,13 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                     if not getattr(self, "_shutdown_requested_flag", False):
                         log.info("🛑 Shutdown requested — closing session gracefully...")
                     break
+
+                if getattr(self, "_defer_war_ib_sync", False):
+                    self._defer_war_ib_sync = False
+                    try:
+                        self._maybe_sync_war_from_ib(force=False)
+                    except Exception as exc:
+                        log.debug(f"Deferred war IB sync: {exc}")
 
                 if getattr(self, "_needs_initial_scan", False):
                     self._needs_initial_scan = False

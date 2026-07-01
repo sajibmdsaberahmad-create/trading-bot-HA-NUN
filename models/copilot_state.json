@@ -1,20 +1,13 @@
 {
-  "narrative": "Local copilot: 0% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required). Tape: trend grind.",
-  "regime_read": "trend grind",
-  "risk_posture": "defensive",
+  "narrative": "ITE | STOP | LOW | HIGH\nPPO signal=False conf=0.05\nAgree: False\nDecide: True\n\u884c\u52a8\u8ba1\u5212\uff1a1. 05% (PPO 0.05%) on clean signal (conf=0.05)\n2. 05% (PPO 0.05%)",
+  "regime_read": "bear trend",
+  "risk_posture": "normal",
   "session_wr": 0.0,
   "session_pnl": 0.0,
   "ticker_bias": {},
   "repeat_losers": [],
-  "ppo_hints": {
-    "confidence_boost": 0.04,
-    "require_quality_on_repeat": false,
-    "min_spike_mult": 1.0
-  },
-  "lessons": [
-    "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
-    "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
-  ],
-  "updated_at": 1782851320.7855842,
-  "source": "heuristic"
+  "ppo_hints": {},
+  "lessons": [],
+  "updated_at": 1782896916.199391,
+  "source": "parse_fallback"
 }

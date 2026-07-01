@@ -771,7 +771,12 @@ def _sync_paper_war_config(state: Dict[str, Any], cfg: Optional[BotConfig] = Non
         state["bullets_total"] = bullets
 
 
-def ensure_war_account(cfg: Optional[BotConfig] = None, ib=None) -> Dict[str, Any]:
+def ensure_war_account(
+    cfg: Optional[BotConfig] = None,
+    ib=None,
+    *,
+    sync_ib: bool = True,
+) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
     if is_replay_session():
         log.debug("War account init skipped — replay session")
@@ -785,12 +790,12 @@ def ensure_war_account(cfg: Optional[BotConfig] = None, ib=None) -> Dict[str, An
     _maybe_refresh_trips_if_settled(state, cfg)
     state["mode"] = _recompute_mode(state, cfg)
     state["is_live"] = is_live_war(cfg)
-    if ib is not None:
+    if ib is not None and sync_ib:
         synced = False
         try:
             from core.war_ib_sync import sync_war_from_ib, war_ib_sync_enabled
             if war_ib_sync_enabled(cfg):
-                sync_war_from_ib(ib, cfg, apply=True, force=True)
+                sync_war_from_ib(ib, cfg, apply=True, force=False)
                 state = load_state(cfg)
                 synced = True
         except Exception as exc:

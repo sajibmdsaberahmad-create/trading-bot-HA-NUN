@@ -104,10 +104,13 @@ def allows_ppo_lead_while_pending(
     spike_ratio: float = 0.0,
 ) -> bool:
     cfg = cfg or BotConfig()
-    if _ai_sure_blocks_fast_paths(cfg):
-        return False
     if not capital_discipline_enabled(cfg):
         return bool(cfg.PPO_LEAD_WHILE_COUNCIL_PENDING)
+    # Explicit PPO lead — green doctrine still gates at submit; not blocked by ai_sure
+    if bool(getattr(cfg, "PPO_LEAD_WHILE_COUNCIL_PENDING", False)):
+        return True
+    if _ai_sure_blocks_fast_paths(cfg):
+        return False
     if bool(getattr(cfg, "CAPITAL_PPO_LEAD_STRONG_SPIKE", True)) and is_strong_spike_setup(
         cfg, scan_score, spike_ratio,
     ):

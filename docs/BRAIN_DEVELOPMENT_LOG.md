@@ -2,6 +2,10 @@
 
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
+
+- `2026-07-01` **engineering** — Deep IB alignment audit (all Telegram/report surfaces) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+- `2026-07-01` **engineering** — Strict green all phases + fast PPO lead + full-day IB session P&L — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+- `2026-07-01` **engineering** — IB-only LIVE_PULSE/notify; copilot CJK discard; premarket entry floors — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — stop.sh IB kevent watchdog + faster SIGKILL — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — stop.sh responsive shutdown (interruptible sleep, skip duplicate flush) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — IB 322 market-rule noise suppressed; logger `HANOON` — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -2013,3 +2017,9 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-06-30 22:12 UTC` **brain_proxy_trained** · stage **toddler** — Teacher proxy holdout acc=92% (random=97%, 335 samples)
 - `2026-06-30 22:12 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 3 mutation(s), git=ok
 - `2026-06-30 22:12 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 106 pairs
+- `2026-07-01 06:52 UTC` **brain_evolution** · stage **toddler** — Halim developer off_hours: 3 mutation(s), git=ok
+- `2026-07-01 09:11 UTC` **brain_proxy_trained** · stage **toddler** — Teacher proxy holdout acc=93% (random=99%, 341 samples)
+- `2026-07-01 09:11 UTC` **brain_evolution** · stage **toddler** — Evolution live_session_end — stage toddler, dataset 106 pairs
+- `2026-07-01 09:12 UTC` **brain_proxy_trained** · stage **toddler** — Teacher proxy holdout acc=93% (random=99%, 341 samples)
+- `2026-07-01 09:12 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 3 mutation(s), git=ok
+- `2026-07-01 09:12 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 106 pairs

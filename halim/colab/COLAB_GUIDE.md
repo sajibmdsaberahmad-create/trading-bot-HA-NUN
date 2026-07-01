@@ -1,188 +1,114 @@
-# Halim Toddler — Google Colab (beginner guide)
+# Halim Colab — one path, no confusion
 
-Train Halim's first language model **for free** on Google's GPU. Your Mac prepares data; Colab trains with **Drive saves + resume**.
-
----
-
-## Quick reference — which mode?
-
-| Situation | Mac command | Colab env |
-|-----------|-------------|-----------|
-| **First train / big jump (v3 + commander)** | `./scripts/halim_colab_ready.sh` | `HALIM_FRESH_TRAIN=true` |
-| **Weekly update / new gold** | `./scripts/halim_prepare_train_incremental.sh` | `HALIM_CONTINUE_LORA=auto` |
-| **Colab crashed mid-run** | (same zip still on Drive) | `HALIM_RESUME=auto` — **do not** set `FRESH_TRAIN` |
-| **After any successful train** | `./scripts/halim_record_train.sh` | (or auto on Colab if repo mounted) |
+Train Halim on **free Colab T4**. Mac builds data; Colab trains; Mac installs.
 
 ---
 
-## Part A — On your Mac
+## Mac → Colab → Mac
 
-### A1 — Full pack (v3 first time with commander gold)
+```
+Mac:  ./scripts/halim_colab_ready.sh
+        ↓ halim_sft.zip (~800 KB, 13k+ pairs)
+Colab: halim/colab/halim_toddler_train.ipynb (4 cells)
+        ↓ halim_toddler_vN.zip on Drive
+Mac:  ./scripts/halim_apply_colab_checkpoint.sh
+        ↓
+      ./scripts/halim_record_train.sh   (after successful install)
+```
+
+---
+
+## Step 1 — Mac: build zip
 
 ```bash
 cd ~/Downloads/tradingbot
 ./scripts/halim_colab_ready.sh
 ```
 
-Creates **`halim_sft.zip`** (~11k pairs full mode). Check `models/halim_sft_package.meta.json` for `build_id`.
+- **Safe:** exports gold (append/dedupe only), rebuilds `halim_sft.zip` — **does not delete** gold or mark anything trained.
+- Check: `models/halim_sft_package.meta.json` → `build_id`, `train_pairs`.
 
-### A2 — Incremental pack (after v3 — faster ~45–90 min)
+---
+
+## Step 2 — Colab: open notebook fresh
+
+1. Upload **`halim/colab/halim_toddler_train.ipynb`** to Colab  
+   (or File → Upload notebook — replace any old copy)
+2. **Runtime → Change runtime type → T4 GPU**
+3. Run cells **1 → 2 → 3 → 4**
+
+| Cell | What |
+|------|------|
+| **1** | Mount Drive (`My Drive/Halim/`) — version storage only |
+| **2** | Upload `halim_sft.zip` to Colab (widget) → setup |
+| **3** | Fresh fast train on `/content/toddler_v1` (~2–3h) |
+| **4** | Zip to Drive as `halim_toddler_vN.zip` |
+
+### Cell 3 — confirm fast path
+
+Log should show:
+
+```
+Knobs: batch=8 grad_accum=1 ... fp16=False bf16=False profile=colab_t4_fast
+```
+
+and `s/it` ~2–3 (faster than ~5.6 slow path; no fp16 AMP on T4 QLoRA).
+
+### Cell 2 — confirm setup
+
+```
+fresh train: no prior toddler weights
+out_dir: /content/toddler_v1
+```
+
+---
+
+## Step 3 — Mac: install
 
 ```bash
-./scripts/halim_record_train.sh          # once, after last successful Colab train
+./scripts/halim_apply_colab_checkpoint.sh
+# or: ./scripts/halim_watch_colab_zip.sh  while downloading
+./scripts/halim_record_train.sh
+```
+
+---
+
+## Where files go
+
+| File | Where |
+|------|--------|
+| `halim_sft.zip` | **Colab upload** (Cell 2) — every train |
+| Training weights | `/content/toddler_v1` during train |
+| `halim_toddler_vN.zip` | **Drive** `My Drive/Halim/` |
+| Gold on Mac | `halim/data/training/*.jsonl` — never deleted by rebuild |
+
+---
+
+## Later: incremental trains (after v4 installed + recorded)
+
+```bash
+./scripts/halim_record_train.sh
 ./scripts/halim_prepare_train_incremental.sh
 ```
 
-Creates a smaller zip: **core curriculum + new gold only** (~1.5–2.5k pairs).
-
-### A3 — Record v2 if you already trained but never recorded
-
-```bash
-# Marks current train.jsonl hashes as "already trained" (use v2 build id)
-HALIM_SFT_MODE=full ./scripts/halim_prepare_train.sh   # if needed
-./scripts/halim_record_train.sh --build-id f952f242ea6e
-```
-
----
-
-## Part B — Google Colab (automatic)
-
-Open **`halim/colab/halim_toddler_train.ipynb`** → Runtime → GPU → run all 4 cells.
-
-### Upload to `My Drive/Halim/` (browser)
-
-| When | File |
-|------|------|
-| **Every train** | `halim_sft.zip` from Mac (`halim_prepare_train_incremental.sh`) |
-| **First time only** | `halim_toddler_v2.zip` if `toddler_v1/` not on Drive yet |
-
-After the first run, weights stay on Drive in `toddler_v1/`. Next runs: **only upload new `halim_sft.zip`**.
-
-Auto logic (`colab_drive_setup.py` inside the SFT zip):
-- picks latest `halim_sft*.zip` and existing `toddler_v1/` on Drive
-- incremental continue LoRA vs crash-resume vs fresh
-- names output `halim_toddler_v4.zip`, `v5`, … on Drive
-
-Copy-paste cells (legacy): **`halim/colab/COLAB_DRIVE_CELLS.md`**
-
-### B1 — Mount Drive + env
+Same notebook — in Cell 3 change env:
 
 ```python
-from google.colab import drive
-drive.mount('/content/drive')
-
-import os
-WORK = "/content/drive/MyDrive/Halim"
-os.makedirs(WORK, exist_ok=True)
-
-os.environ["HALIM_OUT_DIR"] = f"{WORK}/toddler_v1"
-os.environ["HALIM_CONTINUE_LORA"] = "auto"
-os.environ["HALIM_RESUME"] = "false"          # incremental v3
-os.environ["HALIM_SAVE_TOTAL_LIMIT"] = "3"
-
-!ls -la "$WORK"
+os.environ.pop('HALIM_FRESH_TRAIN', None)
+os.environ['HALIM_CONTINUE_LORA'] = 'auto'
 ```
 
-### B2 — Unzip v2 + SFT + script from Drive
-
-```python
-import zipfile, shutil, json
-from pathlib import Path
-
-WORK = Path("/content/drive/MyDrive/Halim")
-
-# v2 (skip if adapter already on Drive)
-if (WORK / "halim_toddler_v2.zip").is_file():
-    adp = WORK / "toddler_v1" / "lora_adapter" / "adapter_model.safetensors"
-    if not adp.is_file():
-        with zipfile.ZipFile(WORK / "halim_toddler_v2.zip", "r") as zf:
-            zf.extractall(WORK)
-
-# remove finished v2 checkpoints (incremental v3)
-adp_dir = WORK / "toddler_v1" / "lora_adapter"
-for p in adp_dir.glob("checkpoint-*"):
-    shutil.rmtree(p)
-
-# SFT from Drive (includes train_toddler_colab.py inside zip)
-with zipfile.ZipFile(WORK / "halim_sft.zip", "r") as zf:
-    zf.extractall("/content")
-print(json.dumps(json.load(open("/content/sft/colab_manifest.json")), indent=2))
-```
-
-### B3 — pip + train
-
-```python
-!pip install -q transformers peft trl datasets accelerate bitsandbytes
-%cd /content
-!python train_toddler_colab.py
-```
-
-Expect: `CONTINUE_LORA: True | RESUME_CKPT: none` and a **real** progress bar (~30–90 min).
-
-### B4 — If session dies mid-train
-
-```python
-os.environ["HALIM_RESUME"] = "true"
-os.environ["HALIM_RESUME_MIDRUN"] = "true"
-# do NOT delete checkpoint-* folders — re-run B2 (skip v2 unzip) + B3
-```
-
-### B5 — Zip v3 on Drive
-
-```python
-!cd /content/drive/MyDrive/Halim && zip -r halim_toddler_v3.zip toddler_v1
-```
-
-Download `halim_toddler_v3.zip` from Drive on your Mac (no Colab upload needed).
-
-
----
-
-## Part C — Back on Mac
-
-```bash
-cd ~/Downloads/tradingbot
-./scripts/halim_start_toddler.sh ~/Downloads/halim_toddler_v3.zip
-./scripts/halim_record_train.sh
-./scripts/ensure_halim_active.sh --serve-only
-```
-
----
-
-## Environment variables (train script)
-
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `HALIM_OUT_DIR` | `toddler_v1` | **Use Drive path** for persistence |
-| `HALIM_RESUME` | `auto` | Resume `checkpoint-*` after crash |
-| `HALIM_FRESH_TRAIN` | `false` | Wipe adapter; train from base Qwen |
-| `HALIM_CONTINUE_LORA` | `auto` | Load existing LoRA on new SFT zip |
-| `HALIM_SAVE_STEPS` | `0` | `0` = save each epoch; `200` = every 200 steps |
-| `HALIM_SAVE_TOTAL_LIMIT` | `3` | Keep last N checkpoints |
-| `HALIM_RESUME_CHECKPOINT` | — | Explicit path to one checkpoint folder |
-| `HALIM_CORE_DELTA_EPOCHS` | `2.5` | Fewer epochs for incremental packs |
-
----
-
-## Your workflow going forward
-
-```
-Mac: gold grows → incremental pack → halim_sft.zip
-Colab: Drive OUT_DIR + CONTINUE_LORA → train ~45–90 min
-Mac: install zip → record_train → serve
-```
-
-**v3 now:** `halim_colab_ready.sh` + Colab with `HALIM_FRESH_TRAIN=true` + Drive `OUT_DIR`  
-**v4+:** `halim_prepare_train_incremental.sh` + `HALIM_CONTINUE_LORA=auto` (no FRESH_TRAIN)
+Expect ~45–90 min on T4.
 
 ---
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
-| Colab disconnected | Re-run with same Drive `OUT_DIR`, `HALIM_RESUME=auto` |
-| Training 5+ hours | Use incremental pack, not full 11k |
-| Incremental pack empty | Run `./scripts/halim_record_train.sh` after last train |
-| `Can't find adapter` | First train needs `FRESH_TRAIN=true` once |
-| Chat weak after v2 | v3 full with commander gold still recommended once |
+| Issue | Fix |
+|-------|-----|
+| `s/it` ~5.6 | Old zip — rerun `halim_colab_ready.sh`, re-upload |
+| `merged/` missing in Cell 4 | Cell 3 still running or failed |
+| OOM on T4 | `HALIM_BATCH_SIZE=4` `HALIM_GRAD_ACCUM=2` |
+| Colab disconnect | Re-run Cell 2+3; set `HALIM_RESUME_MIDRUN=true` only if mid-epoch crash |
+
+Copy-paste cells: `halim/colab/COLAB_DRIVE_CELLS.md` (same as notebook).

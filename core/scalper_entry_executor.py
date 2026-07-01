@@ -444,7 +444,7 @@ class ScalperEntryMixin:
         if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
             send_dynamic_notification(
                 self.notifier, self.autopilot, "trade_opened",
-                self._notify_context(entry_ctx),
+                self._notify_context(entry_ctx, event_type="trade_opened"),
                 f"🎯 ENTRY {shares}x {ticker} @ ${fill_px:.2f} | "
                 f"Stop ${plan.initial_stop_price:.2f} | TP ${plan.take_profit_price:.2f}",
                 ai_commander=self.ai_commander,

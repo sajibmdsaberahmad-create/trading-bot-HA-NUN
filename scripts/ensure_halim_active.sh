@@ -36,14 +36,30 @@ fi
 
 mkdir -p "$LOG_DIR"
 
+_ensure_colab_zip() {
+  if [[ "${HALIM_AUTO_INSTALL_COLAB:-true}" != "true" ]]; then
+    return 0
+  fi
+  if [[ -x "$ROOT/scripts/halim_apply_colab_checkpoint.sh" ]]; then
+    "$ROOT/scripts/halim_apply_colab_checkpoint.sh" --if-new 2>/dev/null || true
+  fi
+}
+
 _ensure_checkpoint() {
+  _ensure_colab_zip
   local ckpt="$ROOT/halim/data/checkpoints/toddler_v1"
   if [[ -f "$ckpt/merged/model.safetensors" ]] || [[ -f "$ckpt/lora_adapter/adapter_model.safetensors" ]]; then
     return 0
   fi
-  local zip="${HALIM_TODDLER_ZIP:-$HOME/Downloads/halim_toddler_v1.zip}"
+  local zip=""
+  if [[ -x "$ROOT/scripts/halim_apply_colab_checkpoint.sh" ]]; then
+    zip=$(python3 "$ROOT/halim/scripts/find_colab_checkpoint.py" 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('path','') if d.get('ok') else '')" 2>/dev/null || true)
+  fi
+  if [[ -z "$zip" ]]; then
+    zip="${HALIM_TODDLER_ZIP:-$HOME/Downloads/halim_toddler_v1.zip}"
+  fi
   if [[ -f "$zip" ]]; then
-    echo "📦 Halim toddler checkpoint missing — extracting $zip…"
+    echo "📦 Halim toddler checkpoint missing — extracting $(basename "$zip")…"
     mkdir -p "$ROOT/halim/data/checkpoints"
     unzip -o "$zip" -d "$ROOT/halim/data/checkpoints/"
     if [[ -d "$ROOT/venv" ]]; then

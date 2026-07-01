@@ -685,11 +685,19 @@ class ScalperSessionMixin:
                 guidelines = self._generate_guidelines()
                 baseline = float(self.cfg.INITIAL_CASH)
                 ib_pnl, ib_pnl_pct = self._day_pnl_ib()
+                ib_trips = 0
+                try:
+                    from core.ib_truth import get_snapshot
+                    snap = get_snapshot()
+                    if snap.refreshed_at > 0:
+                        ib_trips = len(snap.round_trips)
+                except Exception:
+                    ib_trips = 0
                 stmt = (
                     f"portfolio: {today_str} ET | "
                     f"IB=${self.account_equity:,.0f} | "
                     f"IB P&L=${ib_pnl:+,.0f} ({ib_pnl_pct:+.2f}%) | "
-                    f"trades={self.trades_today}"
+                    f"round_trips={ib_trips}"
                 )
                 push_daily_summary(self.account_equity, self.account_equity)
                 try:
@@ -867,6 +875,14 @@ class ScalperSessionMixin:
         ib_change_pct = (ib_change / ib_start) * 100 if ib_start else 0.0
         from core.account_view import day_pnl
         ib_pnl_usd, ib_pnl_pct = day_pnl(self, self.cfg)
+        ib_trips = 0
+        try:
+            from core.ib_truth import get_snapshot
+            snap = get_snapshot()
+            if snap.refreshed_at > 0:
+                ib_trips = len(snap.round_trips)
+        except Exception:
+            pass
         try:
             from core.war_account import war_account_context
             war_ctx = war_account_context(self.cfg)
@@ -892,9 +908,8 @@ class ScalperSessionMixin:
                 f"{war_trips_bit}  "
                 f"mode={war_ctx.get('war_mode', '?')}\n"
             )
-        summary += f" Bot Cash:      ${self.bot_cash:>12,.2f}\n"
         summary += f" Day P&L (IB):  ${ib_pnl_usd:>+12,.2f} ({ib_pnl_pct:+.2f}%)\n"
-        summary += f" Trades:        {self.trades_today:>12d}\n"
+        summary += f" Round-trips:   {ib_trips:>12d} (IB)\n"
         if self.shares > 0:
             summary += f" Position:      {self.shares:.0f} {self.current_ticker}\n"
             summary += " (bracket orders remain active on IB)\n"
@@ -905,8 +920,8 @@ class ScalperSessionMixin:
                 self.notifier, self.autopilot, "session_close",
                 self._notify_context({
                     "pnl": ib_pnl_usd, "pnl_pct": ib_pnl_pct, "ib_change": ib_change,
-                    "trades_today": self.trades_today, "report": str(report_path),
-                }),
+                    "ib_round_trips": ib_trips, "report": str(report_path),
+                }, event_type="session_close"),
                 summary,
                 ai_commander=self.ai_commander,
                 consciousness=self.consciousness,
@@ -920,7 +935,7 @@ class ScalperSessionMixin:
                 from core.graceful_shutdown import flush_git_sync
                 git_r = flush_git_sync(
                     replay=False,
-                    nav=self.bot_nav,
+                    nav=self.account_equity,
                     pnl_pct=ib_pnl_pct,
                     report_path=str(report_path or ""),
                 )
@@ -928,7 +943,7 @@ class ScalperSessionMixin:
             except Exception as exc:
                 log.error(f"Shutdown git sync failed: {exc}")
                 try:
-                    push_daily_summary(self.bot_nav, self.account_equity)
+                    push_daily_summary(self.account_equity, self.account_equity)
                 except Exception:
                     pass
 

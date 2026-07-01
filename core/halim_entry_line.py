@@ -318,6 +318,89 @@ def _normalize_entry_parsed(parsed: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
+def halim_entry_ib_context_enabled() -> bool:
+    return os.getenv("HALIM_ENTRY_IB_CONTEXT", "true").lower() in ("1", "true", "yes")
+
+
+def build_halim_entry_ib_context(
+    cfg: Optional[BotConfig] = None,
+    *,
+    ticker: str = "",
+    price: float = 0.0,
+) -> str:
+    """
+    Compact IB + war sizing line for Halim entry prompts.
+    Uses cached ib_truth snapshot — no extra IB round-trips on the spike path.
+    """
+    if not halim_entry_ib_context_enabled():
+        return ""
+    cfg = cfg or BotConfig()
+    parts: list[str] = []
+    nav = 0.0
+    try:
+        from core.ib_truth import get_snapshot, ib_truth_enabled
+
+        if ib_truth_enabled(cfg):
+            snap = get_snapshot()
+            if snap.refreshed_at > 0:
+                acct = snap.account
+                nav = float(acct.net_liquidation or 0)
+                parts.append(
+                    f"ib nav={nav:.0f} buying_power={acct.buying_power:.0f} "
+                    f"avail={acct.available_funds:.0f} session_pnl={acct.realized_pnl:+.0f}"
+                )
+                if float(acct.excess_liquidity or 0) > 0:
+                    parts.append(f"excess_liq={acct.excess_liquidity:.0f}")
+                parts.append(f"open_positions={len(snap.long_positions())}")
+    except Exception:
+        pass
+
+    try:
+        from core.war_account import war_account_context, war_account_enabled
+
+        if war_account_enabled(cfg):
+            war = war_account_context(cfg)
+            if war:
+                parts.append(
+                    f"war settled={float(war.get('war_settled_cash', 0)):.0f} "
+                    f"bullets_left={int(war.get('war_bullets_remaining', 0))} "
+                    f"deploy_cap={float(war.get('war_deploy_cap_usd', 0)):.0f}"
+                )
+    except Exception:
+        pass
+
+    if price > 0:
+        try:
+            from core.pilot_mode import get_trade_risk_usd
+
+            risk_usd = get_trade_risk_usd(
+                cfg, nav or float(getattr(cfg, "INITIAL_CASH", 1000))
+            )
+            stop_pct = float(getattr(cfg, "SCALP_MIN_STOP_PCT", 0.004))
+            stop_dist = max(price * stop_pct, price * 0.003)
+            shares_hint = max(1, int(risk_usd / stop_dist)) if stop_dist > 0 else 0
+            deploy_cap = 0.0
+            try:
+                from core.war_account import war_account_context, war_account_enabled
+
+                if war_account_enabled(cfg):
+                    deploy_cap = float(war_account_context(cfg).get("war_deploy_cap_usd", 0) or 0)
+            except Exception:
+                pass
+            if deploy_cap > 0:
+                shares_cap = max(1, int(deploy_cap / price))
+                shares_hint = min(shares_hint, shares_cap) if shares_hint else shares_cap
+            notional = shares_hint * price
+            parts.append(
+                f"sizing risk_usd={risk_usd:.0f} shares_hint={shares_hint} "
+                f"notional={notional:.0f} ask={price:.4f}"
+            )
+        except Exception:
+            parts.append(f"ask={price:.4f}")
+
+    return " ".join(parts)
+
+
 def _build_entry_prompt(
     *,
     ticker: str,
@@ -329,6 +412,7 @@ def _build_entry_prompt(
     ppo_reason: str = "",
     loss_context: str = "",
     macro_context: str = "",
+    ib_context: str = "",
     profit_prob: float = 0.0,
     enter_ok: bool = True,
     fakeout_risk: float = 0.0,
@@ -336,6 +420,7 @@ def _build_entry_prompt(
 ) -> str:
     loss_line = f"{loss_context.strip()}\n" if loss_context else ""
     macro_line = f"{macro_context.strip()}\n" if macro_context else ""
+    ib_line = f"{ib_context.strip()}\n" if ib_context else ""
     ppo_side = "buy" if ppo_buy else "hold"
     quality_line = ""
     if profit_prob > 0:
@@ -343,13 +428,19 @@ def _build_entry_prompt(
             f"quality profit_prob={profit_prob:.2f} enter_ok={str(enter_ok).lower()} "
             f"fakeout={fakeout_risk:.2f} setup={setup_type or 'mixed'}\n"
         )
+    math_line = ""
+    if ib_context:
+        math_line = (
+            "Use ib+sizing numbers for conviction; code executes exact shares.\n"
+            'Optional: "size_intent":"full_bullet"|"half"|"skip" in reason.\n'
+        )
     return (
         f"ENTRY {ticker.upper()} price={price:.4f} spike={spike:.2f}x score={scan:.0f}\n"
         f"ppo={ppo_side} conf={ppo_conf:.2f} note={ppo_reason[:50]}\n"
-        f"{quality_line}{macro_line}{loss_line}"
+        f"{quality_line}{ib_line}{macro_line}{loss_line}{math_line}"
         'Reply ONE json object only. No other text.\n'
-        '{"enter":true,"confidence":0.72,"reason":"clean momentum scalp"}\n'
-        '{"enter":false,"confidence":0.55,"reason":"chop fakeout"}\n'
+        '{"enter":true,"confidence":0.72,"reason":"calculated lottery full_bullet"}\n'
+        '{"enter":false,"confidence":0.55,"reason":"chop fakeout skip"}\n'
         "enter=true when profit_prob high and momentum clean; false on chop/fakeout."
     )
 
@@ -495,6 +586,13 @@ class HalimEntryLine:
                 macro_ctx = f"{macro_ctx}\n{hint}" if macro_ctx else hint
         except Exception:
             pass
+        ib_ctx = ""
+        try:
+            ib_ctx = build_halim_entry_ib_context(
+                self.cfg, ticker=key, price=price,
+            )
+        except Exception:
+            pass
         prompt = _build_entry_prompt(
             ticker=key,
             price=price,
@@ -505,6 +603,7 @@ class HalimEntryLine:
             ppo_reason=ppo_reason,
             loss_context=loss_ctx,
             macro_context=macro_ctx,
+            ib_context=ib_ctx,
             profit_prob=profit_prob,
             enter_ok=enter_ok,
             fakeout_risk=fakeout_risk,

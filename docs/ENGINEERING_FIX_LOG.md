@@ -10,6 +10,421 @@
 
 ---
 
+### Verify
+Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no grad scaler crash.
+
+---
+
+## 2026-07-01 — Deep IB alignment audit (all Telegram/report surfaces)
+
+### Problem
+Several user-facing paths still showed `bot_nav`, local `trades_today`, journal-summed P&L, or stream-calculated commander exit P&L outside the main `_notify_context` hub.
+
+### Root cause
+Two outbound pipelines: `send_smart_telegram` (IB-grounded) vs `format_outbound_message` / account eval / daily reports (partial local ctx).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/notify_ib_context.py` | `merge_ib_telegram_context()` for copilot partial ctx |
+| `core/ai_telegram.py` | `format_outbound_message` merges IB before compose |
+| `core/account_evaluator.py` | Snapshots + briefs IB-only; notify via `telegram_notify_context` |
+| `core/daily_activity_report.py` | `/daily` account + session P&L from IB FIFO |
+| `core/daily_self_evaluation.py` | EOD self-eval headlines IB NetLiq + session P&L |
+| `core/system_status.py` | `/system` drops bot_nav; IB round-trips |
+| `core/scalper_session.py` | Session close + daily push: IB round-trips, no bot_cash line |
+| `core/halim_companion.py` | `live_snapshot` IB round-trips; no bot_nav fallback |
+| `core/position_intel.py` | Risk report uses IB round-trip count |
+| `core/scalper_exit_executor.py` | Commander `/exit` P&L from IB fill reconcile |
+| `core/trading_copilot.py` | Copilot context IB round-trips |
+| `core/telegram_listener.py` | Mood fallback labels IB round-trips |
+| `tests/test_notify_ib_context.py` | `merge_ib_telegram_context` test |
+
+### Verify
+```bash
+venv/bin/pytest tests/test_notify_ib_context.py tests/test_ib_grounding.py -q
+# Telegram: /status /positions /risk /daily /system /mood — no bot_nav lines
+# Commander /exit shows · IB fill tag when IB confirms
+```
+
+---
+
+## 2026-07-01 — Telegram notifications IB-only (no local P&L/NAV)
+
+### Problem
+Telegram entry/exit/status alerts mixed `bot_nav`, stream prices, composer local `_session_pnl`, and `runner.trades_today` with IB data.
+
+### Root cause
+`_notify_context` included bot_cash, local deployed_pct, and `ai_notifier._enrich_context` overwrote `session_pnl` with composer accumulator. `position_intel` used stream `_live_price_for` when IB mark available.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/notify_ib_context.py` | **New** — `telegram_notify_context()` / `ib_telegram_account()` refresh IB Truth for all alerts |
+| `core/scalper_runner.py` | `_notify_context` delegates to notify_ib_context |
+| `core/ai_notifier.py` | enrich uses IB session P&L; templates label IB fills; `send_smart_telegram` re-grounds via runner |
+| `core/telegram_listener.py` | `/status` ctx from `ib_telegram_account` |
+| `core/position_intel.py` | Positions use IB mark + unrealized only when IB position exists |
+| `core/scalper_entry_executor.py` | `event_type=trade_opened` |
+| `core/scalper_exit_executor.py` | Exit ctx IB fill fields + `event_type` |
+| `core/notify.py` | `trade_closed` fallback shows IB NetLiq + session P&L |
+| `tests/test_notify_ib_context.py` | Unit tests |
+
+### Verify
+```bash
+venv/bin/pytest tests/test_notify_ib_context.py tests/test_ib_grounding.py -q
+# Telegram entry: "IB fill" + IB NetLiq + Session P&L from FIFO
+# /status: no bot_nav line — NetLiq + Session P&L from IB
+```
+
+---
+
+## 2026-07-01 — Strict green + fast PPO lead + full-day IB session P&L
+
+### Problem
+User rejected pre-market relaxations (commander floor skip, green_bar waiver). Wants green doctrine + PPO/AI on **all** sessions with **fast** entry decisions, not looser gates. Session P&L/Telegram should count **all** IB fills (pre-market included), not RTH-only $0 before 09:30.
+
+### Root cause
+Prior fix relaxed `premarket_full` gates. `PPO_LEAD_WHILE_COUNCIL_PENDING=false` and capital_discipline ignored env PPO lead unless strong spike. `IB_TRUTH_RTH_SESSION=true` excluded pre-market fills from FIFO session P&L.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/commander_runtime.py` | Revert — commander lottery floors apply in pre-market |
+| `core/green_trade_doctrine.py` | Revert — full green_bar + ai_vote required every phase |
+| `core/capital_discipline.py` | Honor `PPO_LEAD_WHILE_COUNCIL_PENDING` (green still gates submit) |
+| `core/ib_truth.py` | Calendar scope prefers FIFO session P&L |
+| `core/account_view.py` | Baseline uses `_ib_starting_balance` when RTH session off |
+| `core/rth_session.py` | Telegram market_note for full-day IB scope |
+| `scripts/start_hanoon.sh` | `PPO_LEAD=true`, `IB_TRUTH_RTH_SESSION=false`, `IB_TRUTH_RTH_FILLS_ONLY=false`, `HALIM_ENTRY_AWAIT_SEC=2.5` |
+| `tests/test_ib_grounding.py` | Strict green + PPO lead + calendar FIFO tests |
+
+### Env vars
+```bash
+PPO_LEAD_WHILE_COUNCIL_PENDING=true   # fast PPO while council logs; green required at submit
+IB_TRUTH_RTH_SESSION=false            # FIFO since midnight ET
+IB_TRUTH_RTH_FILLS_ONLY=false         # count pre/AH fills
+HALIM_ENTRY_AWAIT_SEC=2.5
+```
+
+### Verify
+```bash
+venv/bin/pytest tests/test_ib_grounding.py -q
+# Pre-market Telegram: non-zero ib_fifo_session_pnl after IB fills
+# Spike path: still GREEN veto without green_bar; PPO can lead when council pending
+```
+
+---
+
+## 2026-07-01 — IB-only pulse/notify + copilot Chinese discard + premarket entry floors
+
+### Problem
+1. Pre-market spikes vetoed at 80% profit_prob + green_bar/ai_vote — no IB entries despite live scanner.
+2. `LIVE_PULSE` P&L from stream ticks, not IB portfolio mark/unrealized.
+3. Copilot log showed Chinese text (`行动计划…`) under `[parse_fallback]` — looked like compromise; was Groq/Gemini non-JSON reply stuffed into narrative.
+4. Telegram `trade_opened` fallback used stale `_latest_account_balance` not NetLiq snapshot.
+
+### Root cause
+`COMMANDER_LOTTERY_MIN_PROFIT_PROB=0.80` applied in `premarket_full` via `commander_entry_floors`. Green doctrine required `green_bar+ai_vote` on thin pre-market bars. Copilot `_parse_brief_json` used raw LLM text when JSON parse failed. Monitor path preferred stream over `ib_truth` snapshot.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/response_sanity.py` | **New** — CJK detection; discard non-English structured LLM output |
+| `core/trading_copilot.py` | English-only prompt; heuristic on bad JSON; IB account/positions in session context |
+| `core/commander_runtime.py` | Skip commander lottery floors in `premarket_full` |
+| `core/green_trade_doctrine.py` | Relaxed green entry in pre-market (no green_bar/ai_vote gate) |
+| `core/ib_truth.py` | `position_pulse()` — IB mark + unrealized for monitoring |
+| `core/scalper_runner.py` | `_resolve_monitor_price` prefers IB Truth mark |
+| `core/scalper_exit_executor.py` | LIVE_PULSE uses `position_pulse`; logs `IB` tag when grounded |
+| `core/account_view.py` | `ib_equity` from snapshot NetLiq when fresh |
+| `core/notify.py` | `trade_opened` fallback shows IB NetLiq |
+| `tests/test_ib_grounding.py` | Copilot CJK, premarket floors, green relax |
+
+### Env vars
+Unchanged — behavior is phase-aware. Copilot still uses Groq/Gemini when `COUNCIL_ENABLED=true`.
+
+### Verify
+```bash
+venv/bin/pytest tests/test_ib_grounding.py -q
+# Log: no Chinese in COPILOT lines; bad JSON → heuristic or warning
+# LIVE_PULSE: T $… | P&L … with optional " IB" suffix when ib_truth fresh
+# Pre-market spike: profit_prob target ≤62–65% (not 80%) when phase=premarket_full
+```
+
+---
+
+## 2026-07-01 — IB Truth startup hang after Commander runtime (war sync triple refresh)
+
+### Problem
+HANOON froze at `🧭 Commander runtime ON (live)` — no `⚔️ War account` or `🚀 Life engine running` lines. Process blocked on IB Gateway `kevent` for minutes.
+
+### Root cause
+`ensure_war_account(ib=…)` at startup called `sync_war_from_ib(force=True)`, which ran **three** full `build_snapshot` passes (positions, session PnL, reconcile) immediately after the IB Truth checklist had already refreshed. Overnight Gateway often stalls on repeated `reqExecutions` / `reqAllOpenOrders`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_ib_sync.py` | One snapshot per sync via `_resolve_sync_snapshot`; reuse checklist cache when age ≤ `IB_TRUTH_STARTUP_MAX_AGE_SEC` |
+| `core/war_account.py` | `sync_ib=False` skips blocking IB pull at boot; `force=False` when sync runs |
+| `core/scalper_runner.py` | War ledger init from disk at startup; deferred IB sync on first main-loop tick |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `IB_TRUTH_STARTUP_MAX_AGE_SEC` | `30` | War sync reuses IB Truth snapshot younger than this |
+| `WAR_IB_SYNC` | `true` | Set `false` to disable war↔IB sync entirely |
+
+### Verify
+```bash
+python3 -m pytest tests/test_ib_truth.py -q
+# Restart HANOON off-hours: expect ⚔️ War account + 🚀 Life engine within seconds of Commander runtime line
+```
+
+---
+
+## 2026-07-01 — Colab fp16 QLoRA dtype mismatch (T4 crash at step 0)
+
+### Problem
+Fast path set `fp16=True` but `bnb_4bit_compute_dtype=bfloat16` — training died at step 0 with `NotImplementedError: _amp_foreach_non_finite_check_and_unscale_cuda not implemented for BFloat16`.
+
+### Root cause
+QLoRA on Colab T4 leaves bf16 grads; `fp16=True` enables GradScaler which cannot unscale them.
+
+### Fix
+| File | Change |
+|------|--------|
+| `halim/colab/train_toddler_colab.py` | T4 fast: `batch=8`, `fp16=False`, `bf16=False`; `prepare_model_for_kbit_training` |
+
+### Verify
+Cell 3: `fp16=False bf16=False profile=colab_t4_fast` — steps pass 0 without crash.
+
+---
+
+---
+
+## 2026-07-01 — Colab max-power notebook (batch 24, ~2008 steps)
+
+### Problem
+T4 training at batch 8 used ~4.5/15 GB VRAM — half the GPU idle; 6024 steps ~6h.
+
+### Root cause
+Conservative batch 8 with same step count as effective-batch-8 slow path.
+
+### Fix
+| File | Change |
+|------|--------|
+| `halim/colab/halim_toddler_train_max.ipynb` | New notebook: batch 24, OOM fallback cell for batch 16 |
+| `halim/colab/train_toddler_colab.py` | `HALIM_MAX_POWER=true` → batch 24 on 15GB T4 |
+
+### Verify
+Log: `batch=24 profile=colab_t4_max` and `~2008` total steps; GPU RAM ~10–13 GB.
+
+---
+
+## 2026-07-01 — Colab notebook fresh single-path workflow
+
+### Problem
+Old notebook mixed Drive SFT upload, slow defaults, and incremental/fresh modes — confusing for v4 rebuild.
+
+### Root cause
+`halim_toddler_train.ipynb` lagged behind hybrid + fast-path scripts.
+
+### Fix
+| File | Change |
+|------|--------|
+| `halim/colab/halim_toddler_train.ipynb` | Rewritten: Colab SFT upload, clean `/content`, fresh fast train, Drive zip only |
+| `halim/colab/COLAB_GUIDE.md` | Single Mac→Colab→Mac path |
+| `halim/colab/COLAB_DRIVE_CELLS.md` | Mirror notebook cells |
+
+### Verify
+Upload notebook + `halim_sft.zip` to Colab; Cell 3 shows `profile=colab_t4_fast`.
+
+---
+
+## 2026-07-01 — Colab hybrid: SFT on Colab, toddler versions on Drive
+
+### Problem
+Uploading `halim_sft.zip` to Drive each train is slow; training directly on Drive `toddler_v1/` adds I/O overhead.
+
+### Root cause
+`colab_drive_setup.py` only discovered SFT on Drive and defaulted `HALIM_OUT_DIR` to Drive.
+
+### Fix
+| File | Change |
+|------|--------|
+| `halim/colab/colab_drive_setup.py` | SFT: `/content/halim_sft*.zip` before Drive; train on `/content/toddler_v1`; copy Drive toddler only when continuing LoRA |
+| `halim/colab/COLAB_DRIVE_CELLS.md` | Hybrid upload cells |
+
+### Verify
+Setup log: `sft_zip` from `/content/`, `out_dir` `/content/toddler_v1`, Drive audit still lists `halim_toddler_vN.zip`.
+
+---
+
+## 2026-07-01 — Colab T4 fast training path (fp16 + batch 8)
+
+### Problem
+Full v4 SFT on Colab T4 ran ~5.6s/step (~9h) with GPU RAM at 1.7/15 GB — batch=2, bf16 on T4.
+
+### Root cause
+Conservative defaults (micro-batch 2, grad_accum 4, bf16) under-utilized T4 tensor cores and VRAM.
+
+### Fix
+| File | Change |
+|------|--------|
+| `halim/colab/train_toddler_colab.py` | `HALIM_FAST_PATH=auto` → T4: batch 8, grad_accum 1, fp16; prints `profile=colab_t4_fast` |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `HALIM_FAST_PATH` | `auto` | T4 fast knobs; `false` restores batch 2 / accum 4 / bf16 |
+| `HALIM_BATCH_SIZE` | (auto) | Explicit override |
+| `HALIM_FP16` / `HALIM_BF16` | (auto) | Explicit precision override |
+
+### Verify
+Restart Colab train; log should show `profile=colab_t4_fast` and `s/it` ~1.5–2.5 vs ~5.6.
+
+---
+
+## 2026-07-01 — PPO teacher via Halim LM (Groq fallback)
+
+### Problem
+PPO teacher sessions always called Groq council; Halim LM was not used for batch distillation despite co-evolution gold.
+
+### Root cause
+`_call_teacher` only used `CouncilClient`; no Halim inference path.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ppo_teacher_training.py` | Halim first (`HALIM_PPO_TEACHER_VIA_HALIM=auto`) → Groq → local heuristic |
+| `core/halim_inference.py` | `ppo_teacher` purpose uses 120s timeout |
+| `core/trading_focus_guard.py` | `ppo_teacher` allowed during live gold collect |
+| `scripts/halim_env.sh` | `HALIM_PPO_TEACHER_VIA_HALIM`, `HALIM_PPO_TEACHER_TIMEOUT_SEC` |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `HALIM_PPO_TEACHER_VIA_HALIM` | `auto` | `auto`/`true`/`halim_first` try Halim when LM ready; `groq_only` skip; `halim_only` no Groq |
+| `HALIM_PPO_TEACHER_TIMEOUT_SEC` | `120` | Halim teacher JSON timeout |
+
+### Verify
+```bash
+python3 -m py_compile core/ppo_teacher_training.py core/halim_inference.py
+# After v4 serve up: trigger teacher off-hours or force session
+```
+
+---
+
+## 2026-07-01 — Auto-install Colab Halim vN on Mac (apply + watch + HANOON boot)
+
+### Problem
+After Colab v4 train, user had to manually install zip, record_train, restart serve.
+
+### Root cause
+No orchestrator; docs pointed at v2-only manual cells.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/halim_apply_colab_checkpoint.sh` | **New** — find latest vN zip, install, record_train, MLX deps, eval, restart serve |
+| `scripts/halim_watch_colab_zip.sh` | **New** — poll Downloads/Drive until zip appears |
+| `halim/scripts/find_colab_checkpoint.py` | **New** — highest `halim_toddler_vN.zip` in Downloads + Google Drive Halim/ |
+| `scripts/start_hanoon.sh` | `HALIM_AUTO_INSTALL_COLAB=true` before ensure_halim_active |
+| `scripts/ensure_halim_active.sh` | Auto-install hook + latest zip fallback |
+| `scripts/halim_start_toddler.sh` | Delegates to apply pipeline |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `HALIM_AUTO_INSTALL_COLAB` | `true` | On HANOON start, install new Colab zip if detected |
+| `HALIM_COLAB_SEARCH_DIRS` | *(unset)* | Extra `:`-separated dirs to scan for zips |
+| `HALIM_COLAB_WATCH_SEC` | `15` | Watcher poll interval |
+
+### Verify
+```bash
+chmod +x scripts/halim_apply_colab_checkpoint.sh scripts/halim_watch_colab_zip.sh
+./scripts/halim_watch_colab_zip.sh   # while downloading v4
+# or after download:
+./scripts/halim_apply_colab_checkpoint.sh
+```
+
+---
+
+## Mac after Colab Cell 4 (automatic)
+
+```bash
+# Option A — run now while v4 downloads from Drive:
+./scripts/halim_watch_colab_zip.sh
+
+# Option B — after zip is in ~/Downloads:
+./scripts/halim_apply_colab_checkpoint.sh
+
+# Option C — do nothing; next ./scripts/start_hanoon.sh auto-installs (HALIM_AUTO_INSTALL_COLAB=true)
+```
+
+Log: `logs/halim_colab_install.log` · State: `models/halim_colab_install_state.json`
+
+---
+
+## 2026-07-01 — Colab Drive: latest halim_toddler_vN (not v2-only)
+
+### Problem
+Manual Colab cells and upload_rule required `halim_toddler_v2.zip` even when v3+ existed on Drive; confused users with adapter already on `toddler_v1/`.
+
+### Root cause
+Legacy `COLAB_DRIVE_CELLS.md` predated `colab_drive_setup.py` auto-version pick.
+
+### Fix
+| File | Change |
+|------|--------|
+| `halim/colab/colab_drive_setup.py` | `audit_drive()` — list all vN zips, print highest; note when adapter on Drive skips extract |
+| `halim/colab/COLAB_DRIVE_CELLS.md` | Rewritten — 4-cell auto flow, PPO→Halim gold table |
+| `halim/colab/halim_toddler_train.ipynb` | Cell 2 audits Drive before setup |
+| `halim/scripts/package_colab_sft.py` | upload_rule: latest vN optional, SFT required |
+
+### Verify
+```bash
+./scripts/halim_colab_ready.sh
+python3 halim/colab/colab_drive_setup.py  # on Colab after mount
+```
+
+---
+
+## 2026-07-01 — Halim live spike participation: IB sizing context + coevolution on every verdict
+
+### Problem
+Halim entry LM prompts lacked IB account/sizing numbers; coevolution gold only fired on deferred council path, not every finalized spike verdict.
+
+### Root cause
+`_build_entry_prompt` had macro/quality only; `_emit_spike_verdict` logged verdicts but did not call `record_coevolution`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_entry_line.py` | `build_halim_entry_ib_context()` — nav, buying power, war deploy, shares_hint from cached ib_truth; math/size_intent lines in prompt |
+| `core/ai_commander_verdict.py` | `record_coevolution` on every `_emit_spike_verdict` finalize |
+| `scripts/halim_env.sh` | `HALIM_ENTRY_IB_CONTEXT`, blend 0.35, `HALIM_OUTCOME_GOLD`, `HALIM_PPO_COMPLEMENT` |
+| `scripts/start_hanoon.sh` | Export entry participation env defaults |
+| `tests/test_halim_entry_ib_context.py` | **New** — prompt + IB context unit tests |
+
+### Env vars
+| Var | Default | Effect |
+|-----|---------|--------|
+| `HALIM_ENTRY_IB_CONTEXT` | `true` | IB + sizing line in entry LM prompt |
+| `HALIM_ENTRY_BLEND_WEIGHT` | `0.35` | Halim advisory blend into council decision |
+| `HALIM_PPO_COMPLEMENT` | `true` | PPO HOLD + Halim ENTER quality override |
+| `HALIM_OUTCOME_GOLD` | `true` | Outcome-labeled gold at trade close |
+
+### Verify
+```bash
+python3 -m pytest tests/test_halim_entry_ib_context.py -q
+python3 -m py_compile core/halim_entry_line.py core/ai_commander_verdict.py
+./scripts/halim_colab_ready.sh   # v4 pack when gold ready
+```
+
+---
+
 ## 2026-07-01 — stop.sh: watchdog for IB kevent hang
 
 ### Problem
