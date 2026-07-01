@@ -3,6 +3,8 @@
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
 
+- `2026-07-01` **engineering** — GREEN_WAVE_ENTRY institutional wave riding + spike defer + startup fixes — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+
 - `2026-07-01` **engineering** — ib_async shim + UTC time_utils + runtime journal untrack — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 
 - `2026-07-01` **engineering** — Deep IB alignment audit (all Telegram/report surfaces) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -2048,3 +2050,9 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-07-01 12:43 UTC` **brain_evolution** · stage **toddler** — Evolution live_session_end — stage toddler, dataset 78 pairs
 - `2026-07-01 12:44 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
 - `2026-07-01 12:44 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 78 pairs
+- `2026-07-01 13:34 UTC` **brain_evolution** · stage **toddler** — Evolution live_session_end — stage toddler, dataset 78 pairs
+- `2026-07-01 13:35 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-01 13:35 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 78 pairs
+- `2026-07-01 13:47 UTC` **brain_evolution** · stage **toddler** — Evolution live_session_end — stage toddler, dataset 78 pairs
+- `2026-07-01 13:48 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-01 13:48 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 78 pairs

@@ -52,6 +52,14 @@ def multibar_ride_enabled(cfg: Optional["BotConfig"] = None) -> bool:
     return os.getenv("GREEN_MULTIBAR_RIDE", "true").lower() in ("1", "true", "yes")
 
 
+def green_wave_entry_enabled(cfg: Optional["BotConfig"] = None) -> bool:
+    try:
+        from core.green_wave_entry import green_wave_entry_enabled as _wave_on
+        return _wave_on(cfg)
+    except Exception:
+        return False
+
+
 def slippage_exit_enabled(cfg: Optional["BotConfig"] = None) -> bool:
     """Rapid early exit when slippage / fade predicted — book profit or cut loss."""
     if not green_exit_mandatory(cfg):
@@ -120,6 +128,7 @@ def assess_multi_bar_ride(
     slippage_risk: float = 0.0,
     max_bars: Optional[int] = None,
     min_profit_run: Optional[float] = None,
+    institutional: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Decide whether to ride multiple bars for more profit vs book now.
@@ -157,6 +166,21 @@ def assess_multi_bar_ride(
     )
     ride_score = round(min(1.0, ride_score), 3)
 
+    wave_edge_row: Dict[str, Any] = {}
+    if green_wave_entry_enabled(cfg):
+        try:
+            from core.green_wave_entry import assess_wave_remaining_edge
+            wave_edge_row = assess_wave_remaining_edge(
+                micro, institutional,
+                current_px=current_px,
+                pnl_pct=pnl_pct,
+                peak_pct=peak_pct,
+            )
+            if wave_edge_row.get("should_hold"):
+                ride_score = max(ride_score, float(wave_edge_row.get("wave_edge", 0) or 0))
+        except Exception:
+            pass
+
     should_ride = (
         bars_ok
         and slip_ok
@@ -175,6 +199,7 @@ def assess_multi_bar_ride(
         "max_bars": max_bars_n,
         "profit_run": profit_run,
         "pred_3bar": pred_3,
+        "wave_edge": wave_edge_row,
     }
 
 
@@ -198,6 +223,7 @@ def assess_dynamic_exit(
     slip_any_thr: Optional[float] = None,
     max_ride_bars: Optional[int] = None,
     min_profit_run: Optional[float] = None,
+    institutional: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Unified exit: multi-bar ride when profitable path clear; rapid book on slippage/fade;
@@ -219,7 +245,28 @@ def assess_dynamic_exit(
         slippage_risk=slippage,
         max_bars=max_ride_bars,
         min_profit_run=min_profit_run,
+        institutional=institutional,
     )
+
+    wave_exit = False
+    wave_exit_reason = ""
+    if green_wave_entry_enabled(cfg) and pnl_pct > 0:
+        try:
+            from core.green_wave_entry import assess_wave_remaining_edge
+            we = assess_wave_remaining_edge(
+                micro, institutional,
+                current_px=current_px,
+                pnl_pct=pnl_pct,
+                peak_pct=peak_pct,
+            )
+            if we.get("should_exit_now"):
+                wave_exit = True
+                wave_exit_reason = (
+                    f"green_exit:wave_edge_done edge={we.get('wave_edge', 0):.2f} "
+                    f"pnl=+{pnl_pct:.2%}"
+                )
+        except Exception:
+            pass
 
     should_exit = False
     reason = ""
@@ -251,7 +298,11 @@ def assess_dynamic_exit(
 
     # --- Profit side: ride multi-bar OR book ---
     elif pnl_pct > 0 and green_exit_mandatory(cfg):
-        if ride.get("should_ride") and not ai_exit and ppo_action != 2:
+        if wave_exit:
+            should_exit = True
+            action = "exit_profit"
+            reason = wave_exit_reason
+        elif ride.get("should_ride") and not ai_exit and ppo_action != 2:
             return {
                 "should_exit": False,
                 "reason": "",
@@ -400,6 +451,8 @@ def assess_green_entry(
     ppo_action: int = 0,
     ppo_conf: float = 0.5,
     decision: Optional[Dict[str, Any]] = None,
+    institutional: Optional[Dict[str, Any]] = None,
+    dm: Any = None,
 ) -> Dict[str, Any]:
     """
     Dynamic green-entry assessment — combines mechanical + AI signals.
@@ -410,6 +463,32 @@ def assess_green_entry(
 
     decision = decision or {}
     micro = micro or {}
+
+    if institutional is None and green_wave_entry_enabled(cfg):
+        try:
+            from core.green_wave_entry import scan_institutional_from_market
+            institutional = scan_institutional_from_market(df, dm)
+        except Exception:
+            institutional = {}
+
+    if green_wave_entry_enabled(cfg):
+        try:
+            from core.green_wave_entry import institutional_entry_veto
+            veto = institutional_entry_veto(institutional, micro)
+            if veto:
+                return {
+                    "enter_ok": False,
+                    "composite_score": 0.0,
+                    "uptrend": False,
+                    "green_bar": False,
+                    "prediction_up": False,
+                    "profit_probability": 0.0,
+                    "wave_veto": veto,
+                    "reasons": [veto],
+                }
+        except Exception:
+            pass
+
     quality = assess_entry_quality(
         cfg,
         micro,
@@ -424,6 +503,27 @@ def assess_green_entry(
     green_bar = _is_green_bar(df)
     pred_up = _prediction_up(micro, current_px)
 
+    impulse_row: Dict[str, Any] = {}
+    wave_impulse = False
+    if green_wave_entry_enabled(cfg):
+        try:
+            from core.green_wave_entry import detect_institutional_impulse
+            impulse_row = detect_institutional_impulse(
+                institutional, micro, spike_ratio=spike_ratio,
+            )
+            wave_impulse = bool(impulse_row.get("impulse_ok"))
+        except Exception:
+            pass
+
+    effective_green_bar = green_bar or (
+        wave_impulse and os.getenv("GREEN_WAVE_RELAX_GREEN_BAR", "true").lower() in ("1", "true", "yes")
+    )
+    effective_pred_up = pred_up or (
+        wave_impulse
+        and float(micro.get("spike_likelihood", 0) or 0)
+        >= _env_float("GREEN_WAVE_MIN_SPIKE_LIKELIHOOD", 0.40)
+    )
+
     halim_enter = bool(decision.get("halim_enter") or decision.get("enter"))
     conf = float(decision.get("confidence", ppo_conf) or ppo_conf)
     profit_p = float(quality.get("profit_probability", 0) or 0)
@@ -435,19 +535,21 @@ def assess_green_entry(
     ai_vote = (ppo_buy and ppo_conf >= min_conf * 0.92) or (halim_enter and conf >= min_conf)
     score = (
         (0.25 if uptrend else 0.0)
-        + (0.20 if green_bar else 0.0)
-        + (0.20 if pred_up else 0.0)
+        + (0.20 if effective_green_bar else 0.0)
+        + (0.20 if effective_pred_up else 0.0)
         + (0.15 if ppo_buy else 0.0)
         + (0.10 if halim_enter else 0.0)
         + profit_p * 0.30
         + min(ppo_conf, 1.0) * 0.10
     )
+    if wave_impulse:
+        score += float(impulse_row.get("impulse_score", 0) or 0) * 0.22
     score = round(min(1.0, score), 3)
 
     enter_ok = (
         uptrend
-        and green_bar
-        and pred_up
+        and effective_green_bar
+        and effective_pred_up
         and profit_p >= min_pp
         and ai_vote
         and conf >= min_conf
@@ -458,8 +560,12 @@ def assess_green_entry(
         reasons.append("uptrend")
     if green_bar:
         reasons.append("green_bar")
+    elif wave_impulse:
+        reasons.append("wave_impulse")
     if pred_up:
         reasons.append("pred_up")
+    elif wave_impulse:
+        reasons.append("spike_lik_up")
     if ppo_buy:
         reasons.append("ppo_buy")
     if halim_enter:
@@ -472,7 +578,12 @@ def assess_green_entry(
         "composite_score": score,
         "uptrend": uptrend,
         "green_bar": green_bar,
+        "wave_impulse": wave_impulse,
+        "effective_green_bar": effective_green_bar,
         "prediction_up": pred_up,
+        "effective_prediction_up": effective_pred_up,
+        "impulse": impulse_row,
+        "institutional": institutional or {},
         "profit_probability": profit_p,
         "min_profit_probability": min_pp,
         "confidence": conf,
@@ -495,6 +606,8 @@ def require_green_entry(
     ppo_action: int = 0,
     ppo_conf: float = 0.5,
     decision: Optional[Dict[str, Any]] = None,
+    institutional: Optional[Dict[str, Any]] = None,
+    dm: Any = None,
 ) -> Optional[str]:
     """Hard block reason if green entry doctrine fails; None if OK or disabled."""
     if not green_entry_mandatory(cfg):
@@ -510,15 +623,19 @@ def require_green_entry(
         ppo_action=ppo_action,
         ppo_conf=ppo_conf,
         decision=decision,
+        institutional=institutional,
+        dm=dm,
     )
+    if a.get("wave_veto"):
+        return str(a.get("wave_veto"))
     if a.get("enter_ok"):
         return None
     missing = []
     if not a.get("uptrend"):
         missing.append("uptrend")
-    if not a.get("green_bar"):
+    if not a.get("green_bar") and not a.get("wave_impulse"):
         missing.append("green_bar")
-    if not a.get("prediction_up"):
+    if not a.get("prediction_up") and not a.get("wave_impulse"):
         missing.append("pred_up")
     if float(a.get("profit_probability", 0) or 0) < float(a.get("min_profit_probability", 1)):
         missing.append("profit_prob")

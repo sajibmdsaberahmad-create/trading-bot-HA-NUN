@@ -15,7 +15,103 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 
 ---
 
-## 2026-07-01 — Deferred audit complete: ib_async shim, UTC, git untrack
+### Verify
+```bash
+./START.command   # or ./scripts/start_hanoon.sh — must pass Profit+Learn banner (no unbound STAGNATION_EXIT_SEC)
+```
+
+---
+
+---
+
+## 2026-07-01 — Wave tune + spike green defer (PPO-first action)
+
+### Problem
+Wave never fired live; spikes vetoed on `ai_vote` before PPO ran (spike loop green precheck). Huge vol spikes with cold `micro=0%` failed impulse thresholds.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/hanoon_profit_learn_env.sh` | Lower wave thresholds; `GREEN_SPIKE_PRECHECK=false` |
+| `core/green_wave_entry.py` | Cold-micro: high `spike_ratio` counts as vol/inst footprint |
+| `core/scalper_spike_loop.py` | Green hard-block only when `GREEN_SPIKE_PRECHECK=true` — else defer to post-PPO gate |
+
+### Env
+`GREEN_SPIKE_PRECHECK=false` · `GREEN_WAVE_IMPULSE_MIN_SCORE=0.40` · impulse uses spike_ratio when micro cold
+
+### Verify
+```bash
+# Spikes reach PPO first; green veto after wheel_buy shows wave_impulse in reasons when applicable
+rg 'ppo:wheel_buy|wave_impulse|GREEN veto' logs/HANOON.log | tail
+```
+
+---
+
+## 2026-07-01 — free_ram killed active start_hanoon on launch
+
+### Problem
+`start_hanoon.sh` died during RAM prep: `free_ram_for_trading.sh` `pkill -f start_hanoon.sh` matched the live launcher. `main.py` never started.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/free_ram_for_trading.sh` | Kill orphan `start_hanoon.sh` except `HANOON_START_PID`; pgrep only `scripts/start_hanoon.sh` (not nohup parent) |
+| `scripts/start_hanoon.sh` | `export HANOON_START_PID=$$` at top |
+
+### Verify
+```bash
+nohup ./scripts/start_hanoon.sh >> logs/hanoon_restart.log 2>&1 &
+sleep 120 && pgrep -fl 'main.py --mode scalper'
+```
+
+---
+
+## 2026-07-01 — start_hanoon crash: unbound STAGNATION_EXIT_SEC
+
+### Problem
+`START.command` / `start_hanoon.sh` exited immediately after PPO wheel banner with `STAGNATION_EXIT_SEC: unbound variable` (`set -u`). Bot never reached `main.py`.
+
+### Root cause
+Profit+Learn echo referenced `${STAGNATION_EXIT_SEC}` but `hanoon_profit_learn_env.sh` never exported it (doc said 75s).
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/hanoon_profit_learn_env.sh` | `export STAGNATION_EXIT_SEC="${STAGNATION_EXIT_SEC:-75}"` |
+| `scripts/start_hanoon.sh` | Echo uses `${STAGNATION_EXIT_SEC:-75}` fallback |
+
+### Env
+`STAGNATION_EXIT_SEC=75` (profit+learn default)
+
+---
+
+## 2026-07-01 — Institutional wave entry (GREEN_WAVE_ENTRY)
+
+### Problem
+Green doctrine required confirmed green bar + pred_up — too late for sudden institutional algo bursts. Exits were strong but entries missed the wave start.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/green_wave_entry.py` | **New** — impulse detect, wave_edge clock, institutional scan from bars+ticks |
+| `core/green_trade_doctrine.py` | Wave branch in `assess_green_entry`; `wave_edge` in `assess_dynamic_exit` / multibar ride |
+| `core/scalper_entry_executor.py` | Pass `dm` to green entry |
+| `core/scalper_spike_loop.py` | Pass `dm` to green entry |
+| `core/scalper_exit_executor.py` | Institutional context on all `assess_dynamic_exit` paths |
+| `scripts/hanoon_profit_learn_env.sh` | Wave env defaults ON |
+| `tests/test_green_wave_entry.py` | Impulse, veto, relaxed green bar, wave edge exit |
+
+### Env
+`GREEN_WAVE_ENTRY=true` · `GREEN_WAVE_RELAX_GREEN_BAR=true` · `GREEN_WAVE_EXIT_EDGE=0.22`
+
+### Verify
+```bash
+python3 -m pytest tests/test_green_wave_entry.py tests/test_green_trade_doctrine.py -q
+# Log: wave_impulse in green entry reasons; green_exit:wave_edge_done on fade
+```
+
+---
+
 
 ### Problem
 Remaining audit items were docs-only: unmaintained ib_insync, datetime.utcnow deprecations, runtime journals in git.

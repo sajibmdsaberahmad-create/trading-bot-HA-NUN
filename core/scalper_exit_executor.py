@@ -1160,6 +1160,8 @@ class ScalperExitMixin:
                 opened = getattr(self, "_position_opened_at", 0.0)
                 bars_held = int((time.time() - opened) / 60.0) if opened else 0
                 micro = dict(forecast or {})
+                from core.green_wave_entry import scan_institutional_from_market
+                inst_ctx = scan_institutional_from_market(fast_df, dm)
                 dx = assess_dynamic_exit(
                     self.cfg,
                     ticker=ticker,
@@ -1170,6 +1172,7 @@ class ScalperExitMixin:
                     micro=micro,
                     df=fast_df,
                     bars_held=bars_held,
+                    institutional=inst_ctx,
                 )
                 if dx.get("action") == "ride_multibar" and not dx.get("should_exit"):
                     return False, ""
@@ -1308,9 +1311,11 @@ class ScalperExitMixin:
                 return False
             ticker = self.current_ticker or ""
             micro = getattr(self, "_last_micro_forecast", {}).get(ticker, {})
-            fast_df, _, _, forecast = self._resolve_live_bars(ticker, min_bars=6)
+            fast_df, _, dm, forecast = self._resolve_live_bars(ticker, min_bars=6)
             if forecast:
                 micro = {**micro, **forecast}
+            from core.green_wave_entry import scan_institutional_from_market
+            inst_ctx = scan_institutional_from_market(fast_df, dm)
             dx = assess_dynamic_exit(
                 self.cfg,
                 ticker=ticker,
@@ -1320,6 +1325,7 @@ class ScalperExitMixin:
                 peak_pct=0.0,
                 micro=micro,
                 df=fast_df,
+                institutional=inst_ctx,
             )
             if dx.get("should_exit") and dx.get("action") == "exit_loss":
                 log.info(f"  🛑 LOSS CUT: {dx['reason']}")
@@ -1360,11 +1366,13 @@ class ScalperExitMixin:
             if green_exit_mandatory(self.cfg):
                 ticker = self.current_ticker or ""
                 micro = getattr(self, "_last_micro_forecast", {}).get(ticker, {})
-                fast_df, _, _, forecast = self._resolve_live_bars(ticker, min_bars=6)
+                fast_df, _, dm, forecast = self._resolve_live_bars(ticker, min_bars=6)
                 if forecast:
                     micro = {**micro, **forecast}
                 opened = getattr(self, "_position_opened_at", 0.0)
                 bars_held = int((time.time() - opened) / 60.0) if opened else 0
+                from core.green_wave_entry import scan_institutional_from_market
+                inst_ctx = scan_institutional_from_market(fast_df, dm)
                 dx = assess_dynamic_exit(
                     self.cfg,
                     ticker=ticker,
@@ -1376,6 +1384,7 @@ class ScalperExitMixin:
                     df=fast_df,
                     bars_held=bars_held,
                     ai_stalled=stalled,
+                    institutional=inst_ctx,
                 )
                 if dx.get("action") == "ride_multibar" and dx.get("ride", {}).get("should_ride"):
                     ride = dx["ride"]
@@ -2080,10 +2089,12 @@ class ScalperExitMixin:
                     from core.green_trade_doctrine import assess_dynamic_exit, slippage_exit_enabled
                     ticker = self.current_ticker or ""
                     micro = getattr(self, "_last_micro_forecast", {}).get(ticker, {})
-                    _, _, _, forecast = self._resolve_live_bars(ticker, min_bars=6)
+                    _, _, dm, forecast = self._resolve_live_bars(ticker, min_bars=6)
                     if forecast:
                         micro = {**micro, **forecast}
                     if slippage_exit_enabled(self.cfg):
+                        from core.green_wave_entry import scan_institutional_from_market
+                        inst_ctx = scan_institutional_from_market(fast_df, dm)
                         dx = assess_dynamic_exit(
                             self.cfg,
                             ticker=ticker,
@@ -2093,6 +2104,7 @@ class ScalperExitMixin:
                             peak_pct=peak_pct,
                             micro=micro,
                             df=fast_df,
+                            institutional=inst_ctx,
                         )
                         if dx.get("should_exit") and "slippage" in str(dx.get("reason", "")):
                             reason = dx["reason"]

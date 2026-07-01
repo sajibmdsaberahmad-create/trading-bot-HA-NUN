@@ -1446,7 +1446,8 @@ class ScalperSpikeMixin:
                 )
             try:
                 from core.green_trade_doctrine import require_green_entry, green_entry_mandatory
-                if green_entry_mandatory(self.cfg):
+                precheck = os.getenv("GREEN_SPIKE_PRECHECK", "false").lower() in ("1", "true", "yes")
+                if green_entry_mandatory(self.cfg) and precheck:
                     block = require_green_entry(
                         self.cfg,
                         ticker=ticker,
@@ -1455,6 +1456,7 @@ class ScalperSpikeMixin:
                         micro=fc,
                         spike_ratio=spike_ratio,
                         scan_score=float(target.rank_score),
+                        dm=dm,
                     )
                     if block:
                         log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")

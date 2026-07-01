@@ -45,12 +45,44 @@ for pf in "$LOG_DIR/hanoon.pid" "$LOG_DIR/halim_serve.pid" "$LOG_DIR/git_sync.pi
   fi
 done
 
-# ── Orphan duplicate bot processes (not the one we're about to start) ──
-for pattern in "start_hanoon.sh" "grandmaster_push_" "halim-auto-lm"; do
-  if pgrep -f "$pattern" >/dev/null 2>&1; then
-    pkill -TERM -f "$pattern" 2>/dev/null || true
-    freed_msg "Stopped orphan $pattern"
-  fi
+# ── Orphan duplicate bot processes (not the active start_hanoon parent) ──
+_hanoon_keep_pids() {
+  local p
+  for p in "${HANOON_START_PID:-}" "$$" "${PPID:-}"; do
+    [[ -n "$p" ]] && echo "$p"
+  done
+}
+_is_kept_hanoon_pid() {
+  local pid="$1" keep
+  for keep in $(_hanoon_keep_pids); do
+    [[ "$pid" == "$keep" ]] && return 0
+  done
+  return 1
+}
+# Match only the real launcher script — not nohup/zsh wrappers whose cmdline embeds the path.
+_hanoon_launch_pgrep() {
+  pgrep -f '[./]scripts/start_hanoon\.sh([[:space:]]|$)' 2>/dev/null || true
+}
+if [[ -n "${HANOON_START_PID:-}" ]]; then
+  while read -r pid; do
+    [[ -z "$pid" ]] && continue
+    _is_kept_hanoon_pid "$pid" && continue
+    kill -TERM "$pid" 2>/dev/null || true
+    freed_msg "Stopped stale start_hanoon.sh (pid $pid)"
+  done < <(_hanoon_launch_pgrep)
+else
+  while read -r pid; do
+    [[ -z "$pid" ]] && continue
+    kill -TERM "$pid" 2>/dev/null || true
+    freed_msg "Stopped orphan start_hanoon.sh (pid $pid)"
+  done < <(_hanoon_launch_pgrep)
+fi
+for pattern in "grandmaster_push_" "halim-auto-lm"; do
+  while read -r pid; do
+    [[ -z "$pid" ]] && continue
+    kill -TERM "$pid" 2>/dev/null || true
+    freed_msg "Stopped orphan $pattern (pid $pid)"
+  done < <(pgrep -f "$pattern" 2>/dev/null || true)
 done
 
 # ── IDE sidecars (should be gone after remove_ide_ram_hogs; kill zombies) ──

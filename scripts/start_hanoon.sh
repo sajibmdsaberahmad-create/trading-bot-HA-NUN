@@ -18,6 +18,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+export HANOON_START_PID=$$
 
 # Homebrew / common paths (Ollama often not on minimal PATH)
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
@@ -717,7 +718,7 @@ source "$ROOT/scripts/ppo_wheel_env.sh" 2>/dev/null || true
 source "$ROOT/scripts/hanoon_profit_learn_env.sh" 2>/dev/null || true
 echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${WAR_ENTRY_ADVISORY_ONLY} | conf=${CONFIDENCE_THRESHOLD}"
 if [[ "${HANOON_PROFIT_LEARN_PROFILE:-true}" == "true" ]]; then
-  echo "  💰 Profit+Learn: green_lock=${GREEN_PROFIT_LOCK_ENABLED} | micro_ppo=${LEARNING_LIVE_MICRO_PPO} | defer_rth=${LEARNING_DEFER_DURING_RTH} | stagnation=${STAGNATION_EXIT_SEC}s"
+  echo "  💰 Profit+Learn: green_lock=${GREEN_PROFIT_LOCK_ENABLED} | micro_ppo=${LEARNING_LIVE_MICRO_PPO} | defer_rth=${LEARNING_DEFER_DURING_RTH} | stagnation=${STAGNATION_EXIT_SEC:-75}s"
 fi
 PY="${ROOT}/venv/bin/python3"
 if [[ ! -x "$PY" ]]; then PY="python3"; fi

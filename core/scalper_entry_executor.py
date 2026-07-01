@@ -1625,6 +1625,7 @@ class ScalperEntryMixin:
                             ppo_action=int(ai_dec.get("ppo_action", 0) or 0),
                             ppo_conf=float(ai_dec.get("ppo_conf", 0.5) or 0.5),
                             decision=ai_dec,
+                            dm=dm,
                         )
                         if block:
                             log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
