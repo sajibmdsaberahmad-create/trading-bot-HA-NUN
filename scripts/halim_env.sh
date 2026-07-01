@@ -25,8 +25,11 @@ elif [[ -z "${HALIM_LM_BACKEND:-}" ]]; then
 fi
 export HALIM_LM_BACKEND
 export HALIM_MODEL_PATH="${HALIM_MODEL_PATH:-halim/data/checkpoints/latest}"
-# ≤12GB Mac: LoRA + 4bit base (~500MB) — merged safetensors (~1GB) OOM-kills serve under HANOON
-if [[ "$_RAM_MB" -le 12288 ]]; then
+# ≤12GB Mac: merged MLX when export exists; else LoRA+4bit base
+if [[ -f "$_MERGED_CKPT" ]]; then
+  export HALIM_SERVE_PREFER_ADAPTER="${HALIM_SERVE_PREFER_ADAPTER:-false}"
+  export HALIM_MODEL_PATH="${HALIM_MODEL_PATH:-halim/data/checkpoints/toddler_v1}"
+elif [[ "$_RAM_MB" -le 12288 ]]; then
   export HALIM_SERVE_PREFER_ADAPTER="${HALIM_SERVE_PREFER_ADAPTER:-true}"
 fi
 if [[ "$HALIM_LM_BACKEND" == "mlx" ]]; then

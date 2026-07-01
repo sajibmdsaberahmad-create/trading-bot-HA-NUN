@@ -4,8 +4,8 @@
 # Sourced last in start_hanoon.sh / replay scripts so these override limitless/PPO wheel.
 # Disable: HALIM_SMART_SPRINT=false ./scripts/start_hanoon.sh
 #
-# Fast: PPO leads (await=0), Halim async for blend/gold — no clock block on spikes.
-# Better: strict profit_prob, green doctrine, proxy@child, toddler micro_fast block.
+# Fast: PPO leads; Halim async — await=1.0s on ≤12GB via m2_8gb_live_profile (overrides sprint default 0)
+# Better: strict profit_prob, green doctrine, proxy@child, toddler micro_fast block
 
 [[ "${HALIM_SMART_SPRINT:-true}" == "true" ]] || return 0 2>/dev/null || exit 0
 
@@ -22,6 +22,7 @@ export HALIM_REASONING_VIA_SERVER="${HALIM_REASONING_VIA_SERVER:-auto}"
 export HALIM_FORCE_LM=true
 export HALIM_SERVE_PREFER_ADAPTER=true
 export HALIM_INLINE_LM_FALLBACK=false
+# Overridden to false by m2_8gb_live_profile.sh when merged/model.safetensors exists
 
 # Quality gates (keep ON — main filter for better trades)
 export HALIM_SPRINT_BLOCK_MICRO_FAST="${HALIM_SPRINT_BLOCK_MICRO_FAST:-true}"

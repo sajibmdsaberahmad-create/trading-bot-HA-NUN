@@ -3,6 +3,7 @@
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
 
+- `2026-07-01` **engineering** — Perfection sprint: SYSTEM_ASSESSMENT + M2 roadmap + canonical profile + preflight — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Halim Smart Sprint (all phases A–D, M2 8GB) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Swing bar fetch DataFrame fix + toddler swing IB gate + war scalp-only separation — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — War step-aside when pool dry; IB qualify main-thread guard — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -2073,3 +2074,8 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-07-01 16:20 UTC` **brain_proxy_trained** · stage **child** — Teacher proxy holdout acc=100% (random=100%, 491 samples)
 - `2026-07-01 16:20 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
 - `2026-07-01 16:20 UTC` **brain_evolution** · stage **child** — Evolution standalone_flush — stage child, dataset 598 pairs
+- `2026-07-01 17:11 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=98% (random=99%, 512 samples)
+- `2026-07-01 17:12 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 0%, source outcome_labels
+- `2026-07-01 17:12 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-01 17:12 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 718 pairs
+- `2026-07-01 17:12 UTC` **brain_stage_up** — Brain grew: child → teen

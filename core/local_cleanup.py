@@ -11,7 +11,7 @@ import shutil
 import time
 from collections import deque
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from core.notify import log
 
@@ -296,23 +296,192 @@ def scan_downloads_clones() -> List[Dict[str, object]]:
     return rows
 
 
+def _prune_downloads_halim_extras() -> int:
+    """Remove duplicate Halim checkpoint copies and failed Chrome zip downloads."""
+    freed = 0
+    downloads = Path.home() / "Downloads"
+    if not downloads.is_dir():
+        return 0
+    names = (
+        "toddler_v1",
+        "toddler_v1-2",
+        "halim_toddler_v1.zip",
+        "halim_toddler_v2.zip",
+        "halim_toddler_v3.zip",
+        "halim_toddler_v4.zip",
+        "halim_toddler_v5.zip",
+    )
+    for name in names:
+        p = downloads / name
+        if p.exists():
+            try:
+                if p.is_dir():
+                    freed += sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+                    shutil.rmtree(p, ignore_errors=True)
+                else:
+                    freed += p.stat().st_size
+                    p.unlink(missing_ok=True)
+                log.info(f"Removed Downloads duplicate {name}")
+            except OSError:
+                pass
+    for d in downloads.glob("halim_toddler_v*.zip.download"):
+        if d.is_dir():
+            try:
+                freed += sum(f.stat().st_size for f in d.rglob("*") if f.is_file())
+                shutil.rmtree(d, ignore_errors=True)
+                log.info(f"Removed incomplete download {d.name}")
+            except OSError:
+                pass
+    for d in downloads.glob("*.download"):
+        if not d.is_dir():
+            continue
+        try:
+            total = sum(f.stat().st_size for f in d.rglob("*") if f.is_file())
+            if total < 1024 * 1024:
+                freed += total
+                shutil.rmtree(d, ignore_errors=True)
+        except OSError:
+            pass
+    return freed
+
+
+def prune_halim_colab_artifacts(ckpt: Optional[Path] = None) -> int:
+    """Drop Colab training intermediates — keep merged/ + top-level lora adapter for MLX."""
+    freed = 0
+    root = ckpt or (ROOT / "halim/data/checkpoints/toddler_v1")
+    la = root / "lora_adapter"
+    if not la.is_dir():
+        return 0
+    for name in ("training_args.bin",):
+        p = la / name
+        if p.is_file():
+            try:
+                freed += p.stat().st_size
+                p.unlink(missing_ok=True)
+            except OSError:
+                pass
+    adapter_top = la / "adapter_model.safetensors"
+    merged = root / "merged" / "model.safetensors"
+    for sub in list(la.glob("checkpoint-*")):
+        if not sub.is_dir():
+            continue
+        for junk in ("optimizer.pt", "scheduler.pt", "rng_state.pth"):
+            p = sub / junk
+            if p.is_file():
+                try:
+                    freed += p.stat().st_size
+                    p.unlink(missing_ok=True)
+                except OSError:
+                    pass
+        if adapter_top.is_file() or merged.is_file():
+            try:
+                freed += sum(f.stat().st_size for f in sub.rglob("*") if f.is_file())
+                shutil.rmtree(sub, ignore_errors=True)
+                log.info(f"Pruned Colab checkpoint dir {sub.name}")
+            except OSError:
+                pass
+    if freed:
+        log.info(f"Pruned Halim Colab artifacts (~{freed / (1024 * 1024):.1f}MB)")
+    return freed
+
+
+def _path_size(path: Path) -> int:
+    if not path.exists():
+        return 0
+    try:
+        if path.is_file():
+            return path.stat().st_size
+        return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+    except OSError:
+        return 0
+
+
+def prune_git_lfs_halim_blobs() -> int:
+    """Untrack Halim weight blobs from git/LFS index — keeps files on disk for MLX."""
+    import subprocess
+
+    freed = 0
+    git_dir = ROOT / ".git"
+    if not git_dir.is_dir():
+        return 0
+    before = _path_size(git_dir / "lfs") if (git_dir / "lfs").is_dir() else 0
+
+    paths = [
+        "halim/data/checkpoints/toddler_v1/merged",
+        "halim/data/checkpoints/toddler_v1_mlx",
+    ]
+    for pat in (
+        "halim/data/checkpoints/toddler_v1/lora_adapter/checkpoint-*",
+        "halim/data/checkpoints/**/optimizer.pt",
+        "halim/data/checkpoints/**/scheduler.pt",
+        "halim/data/checkpoints/**/rng_state.pth",
+        "halim/data/checkpoints/**/training_args.bin",
+        "halim/data/checkpoints/**/*.safetensors",
+        "halim/data/checkpoints/**/tokenizer.json",
+    ):
+        for p in glob.glob(str(ROOT / pat), recursive=True):
+            rel = str(Path(p).relative_to(ROOT))
+            try:
+                subprocess.run(
+                    ["git", "-C", str(ROOT), "rm", "--cached", "-q", "-r", rel],
+                    capture_output=True, timeout=30, check=False,
+                )
+            except (subprocess.TimeoutExpired, OSError):
+                pass
+    for rel in paths:
+        try:
+            subprocess.run(
+                ["git", "-C", str(ROOT), "rm", "--cached", "-q", "-r", rel],
+                capture_output=True, timeout=30, check=False,
+            )
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+    try:
+        subprocess.run(
+            ["git", "-C", str(ROOT), "lfs", "prune", "--force"],
+            capture_output=True, timeout=180, check=False,
+        )
+        subprocess.run(
+            ["git", "-C", str(ROOT), "gc", "--prune=now"],
+            capture_output=True, timeout=120, check=False,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    after = _path_size(git_dir / "lfs") if (git_dir / "lfs").is_dir() else 0
+    freed = max(0, before - after)
+    if freed:
+        log.info(f"Git LFS prune freed ~{freed / (1024 * 1024):.1f}MB")
+    return freed
+
+
 def cleanup_device_extras(*, remove_download_dmgs: bool = True) -> Dict[str, int]:
-    """System-level safe cleanup outside the repo (caches, installers, IDE logs)."""
+    """System-level safe cleanup outside the repo (caches, installers, IDE logs).
+
+    Never runs mac-cleaner ``all`` (homebrew prune / full user caches) — that is
+    opt-in via ``DEEP_SWEEP_AGGRESSIVE=true ./scripts/deep_sweep.sh`` only.
+    """
     stats: Dict[str, int] = {
         "cursor_log_bytes": 0,
         "dmg_bytes": 0,
         "mac_cleaner_bytes": 0,
+        "git_lfs_bytes": 0,
+        "downloads_halim_bytes": 0,
     }
+    if os.getenv("HALIM_GIT_LFS_PRUNE", "false").lower() in ("1", "true", "yes"):
+        stats["git_lfs_bytes"] = prune_git_lfs_halim_blobs()
+    if os.getenv("DEEP_SWEEP_PRUNE_DOWNLOADS", "false").lower() in ("1", "true", "yes"):
+        stats["downloads_halim_bytes"] = _prune_downloads_halim_extras()
     stats["cursor_log_bytes"] = _prune_cursor_logs(days=7)
-    if remove_download_dmgs:
+    if remove_download_dmgs and os.getenv("CLEANUP_DOWNLOAD_DMGS", "false").lower() in ("1", "true", "yes"):
         stats["dmg_bytes"] = _remove_download_installers()
     try:
         import subprocess
+        # Safe subsets only — not ``hanoon`` (includes Downloads zip deletion + git gc)
         proc = subprocess.run(
             [
                 "python3",
                 str(ROOT / "mac-cleaner" / "clean.py"),
-                "--clean", "--yes", "all",
+                "--clean", "--yes", "hanoon_cruft", "pip", "cursor_shipit",
             ],
             capture_output=True,
             text=True,
@@ -374,6 +543,7 @@ def cleanup_local_workspace(aggressive: bool = True, *, skip_jsonl_trim: bool = 
         stats["runtime_bytes"] += _prune_learn_cache(
             max_files=int(os.getenv("HALIM_LEARN_CACHE_MAX_FILES", "400")),
         )
+        stats["runtime_bytes"] += prune_halim_colab_artifacts()
         if not skip_jsonl_trim:
             protect_buffer = os.getenv("LEARNING_PROTECT_BUFFER", "true").lower() in (
                 "1", "true", "yes",
@@ -393,6 +563,12 @@ def cleanup_local_workspace(aggressive: bool = True, *, skip_jsonl_trim: bool = 
 def run_periodic_cleanup(cfg=None, *, force: bool = False) -> dict:
     """Called from main loop when market closed or RAM is tight."""
     from core.memory_guard import is_memory_pressured, available_ram_mb
+
+    iv = float(os.getenv("PERIODIC_CLEANUP_SEC", getattr(cfg, "PERIODIC_CLEANUP_SEC", 0) if cfg else 0) or 0)
+    if iv <= 0 and not force:
+        return {"skipped": True, "reason": "PERIODIC_CLEANUP_SEC=0", "available_mb": available_ram_mb()}
+    if os.getenv("AUTO_DISK_CLEANUP", "false").lower() not in ("1", "true", "yes") and not force:
+        return {"skipped": True, "reason": "AUTO_DISK_CLEANUP=false", "available_mb": available_ram_mb()}
 
     ram_tight = is_memory_pressured(
         int(getattr(cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024)) if cfg else 1024

@@ -1,13 +1,19 @@
 # Environment profiles — precedence matrix
 
-**Load order (last wins):** `.env` → `scripts/start_hanoon.sh` → `scripts/ppo_wheel_env.sh` → `scripts/hanoon_profit_learn_env.sh`
+**Load order (last wins):** `.env` → `scripts/start_hanoon.sh` → `scripts/ppo_wheel_env.sh` → `scripts/hanoon_profit_learn_env.sh` → `scripts/halim_smart_sprint_env.sh` → **`scripts/m2_8gb_live_profile.sh`** (≤12 GB RAM only)
+
+**Assessment & plan:** [SYSTEM_ASSESSMENT_2026-07-01.md](SYSTEM_ASSESSMENT_2026-07-01.md) · [PERFECTION_ROADMAP_M2_8GB.md](PERFECTION_ROADMAP_M2_8GB.md)
 
 | Profile | Source | When | Key flags |
 |---------|--------|------|-----------|
 | **Base** | `start_hanoon.sh` | Always | `SMART_STACK=true`, `RAM_LIVE_ONLY=true`, `CAPITAL_PHASES_ENABLED=true` |
-| **PPO Wheel** | `ppo_wheel_env.sh` | Default live | `PPO_ONLY_EXECUTION=true`, `SMART_STACK_AI_SURE_ENTRY=false`, `HALIM_ENTRY_AWAIT_SEC=0`, `CONFIDENCE_THRESHOLD=0.58` |
-| **Profit+Learn** | `hanoon_profit_learn_env.sh` | `HANOON_PROFIT_LEARN_PROFILE=true` (default) | Profit hunt, **GREEN_WAVE_ENTRY**, micro-PPO, stagnation exit |
+| **PPO Wheel** | `ppo_wheel_env.sh` | Default live | `PPO_ONLY_EXECUTION=true`, `CONFIDENCE_THRESHOLD=0.58` |
+| **Profit+Learn** | `hanoon_profit_learn_env.sh` | `HANOON_PROFIT_LEARN_PROFILE=true` (default) | Profit hunt, **GREEN_WAVE_ENTRY**, micro-PPO |
+| **Halim Sprint** | `halim_smart_sprint_env.sh` | `HALIM_SMART_SPRINT=true` (default) | JSON gold, sprint blocks toddler micro_fast |
+| **M2 8 GB live** | `m2_8gb_live_profile.sh` | RAM ≤12 GB | **Canonical:** `strict_prob=true`, `await=1.0`, `merged MLX`, `AUTO_DISK_CLEANUP=false` |
 | **Dev / test** | Manual `.env` | Local tuning | Set `PPO_WHEEL_PROFILE_LOCK=false` to unlock params |
+
+**Preflight (M2):** `./scripts/preflight_m2.sh` before RTH.
 
 ## Capital phases
 

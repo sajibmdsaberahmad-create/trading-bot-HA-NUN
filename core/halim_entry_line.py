@@ -468,7 +468,8 @@ class HalimEntryLine:
         self._seq = 0
         self._stats = {"rung": 0, "fresh": 0, "stale": 0}
 
-    def _halim_complete(self, prompt: str) -> str:
+    def _halim_complete(self, prompt: str) -> tuple[str, str]:
+        """Returns (text, failure_reason). failure_reason empty on success."""
         try:
             from halim.client import complete
             out = complete(
@@ -477,19 +478,25 @@ class HalimEntryLine:
                 timeout=_entry_timeout_sec(),
             )
             if out and out.get("ok") and out.get("text"):
-                return str(out["text"]).strip()
+                return str(out["text"]).strip(), ""
+            if out and not out.get("ok"):
+                reason = str(out.get("reason") or out.get("message") or "serve_not_ok")[:120]
+                return "", reason
         except Exception as exc:
             log.debug(f"Halim entry LM: {exc}")
-        return ""
+            return "", f"client_error:{exc}"[:120]
+        return "", "serve_no_text"
 
     def _run(self, key: str, seq: int, prompt: str) -> None:
         t0 = time.time()
+        fail_reason = ""
         try:
-            raw = self._halim_complete(prompt)
+            raw, fail_reason = self._halim_complete(prompt)
             parsed = _parse_entry_lm_response(raw)
         except Exception as exc:
             log.warning(f"  🧠 Halim entry LM error {key}: {exc}")
             raw = ""
+            fail_reason = f"run_error:{exc}"[:120]
             parsed = {}
         elapsed_ms = (time.time() - t0) * 1000
         with self._lock:
@@ -513,7 +520,8 @@ class HalimEntryLine:
                 f"  🧠 Halim entry LM unparseable {key} ({elapsed_ms:.0f}ms): {raw[:100]!r}"
             )
         else:
-            log.info(f"  🧠 Halim entry LM empty {key} ({elapsed_ms:.0f}ms, serve no text)")
+            detail = fail_reason or "serve no text"
+            log.info(f"  🧠 Halim entry LM empty {key} ({elapsed_ms:.0f}ms, {detail})")
         if parsed:
             try:
                 from core.halim_action_learn import record_action

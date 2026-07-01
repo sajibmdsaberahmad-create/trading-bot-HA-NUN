@@ -104,10 +104,21 @@ cfg_path.write_text(json.dumps(cfg, indent=2))
 print(json.dumps({"ok": True, "config": str(cfg_path), "merged": merged.is_file(), "lora": lora.is_file()}, indent=2))
 PY
 
+python3 - <<'PY'
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(".").resolve()))
+from core.local_cleanup import prune_halim_colab_artifacts
+prune_halim_colab_artifacts()
+PY
+
 chmod +x "$ROOT/scripts/halim_register_checkpoint.sh"
 "$ROOT/scripts/halim_register_checkpoint.sh" toddler_v1 --backend "${HALIM_LM_BACKEND:-mlx}"
 
 echo ""
 echo "✓ Halim toddler installed: $CKPT"
+echo "  Disk: ~1GB in repo (merged + adapter). Downloads source is NOT removed by this script."
+echo "  If disk dropped GB after install, a sweep may have deleted ~/Downloads copies — see ./scripts/disk_audit.sh"
+echo "  After quitting Cursor: ./scripts/untrack_halim_weights.sh  (shrinks .git/lfs, keeps weights)"
 echo "  Auto pipeline: ./scripts/halim_apply_colab_checkpoint.sh"
 echo "  Or restart HANOON (HALIM_AUTO_INSTALL_COLAB=true)"

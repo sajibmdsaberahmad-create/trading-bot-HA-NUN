@@ -75,7 +75,22 @@ def mlx_complete(
                         model, tokenizer = load(base)
                 _model_cache[key] = (model, tokenizer)
             except Exception as exc:
-                return None, f"load_failed:{exc}"[:120]
+                # Colab PEFT 0.19+ adapters may not load on mlx-lm — fall back to merged weights.
+                if merged is None:
+                    merged = _merged_model_dir(checkpoint)
+                if merged is not None:
+                    try:
+                        mkey = str(merged.resolve())
+                        if mkey not in _model_cache:
+                            model, tokenizer = load(str(merged))
+                            _model_cache[mkey] = (model, tokenizer)
+                        else:
+                            model, tokenizer = _model_cache[mkey]
+                        _model_cache[key] = (model, tokenizer)
+                    except Exception as exc2:
+                        return None, f"load_failed:{exc2}"[:120]
+                else:
+                    return None, f"load_failed:{exc}"[:120]
 
         model, tokenizer = _model_cache[key]
         try:

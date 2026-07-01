@@ -35,9 +35,9 @@ class ScalperExitMixin:
                     self._position_slots.pop(ticker, None)
                     self._refresh_aggregate_position_state()
                 return
-        except Exception:
-            pass
-        can_trade, _ = can_trade_now(self.cfg)
+        except Exception as exc:
+            from core.hot_path_guard import log_hot_path_warning
+            log_hot_path_warning("exit_ib_position_check", exc, ticker=ticker)
         if not can_trade:
             return
         if not getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
@@ -296,12 +296,102 @@ class ScalperExitMixin:
             bracket=bracket,
             ib_baseline_shares=float(snap.get("ib_baseline_shares", 0) or 0),
         )
+
+    def _retry_pending_exit_flatten(
+        self,
+        pending,
+        key: str,
+        *,
+        age: float,
+        retry_sec: float,
+        force_sec: float,
+        stuck_sec: float,
+        max_stuck_retries: int,
+    ) -> bool:
+        """When IB still holds shares during exit reconcile, retry flatten. Returns True to continue outer loop."""
+        from core.fill_tracker import ib_position_shares, trade_order_status
+
+        remaining = ib_position_shares(self.ib, pending.ticker)
+        if remaining <= 0.5:
+            return False
+        baseline = float(pending.ib_baseline_shares or pending.shares or 0)
+        px = float(
+            pending.quote_exit_px
+            or self._live_price_for(pending.ticker, 0)
+        )
+
+        if pending.flatten_trade and age >= stuck_sec:
+            ost = trade_order_status(pending.flatten_trade)
+            st = str(ost.get("status", "") or "")
+            if (
+                st in ("PreSubmitted", "PendingSubmit")
+                and pending.stuck_retries < max_stuck_retries
+            ):
+                pending.stuck_retries += 1
+                log.warning(
+                    f"  ⚡ EXIT {pending.ticker}: stuck {st} >{stuck_sec:.0f}s "
+                    f"— cancel + limit retry #{pending.stuck_retries}"
+                )
+                try:
+                    self.broker.cancel_open_orders_for_symbol(pending.ticker)
+                    self.ib.sleep(0.3)
+                    new_trade = self._resubmit_exit_flatten(
+                        pending.ticker, int(max(remaining, baseline)), px,
+                    )
+                    if new_trade is not None:
+                        pending.flatten_trade = new_trade
+                except Exception as exc:
+                    log.warning(
+                        f"EXIT stuck resubmit {pending.ticker}: {exc}"
+                    )
+                return True
+
+        if age < retry_sec:
+            return False
+
+        if not pending.retry_attempted:
+            pending.retry_attempted = True
+            log.warning(
+                f"  🔄 EXIT {pending.ticker}: no IB fill after {age:.0f}s "
+                f"(still {remaining:.0f}sh) — retry flatten"
+            )
+            try:
+                new_trade = self._resubmit_exit_flatten(
+                    pending.ticker, int(remaining), px,
+                )
+                if new_trade is not None:
+                    pending.flatten_trade = new_trade
+                    pending.quote_exit_px = px
+            except Exception as exc:
+                log.warning(f"EXIT retry flatten {pending.ticker}: {exc}")
+            return True
+
+        if age >= force_sec:
+            slot = self._position_slots.get(pending.ticker) or pending.slot
+            if slot:
+                restored = dict(slot)
+                restored["shares"] = remaining
+                restored.pop("exiting", None)
+                restored.pop("exit_started_at", None)
+                self._position_slots[pending.ticker] = restored
+                self._bind_risk_plan_for_ticker(pending.ticker)
+                try:
+                    self._ensure_position_stream(pending.ticker)
+                except Exception:
+                    pass
+            log.error(
+                f"  ❌ EXIT {pending.ticker}: flatten failed — IB still holds "
+                f"{remaining:.0f}sh; monitor re-armed"
+            )
+            self._pending_closes.pop(key, None)
+            return True
+        return False
+
     def _service_pending_closes(self) -> None:
         """Instant IB cache lookup each tick — zero sleep, zero throttle; notify when fill lands."""
         if not self._pending_closes:
             return
         from core.fill_reconciler import finalize_flat_position_close
-        from core.fill_tracker import trade_order_status
 
         cache = self._fill_cache()
         fallback_sec = float(getattr(self.cfg, "FILL_RECONCILE_FALLBACK_SEC", 8.0))
@@ -322,10 +412,6 @@ class ScalperExitMixin:
             if trade_rec is None:
                 remaining = ib_position_shares(self.ib, pending.ticker)
                 baseline = float(pending.ib_baseline_shares or pending.shares or 0)
-                px = float(
-                    pending.quote_exit_px
-                    or self._live_price_for(pending.ticker, 0)
-                )
 
                 if remaining <= 0.5 and baseline > 0.5 and age >= fallback_sec:
                     trade_rec = finalize_flat_position_close(
@@ -333,72 +419,39 @@ class ScalperExitMixin:
                     )
                     if trade_rec is not None:
                         if not self._finalize_closed_trade(trade_rec, pending):
-                            continue
-                        self._pending_closes.pop(key, None)
+                            if self._retry_pending_exit_flatten(
+                                pending, key,
+                                age=age,
+                                retry_sec=retry_sec,
+                                force_sec=force_sec,
+                                stuck_sec=stuck_sec,
+                                max_stuck_retries=max_stuck_retries,
+                            ):
+                                continue
+                        else:
+                            self._pending_closes.pop(key, None)
                         continue
 
-                if pending.flatten_trade and age >= stuck_sec:
-                    ost = trade_order_status(pending.flatten_trade)
-                    st = str(ost.get("status", "") or "")
-                    if (
-                        st in ("PreSubmitted", "PendingSubmit")
-                        and pending.stuck_retries < max_stuck_retries
-                    ):
-                        pending.stuck_retries += 1
-                        log.warning(
-                            f"  ⚡ EXIT {pending.ticker}: stuck {st} >{stuck_sec:.0f}s "
-                            f"— cancel + limit retry #{pending.stuck_retries}"
-                        )
-                        try:
-                            self.broker.cancel_open_orders_for_symbol(pending.ticker)
-                            self.ib.sleep(0.3)
-                            new_trade = self._resubmit_exit_flatten(
-                                pending.ticker, int(max(remaining, baseline)), px,
-                            )
-                            if new_trade is not None:
-                                pending.flatten_trade = new_trade
-                        except Exception as exc:
-                            log.warning(
-                                f"EXIT stuck resubmit {pending.ticker}: {exc}"
-                            )
-                        continue
-
-                if remaining > 0.5 and age >= retry_sec:
-                    if not pending.retry_attempted:
-                        pending.retry_attempted = True
-                        log.warning(
-                            f"  🔄 EXIT {pending.ticker}: no IB fill after {age:.0f}s "
-                            f"(still {remaining:.0f}sh) — retry flatten"
-                        )
-                        try:
-                            new_trade = self._resubmit_exit_flatten(
-                                pending.ticker, int(remaining), px,
-                            )
-                            if new_trade is not None:
-                                pending.flatten_trade = new_trade
-                                pending.quote_exit_px = px
-                        except Exception as exc:
-                            log.warning(f"EXIT retry flatten {pending.ticker}: {exc}")
-                    elif age >= force_sec:
-                        slot = self._position_slots.get(pending.ticker) or pending.slot
-                        if slot:
-                            restored = dict(slot)
-                            restored["shares"] = remaining
-                            restored.pop("exiting", None)
-                            restored.pop("exit_started_at", None)
-                            self._position_slots[pending.ticker] = restored
-                            self._bind_risk_plan_for_ticker(pending.ticker)
-                            try:
-                                self._ensure_position_stream(pending.ticker)
-                            except Exception:
-                                pass
-                        log.error(
-                            f"  ❌ EXIT {pending.ticker}: flatten failed — IB still holds "
-                            f"{remaining:.0f}sh; monitor re-armed"
-                        )
-                        self._pending_closes.pop(key, None)
+                if self._retry_pending_exit_flatten(
+                    pending, key,
+                    age=age,
+                    retry_sec=retry_sec,
+                    force_sec=force_sec,
+                    stuck_sec=stuck_sec,
+                    max_stuck_retries=max_stuck_retries,
+                ):
+                    continue
                 continue
             if not self._finalize_closed_trade(trade_rec, pending):
+                if self._retry_pending_exit_flatten(
+                    pending, key,
+                    age=age,
+                    retry_sec=retry_sec,
+                    force_sec=force_sec,
+                    stuck_sec=stuck_sec,
+                    max_stuck_retries=max_stuck_retries,
+                ):
+                    continue
                 continue
             self._pending_closes.pop(key, None)
     def _finalize_closed_trade(self, trade_rec: Dict[str, Any], pending: PendingClose) -> bool:
@@ -432,9 +485,16 @@ class ScalperExitMixin:
 
         remaining = ib_position_shares(self.ib, ticker)
         if remaining > 0.5:
-            log.warning(
-                f"  ⏳ EXIT {ticker}: IB still holds {remaining:.0f}sh — defer finalize"
-            )
+            defer_ts = getattr(self, "_exit_defer_log_ts", None)
+            if defer_ts is None:
+                defer_ts = {}
+                self._exit_defer_log_ts = defer_ts
+            now = time.time()
+            if now - float(defer_ts.get(ticker, 0) or 0) >= 60.0:
+                log.warning(
+                    f"  ⏳ EXIT {ticker}: IB still holds {remaining:.0f}sh — defer finalize"
+                )
+                defer_ts[ticker] = now
             recently = getattr(self, "_recently_exited", None)
             if recently is not None:
                 recently[ticker.upper()] = time.time()
@@ -1685,7 +1745,9 @@ class ScalperExitMixin:
         if now - self._last_ai_position_manage >= ai_sec:
             self._last_ai_position_manage = now
             if not opened or (now - opened) >= min_hold:
-                self._ai_manage_position(current_px)
+                ct = (self.current_ticker or "").upper()
+                if not ct or not self._has_pending_close(ct):
+                    self._ai_manage_position(current_px)
 
         # Opportunistic profit hunt — AI full power decides exit vs ride
         if trusted:

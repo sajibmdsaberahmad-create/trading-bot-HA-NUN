@@ -591,8 +591,14 @@ def _clean_hanoon_duplicates(dry_run: bool, older_than_days: int = 0) -> int:
         "halim_toddler_v2.zip",
         "halim_toddler_v3",
         "halim_toddler_v3.zip",
+        "halim_toddler_v4.zip",
+        "halim_toddler_v5.zip",
+        "toddler_v1",
+        "toddler_v1-2",
     ):
         freed += _rm_path(dl / name, dry_run=dry_run)
+    for d in list(dl.glob("halim_toddler_v*.zip.download")):
+        freed += _rm_path(d, dry_run=dry_run)
     stale = HOME / "Downloads" / "venv"
     if stale.is_dir() and stale != _hanoon_root() / "venv":
         freed += _rm_path(stale, dry_run=dry_run)

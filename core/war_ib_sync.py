@@ -416,10 +416,18 @@ def sync_war_from_ib(
                 try:
                     from core.capital_phase import uses_war_sizing
                     if uses_war_sizing(cfg):
+                        pool_note = ""
+                        try:
+                            from core.war_account import war_pool_depleted, war_settled_cash
+                            if war_pool_depleted(state, cfg):
+                                settled = war_settled_cash(cfg)
+                                pool_note = f" | pool dry (${settled:,.0f} — monitor only)"
+                        except Exception:
+                            pass
                         log.info(
                             f"⚔️ War IB sync — nav=${float(state.get('nav', 0)):,.0f} "
                             f"session_pnl=${float(state.get('session_pnl_war', 0)):+.2f} "
-                            f"slots={pos_result.get('war_slots', 0)}"
+                            f"slots={pos_result.get('war_slots', 0)}{pool_note}"
                         )
                     else:
                         log.debug(

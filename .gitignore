@@ -52,8 +52,21 @@ models/*.onnx
 models/checkpoints/
 models/backups/
 checkpoints/
-!halim/data/checkpoints/
-!halim/data/checkpoints/**
+# Halim checkpoints — local inference only; never index multi-GB blobs (Cursor/git LFS RAM bleed)
+halim/data/checkpoints/**/merged/
+halim/data/checkpoints/**/lora_adapter/checkpoint-*/
+halim/data/checkpoints/**/*.safetensors
+halim/data/checkpoints/**/optimizer.pt
+halim/data/checkpoints/**/scheduler.pt
+halim/data/checkpoints/**/rng_state.pth
+halim/data/checkpoints/**/training_args.bin
+halim/data/checkpoints/**/tokenizer.json
+halim/data/checkpoints/**/tokenizer_config.json
+halim/data/checkpoints/**/chat_template.jinja
+halim/data/checkpoints/**/generation_config.json
+!halim/data/checkpoints/**/config.json
+!halim/data/checkpoints/**/adapter_config.json
+!halim/data/checkpoints/**/README.md
 halim-release/
 backups/
 

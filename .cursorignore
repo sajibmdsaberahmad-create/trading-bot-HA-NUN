@@ -1,0 +1,15 @@
+# Stop Cursor/git from diffing multi-GB Halim weights (RAM bleed on 8GB Mac)
+halim/data/checkpoints/**/merged/
+halim/data/checkpoints/**/lora_adapter/checkpoint-*/
+halim/data/checkpoints/**/*.safetensors
+halim/data/checkpoints/**/optimizer.pt
+halim/data/checkpoints/**/scheduler.pt
+halim/data/checkpoints/**/rng_state.pth
+halim/data/checkpoints/**/training_args.bin
+halim/data/checkpoints/**/tokenizer.json
+ppo_trader.zip
+models/ppo_trader*.zip
+**/__pycache__/
+venv/
+logs/
+*.log

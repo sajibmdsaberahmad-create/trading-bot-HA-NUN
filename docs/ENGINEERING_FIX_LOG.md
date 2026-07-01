@@ -10,6 +10,96 @@
 
 ---
 
+## 2026-07-01 — Perfection sprint: M2 8 GB assessment, roadmap, canonical profile
+
+### Problem
+User requested full program assessment, documented perfection plan for MacBook Air M2 8 GB, and implementation of all roadmap items without gaps.
+
+### Root cause
+Config spread across 4 env scripts with conflicting `HALIM_ENTRY_AWAIT_SEC`; Halim empty logs hid serve failure reason; silent IB excepts in exit hot path; no single M2 profile or preflight.
+
+### Fix
+| File | Change |
+|------|--------|
+| `docs/SYSTEM_ASSESSMENT_2026-07-01.md` | **New** — whole-program verdict + scorecard |
+| `docs/PERFECTION_ROADMAP_M2_8GB.md` | **New** — phased checklist for M2 perfection |
+| `scripts/m2_8gb_live_profile.sh` | **New** — canonical ≤12 GB live env (sourced last) |
+| `scripts/preflight_m2.sh` | **New** — pre-RTH health + checkpoint + gates smoke |
+| `scripts/start_hanoon.sh` | Source M2 profile; live-money guard (4001); remove await conflicts |
+| `scripts/halim_env.sh` | Prefer merged MLX when safetensors on disk |
+| `core/halim_entry_line.py` | Log serve `reason` on empty LM |
+| `core/hot_path_guard.py` | **New** — throttled fail-loud hot-path warnings |
+| `core/scalper_exit_executor.py` | IB position check uses hot_path_guard |
+| `docs/ENV_PROFILES.md` | M2 profile precedence |
+| `tests/test_m2_live_profile.py` | Profile export smoke |
+| `tests/test_perfection_integrations.py` | Ram-live skip, LM reason, verdict hook |
+| `tests/test_hot_path_guard.py` | Guard smoke |
+
+### Env
+| Var | M2 profile default | Role |
+|-----|-------------------|------|
+| `HANOON_DEVICE_PROFILE` | `m2_8gb_live` | Launch banner traceability |
+| `HALIM_ENTRY_AWAIT_SEC` | `1.0` | Micro-peek without blocking PPO |
+| `HALIM_SERVE_PREFER_ADAPTER` | `false` (if merged on disk) | Stable MLX |
+| `HANOON_LIVE_MONEY_ACK` | unset | Required for `IB_PORT=4001` |
+
+### Verify
+```bash
+./scripts/preflight_m2.sh
+python -m pytest tests/test_m2_live_profile.py tests/test_perfection_integrations.py tests/test_hot_path_guard.py -q
+./scripts/start_hanoon.sh   # banner: Device profile: m2_8gb_live
+```
+
+---
+
+## 2026-07-01 — Gate aggressive disk cleanup (stop silent GB wipes)
+
+### Problem
+Disk dropped by **5+ GB** during a session: `deep_sweep.sh` + `cleanup_device_extras()` ran **mac-cleaner `all`** (Homebrew `--prune=all`, full user caches, `git gc`), **git LFS prune**, and **Downloads Halim dupes** on every device sweep — not only on explicit user request.
+
+### Root cause
+| Trigger | Aggressive action |
+|---------|-------------------|
+| `scripts/deep_sweep.sh` (default) | mac-cleaner `all` at end |
+| `cleanup_device_extras()` | mac-cleaner `all` + unconditional LFS prune + Downloads toddler folders |
+| mac-cleaner `hanoon` preset | Deletes `~/Downloads/toddler_v*` + `halim_toddler_v*.zip` as “duplicates” right after Colab install |
+| `run_periodic_cleanup()` | Ran when `PERIODIC_CLEANUP_SEC>0` even if user wanted RAM-live only |
+| Halim install `--force` | Replaces `toddler_v1/` in repo (~1GB swap) — normal; user often saw follow-on sweep delete Downloads copy |
+
+No cron/LaunchAgent — reduction came from **install + cleanup chain** (Downloads dupes + `.git/lfs` doubling tracked weights).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/local_cleanup.py` | `cleanup_device_extras`: hanoon/pip/cursor_shipit only; LFS/Downloads/DMGs opt-in via env |
+| `core/local_cleanup.py` | `run_periodic_cleanup`: skip when `PERIODIC_CLEANUP_SEC=0` or `AUTO_DISK_CLEANUP=false` |
+| `scripts/deep_sweep.sh` | Safe default; `DEEP_SWEEP_AGGRESSIVE=true` for mac-cleaner `all` |
+| `scripts/sweep_device_junk.sh` | Git LFS prune only when `HALIM_GIT_LFS_PRUNE=true` |
+| `scripts/start_hanoon.sh`, `halim_memory_profile.sh` | `AUTO_DISK_CLEANUP=false` default |
+| `scripts/disk_audit.sh` | **New** read-only space report |
+| `scripts/untrack_halim_weights.sh` | **New** untrack LFS after quitting Cursor |
+| `core/local_cleanup.py` | Device extras use `hanoon_cruft` only (not full `hanoon` = no Downloads zip wipe) |
+
+### Env
+| Var | Default | Role |
+|-----|---------|------|
+| `PERIODIC_CLEANUP_SEC` | `0` in start scripts | No periodic sweep during live |
+| `AUTO_DISK_CLEANUP` | `false` | Off-hours loop won't sweep unless true |
+| `DEEP_SWEEP_AGGRESSIVE` | `false` | Enables mac-cleaner `all` in deep_sweep |
+| `HALIM_GIT_LFS_PRUNE` | `false` | Git LFS prune + gc (reclaims `.git/lfs` GB) |
+| `DEEP_SWEEP_PRUNE_DOWNLOADS` | `false` | Remove `~/Downloads/toddler_v*` dupes |
+| `CLEANUP_DOWNLOAD_DMGS` | `false` | Remove DMGs from Downloads |
+
+### Verify
+```bash
+./scripts/disk_audit.sh
+./scripts/deep_sweep.sh                    # safe — no homebrew prune
+DEEP_SWEEP_AGGRESSIVE=true ./scripts/deep_sweep.sh   # explicit aggressive
+# Live: PERIODIC_CLEANUP_SEC=0 AUTO_DISK_CLEANUP=false in env
+```
+
+---
+
 ## 2026-07-01 — Fast child profile: PPO speed + quality gates
 
 ### Problem
@@ -3354,4 +3444,70 @@ Static score/vol thresholds on fast paths bypassed deliberation; `build_halim_lo
 ### Verify
 ```bash
 pytest tests/test_ai_sure_entry.py tests/test_position_context_isolation.py -q
+```
+
+## 2026-07-01 — INLF stuck partial exit + war sync log clarity
+
+### Problem
+After a partial exit, logs spammed `⏳ EXIT INLF: IB still holds 700sh — defer finalize` and `COUNCIL manage INLF` every loop. `⚔️ War IB sync` looked like war was still blocking entries when the war pool was already dry.
+
+### Root cause
+`_service_pending_closes` only retried flatten when `build_close_record` returned `None`. When IB returned a partial fill record but still held shares, `_finalize_closed_trade` deferred forever without resubmitting flatten. War IB sync runs for all open scalp slots during `rth_war` regardless of pool cash (`WAR_STEP_ASIDE` only affects new entries).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_exit_executor.py` | `_retry_pending_exit_flatten()` shared path; call on finalize defer; throttle defer log 60s; skip council manage while pending close |
+| `core/war_ib_sync.py` | Append `pool dry (monitor only)` when war pool depleted |
+
+### Env
+- `EXIT_FLATTEN_RETRY_SEC` (default 30) — retry flatten when IB still holds
+- `WAR_STEP_ASIDE_WHEN_DRY=true` — entries use full IB balance when pool dry; sync still runs
+
+### Verify
+```bash
+pytest tests/test_war_ib_sync.py tests/test_war_multi_position.py -q
+```
+
+## 2026-07-01 — Deep sweep: git LFS 6GB + Downloads Halim dupes
+
+### Problem
+Deep scan showed `.git/lfs` ~6.2GB (old Halim safetensors in LFS cache), Cursor git diffing weights, duplicate Colab checkpoint dirs still in git index.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/local_cleanup.py` | `prune_git_lfs_halim_blobs()`, `_prune_downloads_halim_extras()` |
+| `scripts/deep_sweep.sh` | One-shot deep sweep orchestrator |
+| `scripts/sweep_device_junk.sh` | LFS prune + Downloads dupes |
+| `mac-cleaner/clean.py` | hanoon_duplicates includes toddler_v1/v4/v5 zips |
+
+### Verify
+```bash
+./scripts/deep_sweep.sh
+du -sh .git/lfs halim/data/checkpoints/toddler_v1
+```
+
+## 2026-07-01 — RAM bleed + live disk sweep (Cursor git LFS on Halim weights)
+
+### Problem
+8GB Mac felt slow during trading: memory climbing, disk activity. `ps` showed multiple `git diff`/`git-lfs filter-process` each ~290MB diffing `halim/.../model.safetensors` and Colab `checkpoint-*/optimizer.pt`. Periodic cleanup could also trim jsonl under RAM pressure off-hours.
+
+### Root cause
+`.gitignore` had `!halim/data/checkpoints/**` forcing all checkpoint blobs into git; `.gitattributes` routes `*.safetensors` through git-lfs. Cursor indexes every change → RAM bleed. v5 Colab install left ~200MB of `checkpoint-*` training shards unused for MLX inference (`merged/` is enough).
+
+### Fix
+| File | Change |
+|------|--------|
+| `.gitignore` | Ignore merged/, safetensors, Colab checkpoint-* dirs; keep config.json only |
+| `.cursorignore` | Same patterns so IDE skips weight diffs |
+| `core/local_cleanup.py` | `prune_halim_colab_artifacts()` |
+| `scripts/halim_install_toddler.sh` | Prune after install |
+| `scripts/sweep_device_junk.sh` | Prune + `git rm --cached` weight blobs |
+| `scripts/halim_memory_profile.sh` | `PERIODIC_CLEANUP_SEC=0`, `LEARNING_SYNC_INTERVAL_SEC=0` on 8GB |
+
+### Verify
+```bash
+./scripts/sweep_device_junk.sh
+# Reload Cursor window after sweep
 ```

@@ -29,6 +29,13 @@ export TZ="America/New_York"
 IB_PORT="${IB_PORT:-4002}"
 IB_HOST="${IB_HOST:-127.0.0.1}"
 
+# Live money guard — paper default (4002); port 4001 requires explicit ack
+if [[ "$IB_PORT" == "4001" ]] && [[ "${HANOON_LIVE_MONEY_ACK:-false}" != "true" ]]; then
+  echo "❌ IB_PORT=4001 is live money — set HANOON_LIVE_MONEY_ACK=true to proceed."
+  echo "   Paper default: IB_PORT=4002 ./scripts/start_hanoon.sh"
+  exit 1
+fi
+
 # HANOON uses a single fixed IB client ID (default 1). Do not auto-rotate —
 # extra client IDs leave ghost sessions that block live market data (IB 10197).
 CLIENT_ID="${CLIENT_ID:-1}"
@@ -227,6 +234,9 @@ export IB_FILL_STRICT="${IB_FILL_STRICT:-true}"
 export IB_FILL_FORCE_SEC="${IB_FILL_FORCE_SEC:-120}"
 export SMART_STACK="${SMART_STACK:-true}"
 export RAM_LIVE_ONLY="${RAM_LIVE_ONLY:-true}"
+export PERIODIC_CLEANUP_SEC="${PERIODIC_CLEANUP_SEC:-0}"
+export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-0}"
+export AUTO_DISK_CLEANUP="${AUTO_DISK_CLEANUP:-false}"
 export LEARNING_LIVE_WEIGHT_EVERY_N_TRADES="${LEARNING_LIVE_WEIGHT_EVERY_N_TRADES:-0}"
 export PPO_BYPASS_REQUIRES_BUY="${PPO_BYPASS_REQUIRES_BUY:-true}"
 export PPO_OVERRIDE_ENTRY_REWARD="${PPO_OVERRIDE_ENTRY_REWARD:--0.15}"
@@ -404,7 +414,7 @@ export HALIM_ENTRY_LM_ENABLED="${HALIM_ENTRY_LM_ENABLED:-true}"
 export HALIM_ENTRY_IB_CONTEXT="${HALIM_ENTRY_IB_CONTEXT:-true}"
 export HALIM_ENTRY_BLEND_WEIGHT="${HALIM_ENTRY_BLEND_WEIGHT:-0.35}"
 export HALIM_ENTRY_AWAIT_LIVE="${HALIM_ENTRY_AWAIT_LIVE:-true}"
-export HALIM_ENTRY_AWAIT_SEC="${HALIM_ENTRY_AWAIT_SEC:-2.5}"
+# HALIM_ENTRY_AWAIT_SEC → canonical value from m2_8gb_live_profile.sh (≤12GB) or sprint env
 export HALIM_PPO_COMPLEMENT="${HALIM_PPO_COMPLEMENT:-true}"
 export HALIM_OUTCOME_GOLD="${HALIM_OUTCOME_GOLD:-true}"
 export HALIM_AUTO_INSTALL_COLAB="${HALIM_AUTO_INSTALL_COLAB:-true}"
@@ -431,7 +441,6 @@ export SMART_STACK_STRICT_PROFIT_PROB="${SMART_STACK_STRICT_PROFIT_PROB:-false}"
 export SMART_STACK_AI_SURE_ENTRY="${SMART_STACK_AI_SURE_ENTRY:-false}"
 export COMMANDER_RUNTIME_ENABLED="${COMMANDER_RUNTIME_ENABLED:-false}"
 export HALIM_ENTRY_SOFT_VETO="${HALIM_ENTRY_SOFT_VETO:-false}"
-export HALIM_ENTRY_AWAIT_SEC="${HALIM_ENTRY_AWAIT_SEC:-1.0}"
 export HALIM_PPO_COMPLEMENT="${HALIM_PPO_COMPLEMENT:-true}"
 export SMART_STACK_TEACHER_HARD_ONLY="${SMART_STACK_TEACHER_HARD_ONLY:-true}"
 export WAR_MIN_PROFIT_PROBABILITY="${WAR_MIN_PROFIT_PROBABILITY:-0.58}"
@@ -445,7 +454,6 @@ export WAR_ENTRY_ADVISORY_ONLY="${WAR_ENTRY_ADVISORY_ONLY:-true}"
 export PPO_DEPLOY_TIERS_ENABLED="${PPO_DEPLOY_TIERS_ENABLED:-true}"
 export LEARN_APPROVAL_REQUIRED="${LEARN_APPROVAL_REQUIRED:-true}"
 export GREEN_VERDICT_RECHECK="${GREEN_VERDICT_RECHECK:-false}"
-export HALIM_ENTRY_AWAIT_SEC="${HALIM_ENTRY_AWAIT_SEC:-0}"
 export SMART_STACK_WAR_POSTURE="${SMART_STACK_WAR_POSTURE:-true}"
 
 export PYTHONUNBUFFERED=1
@@ -718,7 +726,16 @@ source "$ROOT/scripts/ppo_wheel_env.sh" 2>/dev/null || true
 source "$ROOT/scripts/hanoon_profit_learn_env.sh" 2>/dev/null || true
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_smart_sprint_env.sh" 2>/dev/null || true
-echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${WAR_ENTRY_ADVISORY_ONLY} | conf=${CONFIDENCE_THRESHOLD}"
+
+# Canonical ≤12 GB profile — wins over inline/sprint duplicates (see docs/PERFECTION_ROADMAP_M2_8GB.md)
+if [[ "${TOTAL_RAM_MB:-0}" -le 12288 ]] && [[ -f "$ROOT/scripts/m2_8gb_live_profile.sh" ]]; then
+  export HANOON_DEVICE_PROFILE_ROOT="$ROOT"
+  # shellcheck disable=SC1091
+  source "$ROOT/scripts/m2_8gb_live_profile.sh"
+fi
+
+echo "  📋 Device profile: ${HANOON_DEVICE_PROFILE:-default} | RAM=${TOTAL_RAM_MB}MB | IB=$IB_PORT"
+echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${WAR_ENTRY_ADVISORY_ONLY} | strict_prob=${SMART_STACK_STRICT_PROFIT_PROB} | conf=${CONFIDENCE_THRESHOLD}"
 if [[ "${HALIM_SMART_SPRINT:-true}" == "true" ]]; then
   echo "  🧠 Halim sprint: child fast+quality | strict_prob=${SMART_STACK_STRICT_PROFIT_PROB} | await=${HALIM_ENTRY_AWAIT_SEC}s | proxy@child"
 fi
