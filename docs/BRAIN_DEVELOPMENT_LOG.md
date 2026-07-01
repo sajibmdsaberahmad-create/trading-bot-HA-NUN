@@ -3,7 +3,7 @@
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
 
-- `2026-07-01` **engineering** — Codebase health pass: 155 tests green, CI workflow, maturity thresholds, TF optional — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
+- `2026-07-01` **engineering** — ib_async shim + UTC time_utils + runtime journal untrack — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 
 - `2026-07-01` **engineering** — Deep IB alignment audit (all Telegram/report surfaces) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Strict green all phases + fast PPO lead + full-day IB session P&L — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
