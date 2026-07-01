@@ -10,6 +10,46 @@
 
 ---
 
+## 2026-07-01 — Halim Smart Sprint (all phases A–D, M2 8GB)
+
+### Problem
+User wanted all Halim intelligence upgrades at once: JSON gold, MLX retrain, child-stage replay, fewer live mistakes (micro_fast bypass, training echo), on M2 8GB.
+
+### Root cause
+Phases were documented separately with no unified env/orchestrator; limitless profile disabled `SMART_STACK_STRICT_PROFIT_PROB`; toddler `ppo:micro_fast` entered without Halim consensus.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/halim_smart_sprint_env.sh` | **New** — phases A–D env (await 2.5s, block micro_fast, strict profit_prob, JSON API, replay API budget) |
+| `scripts/halim_smart_sprint.sh` | **New** — one-shot: v5 → colab_ready → MLX retrain → optional replay |
+| `core/halim_smart_sprint.py` | **New** — `sprint_status()`, `sprint_block_micro_fast()` |
+| `core/capital_discipline.py` | Block micro_fast when sprint + toddler |
+| `core/smart_stack.py` | Sprint forces strict profit_prob; lower echo→teacher bar |
+| `scripts/start_hanoon.sh` | Source sprint env last + banner |
+| `scripts/start_replay_live.sh`, `weekend_replay_train.sh` | Sprint env for gold collection |
+| `tests/test_halim_smart_sprint.py` | Profile smoke tests |
+
+### Env
+| Var | Default | Role |
+|-----|---------|------|
+| `HALIM_SMART_SPRINT` | `true` | Master switch |
+| `HALIM_SPRINT_BLOCK_MICRO_FAST` | `true` | No micro_fast until child |
+| `HALIM_ENTRY_AWAIT_SEC` | `2.5` | Quick Halim peek before fast path (not 6s block) |
+| `BRAIN_CHILD_DATASET_TARGET` | `200` | Council pairs for child |
+| `REPLAY_DECISION_API_DAILY` | `64` | Replay teacher budget |
+
+### Verify
+```bash
+./scripts/halim_smart_sprint.sh --env-only
+./scripts/halim_smart_sprint.sh              # off-hours full pipeline
+./scripts/halim_smart_sprint.sh --with-replay  # + background replay toward child
+python -m pytest tests/test_halim_smart_sprint.py -q
+./scripts/start_hanoon.sh   # banner: Halim sprint ON
+```
+
+---
+
 ## 2026-07-01 — Swing bar fetch + toddler maturity gate
 
 ### Problem

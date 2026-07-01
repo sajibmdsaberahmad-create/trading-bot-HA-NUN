@@ -45,7 +45,14 @@ def strict_profit_prob_enabled(cfg: Optional[BotConfig] = None) -> bool:
     Hard veto on red profit_probability / enter_ok=false.
     Default ON with Smart Stack — MTF/regime stay advisory; profit prob does not.
     Set SMART_STACK_STRICT_PROFIT_PROB=false to restore legacy fast-path bypasses.
+    Smart Sprint (HALIM_SMART_SPRINT=true) forces ON.
     """
+    try:
+        from core.halim_smart_sprint import sprint_enabled
+        if sprint_enabled():
+            return True
+    except Exception:
+        pass
     if not smart_stack_enabled(cfg):
         return _env_bool("SMART_STACK_STRICT_PROFIT_PROB", "false")
     return _env_bool("SMART_STACK_STRICT_PROFIT_PROB", "true")
@@ -427,12 +434,17 @@ def should_ring_teacher_api(
 
     try:
         from core.halim_entry_line import halim_advisory_is_echo
+        min_prob = 0.68
+        min_scan = 40
+        if os.getenv("HALIM_SMART_SPRINT_ECHO_TEACHER", "").lower() in ("1", "true", "yes"):
+            min_prob = float(os.getenv("HALIM_SPRINT_ECHO_MIN_PROFIT_PROB", "0.55"))
+            min_scan = float(os.getenv("HALIM_SPRINT_ECHO_MIN_SCAN", "35"))
         if (
             halim_parsed
             and halim_advisory_is_echo(halim_parsed)
-            and profit_prob >= 0.68
+            and profit_prob >= min_prob
             and enter_ok
-            and scan_score >= 40
+            and scan_score >= min_scan
         ):
             return True, "teacher:halim_echo_quality"
     except Exception:

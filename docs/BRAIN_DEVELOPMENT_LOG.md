@@ -3,6 +3,7 @@
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
 
+- `2026-07-01` **engineering** — Halim Smart Sprint (all phases A–D, M2 8GB) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Swing bar fetch DataFrame fix + toddler swing IB gate + war scalp-only separation — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — War step-aside when pool dry; IB qualify main-thread guard — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Halim v5 prep (read-only browse + JSON/API gold + SFT zip) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -2065,3 +2066,4 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-07-01 14:37 UTC` **brain_evolution** · stage **toddler** — Evolution live_session_end — stage toddler, dataset 78 pairs
 - `2026-07-01 14:37 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
 - `2026-07-01 14:37 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 78 pairs
+- `2026-07-01 16:00 UTC` **brain_proxy_trained** · stage **child** — Teacher proxy holdout acc=100% (random=100%, 482 samples)

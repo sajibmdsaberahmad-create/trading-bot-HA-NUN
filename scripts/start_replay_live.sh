@@ -25,6 +25,8 @@ cd "$ROOT"
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_env.sh"
 # shellcheck disable=SC1091
+source "$ROOT/scripts/halim_smart_sprint_env.sh" 2>/dev/null || true
+# shellcheck disable=SC1091
 source "$ROOT/scripts/halim_memory_profile.sh" 2>/dev/null || true
 export TZ="America/New_York"
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"

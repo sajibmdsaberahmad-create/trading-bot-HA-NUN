@@ -96,6 +96,8 @@ fi
 export PYTHONPATH="${ROOT}/halim:${ROOT}${PYTHONPATH:+:$PYTHONPATH}"
 # shellcheck source=/dev/null
 source "$ROOT/scripts/halim_env.sh"
+# shellcheck disable=SC1091
+source "$ROOT/scripts/halim_smart_sprint_env.sh" 2>/dev/null || true
 
 # One replay data root — intraday IB farm only (not hanoon daily yfinance)
 export REPLAY_DATA_DIR="${REPLAY_DATA_DIR:-$ROOT/data/replay}"

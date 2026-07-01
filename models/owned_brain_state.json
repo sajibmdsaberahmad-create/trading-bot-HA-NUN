@@ -1,6 +1,6 @@
 {
-  "last_export": "2026-07-01T14:37:39.705896+00:00",
-  "dataset_pairs": 78,
+  "last_export": "2026-07-01T16:00:32.713326+00:00",
+  "dataset_pairs": 506,
   "last_evolution": "2026-07-01T14:37:47.355101+00:00",
   "last_trigger": "cli",
   "device_profile": "m2_8gb",
@@ -9,7 +9,7 @@
   "stage": "toddler",
   "api_usage_today": {
     "day": "2026-07-01",
-    "decision": 17,
+    "decision": 18,
     "copilot": 1
   },
   "_notify_stage": "toddler"

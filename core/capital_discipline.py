@@ -89,6 +89,12 @@ def allows_disciplined_spike_fast(
 
 
 def allows_micro_fast_entry(cfg: Optional[BotConfig] = None) -> bool:
+    try:
+        from core.halim_smart_sprint import sprint_block_micro_fast
+        if sprint_block_micro_fast(cfg):
+            return False
+    except Exception:
+        pass
     if _ai_sure_blocks_fast_paths(cfg):
         return False
     if capital_discipline_enabled(cfg):
