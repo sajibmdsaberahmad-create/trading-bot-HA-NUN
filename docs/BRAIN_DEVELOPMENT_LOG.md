@@ -3,6 +3,7 @@
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
 
+- `2026-07-01` **engineering** — PPO-led coevolution profile: unlimited entries, dedupe overlapping gates — see [PPO_LED_COEVOLUTION_PROFILE.md](PPO_LED_COEVOLUTION_PROFILE.md) · [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Deep IB alignment audit (all Telegram/report surfaces) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Strict green all phases + fast PPO lead + full-day IB session P&L — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — IB-only LIVE_PULSE/notify; copilot CJK discard; premarket entry floors — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)

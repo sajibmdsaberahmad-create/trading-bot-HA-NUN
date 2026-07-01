@@ -41,3 +41,42 @@ def test_sanitize_quote_price_fixes_10x_live_quote():
     from core.fill_tracker import sanitize_quote_price
     fixed = sanitize_quote_price(140.21, ref_px=14.02, pred_px=14.05, symbol="INTC")
     assert fixed == pytest.approx(14.021, rel=0.02)
+
+
+def test_snapshot_market_price_uses_ib_truth_without_qualify():
+    from unittest.mock import MagicMock, patch
+
+    from core.fill_tracker import snapshot_market_price
+    from core.ib_truth import IBAccountSnapshot, IBPosition, IBTruthSnapshot
+
+    ib = MagicMock()
+    ib.isConnected.return_value = True
+    snap = IBTruthSnapshot(
+        account=IBAccountSnapshot(),
+        positions=[IBPosition(symbol="INTC", qty=10, avg_cost=14.0, market_price=14.52)],
+        refreshed_at=1.0,
+    )
+    with patch("core.ib_truth.get_snapshot", return_value=snap), patch(
+        "core.ib_truth.ib_truth_enabled", return_value=True
+    ):
+        px = snapshot_market_price(ib, "INTC")
+    assert px == pytest.approx(14.52)
+    ib.qualifyContracts.assert_not_called()
+
+
+def test_snapshot_market_price_skips_ib_when_async_loop_running():
+    from unittest.mock import MagicMock, patch
+    import asyncio
+
+    from core.fill_tracker import snapshot_market_price
+
+    ib = MagicMock()
+    ib.isConnected.return_value = True
+
+    async def _run():
+        with patch("core.fill_tracker._cached_market_price", return_value=0.0):
+            px = snapshot_market_price(ib, "INTC")
+        assert px == 0.0
+        ib.qualifyContracts.assert_not_called()
+
+    asyncio.run(_run())

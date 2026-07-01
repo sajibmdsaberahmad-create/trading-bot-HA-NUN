@@ -248,6 +248,80 @@ def sanitize_quote_price(
     return fixed
 
 
+def _cached_market_price(symbol: str) -> float:
+    """IB marks from snapshot/cache — safe from any thread (no qualifyContracts)."""
+    sym = (symbol or "").upper()
+    if not sym:
+        return 0.0
+    pos = _truth_long_position(sym)
+    if pos is not None:
+        mkt = float(pos.market_price or 0)
+        if mkt > 0:
+            return mkt
+    try:
+        from core.ib_truth import get_snapshot, ib_truth_enabled
+        if ib_truth_enabled():
+            snap = get_snapshot()
+            if snap.refreshed_at > 0:
+                for p in snap.positions:
+                    if p.symbol == sym:
+                        mkt = float(p.market_price or 0)
+                        if mkt > 0:
+                            return mkt
+    except Exception:
+        pass
+    try:
+        from core.ib_extended import get_extended_cache
+        c = get_extended_cache()
+        q = (c.get("quote_snapshots") or {}).get(sym) or {}
+        for key in ("last", "close"):
+            px = float(q.get(key) or 0)
+            if px > 0:
+                return px
+        bid = float(q.get("bid") or 0)
+        ask = float(q.get("ask") or 0)
+        if bid > 0 and ask > 0:
+            return (bid + ask) / 2
+    except Exception:
+        pass
+    return 0.0
+
+
+def _ib_blocking_calls_safe(ib) -> bool:
+    """False when sync ib_insync calls would orphan async coroutines."""
+    if ib is None:
+        return False
+    try:
+        if not ib.isConnected():
+            return False
+    except Exception:
+        return False
+    try:
+        import asyncio
+        asyncio.get_running_loop()
+        return False
+    except RuntimeError:
+        return True
+
+
+def _portfolio_mark_price(ib, symbol: str) -> float:
+    """IB portfolio mark for a held symbol — no contract qualification."""
+    sym = (symbol or "").upper()
+    if not sym:
+        return 0.0
+    try:
+        for item in ib.portfolio():
+            contract = getattr(item, "contract", None)
+            if getattr(contract, "symbol", "").upper() != sym:
+                continue
+            mkt = float(getattr(item, "marketPrice", 0) or 0)
+            if mkt > 0:
+                return mkt
+    except Exception as exc:
+        log.debug(f"portfolio mark {sym}: {exc}")
+    return 0.0
+
+
 def snapshot_market_price(
     ib,
     symbol: str,
@@ -260,6 +334,14 @@ def snapshot_market_price(
     sym = (symbol or "").upper()
     if not sym:
         return 0.0
+    cached = _cached_market_price(sym)
+    if cached > 0:
+        return cached
+    if not _ib_blocking_calls_safe(ib):
+        return 0.0
+    port_px = _portfolio_mark_price(ib, sym)
+    if port_px > 0:
+        return port_px
     try:
         from ib_insync import Stock
 

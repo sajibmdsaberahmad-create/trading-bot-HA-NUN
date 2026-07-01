@@ -15,6 +15,48 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 
 ---
 
+## 2026-07-01 — PPO-led profile: unlimited entries + dedupe overlapping gates
+
+### Problem
+Hourly entry caps (2–5/hr) and stacked gates (strict profit prob, AI-SURE, commander lottery 80%, Halim soft veto) blocked learning via actions. Overlapped green doctrine checks.
+
+### Fix
+`scripts/start_hanoon.sh` — PPO-led coevolution profile block:
+- `MAX_ENTRIES_PER_HOUR=0` (and war hourly caps 0) = unlimited
+- `SMART_STACK_STRICT_PROFIT_PROB=false`, `SMART_STACK_AI_SURE_ENTRY=false`
+- `COMMANDER_RUNTIME_ENABLED=false` (lottery floors off; green still gates)
+- `HALIM_ENTRY_SOFT_VETO=false`, `HALIM_ENTRY_AWAIT_SEC=1.0`
+- Single profit/conf floor ~58% aligned with green
+
+### Verify
+Restart; no `👁 hourly entry cap` logs; more spikes reach `decide_entry` when green passes.
+
+**Full spec:** [PPO_LED_COEVOLUTION_PROFILE.md](PPO_LED_COEVOLUTION_PROFILE.md)
+
+---
+
+## 2026-07-01 — fill_tracker qualifyContractsAsync warning (council thread)
+
+### Problem
+`RuntimeWarning: coroutine 'IB.qualifyContractsAsync' was never awaited` during council risk checks (e.g. INTC hard_stop). `snapshot_market_price` called `ib.qualifyContracts` from contexts with a running asyncio loop.
+
+### Root cause
+`position_entry_price` → `snapshot_market_price` always qualified contracts live; ib_insync sync wrappers orphan coroutines off the main IB path.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/fill_tracker.py` | `_cached_market_price` from IB Truth + extended cache first; `_ib_blocking_calls_safe` gate; portfolio mark before qualify |
+| `tests/test_position_entry_price.py` | Tests: truth cache path, skip IB under running loop |
+
+### Verify
+```bash
+venv/bin/pytest tests/test_position_entry_price.py -q
+# No qualifyContractsAsync RuntimeWarning on council risk lines
+```
+
+---
+
 ## 2026-07-01 — Deep IB alignment audit (all Telegram/report surfaces)
 
 ### Problem
