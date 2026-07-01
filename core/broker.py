@@ -50,6 +50,19 @@ from core.market_hours import (
 from core.notify import log
 
 
+def _env_float(name: str, default: float) -> float:
+    import os
+    try:
+        return float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+def _orphan_cover_fast(cfg: Optional["BotConfig"] = None) -> bool:
+    import os
+    return os.getenv("ORPHAN_COVER_FAST", "true").lower() in ("1", "true", "yes")
+
+
 def parse_ib_regulatory_cap(error_string: str) -> Optional[float]:
     """Extract IB price cap from error 2161 text."""
     if not error_string:
@@ -486,12 +499,23 @@ class BrokerExecutor:
             log.debug(f"Cancel orders for {sym}: {exc}")
         return cancelled
 
-    def cancel_stale_open_orders(self) -> int:
+    def _ib_sleep_bounded(self, sec: float, deadline: Optional[float] = None) -> bool:
+        """Sleep via IB loop; return False if deadline exceeded (skip sleep)."""
+        if deadline is not None and time.monotonic() >= deadline:
+            return False
+        if deadline is not None:
+            sec = min(sec, max(0.05, deadline - time.monotonic()))
+        self.ib.sleep(sec)
+        return True
+
+    def cancel_stale_open_orders(self, deadline: Optional[float] = None) -> int:
         """Cancel all resting orders on startup — clears orphaned brackets from prior runs."""
         cancelled = 0
         try:
             self.ib.reqAllOpenOrders()
-            self.ib.sleep(0.5)
+            if not self._ib_sleep_bounded(0.5, deadline):
+                log.warning("🧹 Stale order cleanup — time budget exceeded (after reqAllOpenOrders)")
+                return cancelled
             for trade in list(self.ib.openTrades()):
                 try:
                     oid = int(getattr(trade.order, "orderId", 0) or 0)
@@ -508,7 +532,9 @@ class BrokerExecutor:
                 except Exception:
                     pass
             if cancelled:
-                self.ib.sleep(0.5)
+                if not self._ib_sleep_bounded(0.5, deadline):
+                    log.warning("🧹 Stale order cleanup — time budget exceeded (post-cancel)")
+                    return cancelled
                 log.info(f"🧹 Cancelled {cancelled} stale open order(s) from prior session")
             # Clear stuck PendingSubmit / PreSubmitted orders (block new brackets on paper)
             pending = 0
@@ -523,20 +549,28 @@ class BrokerExecutor:
                 except Exception:
                     pass
             if pending:
-                self.ib.sleep(0.3)
+                if not self._ib_sleep_bounded(0.3, deadline):
+                    log.warning("🧹 Stale order cleanup — time budget exceeded (pending pass)")
+                    return cancelled
                 log.info(f"🧹 Cancelled {pending} stuck PendingSubmit/PreSubmitted order(s)")
         except Exception as exc:
             log.debug(f"Stale order cleanup: {exc}")
         return cancelled
 
-    def flatten_orphan_short_positions(self) -> int:
+    def flatten_orphan_short_positions(self, deadline: Optional[float] = None) -> int:
         """Buy to cover unexpected short positions left on the paper account."""
         covered = 0
+        fast = _orphan_cover_fast(self.cfg)
         try:
             from core.ib_client import Stock
             self.ib.reqPositions()
-            self.ib.sleep(0.5)
+            if not self._ib_sleep_bounded(0.5, deadline):
+                log.warning("🧹 Orphan short cover — time budget exceeded (positions)")
+                return covered
             for p in list(self.ib.positions()):
+                if deadline is not None and time.monotonic() >= deadline:
+                    log.warning("🧹 Orphan short cover — time budget exceeded (skipping rest)")
+                    break
                 qty = float(p.position)
                 if qty >= -0.5:
                     continue
@@ -553,7 +587,9 @@ class BrokerExecutor:
                 except Exception:
                     contract = p.contract
                 ref_px = float(getattr(p, "avgCost", 0) or 0)
-                bid, ask = self._snapshot_bid_ask(sym)
+                bid, ask = None, None
+                if not fast and (deadline is None or time.monotonic() < deadline):
+                    bid, ask = self._snapshot_bid_ask(sym)
                 if ref_px <= 0:
                     ref_px = float(bid or ask or 0)
                 from core.entry_pipeline import cover_order_for_session
@@ -568,7 +604,10 @@ class BrokerExecutor:
                 )
                 self._configure_order(order)
                 trade = self.ib.placeOrder(contract, order)
-                self.ib.sleep(0.35)
+                if not self._ib_sleep_bounded(0.35, deadline):
+                    log.warning(f"🧹 Orphan cover {sym} placed — continuing (time budget)")
+                    covered += 1
+                    continue
                 st = trade.orderStatus.status if trade.orderStatus else ""
                 px_note = ""
                 if isinstance(order, LimitOrder) and getattr(order, "lmtPrice", 0):
@@ -590,9 +629,9 @@ class BrokerExecutor:
                         f"ignored until position clears"
                     )
             if covered:
-                self.ib.sleep(0.5)
+                self._ib_sleep_bounded(0.5, deadline)
         except Exception as exc:
-            log.debug(f"Orphan short cleanup: {exc}")
+            log.warning(f"Orphan short cleanup: {exc}")
         return covered
 
     def _snapshot_bid_ask(self, sym: str) -> Tuple[Optional[float], Optional[float]]:

@@ -1583,33 +1583,20 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 from core.startup_log import sinfo
                 sinfo(self.cfg, "☀️ Shadow state ignored on paper — real IB orders enabled")
 
-        if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
-            send_dynamic_notification(
-                self.notifier, self.autopilot, "startup",
-                self._notify_context({"ib_balance": self._ib_starting_balance}, event_type="startup"),
-                "🚀 Life engine running (scalp + swing)",
-                ai_commander=self.ai_commander,
-                consciousness=self.consciousness,
-                pilot=self.pilot,
-            )
-        else:
-            self.notifier.info("🚀 Life engine running (scalp + swing)")
-
-        try:
-            from core.halim_companion import companion_session_ping
-            if not self._shutdown_abort():
-                companion_session_ping(self, self.cfg, trigger="session_startup")
-        except Exception as exc:
-            log.debug(f"Halim companion startup ping: {exc}")
-
         if self._shutdown_abort():
             self._shutdown()
             return
 
-        # Clear orphaned bracket orders from previous sessions before trading
+        # IB housekeeping before notify — bounded so startup cannot hang on orphan covers
+        import time as _time
+        hk_budget = float(os.getenv("STARTUP_IB_HOUSEKEEPING_SEC", "12"))
+        hk_deadline = _time.monotonic() + hk_budget
+        log.info(f"🧹 Startup IB housekeeping (≤{hk_budget:.0f}s) — stale orders + orphan shorts…")
         try:
-            self.broker.cancel_stale_open_orders()
-            n = self.broker.flatten_orphan_short_positions()
+            self.broker.cancel_stale_open_orders(deadline=hk_deadline)
+            n = 0
+            if _time.monotonic() < hk_deadline:
+                n = self.broker.flatten_orphan_short_positions(deadline=hk_deadline)
             if n:
                 log.info(f"🧹 Covered {n} orphan short position(s) on paper account")
             pending = {
@@ -1628,8 +1615,31 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             self._record_war_adoptions(adopted)
             if adopted:
                 self._refresh_aggregate_position_state()
-        except Exception:
-            pass
+        except Exception as exc:
+            log.warning(f"Startup IB housekeeping incomplete: {exc}")
+
+        if self._shutdown_abort():
+            self._shutdown()
+            return
+
+        if getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True):
+            send_dynamic_notification(
+                self.notifier, self.autopilot, "startup",
+                self._notify_context({"ib_balance": self._ib_starting_balance}, event_type="startup"),
+                "🚀 Life engine running (scalp + swing)",
+                ai_commander=self.ai_commander,
+                consciousness=self.consciousness,
+                pilot=self.pilot,
+            )
+        else:
+            self.notifier.info("🚀 Life engine running (scalp + swing)")
+
+        try:
+            from core.halim_companion import companion_session_ping
+            if not self._shutdown_abort():
+                companion_session_ping(self, self.cfg, trigger="session_startup")
+        except Exception as exc:
+            log.debug(f"Halim companion startup ping: {exc}")
 
         if self._shutdown_abort():
             self._shutdown()

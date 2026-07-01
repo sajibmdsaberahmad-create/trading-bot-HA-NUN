@@ -24,6 +24,28 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 
 ---
 
+---
+
+## 2026-07-01 — Startup hang after SNIPER (orphan IB housekeeping)
+
+### Problem
+`HANOON.log` froze at `SNIPER FAST` for minutes — main thread blocked on IB stale-order cancel / orphan short cover (bid-ask snapshot, qualify, PreSubmitted covers).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_runner.py` | IB housekeeping **before** startup notify; `STARTUP_IB_HOUSEKEEPING_SEC` budget; removed inner `import os` (shadowed module `os` → `UnboundLocalError` at `run()`) |
+| `core/broker.py` | Bounded `ib.sleep`; `ORPHAN_COVER_FAST` skips slow mkt-data snapshot |
+| `scripts/hanoon_profit_learn_env.sh` | `ORPHAN_COVER_FAST=true`, `STARTUP_IB_HOUSEKEEPING_SEC=12` |
+
+### Verify
+```bash
+# After SNIPER → within 15s see housekeeping + 🕐 market + startup scan
+rg 'Startup IB housekeeping|🕐|Startup lock complete' logs/HANOON.log | tail
+```
+
+---
+
 ## 2026-07-01 — Wave tune + spike green defer (PPO-first action)
 
 ### Problem
