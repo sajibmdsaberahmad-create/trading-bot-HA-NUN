@@ -703,6 +703,9 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Foreground: StreamHandler → terminal, FileHandler → $MAIN_LOG (see core/notify.py)
+# shellcheck disable=SC1091
+source "$ROOT/scripts/ppo_wheel_env.sh" 2>/dev/null || true
+echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${WAR_ENTRY_ADVISORY_ONLY} | conf=${CONFIDENCE_THRESHOLD}"
 PY="${ROOT}/venv/bin/python3"
 if [[ ! -x "$PY" ]]; then PY="python3"; fi
 "$PY" -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID"

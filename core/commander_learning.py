@@ -197,6 +197,12 @@ def _apply_mutation(
     param = normalize_param(param)
     if is_locked(param):
         return False, f"locked: {param}"
+    try:
+        from core.ppo_wheel_profile import is_ppo_wheel_locked_param
+        if is_ppo_wheel_locked_param(param):
+            return False, f"ppo_wheel_locked: {param}"
+    except Exception:
+        pass
     if not is_tunable(param, cfg):
         return False, f"not in learning bounds: {param}"
     if not hasattr(cfg, param):

@@ -163,7 +163,16 @@ def is_locked(param: str) -> bool:
 
 
 def is_runtime_blocked(param: str) -> bool:
-    return normalize_param(param) in RUNTIME_BLOCKED_PARAMS
+    p = normalize_param(param)
+    if p in RUNTIME_BLOCKED_PARAMS:
+        return True
+    try:
+        from core.ppo_wheel_profile import is_ppo_wheel_locked_param
+        if is_ppo_wheel_locked_param(p):
+            return True
+    except Exception:
+        pass
+    return False
 
 
 def bounds_for(param: str, cfg=None) -> Optional[Tuple]:

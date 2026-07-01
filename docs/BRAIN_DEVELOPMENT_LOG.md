@@ -2026,6 +2026,9 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-07-01 09:12 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 106 pairs
 - `2026-07-01 09:52 UTC` **brain_evolution** · stage **toddler** — Evolution live_session_end — stage toddler, dataset 74 pairs
 - `2026-07-01 09:53 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 3 mutation(s), git=ok
-- `2026-07-01` **ppo_wheel_doc** — Halim participation table + v4 on-device upgrade path in `PPO_WHEEL_ARCHITECTURE.md`
+- `2026-07-01` **ppo_wheel_env_lock** — `ppo_wheel_env.sh` force last; Halim await=0 verified in logs
 - `2026-07-01` **ppo_wheel** — War advisory-only, PPO deploy tiers, learn firewall, Halim await=0; spec `docs/PPO_WHEEL_ARCHITECTURE.md`
 - `2026-07-01 09:53 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 74 pairs
+- `2026-07-01 10:38 UTC` **brain_evolution** · stage **toddler** — Evolution live_session_end — stage toddler, dataset 74 pairs
+- `2026-07-01 10:39 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 3 mutation(s), git=ok
+- `2026-07-01 10:39 UTC` **brain_evolution** · stage **toddler** — Evolution standalone_flush — stage toddler, dataset 74 pairs

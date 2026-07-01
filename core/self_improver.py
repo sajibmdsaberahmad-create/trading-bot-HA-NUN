@@ -300,6 +300,13 @@ def _apply_adjustments(cfg: BotConfig, adjustments: Dict[str, Any]):
 
     for key, meta in adjustments.items():
         param = normalize_param(key)
+        try:
+            from core.ppo_wheel_profile import is_ppo_wheel_locked_param
+            if is_ppo_wheel_locked_param(param):
+                log.debug(f"Self-improvement skip {param}: ppo_wheel_locked")
+                continue
+        except Exception:
+            pass
         if not is_tunable(param, cfg) or not hasattr(cfg, param):
             continue
         old = getattr(cfg, param)

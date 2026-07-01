@@ -233,6 +233,11 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 )
         except Exception as exc:
             log.debug(f"Persisted param reload: {exc}")
+        try:
+            from core.ppo_wheel_profile import log_ppo_wheel_banner
+            log_ppo_wheel_banner()
+        except Exception:
+            pass
         self.conn.register_market_data_error_handler(self._on_market_data_failure)
         self.conn.register_tick_limit_handler(self._on_tick_stream_limit)
         self.conn.register_session_reclaim_handler(self._on_ib_session_reclaim)

@@ -49,9 +49,9 @@ def halim_entry_await_sec(cfg: Optional[BotConfig] = None) -> float:
     if os.getenv("HALIM_ENTRY_AWAIT_ENABLED", "true").lower() not in ("1", "true", "yes"):
         return 0.0
     try:
-        sec = float(os.getenv("HALIM_ENTRY_AWAIT_SEC", "4.5"))
+        sec = float(os.getenv("HALIM_ENTRY_AWAIT_SEC", "0"))
     except (TypeError, ValueError):
-        sec = 4.5
+        sec = 0.0
     if sec <= 0:
         return 0.0
     replay = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")

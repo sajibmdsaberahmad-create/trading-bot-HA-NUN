@@ -15,6 +15,36 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 
 ---
 
+## 2026-07-01 — PPO wheel env lock: Halim await=0 not applying after restart
+
+### Problem
+After restart, logs still showed `Halim entry fresh … (await 4.5s)`. PPO wheel profile not active. Halim developer on shutdown raised `CONFIDENCE_THRESHOLD` to 0.71 despite wheel 0.58 target.
+
+### Root cause
+`halim_env.sh` exported `HALIM_ENTRY_AWAIT_SEC=4.5` before wheel block; `${VAR:-0}` preserves already-set env. Wheel block was not last before `main.py`. Self-improver/Halim dev could mutate locked params at shutdown.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/ppo_wheel_env.sh` | **New** — force exports, sourced last before launch |
+| `scripts/start_hanoon.sh` | Source `ppo_wheel_env.sh`; print wheel banner |
+| `scripts/halim_env.sh` | Skip await 4.5 when `PPO_WHEEL_PROFILE_LOCK` |
+| `core/ppo_wheel_profile.py` | **New** — lock param list + startup banner |
+| `core/param_bounds.py` | `is_runtime_blocked` includes wheel-locked params |
+| `core/commander_learning.py` | Reject mutations on locked params |
+| `core/self_improver.py` | Skip locked params in `_apply_adjustments` |
+| `core/halim_entry_line.py` | Default await 0 (was 4.5) |
+| `tests/test_ppo_wheel_profile.py` | Lock tests |
+
+### Verify
+```bash
+./scripts/stop_hanoon.sh && ./scripts/start_hanoon.sh
+grep "PPO wheel" logs/HANOON.log | tail -3
+# expect: Halim await=0s — zero "await 4.5s" after session start time
+```
+
+---
+
 ## 2026-07-01 — PPO wheel: war advisory, deploy tiers, learn firewall, Halim async
 
 ### Problem
