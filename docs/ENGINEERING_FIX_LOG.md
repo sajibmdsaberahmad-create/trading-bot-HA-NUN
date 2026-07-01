@@ -10,6 +10,22 @@
 
 ---
 
+## 2026-07-01 — Fast child profile: PPO speed + quality gates
+
+### Problem
+User wanted better trades and fast execution. Child stage unlocked (506 council pairs, proxy) but live HANOON ran old env; Halim serve was down; 2.5s await added latency without toddler LM benefit.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/halim_smart_sprint_env.sh` | `HALIM_ENTRY_AWAIT_SEC=0` (PPO leads, Halim async); keep strict profit_prob; ai-sure off for speed |
+| `scripts/start_hanoon.sh` | `ensure_halim_active.sh --serve-only` before launch |
+
+### Verify
+Restart HANOON; banner `await=0s`; `curl :8765/health` ok; entries pass green+profit_prob, exits use profit_lock.
+
+---
+
 ## 2026-07-01 — Halim Smart Sprint (all phases A–D, M2 8GB)
 
 ### Problem

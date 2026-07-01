@@ -1,62 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 298,
+  "total_awakenings": 300,
   "training_sessions": 42,
-  "trades_observed": 1743,
+  "trades_observed": 1745,
   "scans_performed": 42,
   "improvements_applied": 2752,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T09:47:47.013562",
-      "age": "7d 22h 44m 58s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2168",
-      "metadata": {
-        "source": "runtime_order_timeout",
-        "summary": "Observed order_timeout \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review order_timeout on RIOT"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:49:18.721016",
-      "age": "7d 22h 46m 30s",
-      "type": "TRADE",
-      "message": "Observed trade: SOFI ? P&L=$+1862.76",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T09:49:18.937404",
-      "age": "7d 22h 46m 30s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2169",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on SOFI"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:49:45.391083",
-      "age": "7d 22h 46m 56s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2170",
-      "metadata": {
-        "source": "runtime_order_timeout",
-        "summary": "Observed order_timeout \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review order_timeout on RIOT"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T09:50:06.623088",
       "age": "7d 22h 47m 17s",
@@ -11563,9 +11514,37 @@
       "type": "TRADE",
       "message": "Observed trade: MSTU ? P&L=$-8.62",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T16:01:28.178418+00:00",
+      "age": "10d 4h 58m 39s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #299",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T16:06:44.717164+00:00",
+      "age": "10d 5h 3m 56s",
+      "type": "TRADE",
+      "message": "Observed trade: GPUS ? P&L=$-0.24",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T16:12:00.082555+00:00",
+      "age": "10d 5h 9m 11s",
+      "type": "TRADE",
+      "message": "Observed trade: INLF ? P&L=$+0.13",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T16:21:42.094112+00:00",
+      "age": "10d 5h 18m 53s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #300",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-07-01T15:39:01.227728+00:00",
+  "last_awakening": "2026-07-01T16:21:42.093419+00:00",
   "current_version": "v20260629_075355",
   "version_history": [
     {
@@ -13724,11 +13703,9 @@
     }
   ],
   "last_training": "2026-06-29T07:53:55.457760",
-  "mood": "recalibrating",
-  "total_pnl": 330631.23000000056,
+  "mood": "defensive",
+  "total_pnl": 330631.1200000006,
   "win_history": [
-    -14.82,
-    -18.16,
     -14.86,
     4.0,
     -18.19,
@@ -14226,20 +14203,22 @@
     -0.95,
     0,
     -1.27,
-    -8.62
+    -8.62,
+    -0.24,
+    0.13
   ],
-  "consecutive_wins": 0,
-  "consecutive_losses": 4,
+  "consecutive_wins": 1,
+  "consecutive_losses": 0,
   "worst_streak": 86,
-  "veteran_xp": 26790,
+  "veteran_xp": 26830,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 80,
     "entry_timing": 100
   },
-  "flights_completed": 1737,
-  "hours_flown": 173.69999999999442,
+  "flights_completed": 1739,
+  "hours_flown": 173.8999999999944,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14259,7 +14238,7 @@
     "GDC": 14,
     "SOX": 30,
     "BIT": 19,
-    "GPU": 19,
+    "GPU": 20,
     "PLT": 48,
     "LCI": 271,
     "RIO": 32,
@@ -14272,7 +14251,7 @@
     "AST": 242,
     "SES": 12,
     "NVD": 20,
-    "INL": 11,
+    "INL": 12,
     "TNM": 18,
     "SOA": 12,
     "KND": 1,
@@ -14300,5 +14279,5 @@
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-15.69 recent). Tightening entries until edge returns."
+  "mood_message": "Win rate 15% \u00b7 $-14.27. Preserving capital over action."
 }

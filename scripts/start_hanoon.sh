@@ -720,7 +720,11 @@ source "$ROOT/scripts/hanoon_profit_learn_env.sh" 2>/dev/null || true
 source "$ROOT/scripts/halim_smart_sprint_env.sh" 2>/dev/null || true
 echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${WAR_ENTRY_ADVISORY_ONLY} | conf=${CONFIDENCE_THRESHOLD}"
 if [[ "${HALIM_SMART_SPRINT:-true}" == "true" ]]; then
-  echo "  🧠 Halim sprint: micro_fast=${HALIM_SPRINT_BLOCK_MICRO_FAST:-?} | strict_prob=${SMART_STACK_STRICT_PROFIT_PROB} | await=${HALIM_ENTRY_AWAIT_SEC}s"
+  echo "  🧠 Halim sprint: child fast+quality | strict_prob=${SMART_STACK_STRICT_PROFIT_PROB} | await=${HALIM_ENTRY_AWAIT_SEC}s | proxy@child"
+fi
+# Halim LM must be up for entry blend/gold (serve-only — no Telegram during HANOON)
+if [[ "${HALIM_ENSURE_SERVE_ON_START:-true}" == "true" ]]; then
+  "$ROOT/scripts/ensure_halim_active.sh" --serve-only 2>/dev/null || echo "  ⚠️  Halim serve not ready — check logs/halim_serve.log"
 fi
 if [[ "${HANOON_PROFIT_LEARN_PROFILE:-true}" == "true" ]]; then
   echo "  💰 Profit+Learn: green_lock=${GREEN_PROFIT_LOCK_ENABLED} | micro_ppo=${LEARNING_LIVE_MICRO_PPO} | defer_rth=${LEARNING_DEFER_DURING_RTH} | stagnation=${STAGNATION_EXIT_SEC:-75}s"
