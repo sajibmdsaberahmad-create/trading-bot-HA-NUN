@@ -246,6 +246,18 @@ Until then: **PPO + green doctrine + council** remain the execution brain; Halim
 | [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md) | Regression history |
 | [OPS.md](OPS.md) | Day-to-day ops |
 
+### CI workflow (optional one-time)
+
+`.github/workflows/tests.yml` exists locally but may not be on GitHub until your PAT has **`workflow` scope**. Then:
+
+```bash
+git add .github/workflows/tests.yml
+git commit -m "Add GitHub Actions pytest workflow."
+git push origin main
+```
+
+Until then, run tests off-hours: `python -m pytest tests/ -q`
+
 ---
 
 *Last updated: 2026-07-01 · Device: MacBook Air M2 8 GB*
