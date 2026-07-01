@@ -34,7 +34,7 @@ _minute_buckets: Dict[str, Deque[float]] = {}
 _last_call_by_purpose: Dict[str, float] = {}
 _last_daily_digest_day: Optional[str] = None
 
-# Telegram events — structured fallback is enough (no API)
+# Telegram events — structured fallback only (no LLM / Halim on outbound)
 _NOTIFY_TEMPLATE_ONLY: FrozenSet[str] = frozenset({
     "watch_pulse", "system_status", "info", "git_push", "learning_checkpoint",
     "brain_evolution", "brain_proxy_trained", "brain_ppo_teacher", "brain_stage_up",
@@ -45,6 +45,11 @@ _NOTIFY_TEMPLATE_ONLY: FrozenSet[str] = frozenset({
     "vision_unavailable", "image_download_fail", "runner_unavailable",
     "guide_stored", "exit_result", "exitall_result", "commander_exit",
     "improve_result", "account_snapshot",
+    "trade_opened", "trade_closed", "early_exit", "profit_hunt", "hot_swap",
+    "rth_open", "session_close", "session_startup", "session_shutdown",
+    "market_open", "market_close",
+    "account_market_open", "account_market_close", "account_session_startup",
+    "account_session_shutdown", "account_trade_closed",
 })
 
 # Optional API polish when budget allows (still off by default)
@@ -79,6 +84,14 @@ def _copilot_api_enabled(cfg: BotConfig) -> bool:
 
 def _trade_notify_api_enabled(cfg: BotConfig) -> bool:
     return bool(getattr(cfg, "COUNCIL_NOTIFY_API_TRADES", False))
+
+
+def telegram_structured_only(cfg: Optional[BotConfig] = None) -> bool:
+    """Routine Telegram = clean templates. LLM only for copilot / commander chat."""
+    import os
+    if os.getenv("TELEGRAM_STRUCTURED_ONLY", "true").lower() in ("0", "false", "no"):
+        return False
+    return True
 
 
 def _runtime_llm_enabled(cfg: BotConfig) -> bool:

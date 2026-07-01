@@ -304,7 +304,9 @@ export WAR_LAB_MAX_ROUND_TRIPS_PER_DAY="${WAR_LAB_MAX_ROUND_TRIPS_PER_DAY:-2}"
 export WAR_COMMISSION_PER_SIDE_USD="${WAR_COMMISSION_PER_SIDE_USD:-0.35}"
 export WAR_SNIPER_MODE="${WAR_SNIPER_MODE:-true}"
 export WAR_SNIPER_CONF_BUMP="${WAR_SNIPER_CONF_BUMP:-0.03}"
-export HALIM_TELEGRAM_TRADE_NOTIFY="${HALIM_TELEGRAM_TRADE_NOTIFY:-true}"
+export HALIM_TELEGRAM_TRADE_NOTIFY="${HALIM_TELEGRAM_TRADE_NOTIFY:-false}"
+export TELEGRAM_STRUCTURED_ONLY="${TELEGRAM_STRUCTURED_ONLY:-true}"
+export HALIM_COMPANION_PING="${HALIM_COMPANION_PING:-false}"
 # Sniper flash execution — catch vol/green before it fades (PPO-led, no council wait)
 export SNIPER_STRONG_SPIKE_SCORE="${SNIPER_STRONG_SPIKE_SCORE:-45}"
 export SNIPER_STRONG_SPIKE_RATIO="${SNIPER_STRONG_SPIKE_RATIO:-1.18}"
@@ -515,6 +517,12 @@ export USE_TICK_STREAM="${USE_TICK_STREAM:-true}"
 export TICK_BY_TICK_TYPE="${TICK_BY_TICK_TYPE:-AllLast}"
 export HMDS_FETCH_TIMEOUT_SEC="${HMDS_FETCH_TIMEOUT_SEC:-12}"
 echo "✅ Learning posture: loss_streak=on incremental_train=off runtime_observer=on | paper_md=5s-bars | live_tick=${USE_TICK_STREAM} | boot_scan=live_ib"
+export HANOON_PROFIT_LEARN_PROFILE="${HANOON_PROFIT_LEARN_PROFILE:-true}"
+if [[ "${HANOON_PROFIT_LEARN_PROFILE}" == "true" ]]; then
+  echo "✅ Profit+Learn profile: ON (full config applied at launch — see scripts/hanoon_profit_learn_env.sh)"
+else
+  echo "⚠️  Profit+Learn profile: OFF (HANOON_PROFIT_LEARN_PROFILE=false)"
+fi
 
 # ── 2b. GitHub CLI (releases + artifact sync) ───────────────────────────────
 ensure_gh() {
@@ -705,7 +713,12 @@ echo ""
 # Foreground: StreamHandler → terminal, FileHandler → $MAIN_LOG (see core/notify.py)
 # shellcheck disable=SC1091
 source "$ROOT/scripts/ppo_wheel_env.sh" 2>/dev/null || true
+# shellcheck disable=SC1091
+source "$ROOT/scripts/hanoon_profit_learn_env.sh" 2>/dev/null || true
 echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${WAR_ENTRY_ADVISORY_ONLY} | conf=${CONFIDENCE_THRESHOLD}"
+if [[ "${HANOON_PROFIT_LEARN_PROFILE:-true}" == "true" ]]; then
+  echo "  💰 Profit+Learn: green_lock=${GREEN_PROFIT_LOCK_ENABLED} | micro_ppo=${LEARNING_LIVE_MICRO_PPO} | defer_rth=${LEARNING_DEFER_DURING_RTH} | stagnation=${STAGNATION_EXIT_SEC}s"
+fi
 PY="${ROOT}/venv/bin/python3"
 if [[ ! -x "$PY" ]]; then PY="python3"; fi
 "$PY" -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID"

@@ -272,6 +272,12 @@ class AccountEvaluator:
         ai_commander: Optional["AICommander"],
     ) -> str:
         fallback = self._structured_statement(event, current, comparison)
+        try:
+            from core.council_budget import telegram_structured_only
+            if telegram_structured_only(self.cfg):
+                return fallback
+        except Exception:
+            pass
         if event == "session_startup":
             return fallback
         if not ai_commander or not getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True):

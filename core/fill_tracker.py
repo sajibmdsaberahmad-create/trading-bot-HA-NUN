@@ -442,6 +442,74 @@ def ib_position_shares(ib, symbol: str) -> float:
     return 0.0
 
 
+def trade_order_status(trade) -> Dict[str, Any]:
+    """Non-blocking read of ib_insync Trade orderStatus."""
+    if trade is None:
+        return {"status": "missing", "filled": 0.0, "avg_px": 0.0, "order_id": None}
+    try:
+        os = getattr(trade, "orderStatus", None)
+        order = getattr(trade, "order", None)
+        return {
+            "status": str(getattr(os, "status", "") or "Unknown"),
+            "filled": float(getattr(os, "filled", 0) or 0),
+            "avg_px": float(getattr(os, "avgFillPrice", 0) or 0),
+            "order_id": getattr(order, "orderId", None),
+        }
+    except Exception:
+        return {"status": "error", "filled": 0.0, "avg_px": 0.0, "order_id": None}
+
+
+_EXIT_REJECTED = frozenset({"Inactive", "Cancelled", "ApiCancelled"})
+
+
+def confirm_exit_fill(
+    ib,
+    *,
+    symbol: str,
+    flatten_trade=None,
+    cache=None,
+    order_shares: float,
+    ib_baseline: float,
+    started_at: float,
+    quote_px: float,
+    poll_wait: float = 2.0,
+) -> Tuple[float, float, bool, str]:
+    """
+    Confirm flatten exit against order status, exec cache, or position delta.
+    Returns (filled_qty, fill_px, confirmed, source).
+    """
+    sym = (symbol or "").upper()
+    min_qty = max(1.0, float(order_shares) * 0.95)
+    px, qty = poll_trade_fill(ib, flatten_trade, quote_px, max_wait=poll_wait)
+    st = trade_order_status(flatten_trade).get("status", "")
+
+    if qty >= min_qty and px > 0 and _sane_fill_ratio(px, quote_px):
+        return qty, px, True, "order_fill"
+
+    if cache is not None:
+        hit = cache.latest(sym, "SLD", since_ts=max(0.0, started_at - 1.0))
+        if hit and hit.qty >= min_qty and _sane_fill_ratio(hit.price, quote_px):
+            return hit.qty, hit.price, True, "exec_cache"
+
+    current = ib_position_shares(ib, sym)
+    if ib_baseline > 0 and current < ib_baseline - min_qty + 0.01:
+        sold = ib_baseline - current
+        if sold >= min_qty * 0.5:
+            use_px = px if px > 0 else float(quote_px or 0)
+            return sold, use_px, True, "position_delta"
+
+    if st in _EXIT_REJECTED:
+        return 0.0, 0.0, False, f"rejected:{st}"
+
+    if st == "Filled" and px > 0 and qty > 0:
+        return qty, px, True, "order_fill"
+
+    if st in ("Submitted", "PreSubmitted", "PendingSubmit", "PendingCancel"):
+        return 0.0, 0.0, False, f"pending:{st}"
+
+    return 0.0, 0.0, False, st or "unknown"
+
+
 def require_ib_fill_sync(cfg=None) -> bool:
     import os
     env = os.getenv("REQUIRE_IB_FILL_SYNC", "true").strip().lower()

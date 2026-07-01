@@ -18,10 +18,8 @@ requests>=2.28.0          # For holiday calendar checks
 groq>=0.11.0              # Groq council API (passes Cloudflare vs raw urllib)
 typing-extensions>=4.5.0  # For advanced type hints
 
-# Multi-Model AI dependencies
-tensorflow>=2.13.0        # For LSTM model (core/lstm_model.py)
-keras>=2.13.0             # For LSTM layers
-tf-keras>=2.13.0          # For TensorFlow-Keras bridge
+# Multi-Model AI dependencies (legacy LSTM / fusion modes — optional)
+# Install: pip install -r requirements-legacy.txt
 
 # Advanced transformer dependencies
 einops>=0.6.0             # For transformer tensor operations (optional)

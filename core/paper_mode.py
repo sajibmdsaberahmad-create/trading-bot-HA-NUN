@@ -35,10 +35,11 @@ def is_paper_free_learning(cfg: "BotConfig") -> bool:
 
 
 def account_equity(cfg: "BotConfig") -> float:
-    """Best available equity — war ledger on paper/live war; else IB balance."""
+    """Best available equity — war ledger only during RTH war phase; else IB."""
     try:
+        from core.capital_phase import uses_war_sizing
         from core.war_account import war_account_enabled, war_effective_equity
-        if war_account_enabled(cfg):
+        if war_account_enabled(cfg) and uses_war_sizing(cfg):
             eq = war_effective_equity(cfg)
             if eq > 0:
                 return eq

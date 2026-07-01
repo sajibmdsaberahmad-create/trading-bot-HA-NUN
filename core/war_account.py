@@ -920,6 +920,19 @@ def war_account_context(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
         ctx.update(capital_phase_context(cfg))
     except Exception:
         pass
+    phase = str(ctx.get("capital_phase", "") or "")
+    if phase == "premarket_full":
+        ctx["sizing_mode"] = "full_ib"
+        ctx["war_mode_display"] = "PREMARKET_FULL"
+    elif phase == "rth_full":
+        ctx["sizing_mode"] = "full_ib"
+        ctx["war_mode_display"] = "RTH_FULL"
+    elif phase == "rth_war":
+        ctx["sizing_mode"] = "war_pool"
+        ctx["war_mode_display"] = ctx.get("war_mode", "WAR_ACTIVE")
+    else:
+        ctx["sizing_mode"] = "full_ib"
+        ctx["war_mode_display"] = phase or ctx.get("war_mode", "—")
     return ctx
 
 
@@ -1018,7 +1031,11 @@ def war_ledger_applies(
             return phase == PHASE_RTH_WAR
     except Exception:
         pass
-    return True
+    try:
+        from core.rth_session import is_rth
+        return bool(is_rth(cfg))
+    except Exception:
+        return False
 
 
 def check_entry_allowed(
@@ -1343,6 +1360,8 @@ def record_exit(
     spread_pct: float = 0.0,
 ) -> Dict[str, Any]:
     cfg = cfg or BotConfig()
+    if not war_ledger_applies(cfg):
+        return {}
     if not war_account_enabled(cfg):
         return {}
     state = load_state(cfg)

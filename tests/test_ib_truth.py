@@ -48,23 +48,24 @@ def test_ghost_exit_skips_bogus_pnl():
         "mode": "WAR_ACTIVE",
     }
     with patch("core.war_account.war_account_enabled", return_value=True):
-        with patch("core.war_account.load_state", return_value=state):
-            with patch("core.war_account.save_state"):
-                with patch("core.war_account._append_ledger"):
-                    with patch(
-                        "core.war_account.apply_slippage_overlay",
-                        side_effect=lambda *a, **k: (k.get("quote", 3.76), 0.0),
-                    ):
-                        row = record_exit(
-                            cfg,
-                            ticker="TZA",
-                            shares=770,
-                            ib_fill=3.76,
-                            quote=3.76,
-                            pnl_usd_ib=-3212.34,
-                            entry_ib_fill=0.0,
-                            exit_reason="stop",
-                        )
+        with patch("core.war_account.war_ledger_applies", return_value=True):
+            with patch("core.war_account.load_state", return_value=state):
+                with patch("core.war_account.save_state"):
+                    with patch("core.war_account._append_ledger"):
+                        with patch(
+                            "core.war_account.apply_slippage_overlay",
+                            side_effect=lambda *a, **k: (k.get("quote", 3.76), 0.0),
+                        ):
+                            row = record_exit(
+                                cfg,
+                                ticker="TZA",
+                                shares=770,
+                                ib_fill=3.76,
+                                quote=3.76,
+                                pnl_usd_ib=-3212.34,
+                                entry_ib_fill=0.0,
+                                exit_reason="stop",
+                            )
     assert row.get("skipped") is True
     assert state.get("session_pnl_war", 0) == 0
 

@@ -203,6 +203,18 @@ class ScalperSessionMixin:
                 pass
 
         if not is_startup:
+            if old_state == "pre_market":
+                try:
+                    from core.war_account import ensure_war_account
+                    from core.capital_phase import capital_phase_context
+                    ensure_war_account(self.cfg, sync_ib=False)
+                    ph = capital_phase_context(self.cfg, self)
+                    log.info(
+                        f"  ⚔️ RTH capital phase: {ph.get('capital_phase')} "
+                        f"(war sizing={ph.get('uses_war_sizing')})"
+                    )
+                except Exception as exc:
+                    log.debug(f"RTH war account roll: {exc}")
             try:
                 from core.halim_companion import companion_session_ping
                 companion_session_ping(self, self.cfg, trigger="rth_open")

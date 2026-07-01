@@ -122,6 +122,9 @@ class PendingClose:
     bracket: Any = None
     credited: bool = False
     credit_qty: float = 0.0
+    ib_baseline_shares: float = 0.0
+    retry_attempted: bool = False
+    stuck_retries: int = 0
 
 
 def _execution_commission(fill) -> float:
@@ -275,7 +278,7 @@ def build_close_record(
         flatten_trade=pending.flatten_trade,
         bracket=pending.bracket,
         quote_px=pending.quote_exit_px,
-        since_ts=pending.opened_at,
+        since_ts=max(0.0, float(pending.started_at or 0) - 1.0),
         entry_fill=entry_fill,
     )
 
@@ -322,6 +325,97 @@ def build_close_record(
     rec["entry_fill_confirmed"] = entry_confirmed
     rec["exit_fill_confirmed"] = exit_confirmed
     rec["reconcile_event"] = pending.event
+    return rec
+
+
+def finalize_flat_position_close(
+    pending: PendingClose,
+    ib,
+    cache: Optional[FillExecutionCache],
+    *,
+    cfg=None,
+) -> Optional[Dict[str, Any]]:
+    """
+    IB shows flat position but normal reconcile missed the fill.
+    Last-resort salvage so pending_closes do not leak forever.
+    """
+    from core.fill_tracker import ib_position_shares
+
+    sym = (pending.ticker or "").upper()
+    baseline = float(pending.ib_baseline_shares or pending.shares or 0)
+    if baseline <= 0.5:
+        return None
+    if ib_position_shares(ib, sym) > 0.5:
+        return None
+
+    slot = pending.slot or {}
+    entry_quote = float(slot.get("entry_price") or 0)
+    opened_at = float(pending.opened_at or slot.get("opened_at") or 0)
+    slot_entry = float(slot.get("entry_fill_px") or entry_quote)
+    shares = float(pending.shares or slot.get("shares") or 0)
+    if shares <= 0:
+        return None
+
+    entry_fill, entry_confirmed = resolve_entry_from_ib(
+        ib,
+        cache,
+        symbol=sym,
+        slot_entry_fill=slot_entry,
+        slot_entry_quote=entry_quote,
+        opened_at=opened_at,
+    )
+    since = max(0.0, float(pending.started_at or 0) - 1.0)
+    exit_fill, exit_confirmed = resolve_exit_from_ib(
+        ib,
+        cache,
+        symbol=sym,
+        flatten_trade=pending.flatten_trade,
+        bracket=pending.bracket,
+        quote_px=pending.quote_exit_px,
+        since_ts=since,
+        entry_fill=entry_fill,
+    )
+    if not exit_confirmed or exit_fill <= 0:
+        if cache is not None:
+            hit = cache.latest(sym, "SLD", since_ts=since)
+            if hit and _sane_fill(hit.price, entry_fill or pending.quote_exit_px):
+                exit_fill, exit_confirmed = hit.price, True
+    if not exit_confirmed or exit_fill <= 0:
+        if ib_fill_strict(cfg):
+            return None
+        exit_fill = float(pending.quote_exit_px or entry_fill or 0)
+        exit_confirmed = False
+    if exit_fill <= 0:
+        return None
+
+    commission = _round_trip_commission(cache, sym, opened_at)
+    rec = build_round_trip_record(
+        ticker=sym,
+        entry_fill=entry_fill,
+        exit_fill=exit_fill,
+        quote_entry=entry_quote,
+        quote_exit=pending.quote_exit_px,
+        shares=shares,
+        exit_reason=pending.reason,
+        limit_px=slot.get("limit_px"),
+        entry_mode=str(slot.get("entry_mode", "")),
+        regime=str(slot.get("regime", "")),
+        hold_sec=max(0.0, time.time() - pending.opened_at) if pending.opened_at else 0.0,
+        peak_px=float(slot.get("peak") or 0),
+        stop_px=float(slot.get("stop") or 0),
+        target_px=float(slot.get("target") or 0),
+    )
+    if commission > 0:
+        pnl_usd, pnl_pct = round_trip_pnl(entry_fill, exit_fill, shares, commission=commission)
+        rec["pnl_usd"] = round(pnl_usd, 2)
+        rec["pnl_pct"] = round(pnl_pct, 2)
+        rec["result"] = "win" if pnl_usd > 0 else "loss"
+        rec["ib_commission_usd"] = commission
+    rec["fill_confirmed"] = exit_confirmed and (entry_confirmed or entry_fill > 0)
+    rec["entry_fill_confirmed"] = entry_confirmed
+    rec["exit_fill_confirmed"] = exit_confirmed
+    rec["reconcile_event"] = pending.event
+    rec["reconcile_source"] = "position_flat"
     return rec
 
 

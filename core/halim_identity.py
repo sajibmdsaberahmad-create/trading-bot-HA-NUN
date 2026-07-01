@@ -152,7 +152,8 @@ def compute_halim_phase(cfg: Optional[BotConfig] = None) -> str:
             return "toddler" if "toddler" in name else "child"
         return "adult"
 
-    dataset = Path("models/council_training_dataset.jsonl")
+    from core.training_dataset_paths import council_training_dataset_path
+    dataset = council_training_dataset_path()
     n_ds = 0
     if dataset.is_file():
         with open(dataset) as f:
@@ -240,7 +241,9 @@ def write_halim_manifest(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
             "models/ppo_trader.zip",
             "models/teacher_proxy.joblib",
             "models/scalper_weights.json",
-            "models/council_training_dataset.jsonl",
+            str(__import__(
+                "core.training_dataset_paths", fromlist=["council_training_dataset_path"]
+            ).council_training_dataset_path()),
             "models/halim_identity.json",
             "models/halim_manifest.json",
         ],

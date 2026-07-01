@@ -48,6 +48,8 @@ Legacy modes (`trade`, `warmup`, `fusion-trade`) remain in `main.py` for compati
 
 See `docs/VISION_SMART_STACK.md` for pipeline rules.
 
+**Env profiles:** [ENV_PROFILES.md](ENV_PROFILES.md) — wheel / profit-learn / maturity matrix.
+
 ## Tests
 
 ```bash

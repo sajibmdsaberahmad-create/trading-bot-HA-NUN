@@ -232,13 +232,35 @@ class ScalperEntryMixin:
             except Exception:
                 pass
             handle = fill_bracket
+            flatten_trade = None
             try:
-                self.broker.flatten_position(
-                    int(shares), handle=handle, urgent=True, symbol=ticker,
+                bid, ask = self._get_bid_ask(ticker)
+                flatten_trade = self.broker.flatten_position(
+                    int(shares),
+                    handle=handle,
+                    urgent=True,
+                    symbol=ticker,
+                    last_price=fill_px,
+                    bid=bid,
+                    ask=ask,
                 )
                 self.ib.sleep(0.15)
             except Exception as exc:
                 log.warning(f"  Flatten after slippage abort failed: {exc}")
+            if flatten_trade is not None and ticker in self._position_slots:
+                snap = dict(self._position_slots.get(ticker, {}))
+                snap.setdefault("shares", shares)
+                snap.setdefault("entry_fill_px", fill_px)
+                self._enqueue_pending_close(
+                    ticker,
+                    adapt.reason[:120],
+                    fill_px,
+                    event="slippage_abort",
+                    flatten_trade=flatten_trade,
+                    bracket=handle,
+                    slot=snap,
+                    shares=float(shares),
+                )
             self.broker.cancel_open_orders_for_symbol(ticker)
             if self.bracket_handle is handle:
                 self.bracket_handle = None
@@ -270,9 +292,28 @@ class ScalperEntryMixin:
                         f"  Bracket attach failed {ticker}: {exc} — flattening"
                     )
                     try:
-                        self.broker.flatten_position(
-                            int(shares), handle=handle, urgent=True, symbol=ticker,
+                        bid, ask = self._get_bid_ask(ticker)
+                        flatten_trade = self.broker.flatten_position(
+                            int(shares),
+                            handle=handle,
+                            urgent=True,
+                            symbol=ticker,
+                            last_price=fill_px,
+                            bid=bid,
+                            ask=ask,
                         )
+                        if flatten_trade is not None and ticker in self._position_slots:
+                            snap = dict(self._position_slots.get(ticker, {}))
+                            self._enqueue_pending_close(
+                                ticker,
+                                "bracket_attach_failed",
+                                fill_px,
+                                event="bracket_attach_abort",
+                                flatten_trade=flatten_trade,
+                                bracket=handle,
+                                slot=snap,
+                                shares=float(shares),
+                            )
                         self.ib.sleep(0.15)
                     except Exception as flat_exc:
                         log.warning(f"  Flatten after bracket attach failed: {flat_exc}")
@@ -807,9 +848,26 @@ class ScalperEntryMixin:
                     f"Partial fill {int(filled_shares)}/{shares} below "
                     f"{min_fill_ratio:.0%} — flattening and skipping entry"
                 )
-                self.broker.flatten_position(
-                    int(filled_shares), handle=bracket, urgent=True, symbol=ticker,
+                bid, ask = self._get_bid_ask(ticker)
+                flatten_trade = self.broker.flatten_position(
+                    int(filled_shares),
+                    handle=bracket,
+                    urgent=True,
+                    symbol=ticker,
+                    last_price=fill_px,
+                    bid=bid,
+                    ask=ask,
                 )
+                if flatten_trade is not None:
+                    self._enqueue_pending_close(
+                        ticker,
+                        "partial_fill_abort",
+                        fill_px,
+                        event="partial_fill_abort",
+                        flatten_trade=flatten_trade,
+                        bracket=bracket,
+                        shares=float(filled_shares),
+                    )
                 self.ib.sleep(0.1)
             elif parent_status in ("Submitted", "PreSubmitted", "PendingSubmit"):
                 log.info(f"Entry order timed out for {ticker} ({parent_status})")
@@ -1800,10 +1858,26 @@ class ScalperEntryMixin:
                         f"Partial fill {int(filled_shares)}/{shares} below "
                         f"{min_fill_ratio:.0%} — flattening and skipping entry"
                     )
-                    self.broker.flatten_position(
-                        int(filled_shares), handle=bracket,
-                        urgent=True, symbol=ticker,
+                    bid, ask = self._get_bid_ask(ticker)
+                    flatten_trade = self.broker.flatten_position(
+                        int(filled_shares),
+                        handle=bracket,
+                        urgent=True,
+                        symbol=ticker,
+                        last_price=fill_px,
+                        bid=bid,
+                        ask=ask,
                     )
+                    if flatten_trade is not None:
+                        self._enqueue_pending_close(
+                            ticker,
+                            "partial_fill_abort",
+                            fill_px,
+                            event="partial_fill_abort",
+                            flatten_trade=flatten_trade,
+                            bracket=bracket,
+                            shares=float(filled_shares),
+                        )
                     self.ib.sleep(0.5)
                 elif parent_status in ("Submitted", "PreSubmitted", "PendingSubmit"):
                     log.info(f"Entry order pending for {ticker} ({parent_status}) — waiting for IB fill")

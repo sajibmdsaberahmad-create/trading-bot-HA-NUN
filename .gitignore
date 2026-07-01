@@ -93,7 +93,15 @@ models/war_account_ledger.jsonl
 models/war_account_state.json
 models/halim_runtime_state.json
 models/halim_guardrail_state.json
-models/consciousness.json
+models/copilot_journal.jsonl
+models/halim_commander_report_learn.jsonl
+models/halim_commander_report_monitor.jsonl
+models/halim_developer.jsonl
+models/halim_guardrail_audit.jsonl
+models/owned_brain_journal.jsonl
+models/ib_connectivity.jsonl
+models/ib_extended_cache.json
+models/.ib_client_*.lock
 models/cognitive_state.json
 models/pilot_experience.json
 HANOON.log.migrated.*

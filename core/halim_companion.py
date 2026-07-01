@@ -517,13 +517,35 @@ def companion_session_ping(
 
     r = companion_speak("", cfg=cfg, runner=runner, trigger=trigger)
     text = (r.get("text") or "").strip()
+
+    notifier = getattr(runner, "notifier", None) if runner else None
+    try:
+        from core.council_budget import telegram_structured_only
+        structured_only = telegram_structured_only(cfg)
+    except Exception:
+        structured_only = True
+
+    if structured_only and notifier:
+        try:
+            from core.notify_ib_context import telegram_notify_context
+            from core.market_hours import get_market_state
+            ctx = telegram_notify_context(runner, cfg, {"trigger": trigger}, event_type="startup")
+            ib = float(ctx.get("ib_equity") or 0)
+            sess = float(ctx.get("session_pnl") or 0)
+            mkt = get_market_state(cfg)
+            text = (
+                f"🚀 HANOON online · {mkt.replace('_', ' ')}\n"
+                f"IB ${ib:,.0f} · Session P&L ${sess:+,.2f}"
+            )
+        except Exception:
+            text = f"🚀 HANOON online ({trigger})"
+
     if len(text) < 12:
         return False
 
-    notifier = getattr(runner, "notifier", None) if runner else None
     if notifier:
         try:
-            notifier.info(text[:3500])
+            notifier.info(text[:3500], skip_compose=True)
         except Exception as exc:
             log.debug(f"Companion session ping send: {exc}")
             return False
@@ -578,7 +600,7 @@ def halim_trading_notify(
     """
     if str(event or "").lower() not in _TRADE_TELEGRAM_EVENTS:
         return ""
-    if os.getenv("HALIM_TELEGRAM_TRADE_NOTIFY", "true").lower() in ("0", "false", "no"):
+    if os.getenv("HALIM_TELEGRAM_TRADE_NOTIFY", "false").lower() in ("0", "false", "no"):
         return ""
     cfg = cfg or BotConfig()
     intent_map = {

@@ -81,7 +81,11 @@ def collect_status() -> Dict[str, Any]:
     root = _root()
     prof = profile_spec()
     ckpt = checkpoint_path()
-    ds = _count_jsonl(root / "models/council_training_dataset.jsonl")
+    ds = _count_jsonl(
+        __import__(
+            "core.training_dataset_paths", fromlist=["council_training_dataset_path"]
+        ).council_training_dataset_path()
+    )
 
     return {
         "model": MODEL_NAME,

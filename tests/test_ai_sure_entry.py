@@ -27,7 +27,7 @@ def test_fast_pipeline_blocked():
     assert not fast_entry_pipeline_blocked("halim:ai_sure_lead")
 
 
-def test_build_halim_ai_sure_requires_halim_enter():
+def test_build_halim_ai_sure_requires_halim_enter(ppo_wheel_off_env):
     cfg = BotConfig()
     quality = {"profit_probability": 0.91, "enter_ok": True, "reason": "ok"}
     halim = {
@@ -51,7 +51,7 @@ def test_build_halim_ai_sure_requires_halim_enter():
     assert "ai_sure" in out["pipeline"]
 
 
-def test_build_halim_ai_sure_echo_escalates_to_council():
+def test_build_halim_ai_sure_echo_escalates_to_council(ppo_wheel_off_env):
     cfg = BotConfig()
     quality = {"profit_probability": 0.91, "enter_ok": True, "reason": "ok"}
     halim = {
@@ -81,7 +81,7 @@ def test_build_halim_ai_sure_echo_escalates_to_council():
     assert out["pipeline"] == "halim:ai_sure_escalate"
 
 
-def test_build_halim_ai_sure_lead_when_aligned():
+def test_build_halim_ai_sure_lead_when_aligned(ppo_wheel_off_env):
     cfg = BotConfig()
     quality = {"profit_probability": 0.91, "enter_ok": True, "reason": "ok"}
     halim = {

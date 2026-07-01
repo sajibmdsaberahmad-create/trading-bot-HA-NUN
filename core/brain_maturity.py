@@ -31,6 +31,9 @@ STAGES: Tuple[Tuple[str, Dict[str, Any]], ...] = (
         "min_trades": 0,
         "min_evolutions": 0,
         "min_dataset": 0,
+        "min_confidence": 0.58,
+        "min_profit_prob": 0.58,
+        "ai_sure_entry": False,
         "decision_api_daily": 0,
         "copilot_api_daily": 0,
         "ppo_teacher_api_daily": 0,
@@ -45,6 +48,9 @@ STAGES: Tuple[Tuple[str, Dict[str, Any]], ...] = (
         "min_trades": 8,
         "min_evolutions": 0,
         "min_dataset": 0,
+        "min_confidence": 0.58,
+        "min_profit_prob": 0.58,
+        "ai_sure_entry": False,
         "decision_api_daily": 4,
         "copilot_api_daily": 2,
         "ppo_teacher_api_daily": 0,
@@ -59,6 +65,9 @@ STAGES: Tuple[Tuple[str, Dict[str, Any]], ...] = (
         "min_trades": 25,
         "min_evolutions": 1,
         "min_dataset": 50,
+        "min_confidence": 0.58,
+        "min_profit_prob": 0.58,
+        "ai_sure_entry": False,
         "decision_api_daily": 12,
         "copilot_api_daily": 5,
         "ppo_teacher_api_daily": 1,
@@ -73,6 +82,9 @@ STAGES: Tuple[Tuple[str, Dict[str, Any]], ...] = (
         "min_trades": 60,
         "min_evolutions": 2,
         "min_dataset": 200,
+        "min_confidence": 0.60,
+        "min_profit_prob": 0.60,
+        "ai_sure_entry": True,
         "decision_api_daily": 25,
         "copilot_api_daily": 8,
         "ppo_teacher_api_daily": 2,
@@ -87,6 +99,9 @@ STAGES: Tuple[Tuple[str, Dict[str, Any]], ...] = (
         "min_trades": 150,
         "min_evolutions": 4,
         "min_dataset": 600,
+        "min_confidence": 0.61,
+        "min_profit_prob": 0.61,
+        "ai_sure_entry": True,
         "decision_api_daily": 15,
         "copilot_api_daily": 4,
         "ppo_teacher_api_daily": 1,
@@ -101,6 +116,9 @@ STAGES: Tuple[Tuple[str, Dict[str, Any]], ...] = (
         "min_trades": 350,
         "min_evolutions": 8,
         "min_dataset": 1200,
+        "min_confidence": 0.62,
+        "min_profit_prob": 0.62,
+        "ai_sure_entry": True,
         "decision_api_daily": 8,
         "copilot_api_daily": 2,
         "ppo_teacher_api_daily": 0,
@@ -196,7 +214,9 @@ def _metrics(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
     except Exception:
         pass
     dataset = 0
-    ds_path = Path("models/council_training_dataset.jsonl")
+    ds_path = __import__(
+        "core.training_dataset_paths", fromlist=["council_training_dataset_path"]
+    ).council_training_dataset_path()
     if ds_path.is_file():
         with open(ds_path) as f:
             dataset = sum(1 for _ in f)
@@ -510,6 +530,12 @@ def should_use_student_entry(cfg: Optional[BotConfig] = None) -> bool:
     return acc is not None and acc >= 0.50
 
 
+def maturity_ai_sure_entry(cfg: Optional[BotConfig] = None) -> bool:
+    """Halim-led ai-sure entries unlock at child+ when gold dataset is mature."""
+    snap = maturity_snapshot(cfg)
+    return bool(snap["limits"].get("ai_sure_entry"))
+
+
 def apply_maturity_to_config(cfg: BotConfig) -> Dict[str, Any]:
     """Apply infant-appropriate limits to cfg at session start."""
     from core.owned_brain_evolution import detect_device_profile, device_limits
@@ -523,6 +549,24 @@ def apply_maturity_to_config(cfg: BotConfig) -> Dict[str, Any]:
     cfg.PPO_TEACHER_MICRO_STEPS = ppo_steps
     cfg.COPILOT_REFRESH_SEC = float(lim["copilot_refresh_sec"])
     cfg.HYBRID_DISTILL_MIN_TRADES = int(lim["proxy_min_trades"])
+
+    min_conf = float(lim.get("min_confidence", 0.58))
+    min_prob = float(lim.get("min_profit_prob", 0.58))
+    cfg.CONFIDENCE_THRESHOLD = max(float(getattr(cfg, "CONFIDENCE_THRESHOLD", 0.58)), min_conf)
+    cfg.MIN_PROFIT_PROBABILITY = max(float(getattr(cfg, "MIN_PROFIT_PROBABILITY", 0.58)), min_prob)
+    cfg.CAPITAL_MIN_CONFIDENCE = max(float(getattr(cfg, "CAPITAL_MIN_CONFIDENCE", 0.58)), min_conf)
+    cfg.CAPITAL_MIN_PROFIT_PROBABILITY = max(
+        float(getattr(cfg, "CAPITAL_MIN_PROFIT_PROBABILITY", 0.58)), min_prob,
+    )
+
+    if maturity_ai_sure_entry(cfg) and os.getenv(
+        "BRAIN_MATURITY_AI_SURE_AUTO", "false",
+    ).lower() in ("1", "true", "yes"):
+        os.environ["SMART_STACK_AI_SURE_ENTRY"] = "true"
+        log.info(
+            f"  🧠 Maturity {snap['stage']}: ai-sure entry ON "
+            f"(conf≥{min_conf:.2f} prob≥{min_prob:.2f})"
+        )
 
     # Cap council RPM by stage (works with council_budget)
     stage_rpm = {

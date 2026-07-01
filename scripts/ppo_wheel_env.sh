@@ -31,3 +31,8 @@ export CAPITAL_MIN_CONFIDENCE=0.58
 export CAPITAL_MIN_PROFIT_PROBABILITY=0.58
 export WAR_MIN_PROFIT_PROBABILITY=0.58
 export WAR_PAPER_MIN_PROFIT_PROBABILITY=0.58
+
+# PPO owns live buy/sell after green — teachers label only (no Ollama/council execution).
+export PPO_ONLY_EXECUTION=true
+export PPO_LEAD_EXITS=true
+export COUNCIL_EXECUTION_ADVISORY_ONLY=true

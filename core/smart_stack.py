@@ -58,7 +58,17 @@ def ai_sure_entry_enabled(cfg: Optional[BotConfig] = None) -> bool:
     """
     if not smart_stack_enabled(cfg):
         return _env_bool("SMART_STACK_AI_SURE_ENTRY", "false")
-    return _env_bool("SMART_STACK_AI_SURE_ENTRY", "true")
+    if _env_bool("SMART_STACK_AI_SURE_ENTRY", "true"):
+        return True
+    try:
+        from core.brain_maturity import maturity_ai_sure_entry
+        if maturity_ai_sure_entry(cfg) and os.getenv(
+            "BRAIN_MATURITY_AI_SURE_AUTO", "false",
+        ).lower() in ("1", "true", "yes"):
+            return True
+    except Exception:
+        pass
+    return False
 
 
 def dynamic_entry_surety(
@@ -600,6 +610,23 @@ def build_halim_local_entry(
             row["halim_conf"] = float(h_parsed.get("confidence", 0) or 0)
         row.update(extra)
         return row
+
+    try:
+        from core.ppo_wheel_profile import ppo_only_execution_enabled
+        if ppo_only_execution_enabled(cfg):
+            if int(ppo_action) == 1 and base_conf >= min_conf:
+                return _out(
+                    True, "ppo:wheel_buy",
+                    f"PPO buy {base_conf:.0%}",
+                    base_conf,
+                )
+            return _out(
+                False, "ppo:wheel_hold",
+                f"PPO hold action={ppo_action} {base_conf:.0%}",
+                base_conf,
+            )
+    except Exception:
+        pass
 
     if h_status == "fresh" and h_parsed:
         h_enter = bool(h_parsed.get("enter", False))

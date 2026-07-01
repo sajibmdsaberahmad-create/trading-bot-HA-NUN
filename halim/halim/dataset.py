@@ -14,7 +14,9 @@ SYSTEM_PROMPT = (
 )
 
 DEFAULT_PATHS = {
-    "council": "models/council_training_dataset.jsonl",
+    "council": str(__import__(
+        "core.training_dataset_paths", fromlist=["council_training_dataset_path"]
+    ).council_training_dataset_path()),
     "action_gold": "halim/data/training/action_gold.jsonl",
     "coevolution": "halim/data/training/coevolution_gold.jsonl",
     "dialogue": "halim/data/training/dialogue_gold.jsonl",

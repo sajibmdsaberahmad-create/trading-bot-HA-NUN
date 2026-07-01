@@ -15,6 +15,263 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 
 ---
 
+## 2026-07-01 — Codebase health: tests, CI, maturity ladder, TF optional
+
+### Problem
+Audit found 6 failing tests (PPO wheel + capital-phase drift), no CI, runtime jsonl noise in git, monolithic scalper guidelines, duplicate council dataset paths, TensorFlow required for live scalper.
+
+### Fix
+| File | Change |
+|------|--------|
+| `tests/conftest.py` | `ppo_wheel_off` + `war_ledger_on` fixtures |
+| `tests/test_*` | Fix ai-sure / war / ghost-exit tests; add smoke, round-trip, maturity, guidelines tests |
+| `.github/workflows/tests.yml` | pytest on push/PR (Python 3.11) |
+| `.gitignore` | IB locks, journals, connectivity cache |
+| `core/scalper_guidelines.py` | Extract from `scalper_runner.py` |
+| `core/training_dataset_paths.py` | Canonical `models/council_training_dataset.jsonl` |
+| `core/brain_maturity.py` | Stage confidence/prob floors; `maturity_ai_sure_entry`; `BRAIN_MATURITY_AI_SURE_AUTO` |
+| `core/smart_stack.py` | ai-sure respects maturity auto flag |
+| `requirements.txt` | Drop TF (moved to `requirements-legacy.txt`) |
+| `requirements-lock.txt` | Pinned core deps |
+| `core/startup_checks.py` | TF optional unless `require_tensorflow=True` |
+| `docs/ENV_PROFILES.md` | Profile precedence matrix |
+| `docs/IB_ASYNC_MIGRATION.md` | ib_insync → ib_async plan |
+
+### Env
+`BRAIN_MATURITY_AI_SURE_AUTO=false` (default) · `PPO_WHEEL_PROFILE_LOCK=true`
+
+### Verify
+```bash
+venv/bin/python -m pytest tests/ -q
+# GitHub Actions: tests workflow on push
+```
+
+---
+
+
+### Problem
+User wanted one profile: lock profit in flight + capture learning gold + off-hours PPO/brain upgrade — without hand-tuning dozens of env vars.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/hanoon_profit_learn_env.sh` | **New** — green lock, profit hunt, bounded `LEARNING_LIVE_MICRO_PPO`, defer heavy RTH, teacher/off-hours train |
+| `scripts/start_hanoon.sh` | Source profile after `ppo_wheel_env.sh`; banner `HANOON_PROFIT_LEARN_PROFILE` (default true) |
+| `core/config.py` | `STAGNATION_EXIT_SEC` + stagnation knobs read from env (profile sets 75s) |
+
+### Env
+`HANOON_PROFIT_LEARN_PROFILE=true` (default) · disable with `false`
+
+### Verify
+```bash
+./scripts/start_hanoon.sh   # banner: Profit+Learn profile ON + micro_ppo=true stagnation=75s
+./stop.sh                   # graceful → flush_pending_learning + owned_brain_evolution
+./scripts/post_session_evolve.sh   # manual off-hours upgrade
+```
+
+---
+
+### Problem
+Routine Telegram alerts were rewritten by Halim/Ollama — slow, often nonsense (`• Never canned templates`), or raw JSON fragments (`_pnl": 0.0...`). `notifier.info()` double-composed already-formatted messages.
+
+### Root cause
+`HALIM_TELEGRAM_TRADE_NOTIFY` + `compose_outbound` Halim/Ollama paths on trade/session events; no sanitizer on outbound text.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/council_budget.py` | `telegram_structured_only()`; all routine events template-only |
+| `core/ai_notifier.py` | Structured-only short-circuit; `sanitize_telegram_message()`; rth_open template; broadcast ops no longer bypass via `copilot=True` |
+| `core/notify.py` | Skip compose when structured-only; sanitize before send |
+| `core/halim_companion.py` | Session ping uses IB structured line, not generative Halim |
+| `core/account_evaluator.py` | Skip AI compose on account briefs when structured-only |
+| `scripts/start_hanoon.sh` | `TELEGRAM_STRUCTURED_ONLY=true`, `HALIM_COMPANION_PING=false` |
+| `tests/test_telegram_notify.py` | Sanitizer + compose unit tests |
+
+### Env
+`TELEGRAM_STRUCTURED_ONLY=true` (default) · copilot `/help` `/positions` still use LLM when enabled
+
+### Verify
+```bash
+python3 -m unittest tests.test_telegram_notify -q
+# Trade exit → ⚡ EARLY EXIT │ TICKER (instant, no LLM)
+# send_smart_telegram bypasses Halim compose when structured-only
+```
+
+---
+
+## 2026-07-01 — War only at RTH open; fast trade Telegram; ghost slot after exit
+
+### Problem
+Premarket exits logged `⚔️ WAR EXIT` and debited war pool (should be full IB / data phase). Telegram hung on Halim LLM (`NOTIFY │ • Never canned templates`) blocking perception of progress. GSUN kept spamming `TICK LOSS EXIT` after IB fill because slot wasn't cleared when another position finalized.
+
+### Root cause
+`record_exit()` gated on `war_account_enabled` not `war_ledger_applies()` (RTH war phase only). `HALIM_TELEGRAM_TRADE_NOTIFY=true` ran slow Halim compose on every trade. `_clear_closed_position_state` wiped global bracket state when one of multiple positions closed.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `record_exit` + `war_ledger_applies` RTH-only fallback; `war_mode_display` / `sizing_mode` in context |
+| `core/scalper_exit_executor.py` | Fast finalize on confirmed fill; multi-position safe clear; tick exit skips flat IB |
+| `core/scalper_runner.py` | `_deployable_cash` uses `uses_war_sizing` |
+| `core/paper_mode.py` | Equity from war pool only in RTH war phase |
+| `core/ai_notifier.py` | `TELEGRAM_FAST_TRADE_NOTIFY` — structured trade alerts, skip Halim LLM |
+| `core/scalper_session.py` | RTH open rolls war account + logs capital phase |
+| `scripts/start_hanoon.sh` | `HALIM_TELEGRAM_TRADE_NOTIFY=false`, `TELEGRAM_FAST_TRADE_NOTIFY=true` |
+
+### Env
+`CAPITAL_PHASES_ENABLED=true` · `TELEGRAM_FAST_TRADE_NOTIFY=true` · `HALIM_TELEGRAM_TRADE_NOTIFY=false`
+
+### Verify
+```bash
+python3 -m unittest tests.test_capital_phase -q
+# Premarket exit: no ⚔️ WAR EXIT line; capital_phase=premarket_full
+# Trade close Telegram: instant structured message, no Halim stall
+# Multi-position: closing INTC does not break GSUN monitor
+```
+
+---
+
+## 2026-07-01 — Exit pipeline deep fix (pending closes, stuck orders, limits)
+
+### Problem
+Deep audit found multiple exit-path bugs beyond premarket MARKET stall: broken `_pending_closes` dedup (keys `TICKER:ts` vs bare ticker check), retry flatten not updating `pending.flatten_trade`, zombie pending closes when IB flat but fill not reconciled, 90s `exiting` guard allowing duplicate flattens, entry-abort/commander exits bypassing reconciliation, RTH thin-book MARKET SELL asymmetry, orphan short bare MARKET BUY outside RTH.
+
+### Root cause
+Exit pipeline evolved in pieces; reconcile keys/retries were inconsistent with entry stuck-order handling and `entry_pipeline` ext-hours limit doctrine.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_exit_executor.py` | `_has_pending_close`, stuck PreSubmitted cancel+resubmit, retry updates trade, zombie `finalize_flat_position_close`, exiting guard, commander pending close, accurate submit log |
+| `core/fill_reconciler.py` | Exit `since_ts=pending.started_at`, `finalize_flat_position_close()`, `stuck_retries` |
+| `core/entry_pipeline.py` | Thin-book + `should_use_extended_hours_orders` limit SELL; `cover_order_for_session` |
+| `core/broker.py` | Orphan short limit cover; `_hn_order_mode` on trade |
+| `core/scalper_entry_executor.py` | Abort/partial flatten → pending close + bid/ask limits |
+| `tests/test_pending_close.py` | Thin-book limit + flat salvage tests |
+
+### Env
+`EXIT_STUCK_MAX_RETRIES=2`, `PENDING_SUBMIT_MAX_SEC=4`, existing `EXIT_FLATTEN_RETRY_SEC=30`
+
+### Verify
+```bash
+python3 -m unittest tests.test_exit_flatten_ib tests.test_pending_close tests.test_fill_reconciler -q
+# No duplicate flatten while pending close exists
+# Stuck PreSubmitted → cancel + limit retry in log
+# IB flat → 📕 EXIT (IB fill) or position_flat salvage
+```
+
+---
+
+## 2026-07-01 — Premarket flatten: limit SELL (not bare MARKET)
+
+### Problem
+`MECH RISK EXIT: hard_stop` fired at ~07:56 ET (premarket). Logs showed `Flatten order submitted: SELL … (market) status=PreSubmitted` then `EXIT submitted — awaiting IB fill`, but IB app showed no fill/sold notification and positions (INTC, GSUN) unchanged.
+
+### Root cause
+`flatten_position()` always sent `MarketOrder` SELL. IB paper stalls parent MARKET orders in `PreSubmitted` outside RTH — same reason entries use limit-only in extended hours (`entry_pipeline.entry_price_mode_for_session`).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/entry_pipeline.py` | `flatten_exit_limit_px()`, `flatten_order_for_session()` — aggressive limit SELL |
+| `core/broker.py` | Ext-hours/penny flatten uses limit; bid/ask snapshot; log limit price |
+| `core/scalper_exit_executor.py` | Pass `last_price`/`bid`/`ask` on flatten + retry |
+| `tests/test_exit_flatten_ib.py` | Limit pricing unit tests |
+
+### Env
+Uses existing `ENTRY_LIMIT_BUFFER_PCT` / `EXIT_LIMIT_BUFFER_PCT` / `PENNY_PRICE_THRESHOLD`.
+
+### Verify
+```bash
+python3 -m unittest tests.test_exit_flatten_ib -q
+# Premarket: hard_stop → log shows (limit_ext_hours_sell @ $…) not (market)
+# IB: position clears + 📕 EXIT (IB fill) in HANOON.log
+```
+
+---
+
+## 2026-07-01 — Exit flatten: don't clear slots until IB fill confirms
+
+### Problem
+Logs showed `EXIT submitted` / `Flatten order submitted` but IB paper still held T/INTC/GSUN (0 open orders). Bot cleared `_position_slots` and `shares=0` immediately after `placeOrder`, so monitoring stopped while positions remained.
+
+### Root cause
+`_exit_position()` zeroed local state before IB fill. `flatten_position()` did not `ib.sleep` or poll order status after submit. Rejected/pending orders were logged as success.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/fill_tracker.py` | `trade_order_status()`, `confirm_exit_fill()` |
+| `core/broker.py` | Post-submit sleep, status log, urgent fill poll, reject warning |
+| `core/scalper_exit_executor.py` | Keep slot until `_finalize_closed_trade`; `exiting` guard; retry stale flatten |
+| `core/fill_reconciler.py` | `PendingClose.retry_attempted`, `ib_baseline_shares` |
+| `tests/test_exit_flatten_ib.py` | Confirm/reject/pending unit tests |
+
+### Env
+`EXIT_FLATTEN_RETRY_SEC=30` (optional, default 30)
+
+### Verify
+```bash
+python3 -m unittest tests.test_exit_flatten_ib -q
+# Live: EXIT submitted shows status=id=; 📕 EXIT (IB fill) before slot clears; TWS positions match
+```
+
+---
+
+## 2026-07-01 — Stagnation logs: "missing" → readable + PPO wheel mech path
+
+### Problem
+`COUNCIL stagnation T: … awaiting council (missing)` every 15s — "missing" is an internal code meaning Groq never rang (`stagnation_check` is nanny low-priority), not "waiting for answer".
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/live_ai_pipeline.py` | `council_status_label()`; PPO wheel stagnation mech timeout; nanny-missing no longer blocks past limit |
+| `core/ai_commander_exit.py` | Pass `cfg` to `merge_stagnation_decision` |
+| `core/scalper_exit_executor.py` | Stagnation watch logs only on `pulse_verbose`; clearer exit line |
+| `tests/test_ppo_wheel.py` | Stagnation wheel + label tests |
+
+### Verify
+```bash
+python3 -m unittest tests.test_ppo_wheel.TestPpoWheelExecution -q
+# After restart: 📊 Stagnation watch 45s/90s — not "awaiting council (missing)"
+```
+
+---
+
+## 2026-07-01 — PPO wheel execution: PPO-only buy/sell, council advisory
+
+### Problem
+Docs said PPO owns live entry/exit after green, but runtime still bought via `halim:quality_flash` and sold on council Groq exit while PPO held. Logs said `Ollama exit` though backend is Groq/Gemini council.
+
+### Root cause
+`build_halim_local_entry()` quality_flash bypassed PPO; `merge_exit_decision()` allowed council-only exit; `_deliberate_exit_council()` blocked on `in_flight`; no exit mirror of `PPO_LEAD_WHILE_COUNCIL_PENDING`.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ppo_wheel_profile.py` | `ppo_only_execution_enabled()`, `ppo_lead_exits_enabled()`, `council_execution_advisory_only()` |
+| `scripts/ppo_wheel_env.sh` | Force `PPO_ONLY_EXECUTION`, `PPO_LEAD_EXITS`, `COUNCIL_EXECUTION_ADVISORY_ONLY` |
+| `core/smart_stack.py` | PPO-only short-circuit in `build_halim_local_entry()` |
+| `core/live_ai_pipeline.py` | PPO wheel paths in merge entry/exit; rename Ollama → council in reasons |
+| `core/ai_commander_exit.py` | Pass `cfg` into `merge_exit_decision` |
+| `core/scalper_exit_executor.py` | PPO-led exit/risk; clear advisory councils; mech loss exits |
+| `tests/test_ppo_wheel.py` | Execution mode tests |
+| `docs/PPO_WHEEL_ARCHITECTURE.md` | Execution ownership table |
+
+### Env
+`PPO_ONLY_EXECUTION=true`, `PPO_LEAD_EXITS=true`, `COUNCIL_EXECUTION_ADVISORY_ONLY=true`
+
+### Verify
+```bash
+pytest tests/test_ppo_wheel.py -q
+./scripts/stop_hanoon.sh && ./scripts/start_hanoon.sh
+grep -E "ppo:wheel|PPO wheel profile|quality_flash|Ollama exit" logs/HANOON.log | tail -20
+```
+
+---
+
 ## 2026-07-01 — PPO wheel env lock: Halim await=0 not applying after restart
 
 ### Problem

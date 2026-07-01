@@ -1,0 +1,4 @@
+# Legacy fusion / LSTM training — not required for live scalper (main.py --mode scalper)
+tensorflow>=2.13.0
+keras>=2.13.0
+tf-keras>=2.13.0

@@ -15,6 +15,40 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 from core.config import BotConfig
 from core.market_hours import get_market_state, format_et
 from core.notify import log
+from core.council_budget import telegram_structured_only
+
+
+def sanitize_telegram_message(text: str) -> str:
+    """Drop JSON fragments, prompt leaks, and empty LLM garbage."""
+    s = (text or "").strip()
+    if len(s) < 4:
+        return ""
+    junk = (
+        "Never canned template",
+        "NOT a canned template",
+        "MESSAGE TYPE:",
+        "DATA (use these numbers",
+        "Transform the DATA",
+        "Write ONE message",
+        "Never invent",
+        "auto-agree with commander",
+        "LIVE SNAPSHOT",
+        "PERSONALITY:",
+        "do not invent",
+    )
+    if any(j in s for j in junk):
+        return ""
+    first = s.splitlines()[0].strip()
+    if first.startswith("•") and any(
+        w in first.lower() for w in ("never", "always", "avoid", "plain text", "emoji")
+    ):
+        return ""
+    head = s[:120]
+    if head.startswith("{") or head.startswith("["):
+        return ""
+    if '":' in head and not head.lstrip().startswith(("🎯", "✅", "🔴", "⚡", "🚀", "🔭", "📊", "📕", "🧠", "🔔", "❗", "🟢")):
+        return ""
+    return s
 
 if TYPE_CHECKING:
     from core.ai_commander import AICommander
@@ -128,11 +162,14 @@ class TelegramAIComposer:
         from core.council_budget import (
             classify_notify_event,
             notify_event_wants_api,
+            _NOTIFY_COPILOT_EVENTS,
         )
 
         notify_on = getattr(self.cfg, "AI_TELEGRAM_NOTIFICATIONS", True)
         if not notify_on and not copilot:
-            return fallback or self._structured_fallback(event_type, context, fallback)
+            return sanitize_telegram_message(
+                fallback or self._structured_fallback(event_type, context, fallback)
+            )
 
         max_c = max_chars if max_chars is not None else (
             int(getattr(self.cfg, "AI_TELEGRAM_COMMANDER_MAX_CHARS", 3800))
@@ -140,20 +177,34 @@ class TelegramAIComposer:
             else int(getattr(self.cfg, "AI_TELEGRAM_MAX_CHARS", 450))
         )
 
-        purpose = classify_notify_event(event_type, copilot=copilot)
-        use_api = notify_event_wants_api(self.cfg, event_type, copilot=copilot)
-
         enriched = self._enrich_context(event_type, context)
         if fallback and not enriched.get("raw_briefing"):
             enriched["raw_briefing"] = fallback[:2500]
-        structured = fallback or self._structured_fallback(event_type, enriched, fallback)
+        structured = self._structured_fallback(event_type, enriched, fallback)
+        if fallback and len(fallback) > 20 and (
+            structured.startswith("🧠 HANOON │") or len(structured) < 12
+        ):
+            structured = fallback
+        structured = sanitize_telegram_message(structured) or sanitize_telegram_message(fallback or "")
+
+        # Routine outbound: structured templates — LLM only for interactive copilot (/status, /help, …).
+        if telegram_structured_only(self.cfg):
+            et = str(event_type or "").lower()
+            interactive = copilot and et in _NOTIFY_COPILOT_EVENTS
+            if not interactive:
+                return structured
+
+        purpose = classify_notify_event(event_type, copilot=copilot)
+        use_api = notify_event_wants_api(self.cfg, event_type, copilot=copilot)
 
         if not use_api:
             halim_text = self._try_halim_trade_notify(
                 event_type, enriched, structured, max_c, copilot=copilot,
             )
             if halim_text:
-                return halim_text
+                clean = sanitize_telegram_message(halim_text)
+                if clean:
+                    return clean
             return structured
 
         if not copilot:
@@ -169,14 +220,18 @@ class TelegramAIComposer:
             max_chars=max_c, copilot=copilot, purpose=purpose,
         )
         if ai_text:
-            self._last_sent[event_type] = time.time()
-            return ai_text
+            clean = sanitize_telegram_message(ai_text)
+            if clean:
+                self._last_sent[event_type] = time.time()
+                return clean
 
         halim_text = self._try_halim_trade_notify(
             event_type, enriched, structured, max_c, copilot=copilot,
         )
         if halim_text:
-            return halim_text
+            clean = sanitize_telegram_message(halim_text)
+            if clean:
+                return clean
 
         out = structured
         try:
@@ -296,18 +351,20 @@ class TelegramAIComposer:
         if not ctx.get("war_enabled"):
             return ""
         settled = float(ctx.get("war_settled_cash", 0) or 0)
-        mode = ctx.get("war_mode", "—")
+        mode = ctx.get("war_mode_display") or ctx.get("war_mode", "—")
+        phase = ctx.get("capital_phase", "")
         nav = float(ctx.get("war_nav", 0) or 0)
+        phase_note = f" · {phase}" if phase else ""
         if ctx.get("war_balance_driven"):
             left = int(ctx.get("war_bullets_remaining", 0) or 0)
             fired = int(ctx.get("war_round_trips_today", 0) or 0)
             return (
-                f"War {mode} · pool ${nav:,.0f} · settled ${settled:,.0f} · "
+                f"War {mode}{phase_note} · pool ${nav:,.0f} · settled ${settled:,.0f} · "
                 f"{left} bullets left · {fired} fired"
             )
         trips = int(ctx.get("war_round_trips_today", 0) or 0)
         max_t = int(ctx.get("war_round_trips_max", 0) or 0)
-        return f"War {mode} · pool ${nav:,.0f} · settled ${settled:,.0f} · trips {trips}/{max_t}"
+        return f"War {mode}{phase_note} · pool ${nav:,.0f} · settled ${settled:,.0f} · trips {trips}/{max_t}"
 
     @staticmethod
     def _event_guidance(event_type: str) -> str:
@@ -433,7 +490,7 @@ class TelegramAIComposer:
                 f"{footer}"
             )
 
-        if event_type == "trade_closed":
+        if event_type in ("trade_closed", "commander_exit"):
             t = ctx.get("ticker", "?")
             pnl = float(ctx.get("pnl_usd", 0))
             pct = float(ctx.get("pnl_pct", 0))
@@ -445,9 +502,12 @@ class TelegramAIComposer:
             fill_line = ""
             if entry_px and exit_px:
                 fill_line = f"\nIB ${float(entry_px):.4f} → ${float(exit_px):.4f}"
+            label = "COMMANDER EXIT" if event_type == "commander_exit" else "FLIGHT CLOSED"
+            reason = (ctx.get("reason") or "").strip()
+            reason_line = f"\n{reason[:60]}" if reason and event_type == "commander_exit" else ""
             return (
-                f"{emoji} FLIGHT CLOSED │ {t} · {result}{ib_tag}\n"
-                f"P&L ${pnl:+.2f} ({pct:+.2f}%){fill_line}\n"
+                f"{emoji} {label} │ {t} · {result}{ib_tag}\n"
+                f"P&L ${pnl:+.2f} ({pct:+.2f}%){fill_line}{reason_line}\n"
                 f"Session ${float(ctx.get('session_pnl', 0)):+,.2f} · IB ${float(ctx.get('ib_equity', 0)):,.0f}\n"
                 f"Rank {ctx.get('pilot_level', 'Cadet')} · {footer}"
             )
@@ -479,10 +539,24 @@ class TelegramAIComposer:
             war = self._war_line(ctx)
             war_part = f"\n{war}" if war else ""
             sess = float(ctx.get("ib_fifo_session_pnl", ctx.get("session_pnl", 0)) or 0)
+            phase = ctx.get("capital_phase", "")
+            phase_line = f" · {phase}" if phase else ""
             return (
                 f"🚀 HANOON ONLINE · IB Truth\n"
-                f"Market {ctx.get('market_state', '').upper()} · Pilot {ctx.get('pilot_level', 'Cadet')}\n"
+                f"Market {ctx.get('market_state', '').upper()}{phase_line} · "
+                f"Pilot {ctx.get('pilot_level', 'Cadet')}\n"
                 f"IB ${float(ib):,.0f} · Session P&L ${sess:+,.2f}{war_part}\n"
+                f"{footer}"
+            )
+
+        if event_type == "rth_open":
+            ib = float(ctx.get("ib_equity") or ctx.get("ib_account") or 0)
+            sess = float(ctx.get("ib_fifo_session_pnl", ctx.get("session_pnl", 0)) or 0)
+            war = self._war_line(ctx)
+            war_part = f"\n{war}" if war else ""
+            return (
+                f"🔔 RTH OPEN · war training window\n"
+                f"IB ${ib:,.0f} · Session P&L ${sess:+,.2f}{war_part}\n"
                 f"{footer}"
             )
 
@@ -516,11 +590,15 @@ class TelegramAIComposer:
             )
 
         if event_type == "brain_ppo_teacher":
-            try:
-                from core.halim_companion import explain_ppo_teacher_notify
-                return explain_ppo_teacher_notify(ctx) + f"\n{footer}"
-            except Exception:
-                pass
+            if not telegram_structured_only(self.cfg):
+                try:
+                    from core.halim_companion import explain_ppo_teacher_notify
+                    gen = explain_ppo_teacher_notify(ctx)
+                    clean = sanitize_telegram_message(gen)
+                    if clean:
+                        return clean + f"\n{footer}"
+                except Exception:
+                    pass
             wr = ctx.get("win_rate")
             wr_s = f"{float(wr):.0%}" if wr is not None else "—"
             ppo_ok = bool(ctx.get("ppo_trained", False))
@@ -604,7 +682,19 @@ def send_smart_telegram(
         if context.get("pnl_source") in ("ib_fill", "ib_truth"):
             composer.record_trade(float(context["pnl_usd"]))
 
-    msg = composer.compose(event_type, context, fallback)
+    from core.council_budget import telegram_structured_only, _NOTIFY_TEMPLATE_ONLY
+    et = str(event_type or "").lower()
+    if telegram_structured_only(cfg) or et in _NOTIFY_TEMPLATE_ONLY:
+        msg = composer._structured_fallback(et, context, fallback)
+        msg = sanitize_telegram_message(msg) or sanitize_telegram_message(fallback or "")
+        if not msg:
+            return
+    else:
+        msg = composer.compose(event_type, context, fallback)
+        msg = sanitize_telegram_message(msg) or sanitize_telegram_message(fallback or "")
+        if not msg:
+            return
+
     if ai_commander:
         try:
             ai_commander.journal(f"NOTIFY_{event_type}", msg[:200], context)

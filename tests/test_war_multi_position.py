@@ -44,20 +44,21 @@ def test_record_exit_uses_matching_ticker_not_stale_open_war():
         "mode": "WAR_ACTIVE",
     }
     with patch("core.war_account.war_account_enabled", return_value=True):
-        with patch("core.war_account.load_state", return_value=state):
-            with patch("core.war_account.save_state"):
-                with patch("core.war_account._append_ledger"):
-                    with patch("core.war_account.apply_slippage_overlay", side_effect=lambda *a, **k: (k.get("quote", a[3] if len(a) > 3 else 0), 0.0)):
-                        row = record_exit(
-                            cfg,
-                            ticker="BITO",
-                            shares=58,
-                            ib_fill=7.94,
-                            quote=7.94,
-                            pnl_usd_ib=-0.58,
-                            entry_ib_fill=7.95,
-                            exit_reason="trailing_stop",
-                        )
+        with patch("core.war_account.war_ledger_applies", return_value=True):
+            with patch("core.war_account.load_state", return_value=state):
+                with patch("core.war_account.save_state"):
+                    with patch("core.war_account._append_ledger"):
+                        with patch("core.war_account.apply_slippage_overlay", side_effect=lambda *a, **k: (k.get("quote", a[3] if len(a) > 3 else 0), 0.0)):
+                            row = record_exit(
+                                cfg,
+                                ticker="BITO",
+                                shares=58,
+                                ib_fill=7.94,
+                                quote=7.94,
+                                pnl_usd_ib=-0.58,
+                                entry_ib_fill=7.95,
+                                exit_reason="trailing_stop",
+                            )
     assert row["net_pnl"] > -5.0
     assert row["net_pnl"] > -50.0
     assert "BITO" not in state["open_wars"]
@@ -83,15 +84,16 @@ def test_record_entry_keeps_multiple_open_wars():
         "mode": "WAR_ACTIVE",
     }
     with patch("core.war_account.war_account_enabled", return_value=True):
-        with patch("core.war_account.load_state", return_value=state):
-            with patch("core.war_account.save_state"):
-                with patch("core.war_account._roll_session"):
-                    with patch("core.war_account._append_ledger"):
-                        with patch("core.war_account.apply_slippage_overlay", side_effect=lambda *a, **k: (k.get("quote", a[3] if len(a) > 3 else 0), 0.0)):
-                            record_entry(
-                                cfg, ticker="TZA", shares=50,
-                                ib_fill=10.0, quote=10.0,
-                            )
+        with patch("core.war_account.war_ledger_applies", return_value=True):
+            with patch("core.war_account.load_state", return_value=state):
+                with patch("core.war_account.save_state"):
+                    with patch("core.war_account._roll_session"):
+                        with patch("core.war_account._append_ledger"):
+                            with patch("core.war_account.apply_slippage_overlay", side_effect=lambda *a, **k: (k.get("quote", a[3] if len(a) > 3 else 0), 0.0)):
+                                record_entry(
+                                    cfg, ticker="TZA", shares=50,
+                                    ib_fill=10.0, quote=10.0,
+                                )
     assert "BITO" in state["open_wars"]
     assert "TZA" in state["open_wars"]
     use_lab, slot = _resolve_open_slot(state, "TZA")

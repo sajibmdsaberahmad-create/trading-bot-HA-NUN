@@ -394,6 +394,31 @@ def merge_entry_decision(
         "ollama_status": ollama_status,
     }
 
+    try:
+        from core.ppo_wheel_profile import ppo_only_execution_enabled
+        if ppo_only_execution_enabled(cfg):
+            if ppo_buy and ppo_conf >= min_conf:
+                base.update({
+                    "enter": True,
+                    "pending": False,
+                    "confidence": ppo_conf,
+                    "pipeline": "ppo:wheel_buy",
+                    "reason": f"PPO buy {ppo_conf:.0%}: {ppo_reason or 'signal'}"[:200],
+                })
+                return _maybe_war_veto(base)
+            base.update({
+                "enter": False,
+                "pending": False,
+                "pipeline": "ppo:wheel_hold",
+                "reason": (
+                    f"PPO hold action={ppo_action} conf={ppo_conf:.0%} "
+                    f"(council advisory only)"
+                )[:200],
+            })
+            return base
+    except Exception:
+        pass
+
     waiting = ollama_status in ("in_flight", "missing", "stale_context", "empty")
     if waiting:
         from core.capital_discipline import (
@@ -654,23 +679,23 @@ def merge_entry_decision(
                 )[:200]
         elif o_enter and ppo_buy:
             enter = True
-            reason = f"council aligned: Ollama {o_conf:.0%} + PPO {ppo_conf:.0%}"
+            reason = f"council aligned: council {o_conf:.0%} + PPO {ppo_conf:.0%}"
         elif o_enter and o_conf >= min_conf * 0.85:
             enter = True
-            reason = f"Ollama pilot {o_conf:.0%} (PPO {'buy' if ppo_buy else 'hold'})"
+            reason = f"council pilot {o_conf:.0%} (PPO {'buy' if ppo_buy else 'hold'})"
         elif ppo_buy and ppo_conf >= min_conf and (o_enter or o_conf >= min_conf * 0.55):
             enter = True
-            reason = f"PPO {ppo_conf:.0%} + Ollama assent {o_conf:.0%}"
+            reason = f"PPO {ppo_conf:.0%} + council assent {o_conf:.0%}"
         elif ppo_buy and ppo_conf >= min_conf and not ollama.get("enter") is False:
             enter = True
-            reason = f"PPO lead {ppo_conf:.0%} | Ollama: {str(ollama.get('reason', ''))[:60]}"
+            reason = f"PPO lead {ppo_conf:.0%} | council: {str(ollama.get('reason', ''))[:60]}"
         elif gut >= 0.72 and spike_ratio >= 1.3 and scan_score >= 35:
             enter = True
             blend_conf = max(blend_conf, gut)
             reason = f"gut+scanner: feel={gut:.0%} spike={spike_ratio:.1f}x"
         else:
             reason = (
-                f"council pass: Ollama enter={o_enter} conf={o_conf:.0%} | "
+                f"council pass: council enter={o_enter} conf={o_conf:.0%} | "
                 f"PPO buy={ppo_buy} conf={ppo_conf:.0%}"
             )[:200]
 
@@ -691,9 +716,23 @@ def merge_entry_decision(
     base.update({
         "pending": True,
         "pipeline": f"council:{ollama_status}",
-        "reason": f"Ollama {ollama_status} — council still open",
+        "reason": f"council {ollama_status} — council still open",
     })
     return base
+
+
+def council_status_label(status: str) -> str:
+    """Human-readable council pipeline status (not raw internal codes)."""
+    key = str(status or "missing").strip().lower()
+    return {
+        "missing": "council skipped (nanny/budget — no Groq ring)",
+        "in_flight": "Groq reasoning",
+        "empty": "no council reply yet",
+        "stale_context": "stale market fingerprint",
+        "expired": "council reply expired",
+        "timeout": "council wait timed out",
+        "fresh": "council ready",
+    }.get(key, key)
 
 
 def _council_pending_base(
@@ -702,12 +741,13 @@ def _council_pending_base(
     ppo_conf: float,
     ppo_reason: str,
 ) -> Dict[str, Any]:
+    label = council_status_label(ollama_status)
     return {
         "pending": True,
         "pipeline": f"council:{ollama_status}",
         "reason": (
             f"{ppo_label} conf={ppo_conf:.0%} ({ppo_reason or 'neutral'}) — "
-            f"awaiting council ({ollama_status})"
+            f"{label}"
         )[:200],
     }
 
@@ -720,6 +760,7 @@ def merge_exit_decision(
     ppo_reason: str,
     min_conf: float,
     pnl_pct: float = 0.0,
+    cfg: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """Collaborative exit council — non-blocking."""
     base: Dict[str, Any] = {
@@ -732,6 +773,47 @@ def merge_exit_decision(
         "council_agreement": False,
     }
     waiting = ollama_status in ("in_flight", "missing", "stale_context", "empty")
+
+    try:
+        from core.ppo_wheel_profile import (
+            council_execution_advisory_only,
+            ppo_lead_exits_enabled,
+        )
+        wheel_lead = ppo_lead_exits_enabled(cfg)
+        advisory = council_execution_advisory_only(cfg)
+    except Exception:
+        wheel_lead = False
+        advisory = False
+
+    if wheel_lead:
+        if ppo_exit and ppo_conf >= min_conf:
+            base.update({
+                "exit": True,
+                "pending": False,
+                "confidence": ppo_conf,
+                "pipeline": "ppo:wheel_exit",
+                "reason": f"PPO exit {ppo_conf:.0%}: {ppo_reason}"[:200],
+            })
+            return base
+        if advisory:
+            note = f"PPO hold {ppo_conf:.0%}"
+            if ollama_status == "fresh" and ollama:
+                o_exit = bool(ollama.get("exit", False))
+                o_conf = float(ollama.get("confidence", ppo_conf) or ppo_conf)
+                note = (
+                    f"council advisory exit={o_exit} {o_conf:.0%} — PPO holds "
+                    f"({ppo_conf:.0%})"
+                )[:200]
+            elif waiting:
+                note = f"council {ollama_status} — PPO holds (no wait)"
+            base.update({
+                "exit": False,
+                "pending": False,
+                "pipeline": "ppo:wheel_hold",
+                "reason": note,
+            })
+            return base
+
     if waiting:
         base.update(_council_pending_base(ollama_status, "PPO exit", ppo_conf, ppo_reason))
         return base
@@ -764,13 +846,13 @@ def merge_exit_decision(
         reason = ""
         if o_exit and ppo_exit:
             should_exit = True
-            reason = f"council aligned exit: Ollama {o_conf:.0%} + PPO {ppo_conf:.0%}"
+            reason = f"council aligned exit: council {o_conf:.0%} + PPO {ppo_conf:.0%}"
         elif o_exit and o_conf >= min_conf * 0.85:
             should_exit = True
-            reason = f"Ollama exit {o_conf:.0%} (PPO {'exit' if ppo_exit else 'hold'})"
+            reason = f"council exit {o_conf:.0%} (PPO {'exit' if ppo_exit else 'hold'})"
         elif ppo_exit and ppo_conf >= min_conf and (o_exit or o_conf >= min_conf * 0.55):
             should_exit = True
-            reason = f"PPO exit {ppo_conf:.0%} + Ollama assent {o_conf:.0%}"
+            reason = f"PPO exit {ppo_conf:.0%} + council assent {o_conf:.0%}"
         elif gut <= 0.28 and pnl_pct < 0:
             should_exit = True
             reason = f"gut exit: feel={gut:.0%} P&L {pnl_pct:+.2f}%"
@@ -939,6 +1021,7 @@ def merge_stagnation_decision(
     min_conf: float,
     stagnant_sec: float,
     stagnation_sec: float,
+    cfg: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """Collaborative stagnation / dead-trade council — non-blocking."""
     base: Dict[str, Any] = {
@@ -953,10 +1036,63 @@ def merge_stagnation_decision(
         "council_agreement": False,
     }
 
+    try:
+        from core.ppo_wheel_profile import (
+            council_execution_advisory_only,
+            ppo_lead_exits_enabled,
+        )
+        wheel = ppo_lead_exits_enabled(cfg) or council_execution_advisory_only(cfg)
+    except Exception:
+        wheel = False
+
+    if wheel:
+        if ppo_exit and ppo_conf >= min_conf:
+            base.update({
+                "exit": True,
+                "confidence": ppo_conf,
+                "pipeline": "ppo:wheel_stagnation_exit",
+                "reason": f"PPO stagnation exit {ppo_conf:.0%}: {ppo_reason}"[:200],
+            })
+            return base
+        if stagnant_sec >= stagnation_sec:
+            base.update({
+                "exit": True,
+                "confidence": max(ppo_conf, 0.55),
+                "pipeline": "mech:stagnation_timeout",
+                "reason": (
+                    f"Stagnation timeout {stagnant_sec:.0f}s / {stagnation_sec:.0f}s "
+                    f"(mechanical — council advisory)"
+                )[:200],
+            })
+            return base
+        base.update({
+            "exit": False,
+            "pending": False,
+            "pipeline": "ppo:wheel_stagnation_watch",
+            "reason": (
+                f"Stagnation watch {stagnant_sec:.0f}s / {stagnation_sec:.0f}s — "
+                f"PPO {ppo_conf:.0%} ({ppo_reason or 'hold'})"
+            )[:200],
+            "pulse_verbose": stagnant_sec >= stagnation_sec * 0.4,
+        })
+        return base
+
     waiting = ollama_status in ("in_flight", "missing", "stale_context", "empty")
     if waiting:
         base.update(_council_pending_base(ollama_status, "PPO stagnation", ppo_conf, ppo_reason))
         base["pulse_verbose"] = stagnant_sec >= stagnation_sec * 0.4
+        # Nanny skips stagnation_check rings — don't block forever; mech cut at limit.
+        if ollama_status == "missing" and stagnant_sec >= stagnation_sec:
+            base.update({
+                "exit": True,
+                "pending": False,
+                "confidence": max(ppo_conf, 0.55),
+                "pipeline": "mech:stagnation_timeout",
+                "reason": (
+                    f"Stagnation timeout {stagnant_sec:.0f}s / {stagnation_sec:.0f}s "
+                    f"({council_status_label(ollama_status)})"
+                )[:200],
+            })
         return base
 
     if ollama_status == "timeout":
@@ -987,12 +1123,12 @@ def merge_stagnation_decision(
         gut = float(ollama.get("gut_feel", 0.5) or 0.5)
         reason = ""
         if should_exit and ppo_exit:
-            reason = f"council aligned stagnation exit: Ollama {conf:.0%} + PPO {ppo_conf:.0%}"
+            reason = f"council aligned stagnation exit: council {conf:.0%} + PPO {ppo_conf:.0%}"
         elif should_exit and conf >= min_conf * 0.85:
-            reason = f"Ollama dead-trade exit {conf:.0%}"
+            reason = f"council dead-trade exit {conf:.0%}"
         elif ppo_exit and ppo_conf >= min_conf and (should_exit or conf >= min_conf * 0.55):
             should_exit = True
-            reason = f"PPO stagnation {ppo_conf:.0%} + Ollama assent {conf:.0%}"
+            reason = f"PPO stagnation {ppo_conf:.0%} + council assent {conf:.0%}"
         elif gut < 0.35 and not should_exit and stagnant_sec >= stagnation_sec * 0.75:
             should_exit = True
             conf = max(conf, 0.55)
@@ -1003,7 +1139,7 @@ def merge_stagnation_decision(
         else:
             should_exit = False
             reason = (
-                f"council hold: Ollama exit={should_exit} conf={conf:.0%} | "
+                f"council hold: council exit={should_exit} conf={conf:.0%} | "
                 f"PPO exit={ppo_exit} conf={ppo_conf:.0%}"
             )[:200]
         base.update({

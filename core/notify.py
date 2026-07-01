@@ -338,8 +338,14 @@ class Notifier:
 
     def info(self, text: str, event_type: str = "info", context: Optional[Dict[str, Any]] = None,
              skip_compose: bool = False):
-        """Generic notification — AI-composed when composer is attached."""
+        """Generic notification — structured templates unless copilot compose requested."""
         msg = text
+        try:
+            from core.council_budget import telegram_structured_only
+            if telegram_structured_only(self.cfg):
+                skip_compose = True
+        except Exception:
+            pass
         if (
             not skip_compose
             and self._ai_composer
@@ -347,6 +353,10 @@ class Notifier:
             and getattr(self.cfg, "DYNAMIC_AI_NOTIFICATIONS", True)
         ):
             msg = self._ai_composer.compose(event_type, context or {}, text)
+        from core.ai_notifier import sanitize_telegram_message
+        msg = sanitize_telegram_message(msg) or sanitize_telegram_message(text or "")
+        if not msg:
+            return
         self._send_all(msg)
 
     def warning(self, text: str):
@@ -367,6 +377,10 @@ class Notifier:
     # ── Internal fan-out ─────────────────────────────────────────────────────
 
     def _send_all(self, message: str):
+        from core.ai_notifier import sanitize_telegram_message
+        message = sanitize_telegram_message(message or "")
+        if not message:
+            return
         log.info(f"NOTIFY │ {message.splitlines()[0]}")
         if self.telegram_ready:
             self._send_telegram(message)

@@ -56,9 +56,10 @@ def _check_tf_gpu() -> Tuple[bool, str]:
         return False, f"TensorFlow GPU check failed: {exc}"
 
 
-def run_startup_checks() -> None:
-    # Force Keras 3 to use TensorFlow backend to avoid PyTorch memory lock / OOM fragmentation
-    os.environ["KERAS_BACKEND"] = "tensorflow"
+def run_startup_checks(*, require_tensorflow: bool = False) -> None:
+    """Preflight imports. TensorFlow only required for legacy fusion/LSTM modes."""
+    if require_tensorflow:
+        os.environ["KERAS_BACKEND"] = "tensorflow"
 
     checks: List[Tuple[bool, str]] = []
 
@@ -67,14 +68,15 @@ def run_startup_checks() -> None:
     checks.append(_check_import("torch", "pip install torch"))
     checks.append(_check_import("gymnasium", "pip install gymnasium"))
     checks.append(_check_import("stable_baselines3", "pip install stable-baselines3[extra]"))
-    checks.append(_check_import("tensorflow", "pip install tensorflow"))
-    checks.append(_check_import("keras", "pip install keras"))
+    if require_tensorflow:
+        checks.append(_check_import("tensorflow", "pip install -r requirements-legacy.txt"))
+        checks.append(_check_import("keras", "pip install -r requirements-legacy.txt"))
+        checks.append(_check_tf_gpu())
     checks.append(_check_import("sklearn", "pip install scikit-learn"))
     checks.append(_check_import("scipy", "pip install scipy"))
     checks.append(_check_import("dotenv", "pip install python-dotenv"))
     checks.append(_check_cuda())
     checks.append(_check_mps())
-    checks.append(_check_tf_gpu())
 
     failed = [msg for ok, msg in checks if not ok]
 

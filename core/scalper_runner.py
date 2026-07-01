@@ -599,10 +599,11 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         except Exception as exc:
             log.debug(f"War IB sync: {exc}")
     def _deployable_cash(self) -> float:
-        """Cash for new entries — war settled cash when war account enabled."""
+        """Cash for new entries — war settled cash only during RTH war phase."""
         try:
+            from core.capital_phase import uses_war_sizing
             from core.war_account import war_account_enabled, war_settled_cash
-            if war_account_enabled(self.cfg):
+            if war_account_enabled(self.cfg) and uses_war_sizing(self.cfg, self):
                 return max(0.0, war_settled_cash(self.cfg))
         except Exception:
             pass
@@ -2526,52 +2527,13 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             log.debug(f"Market context update failed: {exc}")
     def _generate_guidelines(self) -> str:
         try:
-            weights = self._load_weights()
-            win_rate = len([w for w in weights.get("win_history", []) if w["result"] == "win"]) / max(len(weights.get("win_history", [])), 1)
-            rules = []
-            wins = [w for w in weights.get("win_history", []) if w["result"] == "win"]
-            losses = [w for w in weights.get("win_history", []) if w["result"] == "loss"]
-            if win_rate < 0.4:
-                rules.append("URGENT: Win rate below 40%. Tighten stop-loss (reduce SCALP_STOP_ATR_MULTIPLIER from 0.7 to 0.5).")
-                rules.append("Reduce trade frequency: increase SCAN_INTERVAL_SECONDS from 300 to 600.")
-            elif win_rate > 0.7:
-                rules.append("Win rate excellent (>70%). Consider increasing position size or reducing SCALP_STOP_ATR_MULTIPLIER for bigger wins.")
-            else:
-                rules.append(f"Win rate {win_rate:.0%} — stable. Continue current risk parameters.")
-            if losses:
-                avg_loss = sum(l.get("pnl_usd", 0) for l in losses) / len(losses)
-                if avg_loss > 30:
-                    rules.append(f"Average loss ${avg_loss:.0f} is high. Consider reducing MAX_TRADE_SIZE_USD from $1,000 to $500.")
-                    rules.append("Review trailing stop: tighten SCALP_TRAILING_ATR_MULTIPLIER.")
-            w = weights
-            if w.get("momentum", 0) > 30:
-                rules.append("Momentum weight is very high — strategy is overly focused on momentum. Consider rebalancing.")
-            if w.get("volume", 0) > 30:
-                rules.append("Volume weight is very high — add volume_decay check to avoid chasing pumps.")
-            if w.get("institutional", 0) > 30:
-                rules.append("Institutional weight is very high — ensure institutional detector is accurate (check for false signals).")
-            if self.scan_results:
-                max_score = max(
-                    (r.get("total_score", 0) if isinstance(r, dict) else r.rank_score)
-                    for r in self.scan_results[:3]
-                )
-                if max_score < 20:
-                    rules.append("Market conditions are weak (low scores). Consider wider SCALP_MIN_STOP_PCT or wait for better setups.")
-                elif max_score > 50:
-                    rules.append("Strong market conditions. Increase SCALP_MAX_TP_PCT from 3% to 5% to capture more upside.")
-            if self.bot_nav > float(self.cfg.INITIAL_CASH) * 1.5:
-                rules.append(f"Account grew {self.bot_nav / float(self.cfg.INITIAL_CASH):.0%}x. Consider adding a second concurrent position (MAX_CONCURRENT_POSITIONS).")
-            rules.append("Always use limit orders in fast markets (USE_LIMIT_ORDERS_IN_FAST_MARKETS = True).")
-            rules.append("Monitor slippage: if fills consistently >0.4%, reduce order size.")
-            pnl = self.bot_nav - float(self.cfg.INITIAL_CASH)
-            pnl_pct = pnl / float(self.cfg.INITIAL_CASH)
-            if pnl_pct < -0.1:
-                rules.append("ALERT: Drawdown >10%. Pause trading for 24 hours and review strategy.")
-                rules.append("Strengthen uptrend filter: require price > SMA50 instead of SMA20.")
-            if not rules:
-                rules.append("No guideline changes needed. System running optimally.")
-            rules_text = "\n".join(f"• {r}" for r in rules)
-            return f"🧭 HANOON SELF-IMPROVEMENT GUIDELINES\n{'_'*40}\n{rules_text}\n"
+            from core.scalper_guidelines import generate_scalper_guidelines
+            return generate_scalper_guidelines(
+                self._load_weights(),
+                self.scan_results or [],
+                self.bot_nav,
+                float(self.cfg.INITIAL_CASH),
+            )
         except Exception as exc:
             log.debug(f"Guidelines generation failed: {exc}")
             return ""

@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 
 from core.config import BotConfig
 from core.notify import log
+from core.training_dataset_paths import council_training_dataset_path
 
 
 def _ensure_halim_pkg() -> None:
@@ -18,7 +19,7 @@ def _ensure_halim_pkg() -> None:
 
 
 def _dataset_pairs() -> int:
-    p = Path("models/council_training_dataset.jsonl")
+    p = council_training_dataset_path()
     if not p.is_file():
         return 0
     try:

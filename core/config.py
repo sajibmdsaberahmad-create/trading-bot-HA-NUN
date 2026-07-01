@@ -622,6 +622,16 @@ class BotConfig:
     PPO_ENTRY_MICRO_DEBOUNCE_SEC: float = float(
         os.getenv("PPO_ENTRY_MICRO_DEBOUNCE_SEC", "0")
     )
+    PPO_TEACHER_ENABLED: bool = os.getenv(
+        "PPO_TEACHER_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    PPO_TEACHER_EVERY_N_TRADES: int = int(os.getenv("PPO_TEACHER_EVERY_N_TRADES", "4"))
+    PPO_TEACHER_MIN_INTERVAL_SEC: float = float(
+        os.getenv("PPO_TEACHER_MIN_INTERVAL_SEC", "180")
+    )
+    PPO_TEACHER_WIN_RATE_FLOOR: float = float(
+        os.getenv("PPO_TEACHER_WIN_RATE_FLOOR", "0.38")
+    )
     AI_STREAM_WATCH_CAP: int = int(os.getenv("AI_STREAM_WATCH_CAP", "10"))
     MICRO_SPIKE_BOOST: float = float(os.getenv("MICRO_SPIKE_BOOST", "0.35"))
     MICRO_FADE_EXIT: float = float(os.getenv("MICRO_FADE_EXIT", "0.55"))
@@ -951,11 +961,13 @@ class BotConfig:
 
     POSITION_PULSE_SEC: float = 5.0          # Live P&L log interval (when price/P&L changes)
     POSITION_PULSE_UNCHANGED_SEC: float = 30.0  # Slower heartbeat when flat (reduces spam)
-    STAGNATION_EXIT_ENABLED: bool = True
-    STAGNATION_EXIT_SEC: float = 90.0      # Cut dead trades after N sec with no progress
-    STAGNATION_FLAT_BAND_PCT: float = 0.008  # |P&L| within ±0.8% = no progress
-    STAGNATION_MAX_PEAK_PCT: float = 0.003   # Never reached +0.3% from entry
-    STAGNATION_LOSS_CUT_PCT: float = -0.005  # Exit flat losers worse than -0.5%
+    STAGNATION_EXIT_ENABLED: bool = os.getenv(
+        "STAGNATION_EXIT_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    STAGNATION_EXIT_SEC: float = float(os.getenv("STAGNATION_EXIT_SEC", "90"))
+    STAGNATION_FLAT_BAND_PCT: float = float(os.getenv("STAGNATION_FLAT_BAND_PCT", "0.008"))
+    STAGNATION_MAX_PEAK_PCT: float = float(os.getenv("STAGNATION_MAX_PEAK_PCT", "0.003"))
+    STAGNATION_LOSS_CUT_PCT: float = float(os.getenv("STAGNATION_LOSS_CUT_PCT", "-0.005"))
     AI_STAGNATION_CHECK_SEC: float = 30.0  # Ollama+PPO review after N sec flat
     STALE_PRICE_REFRESH_PULSES: int = 4    # Force IB snapshot after N identical pulses
     STALE_PRICE_REFRESH_SEC: float = 20.0  # Or force snapshot if price frozen this long

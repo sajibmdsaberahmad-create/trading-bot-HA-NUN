@@ -26,6 +26,8 @@ def _gs():
 # LEARNING PERSISTENCE — cross-device experience sync
 # ═════════════════════════════════════════════════════════════════════════════
 
+from core.training_dataset_paths import council_training_dataset_path
+
 LEARNING_ARTIFACTS: Dict[str, List[str]] = {
     "code": [
         "models/consciousness.json",
@@ -39,7 +41,7 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "models/owned_brain_manifest.json",
         "models/device_profile.json",
         "models/copilot_state.json",
-        "models/council_training_dataset.jsonl",
+        str(council_training_dataset_path()),
         "models/owned_brain_journal.jsonl",
         "models/halim_identity.json",
         "models/halim_manifest.json",
@@ -107,7 +109,7 @@ LEARNING_ARTIFACTS: Dict[str, List[str]] = {
         "models/teacher_proxy.joblib",
         "models/hybrid_distill_state.json",
         "models/ppo_trader_replay.zip",
-        "models/council_training_dataset.jsonl",
+        str(council_training_dataset_path()),
     ],
 }
 

@@ -234,6 +234,7 @@ class CommanderExitMixin:
                 live.get("status", "missing"),
                 ppo_exit, ppo_conf, ppo_reason, min_conf,
                 stagnant_sec, stagnation_sec,
+                cfg=self.cfg,
             )
             if merged.get("pending"):
                 return {
@@ -305,6 +306,7 @@ class CommanderExitMixin:
             float(state.get("min_conf", 0.55)),
             float(state.get("stagnant_sec", 0)),
             float(state.get("stagnation_sec", 90)),
+            cfg=self.cfg,
         )
         if merged.get("pending"):
             return {
@@ -599,6 +601,7 @@ class CommanderExitMixin:
                 live.get("status", "missing"),
                 ppo_exit, ppo_conf, ppo_reason, min_conf,
                 pnl_pct=pnl_pct,
+                cfg=self.cfg,
             )
             if merged.get("pending"):
                 return {
@@ -664,6 +667,7 @@ class CommanderExitMixin:
             str(state.get("ppo_reason", "")),
             float(state.get("min_conf", 0.55)),
             pnl_pct=float(ctx.get("pnl_pct", 0)),
+            cfg=self.cfg,
         )
         if merged.get("pending"):
             return {

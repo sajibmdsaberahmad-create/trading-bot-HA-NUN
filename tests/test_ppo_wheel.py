@@ -140,5 +140,128 @@ class TestLearnApproval(unittest.TestCase):
         self.assertEqual(len(filter_for_ppo_training(rows, self.cfg)), 1)
 
 
+class TestPpoWheelExecution(unittest.TestCase):
+    def setUp(self):
+        self.cfg = BotConfig()
+        self._env = os.environ.copy()
+
+    def tearDown(self):
+        os.environ.clear()
+        os.environ.update(self._env)
+
+    @patch.dict(os.environ, {
+        "PPO_WHEEL_PROFILE_LOCK": "true",
+        "PPO_ONLY_EXECUTION": "true",
+    })
+    def test_ppo_only_entry_blocks_quality_flash(self):
+        from core.smart_stack import build_halim_local_entry
+        out = build_halim_local_entry(
+            self.cfg,
+            halim_live={"status": "stale_context", "parsed": {}},
+            quality={"profit_probability": 0.72, "enter_ok": True},
+            ppo_action=0,
+            ppo_conf=0.54,
+            ppo_reason="neutral",
+            min_conf=0.58,
+            scan_score=80,
+            spike_ratio=1.5,
+        )
+        self.assertFalse(out.get("enter"))
+        self.assertEqual(out.get("pipeline"), "ppo:wheel_hold")
+
+    @patch.dict(os.environ, {
+        "PPO_WHEEL_PROFILE_LOCK": "true",
+        "PPO_ONLY_EXECUTION": "true",
+    })
+    def test_ppo_only_entry_allows_buy(self):
+        from core.smart_stack import build_halim_local_entry
+        out = build_halim_local_entry(
+            self.cfg,
+            halim_live={"status": "stale_context", "parsed": {}},
+            quality={"profit_probability": 0.72, "enter_ok": True},
+            ppo_action=1,
+            ppo_conf=0.62,
+            ppo_reason="buy",
+            min_conf=0.58,
+            scan_score=80,
+            spike_ratio=1.5,
+        )
+        self.assertTrue(out.get("enter"))
+        self.assertEqual(out.get("pipeline"), "ppo:wheel_buy")
+
+    @patch.dict(os.environ, {
+        "PPO_WHEEL_PROFILE_LOCK": "true",
+        "PPO_LEAD_EXITS": "true",
+        "COUNCIL_EXECUTION_ADVISORY_ONLY": "true",
+    })
+    def test_council_cannot_exit_without_ppo(self):
+        from core.live_ai_pipeline import merge_exit_decision
+        out = merge_exit_decision(
+            {"exit": True, "confidence": 0.85, "reason": "take profit"},
+            "fresh",
+            ppo_exit=False,
+            ppo_conf=0.5,
+            ppo_reason="hold",
+            min_conf=0.58,
+            cfg=self.cfg,
+        )
+        self.assertFalse(out.get("exit"))
+        self.assertFalse(out.get("pending"))
+        self.assertEqual(out.get("pipeline"), "ppo:wheel_hold")
+
+    @patch.dict(os.environ, {
+        "PPO_WHEEL_PROFILE_LOCK": "true",
+        "PPO_LEAD_EXITS": "true",
+    })
+    def test_ppo_lead_exit(self):
+        from core.live_ai_pipeline import merge_exit_decision
+        out = merge_exit_decision(
+            {"exit": False, "confidence": 0.5},
+            "fresh",
+            ppo_exit=True,
+            ppo_conf=0.65,
+            ppo_reason="sell signal",
+            min_conf=0.58,
+            cfg=self.cfg,
+        )
+        self.assertTrue(out.get("exit"))
+        self.assertEqual(out.get("pipeline"), "ppo:wheel_exit")
+
+    @patch.dict(os.environ, {
+        "PPO_WHEEL_PROFILE_LOCK": "true",
+        "PPO_LEAD_EXITS": "true",
+        "COUNCIL_EXECUTION_ADVISORY_ONLY": "true",
+    })
+    def test_stagnation_wheel_mech_timeout(self):
+        from core.live_ai_pipeline import merge_stagnation_decision
+        out = merge_stagnation_decision(
+            {}, "missing",
+            ppo_exit=False, ppo_conf=0.5, ppo_reason="Warming up",
+            min_conf=0.58, stagnant_sec=95.0, stagnation_sec=90.0,
+            cfg=self.cfg,
+        )
+        self.assertTrue(out.get("exit"))
+        self.assertEqual(out.get("pipeline"), "mech:stagnation_timeout")
+        self.assertIn("mechanical", out.get("reason", ""))
+
+    @patch.dict(os.environ, {
+        "COUNCIL_NANNY_LOW_TASKS": "false",
+        "PPO_WHEEL_PROFILE_LOCK": "false",
+        "PPO_LEAD_EXITS": "false",
+        "COUNCIL_EXECUTION_ADVISORY_ONLY": "false",
+    })
+    def test_stagnation_missing_label(self):
+        from core.live_ai_pipeline import council_status_label, merge_stagnation_decision
+        self.assertIn("skipped", council_status_label("missing"))
+        out = merge_stagnation_decision(
+            {}, "missing",
+            ppo_exit=False, ppo_conf=0.5, ppo_reason="hold",
+            min_conf=0.58, stagnant_sec=40.0, stagnation_sec=90.0,
+            cfg=self.cfg,
+        )
+        self.assertTrue(out.get("pending"))
+        self.assertIn("skipped", out.get("reason", "").lower())
+
+
 if __name__ == "__main__":
     unittest.main()

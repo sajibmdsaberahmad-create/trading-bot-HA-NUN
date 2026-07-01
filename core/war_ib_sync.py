@@ -391,11 +391,24 @@ def sync_war_from_ib(
                     "dropped": pos_result.get("dropped", []),
                     "ts": now,
                 })
-                log.info(
-                    f"⚔️ War IB sync — nav=${float(state.get('nav', 0)):,.0f} "
-                    f"session_pnl=${float(state.get('session_pnl_war', 0)):+.2f} "
-                    f"slots={pos_result.get('war_slots', 0)}"
-                )
+                try:
+                    from core.capital_phase import uses_war_sizing
+                    if uses_war_sizing(cfg):
+                        log.info(
+                            f"⚔️ War IB sync — nav=${float(state.get('nav', 0)):,.0f} "
+                            f"session_pnl=${float(state.get('session_pnl_war', 0)):+.2f} "
+                            f"slots={pos_result.get('war_slots', 0)}"
+                        )
+                    else:
+                        log.debug(
+                            f"IB sync (full-balance phase) — "
+                            f"war_slots={pos_result.get('war_slots', 0)} "
+                            f"monitor={pos_result.get('monitor_only', [])}"
+                        )
+                except Exception:
+                    log.debug(
+                        f"IB sync — war_slots={pos_result.get('war_slots', 0)}"
+                    )
             else:
                 log.debug(
                     f"War IB sync unchanged — nav=${float(state.get('nav', 0)):,.0f} "

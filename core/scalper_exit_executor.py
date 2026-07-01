@@ -22,6 +22,21 @@ class ScalperExitMixin:
 
     def _service_tick_position_exit(self, ticker: str, price: float) -> None:
         """Sub-second micro profit/loss exit on tick (mechanical, no council wait)."""
+        ticker = (ticker or "").upper()
+        if self._has_pending_close(ticker):
+            return
+        try:
+            from core.fill_tracker import ib_position_shares
+            if ib_position_shares(self.ib, ticker) <= 0.5:
+                slot = self._position_slots.get(ticker)
+                if slot and slot.get("exiting"):
+                    return
+                if ticker in self._position_slots and float(slot.get("shares", 0) or 0) > 0:
+                    self._position_slots.pop(ticker, None)
+                    self._refresh_aggregate_position_state()
+                return
+        except Exception:
+            pass
         can_trade, _ = can_trade_now(self.cfg)
         if not can_trade:
             return
@@ -69,12 +84,27 @@ class ScalperExitMixin:
             )
             self._exit_position(price, "tick_micro_loss", ticker=ticker, defer=True)
             self._save_position_context(ticker)
+    def _has_pending_close(self, ticker: str) -> bool:
+        t = (ticker or "").upper()
+        return any(p.ticker == t for p in self._pending_closes.values())
+
+    def _resubmit_exit_flatten(self, ticker: str, shares: int, px: float):
+        bid, ask = self._get_bid_ask(ticker)
+        return self.broker.flatten_position(
+            int(shares),
+            symbol=ticker,
+            urgent=True,
+            last_price=px,
+            bid=bid,
+            ask=ask,
+        )
+
     def _request_deferred_exit(self, ticker: str, price: float, reason: str) -> None:
         """Queue exit for main loop — safe when called from IB tick callbacks."""
         ticker = (ticker or "").upper()
         if not ticker or ticker not in self._position_slots:
             return
-        if ticker in self._pending_closes or ticker in self._deferred_exits:
+        if self._has_pending_close(ticker) or ticker in self._deferred_exits:
             return
         self._deferred_exits[ticker] = {
             "price": float(price),
@@ -88,7 +118,7 @@ class ScalperExitMixin:
         if not can_trade:
             return
         for ticker, req in list(self._deferred_exits.items()):
-            if ticker in self._pending_closes:
+            if self._has_pending_close(ticker):
                 self._deferred_exits.pop(ticker, None)
                 continue
             if ticker not in self._position_slots:
@@ -152,7 +182,7 @@ class ScalperExitMixin:
         """Detect if position was closed (by bracket or manually) — reconcile IB fill async."""
         if self._prev_shares > 0 and self.shares == 0:
             opened_at = getattr(self, "_position_opened_at", 0.0)
-            if opened_at and (time.time() - opened_at) < 60.0:
+            if opened_at and (time.time() - opened_at) < 10.0:
                 return
             closed_ticker = (self.current_ticker or "").upper()
             if not closed_ticker:
@@ -204,7 +234,7 @@ class ScalperExitMixin:
             flatten_trade=flatten_trade,
             bracket=bracket or self._bracket_by_ticker.get(ticker) or self.bracket_handle,
             quote_px=quote_exit_px,
-            since_ts=opened_at,
+            since_ts=max(0.0, time.time() - 300.0),
             entry_fill=entry_fill,
         )
         if ib_fill_strict(self.cfg) and not exit_ok:
@@ -245,6 +275,8 @@ class ScalperExitMixin:
         ticker = (ticker or "").upper()
         if not ticker:
             return
+        if self._has_pending_close(ticker):
+            return
         key = f"{ticker}:{time.time():.3f}"
         snap = snapshot_slot(slot or self._position_slots.get(ticker, {}))
         if not snap.get("entry_fill_px") and self._entry_price > 0 and self.current_ticker == ticker:
@@ -262,14 +294,21 @@ class ScalperExitMixin:
             event=event,
             flatten_trade=flatten_trade,
             bracket=bracket,
+            ib_baseline_shares=float(snap.get("ib_baseline_shares", 0) or 0),
         )
     def _service_pending_closes(self) -> None:
         """Instant IB cache lookup each tick — zero sleep, zero throttle; notify when fill lands."""
         if not self._pending_closes:
             return
+        from core.fill_reconciler import finalize_flat_position_close
+        from core.fill_tracker import trade_order_status
+
         cache = self._fill_cache()
         fallback_sec = float(getattr(self.cfg, "FILL_RECONCILE_FALLBACK_SEC", 8.0))
         force_sec = float(getattr(self.cfg, "IB_FILL_FORCE_SEC", 120.0))
+        retry_sec = float(getattr(self.cfg, "EXIT_FLATTEN_RETRY_SEC", 30.0))
+        stuck_sec = float(getattr(self.cfg, "PENDING_SUBMIT_MAX_SEC", 4.0))
+        max_stuck_retries = int(getattr(self.cfg, "EXIT_STUCK_MAX_RETRIES", 2))
         now = time.time()
 
         for key, pending in list(self._pending_closes.items()):
@@ -281,6 +320,83 @@ class ScalperExitMixin:
                 pending, self.ib, cache, force=force, cfg=self.cfg,
             )
             if trade_rec is None:
+                remaining = ib_position_shares(self.ib, pending.ticker)
+                baseline = float(pending.ib_baseline_shares or pending.shares or 0)
+                px = float(
+                    pending.quote_exit_px
+                    or self._live_price_for(pending.ticker, 0)
+                )
+
+                if remaining <= 0.5 and baseline > 0.5 and age >= fallback_sec:
+                    trade_rec = finalize_flat_position_close(
+                        pending, self.ib, cache, cfg=self.cfg,
+                    )
+                    if trade_rec is not None:
+                        if not self._finalize_closed_trade(trade_rec, pending):
+                            continue
+                        self._pending_closes.pop(key, None)
+                        continue
+
+                if pending.flatten_trade and age >= stuck_sec:
+                    ost = trade_order_status(pending.flatten_trade)
+                    st = str(ost.get("status", "") or "")
+                    if (
+                        st in ("PreSubmitted", "PendingSubmit")
+                        and pending.stuck_retries < max_stuck_retries
+                    ):
+                        pending.stuck_retries += 1
+                        log.warning(
+                            f"  ⚡ EXIT {pending.ticker}: stuck {st} >{stuck_sec:.0f}s "
+                            f"— cancel + limit retry #{pending.stuck_retries}"
+                        )
+                        try:
+                            self.broker.cancel_open_orders_for_symbol(pending.ticker)
+                            self.ib.sleep(0.3)
+                            new_trade = self._resubmit_exit_flatten(
+                                pending.ticker, int(max(remaining, baseline)), px,
+                            )
+                            if new_trade is not None:
+                                pending.flatten_trade = new_trade
+                        except Exception as exc:
+                            log.warning(
+                                f"EXIT stuck resubmit {pending.ticker}: {exc}"
+                            )
+                        continue
+
+                if remaining > 0.5 and age >= retry_sec:
+                    if not pending.retry_attempted:
+                        pending.retry_attempted = True
+                        log.warning(
+                            f"  🔄 EXIT {pending.ticker}: no IB fill after {age:.0f}s "
+                            f"(still {remaining:.0f}sh) — retry flatten"
+                        )
+                        try:
+                            new_trade = self._resubmit_exit_flatten(
+                                pending.ticker, int(remaining), px,
+                            )
+                            if new_trade is not None:
+                                pending.flatten_trade = new_trade
+                                pending.quote_exit_px = px
+                        except Exception as exc:
+                            log.warning(f"EXIT retry flatten {pending.ticker}: {exc}")
+                    elif age >= force_sec:
+                        slot = self._position_slots.get(pending.ticker) or pending.slot
+                        if slot:
+                            restored = dict(slot)
+                            restored["shares"] = remaining
+                            restored.pop("exiting", None)
+                            restored.pop("exit_started_at", None)
+                            self._position_slots[pending.ticker] = restored
+                            self._bind_risk_plan_for_ticker(pending.ticker)
+                            try:
+                                self._ensure_position_stream(pending.ticker)
+                            except Exception:
+                                pass
+                        log.error(
+                            f"  ❌ EXIT {pending.ticker}: flatten failed — IB still holds "
+                            f"{remaining:.0f}sh; monitor re-armed"
+                        )
+                        self._pending_closes.pop(key, None)
                 continue
             if not self._finalize_closed_trade(trade_rec, pending):
                 continue
@@ -427,6 +543,12 @@ class ScalperExitMixin:
             log.debug(f"Post-close learning schedule: {exc}")
         self._sync_bot_nav_from_ib()
         self._attempt_hot_swap_entry()
+        if self.risk.plan:
+            self.risk.close_position()
+        self._reset_profit_hunt_state()
+        self._clear_pending_entry(ticker, cooldown_sec=30.0)
+        self._clear_ai_councils(ticker)
+        self._clear_closed_position_state(ticker)
         return True
     def _clear_closed_position_state(self, ticker: str) -> None:
         """Drop local position tracking after exit (IB brackets may still rest)."""
@@ -438,17 +560,29 @@ class ScalperExitMixin:
             self._position_slots.pop(ticker, None)
             self._bracket_by_ticker.pop(ticker, None)
             self._risk_plans.pop(ticker, None)
+        remaining = list(self._position_slots.keys()) if getattr(self, "_position_slots", None) else []
         if self.current_ticker == ticker:
-            self.current_ticker = None
-        self.bracket_handle = None
-        self._position_opened_at = 0.0
-        self._position_stop = 0.0
-        self._position_target = 0.0
-        self._position_peak = 0.0
-        self._hard_stop_floor = 0.0
+            self.current_ticker = remaining[0] if remaining else None
+        if not remaining:
+            self.bracket_handle = None
+            self._position_opened_at = 0.0
+            self._position_stop = 0.0
+            self._position_target = 0.0
+            self._position_peak = 0.0
+            self._hard_stop_floor = 0.0
+        elif ticker and self.current_ticker:
+            try:
+                self._load_position_context(self.current_ticker)
+            except Exception:
+                pass
         if self._active_stream_ticker == ticker:
             self._stop_target_stream(self._active_stream_ticker)
-            self._active_stream_ticker = None
+            self._active_stream_ticker = remaining[0] if remaining else None
+            if self._active_stream_ticker:
+                try:
+                    self._ensure_position_stream(self._active_stream_ticker)
+                except Exception:
+                    pass
         if getattr(self, "_next_best_pick", None) and self._next_best_score >= 25:
             self.top_pick = self._next_best_pick
         self._refresh_aggregate_position_state()
@@ -478,8 +612,8 @@ class ScalperExitMixin:
         except Exception:
             pass
         try:
-            from core.war_account import record_exit, war_account_enabled
-            if war_account_enabled(self.cfg):
+            from core.war_account import record_exit, war_ledger_applies
+            if war_ledger_applies(self.cfg):
                 record_exit(
                     self.cfg,
                     ticker=ticker,
@@ -687,6 +821,12 @@ class ScalperExitMixin:
         defer: bool = False,
     ):
         """Manually exit position — submit flatten, reconcile IB fill async."""
+        from core.fill_tracker import (
+            confirm_exit_fill,
+            ib_position_shares,
+            trade_order_status,
+        )
+
         ticker = (ticker or self.current_ticker or "").upper()
         if defer:
             self._request_deferred_exit(ticker, current_px, reason)
@@ -699,6 +839,12 @@ class ScalperExitMixin:
             )
             self._request_deferred_exit(ticker, current_px, reason)
             return
+        if self._has_pending_close(ticker):
+            return
+        if ticker and ticker in self._position_slots:
+            slot = self._position_slots[ticker]
+            if slot.get("exiting"):
+                return
         if ticker and ticker in self._position_slots:
             self._load_position_context(ticker)
         if self.shares <= 0:
@@ -706,15 +852,61 @@ class ScalperExitMixin:
         quantity = int(self.shares)
         handle = self._bracket_by_ticker.get(ticker) or self.bracket_handle
         slot_snap = snapshot_slot(self._position_slots.get(ticker, {}))
+        ib_baseline = ib_position_shares(self.ib, ticker)
+        if ib_baseline <= 0:
+            ib_baseline = float(quantity)
+        started_at = time.time()
         flatten_trade = None
+        bid, ask = self._get_bid_ask(ticker)
         try:
             flatten_trade = self.broker.flatten_position(
-                quantity, handle=handle, urgent=True, symbol=ticker,
+                quantity,
+                handle=handle,
+                urgent=True,
+                symbol=ticker,
+                last_price=current_px,
+                bid=bid,
+                ask=ask,
             )
-            log.info(
-                f"⚡ EXIT submitted: SELL {quantity} {ticker} @ market "
-                f"(quote ${current_px:.4f}) | {reason[:80]}"
+            if flatten_trade is None:
+                log.warning(
+                    f"⚠️ EXIT {ticker}: flatten not sent — position kept "
+                    f"({quantity}sh)"
+                )
+                return
+
+            cache = self._fill_cache()
+            fill_qty, fill_px, confirmed, source = confirm_exit_fill(
+                self.ib,
+                symbol=ticker,
+                flatten_trade=flatten_trade,
+                cache=cache,
+                order_shares=float(quantity),
+                ib_baseline=ib_baseline,
+                started_at=started_at,
+                quote_px=current_px,
+                poll_wait=0.0,
             )
+            ost = trade_order_status(flatten_trade)
+            order_mode = getattr(flatten_trade, "_hn_order_mode", None) or "market"
+            mode_note = order_mode
+            if isinstance(getattr(flatten_trade, "order", None), object):
+                lmt = getattr(flatten_trade.order, "lmtPrice", 0)
+                if lmt and float(lmt) > 0:
+                    mode_note = f"{order_mode} @ ${float(lmt):.4f}"
+
+            if source.startswith("rejected"):
+                log.warning(
+                    f"⚠️ EXIT {ticker}: IB rejected flatten ({source}) "
+                    f"id={ost.get('order_id')} — position kept"
+                )
+                return
+
+            slot_snap["ib_baseline_shares"] = ib_baseline
+            if ticker in self._position_slots:
+                self._position_slots[ticker]["exiting"] = True
+                self._position_slots[ticker]["exit_started_at"] = started_at
+
             self._enqueue_pending_close(
                 ticker, reason, current_px,
                 event="early_exit",
@@ -723,15 +915,28 @@ class ScalperExitMixin:
                 slot=slot_snap,
                 shares=float(quantity),
             )
-            self.shares = 0.0
-            self._prev_shares = 0.0
-            self.bracket_handle = None
-            if self.risk.plan:
-                self.risk.close_position()
-            self._reset_profit_hunt_state()
-            self._clear_closed_position_state(ticker)
-            self._clear_pending_entry(ticker, cooldown_sec=30.0)
-            self._clear_ai_councils(ticker)
+
+            if confirmed:
+                log.info(
+                    f"⚡ EXIT filled: SELL {fill_qty:.0f} {ticker} @ ${fill_px:.4f} "
+                    f"({source}) | {reason[:80]}"
+                )
+                for pkey, pending in list(self._pending_closes.items()):
+                    if pending.ticker != ticker:
+                        continue
+                    trade_rec = build_close_record(
+                        pending, self.ib, cache, force=True, cfg=self.cfg,
+                    )
+                    if trade_rec and self._finalize_closed_trade(trade_rec, pending):
+                        self._pending_closes.pop(pkey, None)
+                    break
+                return
+            else:
+                log.info(
+                    f"⚡ EXIT submitted: SELL {quantity} {ticker} ({mode_note}) "
+                    f"(quote ${current_px:.4f}) status={ost.get('status')} "
+                    f"id={ost.get('order_id')} — awaiting IB fill | {reason[:80]}"
+                )
         except Exception as exc:
             log.error(f"Early exit failed: {exc}")
     def commander_positions_intel(self) -> Dict[str, Any]:
@@ -802,8 +1007,34 @@ class ScalperExitMixin:
             self.cfg.TICKER = ticker
             self.conn._contract = None
             self.broker.cancel_open_orders_for_symbol(ticker)
-            flatten_trade = self.broker.flatten_position(qty, urgent=True, symbol=ticker)
-            self.ib.sleep(1)
+            bid, ask = self._get_bid_ask(ticker)
+            flatten_trade = self.broker.flatten_position(
+                qty,
+                urgent=True,
+                symbol=ticker,
+                last_price=px,
+                bid=bid,
+                ask=ask,
+            )
+            if flatten_trade is None:
+                return {"ok": False, "error": f"flatten not sent for {ticker}"}
+            slot = {
+                "entry_price": entry,
+                "entry_fill_px": entry,
+                "shares": qty,
+                "opened_at": exit_since,
+                "ib_baseline_shares": float(qty),
+            }
+            self._enqueue_pending_close(
+                ticker,
+                reason,
+                px,
+                event="commander_exit",
+                flatten_trade=flatten_trade,
+                slot=slot,
+                shares=float(qty),
+            )
+            self.ib.sleep(0.5)
             from core.fill_reconciler import resolve_exit_from_ib, round_trip_pnl
             from core.ib_truth import get_snapshot, refresh
             cache = getattr(self, "_fill_cache", None)
@@ -863,8 +1094,15 @@ class ScalperExitMixin:
             except Exception:
                 pass
             return {
-                "ok": True, "ticker": ticker, "price": px, "pnl": round(pnl, 2),
-                "reason": reason, "source": "ib_only", "pnl_source": "ib_fill" if exit_ok else "pending",
+                "ok": bool(exit_ok),
+                "submitted": True,
+                "ticker": ticker,
+                "price": px,
+                "pnl": round(pnl, 2),
+                "reason": reason,
+                "source": "ib_only",
+                "fill_confirmed": exit_ok,
+                "pnl_source": "ib_fill" if exit_ok else "pending",
             }
         except Exception as exc:
             log.error(f"Commander exit failed {ticker}: {exc}")
@@ -1719,12 +1957,19 @@ class ScalperExitMixin:
                             "ctx": stagnation_ctx,
                             "current_px": current_px,
                         })
+                        if ai_dec.get("pulse_verbose"):
+                            log.info(
+                                f"  🧠 COUNCIL stagnation {self.current_ticker}: "
+                                f"{(ai_dec.get('reason') or 'deliberating')[:100]} | "
+                                f"{ai_dec.get('pipeline', '')}"
+                            )
+                        return False, "council_deliberating"
+                    if ai_dec.get("pulse_verbose") and not ai_dec.get("exit"):
                         log.info(
-                            f"  🧠 COUNCIL stagnation {self.current_ticker}: "
-                            f"{(ai_dec.get('reason') or 'deliberating')[:100]} | "
+                            f"  📊 Stagnation {self.current_ticker}: "
+                            f"{(ai_dec.get('reason') or '')[:100]} | "
                             f"{ai_dec.get('pipeline', '')}"
                         )
-                        return False, "council_deliberating"
                     if ai_dec.get("force_snapshot") and self.current_ticker:
                         snap_px = self._force_price_snapshot(self.current_ticker)
                         self._last_price_snapshot_at = time.time()
@@ -1958,6 +2203,25 @@ class ScalperExitMixin:
         pnl_pct_frac = ((current_px / entry_px) - 1) if entry_px else 0.0
         pnl_pct = pnl_pct_frac * 100
 
+        min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
+        try:
+            from core.ppo_wheel_profile import (
+                council_execution_advisory_only,
+                ppo_lead_exits_enabled,
+            )
+            if ppo_lead_exits_enabled(self.cfg) and ppo_exit and ppo_conf >= min_conf:
+                self._exit_position(current_px, f"ppo_exit: {ppo_reason[:80]}")
+                return True
+            if council_execution_advisory_only(self.cfg):
+                self._ai_councils.pop(self._council_key(ticker, "exit_decision"), None)
+                mech = str((extra_ctx or {}).get("signal", "")).lower()
+                if mech and ppo_exit and ppo_conf >= min_conf * 0.9:
+                    self._exit_position(current_px, ppo_reason[:120])
+                    return True
+                return False
+        except Exception:
+            pass
+
         if profit_exit_bypasses_council(
             self.cfg, ppo_reason or "", pnl_pct_frac,
             ai_stalled=self._ai_profit_decision_stalled(pnl_pct_frac),
@@ -2021,6 +2285,35 @@ class ScalperExitMixin:
         pnl_pct_frac = ((current_px / entry_px) - 1) if entry_px else 0.0
         pnl_pct = pnl_pct_frac * 100
 
+        ppo_exit, ppo_conf, ppo_reason = False, 0.5, ""
+        try:
+            ppo_exit, ppo_conf, ppo_reason = self._ai_gate_exit(current_px)
+        except Exception:
+            pass
+        min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
+        try:
+            from core.ppo_wheel_profile import (
+                council_execution_advisory_only,
+                ppo_lead_exits_enabled,
+            )
+            if council_execution_advisory_only(self.cfg):
+                if ppo_lead_exits_enabled(self.cfg) and ppo_exit and ppo_conf >= min_conf:
+                    log.info(f"  ⚡ PPO wheel risk exit: {risk_signal}")
+                    self._exit_position(current_px, f"ppo_risk: {risk_signal}")
+                    return True
+                loss_mech = pnl_pct_frac < 0 and any(
+                    tok in risk_signal.lower()
+                    for tok in ("hard_stop", "stop_hit", "loss_cut", "max_loss")
+                )
+                if loss_mech:
+                    log.info(f"  ⚡ MECH RISK EXIT: {risk_signal}")
+                    self._exit_position(current_px, risk_signal)
+                    return True
+                self._ai_councils.pop(self._council_key(ticker, "risk_exit"), None)
+                return False
+        except Exception:
+            pass
+
         if profit_exit_bypasses_council(
             self.cfg, risk_signal, pnl_pct_frac,
             ai_stalled=self._ai_profit_decision_stalled(pnl_pct_frac),
@@ -2041,11 +2334,6 @@ class ScalperExitMixin:
             return True
         if self._has_ai_council(ticker, "risk_exit"):
             return True
-        ppo_exit, ppo_conf, ppo_reason = False, 0.5, ""
-        try:
-            ppo_exit, ppo_conf, ppo_reason = self._ai_gate_exit(current_px)
-        except Exception:
-            pass
         ctx = {
             "ticker": ticker,
             "price": current_px,
@@ -2095,11 +2383,11 @@ class ScalperExitMixin:
             return
         self._ai_councils.pop(key, None)
         self._last_stagnation_decision = ai_dec
-        pipeline = str(ai_dec.get("pipeline", ""))
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
         if ai_dec.get("exit") and float(ai_dec.get("confidence", 0)) >= min_conf * 0.9:
+            pipeline = str(ai_dec.get("pipeline", ""))
             log.info(
-                f"  🧠 COUNCIL stagnation exit {ticker}: "
+                f"  🧠 Stagnation exit {ticker}: "
                 f"{(ai_dec.get('reason') or '')[:80]} | {pipeline}"
             )
             self._exit_position(px, f"ai_stagnation: {ai_dec.get('reason', '')[:100]}")
@@ -2155,6 +2443,29 @@ class ScalperExitMixin:
         self._ai_councils.pop(key, None)
         pipeline = str(ai_dec.get("pipeline", ""))
         min_conf = float(getattr(self.cfg, "CONFIDENCE_THRESHOLD", 0.55))
+        try:
+            from core.ppo_wheel_profile import (
+                council_execution_advisory_only,
+                ppo_lead_exits_enabled,
+            )
+            if council_execution_advisory_only(self.cfg):
+                if (
+                    ppo_lead_exits_enabled(self.cfg)
+                    and bool(st.get("ppo_exit", False))
+                    and float(st.get("ppo_conf", 0.5)) >= min_conf
+                ):
+                    log.info(
+                        f"  🎡 PPO wheel exit {ticker}: "
+                        f"{(ai_dec.get('reason') or st.get('ppo_reason', ''))[:80]}"
+                    )
+                    self._exit_position(
+                        px,
+                        f"ppo_exit: {str(st.get('ppo_reason', ''))[:80]}",
+                    )
+                    self._save_position_context(ticker)
+                return
+        except Exception:
+            pass
         if ai_dec.get("exit") and float(ai_dec.get("confidence", 0)) >= min_conf:
             log.info(
                 f"  🧠 COUNCIL exit {ticker}: {(ai_dec.get('reason') or '')[:80]} | {pipeline}"

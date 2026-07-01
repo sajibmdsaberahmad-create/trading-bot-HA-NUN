@@ -131,7 +131,7 @@ class LiveTrader:
     # ── Setup ─────────────────────────────────────────────────────────────────
 
     def setup(self):
-        run_startup_checks()
+        run_startup_checks(require_tensorflow=True)
         if not os.path.exists(self.cfg.MODEL_PATH):
             raise FileNotFoundError(
                 f"No trained model found at '{self.cfg.MODEL_PATH}'.\n"

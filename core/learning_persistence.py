@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from core.config import BotConfig
 from core.notify import log
+from core.training_dataset_paths import council_training_dataset_path as _council_ds_path
 
 RUNTIME_DIR = Path("runtime")
 SESSION_MARKER = RUNTIME_DIR / "session.active"
@@ -39,7 +40,7 @@ CRITICAL_ARTIFACTS: Tuple[str, ...] = (
     "models/post_mortem_audit.jsonl",
     "models/owned_brain_journal.jsonl",
     "models/ppo_teacher_sessions.jsonl",
-    "models/council_training_dataset.jsonl",
+    str(_council_ds_path()),
     "models/scalper_weights.json",
     "models/cognitive_state.json",
     "models/consciousness.json",

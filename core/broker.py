@@ -555,13 +555,32 @@ class BrokerExecutor:
                     contract = qualified[0] if qualified else p.contract
                 except Exception:
                     contract = p.contract
-                order = MarketOrder("BUY", cover_qty)
+                ref_px = float(getattr(p, "avgCost", 0) or 0)
+                bid, ask = self._snapshot_bid_ask(sym)
+                if ref_px <= 0:
+                    ref_px = float(bid or ask or 0)
+                from core.entry_pipeline import cover_order_for_session
+
+                order, order_mode = cover_order_for_session(
+                    self.cfg,
+                    self,
+                    cover_qty,
+                    ref_px,
+                    bid,
+                    ask,
+                )
                 self._configure_order(order)
                 trade = self.ib.placeOrder(contract, order)
                 self.ib.sleep(0.35)
                 st = trade.orderStatus.status if trade.orderStatus else ""
+                px_note = ""
+                if isinstance(order, LimitOrder) and getattr(order, "lmtPrice", 0):
+                    px_note = f" @ ${float(order.lmtPrice):.4f}"
                 if st in ("Filled", "Submitted", "PreSubmitted"):
-                    log.info(f"🧹 Covering orphan short: BUY {cover_qty:,} {sym} ({st})")
+                    log.info(
+                        f"🧹 Covering orphan short: BUY {cover_qty:,} {sym} "
+                        f"({order_mode}{px_note}) ({st})"
+                    )
                     covered += 1
                 elif st in ("PendingSubmit", "PendingCancel"):
                     log.warning(
@@ -579,13 +598,35 @@ class BrokerExecutor:
             log.debug(f"Orphan short cleanup: {exc}")
         return covered
 
-    def flatten_position(self, quantity: int, handle: Optional[BracketHandle] = None,
-                          urgent: bool = True, symbol: Optional[str] = None) -> Optional[Trade]:
+    def _snapshot_bid_ask(self, sym: str) -> Tuple[Optional[float], Optional[float]]:
+        """One-shot IB bid/ask for smart flatten limits."""
+        try:
+            contract = self.conn.get_contract(sym)
+            ticks = self.ib.reqMktData(contract, "", False, False)
+            self.ib.sleep(0.12)
+            bid = float(ticks.bid) if ticks.bid and ticks.bid > 0 else None
+            ask = float(ticks.ask) if ticks.ask and ticks.ask > 0 else None
+            self.ib.cancelMktData(contract)
+            return bid, ask
+        except Exception as exc:
+            log.debug(f"Bid/ask snapshot {sym}: {exc}")
+            return None, None
+
+    def flatten_position(
+        self,
+        quantity: int,
+        handle: Optional[BracketHandle] = None,
+        urgent: bool = True,
+        symbol: Optional[str] = None,
+        last_price: Optional[float] = None,
+        bid: Optional[float] = None,
+        ask: Optional[float] = None,
+    ) -> Optional[Trade]:
         """
         Immediately exit the position. Cancels any resting bracket
         children first (so we don't end up double-selling), then sends
-        a market order. `urgent=True` is used for stop/circuit-breaker
-        exits, where guaranteed execution matters more than price.
+        a market or marketable-limit SELL. Extended hours / penny stocks
+        use LIMIT (bare MARKET stalls PreSubmitted on IB paper).
         """
         if not self._session_allows_orders("flatten"):
             _, state = orders_allowed(self.cfg)
@@ -618,10 +659,69 @@ class BrokerExecutor:
             except Exception as exc:
                 log.warning(f"Could not cancel bracket children cleanly: {exc}")
 
-        order = MarketOrder("SELL", quantity)
+        ref_px = float(last_price or 0)
+        if ref_px <= 0 and sym:
+            try:
+                ticks = self.ib.reqMktData(contract, "", False, False)
+                self.ib.sleep(0.12)
+                for attr in ("last", "close", "bid", "ask"):
+                    v = getattr(ticks, attr, None)
+                    if v and float(v) > 0:
+                        ref_px = float(v)
+                        break
+                self.ib.cancelMktData(contract)
+            except Exception:
+                pass
+        if (bid is None or ask is None) and sym:
+            snap_bid, snap_ask = self._snapshot_bid_ask(sym)
+            bid = bid if bid and bid > 0 else snap_bid
+            ask = ask if ask and ask > 0 else snap_ask
+
+        from core.entry_pipeline import flatten_order_for_session
+
+        order, order_mode = flatten_order_for_session(
+            self.cfg,
+            self,
+            quantity,
+            ref_px,
+            bid,
+            ask,
+        )
         self._configure_order(order)
         trade = self.ib.placeOrder(contract, order)
-        log.info(f"Flatten order submitted: SELL {quantity} sh (market)")
+        try:
+            trade._hn_order_mode = order_mode  # noqa: SLF001 — reconcile/logging hint
+        except Exception:
+            pass
+        oid = getattr(order, "orderId", "?")
+        self.ib.sleep(0.35)
+        st = trade.orderStatus.status if trade.orderStatus else "Unknown"
+        px_note = ""
+        if isinstance(order, LimitOrder) and getattr(order, "lmtPrice", 0):
+            px_note = f" @ ${float(order.lmtPrice):.4f}"
+        log.info(
+            f"Flatten order submitted: SELL {quantity} {sym or 'sh'} "
+            f"({order_mode}{px_note}) status={st} id={oid}"
+        )
+        if st in ("Inactive", "Cancelled", "ApiCancelled"):
+            log.warning(
+                f"⚠️ Flatten {sym} rejected by IB ({st}) — position unchanged; "
+                f"check TWS/Gateway"
+            )
+            return trade
+        if urgent:
+            from core.fill_tracker import poll_trade_fill
+            fill_px, fill_qty = poll_trade_fill(
+                self.ib, trade, 0.0, max_wait=2.0, poll_interval=0.12,
+            )
+            st2 = trade.orderStatus.status if trade.orderStatus else st
+            if fill_qty > 0 and fill_px > 0:
+                log.info(
+                    f"Flatten {sym} filled {fill_qty:.0f}sh @ ${fill_px:.4f} "
+                    f"(status={st2})"
+                )
+            elif st2 in ("Inactive", "Cancelled", "ApiCancelled"):
+                log.warning(f"⚠️ Flatten {sym} failed after submit: {st2}")
         return trade
 
     # ── Slippage-aware entry price decision ──────────────────────────────────

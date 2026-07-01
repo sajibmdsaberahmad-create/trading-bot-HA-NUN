@@ -27,10 +27,11 @@ from typing import Any, Dict, List, Optional
 
 from core.config import BotConfig
 from core.notify import log
+from core.training_dataset_paths import council_training_dataset_path
 
 MODELS = Path("models")
 STATE_PATH = MODELS / "owned_brain_state.json"
-DATASET_PATH = MODELS / "council_training_dataset.jsonl"
+DATASET_PATH = council_training_dataset_path()
 DECISION_LOG = MODELS / "ai_decision_log.jsonl"
 BUFFER_PATH = MODELS / "experience_buffer.jsonl"
 
@@ -371,7 +372,7 @@ def write_manifest(cfg: BotConfig, evolution_result: Dict[str, Any]) -> None:
             "models/ppo_trader.zip",
             "models/teacher_proxy.joblib",
             "models/scalper_weights.json",
-            "models/council_training_dataset.jsonl",
+            str(council_training_dataset_path()),
             "models/experience_buffer.jsonl",
             "models/copilot_state.json",
             "models/owned_brain_manifest.json",

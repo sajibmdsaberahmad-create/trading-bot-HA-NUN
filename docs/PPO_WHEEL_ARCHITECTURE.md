@@ -67,6 +67,18 @@ Set in `scripts/start_hanoon.sh` **after** earlier exports (last wins):
 | `GREEN_VERDICT_RECHECK` | `false` | Skip duplicate green in verdict finalize |
 | `HALIM_ENTRY_AWAIT_SEC` | `0` | Fully async Halim — no clock block before submit |
 | `SMART_STACK_WAR_POSTURE` | `true` | Posture bumps annotate; no veto when advisory |
+| `PPO_ONLY_EXECUTION` | `true` | Entries only on PPO `action==1` after green — no `quality_flash` |
+| `PPO_LEAD_EXITS` | `true` | Exits only on PPO `action==2` at conf floor — council labels only |
+| `COUNCIL_EXECUTION_ADVISORY_ONLY` | `true` | Groq/Halim never submit buy/sell alone; no exit `in_flight` block |
+
+### Execution ownership (doc vs code — fixed 2026-07-01)
+
+| Path | Was | Now |
+|------|-----|-----|
+| Entry after green | `halim:quality_flash` on scan score + profit prob | `ppo:wheel_buy` only when PPO buy + conf |
+| Exit in position | Council Groq 80% sold while PPO held | PPO exit or mechanical loss/stop only |
+| Log strings | `Ollama exit` (legacy name) | `council` / `ppo:wheel_*` |
+| Council pending | Blocked loop with `COUNCIL exit … in_flight` | Cleared when advisory; PPO holds |
 
 ### Aligned advisory floors (~58%)
 
@@ -86,8 +98,10 @@ Set in `scripts/start_hanoon.sh` **after** earlier exports (last wins):
 | `core/green_trade_doctrine.py` | `green_verdict_recheck_enabled()` — single green check in spike loop |
 | `core/scalper_entry_executor.py` | Tier sizing → war rescale → IB submit |
 | `core/ppo_reward_trainer.py` | `collect_training_records()` filters via learn firewall |
-| `core/online_trainer.py` | Incremental train respects learn firewall |
-
+| `core/ppo_wheel_profile.py` | `ppo_only_execution_enabled()`, `ppo_lead_exits_enabled()`, `council_execution_advisory_only()` |
+| `core/live_ai_pipeline.py` | `merge_entry_decision` / `merge_exit_decision` — PPO wheel paths |
+| `core/smart_stack.py` | `build_halim_local_entry()` — skips quality_flash when PPO-only |
+| `core/scalper_exit_executor.py` | `_deliberate_exit_council` / `_resolve_exit_council` — PPO-led exits |
 ---
 
 ## PPO deploy tiers
