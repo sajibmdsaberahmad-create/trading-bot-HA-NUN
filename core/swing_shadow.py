@@ -11,6 +11,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
+import pandas as pd
+
 from core.notify import log
 from core.ib_truth import get_snapshot, refresh
 from core.trade_horizon import HORIZON_SWING, swing_shadow_enabled, tag_record
@@ -38,11 +40,23 @@ def _symbols_for_scan(runner: Any, cfg: Optional["BotConfig"]) -> List[str]:
     return syms[: int(os.getenv("SWING_SHADOW_MAX_SYMBOLS", "6"))]
 
 
-def _simple_swing_signal(bars: List[Any]) -> Dict[str, Any]:
+def _runner_can_fetch_bars(runner: Any) -> bool:
+    if getattr(runner, "_target_monitors", None):
+        return True
+    if getattr(runner, "data", None) is not None:
+        return True
+    if getattr(runner, "conn", None) is not None and getattr(runner, "ib", None) is not None:
+        return True
+    return False
+
+
+def _simple_swing_signal(bars: Any) -> Dict[str, Any]:
     """Lightweight 1h trend read — signals only; PnL always from IB."""
-    if not bars or len(bars) < 20:
+    from core.swing_bars import bars_len, bars_to_closes
+
+    if bars_len(bars) < 20:
         return {"bias": "hold", "strength": 0.0, "reason": "insufficient_bars"}
-    closes = [float(getattr(b, "close", 0) or 0) for b in bars[-20:]]
+    closes = bars_to_closes(bars)[-20:]
     if not closes or closes[-1] <= 0:
         return {"bias": "hold", "strength": 0.0, "reason": "bad_closes"}
     sma10 = sum(closes[-10:]) / 10.0
@@ -77,8 +91,8 @@ def run_swing_shadow_scan(
         except Exception as exc:
             log.debug(f"swing shadow ib refresh: {exc}")
 
-    dm = getattr(runner, "data_manager", None)
-    if dm is None:
+    if not _runner_can_fetch_bars(runner):
+        log.debug("swing shadow: no bar source (conn/ib/data)")
         return 0
 
     snap = get_snapshot()
@@ -98,10 +112,11 @@ def run_swing_shadow_scan(
         except Exception as exc:
             log.debug(f"swing shadow intel {sym}: {exc}")
             try:
-                bars = dm.get_bars(sym, "1 hour", duration="5 D")
+                from core.swing_bars import fetch_swing_bars
+                bars_df = fetch_swing_bars(runner, sym, "1 hour", "5 D")
             except Exception:
-                bars = []
-            signal = _simple_swing_signal(bars or [])
+                bars_df = None
+            signal = _simple_swing_signal(bars_df)
             analysis = {}
         ib_pos = next((p for p in snap.positions if p.symbol == sym), None)
         row = tag_record(

@@ -2,11 +2,11 @@
   "name": "M. A. Halim",
   "legacy_name": "HANOON Owned Brain",
   "version": 1,
-  "updated_at": "2026-07-01T13:48:24.672268+00:00",
+  "updated_at": "2026-07-01T14:37:45.592193+00:00",
   "device": {
     "profile": "m2_8gb",
     "detected_ram_mb": 8192,
-    "updated_at": "2026-07-01T13:48:24.672333+00:00",
+    "updated_at": "2026-07-01T14:37:45.592247+00:00",
     "ram_mb_max": 10240,
     "ram_tier": "compact",
     "ppo_micro_steps": 512,
@@ -30,10 +30,10 @@
         "ok": false,
         "reason": "single_class",
         "error": "This solver needs samples of at least 2 classes in the data, but the data contains only one class: np.int32(0)",
-        "paired": 411,
+        "paired": 477,
         "class_counts": {
           "enter": 0,
-          "skip": 411
+          "skip": 477
         }
       },
       "ppo_teacher": {
@@ -45,10 +45,10 @@
         "ok": true
       }
     },
-    "timestamp": "2026-07-01T13:48:24.188508+00:00"
+    "timestamp": "2026-07-01T14:37:39.564083+00:00"
   },
   "status": {
-    "timestamp": "2026-07-01T13:48:24.628031+00:00",
+    "timestamp": "2026-07-01T14:37:45.541127+00:00",
     "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
     "assets": {
       "ppo_live": {
@@ -73,19 +73,19 @@
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.8,
-        "modified": "2026-07-01T13:48:24.627865+00:00"
+        "modified": "2026-07-01T14:37:45.540922+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
-        "size_kb": 0.6,
-        "modified": "2026-07-01T13:44:59.129527+00:00"
+        "size_kb": 0.7,
+        "modified": "2026-07-01T14:34:48.272788+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 12579.8,
-        "modified": "2026-07-01T13:46:00.672597+00:00"
+        "size_kb": 12670.6,
+        "modified": "2026-07-01T14:33:47.185337+00:00"
       },
       "decision_log": {
         "exists": true,
@@ -97,7 +97,7 @@
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
         "size_kb": 30.2,
-        "modified": "2026-07-01T13:48:24.326406+00:00"
+        "modified": "2026-07-01T14:37:39.705644+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
@@ -122,7 +122,7 @@
       "win_rate": 0.0,
       "avg_pnl": 0.0
     },
-    "buffer_records": 11297,
+    "buffer_records": 11498,
     "dataset_pairs": 78,
     "maturity": {
       "stage": "toddler",
@@ -132,7 +132,7 @@
       "metrics": {
         "closed_trades": 2725,
         "dataset_pairs": 78,
-        "evolution_count": 73,
+        "evolution_count": 76,
         "proxy_accuracy": 0.9286,
         "proxy_holdout_accuracy": 0.9286,
         "rolling_win_rate": null,

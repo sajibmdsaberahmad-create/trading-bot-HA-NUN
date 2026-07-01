@@ -287,21 +287,8 @@ def _cached_market_price(symbol: str) -> float:
     return 0.0
 
 
-def _ib_blocking_calls_safe(ib) -> bool:
-    """False when sync ib_insync calls would orphan async coroutines."""
-    if ib is None:
-        return False
-    try:
-        if not ib.isConnected():
-            return False
-    except Exception:
-        return False
-    try:
-        import asyncio
-        asyncio.get_running_loop()
-        return False
-    except RuntimeError:
-        return True
+from core.ib_sync import ib_blocking_calls_safe as _ib_blocking_calls_safe
+from core.ib_sync import safe_qualify_contracts
 
 
 def _portfolio_mark_price(ib, symbol: str) -> float:
@@ -345,7 +332,7 @@ def snapshot_market_price(
     try:
         from core.ib_client import Stock
 
-        qualified = ib.qualifyContracts(Stock(sym, exchange, currency))
+        qualified = safe_qualify_contracts(ib, Stock(sym, exchange, currency))
         if not qualified:
             return 0.0
         contract = qualified[0]

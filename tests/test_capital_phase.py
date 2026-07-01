@@ -8,10 +8,24 @@ from core.capital_phase import (
     PHASE_PREMARKET_FULL,
     PHASE_RTH_FULL,
     PHASE_RTH_WAR,
+    allows_horizon_live,
     capital_phase,
     uses_war_sizing,
 )
 from core.config import BotConfig
+
+
+def test_swing_allowed_during_rth_war():
+    with patch.dict(
+        "os.environ",
+        {"CAPITAL_PHASES_ENABLED": "true", "SWING_IB_LIVE": "true", "SWING_LIVE_DURING_RTH_WAR": "true"},
+        clear=False,
+    ):
+        with patch("core.capital_phase.capital_phase", return_value=PHASE_RTH_WAR):
+            with patch("core.trade_horizon.swing_ib_live_enabled", return_value=True):
+                assert allows_horizon_live("swing", BotConfig()) is True
+                assert uses_war_sizing(BotConfig(), horizon="swing") is False
+                assert uses_war_sizing(BotConfig(), horizon="scalp") is True
 
 
 def test_premarket_full_phase():

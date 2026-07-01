@@ -1,146 +1,13 @@
 {
   "birth_time": "2026-06-21T11:02:48.682390",
   "creation_event": "AI Consciousness Initialized",
-  "total_awakenings": 293,
+  "total_awakenings": 298,
   "training_sessions": 42,
-  "trades_observed": 1735,
+  "trades_observed": 1741,
   "scans_performed": 42,
   "improvements_applied": 2752,
   "reports_generated": 38,
   "event_log": [
-    {
-      "timestamp": "2026-06-29T09:41:06.449248",
-      "age": "7d 22h 38m 17s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2159",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on SOFI"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:43:28.195385",
-      "age": "7d 22h 40m 39s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2160",
-      "metadata": {
-        "source": "runtime_order_timeout",
-        "summary": "Observed order_timeout \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review order_timeout on PLTR"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:43:35.014766",
-      "age": "7d 22h 40m 46s",
-      "type": "TRADE",
-      "message": "Observed trade: SOFI ? P&L=$+1862.76",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T09:43:35.332769",
-      "age": "7d 22h 40m 46s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2161",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on SOFI"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:44:27.356139",
-      "age": "7d 22h 41m 38s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2162",
-      "metadata": {
-        "source": "runtime_order_timeout",
-        "summary": "Observed order_timeout \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review order_timeout on PLTR"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:44:39.569887",
-      "age": "7d 22h 41m 50s",
-      "type": "TRADE",
-      "message": "Observed trade: SOFI ? P&L=$+1862.76",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T09:44:40.291019",
-      "age": "7d 22h 41m 51s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2163",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on SOFI"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:45:22.211103",
-      "age": "7d 22h 42m 33s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2164",
-      "metadata": {
-        "source": "runtime_order_timeout",
-        "summary": "Observed order_timeout \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review order_timeout on PLTR"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:45:58.001181",
-      "age": "7d 22h 43m 9s",
-      "type": "TRADE",
-      "message": "Observed trade: SOFI ? P&L=$+1904.62",
-      "metadata": {}
-    },
-    {
-      "timestamp": "2026-06-29T09:45:58.216661",
-      "age": "7d 22h 43m 9s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2165",
-      "metadata": {
-        "source": "runtime_trade_closed",
-        "summary": "Observed trade_closed \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review trade_closed on SOFI"
-        ]
-      }
-    },
-    {
-      "timestamp": "2026-06-29T09:46:04.829129",
-      "age": "7d 22h 43m 16s",
-      "type": "IMPROVE",
-      "message": "Applied improvement #2166",
-      "metadata": {
-        "source": "runtime_order_timeout",
-        "summary": "Observed order_timeout \u2014 recorded for learning.",
-        "applied": [],
-        "lessons": [
-          "Review order_timeout on PLTR"
-        ]
-      }
-    },
     {
       "timestamp": "2026-06-29T09:46:47.544851",
       "age": "7d 22h 43m 58s",
@@ -11626,9 +11493,86 @@
       "type": "AWAKEN",
       "message": "Consciousness awakened #293",
       "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T14:21:37.452218+00:00",
+      "age": "10d 3h 18m 48s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #294",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T14:30:21.795245+00:00",
+      "age": "10d 3h 27m 33s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #295",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T14:38:51.618911+00:00",
+      "age": "10d 3h 36m 2s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #296",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T14:53:27.579644+00:00",
+      "age": "10d 3h 50m 38s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #297",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T15:16:00.337480+00:00",
+      "age": "10d 4h 13m 11s",
+      "type": "TRADE",
+      "message": "Observed trade: INLF ? P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T15:16:43.610792+00:00",
+      "age": "10d 4h 13m 54s",
+      "type": "TRADE",
+      "message": "Observed trade: DVLT ? P&L=$-0.16",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T15:18:39.486946+00:00",
+      "age": "10d 4h 15m 50s",
+      "type": "TRADE",
+      "message": "Observed trade: GSUN ? P&L=$-4.74",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T15:21:24.840138+00:00",
+      "age": "10d 4h 18m 36s",
+      "type": "TRADE",
+      "message": "Observed trade: INLF ? P&L=$+1.32",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T15:27:52.184505+00:00",
+      "age": "10d 4h 25m 3s",
+      "type": "TRADE",
+      "message": "Observed trade: BITO ? P&L=$-0.95",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T15:29:44.911852+00:00",
+      "age": "10d 4h 26m 56s",
+      "type": "TRADE",
+      "message": "Observed trade: LHAI LEARN_FAILURE P&L=$+0.00",
+      "metadata": {}
+    },
+    {
+      "timestamp": "2026-07-01T15:39:01.228035+00:00",
+      "age": "10d 4h 36m 12s",
+      "type": "AWAKEN",
+      "message": "Consciousness awakened #298",
+      "metadata": {}
     }
   ],
-  "last_awakening": "2026-07-01T14:05:05.401129+00:00",
+  "last_awakening": "2026-07-01T15:39:01.227728+00:00",
   "current_version": "v20260629_075355",
   "version_history": [
     {
@@ -13787,15 +13731,9 @@
     }
   ],
   "last_training": "2026-06-29T07:53:55.457760",
-  "mood": "recalibrating",
-  "total_pnl": 330645.65000000055,
+  "mood": "defensive",
+  "total_pnl": 330641.1200000006,
   "win_history": [
-    2.24,
-    -9.03,
-    2.2,
-    3.06,
-    -8.83,
-    -4.66,
     -1.57,
     -8.99,
     -14.82,
@@ -14289,20 +14227,26 @@
     0.0,
     0,
     0,
+    0,
+    0.0,
+    -0.16,
+    -4.74,
+    1.32,
+    -0.95,
     0
   ],
   "consecutive_wins": 0,
-  "consecutive_losses": 9,
+  "consecutive_losses": 2,
   "worst_streak": 86,
-  "veteran_xp": 26690,
+  "veteran_xp": 26770,
   "veteran_level": "Veteran",
   "skill_points": {
     "exit_timing": 100,
     "risk_management": 80,
     "entry_timing": 100
   },
-  "flights_completed": 1729,
-  "hours_flown": 172.89999999999446,
+  "flights_completed": 1735,
+  "hours_flown": 173.49999999999443,
   "sector_experience": {
     "HYF": 3,
     "VMA": 2,
@@ -14321,7 +14265,7 @@
     "TZA": 28,
     "GDC": 14,
     "SOX": 30,
-    "BIT": 18,
+    "BIT": 19,
     "GPU": 19,
     "PLT": 48,
     "LCI": 271,
@@ -14335,7 +14279,7 @@
     "AST": 242,
     "SES": 12,
     "NVD": 20,
-    "INL": 9,
+    "INL": 11,
     "TNM": 18,
     "SOA": 12,
     "KND": 1,
@@ -14353,12 +14297,15 @@
     "YHC": 1,
     "BIY": 4,
     "AAL": 4,
-    "T": 1
+    "T": 1,
+    "DVL": 1,
+    "GSU": 1,
+    "LHA": 1
   },
   "best_streak": 114,
   "mood_epoch_start_index": 20,
   "pre_epoch_trade_count": 20,
   "pre_epoch_total_pnl": -17694.21,
   "architecture_version": "hybrid_atr_v1",
-  "mood_message": "Four losses in a row ($-414.26 recent). Tightening entries until edge returns."
+  "mood_message": "Win rate 10% \u00b7 $-23.28. Preserving capital over action."
 }

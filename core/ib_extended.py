@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
+from core.ib_sync import ib_blocking_calls_safe, safe_qualify_contracts
 from core.notify import log
 
 if TYPE_CHECKING:
@@ -172,8 +173,56 @@ def fetch_position_pnl_single(
     return out
 
 
+def _con_id_from_truth(sym: str) -> int:
+    try:
+        from core.ib_truth import get_snapshot
+
+        pos = get_snapshot().long_positions().get(sym.upper())
+        if pos and pos.con_id:
+            return int(pos.con_id)
+    except Exception:
+        pass
+    return 0
+
+
+def _quote_snapshots_from_truth(symbols: List[str]) -> Dict[str, Dict[str, Any]]:
+    out: Dict[str, Dict[str, Any]] = {}
+    try:
+        from core.ib_truth import get_snapshot
+
+        longs = get_snapshot().long_positions()
+        for sym in symbols:
+            sym = sym.upper()
+            pos = longs.get(sym)
+            if not pos:
+                continue
+            mkt = float(getattr(pos, "market_price", 0) or 0)
+            if mkt <= 0:
+                mkt = float(getattr(pos, "avg_cost", 0) or 0)
+            if mkt > 0:
+                out[sym] = {
+                    "last": round(mkt, 4),
+                    "bid": 0.0,
+                    "ask": 0.0,
+                    "volume": 0,
+                    "source": "truth",
+                }
+    except Exception:
+        pass
+    return out
+
+
 def fetch_contract_details(ib, connector: "IBConnector", symbols: List[str]) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
+    if not ib_blocking_calls_safe(ib):
+        for sym in symbols[:12]:
+            sym = sym.upper()
+            if not sym:
+                continue
+            con_id = _con_id_from_truth(sym)
+            if con_id > 0:
+                out[sym] = {"con_id": con_id, "source": "truth"}
+        return out
     for sym in symbols[:12]:
         sym = sym.upper()
         if not sym:
@@ -260,6 +309,12 @@ def fetch_fundamentals(ib, connector: "IBConnector", symbols: List[str]) -> Dict
 
 def fetch_quote_snapshots(ib, connector: "IBConnector", symbols: List[str]) -> Dict[str, Dict[str, Any]]:
     """reqTickers one-shot — bid/ask/last/volume from IB for held symbols."""
+    if not ib_blocking_calls_safe(ib):
+        cached = get_extended_cache().get("quote_snapshots") or {}
+        truth = _quote_snapshots_from_truth(symbols)
+        if truth:
+            return {**cached, **truth}
+        return dict(cached)
     out: Dict[str, Dict[str, Any]] = {}
     contracts = []
     sym_order: List[str] = []
@@ -273,7 +328,11 @@ def fetch_quote_snapshots(ib, connector: "IBConnector", symbols: List[str]) -> D
     if not contracts:
         return out
     try:
-        qualified = ib.qualifyContracts(*contracts)
+        qualified = safe_qualify_contracts(ib, *contracts)
+        if not qualified:
+            cached = get_extended_cache().get("quote_snapshots") or {}
+            truth = _quote_snapshots_from_truth(symbols)
+            return {**cached, **truth} if truth else dict(cached)
         tickers = ib.reqTickers(*qualified)
         ib.sleep(0.35)
         for t in tickers:
@@ -386,10 +445,12 @@ def fetch_historical_news(ib, connector: "IBConnector", symbols: List[str]) -> D
         sym = sym.upper()
         try:
             contract = _contract_for_symbol(connector, sym)
-            con_id = int(getattr(contract, "conId", 0) or 0)
             if con_id <= 0:
-                ib.qualifyContracts(contract)
-                con_id = int(getattr(contract, "conId", 0) or 0)
+                con_id = _con_id_from_truth(sym)
+            if con_id <= 0:
+                qualified = safe_qualify_contracts(ib, contract)
+                if qualified:
+                    con_id = int(getattr(qualified[0], "conId", 0) or 0)
             if con_id <= 0:
                 continue
             articles = ib.reqHistoricalNews(con_id, codes, "", "", int(os.getenv("IB_NEWS_MAX", "8")))
@@ -426,10 +487,12 @@ def fetch_wsh_events(ib, connector: "IBConnector", symbols: List[str]) -> List[D
         sym = sym.upper()
         try:
             contract = _contract_for_symbol(connector, sym)
-            con_id = int(getattr(contract, "conId", 0) or 0)
             if con_id <= 0:
-                ib.qualifyContracts(contract)
-                con_id = int(getattr(contract, "conId", 0) or 0)
+                con_id = _con_id_from_truth(sym)
+            if con_id <= 0:
+                qualified = safe_qualify_contracts(ib, contract)
+                if qualified:
+                    con_id = int(getattr(qualified[0], "conId", 0) or 0)
             if con_id <= 0:
                 continue
             filt = WshEventData(conId=con_id, filter='{"country":"All","watchlist":["Earnings"]}')
@@ -569,6 +632,8 @@ def refresh_ib_extended(
 ) -> Dict[str, Any]:
     """Refresh extended IB data; returns merged cache."""
     if not ib_extended_enabled() or connector is None:
+        return get_extended_cache()
+    if not ib_blocking_calls_safe(ib):
         return get_extended_cache()
 
     from core.ib_truth import get_snapshot

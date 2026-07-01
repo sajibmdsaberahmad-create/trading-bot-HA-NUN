@@ -39,13 +39,53 @@ def _append_analysis(row: Dict[str, Any]) -> None:
         log.debug(f"swing analysis log: {exc}")
 
 
-def _closes_from_bars(bars: List[Any]) -> List[float]:
-    out: List[float] = []
-    for b in bars or []:
-        c = float(getattr(b, "close", 0) or 0)
-        if c > 0:
-            out.append(c)
-    return out
+def _closes_from_bars(bars: Any) -> List[float]:
+    from core.swing_bars import bars_to_closes
+
+    return bars_to_closes(bars)
+
+
+def _atr_pct(bars: Any, period: int = 14) -> float:
+    if bars is None:
+        return 0.0
+    if isinstance(bars, pd.DataFrame):
+        if bars.empty or len(bars) < period + 1:
+            return 0.0
+        need = {"high", "low", "close"}
+        if not need.issubset(bars.columns):
+            return 0.0
+        tail = bars.tail(period + 1)
+        highs = tail["high"].astype(float).tolist()
+        lows = tail["low"].astype(float).tolist()
+        closes = tail["close"].astype(float).tolist()
+    else:
+        bar_list = list(bars or [])
+        if len(bar_list) < period + 1:
+            return 0.0
+        window = bar_list[-(period + 1):]
+        highs, lows, closes = [], [], []
+        for b in window:
+            if isinstance(b, dict):
+                h = float(b.get("high", 0) or b.get("close", 0) or 0)
+                l = float(b.get("low", 0) or b.get("close", 0) or 0)
+                c = float(b.get("close", 0) or 0)
+            else:
+                h = float(getattr(b, "high", 0) or getattr(b, "close", 0) or 0)
+                l = float(getattr(b, "low", 0) or getattr(b, "close", 0) or 0)
+                c = float(getattr(b, "close", 0) or 0)
+            highs.append(h)
+            lows.append(l)
+            closes.append(c)
+    trs: List[float] = []
+    for i in range(1, len(highs)):
+        h, l, pc = highs[i], lows[i], closes[i - 1]
+        if h > 0 and l > 0:
+            trs.append(max(h - l, abs(h - pc), abs(l - pc)))
+    if not trs:
+        return 0.0
+    atr = sum(trs) / len(trs)
+    px = closes[-1] if closes else 1.0
+    return (atr / px * 100.0) if px > 0 else 0.0
 
 
 def _rsi(closes: List[float], period: int = 14) -> float:
@@ -62,23 +102,6 @@ def _rsi(closes: List[float], period: int = 14) -> float:
         return 100.0 if gains > 0 else 50.0
     rs = gains / losses
     return 100.0 - (100.0 / (1.0 + rs))
-
-
-def _atr_pct(bars: List[Any], period: int = 14) -> float:
-    if not bars or len(bars) < period + 1:
-        return 0.0
-    trs: List[float] = []
-    for i in range(-period, 0):
-        h = float(getattr(bars[i], "high", 0) or getattr(bars[i], "close", 0) or 0)
-        l = float(getattr(bars[i], "low", 0) or getattr(bars[i], "close", 0) or 0)
-        pc = float(getattr(bars[i - 1], "close", 0) or 0)
-        if h > 0 and l > 0:
-            trs.append(max(h - l, abs(h - pc), abs(l - pc)))
-    if not trs:
-        return 0.0
-    atr = sum(trs) / len(trs)
-    px = float(getattr(bars[-1], "close", 0) or 1)
-    return (atr / px * 100.0) if px > 0 else 0.0
 
 
 def _trend_from_closes(closes: List[float], label: str) -> Dict[str, Any]:
@@ -114,14 +137,10 @@ def _trend_from_closes(closes: List[float], label: str) -> Dict[str, Any]:
     }
 
 
-def _fetch_bars(runner: Any, sym: str, bar_size: str, duration: str) -> List[Any]:
-    dm = getattr(runner, "data_manager", None)
-    if dm is None:
-        return []
-    try:
-        return dm.get_bars(sym, bar_size, duration=duration) or []
-    except Exception:
-        return []
+def _fetch_bars(runner: Any, sym: str, bar_size: str, duration: str) -> pd.DataFrame:
+    from core.swing_bars import fetch_swing_bars
+
+    return fetch_swing_bars(runner, sym, bar_size, duration)
 
 
 def analyze_swing_technical(runner: Any, sym: str) -> Dict[str, Any]:

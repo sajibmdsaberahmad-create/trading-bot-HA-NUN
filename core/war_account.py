@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-core/war_account.py — Virtual war ledger for sizing/settlement on a $1k pool.
+core/war_account.py — Virtual war ledger for **scalp only** ($1k pool).
 
-War pool sizes entries and trip caps — never raw IB paper ~$900k NAV.
+War sizes and debits RTH scalp entries only (`horizon=scalp`). Swing uses full IB
+account balance with `horizon=swing` tags — never war settled_cash or war:block.
 Positions and session PnL sync from IB Gateway via core/ib_truth.py + war_ib_sync.
 Modes: WAR_ACTIVE | LAB_ACTIVE | OBSERVE | LIVE_WAR.
 """
@@ -26,6 +27,12 @@ LEDGER_PATH = _REPO / "models" / "war_account_ledger.jsonl"
 _state_lock = threading.RLock()
 
 _MODES_WAR_ENTRY = frozenset({"WAR_ACTIVE", "LIVE_WAR"})
+WAR_HORIZON = "scalp"
+
+
+def war_applies_to_horizon(horizon: Optional[str]) -> bool:
+    """War ledger, war:block, and war sizing apply to scalp only."""
+    return str(horizon or WAR_HORIZON).lower() == WAR_HORIZON
 
 
 def _normalize_open_positions(state: Dict[str, Any]) -> None:
@@ -71,6 +78,45 @@ def _resolve_open_slot(state: Dict[str, Any], ticker: str) -> Tuple[bool, Dict[s
     if t in wars:
         return False, wars[t]
     return False, {}
+
+
+def _open_slot_from_ledger(
+    ticker: str,
+    cfg: Optional[BotConfig] = None,
+) -> Dict[str, Any]:
+    """Recover war slot from today's ledger when IB sync cleared open_wars."""
+    t = ticker.upper()
+    try:
+        from core.war_ib_sync import read_war_ledger
+        from core.rth_session import ib_truth_session_start_ts
+
+        since = ib_truth_session_start_ts(cfg or BotConfig())
+        open_rows: Dict[str, Dict[str, Any]] = {}
+        for row in read_war_ledger(since_ts=since):
+            sym = str(row.get("ticker", "") or "").upper()
+            ev = str(row.get("event", "") or "")
+            if ev in ("war_entry", "war_ib_recover"):
+                open_rows[sym] = row
+            elif ev == "war_exit":
+                open_rows.pop(sym, None)
+        row = open_rows.get(t)
+        if not row:
+            return {}
+        entry = float(row.get("virtual_fill") or row.get("ib_fill") or 0)
+        if entry <= 0:
+            return {}
+        return {
+            "ticker": t,
+            "shares": int(row.get("shares", 0) or 0),
+            "entry": entry,
+            "ib_fill": float(row.get("ib_fill") or entry),
+            "comm": float(row.get("commission", 0) or 0),
+            "ts": float(row.get("ts", 0) or 0),
+            "pipeline": str(row.get("pipeline", "ledger_recover") or "ledger_recover"),
+            "recovered": True,
+        }
+    except Exception:
+        return {}
 
 
 def _clear_open_slot(state: Dict[str, Any], ticker: str, *, use_lab: bool) -> None:
@@ -300,13 +346,40 @@ def _entry_deploy_cap(
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
     bullet = _bullet_size(state, cfg)
     comm_buf = _commission_usd(cfg, max(bullet, settled * 0.1)) * 2 + 0.5
+    min_entry = _min_entry_settled(state, cfg)
     if war_ai_sizing_enabled(cfg):
         reserve = _env_float("WAR_CASH_RESERVE_PCT", 0.05)
         deployable = settled * (1.0 - reserve) if reserve > 0 else settled
-        return max(50.0, deployable - comm_buf)
+        cap = deployable - comm_buf
+        if settled < min_entry:
+            return max(0.0, cap)
+        return max(50.0, cap)
     if balance_driven_trips_enabled(cfg, use_lab=use_lab):
+        if settled < min_entry:
+            return max(0.0, settled - comm_buf)
         return max(50.0, min(bullet, settled - comm_buf))
     return min(settled, bullet)
+
+
+def war_pool_depleted(
+    state: Dict[str, Any],
+    cfg: Optional[BotConfig] = None,
+    *,
+    use_lab: bool = False,
+) -> bool:
+    """
+    True when the virtual war/lab pool cannot fund another entry.
+    Bot should step aside to normal account-balance trading (no war:block veto).
+    """
+    cfg = cfg or BotConfig()
+    settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
+    min_entry = _min_entry_settled(state, cfg)
+    if settled < min_entry:
+        return True
+    deploy_cap = _entry_deploy_cap(state, cfg, use_lab=use_lab)
+    affordable = min(settled, deploy_cap * 1.05)
+    comm = _commission_usd(cfg, max(affordable, min_entry)) * 2
+    return affordable + comm < min_entry
 
 
 def war_account_state(cfg: Optional[BotConfig] = None) -> Dict[str, Any]:
@@ -1020,10 +1093,16 @@ def war_ledger_applies(
     capital_phase: Optional[str] = None,
 ) -> bool:
     """Virtual war ledger debits only for RTH war scalp."""
+    if not war_applies_to_horizon(horizon):
+        return False
     if not war_account_enabled(cfg):
         return False
-    if horizon != "scalp":
-        return False
+    try:
+        state = load_state(cfg)
+        if war_pool_depleted(state, cfg):
+            return False
+    except Exception:
+        pass
     try:
         from core.capital_phase import capital_phases_enabled, PHASE_RTH_WAR, capital_phase as current_capital_phase
         if capital_phases_enabled(cfg):
@@ -1038,14 +1117,41 @@ def war_ledger_applies(
         return False
 
 
+_step_aside_session: Optional[str] = None
+
+
+def _war_step_aside_enabled(cfg: Optional[BotConfig] = None) -> bool:
+    cfg = cfg or BotConfig()
+    return os.getenv("WAR_STEP_ASIDE_WHEN_DRY", "true").lower() not in ("0", "false", "no")
+
+
+def _log_war_step_aside(state: Dict[str, Any], cfg: Optional[BotConfig] = None) -> None:
+    global _step_aside_session
+    if not _war_step_aside_enabled(cfg):
+        return
+    session = str(state.get("session_date", "") or _today_key())
+    if _step_aside_session == session:
+        return
+    _step_aside_session = session
+    settled = float(state.get("settled_cash", 0))
+    log.info(
+        f"  ⚔️ war:step_aside — settled pool dry (${settled:,.0f}) — "
+        "bot uses account balance (war ledger off for new entries)"
+    )
+
+
 def check_entry_allowed(
     cfg: Optional[BotConfig],
     *,
     ticker: str = "",
     notional_usd: float = 0.0,
     pipeline: str = "",
+    horizon: str = "scalp",
 ) -> Optional[str]:
+    """War scalp gate — returns veto reason or None. Swing always returns None."""
     cfg = cfg or BotConfig()
+    if not war_applies_to_horizon(horizon):
+        return None
     if not war_account_enabled(cfg):
         return None
 
@@ -1089,10 +1195,14 @@ def check_entry_allowed(
         state["mode"] = mode
         save_state(state)
 
+    use_lab = mode == "LAB_ACTIVE"
+    if _war_step_aside_enabled(cfg) and war_pool_depleted(state, cfg, use_lab=use_lab):
+        _log_war_step_aside(state, cfg)
+        return None
+
     if mode == "OBSERVE":
         return _observe_block_reason(state, cfg)
 
-    use_lab = mode == "LAB_ACTIVE"
     settled = float(state.get("lab_settled" if use_lab else "settled_cash", 0))
     notional = float(notional_usd or 0)
     bullet = _bullet_size(state, cfg)
@@ -1103,12 +1213,18 @@ def check_entry_allowed(
         notional = deploy_cap
 
     if notional > max_notional:
+        if _war_step_aside_enabled(cfg) and war_pool_depleted(state, cfg, use_lab=use_lab):
+            _log_war_step_aside(state, cfg)
+            return None
         return (
             f"war {mode}: need ${notional:,.0f} > settled/deploy cap "
             f"(${max_notional:,.0f})"
         )
 
     if _trip_cap_blocks(state, cfg, use_lab=use_lab):
+        if _war_step_aside_enabled(cfg) and war_pool_depleted(state, cfg, use_lab=use_lab):
+            _log_war_step_aside(state, cfg)
+            return None
         if balance_driven_trips_enabled(cfg, use_lab=use_lab):
             return (
                 f"war {mode}: settled ${settled:,.0f} below min entry "
@@ -1123,6 +1239,9 @@ def check_entry_allowed(
         pass  # size already bullet-limited
 
     if settled < notional + comm:
+        if _war_step_aside_enabled(cfg):
+            _log_war_step_aside(state, cfg)
+            return None
         return f"war GFV risk — settled ${settled:,.0f} < trade+fees ${notional + comm:,.0f}"
 
     return None
@@ -1160,10 +1279,13 @@ def rescale_decision_for_war(
     entry_px: float,
     *,
     ticker: str = "",
+    horizon: str = "scalp",
 ) -> Dict[str, Any]:
     """Clamp shares to war deploy cap + settled cash (full pool when AI sizing)."""
     cfg = cfg or BotConfig()
-    if entry_px <= 0 or not war_ledger_applies(cfg):
+    if not war_applies_to_horizon(horizon):
+        return decision
+    if entry_px <= 0 or not war_ledger_applies(cfg, horizon=horizon):
         return decision
     state = load_state(cfg)
     mode = state.get("mode") or _recompute_mode(state, cfg)
@@ -1367,6 +1489,17 @@ def record_exit(
     state = load_state(cfg)
     t = ticker.upper()
     use_lab, open_slot = _resolve_open_slot(state, t)
+    if not open_slot:
+        recovered = _open_slot_from_ledger(t, cfg)
+        if recovered:
+            wars = state.setdefault("open_wars", {})
+            wars[t] = recovered
+            state["open_war"] = recovered
+            open_slot = recovered
+            log.info(
+                f"  ⚔️ WAR EXIT {t}: recovered slot from ledger "
+                f"({recovered.get('shares', 0)}sh @ ${float(recovered.get('entry', 0)):.4f})"
+            )
 
     v_fill, slip = apply_slippage_overlay(
         cfg, side="SELL", quote=ib_fill or quote, shares=shares, ticker=ticker,

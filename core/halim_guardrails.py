@@ -188,6 +188,8 @@ DEFAULT_CONSTITUTION: Dict[str, Any] = {
         "notify",
         "ib_data",
         "web_search",
+        "halim_json_entry_teacher",
+        "halim_v5_web_drill",
     ],
 }
 
@@ -259,14 +261,23 @@ def _today() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+def v5_prep_active() -> bool:
+    """True during one-shot v5 training pack (raised read-only web/API caps)."""
+    return os.getenv("HALIM_V5_PREP", "false").lower() in ("1", "true", "yes")
+
+
 def learn_uncapped_active() -> bool:
-    """True only when HALIM_LEARN_UNCAPPED_DATE matches today (UTC) — auto-off tomorrow."""
+    """True when HALIM_LEARN_UNCAPPED_DATE matches today (UTC) — auto-off tomorrow."""
+    if v5_prep_active():
+        return True
     target = os.getenv("HALIM_LEARN_UNCAPPED_DATE", "").strip()
     return bool(target) and target == _today()
 
 
 def effective_learn_fetch_daily_cap() -> int:
-    """Normal cap 500; raised cap on uncapped day only (still bounded)."""
+    """Normal cap 500; raised cap on uncapped / v5 prep day (still bounded)."""
+    if v5_prep_active():
+        return int(os.getenv("HALIM_V5_MAX_FETCHES", "2500"))
     base = int(os.getenv("HALIM_LEARN_FETCH_DAILY_CAP", "500"))
     if learn_uncapped_active():
         return int(os.getenv("HALIM_LEARN_UNCAPPED_MAX_FETCHES", "1200"))
@@ -275,6 +286,8 @@ def effective_learn_fetch_daily_cap() -> int:
 
 def learn_gold_budget_remaining() -> int:
     """Cap new gold exports on uncapped days — dedup still applies; prevents SFT blowout."""
+    if v5_prep_active():
+        return 1_000_000
     if not learn_uncapped_active():
         return 1_000_000
     max_g = int(os.getenv("HALIM_LEARN_UNCAPPED_MAX_GOLD", "40"))
@@ -674,9 +687,19 @@ def apply_operator_frontier_settings(cfg: Optional[BotConfig] = None) -> Dict[st
             forbidden.append(item)
 
     limits = constitution.setdefault("rate_limits_daily", {})
-    limits["google_ai_searches"] = int(os.getenv("HALIM_GOOGLE_AI_DAILY_CAP", "150"))
-    limits["learn_fetches"] = effective_learn_fetch_daily_cap()
-    if learn_uncapped_active():
+    if v5_prep_active():
+        limits["google_ai_searches"] = int(os.getenv("HALIM_GOOGLE_AI_DAILY_CAP", "400"))
+        limits["api_calls"] = int(os.getenv("HALIM_V5_API_DAILY_CAP", "2000"))
+        limits["learn_fetches"] = effective_learn_fetch_daily_cap()
+        log.info(
+            f"📚 Halim v5 PREP — read-only web+API caps raised "
+            f"(fetch≤{limits['learn_fetches']} api≤{limits['api_calls']} "
+            f"google≤{limits['google_ai_searches']})"
+        )
+    else:
+        limits["google_ai_searches"] = int(os.getenv("HALIM_GOOGLE_AI_DAILY_CAP", "150"))
+        limits["learn_fetches"] = effective_learn_fetch_daily_cap()
+    if learn_uncapped_active() and not v5_prep_active():
         log.info(
             f"📚 Halim learn UNCAPPED today ({_today()}) — "
             f"fetch≤{limits['learn_fetches']} gold≤{os.getenv('HALIM_LEARN_UNCAPPED_MAX_GOLD', '40')} "

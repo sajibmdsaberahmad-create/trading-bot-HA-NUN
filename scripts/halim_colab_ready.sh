@@ -30,8 +30,12 @@ else
   echo "⚠ No models/ppo_trader_replay.zip — run replay first for best PPO"
 fi
 
-# 2. Export all training gold (deduped)
+# 2. Export all training gold (deduped) + JSON entry curriculum for v5
 echo "→ Exporting training gold…"
+if [[ "${HALIM_JSON_ENTRY_API:-false}" == "true" ]] || [[ "${HALIM_V5_PREP:-false}" == "true" ]]; then
+  export HALIM_JSON_ENTRY_API=true
+  echo "  (API teacher ON — HALIM_JSON_ENTRY_API_MAX=${HALIM_JSON_ENTRY_API_MAX:-120})"
+fi
 "$PY" "$ROOT/halim/scripts/export_training_gold.py"
 
 # 3. Merge SFT train/valid (+ auto-rebuild halim_sft.zip)

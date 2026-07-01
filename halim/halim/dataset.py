@@ -14,6 +14,8 @@ SYSTEM_PROMPT = (
 )
 
 DEFAULT_PATHS = {
+    # v5 curriculum — valid JSON entry_decision pairs (live LM contract)
+    "json_entry_gold": "halim/data/training/json_entry_gold.jsonl",
     "council": str(__import__(
         "core.training_dataset_paths", fromlist=["council_training_dataset_path"]
     ).council_training_dataset_path()),
@@ -26,6 +28,7 @@ DEFAULT_PATHS = {
 
 # Core curriculum for incremental Colab trains (always teach these).
 CORE_SOURCE_CAPS: Dict[str, Optional[int]] = {
+    "json_entry_gold": None,  # all JSON entry pairs — v5 format lock
     "commander_gold": None,   # all IB / doctrine rows
     "coevolution": 900,
     "council": 700,
@@ -172,6 +175,14 @@ def standard_gold(raw: Dict[str, Any], *, default_source: str) -> Optional[Dict[
 
 
 def iter_source_rows(root: Path) -> Iterator[Tuple[str, Dict[str, Any]]]:
+    json_entry = root / DEFAULT_PATHS["json_entry_gold"]
+    for raw in _iter_jsonl(json_entry):
+        row = standard_gold(raw, default_source="json_entry_gold")
+        if row and row.get("capability") == "entry_decision":
+            out = str(row.get("output", ""))
+            if out.startswith("{") and '"enter"' in out:
+                yield "json_entry_gold", row
+
     council = root / DEFAULT_PATHS["council"]
     for raw in _iter_jsonl(council):
         row = council_to_gold(raw)

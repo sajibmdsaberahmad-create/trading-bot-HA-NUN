@@ -5,11 +5,14 @@ core/position_sync.py — IB-grounded multi-position slot sync (extracted from s
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any, Callable, Dict, Optional, Set
 
 from core.fill_tracker import position_avg_cost, position_entry_price
 from core.notify import log
+
+_ADOPT_RECENT_EXIT_GRACE = float(os.getenv("IB_ADOPT_RECENT_EXIT_GRACE_SEC", "300"))
 
 
 def repair_slot_entry_price(
@@ -74,10 +77,17 @@ def adopt_ib_positions_into_slots(
     position_slots: Dict[str, Dict[str, Any]],
     *,
     exclude_tickers: Optional[Set[str]] = None,
+    recently_exited: Optional[Dict[str, float]] = None,
+    recently_exited_grace_sec: Optional[float] = None,
 ) -> list[str]:
     """Recover IB long holdings into position_slots so monitor/AI can manage after restart."""
     adopted: list[str] = []
     skip = {str(t).upper() for t in (exclude_tickers or set())}
+    grace = (
+        float(recently_exited_grace_sec)
+        if recently_exited_grace_sec is not None
+        else _ADOPT_RECENT_EXIT_GRACE
+    )
     ib_map = ib_long_position_map(ib)
     now = time.time()
     for ticker, sh in ib_map.items():
@@ -86,6 +96,13 @@ def adopt_ib_positions_into_slots(
         t = ticker.upper()
         if t in skip:
             continue
+        if recently_exited:
+            exited_at = float(recently_exited.get(t, 0) or 0)
+            if exited_at > 0 and (now - exited_at) < grace:
+                log.warning(
+                    f"  ⏭ Skip adopt {t}: recently exited ({sh:.0f}sh still on IB) — flatten pending"
+                )
+                continue
         resolved = position_entry_price(ib, t)
         entry = resolved if resolved > 0 else 0.0
         slot = position_slots.get(t)

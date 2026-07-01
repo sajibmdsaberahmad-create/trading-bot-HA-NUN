@@ -73,3 +73,8 @@ export TELEGRAM_STRUCTURED_ONLY=true
 export HALIM_TELEGRAM_TRADE_NOTIFY=false
 export CAPITAL_PHASES_ENABLED=true
 export RAM_LIVE_ONLY=true
+
+# ── Limitless war-balance-only (overrides PPO wheel locks when enabled) ───────
+_ROOT_LIMITLESS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$_ROOT_LIMITLESS/scripts/hanoon_limitless_env.sh" 2>/dev/null || true

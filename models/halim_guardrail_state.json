@@ -3,9 +3,10 @@
   "counts": {
     "learn_fetches": 13,
     "google_ai_searches": 3,
-    "api_calls": 392,
+    "api_calls": 520,
     "param_mutations": 30,
-    "git_pushes": 11,
-    "file_writes": 143
+    "git_pushes": 13,
+    "file_writes": 169,
+    "learn_gold_exported": 284
   }
 }

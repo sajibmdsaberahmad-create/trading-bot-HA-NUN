@@ -163,9 +163,11 @@ def sync_war_positions_from_ib(
     ib_long = snap.long_positions()
     nav = float(state.get("nav", operating_capital_usd(cfg)) or operating_capital_usd(cfg))
     max_notional = _max_war_notional(nav, cfg)
+    prev_wars: Dict[str, Any] = dict(state.get("open_wars") or {})
 
     wars: Dict[str, Any] = {}
     monitor_only: List[str] = []
+    oversize_kept: List[str] = []
     adopted: List[str] = []
     dropped: List[str] = []
 
@@ -177,26 +179,45 @@ def sync_war_positions_from_ib(
         if entry <= 0:
             entry = pos.avg_cost
         notional = entry * sh
-        if notional > max_notional:
+        had_slot = sym in prev_wars
+        # Oversize gate applies to IB-only adoption — never evict an active war slot.
+        if notional > max_notional and not had_slot:
             monitor_only.append(sym)
             continue
+        if notional > max_notional and had_slot:
+            oversize_kept.append(sym)
         comm = _commission_usd(cfg, notional)
-        prev = (state.get("open_wars") or {}).get(sym) or {}
-        wars[sym] = {
-            "ticker": sym,
-            "shares": sh,
-            "entry": entry,
-            "ib_fill": entry,
-            "comm": comm,
-            "ts": float(prev.get("ts") or time.time()),
-            "pipeline": "ib_sync",
-            "promotion": prev.get("promotion", ""),
-            "synced": True,
-        }
-        if sym not in (state.get("open_wars") or {}):
-            adopted.append(sym)
+        prev = prev_wars.get(sym) or {}
+        slot_entry = float(prev.get("entry", 0) or 0)
+        if had_slot and slot_entry > 0:
+            wars[sym] = {
+                "ticker": sym,
+                "shares": sh,
+                "entry": slot_entry,
+                "ib_fill": float(prev.get("ib_fill", entry) or entry),
+                "comm": float(prev.get("comm", 0) or comm),
+                "ts": float(prev.get("ts") or time.time()),
+                "pipeline": prev.get("pipeline", "war_entry"),
+                "promotion": prev.get("promotion", ""),
+                "synced": True,
+                "oversize": notional > max_notional,
+            }
+        else:
+            wars[sym] = {
+                "ticker": sym,
+                "shares": sh,
+                "entry": entry,
+                "ib_fill": entry,
+                "comm": comm,
+                "ts": float(prev.get("ts") or time.time()),
+                "pipeline": "ib_sync",
+                "promotion": prev.get("promotion", ""),
+                "synced": True,
+            }
+            if sym not in prev_wars:
+                adopted.append(sym)
 
-    for sym in list((state.get("open_wars") or {}).keys()):
+    for sym in list(prev_wars.keys()):
         if sym not in wars:
             dropped.append(sym)
 
@@ -210,6 +231,7 @@ def sync_war_positions_from_ib(
         "adopted": adopted,
         "dropped": dropped,
         "monitor_only": monitor_only,
+        "oversize_kept": oversize_kept,
     }
 
 

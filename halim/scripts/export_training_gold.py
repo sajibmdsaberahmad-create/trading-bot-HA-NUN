@@ -27,7 +27,16 @@ def export_all(*, include_learn_cache: bool = True) -> dict:
     from core.halim_ppo_dialogue import export_dialogue_gold
     from core.halim_outcome_gold import export_outcome_gold
     from core.commander_ib_gold import export_commander_gold
+    from core.halim_json_entry_gold import export_json_entry_gold
 
+    json_entry = export_json_entry_gold(root=repo_root())
+    web_drills = {}
+    if os.getenv("HALIM_V5_PREP", "false").lower() in ("1", "true", "yes") or os.getenv(
+        "HALIM_JSON_ENTRY_API", "false"
+    ).lower() in ("1", "true", "yes"):
+        from core.halim_json_entry_gold import export_web_json_drills
+
+        web_drills = export_web_json_drills(root=repo_root())
     action = export_action_gold(include_learn_cache=include_learn_cache)
     coev = export_coevolution_gold()
     dialogue = export_dialogue_gold()
@@ -37,6 +46,8 @@ def export_all(*, include_learn_cache: bool = True) -> dict:
 
     return {
         "ok": True,
+        "json_entry_gold": json_entry,
+        "web_json_drills": web_drills,
         "action_gold": action,
         "coevolution_gold": coev,
         "dialogue_gold": dialogue,

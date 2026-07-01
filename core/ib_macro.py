@@ -11,6 +11,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
+from core.ib_sync import ib_blocking_calls_safe, safe_qualify_contracts
 from core.notify import log
 
 if TYPE_CHECKING:
@@ -38,6 +39,28 @@ def _risk_tone(spy_pct: float, qqq_pct: float, vix: float) -> str:
     return "neutral"
 
 
+def _macro_from_cache() -> Dict[str, Any]:
+    """Non-IB macro when qualify/reqTickers unsafe — disk/Yahoo cache only."""
+    try:
+        from core.market_context import get_macro_context
+
+        m = get_macro_context() or {}
+        if not m:
+            return {}
+        return {
+            "source": "cache",
+            "spy_price": float(m.get("spy_price", 0) or 0),
+            "spy_change_pct": float(m.get("spy_change_pct", 0) or 0),
+            "qqq_price": float(m.get("qqq_price", 0) or 0),
+            "qqq_change_pct": float(m.get("qqq_change_pct", 0) or 0),
+            "vix_level": float(m.get("vix_level", 0) or 0),
+            "risk_tone": str(m.get("risk_tone", "neutral") or "neutral"),
+            "timestamp": m.get("timestamp") or datetime.now(timezone.utc).isoformat(),
+        }
+    except Exception:
+        return {}
+
+
 def fetch_ib_macro_snapshot(connector: Optional["IBConnector"]) -> Dict[str, Any]:
     """SPY/QQQ/VIX from IB reqTickers — broker marks only."""
     out: Dict[str, Any] = {
@@ -53,17 +76,30 @@ def fetch_ib_macro_snapshot(connector: Optional["IBConnector"]) -> Dict[str, Any
     if connector is None or not connector.is_connected():
         out["source"] = "none"
         return out
+    ib = connector.ib
+    if not ib_blocking_calls_safe(ib):
+        cached = _macro_from_cache()
+        if cached.get("spy_price", 0) > 0:
+            return cached
+        if _CACHE["data"]:
+            out = dict(_CACHE["data"])
+            out["source"] = "cache"
+            return out
+        out["source"] = "deferred"
+        return out
     try:
         from core.ib_client import Index, Stock
 
-        ib = connector.ib
         contracts = [
             Stock("SPY", "ARCA", "USD"),
             Stock("QQQ", "NASDAQ", "USD"),
             Index("VIX", "CBOE", "USD"),
         ]
-        qualified = ib.qualifyContracts(*contracts)
+        qualified = safe_qualify_contracts(ib, *contracts)
         if not qualified:
+            fallback = _macro_from_cache()
+            if fallback.get("spy_price", 0) > 0:
+                return fallback
             return out
         tickers = ib.reqTickers(*qualified)
         ib.sleep(0.35)
@@ -108,6 +144,9 @@ def fetch_ib_macro_snapshot(connector: Optional["IBConnector"]) -> Dict[str, Any
                 pass
     except Exception as exc:
         log.debug(f"ib_macro snapshot: {exc}")
+        fallback = _macro_from_cache()
+        if fallback.get("spy_price", 0) > 0:
+            return fallback
         out["source"] = "error"
     return out
 

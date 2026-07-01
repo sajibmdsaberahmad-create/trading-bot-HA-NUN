@@ -78,14 +78,7 @@ def _parse_float_price(value: Any, default: float) -> float:
         return default
 
 
-def _deferred_gold_log_tag(cfg: Optional[BotConfig] = None) -> str:
-    """When PPO enters now and decision/coevolution text is logged asynchronously."""
-    cfg = cfg or BotConfig()
-    if os.getenv("HALIM_PPO_DIALOGUE", "true").lower() in ("1", "true", "yes"):
-        return "Halim gold async"
-    backend = str(getattr(cfg, "COUNCIL_BACKEND", None) or os.getenv("COUNCIL_BACKEND", "groq"))
-    return f"{backend} gold async"
-
+from core.ai_commander_mixin_imports import _deferred_gold_log_tag
 
 DECISION_LOG = Path("models/ai_decision_log.jsonl")
 TRADE_JOURNAL = Path("models/trade_journal.json")

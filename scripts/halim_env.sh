@@ -78,9 +78,10 @@ export HALIM_LEARN_LOOP_PAUSE_SEC="${HALIM_LEARN_LOOP_PAUSE_SEC:-30}"
 
 # Today-only raised learn cap (auto-off when UTC date != HALIM_LEARN_UNCAPPED_DATE)
 export HALIM_LEARN_FETCH_DAILY_CAP="${HALIM_LEARN_FETCH_DAILY_CAP:-500}"
-export HALIM_LEARN_UNCAPPED_DATE="${HALIM_LEARN_UNCAPPED_DATE:-2026-06-28}"
+export HALIM_LEARN_UNCAPPED_DATE="${HALIM_LEARN_UNCAPPED_DATE:-2026-07-01}"
 export HALIM_LEARN_UNCAPPED_MAX_FETCHES="${HALIM_LEARN_UNCAPPED_MAX_FETCHES:-1200}"
 export HALIM_LEARN_UNCAPPED_MAX_GOLD="${HALIM_LEARN_UNCAPPED_MAX_GOLD:-40}"
+export HALIM_GOOGLE_AI_DAILY_CAP="${HALIM_GOOGLE_AI_DAILY_CAP:-150}"
 
 # Learn cache RAG + auto LM retrain (wired in core/halim_learn_rag.py, core/halim_auto_lm.py)
 export HALIM_LEARN_RAG="${HALIM_LEARN_RAG:-true}"
@@ -127,6 +128,15 @@ fi
 export HALIM_ENTRY_IB_CONTEXT="${HALIM_ENTRY_IB_CONTEXT:-true}"
 export HALIM_PPO_COMPLEMENT="${HALIM_PPO_COMPLEMENT:-true}"
 export HALIM_OUTCOME_GOLD="${HALIM_OUTCOME_GOLD:-true}"
+# v5 JSON entry curriculum — Groq/Gemini labels for unlabeled council rows (off-hours pack only)
+export HALIM_JSON_ENTRY_API="${HALIM_JSON_ENTRY_API:-false}"
+export HALIM_JSON_ENTRY_API_MAX="${HALIM_JSON_ENTRY_API_MAX:-120}"
+# v5 one-shot pack — ./scripts/halim_v5_ready.sh sets HALIM_V5_PREP=true and raises caps
+export HALIM_V5_PREP="${HALIM_V5_PREP:-false}"
+export HALIM_V5_LEARN_CYCLES="${HALIM_V5_LEARN_CYCLES:-12}"
+export HALIM_V5_MAX_FETCHES="${HALIM_V5_MAX_FETCHES:-2500}"
+export HALIM_V5_API_DAILY_CAP="${HALIM_V5_API_DAILY_CAP:-2000}"
+export HALIM_V5_WEB_DRILL_MAX="${HALIM_V5_WEB_DRILL_MAX:-80}"
 export HALIM_ENTRY_AWAIT_POLL_SEC="${HALIM_ENTRY_AWAIT_POLL_SEC:-0.05}"
 # Teacher API floors during gold collection (replay + live) — avoids daily_decision_cap_1
 export REPLAY_DECISION_API_DAILY="${REPLAY_DECISION_API_DAILY:-48}"

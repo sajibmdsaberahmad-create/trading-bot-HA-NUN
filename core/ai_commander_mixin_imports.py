@@ -47,3 +47,12 @@ from core.pilot_mode import (
 )
 from core.risk import compute_atr, compute_momentum_score
 from core.trade_telemetry import log_bracket_reject
+
+
+def _deferred_gold_log_tag(cfg: Optional[BotConfig] = None) -> str:
+    """When PPO enters now and decision/coevolution text is logged asynchronously."""
+    cfg = cfg or BotConfig()
+    if os.getenv("HALIM_PPO_DIALOGUE", "true").lower() in ("1", "true", "yes"):
+        return "Halim gold async"
+    backend = str(getattr(cfg, "COUNCIL_BACKEND", None) or os.getenv("COUNCIL_BACKEND", "groq"))
+    return f"{backend} gold async"

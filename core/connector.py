@@ -377,7 +377,12 @@ class IBConnector:
             raise RuntimeError("No ticker symbol for contract qualification")
         if self._contract is None or getattr(self._contract, "symbol", None) != sym:
             raw = Stock(sym, self.cfg.EXCHANGE, self.cfg.CURRENCY)
-            qualified = self.ib.qualifyContracts(raw)
+            from core.ib_sync import ib_blocking_calls_safe, safe_qualify_contracts
+
+            if not ib_blocking_calls_safe(self.ib):
+                self._contract = raw
+                return self._contract
+            qualified = safe_qualify_contracts(self.ib, raw)
             if not qualified:
                 raise RuntimeError(
                     f"Could not qualify contract for '{sym}'.\n"

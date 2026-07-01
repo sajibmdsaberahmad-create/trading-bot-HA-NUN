@@ -2,8 +2,8 @@
 """
 core/swing_executor.py — Live IB swing entries (multi-day GTC brackets).
 
-Runs in capital phases premarket_full + rth_full. Economics from IB Truth only;
-local state is tags + learning metadata (no virtual NAV).
+Runs in premarket_full, rth_full, and rth_war (account balance — war is scalp-only).
+Economics from IB Truth only; local state is tags + learning metadata (no virtual NAV).
 """
 from __future__ import annotations
 
@@ -211,7 +211,11 @@ def run_swing_ib_cycle(
 ) -> int:
     """Scan + attempt swing IB entries; returns entries placed."""
     cfg = cfg or getattr(runner, "cfg", None)
-    if not swing_ib_live_enabled(cfg, capital_phase(cfg, runner)):
+    phase = capital_phase(cfg, runner)
+    if not swing_ib_live_enabled(cfg, phase):
+        return 0
+    if not allows_horizon_live(HORIZON_SWING, cfg, runner):
+        log.info(f"  📈 swing:skip — horizon blocked (phase={phase})")
         return 0
     now = time.time()
     last = float(getattr(runner, "_last_swing_ib_scan", 0) or 0)
@@ -220,10 +224,24 @@ def run_swing_ib_cycle(
     runner._last_swing_ib_scan = now
 
     placed = 0
+    notes: List[str] = []
     for sym in _symbols_for_swing(runner, cfg):
         signal = _swing_signal(runner, sym, cfg)
+        if signal.get("bias") != "long":
+            notes.append(f"{sym}:{signal.get('bias', 'hold')}")
+            continue
+        if not signal.get("enter", True):
+            notes.append(f"{sym}:no_enter")
+            continue
+        if float(signal.get("strength", 0) or 0) < _min_signal_strength():
+            notes.append(f"{sym}:weak")
+            continue
         if try_swing_ib_entry(runner, cfg, sym, signal):
             placed += 1
+    if placed == 0 and notes:
+        log.info(f"  📈 swing:scan phase={phase} — no entry ({'; '.join(notes[:5])})")
+    elif placed:
+        log.info(f"  📈 swing:scan phase={phase} — {placed} entry(ies)")
     return placed
 
 

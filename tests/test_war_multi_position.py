@@ -166,6 +166,68 @@ def test_adopt_ib_recovery_skips_oversized_position():
     assert float(state["settled_cash"]) == 3500.0
 
 
+def test_record_exit_recovers_slot_from_ledger():
+    cfg = BotConfig()
+    state = {
+        "nav": 930.0,
+        "cash": 46.0,
+        "settled_cash": 46.0,
+        "deployed_usd": 884.0,
+        "open_wars": {},
+        "open_war": None,
+        "open_labs": {},
+        "open_lab": None,
+        "unsettled": [],
+        "round_trips_today": 0,
+        "session_pnl_war": 0.0,
+        "mode": "WAR_ACTIVE",
+    }
+    ledger_row = {
+        "event": "war_entry",
+        "ticker": "BITO",
+        "shares": 109,
+        "virtual_fill": 8.10,
+        "ib_fill": 8.10,
+        "commission": 0.44,
+        "ts": 1.0,
+        "pipeline": "war_entry",
+    }
+    with patch("core.war_account.war_account_enabled", return_value=True):
+        with patch("core.war_account.war_ledger_applies", return_value=True):
+            with patch("core.war_account.load_state", return_value=state):
+                with patch("core.war_account.save_state"):
+                    with patch("core.war_account._append_ledger"):
+                        with patch(
+                            "core.war_account.apply_slippage_overlay",
+                            side_effect=lambda *a, **k: (k.get("quote", 8.08), 0.0),
+                        ):
+                            with patch(
+                                "core.war_account._open_slot_from_ledger",
+                                return_value={
+                                    "ticker": "BITO",
+                                    "shares": 109,
+                                    "entry": 8.10,
+                                    "ib_fill": 8.10,
+                                    "comm": 0.44,
+                                    "pipeline": "ledger_recover",
+                                    "recovered": True,
+                                },
+                            ):
+                                row = record_exit(
+                                    cfg,
+                                    ticker="BITO",
+                                    shares=109,
+                                    ib_fill=8.08,
+                                    quote=8.08,
+                                    pnl_usd_ib=-2.18,
+                                    entry_ib_fill=8.10,
+                                    exit_reason="ai_stagnation",
+                                )
+    assert row.get("skipped") is not True
+    assert "BITO" not in state["open_wars"]
+    assert float(state.get("session_pnl_war", 0)) < 0
+
+
 def test_reconcile_heals_negative_settled():
     cfg = BotConfig()
     state = {

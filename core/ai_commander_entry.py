@@ -15,6 +15,7 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.ai_commander_mixin_imports import *  # noqa: F403
+from core.ai_commander_mixin_imports import _deferred_gold_log_tag
 from core.pilot_mode import get_ai_deploy_budget  # noqa: F401 — explicit for entry paths
 from core.notify import log
 
@@ -397,7 +398,9 @@ class CommanderEntryMixin:
                 war_context_line,
             )
             if war_account_enabled(self.cfg):
-                war_block = war_entry_block(self.cfg, ticker=ticker, pipeline="entry")
+                war_block = war_entry_block(
+                    self.cfg, ticker=ticker, pipeline="entry", horizon="scalp",
+                )
                 if war_block:
                     log.info(f"  ⚔️ war:block {ticker.upper()} — {war_block}")
                     return {

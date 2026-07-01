@@ -209,6 +209,78 @@ def test_balance_driven_observe_when_settled_dry():
         assert _recompute_mode(state, cfg) == "OBSERVE"
 
 
+def test_war_never_applies_to_swing_horizon():
+    from core.war_account import (
+        check_entry_allowed,
+        war_applies_to_horizon,
+        war_ledger_applies,
+        rescale_decision_for_war,
+    )
+
+    cfg = BotConfig()
+    assert war_applies_to_horizon("swing") is False
+    assert war_applies_to_horizon("scalp") is True
+    state = {
+        "settled_cash": 500.0,
+        "nav": 891.0,
+        "operating_capital": 1000.0,
+        "bullets_total": 8,
+        "mode": "WAR_ACTIVE",
+    }
+    with patch.dict("os.environ", {"WAR_ACCOUNT_ENABLED": "true"}, clear=False):
+        with patch("core.war_account.load_state", return_value=state):
+            with patch("core.rth_session.is_rth", return_value=True):
+                assert war_ledger_applies(cfg, horizon="swing") is False
+        assert check_entry_allowed(cfg, ticker="SPY", pipeline="entry", horizon="swing") is None
+        dec = {"shares": 10, "confidence": 0.8}
+        assert rescale_decision_for_war(cfg, dec, 100.0, horizon="swing") is dec
+
+
+def test_check_entry_steps_aside_when_pool_dry():
+    from core.war_account import check_entry_allowed, war_pool_depleted
+
+    cfg = BotConfig()
+    state = {
+        "session_date": "2026-07-01",
+        "mode": "WAR_ACTIVE",
+        "settled_cash": 9.0,
+        "nav": 891.0,
+        "deployed_usd": 0.0,
+        "bullets_total": 8,
+        "operating_capital": 1000.0,
+        "open_wars": {},
+        "open_war": None,
+        "open_labs": {},
+    }
+    with patch.dict(
+        "os.environ",
+        {
+            "WAR_ACCOUNT_ENABLED": "true",
+            "WAR_AI_SIZING": "true",
+            "WAR_STEP_ASIDE_WHEN_DRY": "true",
+            "WAR_BALANCE_DRIVEN_TRIPS": "true",
+        },
+        clear=False,
+    ):
+        with patch("core.war_account.load_state", return_value=state):
+            with patch("core.war_account.save_state"):
+                with patch("core.war_account._roll_session"):
+                    with patch("core.war_account._apply_settlement"):
+                        assert war_pool_depleted(state, cfg) is True
+                        assert check_entry_allowed(cfg, ticker="TZA", pipeline="entry") is None
+
+
+def test_war_ledger_off_when_pool_dry():
+    from core.war_account import war_ledger_applies
+
+    cfg = BotConfig()
+    state = {"settled_cash": 9.0, "nav": 891.0, "operating_capital": 1000.0, "bullets_total": 8}
+    with patch.dict("os.environ", {"WAR_ACCOUNT_ENABLED": "true", "WAR_AI_SIZING": "true"}, clear=False):
+        with patch("core.war_account.load_state", return_value=state):
+            with patch("core.rth_session.is_rth", return_value=True):
+                assert war_ledger_applies(cfg) is False
+
+
 def test_fixed_cap_still_blocks_at_trip_max():
     cfg = BotConfig()
     state = {

@@ -10,8 +10,211 @@
 
 ---
 
+## 2026-07-01 — Swing bar fetch + toddler maturity gate
+
+### Problem
+Swing pipeline produced no entries: `analyze_swing_technical` fed DataFrames into `_closes_from_bars` / `_atr_pct` which expected bar objects (iterated column names → empty closes). `swing_ib_live_enabled` excluded `toddler` brain stage. Shadow scan bailed when `runner.data` missing but `conn`+`ib` present.
+
+### Root cause
+`fetch_swing_bars` returns `pd.DataFrame`; intel helpers only handled object bars. Maturity gate required child+; device runs toddler Halim.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/swing_bars.py` | `bars_to_closes`, `bars_len` shared helpers |
+| `core/swing_intel.py` | DataFrame-aware `_closes_from_bars`, `_atr_pct` |
+| `core/swing_shadow.py` | DataFrame `_simple_swing_signal`; `_runner_can_fetch_bars` |
+| `core/trade_horizon.py` | `toddler` allowed for swing IB + shadow |
+| `core/swing_executor.py` | INFO scan notes when no entry; rth_war doc |
+| `tests/test_swing_bars.py` | DataFrame technical + fetch mocks |
+| `tests/test_capital_phase.py` | swing during rth_war, war sizing scalp-only |
+| `tests/test_trade_horizon_swing.py` | toddler maturity gates |
+
+### Env
+- `SWING_IB_LIVE=true`, `SWING_LIVE_DURING_RTH_WAR=true`
+- `SWING_IB_SCAN_INTERVAL_SEC=600` (default)
+
 ### Verify
-Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no grad scaler crash.
+```bash
+python -m pytest tests/test_swing_bars.py tests/test_swing_intel.py tests/test_capital_phase.py tests/test_trade_horizon_swing.py -q
+```
+Logs: `swing:scan phase=rth_war — no entry (SYM:bias)` or `SWING IB ENTRY`.
+
+---
+
+## 2026-07-01 — War scalp-only; swing on IB account
+
+### Problem
+User clarified war is **only for scalping**. Swing must never hit war ledger, war:block, or war deploy caps — it sizes from IB account with `horizon=swing` tags.
+
+### Root cause
+War helpers defaulted to scalp but had no explicit horizon guard at `check_entry_allowed` / `rescale_decision_for_war`. Phase docs implied war window blocked swing.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `WAR_HORIZON`, `war_applies_to_horizon()`; `check_entry_allowed` / `rescale` / `war_ledger_applies` scalp-only |
+| `core/capital_phase.py` | Doc: rth_war = war scalp + swing on IB; `SWING_LIVE_DURING_RTH_WAR` (alias `SWING_PARALLEL_WITH_WAR`) |
+| `core/ai_commander_entry.py` | `horizon="scalp"` on war gate |
+| `core/scalper_entry_executor.py` | Explicit `horizon="scalp"` on war record/rescale |
+
+### Env
+- `SWING_LIVE_DURING_RTH_WAR=true` — swing IB during rth_war (account balance, not war pool)
+- Legacy: `SWING_PARALLEL_WITH_WAR`
+
+### Verify
+```bash
+python -m pytest tests/test_war_account_rth.py tests/test_capital_phase.py -q
+```
+Swing entries never log `war:block`; scalp during rth_war still uses war pool.
+
+---
+
+## 2026-07-01 — War step-aside when pool dry + IB qualify hardening
+
+### Problem
+War vetoed entries with `war:block TZA — war WAR_ACTIVE: need $50 > settled/deploy cap ($9)` after pool was spent — bot should trade on account balance instead. `qualifyContractsAsync` RuntimeWarnings still fired from ib_macro/ib_extended on non-main threads.
+
+### Root cause
+`check_entry_allowed` hard-blocked when deploy_cap floored at $50 while settled was $9. `ib_blocking_calls_safe` only checked asyncio loop, not thread ownership — background IB hub refresh still called qualify.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_account.py` | `war_pool_depleted()`, `WAR_STEP_ASIDE_WHEN_DRY` — return None + log step_aside; `war_ledger_applies` off when dry |
+| `core/ib_sync.py` | Main-thread guard + `safe_qualify_contracts()` |
+| `core/ib_macro.py` | safe qualify + macro cache fallback |
+| `core/ib_extended.py` | safe qualify for quotes/news/WSH |
+| `core/connector.py` | Gate `get_contract` qualify |
+| `core/fill_tracker.py` | safe qualify |
+| `tests/test_war_account_rth.py` | step-aside + ledger-off tests |
+| `tests/test_ib_sync.py` | off-main-thread + coroutine qualify tests |
+
+### Env
+| Var | Default | Role |
+|-----|---------|------|
+| `WAR_STEP_ASIDE_WHEN_DRY` | `true` | No war:block when settled pool cannot fund entry |
+
+### Verify
+```bash
+pytest tests/test_war_account_rth.py tests/test_ib_sync.py -q
+# Live: no qualifyContractsAsync warnings; entries proceed after war pool dry
+```
+
+---
+
+## 2026-07-01 — Halim v5 prep: read-only web browse + API enrichment pipeline
+
+### Problem
+v5 needs richer JSON entry gold and more trading knowledge, but `HALIM_JSON_ENTRY_API` defaulted off, learn caps were low, and `halim_json_entry_teacher` was not API-allowlisted — teacher calls could hit guardrail `api_daily_cap`.
+
+### Root cause
+No single orchestrator for off-hours “browse + API label + SFT zip”. Web learn cache was not converted into JSON entry drills. Uncapped learn date was stale (2026-06-28).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_v5_prep.py` | **New** — phases: guardrails → learn browse → JSON/API gold → export → SFT zip |
+| `scripts/halim_v5_ready.sh` | **New** — one-shot v5 pack with raised read-only caps |
+| `core/halim_json_entry_gold.py` | `export_web_json_drills()` from learn_cache via API teacher |
+| `core/halim_guardrails.py` | `v5_prep_active()`, API purposes `halim_json_entry_teacher` / `halim_v5_web_drill` |
+| `scripts/halim_env.sh` | v5 env knobs; uncapped date → 2026-07-01 |
+| `halim/scripts/export_training_gold.py` | Web JSON drills when API/v5 prep on |
+| `tests/test_halim_v5_prep.py` | v5_prep env smoke |
+
+### Env
+| Var | Default (v5_ready.sh) | Role |
+|-----|----------------------|------|
+| `HALIM_V5_PREP` | `true` in script | Raises read-only web/API caps |
+| `HALIM_V5_LEARN_CYCLES` | `12` | Wiki/RSS/Google browse batches |
+| `HALIM_JSON_ENTRY_API_MAX` | `500` | Council + web drill API labels |
+| `HALIM_V5_WEB_DRILL_MAX` | `80` | Learn-cache → JSON drills |
+| `HALIM_V5_MAX_FETCHES` | `2500` | Daily read-only fetch cap |
+| `HALIM_LEARN_DURING_TRADING` | `false` | Set `true` to browse beside live bot |
+
+### Verify
+```bash
+chmod +x scripts/halim_v5_ready.sh
+./scripts/halim_v5_ready.sh              # full pack (off-hours)
+./scripts/halim_v5_ready.sh --skip-learn # API/gold/SFT only
+pytest tests/test_halim_v5_prep.py tests/test_halim_json_entry_gold.py -q
+ls -lh halim_sft.zip
+rg '"enter":' halim/data/training/json_entry_gold.jsonl | wc -l
+```
+
+---
+
+## 2026-07-01 — IB async qualify guard + ghost-position adopt grace
+
+### Problem
+`qualifyContracts` / `reqTickers` from the spike/async loop emitted `RuntimeWarning: coroutine qualifyContractsAsync was never awaited`; macro/extended data fell back to `source: error`. After limit exits, IB could still hold shares while local slots cleared — `adopt_ib_positions_into_slots` re-armed ghost positions (e.g. INLF 1200sh).
+
+### Root cause
+Sync ib_insync calls inside a running asyncio event loop orphan coroutines. Exit finalize cleared slots before IB truth showed flat; adopt only excluded `_pending_closes`, not recently finalized tickers.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_sync.py` | **New** — shared `ib_blocking_calls_safe()` |
+| `core/fill_tracker.py` | Import guard from `ib_sync` |
+| `core/ib_macro.py` | Skip qualify when unsafe; return cache/deferred |
+| `core/ib_extended.py` | Gate refresh + quotes/news/WSH; truth conId + quote fallback |
+| `core/position_sync.py` | `recently_exited` grace window on adopt |
+| `core/scalper_runner.py` | `_recently_exited` dict passed to adopt |
+| `core/scalper_exit_executor.py` | Defer finalize when IB still holds shares; stamp recently exited on clear |
+| `tests/test_ib_sync.py` | Guard + adopt grace tests |
+
+### Env
+| Var | Default | Role |
+|-----|---------|------|
+| `IB_ADOPT_RECENT_EXIT_GRACE_SEC` | `300` | Block IB adopt for N sec after local exit finalize |
+
+### Verify
+```bash
+pytest tests/test_ib_sync.py tests/test_war_multi_position.py -q
+# Live: no qualifyContractsAsync warnings in logs/HANOON.log during RTH spikes
+# After exit: no "Recovered IB position" for same ticker within grace unless IB flat
+```
+
+---
+
+## 2026-07-01 — Halim v5 JSON entry gold + API teacher curriculum
+
+### Problem
+Toddler LM rambles `agree=False on enter…` instead of live entry JSON; SFT gold taught prose echoes, not `{"enter":…,"confidence":…,"reason":…}`.
+
+### Root cause
+`action_gold` / dialogue pairs lack strict JSON assistant targets; `prepare_sft` had no `json_entry_gold` source.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/halim_json_entry_gold.py` | **New** — build/validate JSON pairs from council, outcome, experience; optional Groq/Gemini teacher |
+| `halim/scripts/export_json_entry_gold.py` | **New** — CLI `--api` / `--api-max` |
+| `halim/scripts/export_training_gold.py` | Calls `export_json_entry_gold` before SFT merge |
+| `halim/halim/dataset.py` | `json_entry_gold` source first in core curriculum |
+| `scripts/halim_env.sh` | `HALIM_JSON_ENTRY_API`, `HALIM_JSON_ENTRY_API_MAX` |
+| `scripts/halim_colab_ready.sh` | Logs when API teacher enabled |
+| `tests/test_halim_json_entry_gold.py` | Format roundtrip + ramble rejection |
+
+### Env
+| Var | Default | Role |
+|-----|---------|------|
+| `HALIM_JSON_ENTRY_API` | `false` | Groq/Gemini labels for unlabeled council rows |
+| `HALIM_JSON_ENTRY_API_MAX` | `120` | API budget per export run |
+
+### Verify
+```bash
+python halim/scripts/export_json_entry_gold.py
+python halim/scripts/export_json_entry_gold.py --api   # needs GROQ_API_KEY
+HALIM_JSON_ENTRY_API=true ./scripts/halim_colab_ready.sh
+rg '"enter":' halim/data/training/json_entry_gold.jsonl | head
+pytest tests/test_halim_json_entry_gold.py -q
+```
+
+---
+
+### Verify
 
 ---
 
@@ -23,6 +226,37 @@ Colab Cell 3: `bnb_4bit_compute_dtype: torch.float16` with `fp16=True` — no gr
 ---
 
 ---
+
+---
+
+---
+
+## 2026-07-01 — War slot dropped on IB sync (BITO no open slot)
+
+### Problem
+After a full war deployment (~$882 on ~$930 nav), periodic `sync_war_positions_from_ib` treated the position as **monitor-only** (`notional > nav * 0.90`) and **cleared `open_wars`**. Exit then logged `⚠️ WAR EXIT: no open slot` and post-exit `sync_war_from_ib(force=True)` could block the main loop on IB refresh.
+
+### Root cause
+`WAR_IB_RECOVER_MAX_NAV_PCT` gate applied to **all** IB longs including slots already opened via `record_entry` — evicting legitimate war trades at ~95% deployment.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/war_ib_sync.py` | Oversize gate only blocks **new IB adoption**; preserve existing `open_wars` slots + virtual entry on sync |
+| `core/war_account.py` | `record_exit` recovers slot from today's ledger when `open_wars` missing |
+| `core/scalper_exit_executor.py` | Post-exit war sync `force=False` (throttled/cached snapshot, no blocking refresh) |
+| `scripts/start_hanoon.sh` | Limitless banner: "no decision caps · capital phases active" |
+| `tests/test_war_ib_sync.py` | Oversize preserve + IB-only skip |
+
+### Env
+- `WAR_IB_RECOVER_MAX_NAV_PCT` — still applies to **adoption** only (default 0.90)
+
+### Verify
+```bash
+pytest tests/test_war_ib_sync.py tests/test_war_multi_position.py -q
+# Live: after war entry, War IB sync should show slots=1 (not 0) while position open
+rg 'War IB sync|no open slot|recovered slot' logs/HANOON.log | tail -20
+```
 
 ---
 
@@ -46,7 +280,29 @@ rg 'Startup IB housekeeping|🕐|Startup lock complete' logs/HANOON.log | tail
 
 ---
 
-## 2026-07-01 — Wave tune + spike green defer (PPO-first action)
+## 2026-07-01 — Limitless war-balance-only profile (no decision caps)
+
+### Problem
+Live session blocked every spike: `ppo:wheel_hold` (PPO action=0), Halim `daily_decision_cap_16`, confidence floors — zero entries despite strong vol spikes.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/hanoon_limitless_env.sh` | **New** — `BRAIN_MATURITY_FORCE_API`, uncapped decision API, `PPO_ONLY_EXECUTION=false`, low conf/prob floors, spike fast paths, `PPO_BYPASS_REQUIRES_BUY=false`, war balance-driven trips only |
+| `scripts/hanoon_profit_learn_env.sh` | Sources limitless profile (default ON; `HANOON_LIMITLESS_WAR_ONLY=false` to disable) |
+| `scripts/start_hanoon.sh` | Launch banner line for limitless profile |
+| `core/ai_commander_mixin_imports.py` | Fix `_deferred_gold_log_tag` import for entry mixin (was crashing every spike entry) |
+| `core/ai_commander_entry.py` | Explicit import — `import *` skips leading-underscore names |
+
+### Env
+`HANOON_LIMITLESS_WAR_ONLY=true` (default) · `HANOON_LIMITLESS_WAR_ONLY=false` to restore PPO-wheel-only mode.
+
+### Verify
+```bash
+rg 'Limitless:|quality_flash|halim:spike_quality|ppo:wheel_buy|ENTRY submitted' logs/HANOON.log | tail
+```
+
+---
 
 ### Problem
 Wave never fired live; spikes vetoed on `ai_vote` before PPO ran (spike loop green precheck). Huge vol spikes with cold `micro=0%` failed impulse thresholds.

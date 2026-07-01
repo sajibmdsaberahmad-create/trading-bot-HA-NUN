@@ -1,6 +1,6 @@
 {
-  "narrative": "Local copilot: 0% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required). Tape: bear trend.",
-  "regime_read": "bear trend",
+  "narrative": "Local copilot: 0% session WR. Adapt entry quality on: none (caution \u2014 tighter setup required). Tape: trend grind.",
+  "regime_read": "trend grind",
   "risk_posture": "defensive",
   "session_wr": 0.0,
   "session_pnl": 0.0,
@@ -15,6 +15,6 @@
     "Repeat-loss tickers: require profit_probability + spike confirmation \u2014 do not blanket-skip",
     "Raise PPO bar on re-entry after losses; adapt stops not ticker bans"
   ],
-  "updated_at": 1782914981.548859,
+  "updated_at": 1782920131.507071,
   "source": "heuristic"
 }

@@ -362,6 +362,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self._hour_window_start: float = time.time()
         self._last_quality_watch_log: float = 0.0
         self._pending_closes: Dict[str, PendingClose] = {}
+        self._recently_exited: Dict[str, float] = {}
         self._pending_lottery_meta: Dict[str, Dict[str, Any]] = {}
         self._deferred_exits: Dict[str, Dict[str, Any]] = {}
         self._last_off_hours_train: float = 0.0
@@ -1162,7 +1163,10 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 for p in getattr(self, "_pending_closes", {}).values()
             }
             adopted = adopt_ib_positions_into_slots(
-                self.ib, self._position_slots, exclude_tickers=pending,
+                self.ib,
+                self._position_slots,
+                exclude_tickers=pending,
+                recently_exited=self._recently_exited,
             )
             for ticker in adopted:
                 self._bind_risk_plan_for_ticker(ticker)
@@ -1604,7 +1608,10 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 for p in getattr(self, "_pending_closes", {}).values()
             }
             adopted = adopt_ib_positions_into_slots(
-                self.ib, self._position_slots, exclude_tickers=pending,
+                self.ib,
+                self._position_slots,
+                exclude_tickers=pending,
+                recently_exited=self._recently_exited,
             )
             for ticker in adopted:
                 self._bind_risk_plan_for_ticker(ticker)

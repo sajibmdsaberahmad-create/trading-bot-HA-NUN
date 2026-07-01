@@ -428,6 +428,18 @@ class ScalperExitMixin:
             )
             return False
 
+        from core.fill_tracker import ib_position_shares
+
+        remaining = ib_position_shares(self.ib, ticker)
+        if remaining > 0.5:
+            log.warning(
+                f"  ⏳ EXIT {ticker}: IB still holds {remaining:.0f}sh — defer finalize"
+            )
+            recently = getattr(self, "_recently_exited", None)
+            if recently is not None:
+                recently[ticker.upper()] = time.time()
+            return False
+
         tag = "IB fill" if confirmed else "est. fill"
         log.info(
             f"📕 EXIT {ticker} ({tag}): ${exit_fill:.4f} "
@@ -557,6 +569,9 @@ class ScalperExitMixin:
                 p for p in self._active_positions if p.get("ticker") != ticker
             ]
         if ticker:
+            recently = getattr(self, "_recently_exited", None)
+            if recently is not None:
+                recently[ticker.upper()] = time.time()
             self._position_slots.pop(ticker, None)
             self._bracket_by_ticker.pop(ticker, None)
             self._risk_plans.pop(ticker, None)
@@ -628,7 +643,8 @@ class ScalperExitMixin:
         except Exception as exc:
             log.debug(f"War account exit: {exc}")
         try:
-            self._maybe_sync_war_from_ib(force=True)
+            # Throttled/cached sync — force=True blocked main loop on IB refresh post-exit.
+            self._maybe_sync_war_from_ib(force=False)
         except Exception:
             pass
         self.trade_journal.append(trade_rec)

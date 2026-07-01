@@ -720,6 +720,9 @@ echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${W
 if [[ "${HANOON_PROFIT_LEARN_PROFILE:-true}" == "true" ]]; then
   echo "  💰 Profit+Learn: green_lock=${GREEN_PROFIT_LOCK_ENABLED} | micro_ppo=${LEARNING_LIVE_MICRO_PPO} | defer_rth=${LEARNING_DEFER_DURING_RTH} | stagnation=${STAGNATION_EXIT_SEC:-75}s"
 fi
+if [[ "${HANOON_LIMITLESS_WAR_ONLY:-true}" == "true" ]]; then
+  echo "  ♾️  Limitless: no decision caps · capital phases active | ppo_only=${PPO_ONLY_EXECUTION:-?} | conf=${CONFIDENCE_THRESHOLD:-?} | api_cap=off"
+fi
 PY="${ROOT}/venv/bin/python3"
 if [[ ! -x "$PY" ]]; then PY="python3"; fi
 "$PY" -u main.py --mode scalper --port "$IB_PORT" --client-id "$CLIENT_ID"

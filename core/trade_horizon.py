@@ -58,10 +58,13 @@ def swing_ib_live_enabled(
             PHASE_RTH_WAR,
             capital_phases_enabled,
             capital_phase as get_phase,
+            swing_live_during_rth_war,
         )
         phase = capital_phase or (get_phase(cfg) if capital_phases_enabled(cfg) else "")
         if capital_phases_enabled(cfg):
-            if phase in (PHASE_OFF, PHASE_RTH_WAR):
+            if phase == PHASE_OFF:
+                return False
+            if phase == PHASE_RTH_WAR and not swing_live_during_rth_war(cfg):
                 return False
         else:
             return False
@@ -69,7 +72,7 @@ def swing_ib_live_enabled(
         return False
     try:
         from core.brain_maturity import compute_stage
-        return compute_stage(cfg) in ("teen", "adult", "child")
+        return compute_stage(cfg) in ("toddler", "child", "teen", "adult")
     except Exception:
         return True
 
@@ -81,7 +84,7 @@ def swing_shadow_enabled(cfg: Optional["BotConfig"] = None) -> bool:
         from core.brain_maturity import compute_stage
 
         stage = compute_stage(cfg)
-        return stage in ("child", "teen", "adult")
+        return stage in ("toddler", "child", "teen", "adult")
     except Exception:
         return False
 

@@ -2,9 +2,9 @@
 """
 core/capital_phase.py — Session capital phases (IB Truth + war sizing window).
 
-premarket_full  — pre-market: scalp + swing, full IB paper sizing
-rth_war         — RTH: war ~$1k scalp until daily war limit
-rth_full        — RTH after war cap / after-hours: full IB sizing + swing
+premarket_full  — pre-market: scalp + swing (swing = IB account, not war)
+rth_war         — RTH: war ~$1k **scalp only**; swing on IB account when enabled
+rth_full        — RTH after war pool dry / after-hours: full IB scalp + swing
 """
 from __future__ import annotations
 
@@ -34,12 +34,14 @@ def skip_lab_use_full_ib(cfg: Optional["BotConfig"] = None) -> bool:
 
 
 def war_pool_exhausted(cfg: Optional["BotConfig"] = None) -> bool:
-    """True when RTH war window is done for the day (OBSERVE / skip LAB)."""
+    """True when RTH war window is done — full IB + swing sizing unlocks."""
     try:
-        from core.war_account import war_account_enabled, load_state, _recompute_mode
+        from core.war_account import war_account_enabled, load_state, war_pool_depleted, _recompute_mode
         if not war_account_enabled(cfg):
             return True
         state = load_state(cfg)
+        if war_pool_depleted(state, cfg):
+            return True
         mode = _recompute_mode(state, cfg)
         if mode == "OBSERVE":
             return True
@@ -48,6 +50,24 @@ def war_pool_exhausted(cfg: Optional["BotConfig"] = None) -> bool:
     except Exception:
         pass
     return False
+
+
+def swing_live_during_rth_war(cfg: Optional["BotConfig"] = None) -> bool:
+    """
+    Swing IB entries during rth_war scalp window — uses account balance, not war pool.
+    Legacy env: SWING_PARALLEL_WITH_WAR.
+    """
+    raw = os.getenv("SWING_LIVE_DURING_RTH_WAR", "").strip().lower()
+    if raw in ("0", "false", "no"):
+        return False
+    if raw in ("1", "true", "yes"):
+        return True
+    return os.getenv("SWING_PARALLEL_WITH_WAR", "true").lower() in ("1", "true", "yes")
+
+
+def swing_parallel_with_war_enabled(cfg: Optional["BotConfig"] = None) -> bool:
+    """Alias — swing on IB account while war runs scalp ledger."""
+    return swing_live_during_rth_war(cfg)
 
 
 def capital_phase(
@@ -88,8 +108,13 @@ def uses_war_sizing(
     runner: Any = None,
     *,
     market_state: Optional[str] = None,
+    horizon: str = "scalp",
 ) -> bool:
-    """War $1k ledger + bullet caps apply only in rth_war."""
+    """War $1k ledger + bullet caps apply only to scalp in rth_war."""
+    from core.war_account import war_applies_to_horizon
+
+    if not war_applies_to_horizon(horizon):
+        return False
     if not capital_phases_enabled(cfg):
         try:
             from core.war_account import war_account_enabled
@@ -109,7 +134,7 @@ def allows_horizon_live(
     if phase == PHASE_OFF:
         return False
     if horizon == "swing":
-        if phase == PHASE_RTH_WAR:
+        if phase == PHASE_RTH_WAR and not swing_live_during_rth_war(cfg):
             return False
         try:
             from core.trade_horizon import swing_ib_live_enabled

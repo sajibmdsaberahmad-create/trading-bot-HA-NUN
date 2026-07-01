@@ -1558,5 +1558,129 @@
       "Session trade WR 0% on 0 round-trips",
       "Skip repeat losers until proxy confidence rises"
     ]
+  },
+  {
+    "timestamp": "2026-07-01T14:29:38.657132+00:00",
+    "win_rate": 0.10042857142857142,
+    "buffer_win_rate": 0.058,
+    "returns_win_rate": 0.14285714285714285,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.9,
+        "new": 0.7200000000000001,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.112
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.5,
+        "new": 1.35,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.043
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 30,
+        "new": 39.0,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.051
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 46.4955,
+        "new": 200.0,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.032
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 250000.0,
+        "new": 100.0,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 2940.0
+      },
+      "HARD_STOP_USD": {
+        "old": 50.0,
+        "new": 45.0,
+        "reason": "tighter hard stop when WR weak",
+        "confidence": 0.067
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.65,
+        "new": 0.68,
+        "reason": "raise entry bar when WR low; lower when WR strong (capped per session)",
+        "confidence": 0.055
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-07-01T14:29:38.654446+00:00\nCombined win rate: 10.0% (buffer=5.8%, returns=14.3%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capita"
+  },
+  {
+    "timestamp": "2026-07-01T14:29:38.666457+00:00",
+    "source": "halim_developer_post_standalone_flush",
+    "adjustments": {},
+    "guidelines_summary": "Halim heuristic dev plan \u2014 WR 0%",
+    "lessons": [
+      "Halim documents every mutation in git \u2014 review improvement_history.json",
+      "Session trade WR 0% on 0 round-trips",
+      "Skip repeat losers until proxy confidence rises"
+    ]
+  },
+  {
+    "timestamp": "2026-07-01T14:37:47.422444+00:00",
+    "win_rate": 0.10042857142857142,
+    "buffer_win_rate": 0.058,
+    "returns_win_rate": 0.14285714285714285,
+    "adjustments": {
+      "SCALP_STOP_ATR_MULTIPLIER": {
+        "old": 0.9,
+        "new": 0.7200000000000001,
+        "reason": "tighten stops when WR low; widen when WR strong",
+        "confidence": 0.112
+      },
+      "SCALP_TP_ATR_MULTIPLIER": {
+        "old": 1.5,
+        "new": 1.35,
+        "reason": "increase targets when WR strong; reduce when WR weak",
+        "confidence": 0.043
+      },
+      "SCAN_INTERVAL_SECONDS": {
+        "old": 30,
+        "new": 39.0,
+        "reason": "reduce frequency when WR low; increase when WR strong",
+        "confidence": 0.051
+      },
+      "MAX_TRADE_SIZE_USD": {
+        "old": 46.4955,
+        "new": 200.0,
+        "reason": "reduce size when WR poor; increase when WR strong",
+        "confidence": 0.032
+      },
+      "MAX_RISK_PER_TRADE_USD": {
+        "old": 250000.0,
+        "new": 100.0,
+        "reason": "tighten per-trade risk when WR low; relax slightly when WR strong",
+        "confidence": 2940.0
+      },
+      "HARD_STOP_USD": {
+        "old": 50.0,
+        "new": 45.0,
+        "reason": "tighter hard stop when WR weak",
+        "confidence": 0.067
+      },
+      "CONFIDENCE_THRESHOLD": {
+        "old": 0.65,
+        "new": 0.68,
+        "reason": "raise entry bar when WR low; lower when WR strong (capped per session)",
+        "confidence": 0.055
+      }
+    },
+    "guidelines_summary": "\ud83e\udded SELF-IMPROVEMENT GUIDELINES | 2026-07-01T14:37:47.419699+00:00\nCombined win rate: 10.0% (buffer=5.8%, returns=14.3%)\n\u2022 Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER\n\u2022 Reduce SCAN_INTERVAL_SECONDS to avoid overtrading\n\u2022 Lower MAX_TRADE_SIZE_USD to preserve capita"
+  },
+  {
+    "timestamp": "2026-07-01T14:37:47.432323+00:00",
+    "source": "halim_developer_post_standalone_flush",
+    "adjustments": {},
+    "guidelines_summary": "Halim heuristic dev plan \u2014 WR 0%",
+    "lessons": [
+      "Halim documents every mutation in git \u2014 review improvement_history.json",
+      "Session trade WR 0% on 0 round-trips",
+      "Skip repeat losers until proxy confidence rises"
+    ]
   }
 ]

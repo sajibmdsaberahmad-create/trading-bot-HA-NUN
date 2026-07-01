@@ -403,7 +403,7 @@ class ScalperEntryMixin:
         self._position_slots[ticker] = slot
         try:
             from core.war_account import record_entry, war_ledger_applies
-            if war_ledger_applies(self.cfg):
+            if war_ledger_applies(self.cfg, horizon="scalp"):
                 record_entry(
                     self.cfg,
                     ticker=ticker,
@@ -994,9 +994,9 @@ class ScalperEntryMixin:
             log.debug(f"PPO deploy tier: {exc}")
         try:
             from core.war_account import rescale_decision_for_war, war_ledger_applies
-            if war_ledger_applies(self.cfg):
+            if war_ledger_applies(self.cfg, horizon="scalp"):
                 return rescale_decision_for_war(
-                    self.cfg, decision, entry_px, ticker=ticker,
+                    self.cfg, decision, entry_px, ticker=ticker, horizon="scalp",
                 )
         except Exception as exc:
             log.debug(f"War sizing: {exc}")

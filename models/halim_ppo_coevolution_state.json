@@ -1,13 +1,13 @@
 {
-  "last_cycle": "2026-07-01T13:48:26.368162+00:00",
+  "last_cycle": "2026-07-01T14:37:47.354448+00:00",
   "trigger": "standalone_flush",
   "stats": {
-    "agreements": 1443,
-    "disagreements": 1245,
+    "agreements": 1455,
+    "disagreements": 1365,
     "corrections_for_ppo": 1074,
-    "corrections_for_halim": 171,
+    "corrections_for_halim": 291,
     "complements": 0,
-    "label_v2_events": 2020,
+    "label_v2_events": 2152,
     "legacy_mislabeled_skipped": 1984,
     "market_proved_ppo": 20,
     "market_proved_halim": 5,
@@ -15,16 +15,16 @@
   },
   "export": {
     "ok": true,
-    "added": 864,
-    "total": 864,
-    "events": 7120,
+    "added": 906,
+    "total": 906,
+    "events": 7252,
     "rewritten": true
   },
-  "cycles": 117,
+  "cycles": 122,
   "dialogue_export": {
     "ok": true,
-    "pairs": 5430,
-    "dialogue_lines": 2715,
+    "pairs": 5502,
+    "dialogue_lines": 2751,
     "rewritten": true
   }
 }

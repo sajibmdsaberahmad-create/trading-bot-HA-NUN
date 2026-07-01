@@ -1,5 +1,5 @@
-🧭 SELF-IMPROVEMENT GUIDELINES | 2026-07-01T13:48:26.426286+00:00
-Combined win rate: 10.1% (buffer=6.0%, returns=14.3%)
+🧭 SELF-IMPROVEMENT GUIDELINES | 2026-07-01T14:37:47.419699+00:00
+Combined win rate: 10.0% (buffer=5.8%, returns=14.3%)
 • Win rate below 40%: tighten SCALP_STOP_ATR_MULTIPLIER and SCALP_TP_ATR_MULTIPLIER
 • Reduce SCAN_INTERVAL_SECONDS to avoid overtrading
 • Lower MAX_TRADE_SIZE_USD to preserve capital
@@ -17,6 +17,6 @@ Combined win rate: 10.1% (buffer=6.0%, returns=14.3%)
   - MAX_RISK_PER_TRADE_USD: 250000.0 -> 100.0 (reason: tighten per-trade risk when WR low; relax slightly when WR strong)
   - HARD_STOP_USD: 50.0 -> 45.0 (reason: tighter hard stop when WR weak)
   - CONFIDENCE_THRESHOLD: 0.65 -> 0.68 (reason: raise entry bar when WR low; lower when WR strong (capped per session))
-🧭 COMMANDER LEARNING | 2026-07-01T13:48:26.437859+00:00
+🧭 COMMANDER LEARNING | 2026-07-01T14:37:47.432213+00:00
 Halim heuristic dev plan — WR 0%
 
