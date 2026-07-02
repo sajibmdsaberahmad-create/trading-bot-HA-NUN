@@ -458,9 +458,13 @@ export SMART_STACK_WAR_POSTURE="${SMART_STACK_WAR_POSTURE:-true}"
 
 export PYTHONUNBUFFERED=1
 export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
-export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-600}"
+export LEARNING_SYNC_INTERVAL_SEC="${LEARNING_SYNC_INTERVAL_SEC:-0}"
 
 TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{print int($1/1024/1024)}' || echo 8192)
+if [[ "${TOTAL_RAM_MB:-0}" -le 12288 ]]; then
+  export HANOON_M2_CANONICAL_LIVE=true
+  export HANOON_LIMITLESS_WAR_ONLY=false
+fi
 
 echo "═══════════════════════════════════════════════════════════════════════"
 echo "  HANOON FULL PILOT LAUNCH"
@@ -735,7 +739,9 @@ if [[ "${TOTAL_RAM_MB:-0}" -le 12288 ]] && [[ -f "$ROOT/scripts/m2_8gb_live_prof
 fi
 
 echo "  📋 Device profile: ${HANOON_DEVICE_PROFILE:-default} | RAM=${TOTAL_RAM_MB}MB | IB=$IB_PORT"
-echo "  🎡 PPO wheel: Halim await=${HALIM_ENTRY_AWAIT_SEC}s | war_advisory=${WAR_ENTRY_ADVISORY_ONLY} | strict_prob=${SMART_STACK_STRICT_PROFIT_PROB} | conf=${CONFIDENCE_THRESHOLD}"
+echo "  🎡 Live gates: min_profit=${MIN_PROFIT_PROBABILITY} | conf=${CONFIDENCE_THRESHOLD} | strict_prob=${SMART_STACK_STRICT_PROFIT_PROB} | commander=${COMMANDER_RUNTIME_ENABLED:-?}"
+echo "  🎡 Halim: await=${HALIM_ENTRY_AWAIT_SEC}s | timeout=${HALIM_ENTRY_LM_TIMEOUT_SEC}s | adapter=${HALIM_SERVE_PREFER_ADAPTER:-?} | green=${GREEN_DOCTRINE_ENTRY}"
+echo "  🎡 Discipline: capital=${CAPITAL_DISCIPLINE} | paper_as_live=${TREAT_PAPER_AS_LIVE} | limitless=${HANOON_LIMITLESS_WAR_ONLY:-?}"
 if [[ "${HALIM_SMART_SPRINT:-true}" == "true" ]]; then
   echo "  🧠 Halim sprint: child fast+quality | strict_prob=${SMART_STACK_STRICT_PROFIT_PROB} | await=${HALIM_ENTRY_AWAIT_SEC}s | proxy@child"
 fi

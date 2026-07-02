@@ -195,11 +195,12 @@ def _intent_task(intent: str, trigger: str = "") -> str:
             "Use COEVOLUTION DATA."
         ),
         "ppo_halim_dialogue": (
-            "Write a two-voice exchange BEFORE this trade action.\n"
+            "Write a two-voice exchange. BOTH PPO AND HALIM MUST SPEAK. No exceptions.\n"
             "Format exactly:\n"
             "PPO: [reflex voice — fast instinct, pattern, confidence, first person]\n"
             "Halim: [mind voice — agrees, cautions, or reconciles with reasoning]\n"
-            "Use TRADE DECISION DATA only. Max 5 lines. Fresh generative words — never templates."
+            "Both PPO and Halim must appear. Use TRADE DECISION DATA only. "
+            "Max 5 lines total. Fresh words — never templates."
         ),
         "trade_outcome_dialogue": (
             "Trade just closed. PPO and Halim reflect together on the outcome.\n"

@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # PPO wheel profile — FORCE exports (overrides halim_env.sh, early start_hanoon, and .env leaks).
-# Sourced last in start_hanoon.sh immediately before main.py launch.
+# On ≤12 GB, m2_8gb_live_profile.sh sources after this and wins.
 # Set PPO_WHEEL_PROFILE_LOCK=false to allow Halim developer to tune locked params.
+
+[[ "${HANOON_M2_CANONICAL_LIVE:-}" == "true" ]] && return 0 2>/dev/null || {
+  [[ "${HANOON_M2_CANONICAL_LIVE:-}" == "true" ]] && exit 0
+}
 
 export PPO_WHEEL_PROFILE_LOCK="${PPO_WHEEL_PROFILE_LOCK:-true}"
 

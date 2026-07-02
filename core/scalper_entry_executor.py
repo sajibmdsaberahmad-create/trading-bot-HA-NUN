@@ -1613,7 +1613,13 @@ class ScalperEntryMixin:
                 self._last_ai_confidence = float(ai_dec.get("confidence", 0.5))
                 try:
                     from core.green_trade_doctrine import require_green_entry, green_entry_mandatory
-                    if green_entry_mandatory(self.cfg) and ai_dec.get("enter"):
+                    from core.rth_session import is_pre_market_session
+                    from core.green_trade_doctrine import pre_market_entry_enabled
+                    # Skip green recheck for pre-market (pre-market has relaxed rules)
+                    in_pre = is_pre_market_session(self.cfg)
+                    if green_entry_mandatory(self.cfg) and ai_dec.get("enter") and not (
+                        in_pre and pre_market_entry_enabled(self.cfg)
+                    ):
                         block = require_green_entry(
                             self.cfg,
                             ticker=ticker,

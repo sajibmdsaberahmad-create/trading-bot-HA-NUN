@@ -320,5 +320,21 @@
     "first_seen": "2026-06-25T18:19:50.790909+00:00",
     "last_seen": "2026-06-25T18:19:50.790936+00:00",
     "source": "ib_error"
+  },
+  "SRXH": {
+    "ticker": "SRXH",
+    "failures": 1,
+    "last_code": 162,
+    "last_reason": "Historical Market Data Service error message:HMDS query returned no data: SRXH@SMART Trades",
+    "pattern": "no_historical_data",
+    "exchange": "SMART",
+    "primary_exchange": "AMEX",
+    "skip_until": 1782978855.736147,
+    "skip_until_iso": "2026-07-02T07:54:15.736147+00:00",
+    "first_seen": "2026-07-02T07:49:15.738401+00:00",
+    "last_seen": "2026-07-02T07:49:15.738404+00:00",
+    "source": "ib_error",
+    "market_state": "overnight",
+    "transient": false
   }
 }

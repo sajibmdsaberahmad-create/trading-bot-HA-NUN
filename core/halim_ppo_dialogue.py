@@ -179,6 +179,11 @@ def generate_ppo_halim_dialogue(
         text = (r.get("text") or "").strip()
         if len(text) < 16:
             return None
+        # Reject one-sided dialogues — both voices must appear
+        lower = text.lower()
+        if "halim" not in lower or "ppo" not in lower:
+            log.debug(f"PPO↔Halim dialogue {ticker}: one-sided, skipped (only one voice)")
+            return None
         row = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "phase": phase,
@@ -208,7 +213,7 @@ def generate_ppo_halim_dialogue(
             pass
         log.info(
             f"  💬 PPO↔Halim {ticker}/{task} ({phase}): "
-            f"agree={comparison.get('ppo_halim_agree')} · {text[:100]}…"
+            f"agree={comparison.get('ppo_halim_agree')} · {text[:300]}"
         )
         return text
     except Exception as exc:

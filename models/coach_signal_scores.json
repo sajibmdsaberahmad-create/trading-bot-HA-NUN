@@ -1,10 +1,10 @@
 {
   "fee_bleed": {
-    "count": 36,
+    "count": 38,
     "sessions": [],
-    "pnl_usd": -15.77,
-    "last_ticker": "INLF",
-    "last_at": "2026-07-01T15:15:42.172476+00:00"
+    "pnl_usd": -16.63,
+    "last_ticker": "BITO",
+    "last_at": "2026-07-01T19:43:59.925433+00:00"
   },
   "hope_hold": {
     "count": 2,

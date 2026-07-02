@@ -1,14 +1,14 @@
 {
-  "spy_trend": "up",
-  "qqq_trend": "down",
-  "spy_pct": 0.305,
-  "qqq_pct": -0.927,
-  "spy_price": 749.05,
-  "qqq_price": 729.57,
+  "spy_trend": "flat",
+  "qqq_trend": "flat",
+  "spy_pct": 0.0,
+  "qqq_pct": 0.0,
+  "spy_price": 745.84,
+  "qqq_price": 723.13,
   "vix_level": 0.0,
   "vix_regime": "low",
   "risk_tone": "unknown",
-  "timestamp": "2026-07-01T16:22:38.708031+00:00",
+  "timestamp": "2026-07-02T11:18:57.913818+00:00",
   "source": "ib",
-  "_fetched_at": 1782922958.708012
+  "_fetched_at": 1782996641.808061
 }

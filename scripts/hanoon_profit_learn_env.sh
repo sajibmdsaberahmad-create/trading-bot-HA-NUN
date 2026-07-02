@@ -41,7 +41,11 @@ export STARTUP_IB_HOUSEKEEPING_SEC="${STARTUP_IB_HOUSEKEEPING_SEC:-12}"
 export STAGNATION_EXIT_SEC="${STAGNATION_EXIT_SEC:-75}"
 
 # ── Learning capture (bounded live — 8GB-safe) ────────────────────────────────
-export LEARNING_LIVE_MICRO_PPO=true
+if [[ "${HANOON_M2_CANONICAL_LIVE:-}" == "true" ]]; then
+  export LEARNING_LIVE_MICRO_PPO=false
+else
+  export LEARNING_LIVE_MICRO_PPO=true
+fi
 export PPO_LIVE_MICRO_STEPS_MAX="${PPO_LIVE_MICRO_STEPS_MAX:-48}"
 export PPO_LIVE_MICRO_STEPS_MIN="${PPO_LIVE_MICRO_STEPS_MIN:-32}"
 export LEARNING_LIVE_STEP_SCALE="${LEARNING_LIVE_STEP_SCALE:-0.12}"

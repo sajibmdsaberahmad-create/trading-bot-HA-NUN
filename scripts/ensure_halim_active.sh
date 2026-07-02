@@ -66,7 +66,7 @@ _ensure_checkpoint() {
       # shellcheck disable=SC1091
       source "$ROOT/venv/bin/activate"
     fi
-    "$ROOT/scripts/halim_register_checkpoint.sh" toddler_v1 --backend "${HALIM_LM_BACKEND:-mlx}" 2>/dev/null || true
+    "$ROOT/scripts/halim_register_checkpoint.sh" "$("$ROOT/scripts/halim_current_checkpoint.sh" 2>/dev/null || echo "toddler_v2")" --backend "${HALIM_LM_BACKEND:-mlx}" 2>/dev/null || true
   else
     echo "⚠️  No Halim toddler checkpoint — LM may be unavailable."
     echo "    Run: ./scripts/halim_start_toddler.sh  or set HALIM_TODDLER_ZIP=/path/to/halim_toddler_v1.zip"

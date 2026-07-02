@@ -28,6 +28,16 @@ source "$ROOT/scripts/halim_env.sh"
 source "$ROOT/scripts/halim_smart_sprint_env.sh" 2>/dev/null || true
 # shellcheck disable=SC1091
 source "$ROOT/scripts/halim_memory_profile.sh" 2>/dev/null || true
+# Replay gate profile — match live paper by default (quality gold); REPLAY_GOLD_VOLUME=true for legacy loose mode
+export HANOON_DEVICE_PROFILE_ROOT="$ROOT"
+if [[ "${REPLAY_GOLD_VOLUME:-false}" == "true" ]]; then
+  # shellcheck disable=SC1091
+  source "$ROOT/scripts/replay_gold_volume_profile.sh"
+else
+  export REPLAY_MATCH_LIVE="${REPLAY_MATCH_LIVE:-true}"
+  # shellcheck disable=SC1091
+  source "$ROOT/scripts/replay_match_live_profile.sh"
+fi
 export TZ="America/New_York"
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
@@ -44,10 +54,8 @@ export GIT_BATCH_CHECKPOINTS=true
 export REPLAY_SLIPPAGE_MODEL="${REPLAY_SLIPPAGE_MODEL:-adaptive}"
 export REPLAY_FILL_PROB="${REPLAY_FILL_PROB:-0.93}"
 export REPLAY_PARTIAL_FILL_PROB="${REPLAY_PARTIAL_FILL_PROB:-0.14}"
-export REPLAY_RELAX_COUNCIL="${REPLAY_RELAX_COUNCIL:-true}"
-export REPLAY_RELAX_COPILOT="${REPLAY_RELAX_COPILOT:-true}"
-export REPLAY_RELAX_WAR="${REPLAY_RELAX_WAR:-true}"
-export REPLAY_MIN_PROFIT_PROB="${REPLAY_MIN_PROFIT_PROB:-0.45}"
+# REPLAY_RELAX_* / MIN_PROFIT set by replay_match_live_profile or replay_gold_volume_profile
+export REPLAY_MIN_PROFIT_PROB="${REPLAY_MIN_PROFIT_PROB:-${MIN_PROFIT_PROBABILITY:-0.58}}"
 export PPO_TEACHER_ENABLED="${PPO_TEACHER_ENABLED:-true}"
 export PPO_TEACHER_WIN_RATE_FLOOR="${PPO_TEACHER_WIN_RATE_FLOOR:-0.38}"
 export PPO_TEACHER_EVERY_N_TRADES="${PPO_TEACHER_EVERY_N_TRADES:-4}"
@@ -137,10 +145,7 @@ export HALIM_REPLAY_GOLD_COLLECT="${HALIM_REPLAY_GOLD_COLLECT:-true}"
 export HALIM_AUTO_PACKAGE_COLAB="${HALIM_AUTO_PACKAGE_COLAB:-true}"
 export REPLAY_PREPARE_SFT="${REPLAY_PREPARE_SFT:-true}"
 export HALIM_LEARN_PACKAGE_ON_STOP="${HALIM_LEARN_PACKAGE_ON_STOP:-true}"
-# Replay: looser entry gates for gold volume (live paper uses stricter defaults in start_hanoon.sh)
-export REGIME_ENTRY_BLOCK="${REGIME_ENTRY_BLOCK:-false}"
-export MTF_ENTRY_BLOCK="${MTF_ENTRY_BLOCK:-false}"
-export USE_ACCOUNT_LOSS_HALT="${USE_ACCOUNT_LOSS_HALT:-false}"
+# Entry gates: replay_match_live_profile (default) or replay_gold_volume_profile
 export OFF_HOURS_HEAVY_TRAINING=false
 export SCAN_RUN_DEFERRED_IB=false
 export OFF_HOURS_SUSPEND_MARKET_DATA=false
@@ -151,7 +156,6 @@ export STARTUP_CURATED_WHEN_NOT_TRADABLE=false
 export FAST_SCANNER_LOCK="${FAST_SCANNER_LOCK:-true}"
 export AI_STREAM_WATCH_CAP="${AI_STREAM_WATCH_CAP:-10}"
 export AI_STREAM_PRIORITY_COUNT="${AI_STREAM_PRIORITY_COUNT:-6}"
-export CONFIDENCE_THRESHOLD="${CONFIDENCE_THRESHOLD:-0.65}"
 export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/mpl}"
 
 export LEARNING_PERSISTENCE_ENABLED="${LEARNING_PERSISTENCE_ENABLED:-true}"
@@ -224,7 +228,9 @@ if [[ "${REPLAY_SESSION_MAX_MINUTES:-0}" != "0" ]]; then
 else
   echo "  Session: no time cap — stop with REPLAY_STOP.command when you want"
 fi
-echo "  Council: $COUNCIL_ENABLED (relax=$REPLAY_RELAX_COUNCIL) | Model: $REPLAY_MODEL_PATH"
+echo "  Profile: ${REPLAY_MATCH_LIVE:-?} match-live | relax council=${REPLAY_RELAX_COUNCIL:-?} copilot=${REPLAY_RELAX_COPILOT:-?}"
+echo "  Gates: profit_prob=${MIN_PROFIT_PROBABILITY:-?} commander_runtime=${COMMANDER_RUNTIME_ENABLED:-?} green=${GREEN_DOCTRINE_ENTRY:-?} capital=${CAPITAL_DISCIPLINE:-?}"
+echo "  Council: $COUNCIL_ENABLED | Model: $REPLAY_MODEL_PATH"
   echo "  Training: queue-only=${LEARNING_QUEUE_ONLY:-true} teardown=${REPLAY_TRAINING_ENABLED} snapshot_ppo=${LEARNING_SNAPSHOT_SAVE_PPO:-false}"
   echo "  Halim: M. A. Halim (${HALIM_LM_BACKEND:-?}) coevolution=$HALIM_PPO_COEVOLUTION dialogue=$HALIM_PPO_DIALOGUE gold=$HALIM_ACTION_LEARN"
   if [[ "${HALIM_LOW_MEMORY_ACTIVE:-}" == "true" ]]; then

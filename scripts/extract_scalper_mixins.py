@@ -42,7 +42,7 @@ ENTRY_METHODS: Set[str] = {
 
 SESSION_METHODS: Set[str] = {
     "_suspend_off_hours_market_data", "_resume_tradable_market_data",
-    "_halt_trading_for_closed_market", "_on_day_session_end", "_on_rth_open",
+    "_halt_trading_for_closed_market", "_on_day_session_end", "_on_pre_market_open", "_on_rth_open",
     "_register_shutdown_signals", "_shutdown_abort", "_shutdown",
     "_write_init_report", "_write_close_report", "_log_startup_banner",
     "_log_tick_stream_config", "_maybe_daily_push", "_train_off_hours",

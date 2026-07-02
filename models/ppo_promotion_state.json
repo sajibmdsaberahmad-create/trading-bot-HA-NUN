@@ -1,17 +1,18 @@
 {
-  "timestamp": "2026-07-01T05:53:38.081164+00:00",
+  "timestamp": "2026-07-02T07:41:42.420251+00:00",
   "promoted": false,
   "evaluation": {
     "pass": false,
     "metrics": {
       "trades": 500,
-      "wins": 201,
-      "losses": 299,
-      "win_rate": 0.402,
-      "pnl_usd": 211679.76,
+      "wins": 197,
+      "losses": 303,
+      "win_rate": 0.394,
+      "pnl_usd": 211802.38,
       "worst_trade_pct": -61.55
     },
     "reasons": [
+      "win_rate 39% < 40%",
       "worst_trade -61.55% < -3.50%"
     ],
     "thresholds": {

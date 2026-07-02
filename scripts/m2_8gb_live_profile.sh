@@ -19,10 +19,10 @@ export LEARNING_SYNC_INTERVAL_SEC=0
 export AUTO_DISK_CLEANUP=false
 export HALIM_DEVICE_SWEEP_ON_START=false
 
-# ── Smart stack quality (hard rails) ────────────────────────────────────────
+# ── Smart stack quality (AI sovereignty — all trades decided by AI) ──────────
 export SMART_STACK=true
-export SMART_STACK_STRICT_PROFIT_PROB=true
-export SMART_STACK_AI_SURE_ENTRY=false
+export SMART_STACK_STRICT_PROFIT_PROB=false     # Sprint forces ON during toddler stage
+export SMART_STACK_AI_SURE_ENTRY=false          # PPO can lead without Halim alignment
 export SMART_STACK_WAR_POSTURE=true
 export SMART_STACK_ADVISORY_GATES=true
 export SMART_STACK_TEACHER_HARD_ONLY=true
@@ -30,11 +30,13 @@ export GREEN_DOCTRINE_ENTRY=true
 export GREEN_DOCTRINE_EXIT=true
 export GREEN_VERDICT_RECHECK=false
 export GREEN_SPIKE_PRECHECK=true
+export HYBRID_DISTILL_FAST_PATH=false           # never let student proxy bypass Halim/council
+export SNIPER_HALIM_FAST_SEC=1.5                # give Halim time before fast-path bypass
 
 # ── Pre-market entry mode (relaxed gates + tight risk for AM opportunities) ──
 export PRE_MARKET_ENTRY_ENABLED=true
 export PRE_MARKET_PROFIT_PROB_FLOOR=0.50
-export PRE_MARKET_MIN_CONFIDENCE=0.55
+export PRE_MARKET_MIN_CONFIDENCE=0.48
 export PRE_MARKET_POSITION_SIZE_PCT=0.50
 export PRE_MARKET_STOP_ATR_MULT=0.8
 export PRE_MARKET_TP_ATR_MULT=1.2
@@ -45,7 +47,7 @@ export PRE_MARKET_MIN_SCAN_SCORE=40
 export PRE_MARKET_PPO_MIN_CONF=0.40
 export PRE_MARKET_COUNCIL_FAST=true
 # Existing MIN_CONFIDENCE_PRE_MARKET lowered for AM entry support
-export MIN_CONFIDENCE_PRE_MARKET=0.55
+export MIN_CONFIDENCE_PRE_MARKET=0.48
 
 # ── Commander lottery (no silent 80% floor) ─────────────────────────────────
 export COMMANDER_RUNTIME_ENABLED=false
@@ -53,13 +55,16 @@ export COMMANDER_LOTTERY_MIN_PROFIT_PROB=0.58
 export COMMANDER_LOTTERY_MIN_SPIKE_RATIO=1.25
 export COMMANDER_LOTTERY_MIN_SCAN_SCORE=55
 
-# ── PPO wheel / war (paper-as-live discipline) ──────────────────────────────
+# ── PPO wheel / war (unlimited bullets — use available balance, AI sizes) ────
 export PPO_WHEEL_PROFILE_LOCK=true
 export PPO_ONLY_EXECUTION=true
 export PPO_LEAD_WHILE_COUNCIL_PENDING=true
 export PPO_LEAD_EXITS=true
 export COUNCIL_EXECUTION_ADVISORY_ONLY=true
-export WAR_ENTRY_ADVISORY_ONLY=true
+export WAR_ENTRY_ADVISORY_ONLY=true              # war is context for AI, not a hard block
+export WAR_BALANCE_DRIVEN_TRIPS=true             # use settled cash, not bullet count
+export WAR_AI_SIZING=true                        # AI determines position size
+export WAR_MAX_ROUND_TRIPS_PER_DAY=999           # effectively unlimited
 export PPO_DEPLOY_TIERS_ENABLED=true
 export LEARN_APPROVAL_REQUIRED=true
 export CONFIDENCE_THRESHOLD=0.58
@@ -73,31 +78,48 @@ export TREAT_PAPER_AS_LIVE=true
 export REGIME_ENTRY_BLOCK=true
 export MTF_ENTRY_BLOCK=true
 
-# ── Halim LM (8 GB: merged MLX, 1s micro-peek, 12s timeout) ───────────────
+# ── Halim LM (8 GB: Qwen2.5-1.5B MLX 4-bit, 1s micro-peek, 12s timeout) ────
 export HALIM_FORCE_LM=true
 export HALIM_ENTRY_LM_ENABLED=true
 export HALIM_LIVE_GOLD_COLLECT=true
 export HALIM_ENTRY_AWAIT_ENABLED=true
 export HALIM_ENTRY_AWAIT_LIVE=true
-export HALIM_ENTRY_AWAIT_SEC=1.0
-export HALIM_ENTRY_LM_TIMEOUT_SEC=12
-export HALIM_ENTRY_MAX_TOKENS=48
+export HALIM_ENTRY_AWAIT_SEC=1.6   # Main loop waits 1.6s; Halim continues in background
+export HALIM_ENTRY_LM_TIMEOUT_SEC=45  # Long timeout for 8GB (MLX can swap under memory pressure)
+export HALIM_ENTRY_MAX_TOKENS=32   # Smaller output = faster generation under memory pressure
 export HALIM_ENTRY_TEMPERATURE=0.04
 export HALIM_INFERENCE_TIMEOUT_SEC=90
 export HALIM_ENTRY_SOFT_VETO=false
 export HALIM_SMART_SPRINT=true
 export HALIM_SPRINT_BLOCK_MICRO_FAST=true
+export HALIM_LM_BACKEND=mlx
+export HALIM_MODEL_PATH=halim/data/checkpoints/latest
+export HALIM_SERVE_PREFER_ADAPTER=false
 
-_ROOT="${HANOON_DEVICE_PROFILE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-if [[ -f "$_ROOT/halim/data/checkpoints/toddler_v1/merged/model.safetensors" ]]; then
-  export HALIM_SERVE_PREFER_ADAPTER=false
-  export HALIM_MODEL_PATH="${HALIM_MODEL_PATH:-halim/data/checkpoints/toddler_v1}"
+# Local MLX reasoning is free — unlimited reasoning per session
+export LIVE_DECISION_API_DAILY=9999
+export REPLAY_DECISION_API_DAILY=9999
+
+# If toddler_v2_lora adapter exists, prefer it for fine-tuned reasoning
+_LORA="${HANOON_DEVICE_PROFILE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}/halim/data/checkpoints/toddler_v2_lora"
+if [[ -d "$_LORA" && -f "$_LORA/config.json" ]]; then
+  export HALIM_MODEL_PATH=halim/data/checkpoints/toddler_v2_lora
 fi
 
-# ── Learning (capture gold; no RTH micro-PPO on 8 GB) ───────────────────────
-export LEARNING_LIVE_MICRO_PPO=false
-export LEARNING_DEFER_DURING_RTH=true
-export INCREMENTAL_TRAINING_ENABLED=false
+# ── Learning (PPO learns in-flight; async micro-updates, no blocking) ───────
+export LEARNING_LIVE_MICRO_PPO=true              # PPO learns during live sessions
+export LEARNING_DEFER_DURING_RTH=false           # learn during market hours (async)
+export PPO_ENTRY_MICRO_ASYNC=true                # never block trading loop
+export PPO_ENTRY_MICRO_STEPS=256                 # lighter per-step cost
+export PPO_LIVE_MICRO_STEPS_MAX=128              # cap at 128 for 8GB safety
+export INCREMENTAL_TRAINING_ENABLED=true         # learn between sessions too
+export PPO_LEARN_EVERY_ENTRY=true                # learn on every fill
 
 # ── IB paper safety ─────────────────────────────────────────────────────────
 export CONNECTIVITY_WAIT_ON_IB_LOSS=true
+
+# ── Cloud council budget (PPO+Halim are pilots; API is senior expert) ───────
+export COUNCIL_NANNY_MODE=true                     # API only for critical/hard cases
+export COUNCIL_NANNY_RESERVE_PCT=0.50              # keep 50% budget for real decisions
+export COUNCIL_LEARNING_RING_ENABLED=false          # no deferred learning rings
+export COUNCIL_LEARNING_RING_STRONG_SPIKE_ONLY=false  # no learning rings at all

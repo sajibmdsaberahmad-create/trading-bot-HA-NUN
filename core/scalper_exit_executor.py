@@ -38,8 +38,13 @@ class ScalperExitMixin:
         except Exception as exc:
             from core.hot_path_guard import log_hot_path_warning
             log_hot_path_warning("exit_ib_position_check", exc, ticker=ticker)
-        if not can_trade:
-            return
+        try:
+            from core.smart_stack import can_trade_now
+            can_trade, _ = can_trade_now(self.cfg)
+            if not can_trade:
+                return
+        except Exception:
+            pass
         if not getattr(self.cfg, "SCALPER_MICRO_PREDICT_ENABLED", True):
             return
         if not self._load_position_context(ticker):

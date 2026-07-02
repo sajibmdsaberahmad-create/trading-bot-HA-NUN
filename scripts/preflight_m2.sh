@@ -64,13 +64,22 @@ import os
 from core.config import BotConfig
 from core.green_trade_doctrine import green_entry_mandatory
 from core.smart_stack import live_ram_only
+from core.capital_discipline import effective_min_profit_probability
 
 cfg = BotConfig()
 assert live_ram_only(cfg) or os.getenv("RAM_LIVE_ONLY", "").lower() in ("1", "true", "yes", "")
+eff = effective_min_profit_probability(cfg)
 print("✓ RAM_LIVE_ONLY / smart_stack ok")
 print(f"  green_mandatory={green_entry_mandatory(cfg)}")
 print(f"  await_sec={os.getenv('HALIM_ENTRY_AWAIT_SEC', '?')}")
 print(f"  strict_prob={os.getenv('SMART_STACK_STRICT_PROFIT_PROB', '?')}")
+print(f"  min_profit_env={os.getenv('MIN_PROFIT_PROBABILITY', '?')}")
+print(f"  commander_runtime={os.getenv('COMMANDER_RUNTIME_ENABLED', '?')}")
+print(f"  effective_min_profit={eff:.2f}")
+if os.getenv("HANOON_M2_CANONICAL_LIVE", "").lower() in ("1", "true", "yes"):
+    if eff > 0.60:
+        print(f"✗ effective_min_profit {eff:.2f} > 0.60 on M2 canonical")
+        raise SystemExit(1)
 PY
 
 # Disk (read-only)

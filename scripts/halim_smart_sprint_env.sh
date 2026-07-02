@@ -11,18 +11,19 @@
 
 # ── Phase B: fast + quality (child: proxy filters; no await clock) ───────────
 export HALIM_ENTRY_AWAIT_ENABLED=true
-export HALIM_ENTRY_AWAIT_SEC="${HALIM_ENTRY_AWAIT_SEC:-0}"
+if [[ "${HANOON_M2_CANONICAL_LIVE:-}" != "true" ]]; then
+  export HALIM_ENTRY_AWAIT_SEC="${HALIM_ENTRY_AWAIT_SEC:-0}"
+  export HALIM_ENTRY_LM_TIMEOUT_SEC="${HALIM_ENTRY_LM_TIMEOUT_SEC:-8}"
+  export HALIM_SERVE_PREFER_ADAPTER=true
+fi
 export HALIM_ENTRY_AWAIT_LIVE=true
 export HALIM_ENTRY_AWAIT_REPLAY=true
 export HALIM_ENTRY_LM_ENABLED=true
-export HALIM_ENTRY_LM_TIMEOUT_SEC="${HALIM_ENTRY_LM_TIMEOUT_SEC:-8}"
 export HALIM_ENTRY_MAX_TOKENS="${HALIM_ENTRY_MAX_TOKENS:-48}"
 export HALIM_ENTRY_TEMPERATURE="${HALIM_ENTRY_TEMPERATURE:-0.04}"
 export HALIM_REASONING_VIA_SERVER="${HALIM_REASONING_VIA_SERVER:-auto}"
 export HALIM_FORCE_LM=true
-export HALIM_SERVE_PREFER_ADAPTER=true
 export HALIM_INLINE_LM_FALLBACK=false
-# Overridden to false by m2_8gb_live_profile.sh when merged/model.safetensors exists
 
 # Quality gates (keep ON — main filter for better trades)
 export HALIM_SPRINT_BLOCK_MICRO_FAST="${HALIM_SPRINT_BLOCK_MICRO_FAST:-true}"

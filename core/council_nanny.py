@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """
-core/council_nanny.py — Smart cloud-council budget for profit-first trading.
+core/council_nanny.py — API is the senior expert, not the pilot.
 
-Council is the nanny (advisory), not the engine. PPO + local gates execute;
-Groq/Gemini only weigh in on setups worth the RPM and on open positions.
+PPO and Halim are the pilots. They make every trading decision.
+The cloud API (Groq/Gemini) is a senior expert/teacher — only called for:
+  1. RISK EXITS — emergency capital protection when PPO+mechanical might miss
+  2. HARD ENTRY CASES — PPO+Halim disagree on meaningful spikes (curriculum)
+
+NEVER called for:
+  - position_manage (mechanical trail + PPO exits suffice)
+  - exit_decision (PPO exit signal + mechanical trail + green doctrine suffice)
+  - stagnation_check (mechanical rules handle this)
+  - learning/deferred (off in nanny mode — PPO records are enough)
 """
 
 from __future__ import annotations
@@ -12,18 +20,17 @@ from typing import Tuple
 
 from core.config import BotConfig
 
-# Live profit path — always try when budget allows
-_HIGH_PRIORITY = frozenset({
-    "exit_decision", "position_manage", "risk_exit",
-})
+# Risk exits — emergency capital protection only
+_HIGH_PRIORITY = frozenset({"risk_exit"})
 
-# Entry deliberation — only when setup passes quality bar
+# Entry deliberation — handled by smart_stack.py should_ring_teacher_api()
 _MEDIUM_PRIORITY = frozenset({"entry_decision"})
 
-# Background / learning — off in nanny mode (biggest RPM burn)
+# Background tasks — always off in nanny mode
 _LOW_PRIORITY = frozenset({
     "stagnation_check", "scan_score", "rank_scan",
     "pick_next_target", "lock_review",
+    "position_manage", "exit_decision",
 })
 
 # PPO-led elite entries — one async council ring after fill for distillation only
@@ -104,7 +111,9 @@ def should_ring_council(
     pipeline: str = "",
 ) -> Tuple[bool, str]:
     """
-    Return (allowed, reason). Gates LiveAILine.ring / decide_call hot path.
+    Return (allowed, reason). Senior expert gating.
+
+    PPO + Halim = pilots. API = teacher for hard cases only.
     """
     if not getattr(cfg, "COUNCIL_ENABLED", True):
         return False, "council_disabled"
@@ -117,21 +126,29 @@ def should_ring_council(
 
     task = str(task or "entry_decision")
 
+    # Position management and routine exits — NEVER use API.
+    # PPO exit signal + mechanical trail + green doctrine suffice.
+    if task in ("position_manage", "exit_decision"):
+        return False, "nanny_ppo_exit_suffices"
+
     if for_learning and not learning_ring_for_pipeline(cfg, pipeline):
         return False, "nanny_no_learning_ring"
 
     if task in _LOW_PRIORITY:
-        if not bool(getattr(cfg, "COUNCIL_NANNY_LOW_TASKS", False)):
-            return False, f"nanny_low_task_{task}"
+        return False, f"nanny_low_task_{task}"
 
     headroom = council_budget_headroom(cfg)
     reserve = float(getattr(cfg, "COUNCIL_NANNY_RESERVE_PCT", 0.25))
 
-    if task in _HIGH_PRIORITY or in_position:
-        if headroom <= 0 and _providers_hot(cfg):
+    # Risk exit — emergency capital protection, always allowed within budget
+    if task in _HIGH_PRIORITY:
+        if headroom <= 0:
             return False, "nanny_budget_exhausted"
-        return True, "position_priority"
+        return True, "risk_priority"
 
+    # Entry decision — already gated by smart_stack.py should_ring_teacher_api()
+    # which considers PPO+Halim disagreement, Halim confidence, curriculum sampling.
+    # This is a secondary safety net (spike quality, budget).
     if task in _MEDIUM_PRIORITY:
         min_spike = float(getattr(cfg, "COUNCIL_NANNY_MIN_SPIKE", 1.25))
         min_score = float(getattr(cfg, "COUNCIL_NANNY_MIN_SCORE", 55.0))

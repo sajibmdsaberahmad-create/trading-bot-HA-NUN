@@ -47,14 +47,14 @@
   },
   "rate_limits_daily": {
     "api_calls": 2000,
-    "google_ai_searches": 99999,
+    "google_ai_searches": 150,
     "web_fetches": 0,
     "git_pushes": 50,
     "shell_commands": 20,
     "param_mutations": 30,
     "file_writes": 200,
     "agent_steps": 100,
-    "learn_fetches": 2500
+    "learn_fetches": 500
   },
   "web_allowlist_hosts": [
     "www.google.com",
@@ -132,7 +132,7 @@
     "ib_data",
     "web_search"
   ],
-  "operator_enabled_at": "2026-07-01T16:22:12.541051+00:00",
+  "operator_enabled_at": "2026-07-02T12:50:27.604074+00:00",
   "frontier_policy": {
     "schema": "frontier_model_safety_v1",
     "aligned_with": [

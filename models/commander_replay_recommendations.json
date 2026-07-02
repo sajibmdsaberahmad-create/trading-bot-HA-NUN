@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "generated_at": "2026-06-30T20:00:04.709441+00:00",
-  "day": "2026-06-30",
+  "generated_at": "2026-07-01T20:00:42.612935+00:00",
+  "day": "2026-07-01",
   "commander": {
     "source": "commander_ib_report",
     "report": "Since_Inception_Detailed_11_20260427",
@@ -122,345 +122,319 @@
     ]
   },
   "live": {
-    "trip_count": 155,
-    "valid_trip_count": 155,
-    "total_pnl_usd": -1181.46,
+    "trip_count": 37,
+    "valid_trip_count": 37,
+    "total_pnl_usd": -84.0,
     "class_counts": {
-      "fee_bleed": 33,
-      "loss_other": 92,
-      "good_cut": 21,
-      "hope_hold": 2,
-      "neutral": 4,
-      "tail_loss": 3
+      "good_cut": 6,
+      "loss_other": 19,
+      "tail_loss": 2,
+      "fee_bleed": 3,
+      "neutral": 7
     },
     "pnl_by_class": {
-      "fee_bleed": -14.71,
-      "loss_other": -834.49,
-      "good_cut": 188.67,
-      "hope_hold": -1.91,
-      "neutral": 0.0,
-      "tail_loss": -519.02
+      "good_cut": 19.92,
+      "loss_other": -61.69,
+      "tail_loss": -43.19,
+      "fee_bleed": -0.86,
+      "neutral": 1.82
     },
     "trips": [
       {
-        "ticker": "CELZ",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 63.6,
-        "class": "fee_bleed",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "INLF",
-        "pnl_usd": -0.72,
-        "pnl_pct": -0.99,
-        "hold_sec": 32.3,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +3.46% (peak +4.12%)"
-      },
-      {
-        "ticker": "SOXS",
-        "pnl_usd": -1.0,
-        "pnl_pct": -0.22,
-        "hold_sec": 66.3,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +10.49% (peak +0.06%)"
-      },
-      {
-        "ticker": "CELZ",
-        "pnl_usd": -1.0,
-        "pnl_pct": -0.23,
-        "hold_sec": 0.0,
-        "class": "fee_bleed",
-        "exit_reason": "spike_top_intrabar: +8.94% vol=1.2x"
-      },
-      {
-        "ticker": "BTCT",
-        "pnl_usd": -2.9,
-        "pnl_pct": -0.48,
-        "hold_sec": 39.6,
-        "class": "loss_other",
-        "exit_reason": "tick_micro_loss"
-      },
-      {
-        "ticker": "BTCT",
-        "pnl_usd": -1.83,
-        "pnl_pct": -0.52,
-        "hold_sec": 19.1,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +1.28% (peak +1.28%)"
-      },
-      {
-        "ticker": "INTZ",
-        "pnl_usd": 55.25,
-        "pnl_pct": 9.16,
-        "hold_sec": 35.6,
+        "ticker": "GSUN",
+        "pnl_usd": 11.93,
+        "pnl_pct": 3.53,
+        "hold_sec": 112.0,
         "class": "good_cut",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +9.58% (peak +11.24%)"
+        "exit_reason": "green_exit:early_book slip=67% pred_fade"
       },
       {
-        "ticker": "SOXS",
-        "pnl_usd": -5.0,
-        "pnl_pct": -0.75,
-        "hold_sec": 60.3,
+        "ticker": "INTC",
+        "pnl_usd": -7.24,
+        "pnl_pct": -2.57,
+        "hold_sec": 46.1,
         "class": "loss_other",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "YHC",
-        "pnl_usd": -3.82,
-        "pnl_pct": -1.93,
-        "hold_sec": 24.7,
-        "class": "loss_other",
-        "exit_reason": "tick_micro_loss"
-      },
-      {
-        "ticker": "CELZ",
-        "pnl_usd": -10.76,
-        "pnl_pct": -1.6,
-        "hold_sec": 63.4,
-        "class": "loss_other",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "INLF",
-        "pnl_usd": -0.58,
-        "pnl_pct": -1.27,
-        "hold_sec": 40.4,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:giveback +8.21% (peak +15519.14% gave back 15510.93%)"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -1.0,
-        "pnl_pct": -0.15,
-        "hold_sec": 167.5,
-        "class": "loss_other",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +106.50% (peak +106.50%)"
-      },
-      {
-        "ticker": "BIYA",
-        "pnl_usd": -0.15,
-        "pnl_pct": -0.27,
-        "hold_sec": 21.7,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:giveback +0.16% (peak +0.36% gave back 0.21%)"
-      },
-      {
-        "ticker": "BITO",
-        "pnl_usd": -0.16,
-        "pnl_pct": -0.02,
-        "hold_sec": 0.0,
-        "class": "fee_bleed",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "BIYA",
-        "pnl_usd": 8.86,
-        "pnl_pct": 2.54,
-        "hold_sec": 83.1,
-        "class": "good_cut",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 723.6,
-        "class": "hope_hold",
-        "exit_reason": "tick_micro_loss"
-      },
-      {
-        "ticker": "INLF",
-        "pnl_usd": -0.72,
-        "pnl_pct": -1.02,
-        "hold_sec": 208.6,
-        "class": "loss_other",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "CELZ",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 12.9,
-        "class": "fee_bleed",
-        "exit_reason": "tick_micro_loss"
-      },
-      {
-        "ticker": "CELZ",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 27.6,
-        "class": "fee_bleed",
-        "exit_reason": "spike_top_intrabar: +1.07% vol=39088.0x"
-      },
-      {
-        "ticker": "BITO",
-        "pnl_usd": -0.21,
-        "pnl_pct": -0.13,
-        "hold_sec": 40.5,
-        "class": "fee_bleed",
-        "exit_reason": "trailing_stop"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 132.0,
-        "class": "neutral",
-        "exit_reason": "stop_breach"
-      },
-      {
-        "ticker": "AAL",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 160.7,
-        "class": "neutral",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "AAL",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 166.5,
-        "class": "neutral",
-        "exit_reason": "bracket_exit"
-      },
-      {
-        "ticker": "EDBL",
-        "pnl_usd": -184.42,
-        "pnl_pct": -52.08,
-        "hold_sec": 42.5,
-        "class": "tail_loss",
-        "exit_reason": "stop_breach"
-      },
-      {
-        "ticker": "INTZ",
-        "pnl_usd": -63.55,
-        "pnl_pct": -5.17,
-        "hold_sec": 53.2,
-        "class": "loss_other",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +146.39% (peak +146.39%)"
-      },
-      {
-        "ticker": "VWAV",
-        "pnl_usd": -224.56,
-        "pnl_pct": -42.97,
-        "hold_sec": 53.9,
-        "class": "tail_loss",
-        "exit_reason": "stop_breach"
-      },
-      {
-        "ticker": "SVRE",
-        "pnl_usd": -110.04,
-        "pnl_pct": -61.55,
-        "hold_sec": 54.5,
-        "class": "tail_loss",
-        "exit_reason": "stop_breach"
-      },
-      {
-        "ticker": "SOXS",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 28.9,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +146.06% (peak +146.06%)"
-      },
-      {
-        "ticker": "BIYA",
-        "pnl_usd": 2.64,
-        "pnl_pct": 0.75,
-        "hold_sec": 12.8,
-        "class": "good_cut",
-        "exit_reason": "spike_top_intrabar: +1.70% vol=77654.0x"
-      },
-      {
-        "ticker": "AAL",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 57.6,
-        "class": "fee_bleed",
-        "exit_reason": "stop_breach"
-      },
-      {
-        "ticker": "CELZ",
-        "pnl_usd": 0.0,
-        "pnl_pct": 0.0,
-        "hold_sec": 25.0,
-        "class": "fee_bleed",
-        "exit_reason": "spike_top_intrabar: +0.62% vol=24301.0x"
-      },
-      {
-        "ticker": "BITO",
-        "pnl_usd": -17.48,
-        "pnl_pct": -0.13,
-        "hold_sec": 0.0,
-        "class": "loss_other",
-        "exit_reason": "micro_loss: pressure=0.63 pred\u2193$7.92"
-      },
-      {
-        "ticker": "TZA",
-        "pnl_usd": -1.53,
-        "pnl_pct": -0.76,
-        "hold_sec": 95.2,
-        "class": "loss_other",
-        "exit_reason": "stop_breach"
-      },
-      {
-        "ticker": "BIYA",
-        "pnl_usd": 26.1,
-        "pnl_pct": 7.46,
-        "hold_sec": 111.7,
-        "class": "good_cut",
-        "exit_reason": "spike_top_intrabar: +0.43% vol=221735.0x"
+        "exit_reason": "hard_stop"
       },
       {
         "ticker": "T",
+        "pnl_usd": -22.56,
+        "pnl_pct": -0.31,
+        "hold_sec": 140.1,
+        "class": "tail_loss",
+        "exit_reason": "ai_stagnation: Stagnation timeout 98s / 90s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "BITO",
+        "pnl_usd": -2.18,
+        "pnl_pct": -0.25,
+        "hold_sec": 109.0,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 87s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "INLF",
         "pnl_usd": 0.0,
         "pnl_pct": 0.0,
-        "hold_sec": 231.2,
+        "hold_sec": 66.1,
+        "class": "fee_bleed",
+        "exit_reason": "green_exit:pred_fade"
+      },
+      {
+        "ticker": "DVLT",
+        "pnl_usd": -0.16,
+        "pnl_pct": -0.05,
+        "hold_sec": 92.2,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 86s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "GSUN",
+        "pnl_usd": -4.74,
+        "pnl_pct": -1.36,
+        "hold_sec": 22.6,
+        "class": "loss_other",
+        "exit_reason": "hard_stop"
+      },
+      {
+        "ticker": "INLF",
+        "pnl_usd": 1.32,
+        "pnl_pct": 3.67,
+        "hold_sec": 175.9,
+        "class": "good_cut",
+        "exit_reason": "green_exit:wave_edge_done edge=0.00 pnl=+3.17%"
+      },
+      {
+        "ticker": "BITO",
+        "pnl_usd": -0.95,
+        "pnl_pct": -0.12,
+        "hold_sec": 215.3,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 91s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "TZA",
+        "pnl_usd": -1.27,
+        "pnl_pct": -0.13,
+        "hold_sec": 157.9,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 81s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "MSTU",
+        "pnl_usd": -8.62,
+        "pnl_pct": -0.5,
+        "hold_sec": 143.6,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 85s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "GPUS",
+        "pnl_usd": -0.24,
+        "pnl_pct": -0.13,
+        "hold_sec": 165.5,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 82s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "INLF",
+        "pnl_usd": 0.13,
+        "pnl_pct": 0.35,
+        "hold_sec": 571.4,
         "class": "neutral",
+        "exit_reason": "ai_stagnation: Stagnation timeout 92s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "YHC",
+        "pnl_usd": -1.08,
+        "pnl_pct": -1.37,
+        "hold_sec": 190.7,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 94s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "DXF",
+        "pnl_usd": -2.32,
+        "pnl_pct": -0.66,
+        "hold_sec": 92.4,
+        "class": "loss_other",
+        "exit_reason": "hard_stop"
+      },
+      {
+        "ticker": "DXF",
+        "pnl_usd": -11.89,
+        "pnl_pct": -3.4,
+        "hold_sec": 207.4,
+        "class": "loss_other",
+        "exit_reason": "green_exit:ai_stall"
+      },
+      {
+        "ticker": "SOXS",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 199.8,
+        "class": "neutral",
+        "exit_reason": "ai_stagnation: Stagnation timeout 118s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "INLF",
+        "pnl_usd": -0.48,
+        "pnl_pct": -2.19,
+        "hold_sec": 126.3,
+        "class": "loss_other",
+        "exit_reason": "hard_stop"
+      },
+      {
+        "ticker": "AAL",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 145.9,
+        "class": "neutral",
+        "exit_reason": "ai_stagnation: Stagnation timeout 86s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "SOXS",
+        "pnl_usd": -1.9,
+        "pnl_pct": -0.26,
+        "hold_sec": 108.4,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 86s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "DXF",
+        "pnl_usd": -20.63,
+        "pnl_pct": -5.74,
+        "hold_sec": 39.8,
+        "class": "tail_loss",
         "exit_reason": "stop_breach"
       },
       {
         "ticker": "INLF",
-        "pnl_usd": -5.38,
-        "pnl_pct": 4.11,
-        "hold_sec": 0.0,
-        "class": "good_cut",
-        "exit_reason": "tick_micro_loss"
-      },
-      {
-        "ticker": "CELZ",
         "pnl_usd": 0.0,
         "pnl_pct": 0.0,
-        "hold_sec": 61.3,
-        "class": "fee_bleed",
-        "exit_reason": "spike_top_intrabar: +1.30% vol=14435.0x"
+        "hold_sec": 230.9,
+        "class": "neutral",
+        "exit_reason": "green_exit:ai_stall"
       },
       {
-        "ticker": "AAL",
-        "pnl_usd": -1.54,
-        "pnl_pct": -0.06,
-        "hold_sec": 18.6,
-        "class": "fee_bleed",
-        "exit_reason": "green_profit_lock:ai_stall quick_scalp +14.05% (peak +14.05%)"
-      },
-      {
-        "ticker": "SOXS",
-        "pnl_usd": -18.92,
-        "pnl_pct": -0.62,
-        "hold_sec": 103.5,
-        "class": "loss_other",
-        "exit_reason": "bracket_exit"
+        "ticker": "INLF",
+        "pnl_usd": 3.84,
+        "pnl_pct": 10.67,
+        "hold_sec": 135.2,
+        "class": "good_cut",
+        "exit_reason": "green_exit:ai_stall"
       },
       {
         "ticker": "BITO",
         "pnl_usd": 0.0,
         "pnl_pct": 0.0,
-        "hold_sec": 63.6,
+        "hold_sec": 119.4,
+        "class": "neutral",
+        "exit_reason": "ai_stagnation: Stagnation timeout 77s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "TZA",
+        "pnl_usd": -0.52,
+        "pnl_pct": -0.26,
+        "hold_sec": 148.7,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 104s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "GPUS",
+        "pnl_usd": -1.92,
+        "pnl_pct": -1.0,
+        "hold_sec": 186.8,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 89s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "NVDA",
+        "pnl_usd": 0.02,
+        "pnl_pct": 0.01,
+        "hold_sec": 169.9,
+        "class": "good_cut",
+        "exit_reason": "ai_stagnation: Stagnation timeout 116s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "DVLT",
+        "pnl_usd": -1.63,
+        "pnl_pct": -0.46,
+        "hold_sec": 129.6,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 105s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "DXF",
+        "pnl_usd": -9.99,
+        "pnl_pct": -2.86,
+        "hold_sec": 257.0,
+        "class": "loss_other",
+        "exit_reason": "hard_stop"
+      },
+      {
+        "ticker": "INLF",
+        "pnl_usd": 0.95,
+        "pnl_pct": 10.56,
+        "hold_sec": 277.5,
+        "class": "good_cut",
+        "exit_reason": "wave_end: profit 9.29% volume fading"
+      },
+      {
+        "ticker": "BITO",
+        "pnl_usd": -1.48,
+        "pnl_pct": -0.24,
+        "hold_sec": 177.3,
+        "class": "loss_other",
+        "exit_reason": "ai_stagnation: Stagnation timeout 133s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "YHC",
+        "pnl_usd": 0.0,
+        "pnl_pct": 0.0,
+        "hold_sec": 113.2,
+        "class": "neutral",
+        "exit_reason": "ai_stagnation: Stagnation timeout 76s / 75s (mechanical \u2014 council advisory)"
+      },
+      {
+        "ticker": "DXF",
+        "pnl_usd": -0.12,
+        "pnl_pct": -0.06,
+        "hold_sec": 26.0,
         "class": "fee_bleed",
-        "exit_reason": "bracket_exit"
+        "exit_reason": "hard_stop"
+      },
+      {
+        "ticker": "BITO",
+        "pnl_usd": -0.74,
+        "pnl_pct": -0.12,
+        "hold_sec": 51.2,
+        "class": "fee_bleed",
+        "exit_reason": "hard_stop"
+      },
+      {
+        "ticker": "INLF",
+        "pnl_usd": 1.69,
+        "pnl_pct": 9.39,
+        "hold_sec": 1046.9,
+        "class": "neutral",
+        "exit_reason": "stop_breach"
+      },
+      {
+        "ticker": "SOXS",
+        "pnl_usd": -3.08,
+        "pnl_pct": -0.52,
+        "hold_sec": 127.6,
+        "class": "loss_other",
+        "exit_reason": "hard_stop"
+      },
+      {
+        "ticker": "T",
+        "pnl_usd": 1.86,
+        "pnl_pct": 0.29,
+        "hold_sec": 113.5,
+        "class": "good_cut",
+        "exit_reason": "ai_stagnation: Stagnation timeout 93s / 75s (mechanical \u2014 council advisory)"
       }
     ]
   },
@@ -473,16 +447,6 @@
       "suggested_params": [
         "STAGNATION_EXIT_SEC",
         "MIN_PROFIT_PROBABILITY"
-      ]
-    },
-    {
-      "id": "live_hope_hold",
-      "priority": "high",
-      "signal": "hope_hold",
-      "message": "Live sessions show hope-hold losses \u2014 tighten stagnation / early loss exits.",
-      "suggested_params": [
-        "STAGNATION_EXIT_SEC",
-        "SCALP_PROFIT_GIVEBACK_PCT"
       ]
     },
     {
