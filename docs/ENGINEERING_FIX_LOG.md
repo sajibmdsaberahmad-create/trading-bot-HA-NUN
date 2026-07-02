@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-07-02 — Fix: Tech override never fires in AICommander (PPO blocks all fast paths)
+
+### Problem
+PPO HOLD action=0 at 54% on every ticker. The tech override was only in
+`_ai_gate_entry()` in `scalper_entry_executor.py` — a fallback path that never
+runs because AICommander's `decide_entry()` returns before reaching it.
+
+All sniper/flash/strong-fast paths check `ppo_action != 1 → return False`.
+Zero entries even with smart green bypass.
+
+### Fix
+Added a **tech override block** directly in `AICommander.decide_entry()`
+(`ai_commander_entry.py`). When PPO HOLDs (action=0, not EXIT=2) but
+spike ≥ TECH_OVERRIDE_SPIKE_MIN (1.3) and score ≥ TECH_OVERRIDE_SCORE_MIN (30),
+the override forces `enter=True` with confidence `max(ppo_conf, 0.55, scan_score/80)`.
+No Halim/council wait.
+
+This runs BEFORE the Halim/council paths so it's the primary entry channel for
+strong momentum spikes. PPO still logs its HOLD action and learns from the trade
+outcome.
+
+### Files changed
+- `core/ai_commander_entry.py` — tech override in `decide_entry()` before council path
+
+### Verify
+1. HANOON log: `tech:override spike=1.4x score=40` lines for strong spikes
+2. Entries execute without Halim/council wait when spike+score sufficient
+3. PPO records the trade for learning
+
+---
+
 ## 2026-07-02 — Fix: Green doctrine blocks ALL entries; smart green bypass + Halim restart bug
 
 ### Problem

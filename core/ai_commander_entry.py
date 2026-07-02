@@ -762,6 +762,45 @@ class CommanderEntryMixin:
                 )
             return decision
 
+        # ── Technical override: strong momentum bypasses PPO HOLD ────────────
+        # PPO consistently HOLDs at 54% on all tickers. When spike+score are
+        # strong enough, the momentum itself IS the entry signal — no Halim/council wait.
+        if int(ppo_action) != 1 and int(ppo_action) != 2:
+            tech_spike = float(getattr(self.cfg, "TECH_OVERRIDE_SPIKE_MIN", 1.3))
+            tech_score = float(getattr(self.cfg, "TECH_OVERRIDE_SCORE_MIN", 30))
+            if float(spike_ratio) >= tech_spike and float(scan_score) >= tech_score:
+                tech_out = {
+                    "enter": True,
+                    "confidence": max(ppo_conf, 0.55, min(scan_score / 80.0, 0.85)),
+                    "reason": (
+                        f"Technical override: spike={spike_ratio:.1f}x score={scan_score:.0f} "
+                        f"| PPO HOLD {ppo_conf:.0%} overridden by momentum"
+                    )[:200],
+                    "journal": f"Tech override entry — {ticker}",
+                    "pipeline": "tech:override",
+                    "pending": False,
+                }
+                decision = self._finalize_entry_decision(
+                    tech_out, ticker=ticker, current_px=current_px,
+                    spike_ratio=spike_ratio, scan_score=scan_score,
+                    ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                    min_conf=min_conf, deploy_cap=deploy_cap, max_risk=max_risk,
+                    use_fixed_risk=use_fixed_risk, is_penny=is_penny, avg_vol=avg_vol,
+                    df=df, equity=equity, cash=float(account.get("cash", 0)),
+                    gate_context=gate_ctx,
+                )
+                if decision.get("enter"):
+                    log.info(
+                        f"  🧠 AI skip {ticker}: PPO hold action=0 {ppo_conf:.0%} | "
+                        f"tech:override spike={spike_ratio:.1f}x score={scan_score:.0f}"
+                    )
+                    self._schedule_deferred_entry(
+                        ticker=ticker, fingerprint=fp, decision=decision,
+                        ppo_action=ppo_action, ppo_conf=ppo_conf, ppo_reason=ppo_reason,
+                        market_ctx=mctx,
+                    )
+                return decision
+
         if (
             df is not None
             and len(df) >= 20
