@@ -258,6 +258,21 @@ def main(argv: list[str] | None = None) -> int:
     if not ok:
         print(f"⚠️  {msg}")
 
+    # Pre-load the MLX model at startup so the first client request doesn't
+    # trigger a slow lazy load inside a thread lock.
+    print("📦 Pre-loading MLX model...", flush=True)
+    try:
+        test = complete_reasoning("test", purpose="entry_decision")
+        if test.get("ok"):
+            print(f"   ✅ Model ready ({test.get('backend', 'mlx')})", flush=True)
+        elif "no_checkpoint" in str(test.get("reason", "")):
+            print(f"   ⏭️  No checkpoint found — deferring load", flush=True)
+        else:
+            # Warmup failed but server still starts — may work on next request
+            print(f"   ⚠️  Warmup: {test.get('message', '?')[:80]}", flush=True)
+    except Exception as exc:
+        print(f"   ⚠️  Warmup exception: {exc}", flush=True)
+
     httpd = ThreadingHTTPServer((args.host, args.port), HalimHandler)
     env = runtime_envelope()
     print(f"🧠 {MODEL_NAME} serve — http://{args.host}:{args.port}")

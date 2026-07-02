@@ -4,6 +4,44 @@
 
 ---
 
+## 2026-07-02 — Fix: MLX model lazy-load blocks HTTP thread → serve_no_text
+
+### Problem
+After the stale-serve kill was added to start.sh, Halim still returned 100% `serve_no_text`.
+Every request hung for the full 45s timeout then returned empty. The health endpoint
+responded instantly, but `/v1/complete` timed out every time.
+
+### Root cause
+The MLX model is loaded **lazily on the first inference request** inside
+`inference_backend.mlx_complete()`, which runs inside `_inference_lock` (a
+`threading.Lock`). Loading Qwen2.5-1.5B-Instruct-4bit (~839MB) into memory on 8GB RAM
+takes 10-30 seconds. During that time the HTTP response thread is blocked. The client
+(`_halim_complete` in `halim_entry_line.py`) waits 45s, times out, and returns
+`("", "serve_no_text")`.
+
+Even after load succeeds, the lock serialises all requests — if one inference is
+running, subsequent requests queue behind it and time out.
+
+### Fix
+- `halim/halim/serve.py`: Added **model warmup at startup** — `complete_reasoning("test")`
+  runs before `httpd.serve_forever()`, so the model is loaded before any HTTP request
+  arrives. Warmup duration is printed (flushed) to the daemon log.
+- `start.sh`: Increased wait loop from 3s to **45s with polling**. Checks health every
+  1s, shows daemon log tail every 10s. The health endpoint is only available after
+  warmup completes (because it's after `serve_forever()`).
+
+### Files changed
+- `halim/halim/serve.py` — warmup call in `main()`
+- `start.sh` — 45s polling loop with log visibility
+
+### Verify
+1. Run `bash start.sh`
+2. Watch for `📦 Pre-loading MLX model...` then `✅ Model ready` in the daemon log
+3. Check first `/v1/complete` response time: should be < 5s (not 45s)
+4. Expect zero `serve_no_text` after warmup
+
+---
+
 ## 2026-07-02 — Fix: stale Halim serve causes 100% serve_no_text failure
 
 ### Problem

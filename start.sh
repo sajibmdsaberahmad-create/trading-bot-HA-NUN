@@ -37,7 +37,24 @@ echo "🚀 Starting fresh Halim serve (background)..."
 nohup python3 -u halim/halim/serve.py > logs/halim_serve_daemon.log 2>&1 &
 HALIM_PID=$!
 echo "   Halim PID=$HALIM_PID"
-sleep 3
+
+# Wait for model to pre-load (MLX takes 5-20s depending on cache)
+echo "   Waiting for model warmup..."
+for i in $(seq 1 45); do
+    if curl -s -m 2 http://localhost:8765/health 2>/dev/null | grep -q '"ok":true'; then
+        echo "   ✅ Halim serve ready (model warmed)"
+        echo "   ─── Last lines from daemon log ───"
+        tail -5 logs/halim_serve_daemon.log 2>/dev/null || true
+        echo ""
+        break
+    fi
+    if [ $((i % 10)) -eq 0 ]; then
+        echo "   Still waiting ($i sec)..."
+        tail -2 logs/halim_serve_daemon.log 2>/dev/null || true
+    fi
+    sleep 1
+done
+echo ""
 
 echo "🚀 Starting HANOON scalper..."
 echo "   Stop with Ctrl+C then run: ./stop.sh"
