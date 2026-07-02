@@ -2215,6 +2215,16 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         except Exception as exc:
                             log.debug(f"Overseer digest: {exc}")
 
+                # ── Periodic parameter self-tuning (from Halim observations) ──
+                if not replay_mode:
+                    try:
+                        from core.halim_self_tune import tune_cycle
+                        result = tune_cycle(self.cfg)
+                        if result.get("ok") and result.get("changes"):
+                            pass  # tuned — already logged by tune_cycle
+                    except Exception as exc:
+                        log.debug(f"Self-tune: {exc}")
+
                 cleanup_iv = float(getattr(self.cfg, "PERIODIC_CLEANUP_SEC", 1800))
                 _now = time.time()
                 replay_mode = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")

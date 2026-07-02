@@ -86,6 +86,10 @@ export HALIM_SERVE_RESTART_SEC=900               # restart every 15min to avoid 
 export OVERSEER_ENABLED=true                      # enable system overseer
 export OVERSEER_INTERVAL_SEC=60                   # digest every 60s
 export OVERSEER_MAX_EVENTS=200                    # rolling event window
+
+# ── Parameter self-tuning (Halim observations → safe parameter adjustments) ─
+export SELF_TUNE_ENABLED=true                     # auto-tune parameters
+export SELF_TUNE_INTERVAL_SEC=300                 # tune cycle every 5 min
 export CAPITAL_DISCIPLINE=true
 export TREAT_PAPER_AS_LIVE=true
 export REGIME_ENTRY_BLOCK=true

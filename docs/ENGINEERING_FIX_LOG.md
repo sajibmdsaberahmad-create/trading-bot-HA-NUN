@@ -4,6 +4,55 @@
 
 ---
 
+## 2026-07-02 — New: Parameter self-tuning (Halim observations → safe parameter adjustments)
+
+### Problem
+Every parameter was static. Once `m2_8gb_live_profile.sh` was sourced, thresholds
+stayed fixed forever. Halim could observe "green vetoes cluster on uptrend" but
+couldn't do anything about it — the system had no way to adapt.
+
+### Design
+New module `core/halim_self_tune.py` — reads Halim overseer observations and
+adjusts parameters within hardcoded safety bounds.
+
+**Safety:**
+- Every parameter has hardcoded min/max bounds (never exceeds)
+- Changes are gradual (0.03 float steps, 0.1 spike steps, 3s skip steps)
+- Full audit trail at `models/self_tune_journal.jsonl`
+- Disabled via `SELF_TUNE_ENABLED=false`
+- Only fires after 5min cooldown
+
+**Pattern detection:**
+| Halim says | What happens |
+|---|---|
+| "veto cluster", "consistently blocked" | Lower confidence + profit prob |
+| "never fires", "always HOLD" | Lower confidence threshold |
+| "profit_prob veto near threshold" | Lower profit probability |
+| "missed spike", "spike ignored" | Lower spike override min |
+| "never blocked", "too loose" | Tighten thresholds |
+
+**Tuneable parameters:**
+| Parameter | Default | Range | Step |
+|---|---|---|---|
+| CONFIDENCE_THRESHOLD | 0.65 | 0.45-0.75 | 0.03 |
+| MIN_PROFIT_PROBABILITY | 0.62 | 0.40-0.75 | 0.03 |
+| TECH_OVERRIDE_SPIKE_MIN | 1.3 | 1.0-2.0 | 0.1 |
+| TECH_OVERRIDE_SCORE_MIN | 30 | 20-50 | 2 |
+| SPIKE_SKIP_SEC | 30 | 5-60 | 3 |
+
+### Files changed
+- `core/halim_self_tune.py` — NEW: pattern detection + safe adjustment
+- `core/scalper_runner.py` — self-tune cycle in main loop
+- `scripts/m2_8gb_live_profile.sh` — SELF_TUNE_ENABLED, INTERVAL_SEC
+
+### Verify
+1. HANOON log: `🔧 Self-tune: CONFIDENCE_THRESHOLD: 0.65→0.62` lines
+2. Adjustments respect min/max bounds
+3. `models/self_tune_journal.jsonl` grows with audit entries
+4. No impact on trading — runs async in the periodic block
+
+---
+
 ## 2026-07-02 — New: Halim overseer — advisory-only system observer
 
 ### Problem
