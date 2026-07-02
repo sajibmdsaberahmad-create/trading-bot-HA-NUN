@@ -29,7 +29,7 @@ import os
 import json
 import time
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -395,10 +395,11 @@ class LiveTrader:
         self.broker.flatten_position(quantity, handle=self.bracket_handle, urgent=True)
         self.ib.sleep(1)
 
-        proceeds = quantity * price * (1.0 - self.cfg.TRANSACTION_COST_PCT)
+        # Prefer IB realized P&L (includes commissions) over local computation
+        pnl_usd, pnl_pct = self._ib_exit_pnl_or_fallback(quantity, price)
         entry_price = self.risk.plan.entry_price if self.risk.plan else price
-        pnl_usd = (price - entry_price) * quantity
-        pnl_pct = (price / entry_price - 1.0) * 100.0 if entry_price else 0.0
+
+        proceeds = quantity * price * (1.0 - self.cfg.TRANSACTION_COST_PCT)
 
         self.cash += proceeds
         self.shares = 0.0
@@ -416,6 +417,27 @@ class LiveTrader:
             self.notifier.stop_triggered(reason, self.cfg.TICKER, price, detail=f"P&L: ${pnl_usd:+.2f}")
         self.notifier.trade_closed(self.cfg.TICKER, quantity, price, pnl_usd, pnl_pct, reason)
         push_trade(self.cfg.TICKER, "SELL", price, quantity)
+
+    def _ib_exit_pnl_or_fallback(self, quantity: int, price: float) -> Tuple[float, float]:
+        """Try IB truth snapshot for realized P&L, fall back to local computation."""
+        try:
+            from core.ib_truth import get_snapshot, refresh
+            snap = refresh(self.ib, self.cfg, force=True, ttl_sec=0.5)
+            if snap and snap.refreshed_at > 0:
+                ticker = (self.cfg.TICKER or "").upper()
+                # Per-ticker IB realized PnL
+                ib_pnl = snap.ticker_pnl_ib.get(ticker, 0.0)
+                if abs(ib_pnl) > 0.001:
+                    entry_px = self.risk.plan.entry_price if self.risk.plan else price
+                    pct = (price / entry_px - 1.0) * 100.0 if entry_px else 0.0
+                    return round(ib_pnl, 2), round(pct, 2)
+        except Exception:
+            pass
+        # Fallback: local computation
+        entry_price = self.risk.plan.entry_price if self.risk.plan else price
+        pnl = (price - entry_price) * quantity
+        pct = (price / entry_price - 1.0) * 100.0 if entry_price else 0.0
+        return round(pnl, 2), round(pct, 2)
 
     def _get_bid_ask(self):
         try:

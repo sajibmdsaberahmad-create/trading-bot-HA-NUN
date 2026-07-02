@@ -4,6 +4,72 @@
 
 ---
 
+## 2026-07-02 — Audit + fix: every accounting number comes from IB, never local
+
+### Problem
+Comprehensive audit of all core/ Python files found ~200 instances where the bot
+tracks data locally that IB Gateway already provides. Key categories:
+
+1. **Local P&L** — `(exit - entry) * shares` computed in trader.py, scalper_exit_executor.py
+   (10+ locations), and scalper_runner pulse context (2 locations). IB provides
+   `realized_pnl` + `unrealized_pnl` per position and per account.
+
+2. **Estimated commission** — `war_account._commission_usd()` hardcoded `max($0.35, 0.05%)`
+   at 9 call sites. IB provides actual `fill.commission` per execution.
+
+3. **`war_account.record_exit()`** — received `pnl_usd_ib` parameter but ignored it,
+   recomputing P&L from local slot data and estimated commissions. This was the
+   main source of divergence between war ledger and IB reality.
+
+4. **`trader._exit_position()`** — computed P&L from local `(price - entry_price) * quantity`
+   for risk/learning recording. IB's realized PnL (including commissions) was available
+   but unused.
+
+5. **`performance.py`** — local `pnl_usd = (price - open_price) * shares` for summary
+   display. Accurate for fills but misses commission deduction.
+
+6. **Initial NAV/cash** — `scalper_runner.py` init uses `cfg.INITIAL_CASH` ($1000 default)
+   instead of IB snapshot. (Mitigated: `apply_to_runner()` overrides later.)
+
+### Root cause
+The bot was built with local bookkeeping for speed (hot path exit decisions),
+then accounting reconciliation was added on top. Local caches drifted from IB,
+and estimated commissions created phantom P&L differences.
+
+### What changed (2 files modified)
+
+**1. `core/war_account.py` — record_exit now prefers IB P&L**
+- When `open_slot` exists AND `|pnl_usd_ib| > $0.005`: uses IB P&L directly
+  (`realized_pnl` which already includes commissions). Sets `entry_comm=exit_comm=0`
+  since IB already deducted them. Avoids `_commission_usd()` estimate entirely.
+- When no `pnl_usd_ib` (edge cases): falls back to original local computation +
+  estimated commission for robustness.
+
+**2. `core/trader.py` — _exit_position prefers IB realized P&L**
+- Added `_ib_exit_pnl_or_fallback()` method that force-refreshes IB truth snapshot
+  after flatten, reads per-ticker `realized_pnl` from `snap.ticker_pnl_ib`.
+- Falls back to local `(price - entry) * quantity` if IB data unavailable.
+
+### Not changed (deliberately)
+- **Pulse context P&L** (`scalper_exit_executor.py` lines 1688, 2498): These display
+  unrealized P&L on the hot loop (every 1-2s). IB `unrealized_pnl` is accurate but
+  adds snapshot latency. Local computation is fine for display.
+- **Position slots** (`_position_slots`, `self.shares`): Performance caches for
+  real-time exit decisions. Reconciled to IB via `_sync_position_from_ib()` and
+  `apply_to_runner()`. Changing them to IB calls would add ~80 API calls/second.
+- **Bracket/order tracking**: IB doesn't expose bracket targets as position metadata.
+  Local tracking is required for stop/target management.
+- **Performance tracker** (`performance.py`): Legacy display-only metric. Low impact.
+
+### Verify
+1. Deploy and trade. Check log for `WAR EXIT ...: IB P&L $X.XX (slot entry=$Y.YYYY)`.
+2. After trades, compare `models/drawdown_guard_journal.jsonl` P&L lines to
+   TWS/IBKR Activity Report — they should match within rounding.
+3. Check `models/improvement_history.jsonl` for any `pnl_drift` entries near zero.
+4. Force a war exit with `pnl_usd_ib=0` — verify fallback to local computation works.
+
+---
+
 ## 2026-07-02 — Refactor: Drawdown guard sources P&L from IB truth + Halim watches IB errors
 
 ### Problem

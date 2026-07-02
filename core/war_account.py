@@ -1507,13 +1507,23 @@ def record_exit(
     )
     sh = int(open_slot.get("shares", 0) or shares or 0) if open_slot else int(shares or 0)
     proceeds = v_fill * sh
-    exit_comm = _commission_usd(cfg, proceeds)
-    nav = float(state.get("nav", operating_capital_usd(cfg)) or operating_capital_usd(cfg))
 
-    if open_slot:
+    # IB realized P&L already includes commissions — prefer it over local math
+    if open_slot and abs(pnl_usd_ib) > 0.005:
+        entry_v = float(open_slot.get("entry", 0) or 0)
+        gross = pnl_usd_ib       # IB P&L includes commission deduction
+        entry_comm = 0.0
+        exit_comm = 0.0           # no separate commission tracking needed
+        nav = float(state.get("nav", operating_capital_usd(cfg)) or operating_capital_usd(cfg))
+        log.debug(
+            f"  ⚔️ WAR EXIT {t}: IB P&L ${pnl_usd_ib:+.2f} (slot entry=${entry_v:.4f})"
+        )
+    elif open_slot:
         entry_v = float(open_slot.get("entry", 0) or 0)
         entry_comm = float(open_slot.get("comm", 0) or 0)
+        exit_comm = _commission_usd(cfg, proceeds)
         gross = (v_fill - entry_v) * sh if entry_v > 0 else None
+        nav = float(state.get("nav", operating_capital_usd(cfg)) or operating_capital_usd(cfg))
     elif entry_ib_fill > 0:
         entry_v = float(entry_ib_fill)
         entry_comm = _commission_usd(cfg, entry_v * sh)
