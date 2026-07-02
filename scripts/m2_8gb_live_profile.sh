@@ -144,3 +144,14 @@ export COUNCIL_NANNY_MIN_RING_SEC=15.0             # at most 1 ring per ticker p
 export COUNCIL_LEARNING_RING_ENABLED=false          # no deferred learning rings
 export COUNCIL_LEARNING_RING_STRONG_SPIKE_ONLY=false  # no learning rings at all
 export LIVE_AI_GLOBAL_RING_SEC=30                  # at most 1 council call per 30s globally
+
+# ── Drawdown guard (auto-rollback overrides on P&L decline) ─────────────────
+export DRAWDOWN_GUARD_ENABLED=true
+export DRAWDOWN_THRESHOLD=0.15                    # 15% peak-to-trough = rollback
+export DRAWDOWN_CHECK_INTERVAL_SEC=120            # check every 2 minutes
+export DRAWDOWN_CUTOFF_TRADES=5                   # need 5 trades before assessing
+export DRAWDOWN_MAX_ROLLBACKS=3                   # max 3 rollbacks per session
+
+# ── API-assisted code review (piggybacks on council calls) ───────────────────
+export CODE_REVIEW_ENABLED=true
+export CODE_REVIEW_INTERVAL_SEC=600               # at most 1 review per 10 min

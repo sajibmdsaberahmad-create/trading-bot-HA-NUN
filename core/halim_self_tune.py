@@ -192,6 +192,18 @@ def _default_of(key: str) -> float:
     return 0.0
 
 
+def clear_overrides(cfg: Optional[BotConfig] = None) -> None:
+    """Clear all runtime overrides and reset to defaults/environments."""
+    global _overrides
+    with _override_lock:
+        keys = list(_overrides.keys())
+        _overrides.clear()
+    if cfg is not None:
+        for key in keys:
+            default = _default_of(key)
+            setattr(cfg, key, default)
+
+
 def _journal(entry: Dict[str, Any]) -> None:
     """Append to the self-tune journal."""
     try:

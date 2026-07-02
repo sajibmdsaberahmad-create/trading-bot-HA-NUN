@@ -4,6 +4,69 @@
 
 ---
 
+## 2026-07-02 — New: Drawdown guard (auto-rollback on P&L decline) + API-assisted code review
+
+### Problem
+Two highest-leverage items from the roadmap remained unimplemented:
+1. No safety net — if self-tune overrides hurt P&L, they'd persist until manually reverted
+2. No systematic code review — parameter changes/rollbacks weren't reviewed by cloud AI
+
+### Root cause
+Missing modules. The self-tune system applied changes blindly without any
+mechanism to detect harm or revert. Code changes were never shown to the cloud
+council for review.
+
+### What changed (3 files created, 2 modified)
+
+**Created:**
+1. `core/halim_drawdown_guard.py` — Rolling P&L tracker (deque, 50 trades), peak-to-trough
+   drawdown computation, and automatic rollback when drawdown exceeds threshold.
+   - `record_trade(pnl, ticker)` called from `trader._exit_position`
+   - `check_drawdown(cfg)` called from `scalper_runner` main loop (every 120s)
+   - On threshold breach: calls `halim_self_tune.clear_overrides(cfg)`, journals to
+     `models/drawdown_guard_journal.jsonl`, requests code review
+   - Safety rails: `DRAWDOWN_CUTOFF_TRADES` (need 5 trades), `DRAWDOWN_MAX_ROLLBACKS` (3/session)
+
+2. `core/halim_code_review.py` — Queue-based code review that piggybacks on existing
+   council API calls (no dedicated API cost).
+   - `request_review(context)` queues a review request
+   - `try_review(cfg)` consumes the queue and fires via `council_client.decide_call`
+   - Results journaled to `models/code_review_journal.jsonl`
+   - Throttled: `CODE_REVIEW_INTERVAL_SEC=600` (10 min)
+
+**Modified:**
+3. `core/trader.py` — Added `record_trade(pnl, ticker)` call in `_exit_position` so every
+   completed trade feeds the drawdown guard's P&L tracker.
+
+4. `core/scalper_runner.py` — Added two periodic blocks:
+   - Drawdown guard check (every 120s, non-replay)
+   - Code review fire (every loop iteration, non-replay; throttled internally)
+
+5. `scripts/m2_8gb_live_profile.sh` — Added 6 env vars for drawdown guard + 2 for code review.
+
+### Env vars
+```bash
+# Drawdown guard
+export DRAWDOWN_GUARD_ENABLED=true
+export DRAWDOWN_THRESHOLD=0.15
+export DRAWDOWN_CHECK_INTERVAL_SEC=120
+export DRAWDOWN_CUTOFF_TRADES=5
+export DRAWDOWN_MAX_ROLLBACKS=3
+
+# Code review
+export CODE_REVIEW_ENABLED=true
+export CODE_REVIEW_INTERVAL_SEC=600
+```
+
+### Verify
+1. Deploy and trade. After 5+ trades, check `models/drawdown_guard_journal.jsonl` for entries.
+2. If a 15%+ drawdown occurs: verify auto-rollback fires (check logs for
+   `Drawdown guard: ... reverted overrides`).
+3. On rollback: verify code review is queued and fires on next council call.
+4. Check `models/code_review_journal.jsonl` for review results.
+
+---
+
 ## 2026-07-02 — New: Parameter self-tuning (Halim observations → safe parameter adjustments)
 
 ### Problem

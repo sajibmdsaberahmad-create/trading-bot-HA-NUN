@@ -2225,6 +2225,31 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                     except Exception as exc:
                         log.debug(f"Self-tune: {exc}")
 
+                # ── Drawdown guard (auto-rollback overrides on P&L decline) ──
+                if not replay_mode:
+                    try:
+                        from core.halim_drawdown_guard import check_drawdown
+                        result = check_drawdown(self.cfg)
+                        if result.get("rollback"):
+                            try:
+                                from core.halim_code_review import request_review
+                                request_review(
+                                    f"Drawdown rollback triggered. "
+                                    f"drawdown={result.get('drawdown', 0):.1%}",
+                                )
+                            except Exception:
+                                pass
+                    except Exception as exc:
+                        log.debug(f"Drawdown guard: {exc}")
+
+                # ── Periodic code review (fire pending requests via council) ──
+                if not replay_mode:
+                    try:
+                        from core.halim_code_review import try_review
+                        try_review(self.cfg)
+                    except Exception as exc:
+                        log.debug(f"Code review: {exc}")
+
                 cleanup_iv = float(getattr(self.cfg, "PERIODIC_CLEANUP_SEC", 1800))
                 _now = time.time()
                 replay_mode = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
