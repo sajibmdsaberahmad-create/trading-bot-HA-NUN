@@ -12,10 +12,11 @@ Halim serve_no_text (75% failure) was largely caused by memory pressure
 from open IDEs and browsers.
 
 ### Changes
-- `scripts/max_perf.sh` — new script that kills Cursor, VS Code, all
-  browsers, office apps, media apps, communication apps, and utilities.
-  Leaves only the trading system (Halim serve + scalper + IB Gateway)
-  running. Run before ./start.sh.
+- `scripts/max_perf.sh` — kills Cursor, VS Code, all browsers, office apps,
+  media apps, communication apps, and utilities. Leaves only the trading
+  system running.
+- `start.sh` — now auto-runs `max_perf.sh` at the very beginning before
+  starting Halim serve and the scalper. Double-click ready.
 - `.gitignore` — add `.github/workflows/` to prevent CI workflow files
   from being committed (they require special `workflow` git scope).
 
