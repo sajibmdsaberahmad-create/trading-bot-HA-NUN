@@ -102,15 +102,47 @@ def mlx_complete(
             formatted = tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True,
             )
-            text = generate(
-                model,
-                tokenizer,
-                prompt=formatted,
-                max_tokens=max_tokens,
-                sampler=make_sampler(temp=temperature),
-                verbose=False,
-            )
-            return (text or "").strip() or None, "ok"
+
+            # Wrap generate in a thread with timeout so memory pressure
+            # (swap > 30s) doesn't hang the serve worker for 90+ seconds.
+            _INFERENCE_TIMEOUT = float(os.getenv("MLX_GENERATE_TIMEOUT_SEC", "30.0"))
+
+            def _generate_or_raise() -> str:
+                result = generate(
+                    model,
+                    tokenizer,
+                    prompt=formatted,
+                    max_tokens=max_tokens,
+                    sampler=make_sampler(temp=temperature),
+                    verbose=False,
+                )
+                return (result or "").strip()
+
+            import threading as _thr
+
+            _gen_result: list[str] = []
+            _gen_error: list[str] = []
+
+            def _run_gen() -> None:
+                try:
+                    txt = _generate_or_raise()
+                    if txt:
+                        _gen_result.append(txt)
+                except Exception as exc:
+                    _gen_error.append(str(exc)[:120])
+
+            t = _thr.Thread(target=_run_gen, daemon=True)
+            t.start()
+            t.join(timeout=_INFERENCE_TIMEOUT)
+            if t.is_alive():
+                # Inference hung (memory swap) — return fast instead of blocking
+                return None, f"timeout_{_INFERENCE_TIMEOUT}s"
+
+            if _gen_error:
+                return None, f"generate_failed:{_gen_error[0]}"
+
+            text = _gen_result[0] if _gen_result else None
+            return text or None, "ok"
         except Exception as exc:
             return None, f"generate_failed:{exc}"[:120]
 

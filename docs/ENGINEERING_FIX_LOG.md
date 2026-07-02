@@ -4,6 +4,71 @@
 
 ---
 
+## 2026-07-02 — Fix: Halim serve_no_text from MLX memory pressure + 3rd Groq key
+
+### Problem
+Two issues reported during live trading:
+
+1. **Halim still returning `serve_no_text`** with 90-second timeouts. Despite pre-loading
+   the model at startup (previous fix), the Qwen 1.5B 4-bit model (~900MB) gets paged
+   out to swap on M2 8GB when the main bot process, PPO, and IB Gateway compete for
+   RAM. The `mlx_lm.generate()` call is synchronous and blocking — once the model is
+   swapped, generation takes 90+ seconds with no way to abort.
+
+   Log entry: `Halim entry LM empty SOXS (90003ms, serve_no_text)` — exactly 90s, the
+   client timeout limit.
+
+2. **Groq API rate limits hit frequently** — only 2 keys in the pool, both hitting
+   429s simultaneously, falling back to Gemini which also hits limits.
+
+### Root cause
+
+**For serve_no_text:** `mlx_complete()` in `halim/halim/inference_backend.py` called
+`mlx_lm.generate()` directly with no timeout. Under memory pressure, Apple's memory
+pressure system swaps the model to disk, making generation take 90+ seconds. The
+HTTP server thread is blocked the entire time.
+
+**For rate limits:** Only 2 Groq keys available. With multiple concurrent spike
+decision rings, both keys hit their per-minute rate limits.
+
+### What changed (2 files modified)
+
+**1. `halim/halim/inference_backend.py` — Thread-based timeout for MLX generate**
+- Wrapped `mlx_lm.generate()` in a daemon thread with `join(timeout=30)`
+- If generate takes >30s (memory swap), the thread is abandoned and
+  `("", "timeout_30s")` is returned immediately
+- The HTTP server thread is freed in 30s instead of blocking for 90s
+- The client receives a fast error and Halim is marked as "empty" quickly,
+  allowing PPO/fast path to proceed without waiting
+- Configurable via `MLX_GENERATE_TIMEOUT_SEC` (default 30.0)
+
+**2. `scripts/m2_8gb_live_profile.sh` — Groq key + timeout tuning**
+- Added `GROQ_API_KEY_3` with the user's new key for the round-robin pool
+- Reduced `HALIM_INFERENCE_TIMEOUT_SEC` from 90→35 (faster client timeout)
+- Reduced `HALIM_ENTRY_LM_TIMEOUT_SEC` from 90→35 (faster async thread timeout)
+- Added `MLX_GENERATE_TIMEOUT_SEC=30` (hard abort on MLX generate)
+
+### Why 35s for client/thread timeout with 30s MLX timeout?
+The MLX generate thread gets 30s. If it hangs, the thread is abandoned and
+a "timeout_30s" error is returned. The HTTP response arrives at the client
+within 31s. The client timeout of 35s gives a 4-5s buffer for network/scheduling.
+
+### Why Halim serve_no_text is expected under memory pressure (and why it's OK now)
+With `HALIM_ENTRY_AWAIT_ENABLED=false`, Halim is an **async coach** — the bot never
+waits for Halim to enter trades. When Halim returns empty or timeout, PPO leads the
+entry decision (which is faster and often correct). Halim's empty response is logged
+for training but doesn't block trading. The 15-minute periodic restart reclaims
+memory.
+
+### Verify
+1. Deploy and restart Halim serve. First request: should complete in <10s (model cached).
+2. Under memory pressure: MLX generate should timeout after 30s, not 90s.
+3. Check logs for `timeout_30s` instead of `serve_no_text` with 90s.
+4. Run `start.sh` and verify Groq now has 3 keys in the pool (check debug log).
+5. Rate limits should be significantly reduced with 3 keys rotating.
+
+---
+
 ## 2026-07-02 — Audit + fix: every accounting number comes from IB, never local
 
 ### Problem
