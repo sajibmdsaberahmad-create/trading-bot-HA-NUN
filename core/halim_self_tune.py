@@ -119,6 +119,7 @@ _PATTERN_RULES = [
     (r"too.*loose|never.*blocked|never.*veto|always.*pass", "tighten", None),
     (r"spike.*miss|missed.*spike|spike.*ignored", "lower_spike_min", None),
     (r"memory|slow|degrad|timeout|swap", "memory", None),
+    (r"ib.*error|order.*reject|connectivity.*lost|competing.*session", "ib_errors", None),
 ]
 
 
@@ -173,6 +174,15 @@ def _compute_adjustments(
     if lower_spike > 0:
         n = min(lower_spike, 3)
         adjustments["TECH_OVERRIDE_SPIKE_MIN"] = adjustments.get("TECH_OVERRIDE_SPIKE_MIN", 0) - 0.1 * n
+
+    # IB errors → tighten (reduce entry aggression when IB is having issues)
+    ib_err_count = category_counts.get("ib_errors", 0)
+    if ib_err_count > 1:
+        n = min(ib_err_count, 3)
+        adjustments["CONFIDENCE_THRESHOLD"] = adjustments.get("CONFIDENCE_THRESHOLD", 0) + 0.02 * n
+        adjustments["MIN_PROFIT_PROBABILITY"] = adjustments.get("MIN_PROFIT_PROBABILITY", 0) + 0.02 * n
+        # Prolong spike skip to reduce IB pressure
+        adjustments["SPIKE_SKIP_SEC"] = adjustments.get("SPIKE_SKIP_SEC", 0) + 3.0 * n
 
     return adjustments
 

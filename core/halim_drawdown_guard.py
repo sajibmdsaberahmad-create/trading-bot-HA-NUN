@@ -1,32 +1,27 @@
 #!/usr/bin/env python3
 """
-core/halim_drawdown_guard.py — Rolling P&L tracker + automatic parameter rollback.
+core/halim_drawdown_guard.py — Rolling P&L tracker from IB truth + auto rollback.
 
-Covers Steps 2 and 5 from the roadmap:
-  Step 2: Validate changes via real trade outcomes (not replay).
-          When a self-tune change is made, subsequent trades validate it.
-  Step 5: Auto-rollback on drawdown. If rolling P&L drops below threshold,
-          all self-tune overrides are reverted to defaults.
+IB is the single source of truth for P&L. The guard reads session P&L
+from the cached IB truth snapshot — no local trade tracking.
 
 Design:
-  - Trades tracked in a bounded deque (last N = 50)
-  - Drawdown computed as: peak_total - current_total / peak_total
-  - If drawdown exceeds DD_THRESHOLD (default 15%), trigger rollback
-  - Rollback: clear ALL self-tune overrides, reset P&L tracking
-  - Every trade close calls record_trade(pnl, ticker)
-  - Main loop calls check_drawdown(cfg) periodically
+  - Reads realized_pnl + unrealized_pnl from ib_truth snapshot periodically
+  - Tracks peak day PnL; computes drawdown as peak-to-current decline
+  - If drawdown exceeds DRAWDOWN_THRESHOLD, triggers auto-rollback of
+    all self-tune overrides
+  - Journals to models/drawdown_guard_journal.jsonl
+  - No local trade accounting — IB Gateway does the math
 """
 
 from __future__ import annotations
 
 import json
 import os
-import threading
 import time
-from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from core.config import BotConfig
 from core.notify import log
@@ -35,9 +30,7 @@ GUARD_JOURNAL = Path("models/drawdown_guard_journal.jsonl")
 
 # ── Runtime state ─────────────────────────────────────────────────────────
 
-_trades: deque = deque(maxlen=50)
-_trades_lock = threading.Lock()
-_peak_total: float = 0.0
+_peak_pnl: float = 0.0
 _in_drawdown: bool = False
 _rollback_count: int = 0
 _last_check: float = 0.0
@@ -55,51 +48,64 @@ def drawdown_check_interval_sec(cfg: Optional[BotConfig] = None) -> float:
     return float(os.getenv("DRAWDOWN_CHECK_INTERVAL_SEC", "120"))  # every 2 min
 
 
-def drawdown_cutoff_trades(cfg: Optional[BotConfig] = None) -> int:
-    return int(os.getenv("DRAWDOWN_CUTOFF_TRADES", "5"))  # need at least 5 trades to assess
-
-
 def max_rollbacks_per_session(cfg: Optional[BotConfig] = None) -> int:
     return int(os.getenv("DRAWDOWN_MAX_ROLLBACKS", "3"))
 
 
-# ── P&L tracking ─────────────────────────────────────────────────────────
-
-def record_trade(pnl: float, ticker: str = "") -> None:
-    """Record a completed trade's P&L. Thread-safe."""
-    global _peak_total
-    with _trades_lock:
-        _trades.append({
-            "pnl": round(pnl, 2),
-            "ticker": ticker.upper() if ticker else "?",
-            "ts": datetime.now(timezone.utc).isoformat(),
-        })
-        # Update peak total (sum of all trades in window)
-        total = sum(t["pnl"] for t in _trades)
-        if total > _peak_total:
-            _peak_total = total
+def min_trades_ib(cfg: Optional[BotConfig] = None) -> int:
+    """Minimum number of IB executions (round trips) before assessing drawdown."""
+    return int(os.getenv("DRAWDOWN_MIN_TRIPS", "2"))
 
 
-def _compute_drawdown() -> float:
-    """Compute current drawdown relative to peak. Returns 0 if no peak."""
-    global _peak_total
-    with _trades_lock:
-        if not _trades or _peak_total <= 0:
-            return 0.0
-        current_total = sum(t["pnl"] for t in _trades)
-        if _peak_total <= 0:
-            return 0.0
-        return max(0.0, (_peak_total - current_total) / _peak_total)
+# ── IB P&L reading ───────────────────────────────────────────────────────
+
+def _ib_day_pnl() -> Dict[str, float]:
+    """
+    Read current P&L from IB truth snapshot.
+
+    Returns dict with realized_pnl, unrealized_pnl, total, and trip_count.
+    Returns zeros if IB truth is unavailable.
+    """
+    try:
+        from core.ib_truth import get_snapshot
+        snap = get_snapshot()
+        if not snap or not snap.refreshed_at or snap.refreshed_at <= 0:
+            return {"realized": 0.0, "unrealized": 0.0, "total": 0.0, "trips": 0}
+
+        realized = float(snap.account.realized_pnl)
+        unrealized = float(snap.account.unrealized_pnl)
+        trips = len(snap.round_trips)
+
+        return {
+            "realized": round(realized, 2),
+            "unrealized": round(unrealized, 2),
+            "total": round(realized + unrealized, 2),
+            "trips": trips,
+        }
+    except Exception as exc:
+        log.debug(f"Drawdown guard: IB snapshot read error: {exc}")
+        return {"realized": 0.0, "unrealized": 0.0, "total": 0.0, "trips": 0}
 
 
-def _current_total() -> float:
-    with _trades_lock:
-        return sum(t["pnl"] for t in _trades)
+def _compute_drawdown() -> Dict[str, float]:
+    """
+    Compute current drawdown from IB P&L.
 
+    Returns dict with drawdown (fraction 0-1), current_pnl, peak_pnl, trips.
+    """
+    global _peak_pnl
+    pnl = _ib_day_pnl()
+    total = pnl["total"]
 
-def _trade_count() -> int:
-    with _trades_lock:
-        return len(_trades)
+    # Update peak (only on positive P&L — don't track losses as peak)
+    if total > _peak_pnl:
+        _peak_pnl = total
+
+    if _peak_pnl <= 0:
+        return {**pnl, "drawdown": 0.0, "peak_pnl": _peak_pnl}
+
+    dd = max(0.0, (_peak_pnl - total) / max(_peak_pnl, 0.01))
+    return {**pnl, "drawdown": round(dd, 4), "peak_pnl": round(_peak_pnl, 2)}
 
 
 def _journal(event: str, detail: Dict[str, Any]) -> None:
@@ -117,21 +123,19 @@ def _journal(event: str, detail: Dict[str, Any]) -> None:
 
 
 def _reset() -> None:
-    """Reset all tracking state."""
-    global _peak_total, _in_drawdown, _rollback_count
-    with _trades_lock:
-        _trades.clear()
-        _peak_total = 0.0
-        _in_drawdown = False
+    """Reset peak tracking."""
+    global _peak_pnl, _in_drawdown
+    _peak_pnl = 0.0
+    _in_drawdown = False
 
 
 # ── Drawdown check ───────────────────────────────────────────────────────
 
 def check_drawdown(cfg: BotConfig) -> Dict[str, Any]:
     """
-    Check current drawdown and trigger rollback if threshold exceeded.
+    Check current drawdown from IB P&L and trigger rollback if threshold exceeded.
 
-    Returns status dict. Safe to call any time — throttles internally.
+    Returns status dict. Throttled internally.
     """
     global _in_drawdown, _rollback_count, _last_check
 
@@ -143,68 +147,103 @@ def check_drawdown(cfg: BotConfig) -> Dict[str, Any]:
         return {"ok": False, "reason": "too_soon"}
     _last_check = now
 
-    if _trade_count() < drawdown_cutoff_trades(cfg):
-        return {"ok": False, "reason": "insufficient_trades"}
+    state = _compute_drawdown()
+    trips = state.get("trips", 0)
+
+    if trips < min_trades_ib(cfg):
+        return {"ok": True, "reason": "insufficient_trips", **state}
 
     if _rollback_count >= max_rollbacks_per_session(cfg):
-        return {"ok": True, "drawdown": _compute_drawdown(),
-                "rollback": False, "reason": "max_rollbacks_reached"}
+        return {"ok": True, "rollback": False, "reason": "max_rollbacks_reached", **state}
 
-    dd = _compute_drawdown()
+    dd = state.get("drawdown", 0.0)
     threshold = drawdown_threshold(cfg)
 
     if dd <= threshold:
         if _in_drawdown:
             _in_drawdown = False
-            log.info(f"📈 Drawdown recovered: {dd:.1%} (below {threshold:.0%})")
-        return {"ok": True, "drawdown": dd, "rollback": False, "reason": "below_threshold"}
+            log.info(
+                f"📈 Drawdown recovered: {dd:.1%} (below {threshold:.0%}) "
+                f"pnl=${state.get('total', 0):+.2f} trips={trips}"
+            )
+        return {"ok": True, "rollback": False, "reason": "below_threshold", **state}
 
     # ── Drawdown exceeded threshold → rollback ────────────────────────
     _in_drawdown = True
     _rollback_count += 1
 
     try:
-        from core.halim_self_tune import current_overrides
-        overrides_before = current_overrides()
+        from core.halim_self_tune import current_overrides as _co
+        overrides_before = _co()
     except Exception:
         overrides_before = {}
 
-    # Revert all self-tune overrides by clearing them
+    # Revert all self-tune overrides
     try:
-        from core.halim_self_tune import clear_overrides
-        clear_overrides(cfg)
+        from core.halim_self_tune import clear_overrides as _clear
+        _clear(cfg)
     except Exception:
         pass
 
     log.warning(
-        f"🛑 Drawdown guard: {dd:.1%} exceeds {threshold:.0%} — "
+        f"🛑 Drawdown guard: {dd:.1%} exceeds {threshold:.0%} "
+        f"(pnl=${state.get('total', 0):+.2f}, peak=${state.get('peak_pnl', 0):+.2f}) — "
         f"reverted overrides: {overrides_before or 'none'} "
         f"(rollback #{_rollback_count})"
     )
     _journal("rollback", {
-        "drawdown": round(dd, 4),
-        "threshold": round(threshold, 4),
+        "drawdown": dd,
+        "threshold": threshold,
+        "current_pnl": state.get("total", 0),
+        "peak_pnl": state.get("peak_pnl", 0),
+        "trips": trips,
         "overrides_before": overrides_before,
         "rollback_number": _rollback_count,
-        "trades_in_window": _trade_count(),
-        "total_pnl": round(_current_total(), 2),
     })
 
-    # Reset P&L tracking after rollback (fresh start)
+    # Reset peak tracking after rollback (fresh start)
     _reset()
 
-    return {"ok": True, "drawdown": dd, "rollback": True, "reason": "drawdown_exceeded"}
+    # Also fire a code review on rollback
+    try:
+        from core.halim_code_review import request_review as _rr
+        _rr(
+            f"Drawdown rollback triggered. "
+            f"IB PnL=${state.get('total', 0):+.2f} from peak=${state.get('peak_pnl', 0):+.2f}"
+        )
+    except Exception:
+        pass
+
+    # Record the IB error pattern for Halim overseer
+    try:
+        from core.halim_overseer import record_event as _re
+        _re("drawdown_rollback", f"dd={dd:.1%} pnl=${state.get('total', 0):+.2f}")
+    except Exception:
+        pass
+
+    return {"ok": True, "rollback": True, "reason": "drawdown_exceeded", **state}
+
+
+def drawdown_value() -> float:
+    """Current drawdown as fraction (0-1). Queries IB truth."""
+    state = _compute_drawdown()
+    return state.get("drawdown", 0.0)
+
+
+def pnl_status() -> Dict[str, float]:
+    """Current IB P&L snapshot for logging."""
+    return _compute_drawdown()
 
 
 def status_line(cfg: BotConfig) -> str:
     """Brief status for logging."""
-    dd = _compute_drawdown()
+    state = _compute_drawdown()
     thr = drawdown_threshold(cfg)
-    n = _trade_count()
     rc = _rollback_count
-    return f"drawdown={dd:.1%}/{thr:.0%} trades={n} rollbacks={rc}"
-
-
-def drawdown_value() -> float:
-    """Current drawdown as fraction (0-1)."""
-    return _compute_drawdown()
+    return (
+        f"IB PnL=${state.get('total', 0):+.2f} "
+        f"peak=${state.get('peak_pnl', 0):+.2f} "
+        f"dd={state.get('drawdown', 0):.1%}/{thr:.0%} "
+        f"trips={state.get('trips', 0)} "
+        f"rollbacks={rc}"
+    )

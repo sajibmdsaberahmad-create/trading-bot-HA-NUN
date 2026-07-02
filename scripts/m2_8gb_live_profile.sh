@@ -149,7 +149,7 @@ export LIVE_AI_GLOBAL_RING_SEC=30                  # at most 1 council call per 
 export DRAWDOWN_GUARD_ENABLED=true
 export DRAWDOWN_THRESHOLD=0.15                    # 15% peak-to-trough = rollback
 export DRAWDOWN_CHECK_INTERVAL_SEC=120            # check every 2 minutes
-export DRAWDOWN_CUTOFF_TRADES=5                   # need 5 trades before assessing
+export DRAWDOWN_MIN_TRIPS=2                       # minimum IB round trips before assessing
 export DRAWDOWN_MAX_ROLLBACKS=3                   # max 3 rollbacks per session
 
 # ── API-assisted code review (piggybacks on council calls) ───────────────────

@@ -4,6 +4,64 @@
 
 ---
 
+## 2026-07-02 — Refactor: Drawdown guard sources P&L from IB truth + Halim watches IB errors
+
+### Problem
+Two issues raised by the pilot:
+
+1. **Drawdown guard tracked P&L locally** in a deque (record_trade in trader.py) instead of
+   reading IB's authoritative P&L. IB Gateway already computes realized/unrealized P&L,
+   session P&L, and per-ticker P&L perfectly — local tracking was duplicate work that
+   could drift from IB's numbers.
+
+2. **Halim did not watch IB errors**. When IB rejects orders, loses connectivity, or has
+   competing sessions, Halim had no visibility. The pilot wanted Halim to observe these
+   events and auto-adjust.
+
+### What changed (4 files modified, 1 created previously)
+
+**Drawdown guard → IB truth source:**
+- `core/halim_drawdown_guard.py` — **Rewritten**: removed local deque-based P&L tracking
+  (`record_trade`, `_trades`, `_trades_lock`). Now reads `realized_pnl + unrealized_pnl`
+  directly from `ib_truth.get_snapshot()` every check cycle. Tracks peak-to-trough on
+  IB's own numbers. Minimum trip count validated via `snap.round_trips` length.
+- `core/trader.py` — **Reverted**: removed `record_trade()` call from `_exit_position`.
+  Drawdown guard no longer needs per-trade recording.
+- `core/scalper_runner.py` — **Cleaned**: drawdown block now just calls `check_drawdown()`;
+  code review request + overseer event moved inside `check_drawdown` itself.
+
+**Halim watches IB errors:**
+- `core/connector.py` — **Modified**: Added `record_event("ib_error", ...)` at 3 points
+  in `_on_error`: (1) order errors (201/202/399/2161) when stored, (2) connectivity
+  loss (1100), (3) competing session reclaim burst (10197), (4) all other non-benign
+  errors at the fallthrough log line.
+- `core/halim_overseer.py` — **Modified**: `_summarize_spikes` now includes `IB-err:N`
+  and `rollback:N` counts. `build_digest` includes `ib_error` events in the detailed
+  section. The `_OVERSEER_TASK` prompt now instructs Halim to watch IB error codes.
+- `core/halim_self_tune.py` — **Modified**: Added `ib_errors` pattern to `_PATTERN_RULES`
+  (matches "ib error", "order reject", "connectivity lost", "competing session").
+  `_compute_adjustments` now tightens thresholds when IB errors are frequent:
+  `+0.02 * n` to `CONFIDENCE_THRESHOLD` and `MIN_PROFIT_PROBABILITY`, `+3.0 * n` to
+  `SPIKE_SKIP_SEC`.
+
+### Env vars (drawdown guard — updated)
+```bash
+export DRAWDOWN_GUARD_ENABLED=true
+export DRAWDOWN_THRESHOLD=0.15
+export DRAWDOWN_CHECK_INTERVAL_SEC=120
+export DRAWDOWN_MIN_TRIPS=2       # new: minimum IB round trips before assessing
+export DRAWDOWN_MAX_ROLLBACKS=3
+```
+
+### Verify
+1. Deploy and trade. Check logs for `IB PnL=$X.XX` in periodic status lines.
+2. After 2+ round trips, check `models/drawdown_guard_journal.jsonl` for entries.
+3. If drawdown is triggered: verify rollback fires and Halim overseer records it.
+4. Intentionally cause an IB error (e.g., order reject). Check `halim/data/overseer/observations.jsonl`
+   for IB error observations.
+
+---
+
 ## 2026-07-02 — New: Drawdown guard (auto-rollback on P&L decline) + API-assisted code review
 
 ### Problem

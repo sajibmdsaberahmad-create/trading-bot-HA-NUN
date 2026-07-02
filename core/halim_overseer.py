@@ -83,11 +83,14 @@ def _summarize_spikes(events: List[Dict]) -> str:
     ppo_buys = [e for e in events if e["c"] == "ppo_buy"]
     halim_ok = [e for e in events if e["c"] == "halim_ok"]
     halim_empty = [e for e in events if e["c"] == "halim_empty"]
+    ib_errors = [e for e in events if e["c"] == "ib_error"]
+    rollbacks = [e for e in events if e["c"] == "drawdown_rollback"]
     return (
         f"Spikes:{len(spikes)} strong:{len(strong)} veto-green:{len(vetoed_green)} "
         f"veto-profit:{len(vetoed_profit)} entries:{len(entries)} exits:{len(exits)} "
         f"PPO:hold={len(ppo_holds)} buy={len(ppo_buys)} "
-        f"Halim:ok={len(halim_ok)} empty={len(halim_empty)}"
+        f"Halim:ok={len(halim_ok)} empty={len(halim_empty)} "
+        f"IB-err:{len(ib_errors)} rollback:{len(rollbacks)}"
     )
 
 
@@ -122,7 +125,7 @@ def build_digest(events: List[Dict[str, Any]], tickers: int) -> str:
     # Add recent event details for pattern detection
     detail_count = 0
     for e in events[-20:]:  # last 20 events in detail
-        if e["c"] in ("green_veto", "profit_veto", "entry", "exit", "halim_empty"):
+        if e["c"] in ("green_veto", "profit_veto", "entry", "exit", "halim_empty", "ib_error"):
             ticker = e["m"].get("ticker", "?")
             reason = e["d"][:60]
             lines.append(f"  {e['c']} {ticker}: {reason}")
@@ -168,14 +171,17 @@ _OVERSEER_TASK = (
     "Read the SYSTEM DIGEST below. Respond with JSON only:\n"
     "{\n"
     '  "observation": "<1-2 sentence summary of what you notice>",\n'
-    '  "pattern_detected": "<any recurring pattern, or 'none'>",\n'
-    '  "suggestion": "<advisory only — what the pilot might consider, or 'none'>",\n'
+    "  \"pattern_detected\": \"<any recurring pattern, or 'none'>\",\n"
+    "  \"suggestion\": \"<advisory only \u2014 what the pilot might consider, or 'none'>\",\n"
     '  "confidence_trend": "<up|down|stable>",\n'
     '  "volatility_observation": "<calm|normal|elevated>",\n'
-    '  "watch": "<ANY ticker name that deserves attention, or 'none'>"\n'
+    "  \"watch\": \"<ANY ticker name that deserves attention, or 'none'>\"\n"
     "}\n"
     "Never suggest blocking or skipping any ticker. "
-    "Do not include markdown or explanation outside JSON."
+    "Do not include markdown or explanation outside JSON.\n\n"
+    "IMPORTANT \u2014 Watch IB error codes in the digest. If IB error counts are high, "
+    "note the pattern (connectivity, order rejections, competing sessions). "
+    "If drawdown rollbacks occur, note the frequency."
 )
 
 

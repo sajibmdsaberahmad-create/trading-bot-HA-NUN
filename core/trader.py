@@ -416,12 +416,6 @@ class LiveTrader:
             self.notifier.stop_triggered(reason, self.cfg.TICKER, price, detail=f"P&L: ${pnl_usd:+.2f}")
         self.notifier.trade_closed(self.cfg.TICKER, quantity, price, pnl_usd, pnl_pct, reason)
         push_trade(self.cfg.TICKER, "SELL", price, quantity)
-        # Record trade for drawdown guard
-        try:
-            from core.halim_drawdown_guard import record_trade
-            record_trade(pnl_usd, self.cfg.TICKER)
-        except Exception:
-            pass
 
     def _get_bid_ask(self):
         try:

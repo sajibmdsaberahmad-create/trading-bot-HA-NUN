@@ -772,6 +772,15 @@ class IBConnector:
                 if cap:
                     info["price_cap"] = cap
             self._order_errors[int(reqId)] = info
+            # Record order errors for Halim overseer
+            try:
+                from core.halim_overseer import record_event
+                record_event("ib_error", f"order_{errorCode}", {
+                    "code": errorCode, "req_id": int(reqId),
+                    "message": errorString[:100],
+                })
+            except Exception:
+                pass
         if errorCode in BENIGN or errorCode in QUIET_ORDER:
             return
 
@@ -787,6 +796,11 @@ class IBConnector:
         if errorCode == 1100:
             self._connectivity_lost = True
             self._mark_connectivity_outage(trigger="ib_1100")
+            try:
+                from core.halim_overseer import record_event
+                record_event("ib_error", "connectivity_lost_1100", {"code": 1100})
+            except Exception:
+                pass
             log.warning(
                 "IB 1100 — connectivity between IB and Gateway lost "
                 "(waiting for restore before MD reclaim)"
@@ -840,6 +854,11 @@ class IBConnector:
                 log.warning(
                     f"IB 10197 burst ({threshold}+ errors) — scheduling session reclaim"
                 )
+                try:
+                    from core.halim_overseer import record_event
+                    record_event("ib_error", "10197_reclaim", {"code": 10197, "count": threshold})
+                except Exception:
+                    pass
                 self.request_session_reclaim()
             elif now - self._10197_last_log_ts >= 5.0:
                 self._10197_last_log_ts = now
@@ -903,5 +922,22 @@ class IBConnector:
                     return
         except Exception as exc:
             log.debug(f"MD learning hook: {exc}")
+
+        # Record for Halim overseer (all non-benign errors)
+        try:
+            from core.halim_overseer import record_event
+            ticker = None
+            try:
+                if contract:
+                    ticker = contract.symbol if hasattr(contract, 'symbol') else None
+            except Exception:
+                pass
+            record_event("ib_error", f"code={errorCode}", {
+                "code": errorCode,
+                "ticker": ticker or "?",
+                "req_id": int(reqId),
+            })
+        except Exception:
+            pass
 
         log.warning(f"IB error {errorCode}: {errorString} (reqId={reqId})")
