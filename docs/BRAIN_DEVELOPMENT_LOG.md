@@ -2079,3 +2079,21 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-07-01 17:12 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
 - `2026-07-01 17:12 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 718 pairs
 - `2026-07-01 17:12 UTC` **brain_stage_up** — Brain grew: child → teen
+- `2026-07-01 18:16 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=98% (random=99%, 516 samples)
+- `2026-07-01 18:18 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=98% (random=99%, 516 samples)
+- `2026-07-01 18:18 UTC` **brain_ppo_teacher** — PPO teacher standalone_flush: WR 0%, source outcome_labels
+- `2026-07-01 18:18 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-01 18:18 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 830 pairs
+- `2026-07-02 02:40 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=94% (random=97%, 532 samples)
+- `2026-07-02 05:32 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=94% (random=97%, 532 samples)
+- `2026-07-02 05:32 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=94% (random=97%, 532 samples)
+- `2026-07-02 05:32 UTC` **brain_evolution** · stage **teen** — Evolution replay_teardown — stage teen, dataset 1012 pairs
+- `2026-07-02 06:07 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=97% (random=98%, 532 samples)
+- `2026-07-02 06:07 UTC` **brain_proxy_trained** · stage **teen** — Teacher proxy holdout acc=97% (random=98%, 532 samples)
+- `2026-07-02 06:07 UTC` **brain_evolution** · stage **teen** — Evolution replay_teardown — stage teen, dataset 1012 pairs
+- `2026-07-02 07:06 UTC` **brain_evolution** · stage **teen** — Evolution replay_teardown — stage teen, dataset 1014 pairs
+- `2026-07-02 07:41 UTC` **brain_evolution** · stage **teen** — Evolution replay_teardown — stage teen, dataset 1014 pairs
+- `2026-07-02 07:50 UTC` **brain_evolution** · stage **toddler** — Halim developer off_hours: 0 mutation(s), git=ok
+- `2026-07-02 09:48 UTC` **brain_evolution** · stage **teen** — Evolution live_session_end — stage teen, dataset 1014 pairs
+- `2026-07-02 09:49 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-02 09:49 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 1014 pairs

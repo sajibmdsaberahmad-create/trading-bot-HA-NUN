@@ -2,6 +2,148 @@
 
 **Purpose:** Track every intentional code/config change with enough detail to debug regressions, avoid duplicate fixes, and know what to verify. Append new entries at the top (newest first).
 
+---
+
+## 2026-07-02 — Halim LM upgrade: Qwen2.5-1.5B + chat template fix + M2 8GB profile enable
+
+### Problem
+Halim LM on Qwen2.5-0.5B-Instruct (494M params) could not produce valid JSON or reasoning. Evaluation showed 0/4 JSON pass, 1/4 token pass. The model memorized training fragments (repeated "ppo=hold conf=0.55") instead of understanding the task structure. This was a model-size ceiling — 0.5B lacks the attention/embedding capacity for structured trading decisions.
+
+### Analysis
+- Measured bot baseline RAM: ~1.3 GB (Python + PPO + market data)
+- Measured available RAM: ~5 GB when Cursor/Chrome closed; ~1.5 GB with tools open
+- Benchmark tested 3 candidate models (MLX 4-bit quantized):
+  - Llama-3.2-3B-Instruct-4bit: ✅ fits (1.8 GB RAM) but ❌ 26s inference — too slow for scalping
+  - Qwen2.5-1.5B-Instruct-4bit: ✅ fits (970 MB RAM), ✅ 1.2s cached inference, ✅ same chat template architecture
+  - Qwen2.5-0.5B-4bit (current): ✅ 0.7s but ❌ cannot produce valid JSON (model capacity ceiling)
+
+### Changes
+| File | Change |
+|------|--------|
+| `halim/halim/scaffold.py` | Changed `SCAFFOLD_HF` → `Qwen/Qwen2.5-1.5B-Instruct`, `SCAFFOLD_MLX_4BIT` → `mlx-community/Qwen2.5-1.5B-Instruct-4bit` |
+| `halim/halim/inference_backend.py` | Added `tokenizer.apply_chat_template()` in `mlx_complete()` — wraps prompt with proper role markers (`<\|im_start\|>`) before generation. Previously sent raw text which instruct models cannot reliably parse. |
+| `halim/halim/device.py` | Updated `m2_8gb` profile: `reflex_only=false`, `lm_enabled=true`, `lm_max_params_b=1.5`. Previously blocked all LM inference on 8GB machines. |
+| `halim/data/checkpoints/toddler_v2/config.json` | New checkpoint with `base_model: mlx-community/Qwen2.5-1.5B-Instruct-4bit`. No local weights — loads from HF. |
+| `halim/data/checkpoints/latest` | Symlink updated → `toddler_v2` |
+| `halim/HALIM_MANIFEST.json` | Updated versions, timestamps, added `halim_lm_checkpoint` asset, set `native_mode=true`, `halim_lm=active` |
+
+### Verification
+```bash
+# Inference benchmark (raw model, no LoRA):
+# entry (buy signal):     21.7s first  → 1.2s cached  ✅ VALID JSON
+# entry (weak signal):     1.2s                       ✅ VALID JSON  
+# exit (take profit):      3.5s                       ⚠️ text (needs LoRA)
+# chat (briefing):         6.8s                       ⚠️ verbose (needs LoRA)
+
+# LoRA training test (10 iterations):
+# Peak mem: 2.114 GB (fits M2 8GB)
+# Valid loss: 4.036 → 3.658 (learning signal confirmed)
+# Tokens/sec: 41.6 → 76.1
+
+# Prompt output comparison:
+# BEFORE (0.5B): "ppo=hold conf=0.55 ppo=hold conf=0.25 ppo=hold con"  ❌
+# AFTER (1.5B):  {"enter": true, "confidence": 0.9, "reason": "high price movement..."}  ✅
+```
+
+### To run full LoRA training
+```bash
+# Close Cursor/Chrome to free 3+ GB RAM, then:
+python halim/scripts/train_toddler.py \
+  --base-model "mlx-community/Qwen2.5-1.5B-Instruct-4bit" \
+  --out-name toddler_v2_lora \
+  --iters 800 \
+  --batch-size 1 \
+  --lora-layers 8
+
+# Then register and deploy:
+./scripts/halim_register_checkpoint.sh toddler_v2_lora
+# Halim serve will auto-load merged weights
+```
+
+---
+
+## 2026-07-02 — Pre-market entry mode: relaxed gates + tight risk controls for AM trading
+
+### Problem
+Bot blocked ALL pre-market entries because green doctrine requires uptrend + green bar + PPO/Halim AI vote. Pre-market has fewer bars (uptrend/green_bar unreliable) and PPO defaults to HOLD. Logs showed `GREEN veto` on every pre-market spike — zero entries even on strong setups like DSY (1.5x vol, score=96).
+
+### Design
+New pre-market entry assessment that:
+1. Replaces uptrend/green-bar requirements with spike strength + micro prediction + momentum
+2. Lowers profit-probability floor to 0.50 (from 0.62) for pre-market only
+3. Lowers confidence threshold to 0.55 (from 0.65) for pre-market only
+4. Uses half position size (0.5x) and tighter stops (0.8x ATR) in pre-market
+5. Auto-exits pre-market positions 120s before RTH bell (09:28 ET)
+6. Uses PPO confidence even on HOLD (conf ≥0.40 = strong signal) for pre-market fast entry
+
+### Changes
+| File | Change |
+|------|--------|
+| `core/config.py` | Added 12 new `PRE_MARKET_*` config flags: entry enabled, profit prob floor (0.50), min confidence (0.55), position size pct (0.50), stop ATR mult (0.8), TP ATR mult (1.2), exit before RTH, exit cushion, min spike ratio (1.20), min scan score (40), PPO min conf (0.40), council fast. Lowered `MIN_CONFIDENCE_PRE_MARKET` to 0.55. |
+| `core/green_trade_doctrine.py` | Added `pre_market_entry_enabled()`, `assess_pre_market_entry()`, `require_pre_market_entry()`. Relaxed gates: no uptrend/green_bar required; spike strength + micro + PPO conf + profit prob floor + momentum are the entry signals. |
+| `core/scalper_spike_loop.py` | Session-aware entry gating: if pre-market, use `require_pre_market_entry()` (relaxed gates) instead of `require_green_entry()` (strict gates). Falls back to green doctrine for RTH. |
+| `core/scalper_session.py` | Added `_sweep_pre_market_positions()` — closes pre-market entries before RTH open with configurable cushion. |
+| `core/scalper_runner.py` | Calls `_sweep_pre_market_positions()` every loop iteration when close to RTH. |
+| `scripts/m2_8gb_live_profile.sh` | Exports all pre-market entry settings with M2-appropriate defaults. |
+
+### Env vars (new)
+- `PRE_MARKET_ENTRY_ENABLED=true` (default on — relaxed AM gates active)
+- `PRE_MARKET_PROFIT_PROB_FLOOR=0.50` (lower floor for limited-bar environment)
+- `PRE_MARKET_MIN_CONFIDENCE=0.55`
+- `PRE_MARKET_POSITION_SIZE_PCT=0.50` (half-size risk)
+- `PRE_MARKET_STOP_ATR_MULT=0.8` (tighter stops)
+- `PRE_MARKET_EXIT_BEFORE_RTH=true` (sweep before 09:30 ET)
+- `MIN_CONFIDENCE_PRE_MARKET=0.55`
+
+### Verify
+```bash
+python -m pytest tests/ -q --tb=short
+# All 215 tests pass
+
+# Pre-market log should now show:
+# 🌅 PRE-MARKET entry OK DSY: spike=1.35x score=96
+# 🌅 PRE-MARKET veto WEAK: pre_market:need profit_prob+score score=0.22 pp=0.15
+```
+
+---
+
+## 2026-07-02 — Comprehensive system assessment + tests/__init__.py
+
+### Problem
+No `tests/__init__.py` existed (minor — Python 3.3+ namespace packages work, but some tooling prefers explicit init). Needed full-system health audit after recent env/session/replay fix chain.
+
+### Audit findings (July 2, 2026, 14:55 UTC+6)
+| Area | Status |
+|------|--------|
+| **226 tests** (215 old + 11 untracked) | ✅ ALL PASS |
+| **16 core modules** import | ✅ Clean |
+| **Preflight** (`scripts/preflight_m2.sh`) | ✅ PASS |
+| **Syntax check** (all .py files) | ✅ Zero errors |
+| **Current session WARNINGs** (since 05:22 ET) | ✅ 0 (19 benign startup lines only) |
+| **Current session ERRORs** | ✅ **0** |
+| **`in_connectivity_outage` fix** (ReplayConnector) | ✅ Working — 0 occurrences in current session |
+| **Ib Gateway** | ✅ Connected port 4002 |
+| **Halim serve** (:8765) | ✅ Healthy, active endpoints |
+| **RAM tier** | ✅ Compact (M2 8GB) — all settings optimized |
+| **MPS (Apple GPU)** | ✅ Available for torch |
+| **RAM usage** | ✅ 1.1% (main bot) — excellent |
+| **Green doctrine** | ✅ Blocking counter-trend pre-market spikes |
+| **Profit probability** | ✅ Vetoing low-probability setups |
+| **War account** | ✅ NAV=$1,000, active |
+| **Council brain** | ✅ Groq + Gemini, online |
+
+### Fix
+| File | Change |
+|------|--------|
+| `tests/__init__.py` | Added empty init for explicit package (best practice) |
+
+### Verify
+```bash
+python -m pytest tests/ -q --tb=short
+./scripts/preflight_m2.sh
+# Expect: all pass
+```
+
 **Related:** [BRAIN_DEVELOPMENT_LOG.md](BRAIN_DEVELOPMENT_LOG.md) (runtime brain events) · [VISION_SMART_STACK.md](VISION_SMART_STACK.md) (architecture)
 
 **How to add an entry:** Copy the template at the bottom, fill every section, link files and env vars explicitly.
@@ -14,6 +156,149 @@
 ```bash
 ./scripts/start_replay_live.sh chunk 5   # should run steps, not halt on IB Truth
 python -m pytest tests/test_ib_truth_checklist.py -q
+```
+
+---
+
+## 2026-07-02 — Pre-market / RTH session auto-arm (no restart)
+
+### Problem
+Bot started before 04:00 ET stayed in overnight training mode after pre-market opened: `⏸ NO TRADING SESSION (overnight)` with no live IB scanner, streams, or entries. RTH at 09:30 had `_on_rth_open`; pre-market had no equivalent handler.
+
+### Root cause
+`get_market_state()` correctly returns `pre_market` at 04:00 ET, but `scalper_runner` only called `_on_rth_open` on `open` transitions. Overnight→pre-market only cleared `_day_session_ended`; no rescan, no MD resume bell, no companion ping. Main loop also slept at default cadence until the last 120s before RTH (`is_pre_rth_countdown`).
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/scalper_session.py` | `_on_pre_market_open`: resume MD, clear blocks, macro refresh, force IB rescan |
+| `core/scalper_runner.py` | Wire overnight/closed → pre_market transition; track `_pre_market_open_day` |
+| `core/rth_session.py` | `is_pre_market_session` + `PRE_MARKET_LOOP_SEC` fast loop (0.12s) |
+| `core/account_evaluator.py` | Evaluate + optional IB learning on pre-market transition |
+| `core/config.py` | `PRE_MARKET_LOOP_SEC`, `PRE_MARKET_OPEN_FORCE_RESCAN` |
+| `tests/test_session_transitions.py` | State, loop cadence, rescan-on-open |
+
+### Env
+- `PRE_MARKET_OPEN_FORCE_RESCAN=true` (default)
+- `PRE_MARKET_LOOP_SEC=0.12` (default)
+
+### Verify
+```bash
+python -m pytest tests/test_session_transitions.py -q
+# Start before 04:00 ET; at bell expect:
+# 🔔 PRE-MARKET OPEN (overnight → pre_market)
+# 🔍 Pre-market open — forcing live IB universe rescan
+```
+
+---
+
+## 2026-07-02 — M2 canonical live: fix env chain blocking all entries
+
+### Problem
+Live paper on M2 8 GB looked “dead” — no entries, no green vetoes, profit-prob target 80% or 32% depending on session. Replay had same commander 80% bug; live had **four scripts fighting** after `m2_8gb_live_profile.sh` used soft `${VAR:-default}` so limitless/ppo_wheel/sprint won.
+
+### Root cause
+`hanoon_limitless_env.sh` (default on via profit_learn) FORCE-set `MIN_PROFIT_PROBABILITY=0.32`, `CAPITAL_DISCIPLINE=false`, `COMMANDER_RUNTIME` unchanged. `ppo_wheel` set `HALIM_ENTRY_AWAIT_SEC=0`. `halim_smart_sprint` FORCE `HALIM_SERVE_PREFER_ADAPTER=true`. M2 profile sourced last but could not override. Spike loop also under-estimated quality (no `ticker`/PPO in `assess_entry_quality`).
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/m2_8gb_live_profile.sh` | FORCE canonical exports: 0.58 floors, commander off, await 1.0s, merged MLX, RAM-live |
+| `scripts/start_hanoon.sh` | ≤12 GB: `HANOON_LIMITLESS_WAR_ONLY=false`, `HANOON_M2_CANONICAL_LIVE=true`; sync interval 0; richer banner |
+| `scripts/ppo_wheel_env.sh` | Skip when M2 canonical (m2 owns wheel) |
+| `scripts/halim_smart_sprint_env.sh` | Skip await/adapter overrides on M2 canonical |
+| `scripts/hanoon_profit_learn_env.sh` | `LEARNING_LIVE_MICRO_PPO=false` on M2 canonical |
+| `core/scalper_spike_loop.py` | Pass `ticker` + PPO obs into `assess_entry_quality` |
+| `scripts/preflight_m2.sh` | Check commander + effective min profit |
+| `tests/test_m2_live_chain.py` | Full tail-chain simulation test |
+
+### Verify
+```bash
+python -m pytest tests/test_m2_live_profile.py tests/test_m2_live_chain.py -q
+./scripts/preflight_m2.sh
+# start_hanoon banner: min_profit=0.58 commander=false limitless=false
+```
+
+---
+
+## 2026-07-02 — Replay match-live: disable commander 80% lottery floor
+
+### Problem
+Replay showed `PROFIT PROB veto … (target 80%)` on every spike, zero `🟢 GREEN veto` lines, zero `REPLAY ENTRY` / exits. Gates looked stricter than live paper despite `replay_match_live_profile`.
+
+### Root cause
+`COMMANDER_RUNTIME_ENABLED` defaults `true` in `BotConfig`; live `start_hanoon.sh` PPO wheel sets it `false`. Replay never sourced that — `effective_min_profit_probability()` forced **0.80** lottery floor before green doctrine or `decide_entry` could run.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/replay_match_live_profile.sh` | `COMMANDER_RUNTIME_ENABLED=false`, `COMMANDER_LOTTERY_MIN_PROFIT_PROB=0.58`, `GREEN_SPIKE_PRECHECK=true` |
+| `core/replay_scalper_runner.py` | Apply commander-off + lottery floor on cfg when match-live |
+| `scripts/start_replay_live.sh` | Banner shows `commander_runtime=` |
+| `tests/test_replay_match_live_profile.py` | Assert commander disabled in match-live profile |
+
+### Verify
+```bash
+python -m pytest tests/test_replay_match_live_profile.py -q
+# restart replay — profit prob target should read 58% not 80%; green veto / entries possible
+```
+
+---
+
+## 2026-07-02 — ReplayConnector: in_connectivity_outage parity
+
+### Problem
+Replay tick-spike loop spammed `Tick spike monitor failed: 'ReplayConnector' object has no attribute 'in_connectivity_outage'` on every tick spike; `_attempt_entry()` aborted before green/profit gates could run consistently.
+
+### Root cause
+Live `Connector.in_connectivity_outage()` added in connectivity wait-mode refactor; `ReplayConnector` stub never got the same method.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/replay_connector.py` | `in_connectivity_outage()` → always `False`; session reclaim noops |
+| `tests/test_replay_connector.py` | Smoke test for outage + reclaim stubs |
+
+### Verify
+```bash
+python -m pytest tests/test_replay_connector.py -q
+# replay log: no "in_connectivity_outage" AttributeError on TICK SPIKE lines
+```
+
+---
+
+## 2026-07-02 — Replay match-live: quality gold over volume
+
+### Problem
+Replay used looser gates than live paper (`REPLAY_MIN_PROFIT_PROB=0.45`, relaxed copilot/council, regime/MTF blocks off). PPO/Halim learned replay-only habits that failed green doctrine and profit-prob rails at RTH — low transfer, noisy gold.
+
+### Root cause
+`start_replay_live.sh` and `replay_scalper_runner._setup_replay_mode` intentionally relaxed peripheral gates for council label volume; live M2 profile (`m2_8gb_live_profile.sh`) was never sourced for replay.
+
+### Fix
+| File | Change |
+|------|--------|
+| `scripts/replay_match_live_profile.sh` | New — mirrors live M2 gates (0.58 profit prob, green, capital discipline, regime/MTF) |
+| `scripts/replay_gold_volume_profile.sh` | New — opt-in legacy loose mode (`REPLAY_GOLD_VOLUME=true`) |
+| `scripts/start_replay_live.sh` | Default match-live profile; volume mode opt-in |
+| `scripts/weekend_replay_train.sh` | Default `REPLAY_MATCH_LIVE=true` |
+| `core/replay_profile.py` | Central `replay_match_live()` / `replay_relax_*()` helpers |
+| `core/replay_scalper_runner.py` | Apply live min_profit when match-live; log profile; stamp `profit_probability` on replay BUY |
+| `core/trading_copilot.py` | Match-live copilot reset (no skip bypass) |
+| `core/experience_buffer.py` | Skip low `profit_probability` replay BUY rows when `REPLAY_GOLD_QUALITY_FILTER=true` |
+| `tests/test_replay_match_live_profile.py` | Profile + buffer filter smoke tests |
+
+### Env vars
+- `REPLAY_MATCH_LIVE=true` (default) — live-quality gates
+- `REPLAY_GOLD_VOLUME=true` — legacy loose replay for bulk labels
+- `REPLAY_GOLD_QUALITY_FILTER=true` — drop replay BUY buffer rows below `REPLAY_GOLD_MIN_PROFIT_PROB`
+
+### Verify
+```bash
+python -m pytest tests/test_replay_match_live_profile.py -q
+source scripts/replay_match_live_profile.sh && env | grep MIN_PROFIT_PROBABILITY  # 0.58
+REPLAY_GOLD_VOLUME=true source scripts/replay_gold_volume_profile.sh && env | grep REPLAY_RELAX_COUNCIL  # true
+./scripts/start_replay_live.sh chunk 5   # banner shows match-live + profit_prob=0.58
 ```
 
 ---

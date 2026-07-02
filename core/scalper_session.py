@@ -96,6 +96,102 @@ class ScalperSessionMixin:
             )
         except Exception as exc:
             log.debug(f"Session-end coach lane: {exc}")
+    def _sweep_pre_market_positions(self) -> int:
+        """Exit pre-market positions before RTH open. Returns count of positions closed."""
+        if not getattr(self.cfg, "PRE_MARKET_EXIT_BEFORE_RTH", True):
+            return 0
+        from core.rth_session import seconds_until_rth_open
+        sec = seconds_until_rth_open(self.cfg)
+        if sec is None or sec > 180:
+            return 0
+        cushion = float(getattr(self.cfg, "PRE_MARKET_EXIT_CUSHION_SEC", 120))
+        if sec > cushion + 10:
+            return 0
+        closed = 0
+        for ticker in list(getattr(self, "_open_tickers", []) or []):
+            try:
+                log.info(
+                    f"  🌅 Closing pre-market position {ticker} "
+                    f"({sec:.0f}s before RTH)"
+                )
+                self._exit_position(ticker, reason="pre_market_sweep")
+                closed += 1
+            except Exception as exc:
+                log.debug(f"Pre-market sweep {ticker}: {exc}")
+        if closed:
+            log.info(f"  🌅 Pre-market sweep done — closed {closed} position(s)")
+        return closed
+    def _on_pre_market_open(self, old_state: str) -> None:
+        """
+        04:00 ET bell — leave overnight training mode and arm live IB scanner.
+        Unlike RTH open, pre-market keeps extended-hours order flags.
+        """
+        today = now_et().strftime("%Y-%m-%d")
+        if self._pre_market_open_day == today:
+            return
+        self._pre_market_open_day = today
+        self._day_session_ended = False
+
+        from core.market_hours import market_status_line
+        from core.startup_log import sinfo
+
+        log.info(
+            f"🔔 PRE-MARKET OPEN ({old_state} → pre_market) | "
+            f"{market_status_line(self.cfg)}"
+        )
+
+        self._resume_tradable_market_data()
+
+        cleared = clear_transient_md_blocks(self.cfg)
+        if cleared:
+            for t in cleared:
+                self._contract_blacklist.discard(t.upper())
+                self._contract_blacklist.discard(t)
+        try:
+            from core.market_data_learning import clear_hmds_transient_blocks
+            clear_hmds_transient_blocks()
+        except Exception:
+            pass
+
+        try:
+            from core.market_context import refresh_macro_context
+            ctx = refresh_macro_context(force=True, connector=getattr(self, "conn", None))
+            log.info(
+                f"🌍 Pre-market macro: SPY {ctx.get('spy_pct', 0):+.2f}% | "
+                f"QQQ {ctx.get('qqq_pct', 0):+.2f}% | "
+                f"VIX {ctx.get('vix_level', 0):.1f} ({ctx.get('risk_tone', '?')})"
+            )
+        except Exception:
+            pass
+
+        if getattr(self.cfg, "PRE_MARKET_OPEN_FORCE_RESCAN", True):
+            self._last_scan_time = 0.0
+            self._needs_initial_scan = True
+            self._deferred_ib_scan = False
+            log.info("  🔍 Pre-market open — forcing live IB universe rescan")
+
+        try:
+            from core.war_account import ensure_war_account
+            ensure_war_account(self.cfg, sync_ib=False)
+        except Exception as exc:
+            log.debug(f"Pre-market war account: {exc}")
+
+        try:
+            from core.halim_companion import companion_session_ping
+            companion_session_ping(self, self.cfg, trigger="pre_market")
+        except Exception as exc:
+            log.debug(f"Halim companion pre-market ping: {exc}")
+
+        teach_profit_hunt_lesson(
+            self.autopilot, self.consciousness,
+            "Pre-market live — extended hours scanner and entries armed.",
+        )
+        self._observe_runtime(
+            "pre_market_open",
+            old_state=old_state,
+            tier=rth_tier(self.cfg),
+            cleared_md=cleared[:20],
+        )
     def _on_rth_open(self, old_state: str) -> None:
         """
         Bell at 09:30 ET — shift to live RTH mode when transitioning from pre-market.

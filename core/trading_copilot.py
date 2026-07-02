@@ -102,28 +102,46 @@ def copilot_caution_for_ticker(cfg: BotConfig, ticker: str) -> float:
 
 def is_replay_relax_copilot() -> bool:
     """Replay gold collection — allow entries; don't veto from stale live skip list."""
-    return (
-        os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
-        and os.getenv("REPLAY_RELAX_COPILOT", "true").lower() in ("1", "true", "yes")
-    )
+    try:
+        from core.replay_profile import replay_relax_copilot
+        return replay_relax_copilot()
+    except Exception:
+        return (
+            os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+            and os.getenv("REPLAY_RELAX_COPILOT", "true").lower() in ("1", "true", "yes")
+        )
 
 
 def reset_copilot_for_replay(cfg: Optional[BotConfig] = None) -> None:
-    """Clear stale live-session SKIP list so replay can trade and collect gold."""
+    """Clear stale live-session SKIP list; posture matches replay profile."""
     global _copilot
-    brief = CopilotBrief(
-        narrative="Replay session — training gold collection (copilot entry veto relaxed).",
-        regime_read="replay",
-        risk_posture="aggressive",
-        ticker_bias={},
-        repeat_losers=[],
-        ppo_hints={"confidence_boost": 0.0, "skip_repeat_losers": False},
-        updated_at=time.time(),
-        source="replay_reset",
-    )
+    from core.replay_profile import replay_match_live
+    if replay_match_live():
+        brief = CopilotBrief(
+            narrative="Replay match-live — same copilot rails as paper (no stale skip bypass).",
+            regime_read="replay",
+            risk_posture="normal",
+            ticker_bias={},
+            repeat_losers=[],
+            ppo_hints={"confidence_boost": 0.0, "skip_repeat_losers": True},
+            updated_at=time.time(),
+            source="replay_reset_match_live",
+        )
+        log.info("🧭 Copilot reset for replay match-live — live-quality entry rails")
+    else:
+        brief = CopilotBrief(
+            narrative="Replay session — training gold collection (copilot entry veto relaxed).",
+            regime_read="replay",
+            risk_posture="aggressive",
+            ticker_bias={},
+            repeat_losers=[],
+            ppo_hints={"confidence_boost": 0.0, "skip_repeat_losers": False},
+            updated_at=time.time(),
+            source="replay_reset",
+        )
+        log.info("🧭 Copilot reset for replay — skip list cleared, entries allowed for gold")
     _save_brief(brief)
     _copilot = None
-    log.info("🧭 Copilot reset for replay — skip list cleared, entries allowed for gold")
 
 
 def _load_brief() -> CopilotBrief:

@@ -68,8 +68,39 @@ def _tail_jsonl(path: Path, n: int) -> List[Dict[str, Any]]:
     return records
 
 
+def _replay_gold_quality_ok(record: Dict[str, Any]) -> bool:
+    """Drop low-edge replay BUY rows when match-live quality filter is on."""
+    if record.get("source") != "replay_live":
+        return True
+    if os.getenv("REPLAY_GOLD_QUALITY_FILTER", "false").lower() not in ("1", "true", "yes"):
+        return True
+    action = str(record.get("action", "")).upper()
+    if action not in ("BUY", "ENTER"):
+        return True
+    try:
+        pp = float(
+            record.get("profit_probability", record.get("quality_conf", 0)) or 0,
+        )
+    except (TypeError, ValueError):
+        pp = 0.0
+    if pp <= 0:
+        return True
+    try:
+        floor = float(
+            os.getenv(
+                "REPLAY_GOLD_MIN_PROFIT_PROB",
+                os.getenv("MIN_PROFIT_PROBABILITY", "0.58"),
+            ),
+        )
+    except (TypeError, ValueError):
+        floor = 0.58
+    return pp >= floor
+
+
 def append(record: Dict[str, Any]) -> None:
     """Append one experience record to the buffer."""
+    if not _replay_gold_quality_ok(record):
+        return
     record.setdefault("timestamp", utc_now_iso())
     record.setdefault("model_version", "scalper_v1")
     line = json.dumps(record, separators=(",", ":"))

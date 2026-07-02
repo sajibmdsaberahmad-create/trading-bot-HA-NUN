@@ -146,8 +146,15 @@ def rth_monitor_interval_sec(cfg: BotConfig) -> float:
     return float(getattr(cfg, "FAST_MONITOR_SEC", 1.0))
 
 
+def is_pre_market_session(cfg: Optional[BotConfig] = None) -> bool:
+    """True during extended pre-market (04:00–09:30 ET on market days)."""
+    return get_market_state(cfg or BotConfig()) == "pre_market"
+
+
 def rth_main_loop_sec(cfg: BotConfig, **kwargs) -> Optional[float]:
     """Override main-loop sleep when near or in RTH alert tiers."""
+    if is_pre_market_session(cfg):
+        return float(getattr(cfg, "PRE_MARKET_LOOP_SEC", 0.12))
     if is_rth_opening_window(cfg):
         return float(getattr(cfg, "RTH_OPENING_LOOP_SEC", 0.05))
     if is_rth(cfg):

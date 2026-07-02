@@ -1,0 +1,16 @@
+{
+  "halim_phase": "toddler",
+  "model": "M. A. Halim",
+  "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "backend": "mlx",
+  "phase": "toddler",
+  "promotion_eligible": false,
+  "created_at": "2026-07-02T10:05:00+00:00",
+  "description": "Qwen2.5-1.5B-Instruct-4bit base — 3x capacity over 0.5B for reliable JSON + reasoning.",
+  "train_pairs": 0,
+  "valid_pairs": 0,
+  "epochs": 0,
+  "sft_mode": "none",
+  "trained_on": "none_raw_hf",
+  "build_id": null
+}

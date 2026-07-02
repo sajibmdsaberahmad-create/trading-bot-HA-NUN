@@ -1,31 +1,32 @@
 {
   "model": "M. A. Halim",
   "short_name": "Halim",
-  "updated_at": "2026-07-01T16:20:26.067871+00:00",
+  "updated_at": "2026-07-02T10:15:00+00:00",
   "phase": "toddler",
   "phase_info": {
     "index": 1,
-    "description": "First Halim language core \u2014 fine-tune small transformer on trading dataset.",
+    "description": "Qwen2.5-1.5B-Instruct-4bit LM core (upgraded from 0.5B). Chat template fix + M2 8GB profile enable. LoRA fine-tuning next.",
     "external_llm": false,
     "capabilities": [
       "trade_reflex",
       "enter_skip_proxy",
-      "halim_trade_reasoning"
+      "halim_trade_reasoning",
+      "local_lm_inference"
     ]
   },
   "identity": {
     "name": "M. A. Halim",
     "short_name": "Halim",
-    "version": 1,
+    "version": 2,
     "birth_at": "2026-06-27T06:40:22.991421+00:00",
     "phase": "toddler",
     "philosophy": "Own every weight. No permanent dependency on Groq, Gemini, Claude, or Ollama. Grow from trading reflexes into a frontier model \u2014 generative, calculative, coding.",
     "body": "HANOON trading bot (first embodiment)",
     "repo": "halim",
     "external_llm_policy": "none_when_native",
-    "native_mode": false
+    "native_mode": true
   },
-  "native_mode": false,
+  "native_mode": true,
   "roadmap_repo": "halim",
   "owned_assets": [
     "models/ppo_trader.zip",
@@ -33,127 +34,136 @@
     "models/scalper_weights.json",
     "models/council_training_dataset.jsonl",
     "models/halim_identity.json",
-    "models/halim_manifest.json"
+    "models/halim_manifest.json",
+    "halim/data/checkpoints/toddler_v2"
   ],
   "brain_status": {
-    "timestamp": "2026-07-01T16:20:26.026430+00:00",
-    "philosophy": "API teaches \u2192 students on disk learn \u2192 API calls shrink over time",
+    "timestamp": "2026-07-02T10:15:00+00:00",
+    "philosophy": "1.5B local LM active (MLX 4-bit). API teaches hard cases; Halim handles routine decisions.",
     "assets": {
       "ppo_live": {
         "exists": true,
         "path": "ppo_trader.zip",
         "size_kb": 28474.7,
-        "modified": "2026-07-01T13:48:23.918740+00:00"
+        "modified": "2026-07-01T20:01:25.719147+00:00"
       },
       "ppo_replay": {
         "exists": true,
         "path": "models/ppo_trader_replay.zip",
         "size_kb": 28474.7,
-        "modified": "2026-06-30T08:01:46.986997+00:00"
+        "modified": "2026-07-02T05:32:43.441747+00:00"
       },
       "teacher_proxy": {
         "exists": true,
         "path": "models/teacher_proxy.joblib",
         "size_kb": 14.7,
-        "modified": "2026-07-01T16:20:19.274472+00:00"
+        "modified": "2026-07-02T06:07:44.622761+00:00"
       },
       "scalper_weights": {
         "exists": true,
         "path": "models/scalper_weights.json",
         "size_kb": 0.4,
-        "modified": "2026-07-01T16:20:26.011246+00:00"
+        "modified": "2026-07-02T09:49:29.259141+00:00"
       },
       "copilot_state": {
         "exists": true,
         "path": "models/copilot_state.json",
         "size_kb": 0.7,
-        "modified": "2026-07-01T16:18:04.370343+00:00"
+        "modified": "2026-07-02T09:45:51.282934+00:00"
       },
       "experience_buffer": {
         "exists": true,
         "path": "models/experience_buffer.jsonl",
-        "size_kb": 13200.5,
-        "modified": "2026-07-01T16:19:28.031233+00:00"
+        "size_kb": 4098.4,
+        "modified": "2026-07-02T09:47:50.796742+00:00"
       },
       "decision_log": {
         "exists": true,
         "path": "models/ai_decision_log.jsonl",
-        "size_kb": 1842.7,
-        "modified": "2026-07-01T16:19:23.583201+00:00"
+        "size_kb": 1946.8,
+        "modified": "2026-07-02T07:02:00.998975+00:00"
       },
       "council_dataset": {
         "exists": true,
         "path": "models/council_training_dataset.jsonl",
-        "size_kb": 230.1,
-        "modified": "2026-07-01T16:20:18.066766+00:00"
+        "size_kb": 421.6,
+        "modified": "2026-07-02T09:49:12.719379+00:00"
       },
       "ppo_teacher_sessions": {
         "exists": true,
         "path": "models/ppo_teacher_sessions.jsonl",
-        "size_kb": 48.1,
-        "modified": "2026-06-30T19:56:44.796271+00:00"
+        "size_kb": 49.5,
+        "modified": "2026-07-01T18:18:16.926658+00:00"
+      },
+      "halim_lm_checkpoint": {
+        "exists": true,
+        "path": "halim/data/checkpoints/toddler_v2",
+        "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+        "status": "active_raw_inference"
       }
     },
     "phases": {
       "ppo": "active",
-      "teacher_proxy": "distilled",
-      "proxy_accuracy": 1.0,
-      "fast_path": false,
+      "teacher_proxy": "fast_path",
+      "proxy_accuracy": 0.9717,
+      "fast_path": true,
       "ppo_teacher": "active",
       "copilot": "active",
-      "growth_stage": "child"
+      "halim_lm": "active",
+      "growth_stage": "teen"
     },
-    "api_dependency": "high",
-    "next_milestone": "Optional: fine-tune 1-3B model on council_dataset (Modal/Colab once)",
+    "api_dependency": "low",
+    "next_milestone": "LoRA fine-tune toddler_v2 on SFT data (22K pairs) with Qwen2.5-1.5B base",
     "trade_stats": {
-      "count": 4,
-      "win_rate": 0.25,
-      "avg_pnl": -2.5
+      "count": 0,
+      "win_rate": 0.0,
+      "avg_pnl": 0.0
     },
-    "buffer_records": 12568,
-    "dataset_pairs": 598,
+    "buffer_records": 7132,
+    "dataset_pairs": 1014,
     "maturity": {
-      "stage": "child",
-      "stage_index": 3,
+      "stage": "teen",
+      "stage_index": 4,
       "stage_count": 6,
-      "description": "Student proxy assists entries; API still teaches gaps",
+      "description": "Students lead; Halim LM active for reasoning (1.5B, raw); teacher for hard cases",
       "metrics": {
-        "closed_trades": 2734,
-        "dataset_pairs": 598,
-        "evolution_count": 79,
-        "proxy_accuracy": 1.0,
-        "proxy_holdout_accuracy": 1.0,
+        "closed_trades": 2768,
+        "dataset_pairs": 1014,
+        "evolution_count": 87,
+        "proxy_accuracy": 0.9717,
+        "proxy_holdout_accuracy": 0.9717,
         "rolling_win_rate": null,
-        "proxy_exists": true
+        "proxy_exists": true,
+        "lm_available": true
       },
       "limits": {
-        "min_trades": 60,
-        "min_evolutions": 2,
-        "min_dataset": 200,
-        "min_confidence": 0.6,
-        "min_profit_prob": 0.6,
+        "min_trades": 150,
+        "min_evolutions": 4,
+        "min_dataset": 600,
+        "min_confidence": 0.61,
+        "min_profit_prob": 0.61,
         "ai_sure_entry": true,
-        "decision_api_daily": 25,
-        "copilot_api_daily": 8,
-        "ppo_teacher_api_daily": 2,
-        "council_sample_rate": 0.35,
-        "copilot_refresh_sec": 120.0,
+        "decision_api_daily": 15,
+        "copilot_api_daily": 4,
+        "ppo_teacher_api_daily": 1,
+        "halim_lm_daily_calls": 100,
+        "council_sample_rate": 0.15,
+        "copilot_refresh_sec": 150.0,
         "ppo_micro_steps": 512,
-        "proxy_min_trades": 15,
+        "proxy_min_trades": 12,
         "use_proxy_entries": true,
-        "description": "Student proxy assists entries; API still teaches gaps"
+        "description": "Students lead; Halim LM active for routine reasoning"
       },
       "api_budget_multiplier": 0.2,
       "api_usage_today": {
-        "day": "2026-07-01",
-        "decision": 18,
-        "copilot": 1
+        "day": "2026-07-02",
+        "decision": 17
       },
       "decision_budget_left": 0,
       "copilot_budget_left": 0,
       "ppo_teacher_budget_left": 0,
-      "next_stage": "teen"
+      "next_stage": "adult"
     }
   },
-  "next_milestone": "./scripts/halim_train_toddler.sh \u2192 register checkpoint \u2192 HALIM_LM_BACKEND=mlx"
+  "next_milestone": "Phase 1 complete: Qwen2.5-1.5B raw LM active on M2 8GB. Next: LoRA fine-tune on SFT data (22K pairs) for domain-aligned JSON output."
 }

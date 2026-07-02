@@ -109,6 +109,18 @@ class ReplayConnector:
         self._connectivity_handlers: list = []
         self._stream_managers: dict = {}
         self.fill_cache = None
+        self._connectivity_outage_active = False
+        self._pending_session_reclaim = False
+
+    def in_connectivity_outage(self) -> bool:
+        """Replay never loses IB — CSV fake-live stays connected."""
+        return False
+
+    def request_session_reclaim(self) -> None:
+        pass
+
+    def clear_pending_session_reclaim(self) -> None:
+        self._pending_session_reclaim = False
 
     def connect(self, reclaim: Optional[bool] = None) -> bool:
         self._connected = True

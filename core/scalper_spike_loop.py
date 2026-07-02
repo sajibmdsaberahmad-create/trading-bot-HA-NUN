@@ -1423,11 +1423,31 @@ class ScalperSpikeMixin:
             from core.entry_quality import (
                 assess_entry_quality, quality_blocks_entry, regime_blocks_entry, mtf_blocks_entry,
             )
+            ppo_action = 0
+            ppo_conf = 0.5
+            try:
+                if self.model is not None and len(self._feature_buffer) >= self.cfg.WINDOW_SIZE:
+                    import numpy as np
+                    window = np.array(
+                        list(self._feature_buffer)[-self.cfg.WINDOW_SIZE:],
+                        dtype=np.float32,
+                    ).flatten()
+                    total = self.bot_cash + self.shares * live_px
+                    c_rat = self.bot_cash / (total + 1e-9)
+                    p_rat = (self.shares * live_px) / (total + 1e-9)
+                    obs = np.concatenate([window, [c_rat, p_rat]]).astype(np.float32)
+                    ppo_action, _ = self.model.predict(obs, deterministic=True)
+                    ppo_conf = float(getattr(self, "_last_ppo_confidence", 0.5) or 0.5)
+            except Exception:
+                pass
             quality = assess_entry_quality(
                 self.cfg, fc,
                 spike_ratio=spike_ratio,
                 scan_score=float(target.rank_score),
                 live_px=live_px,
+                ticker=ticker,
+                ppo_action=int(ppo_action or 0),
+                ppo_conf=ppo_conf,
             )
             fc.update(quality)
             self._last_micro_forecast[ticker] = fc
@@ -1445,9 +1465,42 @@ class ScalperSpikeMixin:
                     f"  📊 QUALITY advisory {ticker}: {quality.get('reason', '')[:100]}"
                 )
             try:
-                from core.green_trade_doctrine import require_green_entry, green_entry_mandatory
+                from core.green_trade_doctrine import (
+                    require_green_entry, green_entry_mandatory,
+                    require_pre_market_entry, pre_market_entry_enabled,
+                )
+                from core.rth_session import is_pre_market_session
                 precheck = os.getenv("GREEN_SPIKE_PRECHECK", "false").lower() in ("1", "true", "yes")
-                if green_entry_mandatory(self.cfg) and precheck:
+                in_pre_market = is_pre_market_session(self.cfg)
+                if in_pre_market and pre_market_entry_enabled(self.cfg) and precheck:
+                    block = require_pre_market_entry(
+                        self.cfg,
+                        ticker=ticker,
+                        df=work_df,
+                        current_px=live_px,
+                        micro=fc,
+                        spike_ratio=spike_ratio,
+                        scan_score=float(target.rank_score),
+                        dm=dm,
+                    )
+                    if block:
+                        if "disabled" in str(block):
+                            log.info(
+                                f"  ⏭ Pre-market entry disabled for {ticker}: "
+                                f"{block[:60]}"
+                            )
+                        else:
+                            log.info(f"  🌅 PRE-MARKET veto {ticker}: {block[:100]}")
+                            self._spike_skip_until[ticker] = time.time() + float(
+                                getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                            )
+                            continue
+                    else:
+                        log.info(
+                            f"  🌅 PRE-MARKET entry OK {ticker}: "
+                            f"spike={spike_ratio:.2f}x score={float(target.rank_score):.0f}"
+                        )
+                elif green_entry_mandatory(self.cfg) and precheck:
                     block = require_green_entry(
                         self.cfg,
                         ticker=ticker,

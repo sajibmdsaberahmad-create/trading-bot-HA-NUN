@@ -91,8 +91,9 @@ class ReplayScalperRunner(ScalperRunner):
                 set_ppo_model(self.model)
         except Exception:
             pass
-        # Looser council gates for replay learning volume (live unchanged)
-        if os.getenv("REPLAY_RELAX_COUNCIL", "true").lower() in ("1", "true", "yes"):
+        # Council gates: match live paper by default (REPLAY_MATCH_LIVE); loose only in gold-volume mode
+        from core.replay_profile import replay_match_live, replay_profile_label, replay_relax_council
+        if replay_relax_council():
             self.cfg.MIN_PROFIT_PROBABILITY = float(
                 os.getenv("REPLAY_MIN_PROFIT_PROB", "0.45"),
             )
@@ -101,6 +102,23 @@ class ReplayScalperRunner(ScalperRunner):
             )
             self.cfg.CAPITAL_DISCIPLINE = False
             os.environ["CAPITAL_DISCIPLINE"] = "false"
+        elif replay_match_live():
+            self.cfg.MIN_PROFIT_PROBABILITY = float(
+                os.getenv("MIN_PROFIT_PROBABILITY", "0.58"),
+            )
+            self.cfg.CAPITAL_MIN_PROFIT_PROBABILITY = float(
+                os.getenv("CAPITAL_MIN_PROFIT_PROBABILITY", "0.58"),
+            )
+            self.cfg.CAPITAL_DISCIPLINE = os.getenv(
+                "CAPITAL_DISCIPLINE", "true",
+            ).lower() in ("1", "true", "yes")
+            self.cfg.COMMANDER_RUNTIME_ENABLED = os.getenv(
+                "COMMANDER_RUNTIME_ENABLED", "false",
+            ).lower() in ("1", "true", "yes")
+            os.environ.setdefault("COMMANDER_RUNTIME_ENABLED", "false")
+            self.cfg.COMMANDER_LOTTERY_MIN_PROFIT_PROB = float(
+                os.getenv("COMMANDER_LOTTERY_MIN_PROFIT_PROB", "0.58"),
+            )
         self.cfg.PPO_TEACHER_ENABLED = os.getenv(
             "PPO_TEACHER_ENABLED", "true",
         ).lower() in ("1", "true", "yes")
@@ -145,7 +163,9 @@ class ReplayScalperRunner(ScalperRunner):
         self._replay_fills = ReplayFillSimulator()
         log.info(
             f"🎬 REPLAY SCALPER — {len(self.replay_hub.tickers)} tickers | "
+            f"profile={replay_profile_label()} | "
             f"council={'on' if getattr(self.cfg, 'COUNCIL_ENABLED', False) else 'off'} | "
+            f"min_profit={getattr(self.cfg, 'MIN_PROFIT_PROBABILITY', 0):.2f} | "
             f"fills=stochastic sim | IB orders BLOCKED"
         )
         import core.pilot_mode as pilot_mode
@@ -579,6 +599,9 @@ class ReplayScalperRunner(ScalperRunner):
                 ),
                 "regime": regime_label,
                 "confidence": getattr(self, "_last_ai_confidence", 0.5),
+                "profit_probability": float(
+                    ai_dec.get("profit_probability", ai_dec.get("quality_conf", 0)) or 0,
+                ),
                 "features": snapshot_features(self._feature_buffer, self.cfg),
                 "spike_ratio": spike,
                 "scan_score": float(getattr(self, "_last_scan_score", 0)),

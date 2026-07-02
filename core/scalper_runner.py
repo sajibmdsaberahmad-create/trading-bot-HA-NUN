@@ -357,6 +357,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self._last_market_closed_log: float = 0.0
         self._day_session_ended: bool = False
         self._rth_open_day: Optional[str] = None
+        self._pre_market_open_day: Optional[str] = None
         self._entries_this_hour: int = 0
         self._smart_gate_context: Dict[str, Dict[str, Any]] = {}
         self._hour_window_start: float = time.time()
@@ -1917,6 +1918,8 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         log.debug(f"Market transition eval: {exc}")
                     if market_state == "open" and old_state != "open":
                         self._on_rth_open(old_state)
+                    if market_state == "pre_market" and old_state in ("overnight", "closed"):
+                        self._on_pre_market_open(old_state)
                     if old_state in ("open", "pre_market") and market_state in (
                         "after_hours", "overnight", "closed",
                     ):
@@ -1927,6 +1930,12 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 can_trade, market_state = can_trade_now(self.cfg)
                 if not can_trade:
                     self._halt_trading_for_closed_market(market_state)
+
+                # Sweep pre-market positions before RTH open
+                try:
+                    self._sweep_pre_market_positions()
+                except Exception as exc:
+                    log.debug(f"Pre-market sweep loop: {exc}")
 
                 self._service_pending_ai_councils()
                 self._service_shadow_positions()

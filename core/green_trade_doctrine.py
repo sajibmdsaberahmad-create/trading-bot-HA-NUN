@@ -648,6 +648,194 @@ def require_green_entry(
     )
 
 
+def pre_market_entry_enabled(cfg: Optional["BotConfig"] = None) -> bool:
+    """Pre-market relaxed entry mode active."""
+    if cfg is None:
+        try:
+            from core.config import BotConfig
+            cfg = BotConfig()
+        except Exception:
+            return os.getenv("PRE_MARKET_ENTRY_ENABLED", "true").lower() in ("1", "true", "yes")
+    return bool(getattr(cfg, "PRE_MARKET_ENTRY_ENABLED", True))
+
+
+def assess_pre_market_entry(
+    cfg: Optional["BotConfig"],
+    *,
+    ticker: str,
+    df: pd.DataFrame,
+    current_px: float,
+    micro: Optional[Dict[str, Any]] = None,
+    spike_ratio: float = 1.0,
+    scan_score: float = 0.0,
+    ppo_action: int = 0,
+    ppo_conf: float = 0.5,
+    decision: Optional[Dict[str, Any]] = None,
+    dm: Any = None,
+) -> Dict[str, Any]:
+    """
+    Pre-market entry assessment — relaxed vs green doctrine.
+    
+    Pre-market has less bar history, so uptrend/green_bar filters are unreliable.
+    Instead we use: spike strength + micro prediction + PPO confidence + council approval.
+    Profit probability floor and confidence minimum still protect capital.
+    """
+    from core.entry_quality import assess_entry_quality
+
+    if cfg is None:
+        from core.config import BotConfig
+        cfg = BotConfig()
+
+    decision = decision or {}
+    micro = micro or {}
+
+    quality = assess_entry_quality(
+        cfg,
+        micro,
+        spike_ratio=spike_ratio,
+        scan_score=scan_score,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        live_px=current_px,
+        ticker=ticker,
+    )
+    profit_p = float(quality.get("profit_probability", 0) or 0)
+    setup_type = str(quality.get("setup_type", "neutral") or "neutral")
+    fakeout = float(quality.get("fakeout_risk", 0) or 0)
+
+    sl = float(micro.get("spike_likelihood", 0) or 0)
+    mom = float(micro.get("momentum", 0) or 0)
+    pred_1 = float(micro.get("pred_1bar") or current_px or 0)
+
+    # Pre-market thresholds from config
+    min_pp = float(getattr(cfg, "PRE_MARKET_PROFIT_PROB_FLOOR", 0.50))
+    min_conf = float(getattr(cfg, "PRE_MARKET_MIN_CONFIDENCE", 0.55))
+    min_spike = float(getattr(cfg, "PRE_MARKET_MIN_SPIKE_RATIO", 1.20))
+    min_scan = float(getattr(cfg, "PRE_MARKET_MIN_SCAN_SCORE", 40))
+    ppo_min_conf = float(getattr(cfg, "PRE_MARKET_PPO_MIN_CONF", 0.40))
+
+    halim_enter = bool(decision.get("halim_enter") or decision.get("enter"))
+    conf = float(decision.get("confidence", ppo_conf) or ppo_conf)
+    ppo_buy = int(ppo_action or decision.get("ppo_action", 0) or 0) == 1
+
+    # Pre-market entry signals:
+    # 1. Strong spike + micro prediction up (mechanical)
+    spike_strong = spike_ratio >= min_spike and sl >= 0.20
+    pred_up = pred_1 > current_px * 0.999 if current_px > 0 else False
+    
+    # 2. PPO confidence for entry (even on HOLD, strong confidence counts)
+    ppo_strong = ppo_conf >= ppo_min_conf and (ppo_buy or ppo_conf >= ppo_min_conf + 0.10)
+    
+    # 3. AI vote (Halim or council approval)
+    ai_vote = halim_enter or bool(decision.get("ollama_enter") or decision.get("council_enter"))
+    
+    # 4. Momentum + volume confirmation
+    mom_ok = mom > 0.02 or spike_ratio >= 1.15
+    
+    # Composite score for pre-market
+    score = (
+        (0.30 if spike_strong else 0.0)
+        + (0.15 if pred_up else 0.0)
+        + (0.15 if ppo_strong else 0.0)
+        + (0.15 if ai_vote else 0.0)
+        + profit_p * 0.25
+        + min(ppo_conf, 1.0) * 0.10
+        + (0.05 if mom_ok else 0.0)
+    )
+    if scan_score >= min_scan:
+        score += min(scan_score / 100.0, 0.15)
+    score = round(min(1.0, score), 3)
+
+    # Enter decision: must pass profit-prob floor + either spike/PRO strong or AI vote
+    enter_ok = (
+        profit_p >= min_pp
+        and fakeout <= 0.70
+        and conf >= min_conf
+        and mom_ok
+        and (
+            (spike_strong and scan_score >= min_scan * 0.8)
+            or ppo_strong
+            or ai_vote
+        )
+    )
+
+    reasons = []
+    if spike_strong:
+        reasons.append("spike_strong")
+    if pred_up:
+        reasons.append("pred_up")
+    if ppo_strong:
+        reasons.append("ppo_strong")
+    if ai_vote:
+        reasons.append("ai_vote")
+    if mom_ok:
+        reasons.append("momentum")
+    reasons.append(f"pp={profit_p:.2f}")
+    reasons.append(f"conf={conf:.2f}")
+
+    return {
+        "enter_ok": enter_ok,
+        "composite_score": score,
+        "profit_probability": profit_p,
+        "min_profit_probability": min_pp,
+        "confidence": conf,
+        "min_confidence": min_conf,
+        "ai_vote": ai_vote,
+        "quality": quality,
+        "reasons": reasons,
+        "pre_market": True,
+    }
+
+
+def require_pre_market_entry(
+    cfg: Optional["BotConfig"],
+    *,
+    ticker: str,
+    df: pd.DataFrame,
+    current_px: float,
+    micro: Optional[Dict[str, Any]] = None,
+    spike_ratio: float = 1.0,
+    scan_score: float = 0.0,
+    ppo_action: int = 0,
+    ppo_conf: float = 0.5,
+    decision: Optional[Dict[str, Any]] = None,
+    dm: Any = None,
+) -> Optional[str]:
+    """Hard block reason for pre-market entry; None if OK or disabled."""
+    if not pre_market_entry_enabled(cfg):
+        return "pre_market_entry_disabled"
+    a = assess_pre_market_entry(
+        cfg,
+        ticker=ticker,
+        df=df,
+        current_px=current_px,
+        micro=micro,
+        spike_ratio=spike_ratio,
+        scan_score=scan_score,
+        ppo_action=ppo_action,
+        ppo_conf=ppo_conf,
+        decision=decision,
+        dm=dm,
+    )
+    if a.get("enter_ok"):
+        return None
+    missing = []
+    if float(a.get("profit_probability", 0) or 0) < float(a.get("min_profit_probability", 1)):
+        missing.append("profit_prob")
+    if not a.get("ai_vote"):
+        if not (float(a.get("confidence", 0) or 0) >= float(a.get("min_confidence", 0.55))):
+            missing.append("confidence")
+    if float(a.get("quality", {}).get("fakeout_risk", 0) or 0) > 0.70:
+        missing.append("fakeout")
+    if float(a.get("composite_score", 0) or 0) < 0.50:
+        missing.append("score")
+    return (
+        f"pre_market:need {'+'.join(missing) or 'alignment'} "
+        f"score={a.get('composite_score', 0):.2f} "
+        f"pp={a.get('profit_probability', 0):.2f}"
+    )
+
+
 def apply_unified_pipeline_gates(
     cfg: Optional["BotConfig"],
     *,

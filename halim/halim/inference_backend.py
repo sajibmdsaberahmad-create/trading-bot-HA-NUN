@@ -96,10 +96,16 @@ def mlx_complete(
         try:
             from mlx_lm.sample_utils import make_sampler
 
+            # Apply chat template — instruct models need proper role markers
+            # (Qwen: <|im_start|>, Llama: <|start_header_id|>, etc.)
+            messages = [{"role": "user", "content": prompt}]
+            formatted = tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True,
+            )
             text = generate(
                 model,
                 tokenizer,
-                prompt=prompt,
+                prompt=formatted,
                 max_tokens=max_tokens,
                 sampler=make_sampler(temp=temperature),
                 verbose=False,

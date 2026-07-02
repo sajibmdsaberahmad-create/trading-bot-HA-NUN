@@ -16,11 +16,11 @@ PROFILES: Dict[str, Dict[str, Any]] = {
     },
     "m2_8gb": {
         "ram_gb_max": 10,
-        "reflex_only": True,
-        "lm_enabled": False,
-        "lm_max_params_b": 0,
+        "reflex_only": False,
+        "lm_enabled": True,
+        "lm_max_params_b": 1.5,
         "quant": "4bit",
-        "description": "PPO + proxy + dataset collection (current Mac)",
+        "description": "PPO + proxy + up to 1.5B Halim LM (Qwen2.5-1.5B-4bit fits ~1GB RAM)",
     },
     "m2_16gb": {
         "ram_gb_max": 20,

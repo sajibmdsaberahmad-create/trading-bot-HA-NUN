@@ -12,8 +12,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT / "halim") not in sys.path:
-    sys.path.insert(0, str(ROOT / "halim"))
+for p in (str(ROOT / "halim"), str(ROOT)):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 from halim.dataset import prepare_sft_dataset, repo_root  # noqa: E402
 from halim.device import detect_profile, profile_spec  # noqa: E402

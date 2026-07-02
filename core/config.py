@@ -419,9 +419,62 @@ class BotConfig:
     PRE_MARKET_END:            str  = "09:25"   # ET
     AFTER_HOURS_START:         str  = "16:00"   # ET
     AFTER_HOURS_END:           str  = "20:00"   # ET
-    MIN_CONFIDENCE_PRE_MARKET: float = float(os.getenv("MIN_CONFIDENCE_PRE_MARKET", "0.70"))
+    MIN_CONFIDENCE_PRE_MARKET: float = float(os.getenv("MIN_CONFIDENCE_PRE_MARKET", "0.55"))
     MIN_CONFIDENCE_AFTER_HOURS: float = float(os.getenv("MIN_CONFIDENCE_AFTER_HOURS", "0.72"))
     MIN_CONFIDENCE_OVERNIGHT: float = float(os.getenv("MIN_CONFIDENCE_OVERNIGHT", "0.78"))
+    PRE_MARKET_LOOP_SEC: float = float(os.getenv("PRE_MARKET_LOOP_SEC", "0.12"))
+    PRE_MARKET_OPEN_FORCE_RESCAN: bool = os.getenv(
+        "PRE_MARKET_OPEN_FORCE_RESCAN", "true"
+    ).lower() in ("1", "true", "yes")
+
+    # ── Pre-market entry mode (relaxed gates + tight risk for AM opportunities) ──
+    PRE_MARKET_ENTRY_ENABLED: bool = os.getenv(
+        "PRE_MARKET_ENTRY_ENABLED", "true"
+    ).lower() in ("1", "true", "yes")
+    # Lower profit-prob floor for pre-market (less historical bar data)
+    PRE_MARKET_PROFIT_PROB_FLOOR: float = float(
+        os.getenv("PRE_MARKET_PROFIT_PROB_FLOOR", "0.50")
+    )
+    # Pre-market confidence threshold (slightly below RTH)
+    PRE_MARKET_MIN_CONFIDENCE: float = float(
+        os.getenv("PRE_MARKET_MIN_CONFIDENCE", "0.55")
+    )
+    # Position size multiplier (1.0 = normal, 0.5 = half-size)
+    PRE_MARKET_POSITION_SIZE_PCT: float = float(
+        os.getenv("PRE_MARKET_POSITION_SIZE_PCT", "0.50")
+    )
+    # Stop ATR multiplier for pre-market (tighter)
+    PRE_MARKET_STOP_ATR_MULT: float = float(
+        os.getenv("PRE_MARKET_STOP_ATR_MULT", "0.8")
+    )
+    # Take-profit ATR multiplier for pre-market (tighter — book quick)
+    PRE_MARKET_TP_ATR_MULT: float = float(
+        os.getenv("PRE_MARKET_TP_ATR_MULT", "1.2")
+    )
+    # Auto-exit pre-market positions before RTH bell
+    PRE_MARKET_EXIT_BEFORE_RTH: bool = os.getenv(
+        "PRE_MARKET_EXIT_BEFORE_RTH", "true"
+    ).lower() in ("1", "true", "yes")
+    # Seconds before RTH to sweep pre-market positions
+    PRE_MARKET_EXIT_CUSHION_SEC: float = float(
+        os.getenv("PRE_MARKET_EXIT_CUSHION_SEC", "120")
+    )
+    # Min spike ratio for pre-market entry (higher bar — need real moves)
+    PRE_MARKET_MIN_SPIKE_RATIO: float = float(
+        os.getenv("PRE_MARKET_MIN_SPIKE_RATIO", "1.20")
+    )
+    # Min scan score for pre-market entry
+    PRE_MARKET_MIN_SCAN_SCORE: float = float(
+        os.getenv("PRE_MARKET_MIN_SCAN_SCORE", "40")
+    )
+    # PPO min confidence for pre-market fast entry
+    PRE_MARKET_PPO_MIN_CONF: float = float(
+        os.getenv("PRE_MARKET_PPO_MIN_CONF", "0.40")
+    )
+    # Council fast path: true = use scanner-fast council on pre-market spikes
+    PRE_MARKET_COUNCIL_FAST: bool = os.getenv(
+        "PRE_MARKET_COUNCIL_FAST", "true"
+    ).lower() in ("1", "true", "yes")
 
     # ════════════════════════════════════════════════════════════════════
     # RTH OPEN ALERT (09:30 ET bell — bot may run since pre-market)

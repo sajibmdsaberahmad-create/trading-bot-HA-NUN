@@ -9,6 +9,6 @@ Never use scaffold names in user-facing logs or UI.
 from __future__ import annotations
 
 # HF registry id — required by transformers/peft and checkpoint manifests.
-SCAFFOLD_HF = "Qwen/Qwen2.5-0.5B-Instruct"
+SCAFFOLD_HF = "Qwen/Qwen2.5-1.5B-Instruct"
 # MLX 4-bit quant of the same scaffold — default on Apple Silicon.
-SCAFFOLD_MLX_4BIT = "mlx-community/Qwen2.5-0.5B-Instruct-4bit"
+SCAFFOLD_MLX_4BIT = "mlx-community/Qwen2.5-1.5B-Instruct-4bit"
