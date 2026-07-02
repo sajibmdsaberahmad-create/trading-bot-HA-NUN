@@ -4,6 +4,27 @@
 
 ---
 
+## 2026-07-02 — Fix: max_perf.sh abort on macOS (rg → grep) + start.sh resilience
+
+### Problem
+`max_perf.sh` used `rg` (ripgrep) which is not installed on macOS by
+default. Combined with `set -euo pipefail`, the command failure killed
+the entire script, and `start.sh`'s `set -e` propagated it — so the bot
+never started after the cleanup step.
+
+### Files changed
+- `scripts/max_perf.sh` — replaced `rg` with `grep`; removed `set -euo pipefail`
+  (cleanup script should not abort on minor failures)
+- `start.sh` — `bash scripts/max_perf.sh || echo "..."` so the bot starts
+  even if cleanup encounters issues
+
+### Verification
+After fix: double-clicking START.command runs cleanup (even if partial),
+then Halim serve starts, then scalper starts. Bot runs even if `rg` is
+missing or some apps can't be killed.
+
+---
+
 ## 2026-07-02 — Add max_perf.sh: kill non-essential apps + gitignore CI
 
 ### Problem
@@ -14,9 +35,10 @@ from open IDEs and browsers.
 ### Changes
 - `scripts/max_perf.sh` — kills Cursor, VS Code, all browsers, office apps,
   media apps, communication apps, and utilities. Leaves only the trading
-  system running.
-- `start.sh` — now auto-runs `max_perf.sh` at the very beginning before
-  starting Halim serve and the scalper. Double-click ready.
+  system running. Removed `set -euo pipefail` and replaced `rg` with `grep`
+  so it works on macOS without ripgrep installed.
+- `start.sh` — now auto-runs `max_perf.sh` at the very beginning; uses
+  `|| true` so the bot starts even if cleanup has minor issues.
 - `.gitignore` — add `.github/workflows/` to prevent CI workflow files
   from being committed (they require special `workflow` git scope).
 

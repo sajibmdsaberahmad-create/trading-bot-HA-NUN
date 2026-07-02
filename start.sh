@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 echo "🧹 Force-closing non-essential apps to free RAM..."
 echo "   (Cursor, browsers, office, media, utilities)"
 echo ""
-bash scripts/max_perf.sh
+bash scripts/max_perf.sh || echo "   (max_perf cleanup non-critical, continuing...)"
 echo ""
 
 source venv/bin/activate

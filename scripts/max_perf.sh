@@ -9,8 +9,6 @@
 # Safe: only kills user-space GUI apps. Never kills system processes,
 # Halim serve, or the scalper runner.
 
-set -euo pipefail
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -140,7 +138,7 @@ echo "   Killed $KILLED processes, freed ≈ ${FREED_MB}MB RAM"
 echo ""
 
 # Show available RAM
-AVAIL=$(memory_pressure 2>/dev/null | rg 'Pages free' | awk '{print $3}')
+AVAIL=$(memory_pressure 2>/dev/null | grep 'Pages free' | awk '{print $3}')
 if [ -n "$AVAIL" ]; then
     FREE_MB=$((AVAIL * 16384 / 1024 / 1024))
     echo -e "   Free RAM now: ${FREE_MB}MB"
