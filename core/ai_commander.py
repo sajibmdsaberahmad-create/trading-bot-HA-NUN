@@ -138,18 +138,15 @@ class AICommander(CommanderVerdictMixin, CommanderLearningMixin, CommanderEntryM
     def council_audit_snapshot(self, ticker: str, task: str = "entry_decision") -> Dict[str, Any]:
         """Raw + parsed cloud council output for post-mortem."""
         return self._live_line.peek(ticker, task)
-    def ollama_audit_snapshot(self, ticker: str, task: str = "entry_decision") -> Dict[str, Any]:
-        """Legacy alias — council snapshot (not local Ollama)."""
-        return self.council_audit_snapshot(ticker, task)
     def _vision_analyze(self, prompt: str, image_bytes: bytes) -> str:
         ollama = None
         if self.autopilot and getattr(self.autopilot, "core", None):
             ollama = getattr(self.autopilot.core, "ollama", None)
         if ollama and hasattr(ollama, "analyze_image"):
             return (ollama.analyze_image(prompt, image_bytes, trading_context=True) or "").strip()
-        from core.ollama_brain import OllamaBrain
+        from core.council_brain import CouncilBrain
 
-        brain = OllamaBrain(self.cfg)
+        brain = CouncilBrain(self.cfg)
         return (brain.analyze_image(prompt, image_bytes, trading_context=True) or "").strip()
     def prefetch_chart_vision(
         self,
@@ -279,7 +276,7 @@ class AICommander(CommanderVerdictMixin, CommanderLearningMixin, CommanderEntryM
         fingerprint: str,
     ) -> Dict[str, Any]:
         """
-        Non-blocking live Ollama — ring async + consume fresh result only.
+        Non-blocking live council — ring async + consume fresh result only.
         Never uses TTL cache; stale fingerprints are discarded.
         """
         mood, conf, lessons = self._mood_context()
@@ -293,7 +290,7 @@ class AICommander(CommanderVerdictMixin, CommanderLearningMixin, CommanderEntryM
         """Scalper attaches live PPO for per-entry micro-improvement."""
         self._ppo_model_ref = model
     def service_deferred_learning(self) -> int:
-        """Log late Ollama answers after PPO-led execute — non-blocking."""
+        """Log late council answers after PPO-led execute — non-blocking."""
         from core.ppo_entry_learning import set_ppo_model
         if self._ppo_model_ref is not None:
             set_ppo_model(self._ppo_model_ref)
@@ -340,7 +337,7 @@ class AICommander(CommanderVerdictMixin, CommanderLearningMixin, CommanderEntryM
             except Exception:
                 pass
     def _fast_log_line(self, category: str, context: Dict[str, Any]) -> str:
-        """Structured log line — no Ollama (hot path must not block IB loop)."""
+        """Structured log line — no council (hot path must not block IB loop)."""
         if category == "LIVE_PULSE":
             t = context.get("ticker", "?")
             px = context.get("price", 0)
@@ -367,7 +364,7 @@ class AICommander(CommanderVerdictMixin, CommanderLearningMixin, CommanderEntryM
         """AI writes the log line itself."""
         if not self.full_control:
             return
-        # Hot-path categories: never block the trading loop on Ollama
+        # Hot-path categories: never block the trading loop on council
         hot = {"LIVE_PULSE", "STOP_UPDATE", "TP_UPDATE", "TRAIL_UPDATE", "ENTRY_DECISION"}
         if category in hot:
             line = self._fast_log_line(category, context)

@@ -2,7 +2,7 @@
 """
 core/council_brain.py — Cloud council brain (Groq + Gemini).
 
-Drop-in replacement for the former OllamaBrain local LLM layer.
+Drop-in replacement for the former local LLM layer.
 """
 
 from __future__ import annotations
@@ -109,7 +109,3 @@ def create_council_brain(cfg: BotConfig) -> Optional[CouncilBrain]:
     )
     return brain
 
-
-# Backward-compatible aliases (legacy imports)
-OllamaBrain = CouncilBrain
-create_ollama_brain = create_council_brain

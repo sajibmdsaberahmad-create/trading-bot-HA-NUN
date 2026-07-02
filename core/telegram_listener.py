@@ -128,7 +128,7 @@ class TelegramCommandListener:
         *,
         reply_to: Optional[int] = None,
     ) -> None:
-        """Immediate reply — auth, errors, progress (no Ollama wait)."""
+        """Immediate reply — auth, errors, progress (no council wait)."""
         self.send(chat_id, text, reply_to=reply_to)
 
     def stop(self) -> None:
@@ -494,7 +494,7 @@ class TelegramCommandListener:
                 return
         except Exception:
             pass
-        from core.ollama_vision import ensure_vision_model, is_vision_model_present, vision_model_name
+        from core.council_vision import ensure_vision_model, is_vision_model_present, vision_model_name
 
         model = vision_model_name(self.cfg)
         if not is_vision_model_present(self.cfg, model):

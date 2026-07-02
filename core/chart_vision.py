@@ -158,7 +158,7 @@ class ChartVisionLine:
         if scan_score < min_score:
             return False
 
-        from core.ollama_vision import is_vision_model_present, resolve_vision_model
+        from core.council_vision import is_vision_model_present, resolve_vision_model
 
         vmodel = resolve_vision_model(self.cfg)
         if not is_vision_model_present(self.cfg, vmodel):
@@ -221,7 +221,7 @@ class ChartVisionLine:
             read = ""
             reserved = opportunistic
             try:
-                from core.ollama_vision import prepare_for_vision_call
+                from core.council_vision import prepare_for_vision_call
 
                 prepare_for_vision_call(self.cfg)
                 read = (analyze_fn(_VISION_ENTRY_PROMPT, png) or "").strip()
@@ -233,9 +233,9 @@ class ChartVisionLine:
                         ChartVisionLine._global_vision_in_flight = max(
                             0, ChartVisionLine._global_vision_in_flight - 1
                         )
-                if getattr(self.cfg, "OLLAMA_VISION_UNLOAD_AFTER_CALL", False):
+                if getattr(self.cfg, "COUNCIL_VISION_UNLOAD_AFTER_CALL", False):
                     try:
-                        from core.ollama_vision import stop_vision_model
+                        from core.council_vision import stop_vision_model
 
                         stop_vision_model(self.cfg)
                     except Exception:

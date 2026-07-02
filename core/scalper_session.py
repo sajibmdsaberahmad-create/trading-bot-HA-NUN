@@ -607,7 +607,7 @@ class ScalperSessionMixin:
         try:
             log.info("🧠 OFF-HOURS TRAINING: Launching isolated training subprocess...")
             
-            # Full IB yesterday bundle → Ollama analyze + PPO (beat yesterday goal)
+            # Full IB yesterday bundle → council analyze + PPO (beat yesterday goal)
             if getattr(self.cfg, "DAILY_IB_LEARNING_ENABLED", True):
                 if self._shutdown_abort():
                     return
@@ -690,10 +690,10 @@ class ScalperSessionMixin:
             except Exception as exc:
                 log.debug(f"Consciousness training failed: {exc}")
 
-            # Ollama meta-optimizer: AI proposes guarded param tweaks from performance
+            # Council meta-optimizer: AI proposes guarded param tweaks from performance
             try:
                 if (
-                    getattr(self.cfg, "OLLAMA_META_OPTIMIZER_ENABLED", True)
+                    getattr(self.cfg, "COUNCIL_META_OPTIMIZER_ENABLED", True)
                     and self.autopilot
                     and getattr(self.autopilot, "core", None)
                     and getattr(self.autopilot.core, "ollama", None)
@@ -705,7 +705,7 @@ class ScalperSessionMixin:
                         "pilot": self.pilot.get_veteran_status() if hasattr(self, "pilot") else {},
                     }
                     self.autopilot.core.ollama.meta_optimize(report, self.cfg)
-                    log.info("🧬 Ollama meta-optimizer ran (guardrailed param proposals)")
+                    log.info("🧬 Council meta-optimizer ran (guardrailed param proposals)")
             except Exception as exc:
                 log.debug(f"Meta-optimizer: {exc}")
             

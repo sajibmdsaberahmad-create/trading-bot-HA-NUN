@@ -87,7 +87,7 @@ class CognitiveCore:
     │                  COGNITIVE CORE (this module)                │
     │  ┌─────────────┐  ┌──────────────┐  ┌───────────────────┐  │
     │  │   THINKER   │  │  EVALUATOR   │  │   IMPROVER        │  │
-    │  │  (Ollama)   │  │ (self_eval)  │  │ (param mutation)  │  │
+    │  │  (Council)  │  │ (self_eval)  │  │ (param mutation)  │  │
     │  └──────┬──────┘  └──────┬───────┘  └────────┬──────────┘  │
     │         │                │                     │             │
     │  ┌──────┴────────────────┴─────────────────────┴──────────┐ │
@@ -113,13 +113,13 @@ class CognitiveCore:
         self._running = False
 
         # Initialize sub-components
-        self.ollama = CouncilBrain(cfg) if getattr(cfg, "COUNCIL_ENABLED", getattr(cfg, "OLLAMA_ENABLED", False)) else None
+        self.ollama = CouncilBrain(cfg) if getattr(cfg, "COUNCIL_ENABLED", False) else None
         self.guardrails = GuardrailController(cfg)
         self.cognitive_guardrails = CognitiveGuardrails(cfg)
         self.device = DeviceOptimizer()
         self.evaluator = SelfEvaluator(cfg)
 
-        # Initialize git sync with ollama for AI commit messages
+        # Initialize git sync with council for AI commit messages
         git_sync_init(cfg, ollama_brain=self.ollama)
 
         # Configuration that AI CAN modify (within learning bounds)
@@ -161,7 +161,7 @@ class CognitiveCore:
             logger.debug(f"Cognitive state load: {exc}")
 
     def _persist_state(self, push_git: bool = False):
-        """Save Ollama/cognitive learning to disk (+ optional git push)."""
+        """Save council/cognitive learning to disk (+ optional git push)."""
         try:
             COGNITIVE_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
             payload = {
@@ -436,7 +436,7 @@ class CognitiveCore:
             "gut_check", "decide", "exit", "account_eval", "account_brief",
         }
         always_active = getattr(self.cfg, "AI_ALWAYS_ACTIVE", True)
-        bypass = getattr(self.cfg, "OLLAMA_DECISION_BYPASS_RATE_LIMIT", True)
+        bypass = getattr(self.cfg, "COUNCIL_DECISION_BYPASS_RATE_LIMIT", True)
         use_decide = always_active and bypass and task in decision_tasks
         if use_decide and hasattr(self.ollama, "decide_call"):
             result = self.ollama.decide_call(full) or ""
@@ -517,8 +517,8 @@ class CognitiveCore:
                 break
 
         think_fn = None
-        if self.ollama and getattr(self.ollama, "config", None) and self.ollama.config.enabled:
-            think_fn = self.ollama._call_ollama
+        if self.ollama and self.ollama.enabled:
+            think_fn = self.ollama.think
 
         from core.generative_mood import assess_mood
         mood, message = assess_mood(

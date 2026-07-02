@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-core/deferred_council_learning.py — Log late Ollama responses after PPO-led execution.
+core/deferred_council_learning.py — Log late council responses after PPO-led execution.
 
-Profit hunting executes on PPO + mechanical signals without waiting for Ollama.
+Profit hunting executes on PPO + mechanical signals without waiting for the council.
 When the council answer arrives (seconds later), we still record it for learning
 so PPO and the strategist improve from every hunt.
 """
@@ -26,7 +26,7 @@ def deferred_learning_enabled(cfg: BotConfig) -> bool:
 
 
 class DeferredCouncilLearner:
-  """Track post-execute council rings and log Ollama when it catches up."""
+  """Track post-execute council rings and log council when it catches up."""
 
   def __init__(self, cfg: BotConfig, live_line: "LiveAILine"):
       self.cfg = cfg
@@ -131,7 +131,7 @@ class DeferredCouncilLearner:
       if agreement:
           reward_hint = 0.15
       elif ppo_agrees and not agreement:
-          reward_hint = 0.25  # PPO was right, Ollama late/wrong — reinforce PPO
+            reward_hint = 0.25  # PPO was right, council late/wrong — reinforce PPO
       else:
           reward_hint = -0.05
 
@@ -170,7 +170,7 @@ class DeferredCouncilLearner:
               self.cfg,
               ticker=ticker,
               reason=(
-                  f"LATE {task}: executed={executed_enter} ollama={ollama_enter} "
+                  f"LATE {task}: executed={executed_enter} council={ollama_enter} "
                   f"PPO={ppo_conf:.0%} agree={agreement} ({latency_ms:.0f}ms)"
               )[:200],
               event="deferred_council",
@@ -188,7 +188,7 @@ class DeferredCouncilLearner:
       log.info(
           f"  📚 LATE COUNCIL {ticker}/{task}: "
           f"executed={'Y' if executed_enter else 'N'} "
-          f"ollama={'Y' if ollama_enter else 'N'} | "
+          f"council={'Y' if ollama_enter else 'N'} | "
           f"PPO {ppo_conf:.0%} | agree={agreement} | {latency_ms:.0f}ms late"
       )
 

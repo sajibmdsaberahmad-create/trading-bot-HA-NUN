@@ -338,7 +338,7 @@ class BotConfig:
         os.getenv("GREEN_PROFIT_LOCK_FADE_FLOOR_PCT", "0.0015")
     )
 
-    # Daily IB learning — full IB day bundle → Ollama + PPO (beat yesterday)
+    # Daily IB learning — full IB day bundle → council + PPO (beat yesterday)
     DAILY_IB_LEARNING_ENABLED: bool = os.getenv(
         "DAILY_IB_LEARNING_ENABLED", "true"
     ).lower() in ("1", "true", "yes")
@@ -844,7 +844,7 @@ class BotConfig:
     ENTRY_PENDING_BLOCK_FAST_SEC: float = float(os.getenv("ENTRY_PENDING_BLOCK_FAST_SEC", "12"))
     BACKGROUND_WATCH_SEC: float = float(os.getenv("BACKGROUND_WATCH_SEC", "15"))
     FLAT_PULSE_SEC: float = 15.0              # WATCHING heartbeat log interval (not the monitor rate)
-    AI_POSITION_MANAGE_SEC: float = 10.0    # Ollama position decisions — frequent, priority path
+    AI_POSITION_MANAGE_SEC: float = 10.0    # Council position decisions — frequent, priority path
     AI_POSITION_MANAGE_IN_PROFIT_SEC: float = float(
         os.getenv("AI_POSITION_MANAGE_IN_PROFIT_SEC", "1.0")
     )
@@ -853,8 +853,11 @@ class BotConfig:
     )  # 0.3% — faster council + trail when green
     AI_EXIT_CHECK_SEC: float = 5.0          # AI early-exit evaluation interval in position loop
     AI_ALWAYS_ACTIVE: bool = True           # Never defer trading decisions to PPO-only fallbacks
-    OLLAMA_DECISION_BYPASS_RATE_LIMIT: bool = True  # Entry/exit/position calls skip interval gate
-    OLLAMA_DECISION_MIN_FREE_RAM_MB: int = int(os.getenv("OLLAMA_DECISION_MIN_FREE_RAM_MB", "768"))
+    COUNCIL_DECISION_BYPASS_RATE_LIMIT: bool = True  # Entry/exit/position calls skip interval gate
+    COUNCIL_DECISION_MIN_FREE_RAM_MB: int = int(os.getenv(
+        "COUNCIL_DECISION_MIN_FREE_RAM_MB",
+        os.getenv("OLLAMA_DECISION_MIN_FREE_RAM_MB", "768"),
+    ))
     # Hybrid distillation — council teacher → fast PPO proxy (auto when enough trades)
     HYBRID_DISTILLATION_ENABLED: bool = True
     HYBRID_DISTILL_MIN_TRADES: int = int(os.getenv("HYBRID_DISTILL_MIN_TRADES", "100"))
@@ -865,7 +868,7 @@ class BotConfig:
     HYBRID_DISTILL_AUTO_FAST_PATH: bool = os.getenv(
         "HYBRID_DISTILL_AUTO_FAST_PATH", "false"
     ).lower() in ("1", "true", "yes")
-    HYBRID_DISTILL_FAST_PATH: bool = False       # Manual override — skip Ollama on entry
+    HYBRID_DISTILL_FAST_PATH: bool = False       # Manual override — skip council on entry
     HYBRID_DISTILL_HOLDOUT_MIN_SAMPLES: int = int(
         os.getenv("HYBRID_DISTILL_HOLDOUT_MIN_SAMPLES", "8")
     )
@@ -939,23 +942,26 @@ class BotConfig:
     SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC: float = float(
         os.getenv("SPIKE_ENTRY_ATTEMPT_COOLDOWN_SEC", "20")
     )
-    OLLAMA_VISION_UNLOAD_AFTER_CALL: bool = field(
+    COUNCIL_VISION_UNLOAD_AFTER_CALL: bool = field(
         default_factory=lambda: os.getenv(
-            "OLLAMA_VISION_UNLOAD_AFTER_CALL", "true" if _LOW_RAM else "false",
+            "COUNCIL_VISION_UNLOAD_AFTER_CALL",
+            os.getenv("OLLAMA_VISION_UNLOAD_AFTER_CALL", "true" if _LOW_RAM else "false"),
         ).lower() in ("1", "true", "yes")
     )
-    OLLAMA_VISION_SWAP_TEXT_MODEL: bool = field(
+    COUNCIL_VISION_SWAP_TEXT_MODEL: bool = field(
         default_factory=lambda: os.getenv(
-            "OLLAMA_VISION_SWAP_TEXT_MODEL", "true" if _LOW_RAM else "false",
+            "COUNCIL_VISION_SWAP_TEXT_MODEL",
+            os.getenv("OLLAMA_VISION_SWAP_TEXT_MODEL", "true" if _LOW_RAM else "false"),
         ).lower() in ("1", "true", "yes")
     )
-    ENTRY_OLLAMA_WAIT_SEC: float = float(os.getenv(
-        "ENTRY_OLLAMA_WAIT_SEC", "2" if _LOW_RAM else "3"
+    ENTRY_COUNCIL_WAIT_SEC: float = float(os.getenv(
+        "ENTRY_COUNCIL_WAIT_SEC",
+        os.getenv("ENTRY_OLLAMA_WAIT_SEC", "2" if _LOW_RAM else "3"),
     ))
     AI_COUNCIL_MAX_WAIT_SEC: float = float(os.getenv(
         "AI_COUNCIL_MAX_WAIT_SEC", "4" if _LOW_RAM else "4"
     ))
-    # Strong scanner + spike → decide without waiting for slow Ollama
+    # Strong scanner + spike → decide without waiting for slow council
     COUNCIL_SCANNER_FAST_SEC: float = float(os.getenv(
         "COUNCIL_SCANNER_FAST_SEC", "3" if _LOW_RAM else "3"
     ))
@@ -970,9 +976,10 @@ class BotConfig:
     AI_COUNCIL_ALL_DECISIONS: bool = os.getenv(
         "AI_COUNCIL_ALL_DECISIONS", "true"
     ).lower() in ("1", "true", "yes")
-    # Ollama does judgment only — Python computes all stop/TP/shares (prevents inverted stops)
-    OLLAMA_NUMERIC_BRACKETS: bool = os.getenv(
-        "OLLAMA_NUMERIC_BRACKETS", "false"
+    # Council does judgment only — Python computes all stop/TP/shares (prevents inverted stops)
+    COUNCIL_NUMERIC_BRACKETS: bool = os.getenv(
+        "COUNCIL_NUMERIC_BRACKETS",
+        os.getenv("OLLAMA_NUMERIC_BRACKETS", "false"),
     ).lower() in ("1", "true", "yes")
     MAX_REWARD_RISK_RATIO: float = float(os.getenv("MAX_REWARD_RISK_RATIO", "10.0"))
 
@@ -1022,7 +1029,7 @@ class BotConfig:
     STAGNATION_FLAT_BAND_PCT: float = float(os.getenv("STAGNATION_FLAT_BAND_PCT", "0.008"))
     STAGNATION_MAX_PEAK_PCT: float = float(os.getenv("STAGNATION_MAX_PEAK_PCT", "0.003"))
     STAGNATION_LOSS_CUT_PCT: float = float(os.getenv("STAGNATION_LOSS_CUT_PCT", "-0.005"))
-    AI_STAGNATION_CHECK_SEC: float = 30.0  # Ollama+PPO review after N sec flat
+    AI_STAGNATION_CHECK_SEC: float = 30.0  # Council+PPO review after N sec flat
     STALE_PRICE_REFRESH_PULSES: int = 4    # Force IB snapshot after N identical pulses
     STALE_PRICE_REFRESH_SEC: float = 20.0  # Or force snapshot if price frozen this long
     VOLATILITY_STOP_WIDEN_MAX_PCT: float = 0.025  # Unrealized noise cushion (not below $50 risk)
@@ -1053,9 +1060,12 @@ class BotConfig:
     AI_TELEGRAM_MIN_INTERVAL_SEC: float = 6.0  # Throttle duplicate event types
     AI_TELEGRAM_MAX_CHARS: int = 450
     AI_TELEGRAM_COMMANDER_MAX_CHARS: int = int(os.getenv("TRADING_BOT_TELEGRAM_AI_CHARS", "3800"))
-    AI_TELEGRAM_OLLAMA_MAX_TOKENS: int = 120   # Short pilot briefings
-    AI_TELEGRAM_OLLAMA_TIMEOUT: int = 12       # Seconds — notifications must not stall loop
-    OLLAMA_NOTIFY_MIN_FREE_RAM_MB: int = 512   # Lighter gate for Telegram compose (model often warm)
+    AI_TELEGRAM_COUNCIL_MAX_TOKENS: int = 120   # Short pilot briefings
+    AI_TELEGRAM_COUNCIL_TIMEOUT: int = 12       # Seconds — notifications must not stall loop
+    COUNCIL_NOTIFY_MIN_FREE_RAM_MB: int = int(os.getenv(
+        "COUNCIL_NOTIFY_MIN_FREE_RAM_MB",
+        os.getenv("OLLAMA_NOTIFY_MIN_FREE_RAM_MB", "512"),
+    ))  # Lighter gate for Telegram compose (model often warm)
     AI_ACCOUNT_EVALUATION: bool = True         # AI account brief on market open/close
     AI_DAILY_SELF_EVALUATION: bool = os.getenv(
         "AI_DAILY_SELF_EVALUATION", "true"
@@ -1179,7 +1189,7 @@ class BotConfig:
     # Silent opportunity scan while holding a position (see BACKGROUND_WATCH_SEC above)
 
     # ════════════════════════════════════════════════════════════════════
-    # CLOUD COUNCIL LLM — Groq primary, Gemini fallback (no local Ollama)
+    # CLOUD COUNCIL LLM — Groq primary, Gemini fallback
     # ════════════════════════════════════════════════════════════════════
     COUNCIL_ENABLED: bool = field(
         default_factory=lambda: os.getenv(
@@ -1243,7 +1253,7 @@ class BotConfig:
     COUNCIL_CHART_VISION_API_ENABLED: bool = os.getenv(
         "COUNCIL_CHART_VISION_API_ENABLED", "false"
     ).lower() in ("1", "true", "yes")
-    # Legacy alias — same as COUNCIL_ENABLED (local Ollama removed)
+                # Legacy alias — reads OLLAMA_ENABLED for backward compat
     OLLAMA_ENABLED: bool = field(
         default_factory=lambda: os.getenv(
             "COUNCIL_ENABLED",
@@ -1406,11 +1416,12 @@ class BotConfig:
     GENERATIVE_MOOD_MIN_SEC: float = float(os.getenv("GENERATIVE_MOOD_MIN_SEC", "45"))
 
     # Chart vision — Gemini multimodal (see core/council_client.py)
-    OLLAMA_VISION_MODEL: str = os.getenv(
-        "GEMINI_VISION_MODEL", "gemini-2.5-flash"
+    COUNCIL_VISION_MODEL: str = os.getenv(
+        "COUNCIL_VISION_MODEL",
+        os.getenv("GEMINI_VISION_MODEL", "gemini-2.5-flash"),
     )
-    OLLAMA_VISION_TIMEOUT: int = int(os.getenv("COUNCIL_VISION_TIMEOUT_SEC", "25"))
-    OLLAMA_VISION_MAX_TOKENS: int = int(os.getenv("COUNCIL_VISION_MAX_TOKENS", "512"))
+    COUNCIL_VISION_TIMEOUT: int = int(os.getenv("COUNCIL_VISION_TIMEOUT_SEC", "25"))
+    COUNCIL_VISION_MAX_TOKENS: int = int(os.getenv("COUNCIL_VISION_MAX_TOKENS", "512"))
 
     EMAIL_ENABLED: bool = False
     EMAIL_SMTP_HOST: str = os.getenv("TRADING_BOT_SMTP_HOST", "")
@@ -1445,10 +1456,11 @@ class BotConfig:
         return min(pct_based, self.MAX_RISK_PER_TRADE_USD)
 
     # ════════════════════════════════════════════════════════════════════
-    # OLLAMA META-OPTIMIZER (Active File Mutation)
+    # COUNCIL META-OPTIMIZER (Active File Mutation)
     # ════════════════════════════════════════════════════════════════════
-    OLLAMA_META_OPTIMIZER_ENABLED: bool = (
-        os.getenv("OLLAMA_META_OPTIMIZER_ENABLED", "false" if _LOW_RAM else "true").lower()
+    COUNCIL_META_OPTIMIZER_ENABLED: bool = (
+        os.getenv("COUNCIL_META_OPTIMIZER_ENABLED",
+                   os.getenv("OLLAMA_META_OPTIMIZER_ENABLED", "false" if _LOW_RAM else "true")).lower()
         in ("1", "true", "yes")
     )
     META_OPTIMIZE_ONLY_WHEN_MARKET_CLOSED: bool = True
@@ -1471,6 +1483,4 @@ class BotConfig:
         apply_ram_tier_to_config(self)
         if self.PAPER_REALTIME_BARS_ONLY:
             self.USE_TICK_STREAM = False
-        # Keep legacy OLLAMA_ENABLED in sync with COUNCIL_ENABLED
-        object.__setattr__(self, "OLLAMA_ENABLED", self.COUNCIL_ENABLED)
-        object.__setattr__(self, "OLLAMA_MODEL", self.GROQ_MODEL)
+        # COUNCIL_ENABLED is the canonical flag — no legacy OLLAMA_ENABLED sync needed

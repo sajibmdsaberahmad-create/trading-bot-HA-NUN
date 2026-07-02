@@ -202,7 +202,6 @@ def apply_halim_native_mode(cfg: BotConfig) -> BotConfig:
         return cfg
 
     cfg.COUNCIL_ENABLED = False
-    cfg.OLLAMA_ENABLED = False
     cfg.GENERATIVE_THINKING_ENABLED = False
     os.environ["TRADING_COPILOT_ENABLED"] = "false"
     cfg.PPO_TEACHER_ENABLED = True

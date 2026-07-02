@@ -84,8 +84,8 @@ def collect_system_status(cfg: BotConfig, runner: Optional["ScalperRunner"] = No
         status["telegram_verified_chats"] = 0
 
     status["council_model"] = getattr(cfg, "GROQ_MODEL", "") or getattr(cfg, "GEMINI_MODEL", "")
-    status["ollama_model"] = status["council_model"]  # legacy key
-    status["vision_model"] = getattr(cfg, "OLLAMA_VISION_MODEL", "llava")
+    status["vision_model"] = getattr(cfg, "COUNCIL_VISION_MODEL",
+                                      getattr(cfg, "OLLAMA_VISION_MODEL", "gemini-2.5-flash"))
 
     if runner:
         status["ib_equity"] = round(getattr(runner, "account_equity", 0), 2)
@@ -207,7 +207,7 @@ def format_system_report(status: Dict[str, Any]) -> str:
         "",
         "📡 Telegram",
         f"Verified commanders: {status.get('telegram_verified_chats', 0)}",
-        f"Ollama: {status.get('ollama_model') or 'default'} · Vision: {status.get('vision_model', 'llava')}",
+        f"Cncl: {status.get('council_model') or 'default'} · Vision: {status.get('vision_model', 'gemini-2.5-flash')}",
     ])
 
     arts = status.get("artifacts") or {}

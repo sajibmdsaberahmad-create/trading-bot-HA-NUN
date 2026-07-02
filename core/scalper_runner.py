@@ -251,7 +251,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
         self.fe = FeatureEngineerEnhanced()
         self.regime_detector = MarketRegimeDetector()
         
-        # Background worker for non-blocking Git/Ollama/notifications
+        # Background worker for non-blocking Git/council/notifications
         self._worker = get_background_worker()
         
         # File watcher for hot-reload of weights
@@ -1530,9 +1530,9 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             enable_halim_developer_mode(self.cfg)
         except Exception as exc:
             log.debug(f"Halim developer mode: {exc}")
-        if getattr(self.cfg, "COUNCIL_ENABLED", getattr(self.cfg, "OLLAMA_ENABLED", False)):
+        if getattr(self.cfg, "COUNCIL_ENABLED", False):
             try:
-                from core.ollama_models import text_model_startup_warnings
+                from core.council_models import text_model_startup_warnings
                 for warn in text_model_startup_warnings(self.cfg):
                     log.warning(f"⚠️ {warn}")
             except Exception:
@@ -2254,7 +2254,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         ram_only_live = live_ram_only(self.cfg) and can_trade
                         if ram_only_live:
                             if is_memory_pressured(
-                                int(getattr(self.cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024))
+                                int(getattr(self.cfg, "COUNCIL_MIN_FREE_RAM_MB", 1024))
                             ) and _now - getattr(self, "_last_ram_live_warn", 0) >= 300.0:
                                 self._last_ram_live_warn = _now
                                 log.warning(
@@ -2262,7 +2262,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                                     "RAM_LIVE_ONLY: no disk sweep (off-hours cleanup)"
                                 )
                         elif is_memory_pressured(
-                            int(getattr(self.cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024))
+                            int(getattr(self.cfg, "COUNCIL_MIN_FREE_RAM_MB", 1024))
                         ):
                             run_periodic_cleanup(self.cfg, force=True)
                         elif not can_trade:
@@ -2327,7 +2327,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
     def _council_key(self, ticker: str, task: str) -> str:
         return f"{ticker}:{task}"
     def _clear_ai_councils(self, ticker: str, tasks: Optional[List[str]] = None) -> None:
-        """Drop pending Ollama deliberation for a ticker (e.g. after exit)."""
+        """Drop pending council deliberation for a ticker (e.g. after exit)."""
         if not ticker:
             return
         if tasks:
@@ -2339,7 +2339,7 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
             if key.startswith(prefix):
                 self._ai_councils.pop(key, None)
     def _set_ai_council(self, ticker: str, task: str, state: Dict[str, Any]) -> None:
-        # One Ollama slot per ticker — exit beats manage; avoid dual in_flight deadlock
+        # One council slot per ticker — exit beats manage; avoid dual in_flight deadlock
         if task == "position_manage" and self._has_ai_council(ticker, "exit_decision"):
             return
         if task == "entry_decision" and (

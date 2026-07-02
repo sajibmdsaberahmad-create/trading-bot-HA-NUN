@@ -35,7 +35,7 @@ class CommanderEntryMixin:
         avg_vol: float,
         atr: Optional[float] = None,
     ) -> Any:
-        """ATR-only brackets — Ollama never supplies stop/TP/shares."""
+        """ATR-only brackets — council never supplies stop/TP/shares."""
         if atr is None or atr <= 0:
             if df is not None and len(df) >= 5:
                 atr = compute_atr(df, period=5)
@@ -324,7 +324,7 @@ class CommanderEntryMixin:
         fingerprint: str = "",
         micro: Optional[dict] = None,
     ) -> Dict[str, Any]:
-        """Enter on PPO now — Ollama still ringing for deferred learning."""
+        """Enter on PPO now — council still ringing for deferred learning."""
         mctx = market_ctx or {}
         micro = micro or account.get("micro_forecast") or {}
         deploy_cap = get_ai_deploy_budget(
@@ -1126,7 +1126,7 @@ class CommanderEntryMixin:
     def poll_entry_council(
         self, state: Dict[str, Any], df: Optional[pd.DataFrame] = None,
     ) -> Dict[str, Any]:
-        """Non-blocking poll — Ollama+PPO council resolves when hotline is fresh."""
+        """Non-blocking poll — council resolves when hotline is fresh."""
         ticker = str(state["ticker"])
         fp = str(state["fingerprint"])
         live = self._live_line.consume(ticker, "entry_decision", fp)

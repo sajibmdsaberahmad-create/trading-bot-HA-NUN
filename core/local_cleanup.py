@@ -189,7 +189,7 @@ def _remove_root_artifacts() -> int:
 
 def _trim_all_logs(max_mb: float = 2.0, keep_lines: int = 2500) -> int:
     freed = 0
-    for rel in ("HANOON.log", "logs/HANOON.log", "logs/ollama.log", "logs/REPLAY_SCALPER.log"):
+    for rel in ("HANOON.log", "logs/HANOON.log", "logs/REPLAY_SCALPER.log"):
         freed += _trim_log(ROOT / rel, max_mb=max_mb, keep_lines=keep_lines)
     logs_dir = ROOT / "logs"
     if logs_dir.is_dir():
@@ -217,12 +217,8 @@ def _prune_duplicate_ppo_warmups(keep: int = 1) -> int:
     return freed
 
 
-def _unload_ollama_ram() -> None:
-    try:
-        from core.memory_guard import unload_heavy_ollama_models
-        unload_heavy_ollama_models()
-    except Exception:
-        pass
+def _unload_council_ram() -> None:
+    """No-op — local Ollama was removed."""
 
 
 def _prune_cursor_logs(days: int = 7) -> int:
@@ -553,7 +549,7 @@ def cleanup_local_workspace(aggressive: bool = True, *, skip_jsonl_trim: bool = 
                     continue
                 stats["jsonl_bytes"] += _trim_jsonl(rel, max_lines)
 
-    _unload_ollama_ram()
+    _unload_council_ram()
 
     total_mb = sum(stats.values()) / (1024 * 1024)
     log.info(f"🧹 Local cleanup done (~{total_mb:.1f}MB freed)")
@@ -571,7 +567,7 @@ def run_periodic_cleanup(cfg=None, *, force: bool = False) -> dict:
         return {"skipped": True, "reason": "AUTO_DISK_CLEANUP=false", "available_mb": available_ram_mb()}
 
     ram_tight = is_memory_pressured(
-        int(getattr(cfg, "OLLAMA_MIN_FREE_RAM_MB", 1024)) if cfg else 1024
+        int(getattr(cfg, "COUNCIL_MIN_FREE_RAM_MB", 1024)) if cfg else 1024
     )
     aggressive = force or ram_tight
     if not aggressive and not force:

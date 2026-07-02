@@ -92,7 +92,7 @@ class CouncilClient:
             return getattr(self.cfg, "GEMINI_VISION_MODEL", "gemini-2.5-flash")
         return getattr(self.cfg, "GEMINI_MODEL", "gemini-2.5-flash")
 
-    # ── Public API (OllamaBrain-compatible) ─────────────────────────────
+    # ── Public API (council-compatible) ─────────────────────────────
 
     def decide_call(
         self,

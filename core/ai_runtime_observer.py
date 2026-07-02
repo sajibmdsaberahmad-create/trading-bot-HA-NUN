@@ -67,9 +67,9 @@ class AIRuntimeObserver:
         self._append_insight(event, context)
         self._record_experience(event, context)
 
-        # rth_open / transient MD — record only; Ollama here starves entry councils
+        # rth_open / transient MD — record only; council here starves entry councils
         if event == "rth_open":
-            log.debug(f"RUNTIME {event}: recorded (no Ollama — avoid council starvation)")
+            log.debug(f"RUNTIME {event}: recorded (avoid council starvation)")
             return
         if event == "market_data_failure" and context.get("transient"):
             log.debug(f"RUNTIME {event}: transient — recorded only")
@@ -217,15 +217,15 @@ class AIRuntimeObserver:
             log.debug(f"Runtime observer {event}: {exc}")
 
     def _heuristic_mutations(self, event: str, context: Dict[str, Any]) -> list:
-        """Rule-based mutations when Ollama is busy or returns empty."""
+        """Rule-based mutations when council is busy or returns empty."""
         muts: list = []
         pipe = str(context.get("pipeline", ""))
         if event == "council_timeout" or "timeout" in pipe:
             wait = float(getattr(self.cfg, "AI_COUNCIL_MAX_WAIT_SEC", 6.0))
             muts.append({
-                "param": "ENTRY_OLLAMA_WAIT_SEC",
+                "param": "ENTRY_COUNCIL_WAIT_SEC",
                 "value": min(18.0, wait + 2.0),
-                "reason": "Council timed out — extend Ollama wait",
+                "reason": "Council timed out — extend entry wait",
             })
             if float(context.get("scan_score", 0) or 0) >= 75:
                 muts.append({

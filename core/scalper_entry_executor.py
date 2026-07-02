@@ -515,7 +515,7 @@ class ScalperEntryMixin:
         })
         snap_parsed = {}
         if self.ai_commander:
-            snap = self.ai_commander.ollama_audit_snapshot(ticker)
+            snap = self.ai_commander.council_audit_snapshot(ticker)
             snap_parsed = snap.get("parsed") or {}
         log_entry_execution(
             ticker=ticker,
@@ -1099,7 +1099,7 @@ class ScalperEntryMixin:
             log.warning(f"  🛑 BRACKET REJECTED {ticker}: {err}")
             spike = float(getattr(self, "_last_spike_ratio", 1.0))
             snap = (
-                self.ai_commander.ollama_audit_snapshot(ticker)
+                self.ai_commander.council_audit_snapshot(ticker)
                 if self.ai_commander else {}
             )
             log_bracket_reject(
@@ -1180,7 +1180,7 @@ class ScalperEntryMixin:
         vol_ratio = float(market_ctx.get("recent_volume", 0)) / (avg_volume + 1e-9)
         self._last_entry_regime = regime_label
         snap = (
-            self.ai_commander.ollama_audit_snapshot(ticker)
+            self.ai_commander.council_audit_snapshot(ticker)
             if self.ai_commander else {}
         )
         plan = TradePlan(

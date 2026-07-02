@@ -368,7 +368,7 @@ class CommanderVerdictMixin:
         if not bracket.ok:
             reason = f"bracket rejected: {bracket.reason}"
             log.warning(f"  🛑 {ticker} {reason}")
-            snap = self.ollama_audit_snapshot(ticker)
+            snap = self.council_audit_snapshot(ticker)
             log_bracket_reject(
                 self.cfg, ticker=ticker, reason=bracket.reason,
                 entry=current_px, stop=bracket.stop, target=bracket.target,
@@ -424,7 +424,7 @@ class CommanderVerdictMixin:
         )
         ok, decision, err = validate_decision_bracket(self.cfg, decision, fallback_entry=current_px)
         if not ok:
-            snap = self.ollama_audit_snapshot(ticker)
+            snap = self.council_audit_snapshot(ticker)
             log_bracket_reject(
                 self.cfg, ticker=ticker, reason=err,
                 entry=current_px, stop=decision.get("stop", 0),

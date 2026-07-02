@@ -46,7 +46,7 @@ def is_memory_pressured(min_free_mb: int = 2048) -> bool:
 
 
 def _council_on(cfg) -> bool:
-    enabled = getattr(cfg, "COUNCIL_ENABLED", getattr(cfg, "OLLAMA_ENABLED", False))
+    enabled = getattr(cfg, "COUNCIL_ENABLED", False)
     if not enabled:
         return False
     if not getattr(cfg, "GENERATIVE_THINKING_ENABLED", True):
@@ -67,21 +67,6 @@ def recommended_council_model(cfg=None) -> str:
     return getattr(cfg, "GROQ_MODEL", "llama-3.3-70b-versatile")
 
 
-def recommended_ollama_model(memory_budget_mb: int = 2560) -> str:
-    """Legacy alias."""
-    return recommended_council_model()
-
-
-def should_allow_ollama_decide(cfg) -> tuple[bool, str]:
-    if not _council_on(cfg):
-        return False, "council_disabled"
-    return True, "ok"
-
-
-def should_allow_ollama_notify(cfg) -> tuple[bool, str]:
-    return should_allow_ollama_decide(cfg)
-
-
 def should_allow_chart_vision(cfg) -> tuple[bool, str]:
     always = getattr(cfg, "LIVE_CHART_VISION_ENABLED", False)
     opportunistic = getattr(cfg, "LIVE_CHART_VISION_OPPORTUNISTIC", False)
@@ -97,12 +82,6 @@ def should_allow_chart_vision(cfg) -> tuple[bool, str]:
     return True, "ok"
 
 
-def unload_heavy_ollama_models() -> None:
-    """No-op — local Ollama removed."""
-
-
-def should_allow_ollama(cfg) -> tuple[bool, str]:
-    return should_allow_ollama_decide(cfg)
 
 
 def memory_status(cfg=None) -> dict:

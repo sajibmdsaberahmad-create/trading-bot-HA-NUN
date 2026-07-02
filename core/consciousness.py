@@ -290,10 +290,10 @@ class AIConsciousness:
         think_fn = None
         try:
             from core.cognitive_autopilot import CognitiveAutopilot  # noqa: F401
-            from core.ollama_brain import OllamaBrain
-            brain = OllamaBrain(self.cfg)
-            if brain.config.enabled:
-                think_fn = brain._call_ollama
+            from core.council_brain import CouncilBrain
+            brain = CouncilBrain(self.cfg)
+            if brain.enabled:
+                think_fn = brain.think
         except Exception:
             pass
 

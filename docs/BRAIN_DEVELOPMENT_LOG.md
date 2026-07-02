@@ -3,6 +3,7 @@
 Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.md).
 
 
+- `2026-07-02` **engineering** — Clean: remove all Ollama legacy references (shims, config vars, aliases, comments) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Perfection sprint: SYSTEM_ASSESSMENT + M2 roadmap + canonical profile + preflight — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Halim Smart Sprint (all phases A–D, M2 8GB) — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
 - `2026-07-01` **engineering** — Swing bar fetch DataFrame fix + toddler swing IB gate + war scalp-only separation — see [ENGINEERING_FIX_LOG.md](ENGINEERING_FIX_LOG.md)
@@ -2115,3 +2116,18 @@ Auto-appended on each owned-brain event. See also [OWNED_BRAIN.md](OWNED_BRAIN.m
 - `2026-07-02 12:59 UTC` **brain_evolution** · stage **teen** — Evolution live_session_end — stage teen, dataset 1054 pairs
 - `2026-07-02 13:00 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
 - `2026-07-02 13:00 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 1054 pairs
+- `2026-07-02 14:07 UTC` **brain_evolution** · stage **teen** — Evolution live_session_end — stage teen, dataset 1064 pairs
+- `2026-07-02 14:07 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-02 14:07 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 1064 pairs
+- `2026-07-02 14:26 UTC` **brain_evolution** · stage **teen** — Evolution live_session_end — stage teen, dataset 1064 pairs
+- `2026-07-02 14:26 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-02 14:26 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 1064 pairs
+- `2026-07-02 14:51 UTC` **brain_evolution** · stage **teen** — Evolution live_session_end — stage teen, dataset 1082 pairs
+- `2026-07-02 14:52 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-02 14:52 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 1082 pairs
+- `2026-07-02 15:27 UTC` **brain_evolution** · stage **teen** — Evolution live_session_end — stage teen, dataset 1104 pairs
+- `2026-07-02 15:28 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-02 15:28 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 1104 pairs
+- `2026-07-02 15:59 UTC` **brain_evolution** · stage **teen** — Evolution live_session_end — stage teen, dataset 1124 pairs
+- `2026-07-02 15:59 UTC` **brain_evolution** · stage **toddler** — Halim developer post_standalone_flush: 0 mutation(s), git=ok
+- `2026-07-02 15:59 UTC` **brain_evolution** · stage **teen** — Evolution standalone_flush — stage teen, dataset 1124 pairs

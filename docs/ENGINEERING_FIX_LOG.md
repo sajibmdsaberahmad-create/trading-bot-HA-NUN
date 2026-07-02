@@ -4,6 +4,79 @@
 
 ---
 
+## 2026-07-02 — Clean: remove all Ollama legacy references
+
+### Problem
+The codebase had widespread stale "Ollama" references — 3 deprecated shim files, 2 dead cleanup scripts, dozens of config vars named `OLLAMA_*`, and hundreds of comments/variables/dict-keys/log-messages using the Ollama name. The local Ollama was removed long ago; everything routes through the cloud council (Groq/Gemini). The naming pollution was misleading and cluttered the codebase.
+
+### Changes
+
+**Files deleted:**
+- `core/ollama_brain.py` — deprecated shim (local Ollama removed)
+- `scripts/purge_ollama_local.sh` — dead cleanup script
+- `scripts/uninstall_ollama.sh` — dead cleanup script
+
+**Files renamed:**
+- `core/ollama_vision.py` → `core/council_vision.py` (functions preserved)
+- `core/ollama_models.py` → `core/council_models.py` (functions preserved)
+
+**Config vars renamed (`core/config.py`):**
+- `OLLAMA_DECISION_BYPASS_RATE_LIMIT` → `COUNCIL_DECISION_BYPASS_RATE_LIMIT`
+- `OLLAMA_DECISION_MIN_FREE_RAM_MB` → `COUNCIL_DECISION_MIN_FREE_RAM_MB`
+- `OLLAMA_VISION_UNLOAD_AFTER_CALL` → `COUNCIL_VISION_UNLOAD_AFTER_CALL`
+- `OLLAMA_VISION_SWAP_TEXT_MODEL` → `COUNCIL_VISION_SWAP_TEXT_MODEL`
+- `ENTRY_OLLAMA_WAIT_SEC` → `ENTRY_COUNCIL_WAIT_SEC`
+- `OLLAMA_NUMERIC_BRACKETS` → `COUNCIL_NUMERIC_BRACKETS`
+- `AI_TELEGRAM_OLLAMA_MAX_TOKENS` → `AI_TELEGRAM_COUNCIL_MAX_TOKENS`
+- `AI_TELEGRAM_OLLAMA_TIMEOUT` → `AI_TELEGRAM_COUNCIL_TIMEOUT`
+- `OLLAMA_NOTIFY_MIN_FREE_RAM_MB` → `COUNCIL_NOTIFY_MIN_FREE_RAM_MB`
+- `OLLAMA_VISION_MODEL` → `COUNCIL_VISION_MODEL`
+- `OLLAMA_VISION_TIMEOUT` → `COUNCIL_VISION_TIMEOUT`
+- `OLLAMA_VISION_MAX_TOKENS` → `COUNCIL_VISION_MAX_TOKENS`
+- `OLLAMA_META_OPTIMIZER_ENABLED` → `COUNCIL_META_OPTIMIZER_ENABLED`
+
+Each new env var includes an `os.getenv("OLLAMA_*", "...")` fallback for backward compat.
+
+**Legacy aliases removed:**
+- `council_brain.py`: removed `OllamaBrain = CouncilBrain` and `create_ollama_brain = create_council_brain` aliases
+- `config.py __post_init__`: removed `OLLAMA_ENABLED` / `OLLAMA_MODEL` sync
+- `memory_guard.py`: removed `recommended_ollama_model`, `should_allow_ollama_notify`, `unload_heavy_ollama_models`, `should_allow_ollama`, removed `OLLAMA_ENABLED` fallback from `_council_on()`
+- `halim_identity.py`: removed `cfg.OLLAMA_ENABLED = False`
+
+**Renamed code identifiers:**
+- `ai_commander.py`: `ollama_audit_snapshot()` method removed (callers use `council_audit_snapshot()`)
+- `scalper_entry_executor.py`: 3 calls to `ollama_audit_snapshot` → `council_audit_snapshot`
+- `ai_commander_verdict.py`: 2 calls to `ollama_audit_snapshot` → `council_audit_snapshot`
+- `cognitive_core.py`: `_call_ollama` → `think` (dead reference fix)
+- `memory_guard.py`: `should_allow_ollama_decide` → `should_allow_council_decide`
+- `ram_tier.py`: string keys `OLLAMA_META_OPTIMIZER_ENABLED` → `COUNCIL_META_OPTIMIZER_ENABLED`, `ENTRY_OLLAMA_WAIT_SEC` → `ENTRY_COUNCIL_WAIT_SEC`
+- `ai_runtime_observer.py`: `ENTRY_OLLAMA_WAIT_SEC` → `ENTRY_COUNCIL_WAIT_SEC`
+- `scalper_runner.py`: `OLLAMA_MIN_FREE_RAM_MB` → `COUNCIL_MIN_FREE_RAM_MB`
+- `local_cleanup.py`: `_unload_ollama_ram` → `_unload_council_ram`, removed `logs/ollama.log` from trim list
+- `system_status.py`: removed `ollama_model` legacy key
+
+**Comments/log messages updated** across 20+ files (all visible "Ollama" → "council" references).
+
+**Env var export updated:**
+- `scripts/start_hanoon.sh`: `OLLAMA_VISION_SWAP_TEXT_MODEL` → `COUNCIL_VISION_SWAP_TEXT_MODEL`
+
+**Syntax fix:**
+- `deferred_council_learning.py`: Fixed mixed 2/4-space indentation (pre-existing bug exposed by our edit)
+
+### Env vars
+- All renamed vars maintain backward compat via `os.getenv("NEW_NAME", os.getenv("OLD_NAME", default))`
+- `COUNCIL_ENABLED` (was `OLLAMA_ENABLED`) remains the canonical flag
+- Shell scripts using old `OLLAMA_*` env exports still work (fallback chain)
+
+### Verify
+1. `git diff --stat` shows clean renames, no accidental deletions
+2. All 25 modified Python files pass `ast.parse` syntax check
+3. Bot starts without `AttributeError` on config attribute access
+4. No `from core.ollama_* import` lines remain
+5. `/usr/bin/rg -i 'ollama' --include '*.py' core/` returns only backward-compat env fallbacks and live_ai_pipeline.py council dict params
+
+---
+
 ## 2026-07-02 — Remove: all war entry/round-trip caps set to unlimited
 
 ### Problem

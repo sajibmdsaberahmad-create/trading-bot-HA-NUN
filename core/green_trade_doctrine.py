@@ -727,7 +727,7 @@ def assess_pre_market_entry(
     ppo_strong = ppo_conf >= ppo_min_conf and (ppo_buy or ppo_conf >= ppo_min_conf + 0.10)
     
     # 3. AI vote (Halim or council approval)
-    ai_vote = halim_enter or bool(decision.get("ollama_enter") or decision.get("council_enter"))
+    ai_vote = halim_enter or bool(decision.get("council_enter") or decision.get("council_enter"))
     
     # 4. Momentum + volume confirmation
     mom_ok = mom > 0.02 or spike_ratio >= 1.15
