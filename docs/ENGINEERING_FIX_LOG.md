@@ -10,6 +10,34 @@
 
 ---
 
+### Verify
+```bash
+./scripts/start_replay_live.sh chunk 5   # should run steps, not halt on IB Truth
+python -m pytest tests/test_ib_truth_checklist.py -q
+```
+
+---
+
+## 2026-07-02 — Replay: skip IB Truth startup block (CSV mode)
+
+### Problem
+`REPLAY_START.command` loaded 56k bars then immediately halted: `IB Truth not ready — connected: IB not connected`. Replay uses CSV fake-live (`REPLAY_BLOCK_IB=true`) and does not need IB Gateway; 0 replay steps ran before teardown.
+
+### Root cause
+`run_startup_checklist()` in `scalper_runner` required live Gateway `connected=true` with `IB_TRUTH_STARTUP_BLOCK=true` (default from `start_hanoon.sh` inheritance). Replay never connects to IB.
+
+### Fix
+| File | Change |
+|------|--------|
+| `core/ib_truth_checklist.py` | Skip checklist + block when `REPLAY_LIVE`; `runtime_ib_truth_ok` always true in replay |
+| `scripts/start_replay_live.sh` | `IB_TRUTH_STARTUP_CHECK=false`, `IB_TRUTH_STARTUP_BLOCK=false` |
+| `tests/test_ib_truth_checklist.py` | Replay skip smoke test |
+
+### Verify
+`REPLAY_LIVE=true ./scripts/start_replay_live.sh chunk 5` — no IB Truth halt; steps advance.
+
+---
+
 ## 2026-07-01 — Perfection sprint: M2 8 GB assessment, roadmap, canonical profile
 
 ### Problem

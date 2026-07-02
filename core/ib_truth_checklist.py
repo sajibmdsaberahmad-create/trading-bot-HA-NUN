@@ -24,13 +24,21 @@ if TYPE_CHECKING:
     from core.config import BotConfig
 
 
+def _is_replay_live() -> bool:
+    return os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")
+
+
 def checklist_enabled(cfg: Optional["BotConfig"] = None) -> bool:
+    if _is_replay_live():
+        return False
     if not ib_truth_enabled(cfg):
         return False
     return os.getenv("IB_TRUTH_STARTUP_CHECK", "true").lower() in ("1", "true", "yes")
 
 
 def startup_block_on_fail(cfg: Optional["BotConfig"] = None) -> bool:
+    if _is_replay_live():
+        return False
     return os.getenv("IB_TRUTH_STARTUP_BLOCK", "true").lower() in ("1", "true", "yes")
 
 
@@ -230,7 +238,17 @@ def run_startup_checklist(
     """
     cfg = cfg or getattr(runner, "cfg", None)
     if not checklist_enabled(cfg):
-        return {"ok": True, "skipped": True, "block": False, "lines": []}
+        reason = "replay_live" if _is_replay_live() else "checklist_disabled"
+        lines: List[str] = []
+        if _is_replay_live():
+            lines = ["IB Truth checklist skipped (replay CSV mode — no Gateway required)"]
+        return {
+            "ok": True,
+            "skipped": True,
+            "block": False,
+            "reason": reason,
+            "lines": lines,
+        }
 
     if wait:
         result = wait_for_ib_truth_ready(ib, cfg, runner)
@@ -277,6 +295,8 @@ def log_startup_checklist(result: Dict[str, Any]) -> None:
 
 def runtime_ib_truth_ok(cfg: Optional["BotConfig"] = None, runner: Any = None) -> bool:
     """Quick gate for entry paths — snapshot fresh enough."""
+    if _is_replay_live():
+        return True
     if not ib_truth_enabled(cfg):
         return True
     if runner is not None and hasattr(runner, "_ib_truth_ready"):

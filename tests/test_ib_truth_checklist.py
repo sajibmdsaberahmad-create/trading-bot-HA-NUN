@@ -8,6 +8,18 @@ from core.ib_truth_checklist import (
 )
 
 
+def test_checklist_skipped_in_replay_live(monkeypatch):
+    monkeypatch.setenv("REPLAY_LIVE", "true")
+    cfg = BotConfig()
+    assert checklist_enabled(cfg) is False
+    from core.ib_truth_checklist import run_startup_checklist, runtime_ib_truth_ok
+
+    r = run_startup_checklist(None, None, cfg, wait=False)
+    assert r.get("ok") is True
+    assert r.get("skipped") is True
+    assert runtime_ib_truth_ok(cfg) is True
+
+
 def test_checklist_enabled_when_ib_truth_on():
     cfg = BotConfig()
     assert checklist_enabled(cfg) or not __import__("os").getenv("REQUIRE_IB_FILL_SYNC", "true")
