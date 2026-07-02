@@ -81,6 +81,11 @@ export TECH_OVERRIDE_SCORE_MIN=30                # scan score threshold (was 35)
 
 # ── Halim serve periodic restart (reclaims swapped MLX model memory) ─────────
 export HALIM_SERVE_RESTART_SEC=900               # restart every 15min to avoid memory decay
+
+# ── Halim overseer (advisory only — Halim observes, never blocks) ──────────
+export OVERSEER_ENABLED=true                      # enable system overseer
+export OVERSEER_INTERVAL_SEC=60                   # digest every 60s
+export OVERSEER_MAX_EVENTS=200                    # rolling event window
 export CAPITAL_DISCIPLINE=true
 export TREAT_PAPER_AS_LIVE=true
 export REGIME_ENTRY_BLOCK=true

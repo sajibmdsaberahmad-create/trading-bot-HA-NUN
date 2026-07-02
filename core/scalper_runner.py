@@ -2199,6 +2199,22 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         except Exception as exc:
                             log.debug(f"Halim periodic restart: {exc}")
 
+                # ── Periodic Halim overseer digest (advisory observations) ──
+                overseer_iv = float(os.getenv("OVERSEER_INTERVAL_SEC", "60"))
+                if overseer_iv > 0 and not replay_mode:
+                    last_ov = getattr(self, "_last_overseer_run", 0)
+                    if last_ov == 0:
+                        self._last_overseer_run = now
+                    elif now - last_ov >= overseer_iv:
+                        self._last_overseer_run = now
+                        try:
+                            from core.halim_overseer import get_digest, run_overseer_digest
+                            digest_events = get_digest().consume()
+                            tickers = len(getattr(self, "_locked_targets", []) or [])
+                            run_overseer_digest(digest_events, tickers, cfg=self.cfg)
+                        except Exception as exc:
+                            log.debug(f"Overseer digest: {exc}")
+
                 cleanup_iv = float(getattr(self.cfg, "PERIODIC_CLEANUP_SEC", 1800))
                 _now = time.time()
                 replay_mode = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")

@@ -12,6 +12,7 @@ import pandas as pd
 
 from core.config import BotConfig
 from core.notify import log
+from core.halim_overseer import record_event
 
 if TYPE_CHECKING:
     pass
@@ -1420,6 +1421,9 @@ class ScalperSpikeMixin:
                 f"score={target.rank_score:.0f} | micro={fc.get('spike_likelihood', 0):.0%} "
                 f"pred→${(fc.get('pred_1bar') or live_px):.2f}{q_extra} | attempting entry..."
             )
+            record_event("spike", f"{ticker} vol={spike_ratio:.1f}x", {
+                "ticker": ticker, "ratio": spike_ratio, "score": target.rank_score,
+            })
             from core.entry_quality import (
                 assess_entry_quality, quality_blocks_entry, regime_blocks_entry, mtf_blocks_entry,
             )
@@ -1456,6 +1460,7 @@ class ScalperSpikeMixin:
                 log.info(
                     f"  ⏭ PROFIT PROB veto {ticker}: {quality.get('reason', '')[:100]}"
                 )
+                record_event("profit_veto", quality.get("reason", "")[:80], {"ticker": ticker})
                 self._spike_skip_until[ticker] = time.time() + float(
                     getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                 )
@@ -1509,6 +1514,7 @@ class ScalperSpikeMixin:
                             f"  🟢 SMART GREEN bypass {ticker}: "
                             f"spike={float(spike_ratio):.1f}x score={float(target.rank_score):.0f}"
                         )
+                        record_event("green_bypass", f"spike={float(spike_ratio):.1f}x", {"ticker": ticker})
                     else:
                         block = require_green_entry(
                             self.cfg,
@@ -1522,6 +1528,7 @@ class ScalperSpikeMixin:
                         )
                         if block:
                             log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
+                            record_event("green_veto", block[:80], {"ticker": ticker})
                             self._spike_skip_until[ticker] = time.time() + float(
                                 getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
                             )

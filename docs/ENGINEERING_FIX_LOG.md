@@ -4,6 +4,46 @@
 
 ---
 
+## 2026-07-02 — New: Halim overseer — advisory-only system observer
+
+### Problem
+Halim only saw entry/exit decisions via PPO dialogues. Everything else —
+green vetoes, profit prob blocks, scanner quality, PPO drift — was invisible
+to Halim. No system-wide pattern detection.
+
+### Design
+New module `core/halim_overseer.py` — a silent advisory observer.
+
+**Halim NEVER blocks or vetoes anything.** It observes, detects patterns,
+and logs suggestions. The bot remains fully autonomous.
+
+How it works:
+1. `EventDigest` — thread-safe rolling event collector (bounded 200 events)
+2. `record_event()` — called at key system points to log events (spikes,
+   green vetoes, profit vetoes, green bypasses)
+3. Every 60s, `scalper_runner.py` builds a compact digest from collected
+   events and fires it async to Halim LM
+4. Halim returns JSON with observation, pattern_detected, suggestion,
+   confidence_trend, volatility_observation, watch
+5. Observations logged to `halim/data/overseer/observations.jsonl` as gold
+6. Logged as info line for real-time visibility
+
+Currently records: spikes, green vetoes/bypasses, profit prob vetoes.
+Extensible: just add `record_event("category", "detail", {meta})` at any point.
+
+### Files changed
+- `core/halim_overseer.py` — NEW: event digest, digest builder, Halim fire
+- `core/scalper_spike_loop.py` — recording at spike/green_veto/green_bypass/profit_veto
+- `core/scalper_runner.py` — periodic digest fire in main loop
+- `scripts/m2_8gb_live_profile.sh` — OVERSEER_ENABLED, INTERVAL, MAX_EVENTS
+
+### Verify
+1. HANOON log: `👁 Halim observe:` lines every ~60s with observations
+2. No performance impact — runs async, digest is compact (< 800 chars)
+3. No blocking — Halim never delays or vetoes any trade decision
+
+---
+
 ## 2026-07-02 — Fix: Tech override never fires in AICommander (PPO blocks all fast paths)
 
 ### Problem
