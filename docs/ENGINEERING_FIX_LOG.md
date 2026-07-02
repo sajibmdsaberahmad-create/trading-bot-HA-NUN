@@ -4,6 +4,46 @@
 
 ---
 
+## 2026-07-02 — Fix: Green doctrine blocks ALL entries; smart green bypass + Halim restart bug
+
+### Problem
+After the previous commit (async coach mode), entries still showed **zero** in 30+ minutes:
+- 310 GREEN vetoes, 783 spike attempts, 0 entries
+- 0 `Technical override` lines fired
+- Halim serve restart fired **immediately** at startup (not after 15 min)
+
+### Root cause
+1. **Green precheck blocked everything**: The green doctrine precheck in
+   `scalper_spike_loop.py` ran before the tech override in `scalper_entry_executor.py`.
+   Every spike hit the green check → `continue` → never reached the AI commander or
+   the tech override path.
+2. **Halim restart fired immediately**: `getattr(self, "_last_halim_restart", 0)`
+   returned 0 on first access → `now - 0 >= 900` was True immediately → killed the
+   Halim serve at loop iteration 1.
+
+### Fix
+1. **Smart green bypass** (`scalper_spike_loop.py` + `scalper_entry_executor.py`):
+   When spike_ratio ≥ TECH_OVERRIDE_SPIKE_MIN (1.3) AND scan_score ≥
+   TECH_OVERRIDE_SCORE_MIN (30), the green doctrine precheck is bypassed. The
+   momentum itself IS the green signal. Weaker setups still go through full green
+   doctrine.
+2. **Halim restart timer fix** (`scalper_runner.py`): Changed from
+   `getattr(self, "_last_halim_restart", 0)` to explicit check: if `last == 0`,
+   set to `now` and skip first iteration.
+
+### Files changed
+- `core/scalper_spike_loop.py` — smart green bypass with TECH_OVERRIDE thresholds
+- `core/scalper_entry_executor.py` — same bypass in the verdict-layer green recheck
+- `core/scalper_runner.py` — fix immediate restart bug
+
+### Verify
+1. HANOON log: `🟢 SMART GREEN bypass LIMN: spike=1.4x score=40` lines appear
+2. Entries pass through to AI commander for strong spikes
+3. Halim serve restart only fires after 15+ minutes, not at startup
+4. Weaker spikes still show `🟢 GREEN veto LIMN: ...`
+
+---
+
 ## 2026-07-02 — Halim as async coach + PPO leads entries + periodic serve restart
 
 ### Problem

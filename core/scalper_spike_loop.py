@@ -1501,22 +1501,31 @@ class ScalperSpikeMixin:
                             f"spike={spike_ratio:.2f}x score={float(target.rank_score):.0f}"
                         )
                 elif green_entry_mandatory(self.cfg) and precheck:
-                    block = require_green_entry(
-                        self.cfg,
-                        ticker=ticker,
-                        df=work_df,
-                        current_px=live_px,
-                        micro=fc,
-                        spike_ratio=spike_ratio,
-                        scan_score=float(target.rank_score),
-                        dm=dm,
-                    )
-                    if block:
-                        log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
-                        self._spike_skip_until[ticker] = time.time() + float(
-                            getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                    # Smart green: strong momentum bypass — spike+score IS the green signal
+                    tech_spike = float(getattr(self.cfg, "TECH_OVERRIDE_SPIKE_MIN", 1.3))
+                    tech_score = float(getattr(self.cfg, "TECH_OVERRIDE_SCORE_MIN", 30))
+                    if float(spike_ratio) >= tech_spike and float(target.rank_score) >= tech_score:
+                        log.info(
+                            f"  🟢 SMART GREEN bypass {ticker}: "
+                            f"spike={float(spike_ratio):.1f}x score={float(target.rank_score):.0f}"
                         )
-                        continue
+                    else:
+                        block = require_green_entry(
+                            self.cfg,
+                            ticker=ticker,
+                            df=work_df,
+                            current_px=live_px,
+                            micro=fc,
+                            spike_ratio=spike_ratio,
+                            scan_score=float(target.rank_score),
+                            dm=dm,
+                        )
+                        if block:
+                            log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
+                            self._spike_skip_until[ticker] = time.time() + float(
+                                getattr(self.cfg, "SPIKE_SKIP_SEC", 12.0)
+                            )
+                            continue
             except Exception:
                 pass
             spike_regime = "momentum_spike"

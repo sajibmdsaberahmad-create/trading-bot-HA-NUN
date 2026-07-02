@@ -1620,23 +1620,30 @@ class ScalperEntryMixin:
                     if green_entry_mandatory(self.cfg) and ai_dec.get("enter") and not (
                         in_pre and pre_market_entry_enabled(self.cfg)
                     ):
-                        block = require_green_entry(
-                            self.cfg,
-                            ticker=ticker,
-                            df=df_fast,
-                            current_px=current_px,
-                            micro=forecast,
-                            spike_ratio=spike_ratio,
-                            scan_score=scan_score,
-                            ppo_action=int(ai_dec.get("ppo_action", 0) or 0),
-                            ppo_conf=float(ai_dec.get("ppo_conf", 0.5) or 0.5),
-                            decision=ai_dec,
-                            dm=dm,
-                        )
-                        if block:
-                            log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
-                            self._spike_skip_until[ticker] = time.time() + entry_cooldown_after_skip(self.cfg)
-                            return "waiting"
+                        # Smart green: strong momentum bypasses the recheck
+                        from core.config import BotConfig as _B
+                        _tech_spike = float(getattr(self.cfg, "TECH_OVERRIDE_SPIKE_MIN", 1.3))
+                        _tech_score = float(getattr(self.cfg, "TECH_OVERRIDE_SCORE_MIN", 30))
+                        if float(spike_ratio) >= _tech_spike and float(scan_score) >= _tech_score:
+                            pass  # Strong momentum — skip green recheck
+                        else:
+                            block = require_green_entry(
+                                self.cfg,
+                                ticker=ticker,
+                                df=df_fast,
+                                current_px=current_px,
+                                micro=forecast,
+                                spike_ratio=spike_ratio,
+                                scan_score=scan_score,
+                                ppo_action=int(ai_dec.get("ppo_action", 0) or 0),
+                                ppo_conf=float(ai_dec.get("ppo_conf", 0.5) or 0.5),
+                                decision=ai_dec,
+                                dm=dm,
+                            )
+                            if block:
+                                log.info(f"  🟢 GREEN veto {ticker}: {block[:100]}")
+                                self._spike_skip_until[ticker] = time.time() + entry_cooldown_after_skip(self.cfg)
+                                return "waiting"
                 except Exception:
                     pass
                 return self._submit_ai_entry(ticker, df_fast, ai_dec, market_ctx, current_px)

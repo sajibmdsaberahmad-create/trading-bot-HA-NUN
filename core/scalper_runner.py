@@ -2169,7 +2169,10 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                 # ── Periodic Halim serve restart (reclaims swapped MLX model) ──
                 halim_restart_iv = float(getattr(self.cfg, "HALIM_SERVE_RESTART_SEC", 900))
                 if halim_restart_iv > 0 and not replay_mode:
-                    if now - getattr(self, "_last_halim_restart", 0) >= halim_restart_iv:
+                    last = getattr(self, "_last_halim_restart", 0)
+                    if last == 0:
+                        self._last_halim_restart = now  # don't fire immediately
+                    elif now - last >= halim_restart_iv:
                         self._last_halim_restart = now
                         try:
                             import subprocess, signal
