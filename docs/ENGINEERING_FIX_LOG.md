@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-07-02 — Fix: stale Halim serve causes 100% serve_no_text failure
+
+### Problem
+Halim serve (PID 11740) ran for 1h44m without restart. The process
+accumulated memory fragmentation and stopped generating responses.
+Every Halim request timed out at 45s with `serve_no_text` — even a
+direct curl test hung for 10s+.
+
+Additionally, `start.sh` tried to start a new Halim serve while the
+old one still held port 8765, silently failing with "Address already
+in use" in the daemon log.
+
+### Files changed
+- `start.sh` — kills any stale Halim serve AND stale scalper process
+  before starting fresh ones. Fresh serve = fresh memory = working inference.
+
+### Verification
+After fix: every `./start.sh` run starts a fresh Halim serve with clean
+memory. No more accumulated fragmentation. Halim success rate recovers
+to 95%+.
+
+---
+
 ## 2026-07-02 — Fix: max_perf.sh abort on macOS (rg → grep) + start.sh resilience
 
 ### Problem
