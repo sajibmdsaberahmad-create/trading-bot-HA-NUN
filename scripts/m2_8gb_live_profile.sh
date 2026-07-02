@@ -136,6 +136,17 @@ export PPO_LEARN_EVERY_ENTRY=true                # learn on every fill
 # ── IB paper safety ─────────────────────────────────────────────────────────
 export CONNECTIVITY_WAIT_ON_IB_LOSS=true
 
+# ── Unlimited entry caps — all war/trade frequency limits removed ─────────
+export WAR_MAX_ENTRIES_PER_HOUR=9999              # no hourly cap on entries
+export WAR_PAPER_MAX_ENTRIES_PER_HOUR=9999        # paper too
+export WAR_MAX_ROUND_TRIPS_PER_DAY=9999           # no daily round-trip cap
+export WAR_PAPER_MAX_ROUND_TRIPS_PER_DAY=9999     # paper too
+export WAR_LAB_MAX_ROUND_TRIPS_PER_DAY=9999       # lab too
+export WAR_PAPER_LAB_MAX_ROUND_TRIPS_PER_DAY=9999 # paper-lab too
+export SPIKE_SKIP_SEC=3                           # re-evaluate spikes faster (down from 12-30s)
+export TICKER_LOSS_COOLDOWN_SEC=30                # recover faster after loss (down from 180s)
+export MIN_POSITION_HOLD_SEC=10                   # exit faster if needed (down from 45s)
+
 # ── Cloud council budget (PPO+Halim are pilots; API is senior expert) ───────
 export COUNCIL_NANNY_MODE=true                     # API only for critical/hard cases
 export COUNCIL_NANNY_RESERVE_PCT=0.75              # keep 75% budget reserved for risk exits

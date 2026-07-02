@@ -4,6 +4,44 @@
 
 ---
 
+## 2026-07-02 — Remove: all war entry/round-trip caps set to unlimited
+
+### Problem
+Live trading logs showed `hourly entry cap 5 reached` — war paper mode defaulted
+`WAR_PAPER_MAX_ENTRIES_PER_HOUR=5`, capping entries after 5 per hour. The user
+explicitly said "war bullets should not be limited".
+
+### Audit
+Subagent scanned every cap/limit across the codebase — found ~115 env vars and
+~20 hardcoded limits. The caps directly blocking profitable trades were the
+war-mode entry frequency and round-trip limits.
+
+### Changed (scripts/m2_8gb_live_profile.sh)
+All war entry/round-trip caps set to 9999 (unlimited):
+- `WAR_MAX_ENTRIES_PER_HOUR=9999` (was default 2)
+- `WAR_PAPER_MAX_ENTRIES_PER_HOUR=9999` (was default 5)
+- `WAR_MAX_ROUND_TRIPS_PER_DAY=9999` (was default 2)
+- `WAR_PAPER_MAX_ROUND_TRIPS_PER_DAY=9999` (was default 8)
+- `WAR_LAB_MAX_ROUND_TRIPS_PER_DAY=9999` (was default 2)
+- `WAR_PAPER_LAB_MAX_ROUND_TRIPS_PER_DAY=9999` (was default 4)
+
+Plus lowered friction cooldowns:
+- `SPIKE_SKIP_SEC=3` (was 12-30s)
+- `TICKER_LOSS_COOLDOWN_SEC=30` (was 180s)
+- `MIN_POSITION_HOLD_SEC=10` (was 45s)
+
+### Safety note
+All position-level safety caps remain intact:
+- MAX_CONCURRENT_POSITIONS, HARD_STOP_USD, MAX_DAILY_LOSS_PCT, etc.
+Only the frequency/velocity limits that blocked AI from entering good setups
+were removed.
+
+### Verify
+Deploy and trade. The `hourly entry cap N reached` log line should never appear.
+PPO and AI should be able to enter on every spike that meets quality thresholds.
+
+---
+
 ## 2026-07-02 — Fix: Halim serve_no_text from MLX memory pressure + 3rd Groq key
 
 ### Problem
