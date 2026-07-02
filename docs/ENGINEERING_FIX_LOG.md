@@ -4,6 +4,74 @@
 
 ---
 
+## 2026-07-02 — Halim as async coach + PPO leads entries + periodic serve restart
+
+### Problem
+Three issues blocking entries:
+
+1. **Halim too slow on 8GB**: MLX inference degraded from 0.9s → 44s over 30min
+   as RAM filled. The 1.6s await always timed out, wasting main loop time.
+   Halim's entry advice was useless because it never completed in time.
+
+2. **PPO stuck at HOLD forever**: PPO output HOLD=54% consistently. Green
+   doctrine + profit_prob + Halim timeout formed a triple wall. PPO never
+   got to experience actual trade outcomes → cannot learn.
+
+3. **Degenerate dialogues**: Every PPO↔Halim dialogue read identically:
+   "PPO: I'm watching the market... / Halim: I agree..." — no useful
+   training data.
+
+### Fixes
+
+1. **Halim → async coach** (`m2_8gb_live_profile.sh`):
+   - `HALIM_ENTRY_AWAIT_ENABLED=false` — PPO never waits for Halim
+   - Halim still runs in background, produces dialogue + teaching signal
+   - Halim serve restarted every 15min (`HALIM_SERVE_RESTART_SEC=900`)
+     via `scalper_runner.py` main loop — reclaims swapped MLX model memory
+
+2. **Lower profit probability** (`m2_8gb_live_profile.sh`):
+   - `MIN_PROFIT_PROBABILITY` 0.61 → **0.52** (all variants)
+   - Catches ~165 near-miss entries that were green-approved but blocked
+     at the last gate
+
+3. **Technical override lowered** (`scalper_entry_executor.py` + profile):
+   - Tech override spike threshold: 1.5x → **1.3x** (configurable via
+     `TECH_OVERRIDE_SPIKE_MIN`)
+   - Score threshold: 35 → **30** (configurable via `TECH_OVERRIDE_SCORE_MIN`)
+   - These are hardcoded -> env var configurable now
+
+4. **Fix degenerate dialogues** (`halim_companion.py`):
+   - `ppo_halim_dialogue` prompt now explicitly requires actual numbers
+     from LIVE SNAPSHOT and TRADE DECISION DATA
+   - Same for `trade_outcome_dialogue`
+   - Added anti-template language: "Never use generic phrases like 'I'm
+     watching the market' or 'I tightened my stops'"
+
+5. **Halim serve restart** (`scalper_runner.py`):
+   - Kills stale Halim serve process every `HALIM_SERVE_RESTART_SEC`
+   - Launches fresh serve in background
+   - Only runs during live trading (not replay)
+   - Safer parallel with no await (Halim is async coach, not gatekeeper)
+
+### Files changed
+- `scripts/m2_8gb_live_profile.sh` — await disabled, profit_prob 0.52,
+  tech_override env vars, Halim restart interval
+- `core/scalper_entry_executor.py` — hardcoded spike/score → env config
+- `core/scalper_runner.py` — periodic Halim serve restart in main loop
+- `core/halim_companion.py` — stricter dialogue prompt with number requirement
+
+### Verify
+1. Run `bash start.sh` — Halim warmup still shows `✅ Model ready (mlx)`
+2. HANOON log: no more `Halim entry await timeout` lines
+3. HANOON log: entries triggered by tech override (`Technical override:
+   spike=1.3x score=30`)
+4. HANOON log: profit_prob vetoes at 52% instead of 61%
+5. HANOON log: every 15min shows `🔄 Halim serve restart: killed PID(s)...`
+6. PPO↔Halim dialogues: should reference actual prices and confidence
+   rather than generic templates
+
+---
+
 ## 2026-07-02 — Fix: cloud API (Groq/Gemini) hammered by 8-ticker entry_decision rings
 
 ### Problem

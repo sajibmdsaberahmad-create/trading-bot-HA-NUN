@@ -199,7 +199,10 @@ def _intent_task(intent: str, trigger: str = "") -> str:
             "Format exactly:\n"
             "PPO: [reflex voice — fast instinct, pattern, confidence, first person]\n"
             "Halim: [mind voice — agrees, cautions, or reconciles with reasoning]\n"
-            "Both PPO and Halim must appear. Use TRADE DECISION DATA only. "
+            "Both PPO and Halim must appear. Use TRADE DECISION DATA only.\n"
+            "CRITICAL: Reference actual numbers from LIVE SNAPSHOT and TRADE DECISION DATA — "
+            "ticker price, PPO confidence %, Halim confidence %, spike ratio x.\n"
+            "Never use generic phrases like 'I'm watching the market' or 'I tightened my stops'.\n"
             "Max 5 lines total. Fresh words — never templates."
         ),
         "trade_outcome_dialogue": (
@@ -207,7 +210,9 @@ def _intent_task(intent: str, trigger: str = "") -> str:
             "Format:\n"
             "PPO: [what the reflex learned from this result]\n"
             "Halim: [what the mind learned — who was right, next adjustment]\n"
-            "Use TRADE DECISION DATA. First person. Max 5 lines."
+            "Use TRADE DECISION DATA. CRITICAL: Reference the actual P&L, entry price, "
+            "exit price from LIVE SNAPSHOT. Never use generic phrases.\n"
+            "First person. Max 5 lines."
         ),
         "trade_entry": (
             "Commander Telegram alert: you just opened a position. Halim voice — first person, "

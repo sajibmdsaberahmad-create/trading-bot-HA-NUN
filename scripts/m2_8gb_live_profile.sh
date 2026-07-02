@@ -69,24 +69,32 @@ export PPO_DEPLOY_TIERS_ENABLED=true
 export LEARN_APPROVAL_REQUIRED=true
 export CONFIDENCE_THRESHOLD=0.58
 export CAPITAL_MIN_CONFIDENCE=0.58
-export MIN_PROFIT_PROBABILITY=0.58
-export CAPITAL_MIN_PROFIT_PROBABILITY=0.58
-export WAR_MIN_PROFIT_PROBABILITY=0.58
-export WAR_PAPER_MIN_PROFIT_PROBABILITY=0.58
+export MIN_PROFIT_PROBABILITY=0.52
+export CAPITAL_MIN_PROFIT_PROBABILITY=0.52
+export WAR_MIN_PROFIT_PROBABILITY=0.52
+export WAR_PAPER_MIN_PROFIT_PROBABILITY=0.52
+
+# ── Technical override (momentum entries when PPO hesitates) ──────────────────
+# When PPO says HOLD on a real spike, this override forces entry
+export TECH_OVERRIDE_SPIKE_MIN=1.3               # spike ratio threshold (was 1.5)
+export TECH_OVERRIDE_SCORE_MIN=30                # scan score threshold (was 35)
+
+# ── Halim serve periodic restart (reclaims swapped MLX model memory) ─────────
+export HALIM_SERVE_RESTART_SEC=900               # restart every 15min to avoid memory decay
 export CAPITAL_DISCIPLINE=true
 export TREAT_PAPER_AS_LIVE=true
 export REGIME_ENTRY_BLOCK=true
 export MTF_ENTRY_BLOCK=true
 
-# ── Halim LM (8 GB: Qwen2.5-1.5B MLX 4-bit, 1s micro-peek, 12s timeout) ────
+# ── Halim LM (8 GB: async coach mode — never awaited for entries) ──────────
 export HALIM_FORCE_LM=true
 export HALIM_ENTRY_LM_ENABLED=true
 export HALIM_LIVE_GOLD_COLLECT=true
-export HALIM_ENTRY_AWAIT_ENABLED=true
-export HALIM_ENTRY_AWAIT_LIVE=true
-export HALIM_ENTRY_AWAIT_SEC=1.6   # Main loop waits 1.6s; Halim continues in background
-export HALIM_ENTRY_LM_TIMEOUT_SEC=45  # Long timeout for 8GB (MLX can swap under memory pressure)
-export HALIM_ENTRY_MAX_TOKENS=32   # Smaller output = faster generation under memory pressure
+export HALIM_ENTRY_AWAIT_ENABLED=false          # Halim is async coach — never blocks entries
+export HALIM_ENTRY_AWAIT_LIVE=false
+export HALIM_ENTRY_AWAIT_SEC=0.0                # No wait — PPO acts instantly
+export HALIM_ENTRY_LM_TIMEOUT_SEC=90            # Long timeout for background teaching
+export HALIM_ENTRY_MAX_TOKENS=32                # Small output for mem pressure
 export HALIM_ENTRY_TEMPERATURE=0.04
 export HALIM_INFERENCE_TIMEOUT_SEC=90
 export HALIM_ENTRY_SOFT_VETO=false

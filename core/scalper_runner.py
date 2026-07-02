@@ -2166,6 +2166,36 @@ class ScalperRunner(ScalperExitMixin, ScalperEntryMixin, ScalperSessionMixin, Sc
                         except Exception:
                             pass
 
+                # ── Periodic Halim serve restart (reclaims swapped MLX model) ──
+                halim_restart_iv = float(getattr(self.cfg, "HALIM_SERVE_RESTART_SEC", 900))
+                if halim_restart_iv > 0 and not replay_mode:
+                    if now - getattr(self, "_last_halim_restart", 0) >= halim_restart_iv:
+                        self._last_halim_restart = now
+                        try:
+                            import subprocess, signal
+                            old = subprocess.run(
+                                ["pgrep", "-f", "halim/halim/serve.py"],
+                                capture_output=True, text=True, timeout=5,
+                            )
+                            pids = [int(p) for p in old.stdout.strip().split() if p.strip()]
+                            for pid in pids:
+                                os.kill(pid, signal.SIGTERM)
+                            log.info(f"🔄 Halim serve restart: killed PID(s) {pids} (stale memory)")
+                            # Start fresh Halim serve in background
+                            root = getattr(self.cfg, "HANOON_DEVICE_PROFILE_ROOT", "")
+                            serve_script = os.path.join(root, "halim", "halim", "serve.py") if root else "halim/halim/serve.py"
+                            env = os.environ.copy()
+                            env.pop("HALIM_SERVE_RESTART_SEC", None)  # prevent restart loop
+                            subprocess.Popen(
+                                ["python3", "-u", serve_script],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                                env=env,
+                            )
+                            log.info(f"  🚀 New Halim serve launched (PID check after warmup)")
+                        except Exception as exc:
+                            log.debug(f"Halim periodic restart: {exc}")
+
                 cleanup_iv = float(getattr(self.cfg, "PERIODIC_CLEANUP_SEC", 1800))
                 _now = time.time()
                 replay_mode = os.getenv("REPLAY_LIVE", "").lower() in ("1", "true", "yes")

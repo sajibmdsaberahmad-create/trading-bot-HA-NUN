@@ -1965,9 +1965,11 @@ class ScalperEntryMixin:
             threshold = get_effective_confidence_threshold(self.cfg, self.pilot)
             should_enter = (action == 1 and confidence >= threshold)
 
-            # Technical momentum override — disabled when council owns decisions
+            # Technical momentum override — enabled when council does not own decisions
             if not should_enter and action != 2 and not is_ai_council_mode(self.cfg):
-                if spike_ratio >= 1.5 and scan_score >= 35:
+                tech_spike = float(getattr(self.cfg, "TECH_OVERRIDE_SPIKE_MIN", 1.3))
+                tech_score = float(getattr(self.cfg, "TECH_OVERRIDE_SCORE_MIN", 30))
+                if spike_ratio >= tech_spike and scan_score >= tech_score:
                     should_enter = True
                     confidence = max(confidence, 0.55)
                     reasoning = (
