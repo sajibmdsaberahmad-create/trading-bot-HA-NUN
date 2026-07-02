@@ -92,7 +92,13 @@ class LiveSlot:
 class LiveAILine:
     """
     Per-ticker async cloud council hotline — always ringing, never blocking.
+    Global throttle prevents all-ticker bursts from rate-limiting every provider.
     """
+
+    # Global ring throttle: shared across all tickers/tasks so one spike
+    # doesn't hammer Groq+Gemini on 8 tickers simultaneously.
+    _last_global_ring_at: float = 0.0
+    _global_lock: threading.Lock = threading.Lock()
 
     def __init__(self, cfg: BotConfig, decide_fn: Callable[[str], str]):
         self.cfg = cfg
@@ -115,6 +121,10 @@ class LiveAILine:
         except Exception:
             return float(getattr(self.cfg, "LIVE_AI_MIN_RING_SEC", 0.8))
 
+    def _global_ring_sec(self) -> float:
+        """Minimum seconds between ANY council call, regardless of ticker."""
+        return float(getattr(self.cfg, "LIVE_AI_GLOBAL_RING_SEC", 15.0))
+
     def _should_ring(self, key: str, fingerprint: str) -> bool:
         with self._lock:
             slot = self._slots.get(key)
@@ -124,6 +134,18 @@ class LiveAILine:
                 return False
             if slot.completed_at and (time.time() - slot.completed_at) < self._min_ring_interval():
                 return False
+            return True
+
+    def _global_throttle_allows(self) -> bool:
+        """True if we've waited long enough since the last council ring globally."""
+        gap = self._global_ring_sec()
+        if gap <= 0:
+            return True
+        with self._global_lock:
+            elapsed = time.time() - self._last_global_ring_at
+            if elapsed < gap:
+                return False
+            self._last_global_ring_at = time.time()
             return True
 
     def ring(
@@ -147,6 +169,11 @@ class LiveAILine:
             pass
         key = self._key(ticker, task)
         if not self._should_ring(key, fingerprint):
+            return False
+
+        # Global throttle — only 1 council call per N seconds system-wide
+        if not self._global_throttle_allows():
+            log.debug(f"Council ring throttled {ticker}/{task}: global_ring_sec={self._global_ring_sec():.0f}s")
             return False
 
         with self._lock:

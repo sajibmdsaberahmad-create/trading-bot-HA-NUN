@@ -120,6 +120,10 @@ export CONNECTIVITY_WAIT_ON_IB_LOSS=true
 
 # ── Cloud council budget (PPO+Halim are pilots; API is senior expert) ───────
 export COUNCIL_NANNY_MODE=true                     # API only for critical/hard cases
-export COUNCIL_NANNY_RESERVE_PCT=0.50              # keep 50% budget for real decisions
+export COUNCIL_NANNY_RESERVE_PCT=0.75              # keep 75% budget reserved for risk exits
+export COUNCIL_NANNY_MIN_SPIKE=2.0                 # only call API on extreme spikes (2x+)
+export COUNCIL_NANNY_MIN_SCORE=70                  # only call API on very high scan scores
+export COUNCIL_NANNY_MIN_RING_SEC=15.0             # at most 1 ring per ticker per 15s
 export COUNCIL_LEARNING_RING_ENABLED=false          # no deferred learning rings
 export COUNCIL_LEARNING_RING_STRONG_SPIKE_ONLY=false  # no learning rings at all
+export LIVE_AI_GLOBAL_RING_SEC=30                  # at most 1 council call per 30s globally

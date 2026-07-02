@@ -4,6 +4,55 @@
 
 ---
 
+## 2026-07-02 — Fix: cloud API (Groq/Gemini) hammered by 8-ticker entry_decision rings
+
+### Problem
+After nanny rewrite, the cloud API was still being hammered:
+```
+09:30:09 | All Groq keys rate-limited — falling back to Gemini (×4)
+09:30:09 | Gemini rate limit (429) (×4)
+```
+Every 15-30 seconds, 4+ simultaneous council rings hit both Groq and Gemini,
+immediately exhausting both providers. PPO+Halim are the pilots — API should
+rarely be called for entry decisions.
+
+### Root cause
+1. **No global throttle**: `should_ring_council` checked spike_ratio (≥1.25) and
+   scan_score (≥55) per-ticker. With 8 tickers in the pool, multiple could
+   qualify simultaneously → 4-8 simultaneous API calls → instant 429 on both
+   Groq and Gemini.
+2. **Thresholds too low**: spike 1.25x and score 55 are common for penny
+   stocks. Every mild spike triggered a council ring.
+3. **No rate limit cooldown awareness**: Once providers were hot with 45s
+   cooldowns, the nanny's `_providers_hot()` correctly blocked more rings,
+   but the damage was already done.
+
+### Fix
+- `core/live_ai_pipeline.py`: Added **global ring throttle** — a class-level
+  lock (`_last_global_ring_at` + `_global_lock`) that limits to 1 council ring
+  per 30s globally, regardless of ticker count. Configurable via
+  `LIVE_AI_GLOBAL_RING_SEC`. This is separate from the per-key ring interval.
+- `scripts/m2_8gb_live_profile.sh`: Tightened thresholds:
+  - `COUNCIL_NANNY_MIN_SPIKE` 1.25 → **2.0** (only extreme spikes)
+  - `COUNCIL_NANNY_MIN_SCORE` 55 → **70** (only high conviction)
+  - `COUNCIL_NANNY_RESERVE_PCT` 0.50 → **0.75** (keep 75% budget for risk)
+  - `COUNCIL_NANNY_MIN_RING_SEC` → **15s** (per-ticker cooldown from 3s)
+  - `LIVE_AI_GLOBAL_RING_SEC` → **30s** (new: at most 1 call per 30s)
+- `start.sh`: Added port 8765 cleanup + timeout warning if warmup fails.
+
+### Files changed
+- `core/live_ai_pipeline.py` — global throttle
+- `scripts/m2_8gb_live_profile.sh` — tighter nanny thresholds
+- `start.sh` — port cleanup + timeout warning
+
+### Verify
+1. Run `bash start.sh` — check daemon log for `📦 Pre-loading MLX model... ✅ Model ready`
+2. Watch HANOON log — expect zero `All Groq keys rate-limited` and zero `Gemini rate limit`
+3. Watch for `Council ring throttled` debug lines (1 per 30s max)
+4. PPO+Halim handle all entries; API only rings for extreme spikes (2x+) or risk exits
+
+---
+
 ## 2026-07-02 — Fix: MLX model lazy-load blocks HTTP thread → serve_no_text
 
 ### Problem

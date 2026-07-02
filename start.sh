@@ -19,6 +19,14 @@ if [ -n "$OLD_HALIM" ]; then
     kill -0 "$OLD_HALIM" 2>/dev/null && kill -9 "$OLD_HALIM" 2>/dev/null || true
     echo "   ✅ Old Halim serve stopped"
 fi
+# Also free port 8765 if anything else is holding it (e.g. zombie from crashed serve)
+PORT_PID=$(lsof -ti :8765 2>/dev/null || true)
+if [ -n "$PORT_PID" ]; then
+    echo "🔄 Freeing port 8765 (PID $PORT_PID)..."
+    kill "$PORT_PID" 2>/dev/null || true
+    sleep 1
+    kill -0 "$PORT_PID" 2>/dev/null && kill -9 "$PORT_PID" 2>/dev/null || true
+fi
 
 # ── Kill any stale scalper process ─────────────────────────────────────────
 OLD_SCALPER=$(pgrep -f "main.py.*mode scalper" 2>/dev/null || true)
@@ -54,6 +62,13 @@ for i in $(seq 1 45); do
     fi
     sleep 1
 done
+# Warn if we never saw healthy (healtcheck may have failed silently)
+if ! curl -s -m 1 http://localhost:8765/health 2>/dev/null | grep -q '"ok":true'; then
+    echo "   ⚠️  Halim serve health not confirmed after 45s"
+    echo "   ─── Last daemon log lines ───"
+    tail -10 logs/halim_serve_daemon.log 2>/dev/null || true
+    echo "   Continuing — may serve empty/506 on first requests"
+fi
 echo ""
 
 echo "🚀 Starting HANOON scalper..."
